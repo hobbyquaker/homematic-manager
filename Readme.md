@@ -3,7 +3,7 @@
 ## Dokumentation
 
 * IP Adresse auf der rfd/hs485d erreichbar ist in config.json anpassen
-* ```node hm-manager.js start```
+* ```npm install; node hm-manager.js start```
 * http://&lt;ip&gt;:8081 aufrufen
 
 ## Ziele

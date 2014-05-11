@@ -3,17 +3,18 @@
 ## Dokumentation
 
 * IP Adresse auf der rfd/hs485d erreichbar ist in config.json anpassen
-
-
-    node homematic-manager.js start
-
+* ```node hm-manager.js start```
 * http://&lt;ip&gt;:8081 aufrufen
 
 ## Ziele
 
-* Anlernen/Ablernen von Geräten
-* Konfigurieren von Geräten
 * Direktverknüpfungen anlegen/löschen/bearbeiten
+* Anlernen/Ablernen von Geräten
+* Geräte tauschen
+* Konfigurieren von Geräten
+* Zuordnung Geräte/Interfaces
+* RPC Konsole
+
 
 ## Lizenz
 

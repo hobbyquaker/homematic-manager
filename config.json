@@ -1,0 +1,7 @@
+{
+    "webServerPort": 8081,
+    "rfdIp": "172.16.23.3",
+    "rfdPort": 2000,
+    "hs485dIp": "172.16.23.3",
+    "hs485dPort": 2001
+}

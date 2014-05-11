@@ -1,0 +1,14 @@
+{
+    "name": "homematic-manager",
+    "version": "0.0.1",
+    "private": true,
+    "scripts": {
+        "start": " node hm-manager.js start"
+    },
+    "dependencies": {
+        "express": "~4.1.0",
+        "socket.io": "~0.9.0",
+        "xmlrpc": "~1.2.0",
+        "daemonize2": "~0.4.2"
+    }
+}

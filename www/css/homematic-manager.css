@@ -39,3 +39,8 @@ li.header {
 #table-paramset tr td {
     padding-right: 24px !important;
 }
+
+#table-paramset tr th {
+    text-align: left;
+    font-weight: bold;
+}

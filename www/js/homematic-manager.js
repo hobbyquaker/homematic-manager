@@ -63,7 +63,7 @@ $(document).ready(function () {
     function paramsetDialog(data, desc, address, paramset) {
 
         // Tabelle befüllen
-        $("#table-paramset").html('<tr><td>Param</td><td>Value</td><td>Default</td></tr>');
+        $("#table-paramset").html('<tr><th>Param</th><th>Value</th><th>Default</th></tr>');
         for (var param in data) {
 
             // TODO stringtable aus CCU-Firmware holen um Param-Bezeichnung und Enum-Werte zu ersetzen
@@ -76,19 +76,19 @@ $(document).ready(function () {
             var input;
             switch (desc[param].TYPE) {
                 case "BOOL":
-                    input = '<input type="checkbox" value="true"' + (data[param] != 'false' ? ' checked="checked"' : '') + (data[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
+                    input = '<input type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
                     break;
                 case "INTEGER":
-                    input = '<input type="number" min="' + data[param].MIN + '" max="' + data[param].MAX + '" value="' + data[param] + '"' + (data[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
+                    input = '<input type="number" min="' + data[param].MIN + '" max="' + data[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
                     break;
                 case "FLOAT":
                 case "ENUM":
                     // TODO <select>
                 default:
-                    input = '<input type="text" value="' + data[param] + '"' + (data[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
+                    input = '<input type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
             }
 
-            $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td></tr>');
+            $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + desc[param].UNIT + '</td></tr>');
         }
 
         // Hidden-Hilfsfelder

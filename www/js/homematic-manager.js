@@ -49,19 +49,46 @@ $(document).ready(function () {
             var address = tmp[1];
             var paramset = tmp[2];
             socket.emit("getParamset", address, paramset, function (err, data) {
-                paramsetDialog(data, address, paramset);
+                // TODO catch errors
+                socket.emit("getParamsetDescription", address, paramset, function (err2, data2) {
+                    console.log(data, data2);
+                    // TODO catch errors
+                    paramsetDialog(data, data2, address, paramset);
+                });
             });
         });
 
     }
 
-    function paramsetDialog(data, address, paramset) {
+    function paramsetDialog(data, desc, address, paramset) {
 
         // Tabelle befüllen
-        $("#table-paramset").html("");
+        $("#table-paramset").html('<tr><td>Param</td><td>Value</td><td>Default</td></tr>');
         for (var param in data) {
-            // TODO Checkboxen, Dropdowns, input-type-number je nach Wertetyp
-            $("#table-paramset").append('<tr><td>' + param + '</td><td><input type="text" value="' + data[param] + '"/></td></tr>');
+
+            // TODO stringtable aus CCU-Firmware holen um Param-Bezeichnung und Enum-Werte zu ersetzen
+
+            // Dirty workaround for encoding problem
+            if (desc[param].UNIT == "�C") desc[param].UNIT = "°C";
+
+            // Create Input-Field
+
+            var input;
+            switch (desc[param].TYPE) {
+                case "BOOL":
+                    input = '<input type="checkbox" value="true"' + (data[param] != 'false' ? ' checked="checked"' : '') + (data[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
+                    break;
+                case "INTEGER":
+                    input = '<input type="number" min="' + data[param].MIN + '" max="' + data[param].MAX + '" value="' + data[param] + (data[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
+                    break;
+                case "FLOAT":
+                case "ENUM":
+                    // TODO <select>
+                default:
+                    input = '<input type="text" value="' + data[param] + (data[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
+            }
+
+            $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td></tr>');
         }
 
         // Hidden-Hilfsfelder

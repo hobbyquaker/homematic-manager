@@ -84,7 +84,7 @@ $(document).ready(function () {
                     input = '<input type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
                     break;
                 case "INTEGER":
-                    input = '<input type="number" min="' + data[param].MIN + '" max="' + data[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
+                    input = '<input type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
                     break;
                 case "FLOAT":
                 case "ENUM":

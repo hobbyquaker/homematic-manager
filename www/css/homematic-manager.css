@@ -29,6 +29,7 @@ tr.ui-row-ltr {
 li.header {
     margin-left: 8px !important;
     margin-right: 8px !important;
+    margin-top: -1px !important;
 }
 
 .paramset {

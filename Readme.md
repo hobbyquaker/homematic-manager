@@ -22,6 +22,12 @@
 * Zuordnung Geräte/Interfaces
 * RPC Konsole
 
+## Changelog
+
+### 0.0.2
+
+*
+
 
 ## Lizenz
 

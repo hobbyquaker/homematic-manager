@@ -14,7 +14,7 @@
             "isCcu": true
         },
         "Funk-Büro": {
-            "type": "BidCos-Wired",
+            "type": "BidCos-RF",
             "ip": "10.0.12.5",
             "port": 2000,
             "isCcu": false

@@ -22,16 +22,12 @@ var regaCache = {};
 initWebServer();
 initSocket();
 
-
 for (var daemon in config.daemons) {
     if (config.daemons[daemon].isCcu && !regaCache[config.daemons[daemon].ip]) {
         regaCache[config.daemons[daemon].ip] = {};
         getRegaObjects(config.daemons[daemon].ip);
     }
 }
-
-
-
 
 
 function initSocket() {

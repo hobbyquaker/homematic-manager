@@ -36,6 +36,10 @@ li.header {
     font-size: 11px !important;
 }
 
+#table-paramset tr {
+    height: 28px;
+}
+
 #table-paramset tr td {
     padding-right: 24px !important;
 }

@@ -71,8 +71,13 @@ $(document).ready(function () {
             // Dirty workaround for encoding problem
             if (desc[param].UNIT == "�C") desc[param].UNIT = "°C";
 
-            // Create Input-Field
+            // Calculate percent values
+            if (desc[param].UNIT == "100%") {
+                desc[param].UNIT = "%";
+                data[param] *= 100;
+            }
 
+            // Create Input-Field
             var input;
             switch (desc[param].TYPE) {
                 case "BOOL":

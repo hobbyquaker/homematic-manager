@@ -3,17 +3,30 @@ $(document).ready(function () {
     var socket = io.connect();
 
     var listDevices;
+    var regaNames;
 
     socket.on("connect", function () {
         console.log("connect");
+        getConfig();
+    });
+
+    function getConfig() {
         socket.emit("getConfig", function (config) {
             $("#select-bidcos-daemon").html('<option value="null">Bitte einen Daemon auswählen</option>');
             for (var daemon in config.daemons) {
                 $("#select-bidcos-daemon").append('<option value="' + daemon + '">' + daemon + ' (' + config.daemons[daemon].type + ' ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
             }
             initHandlers();
+            getRegaNames();
         });
-    });
+    }
+
+    function getRegaNames() {
+        socket.emit("getRegaNames", function (names) {
+            regaNames = names;
+            console.log(regaNames);
+        });
+    }
 
     function initHandlers() {
         $("#select-bidcos-daemon").change(function () {

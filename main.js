@@ -38,7 +38,7 @@ function initSocket() {
             callback(config);
         });
 
-        socket.on("getRegaObjects", function (callback) {
+        socket.on("getRegaNames", function (callback) {
             callback(regaCache);
         });
 

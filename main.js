@@ -25,7 +25,7 @@ initSocket();
 for (var daemon in config.daemons) {
     if (config.daemons[daemon].isCcu && !regaCache[config.daemons[daemon].ip]) {
         regaCache[config.daemons[daemon].ip] = {};
-        getRegaObjects(config.daemons[daemon].ip);
+        getRegaNames(config.daemons[daemon].ip);
     }
 }
 
@@ -104,27 +104,16 @@ function initWebServer() {
 }
 
 
-function getRegaObjects(ip) {
-    console.log("loading rega devices from " + ip);
-    regaScript(ip, "devices.fn", function (res) {
-        regaCache[ip].devices = res;
-        console.log("loading rega channels from " + ip);
-        regaScript(ip, "channels.fn", function (res) {
-            regaCache[ip].channels = res;
-            console.log("loading rega rooms from " + ip);
-            regaScript(ip, "rooms.fn", function (res) {
-                regaCache[ip].rooms = res;
-                console.log("loading rega functions from " + ip);
-                regaScript(ip, "functions.fn", function (res) {
-                    regaCache[ip].functions = res;
-                });
-            });
-        });
+function getRegaNames(ip) {
+    console.log("loading rega names from " + ip);
+    regaScript(ip, "reganames.fn", function (res) {
+        regaCache[ip] = res;
+        console.log(regaCache[ip]);
     });
 }
 
 function regaScript(ip, file, callback) {
-    fs.readFile(__dirname + '/regascripts/' + file, 'utf8', function (err, script) {
+    fs.readFile(__dirname + '/' + file, 'utf8', function (err, script) {
         if (err) {
             console.log("regaScript " + err);
             return false;
@@ -147,7 +136,7 @@ function regaScript(ip, file, callback) {
             });
             res.on('end', function () {
                 var pos = data.lastIndexOf("<xml>");
-                var stdout = (data.substring(0, pos));
+                var stdout = unescape(data.substring(0, pos));
                 try {
                     var result = JSON.parse(stdout);
                     callback(result);

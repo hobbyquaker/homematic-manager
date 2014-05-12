@@ -12,11 +12,41 @@ var logStream = openLog(__dirname + "/log/hm-manager.log");
 
 var app;
 var server;
-var socket;
+var io;
+var rpc;
 
 initWebServer();
+initSocket();
 
+function initSocket() {
 
+    io.sockets.on('connection', function (socket) {
+
+        socket.on("getConfig", function (callback) {
+            callback(config);
+        });
+
+        socket.on("bidcosConnect", function (daemon, callback) {
+            console.log("connect "+daemon);
+            rpc = xmlrpc.createClient({
+                host: config.daemons[daemon].ip,
+                port: config.daemons[daemon].port,
+                path: '/'
+            });
+           callback();
+
+        });
+
+        socket.on("listDevices", function (callback) {
+            console.log("listDevices");
+            rpc.methodCall("listDevices", [], function (error, result) {
+                callback(error, result);
+            });
+        });
+
+    });
+
+}
 
 function initWebServer() {
     app = express();
@@ -24,10 +54,10 @@ function initWebServer() {
     server = require('http').createServer(app);
     server.listen(config.webServerPort);
 
-    socket = socketio.listen(server);
+    io = socketio.listen(server);
 
     // redirect socket.io logging to log file
-    socket.set('logger', {
+    io.set('logger', {
         debug: function(obj) {
             log("socket.io debug: "+obj);
         },
@@ -43,6 +73,9 @@ function initWebServer() {
     });
 
     log("webserver listening on port "+config.webServerPort);
+
+
+
 }
 
 function loadConfig() {

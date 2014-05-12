@@ -1,7 +1,20 @@
 {
     "webServerPort": 8081,
-    "rfdIp": "172.16.23.3",
-    "rfdPort": 2001,
-    "hs485dIp": "172.16.23.3",
-    "hs485dPort": 2000
+    "daemons": {
+        "Funk-Zuhause": {
+            "type": "BidCos-RF",
+            "ip": "172.16.23.3",
+            "port": 2001
+        },
+        "Wired-Zuhause": {
+            "type": "BidCos-Wired",
+            "ip": "172.16.23.3",
+            "port": 2000
+        },
+        "Funk-Büro": {
+            "type": "BidCos-Wired",
+            "ip": "10.0.12.5",
+            "port": 2000
+        }
+    }
 }

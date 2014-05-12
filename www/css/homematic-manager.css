@@ -1,0 +1,32 @@
+body {
+    font-size: 12px;
+    min-width: 1008px;
+    min-height: 584px;
+
+}
+
+.header {
+    height: 29px;
+    line-height: 29px;
+}
+
+a.ui-tabs-anchor:focus {
+    outline: none;
+}
+
+tr.ui-row-ltr {
+    font-family: consolas "lucida console" courier;
+    font-size: 14px;
+}
+
+
+#select-bidcos-daemon {
+    margin-top: 4px;
+    margin-right: 6px;
+    width: 360px;
+}
+
+li.header {
+    margin-left: 8px !important;
+    margin-right: 8px !important;
+}

@@ -79,13 +79,13 @@ $(document).ready(function () {
                     input = '<input type="checkbox" value="true"' + (data[param] != 'false' ? ' checked="checked"' : '') + (data[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
                     break;
                 case "INTEGER":
-                    input = '<input type="number" min="' + data[param].MIN + '" max="' + data[param].MAX + '" value="' + data[param] + (data[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
+                    input = '<input type="number" min="' + data[param].MIN + '" max="' + data[param].MAX + '" value="' + data[param] + '"' + (data[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
                     break;
                 case "FLOAT":
                 case "ENUM":
                     // TODO <select>
                 default:
-                    input = '<input type="text" value="' + data[param] + (data[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
+                    input = '<input type="text" value="' + data[param] + '"' + (data[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
             }
 
             $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td></tr>');

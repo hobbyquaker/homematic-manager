@@ -43,6 +43,38 @@ $(document).ready(function () {
                 });
             }
         });
+
+        $('body').on('click', 'button.paramset', function () {
+            var tmp = $(this).attr("id").split("_");
+            var address = tmp[1];
+            var paramset = tmp[2];
+            socket.emit("getParamset", address, paramset, function (err, data) {
+                paramsetDialog(data, address, paramset);
+            });
+        });
+
+    }
+
+    function paramsetDialog(data, address, paramset) {
+
+        // Tabelle befüllen
+        $("#table-paramset").html("");
+        for (var param in data) {
+            // TODO Checkboxen, Dropdowns, input-type-number je nach Wertetyp
+            $("#table-paramset").append('<tr><td>' + param + '</td><td><input type="text" value="' + data[param] + '"/></td></tr>');
+        }
+
+        // Hidden-Hilfsfelder
+
+        // Dialog-Überschrift setzen
+        if (regaNames && regaNames[config.daemons[daemon].ip]) {
+            var names = regaNames[config.daemons[daemon].ip];
+        }
+        var name = names[address].Name || "";
+
+        $("div[aria-describedby='dialog-paramset'] span.ui-dialog-title").html(name + " PARAMSET " + address + " " + paramset);
+
+        $("#dialog-paramset").dialog("open");
     }
 
     function buildGridDevices() {
@@ -72,6 +104,14 @@ $(document).ready(function () {
     //
     //      initialize UI elements
     //
+
+    // Dialogs
+    $("#dialog-paramset").dialog({
+        autoOpen: false,
+        modal: true,
+        width: 640,
+        height: 400
+    });
 
     // Tabs
     $("#tabs-main").tabs({

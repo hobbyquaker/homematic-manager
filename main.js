@@ -61,7 +61,7 @@ function initSocket() {
            //     console.log(rpcCache[daemon]);
            //     callback(rpcCache[daemon].listDevices);
            // } else {
-                console.log("listDevices RPC");
+                console.log("RPC listDevices");
                 rpc.methodCall("listDevices", [], function (error, result) {
                     // TODO catch errors
                     if (!rpcCache[daemon]) rpcCache[daemon] = {};
@@ -69,7 +69,14 @@ function initSocket() {
                     callback(error, result);
                 });
            // }
+        });
 
+        socket.on("getParamset", function (address, paramset, callback) {
+            console.log("RPC getParamset");
+            rpc.methodCall("getParamset", [address, paramset], function (error, result) {
+                // TODO catch errors
+                callback(error, result);
+            });
         });
 
     });

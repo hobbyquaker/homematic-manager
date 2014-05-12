@@ -1,8 +1,15 @@
-# HomeMatic Manager 0.1
+# HomeMatic Manager 0.0.1
 
 ## Dokumentation
 
-* IP Adresse auf der rfd/hs485d erreichbar ist in config.json anpassen
+### Installation
+
+* Repository clonen oder Zip-File herunterladen und auspacken
+* Node-Module installieren: ``npm install``
+* IP Adressen auf der die rfd/hs485d erreichbar sind in config.json anpassen
+
+### Starten
+
 * ```node hm-manager.js start```
 * http://&lt;ip&gt;:8081 aufrufen
 

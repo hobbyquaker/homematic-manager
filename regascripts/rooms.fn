@@ -1,0 +1,41 @@
+!# rooms.fn 1.1 CCU.IO
+!#
+!# Dieses Script gibt eine Liste der Raeume als JSON Objekt aus
+!#
+!# 5'2013-7'2013 bluefox, hobbyquaker
+!#
+
+object  oRoom;
+string  sRoomId;
+string  sChannelId;
+boolean bFirst       = true;
+boolean bFirstSecond = true;
+
+Write("{");
+foreach (sRoomId, dom.GetObject(ID_ROOMS).EnumUsedIDs())
+{
+    if (bFirst == false) {
+      WriteLine(',');
+    } else {
+      bFirst = false;
+    }
+    oRoom = dom.GetObject(sRoomId);
+	Write('"' # sRoomId # '": ');
+    Write('{"Name": "');
+    WriteURL(oRoom.Name())
+    Write('", "TypeName":"' # oRoom.TypeName() # '_ROOMS');
+    Write('", "EnumInfo":"');
+    WriteURL(oRoom.EnumInfo());
+    Write('", "Channels":[');
+	bFirstSecond = true;
+    foreach(sChannelId, oRoom.EnumUsedIDs()) {
+		if (bFirstSecond == false) {
+		  Write(',');
+		} else {
+		  bFirstSecond = false;
+		}
+		Write(sChannelId);
+    }
+    Write(']}');
+}
+Write('}');

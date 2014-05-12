@@ -15,8 +15,16 @@ var server;
 var io;
 var rpc;
 
+var rpcCache = {};
+var regaCache = {};
+
 initWebServer();
 initSocket();
+getRegaObjects();
+
+function getRegaObjects() {
+
+}
 
 function initSocket() {
 
@@ -38,10 +46,19 @@ function initSocket() {
         });
 
         socket.on("listDevices", function (callback) {
-            console.log("listDevices");
-            rpc.methodCall("listDevices", [], function (error, result) {
-                callback(error, result);
-            });
+            if (rpcCache[daemon] && rpcCache[daemon].listDevices) {
+                console.log("listDevices cache hit");
+                callback(rpcCache[daemon].listDevices);
+            } else {
+                console.log("listDevices RPC");
+                rpc.methodCall("listDevices", [], function (error, result) {
+                    // TODO catch errors
+                    if (!rpcCache[daemon]) rpcCache[daemon] = {};
+                    rpcCache[daemon].listDevices = result;
+                    callback(error, result);
+                });
+            }
+
         });
 
     });

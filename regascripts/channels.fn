@@ -1,0 +1,107 @@
+!# channels.fn 1.7 CCU.IO
+!#
+!# Dieses Homematic-Script gibt alle Kanaele als JSON String aus
+!#
+!# 3'2013-1'2014 hobbyquaker https://github.com/hobbyquaker
+!#
+
+string sDevId;
+string sChnId;
+string sDPId;
+string sDPName;
+
+Write('{');
+
+boolean dFirst = true;
+boolean cFirst = true;
+
+foreach (sDevId, root.Devices().EnumUsedIDs()) {
+
+
+    object oDevice   = dom.GetObject(sDevId);
+    boolean bDevReady = oDevice.ReadyConfig();
+    string sDevInterfaceId = oDevice.Interface();
+    string sDevInterface   = dom.GetObject(sDevInterfaceId).Name();
+
+    if (bDevReady) {
+
+
+        string sChnId;
+        string sDPId;
+
+        foreach(sChnId, oDevice.Channels()) {
+            object oChannel = dom.GetObject(sChnId);
+            string sChnHssType = oChannel.HssType();
+                if (cFirst) {
+                  cFirst = false;
+                } else {
+                  Write(',');
+                }
+
+                integer iChnDir = oChannel.ChnDirection();
+                Write('"' # sChnId # '":{"Name":"');
+                WriteURL(oChannel.Name());
+                Write('","TypeName":"' # oChannel.TypeName());
+                Write('","HssType":"' # sChnHssType);
+                Write('","ChnDirection":' # iChnDir # ',"ChannelType":');
+                Write(oChannel.ChannelType());
+                Write(',"Address":"' # oChannel.Address());
+                Write('","ChnLabel":"' # oChannel.ChnLabel());
+                Write('","Parent":' # sDevId);
+                Write(',"DPs":{');
+
+                boolean dpFirst = true;
+
+                if (iChnDir == 2) {
+                    object oWork = oChannel.DPByHssDP('WORKING');
+                    if (oWork) {
+                        dpFirst = false;
+                        string oWId = oWork.ID();
+                        Write('"WORKING":'#oWId);
+                    }
+                    object oDir = oChannel.DPByHssDP('DIRECTION');
+                    if (oDir) {
+                        if (dpFirst) {
+                          dpFirst = false;
+                        } else {
+                          WriteLine(',');
+                        }
+                        string oDirId = oDir.ID();
+                        Write('"DIRECTION":'#oDirId);
+                    }
+                }
+
+                if (sChnHssType == "SMOKE_DETECTOR") {
+                    if (dpFirst) {
+                        dpFirst = false;
+                    } else {
+                        WriteLine(',');
+                    }
+                    Write('"STATE":'#oChannel.DPByHssDP('STATE').ID());
+                }
+
+                foreach(sDPId, oChannel.DPs().EnumUsedIDs()) {
+                    object oDP = dom.GetObject(sDPId);
+                    if (oDP.TypeName() == "VARDP") {
+                        sDPName = oDP.Name();
+                    } else {
+                        sDPName = oDP.Name().StrValueByIndex(".", 2);
+                    }
+                    if(oDP) {
+                        if (dpFirst) {
+                          dpFirst = false;
+                        } else {
+                          WriteLine(',');
+                        }
+                        Write('"');
+                        WriteURL(sDPName);
+                        Write('":'#sDPId);
+                    }
+                }
+                Write('}}');
+
+        }
+
+    }
+}
+Write('}');

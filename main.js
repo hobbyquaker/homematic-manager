@@ -16,6 +16,7 @@ var server;
 var io;
 var rpc;
 
+var daemon;
 var rpcCache = {};
 var regaCache = {};
 
@@ -42,8 +43,9 @@ function initSocket() {
             callback(regaCache);
         });
 
-        socket.on("bidcosConnect", function (daemon, callback) {
-            console.log("connect "+daemon);
+        socket.on("bidcosConnect", function (d, callback) {
+            daemon = d;
+            console.log("connect " + daemon);
             rpc = xmlrpc.createClient({
                 host: config.daemons[daemon].ip,
                 port: config.daemons[daemon].port,
@@ -54,18 +56,19 @@ function initSocket() {
         });
 
         socket.on("listDevices", function (callback) {
-            if (rpcCache[daemon] && rpcCache[daemon].listDevices) {
-                console.log("listDevices cache hit");
-                callback(rpcCache[daemon].listDevices);
-            } else {
+           // if (rpcCache[daemon] && rpcCache[daemon].listDevices) {
+           //     console.log("listDevices cache hit");
+           //     console.log(rpcCache[daemon]);
+           //     callback(rpcCache[daemon].listDevices);
+           // } else {
                 console.log("listDevices RPC");
                 rpc.methodCall("listDevices", [], function (error, result) {
                     // TODO catch errors
                     if (!rpcCache[daemon]) rpcCache[daemon] = {};
-                    rpcCache[daemon].listDevices = result;
+                    rpcCache[daemon].listDevices = JSON.parse(JSON.stringify(result));
                     callback(error, result);
                 });
-            }
+           // }
 
         });
 
@@ -108,7 +111,6 @@ function getRegaNames(ip) {
     console.log("loading rega names from " + ip);
     regaScript(ip, "reganames.fn", function (res) {
         regaCache[ip] = res;
-        console.log(regaCache[ip]);
     });
 }
 

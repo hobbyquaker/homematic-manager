@@ -1,7 +1,8 @@
 $(document).ready(function () {
 
     var socket = io.connect();
-
+    var daemon;
+    var config;
     var listDevices;
     var regaNames;
 
@@ -11,7 +12,8 @@ $(document).ready(function () {
     });
 
     function getConfig() {
-        socket.emit("getConfig", function (config) {
+        socket.emit("getConfig", function (data) {
+            config = data;
             $("#select-bidcos-daemon").html('<option value="null">Bitte einen Daemon auswählen</option>');
             for (var daemon in config.daemons) {
                 $("#select-bidcos-daemon").append('<option value="' + daemon + '">' + daemon + ' (' + config.daemons[daemon].type + ' ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
@@ -24,20 +26,18 @@ $(document).ready(function () {
     function getRegaNames() {
         socket.emit("getRegaNames", function (names) {
             regaNames = names;
-            console.log(regaNames);
         });
     }
 
     function initHandlers() {
         $("#select-bidcos-daemon").change(function () {
-            var daemon = $("#select-bidcos-daemon option:selected").val();
+            daemon = $("#select-bidcos-daemon option:selected").val();
             $("#grid-devices").jqGrid("clearGridData");
             if (daemon !== "null") {
                 $("#load_grid-devices").show();
                 socket.emit("bidcosConnect", daemon, function () {
                     socket.emit("listDevices", function (err, data) {
                         listDevices = data;
-                        console.log(listDevices);
                         buildGridDevices();
                     });
                 });
@@ -46,10 +46,16 @@ $(document).ready(function () {
     }
 
     function buildGridDevices() {
+        if (regaNames && regaNames[config.daemons[daemon].ip]) {
+            var names = regaNames[config.daemons[daemon].ip];
+        }
         for (var i = 0, len = listDevices.length; i < len; i++) {
             if (listDevices[i].RF_ADDRESS) {
                 listDevices[i].RF_ADDRESS = parseInt(listDevices[i].RF_ADDRESS, 10).toString(16);
             }
+
+            if (names && names[listDevices[i].ADDRESS]) listDevices[i].Name = names[listDevices[i].ADDRESS].Name;
+
             var paramsets = "";
             for (var j = 0; j < listDevices[i].PARAMSETS.length; j++) {
                 paramsets += '<button class="paramset" id="paramset_' + listDevices[i].ADDRESS + '_' + listDevices[i].PARAMSETS[j] + '">' + listDevices[i].PARAMSETS[j] + '</button>';
@@ -61,6 +67,7 @@ $(document).ready(function () {
         }
         $("#grid-devices").trigger('reloadGrid');
     }
+
 
     //
     //      initialize UI elements
@@ -76,8 +83,9 @@ $(document).ready(function () {
 
     // Geräte-Tabelle
     $("#grid-devices").jqGrid({
-        colNames: ['ADDRESS', 'FIRMWARE', 'FLAGS', 'INTERFACE', 'PARENT', 'RF_ADDRESS', 'PARAMSETS', 'ROAMING', 'RX-MODE', 'TYPE', 'VERSION'],
+        colNames: ['Name', 'ADDRESS', 'FIRMWARE', 'FLAGS', 'INTERFACE', 'PARENT', 'RF_ADDRESS', 'PARAMSETS', 'ROAMING', 'RX-MODE', 'TYPE', 'VERSION'],
         colModel: [
+            {name:'Name', index: 'Name', width: 100},
             {name:'ADDRESS',index:'ADDRESS', width:70},
             {name:'FIRMWARE',index:'FIRMWARE', width:50},
             {name:'FLAGS',index:'FLAGS', width:50},
@@ -105,7 +113,8 @@ $(document).ready(function () {
         subGrid:    true,
         subGridRowExpanded: function(grid_id, row_id) {
             subGridChannels(grid_id, row_id);
-        }
+        },
+        shrinkToFit: true
 
     })
     .navGrid('#pager-devices')
@@ -147,21 +156,8 @@ $(document).ready(function () {
         $("#" + grid_id).html("<table id='" + subgrid_table_id + "''></table>");
         var gridConf = {
             datatype: "local",
-            /*
-             ADDRESS: "BidCoS-RF:0"
-             AES_ACTIVE: 0
-             DIRECTION: 0
-             FLAGS: 3
-             INDEX: 0
-             LINK_SOURCE_ROLES: ""
-             LINK_TARGET_ROLES: ""
-             PARAMSETS: Array[2]
-             PARENT: "BidCoS-RF"
-             PARENT_TYPE: "HM-RCV-50"
-             TYPE: "MAINTENANCE"
-             VERSION: 6
-             */
             colNames: [
+                'Name',
                 'ADDRESS',
                 'AES_ACTIVE',
                 'DIRECTION',
@@ -174,6 +170,7 @@ $(document).ready(function () {
                 'VERSION'
             ],
             colModel: [
+                {name: 'Name', index: 'Name', width: 100},
                 {name: 'ADDRESS', index: 'ADDRESS', width: 70},
                 {name: 'AES_ACTIVE', index: 'AES_ACTIVE', width: 50},
                 {name: 'DIRECTION', index: 'DIRECTION', width: 50},
@@ -191,12 +188,21 @@ $(document).ready(function () {
             width: 1200,
             sortorder: "desc",
             viewrecords: true,
-            ignoreCase: true
+            ignoreCase: true,
+            shrinkToFit: true
         };
         $("#" + subgrid_table_id).jqGrid(gridConf);
+
+        if (regaNames && regaNames[config.daemons[daemon].ip]) {
+            var names = regaNames[config.daemons[daemon].ip];
+        }
+
         for (var i = 0, len = listDevices.length; i < len; i++) {
 
             if (listDevices[i].PARENT == listDevices[row_id].ADDRESS) {
+
+                if (names && names[listDevices[i].ADDRESS]) listDevices[i].Name = names[listDevices[i].ADDRESS].Name;
+
                 var paramsets = "";
                 for (var j = 0; j < listDevices[i].PARAMSETS.length; j++) {
                     if (listDevices[i].PARAMSETS[j] == "LINK") continue;

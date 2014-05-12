@@ -4,17 +4,20 @@
         "Funk-Zuhause": {
             "type": "BidCos-RF",
             "ip": "172.16.23.3",
-            "port": 2001
+            "port": 2001,
+            "isCcu": true
         },
         "Wired-Zuhause": {
             "type": "BidCos-Wired",
             "ip": "172.16.23.3",
-            "port": 2000
+            "port": 2000,
+            "isCcu": true
         },
         "Funk-Büro": {
             "type": "BidCos-Wired",
             "ip": "10.0.12.5",
-            "port": 2000
+            "port": 2000,
+            "isCcu": false
         }
     }
 }

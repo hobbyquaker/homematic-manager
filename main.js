@@ -177,11 +177,7 @@ function initWebServer() {
     });
 
     log("webserver listening on port "+config.webServerPort);
-
-
-
 }
-
 
 function getRegaNames(ip) {
     console.log("loading rega names from " + ip);

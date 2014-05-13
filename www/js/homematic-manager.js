@@ -19,12 +19,13 @@ $(document).ready(function () {
             var vars = [];
             if (window.location.href.indexOf('?') > -1)
                 vars = getUrlVars();
-console.log(vars);
+
             for (var daemon in config.daemons) {
                 $("#select-bidcos-daemon").append('<option value="' + daemon + '"' + (vars['daemon'] == daemon ? ' selected' : '') + '>' + daemon + ' (' + config.daemons[daemon].type + ' ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
             }
             initHandlers();
             getRegaNames();
+            initDaemon();
         });
     }
 
@@ -49,17 +50,7 @@ console.log(vars);
 
     function initHandlers() {
         $("#select-bidcos-daemon").change(function () {
-            daemon = $("#select-bidcos-daemon option:selected").val();
-            $("#grid-devices").jqGrid("clearGridData");
-            if (daemon !== "null") {
-                $("#load_grid-devices").show();
-                socket.emit("bidcosConnect", daemon, function () {
-                    socket.emit("listDevices", function (err, data) {
-                        listDevices = data;
-                        buildGridDevices();
-                    });
-                });
-            }
+            initDaemon();
         });
 
         $('body').on('click', 'button.paramset', function () {
@@ -110,9 +101,23 @@ console.log(vars);
                 console.log(err);
                 console.log(res);
             });
-
         });
+    }
 
+    function initDaemon() {
+        daemon = $("#select-bidcos-daemon option:selected").val();
+        if (daemon != "null") {
+            $("#grid-devices").jqGrid("clearGridData");
+            if (daemon !== "null") {
+                $("#load_grid-devices").show();
+                socket.emit("bidcosConnect", daemon, function () {
+                    socket.emit("listDevices", function (err, data) {
+                        listDevices = data;
+                        buildGridDevices();
+                    });
+                });
+            }
+        }
     }
 
     function putParamset() {

@@ -155,19 +155,23 @@ $(document).ready(function () {
                 case "INTEGER":
                     input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                     break;
-                case "FLOAT":
                 case "ENUM":
-                    // TODO <select>
-
+                    input = '<select id="paramset-select-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
+                    for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
+                        input += '<option value="' + i + '">' + i + '</option>';
+                    }
+                    input += '</select>';
+                    break;
+                case "FLOAT":
                 default:
                     input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
             }
 
             // Readonly?
             if (paramset == "VALUES" && (desc[param].OPERATIONS & 2)) {
-                $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + unit + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
+                $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
             } else {
-                $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + desc[param].DEFAULT + unit + '</td></tr>');
+                $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + desc[param].DEFAULT + '</td></tr>');
             }
 
 

@@ -15,12 +15,30 @@ $(document).ready(function () {
         socket.emit("getConfig", function (data) {
             config = data;
             $("#select-bidcos-daemon").html('<option value="null">Bitte einen Daemon auswählen</option>');
+
+            var vars = [];
+            if (window.location.href.indexOf('?') > -1)
+                vars = getUrlVars();
+console.log(vars);
             for (var daemon in config.daemons) {
-                $("#select-bidcos-daemon").append('<option value="' + daemon + '">' + daemon + ' (' + config.daemons[daemon].type + ' ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
+                $("#select-bidcos-daemon").append('<option value="' + daemon + '"' + (vars['daemon'] == daemon ? ' selected' : '') + '>' + daemon + ' (' + config.daemons[daemon].type + ' ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
             }
             initHandlers();
             getRegaNames();
         });
+    }
+
+    function getUrlVars()
+    {
+        var vars = [], hash;
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for (var i = 0; i < hashes.length; i++)
+        {
+            hash = hashes[i].split('=');
+            vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+        return vars;
     }
 
     function getRegaNames() {

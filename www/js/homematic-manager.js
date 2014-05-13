@@ -135,47 +135,49 @@ $(document).ready(function () {
         $("#table-paramset").html('<tr><th>Param</th><th>Value</th><th>Default</th><th></th></tr>');
         for (var param in data) {
 
-            // TODO stringtable aus CCU-Firmware holen um Param-Bezeichnung und Enum-Werte zu ersetzen
+            if (desc[param]) {
+                // Dirty workaround for encoding problem
+                if (desc[param].UNIT == "�C") desc[param].UNIT = "°C";
 
-            // Dirty workaround for encoding problem
-            if (desc[param].UNIT == "�C") desc[param].UNIT = "°C";
+                // Calculate percent values
+                if (desc[param].UNIT == "100%") {
+                    var unit = "%";
+                    data[param] *= 100;
+                } else {
+                    var unit = desc[param].UNIT;
+                }
 
-            // Calculate percent values
-            if (desc[param].UNIT == "100%") {
-                var unit = "%";
-                data[param] *= 100;
+                // Create Input-Field
+                var input;
+                switch (desc[param].TYPE) {
+                    case "BOOL":
+                        input = '<input id="paramset-input-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
+                        break;
+                    case "INTEGER":
+                        input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        break;
+                    case "ENUM":
+                        input = '<select id="paramset-input-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
+                        for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
+                            input += '<option value="' + i + '">' + desc[param].VALUE_LIST[i] + '</option>';
+                        }
+                        input += '</select>';
+                        break;
+                    case "FLOAT":
+                    default:
+                        input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                }
+
+                // Paramset VALUES?
+                if (paramset == "VALUES" && (desc[param].OPERATIONS & 2)) {
+                    $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
+                } else {
+                    $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + desc[param].DEFAULT + '</td></tr>');
+                }
+
             } else {
-                var unit = desc[param].UNIT;
+                $("#table-paramset").append('<tr><td>' + param + '</td><td colspan = "3">' + data[param] + '</td></tr>');
             }
-
-            // Create Input-Field
-            var input;
-            switch (desc[param].TYPE) {
-                case "BOOL":
-                    input = '<input id="paramset-input-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
-                    break;
-                case "INTEGER":
-                    input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
-                    break;
-                case "ENUM":
-                    input = '<select id="paramset-input-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
-                    for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
-                        input += '<option value="' + i + '">' + desc[param].VALUE_LIST[i] + '</option>';
-                    }
-                    input += '</select>';
-                    break;
-                case "FLOAT":
-                default:
-                    input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
-            }
-
-            // Readonly?
-            if (paramset == "VALUES" && (desc[param].OPERATIONS & 2)) {
-                $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
-            } else {
-                $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + desc[param].DEFAULT + '</td></tr>');
-            }
-
 
         }
 

@@ -120,6 +120,12 @@ $(document).ready(function () {
                 } else if (elem == 'SELECT') {
                     val = $input.find('option:selected').val();
                 }
+
+                // calculate value if unit is "100%"
+                if ($input.attr('data-unit') == '100%') {
+                    val /= 100;
+                }
+
                 values[param] = val;
             }
         });

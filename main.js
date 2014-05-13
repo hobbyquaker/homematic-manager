@@ -237,7 +237,7 @@ function regaScript(ip, file, callback) {
 
 
 function loadConfig() {
-    if (!fs.existsSync(path)) {
+    if (!fs.existsSync(__dirname + "/config.json")) {
         fs.writeFileSync(__dirname + "/config.json", fs.readFileSync(__dirname + "/config-default.json"));
     }
     return JSON.parse(fs.readFileSync(__dirname + "/config.json"));

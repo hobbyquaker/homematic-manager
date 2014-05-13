@@ -86,13 +86,45 @@ $(document).ready(function () {
             if ($input.attr('data-unit') == '100%') {
                 val /= 100;
             }
-            console.log(address, param, val);
-            socket.emit('setValue', address, param, val, function () {
 
+            socket.emit('setValue', address, param, val, function (err, res) {
+                // TODO catch errors
             });
 
         });
 
+    }
+
+    function putParamset() {
+        var address = $('#edit-paramset-address').val();
+        var paramset = $('#edit-paramset-paramset').val();
+        var values = {};
+        $('[id^="paramset-input"]').each(function () {
+            var $input = $(this);
+            if (!$input.is(':disabled')) {
+                var parts = $input.attr('id').split('-', 3);
+                var param = parts[2];
+                var elem = $input[0].nodeName;
+                var type = $input.attr('type');
+
+                // get value
+                var val;
+                if (elem == 'INPUT') {
+                    if (type == 'checkbox') {
+                        val = $input.is(':checked');
+                    } else {
+                        val = $input.val();
+                    }
+                } else if (elem == 'SELECT') {
+                    val = $input.find('option:selected').val();
+                }
+                values[parts[2]] = val;
+            }
+        });
+        console.log(address, paramset, values);
+        socket.emit('putParamset', address, paramset, values, function (err, res) {
+            // Todo catch errors
+        });
     }
 
     function paramsetDialog(data, desc, address, paramset) {
@@ -118,7 +150,7 @@ $(document).ready(function () {
             var input;
             switch (desc[param].TYPE) {
                 case "BOOL":
-                    input = '<input id="paramset-checkbox-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
+                    input = '<input id="paramset-input-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
                     break;
                 case "INTEGER":
                     input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
@@ -222,13 +254,7 @@ $(document).ready(function () {
             {
                 text: "putParamset",
                 click: function () {
-                    
-                }
-            },
-            {
-                text: "Abbrechen",
-                click: function () {
-                    $(this).dialog('close');
+                    putParamset();
                 }
             }
         ]

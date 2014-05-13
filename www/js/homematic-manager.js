@@ -158,7 +158,7 @@ $(document).ready(function () {
                 case "ENUM":
                     input = '<select id="paramset-select-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
                     for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
-                        input += '<option value="' + i + '">' + i + '</option>';
+                        input += '<option value="' + i + '">' + desc[param].VALUE_LIST[i] + '</option>';
                     }
                     input += '</select>';
                     break;

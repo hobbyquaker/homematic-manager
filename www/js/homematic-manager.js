@@ -89,6 +89,8 @@ $(document).ready(function () {
 
             socket.emit('setValue', address, param, val, function (err, res) {
                 // TODO catch errors
+                console.log(err);
+                console.log(res);
             });
 
         });

@@ -56,6 +56,7 @@ function initSocket() {
         });
 
         socket.on("listDevices", function (callback) {
+           // TODO fix or remove caching?
            // if (rpcCache[daemon] && rpcCache[daemon].listDevices) {
            //     console.log("listDevices cache hit");
            //     console.log(rpcCache[daemon]);
@@ -77,9 +78,72 @@ function initSocket() {
             });
         });
 
+        socket.on("putParamset", function (address, paramset, data, callback) {
+            console.log("RPC putParamset");
+            rpc.methodCall("putParamset", [address, paramset, data], function (error, result) {
+                callback(error, result);
+            });
+        });
+
+        socket.on("setValue", function (address, value, data, callback) {
+            console.log("RPC setValue");
+            rpc.methodCall("setValue", [address, value, data], function (error, result) {
+                callback(error, result);
+            });
+        });
+
         socket.on("getParamsetDescription", function (address, paramset, callback) {
             console.log("RPC getParamsetDescription");
             rpc.methodCall("getParamsetDescription", [address, paramset], function (error, result) {
+                callback(error, result);
+            });
+        });
+
+        socket.on("restoreConfigToDevice", function (address, callback) {
+            console.log("RPC restoreConfigToDevice");
+            rpc.methodCall("restoreConfigToDevice", [address], function (error, result) {
+                callback(error, result);
+            });
+        });
+
+        socket.on("setMetadata", function (id, key, value, callback) {
+            console.log("RPC setMetadata");
+            rpc.methodCall("setMetadata", [id, key, value], function (error, result) {
+                callback(error, result);
+            });
+        });
+
+        socket.on("getMetadata", function (id, key, callback) {
+            console.log("RPC getMetadata");
+            rpc.methodCall("getMetadata", [id, key], function (error, result) {
+                callback(error, result);
+            });
+        });
+
+        socket.on("getAllMetadata", function (id, callback) {
+            console.log("RPC getAllMetadata");
+            rpc.methodCall("getAllMetadata", [id], function (error, result) {
+                callback(error, result);
+            });
+        });
+
+        socket.on("getServiceMessages", function (callback) {
+            console.log("RPC getServiceMessages");
+            rpc.methodCall("getServiceMessages", [], function (error, result) {
+                callback(error, result);
+            });
+        });
+
+        socket.on("listBidcosInterfaces", function (callback) {
+            console.log("RPC listBidcosInterfaces");
+            rpc.methodCall("listBidcosInterfaces", [], function (error, result) {
+                callback(error, result);
+            });
+        });
+
+        socket.on("rssiInfo", function (callback) {
+            console.log("RPC rssiInfo");
+            rpc.methodCall("rssiInfo", [], function (error, result) {
                 callback(error, result);
             });
         });

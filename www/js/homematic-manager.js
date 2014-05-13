@@ -58,12 +58,16 @@ $(document).ready(function () {
             });
         });
 
+        $('body').on('click', 'button.paramset-setValue', function () {
+            console.log($(this).attr("id"));
+        });
+
     }
 
     function paramsetDialog(data, desc, address, paramset) {
 
         // Tabelle befüllen
-        $("#table-paramset").html('<tr><th>Param</th><th>Value</th><th>Default</th></tr>');
+        $("#table-paramset").html('<tr><th>Param</th><th>Value</th><th>Default</th><th></th></tr>');
         for (var param in data) {
 
             // TODO stringtable aus CCU-Firmware holen um Param-Bezeichnung und Enum-Werte zu ersetzen
@@ -89,11 +93,18 @@ $(document).ready(function () {
                 case "FLOAT":
                 case "ENUM":
                     // TODO <select>
+
                 default:
                     input = '<input type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
             }
 
-            $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + desc[param].UNIT + '</td></tr>');
+            if (paramset == "VALUES" && (desc[param].OPERATIONS & 2)) {
+                $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + desc[param].UNIT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
+            } else {
+                $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + desc[param].DEFAULT + desc[param].UNIT + '</td></tr>');
+            }
+
+
         }
 
         // Hidden-Hilfsfelder
@@ -106,6 +117,9 @@ $(document).ready(function () {
 
         $("div[aria-describedby='dialog-paramset'] span.ui-dialog-title").html(name + " PARAMSET " + address + " " + paramset);
 
+        $("#edit-paramset-address").val(address);
+        $("#edit-paramset-paramset").val(paramset);
+
         $("#dialog-paramset").dialog("open");
     }
 
@@ -117,6 +131,33 @@ $(document).ready(function () {
             if (listDevices[i].RF_ADDRESS) {
                 listDevices[i].RF_ADDRESS = parseInt(listDevices[i].RF_ADDRESS, 10).toString(16);
             }
+
+            var rx_mode = "";
+            if (listDevices[i].RX_MODE & 1) rx_mode += "ALWAYS ";
+            if (listDevices[i].RX_MODE & 2) rx_mode += "BURST ";
+            if (listDevices[i].RX_MODE & 4) rx_mode += "CONFIG ";
+            if (listDevices[i].RX_MODE & 8) rx_mode += "WAKEUP ";
+            if (listDevices[i].RX_MODE & 16) rx_mode += "LAZY_CONFIG ";
+            listDevices[i].rx_mode = rx_mode;
+
+            var flags = "";
+            if (listDevices[i].FLAGS & 1) flags += "Visible ";
+            if (listDevices[i].FLAGS & 2) flags += "Internal ";
+            if (listDevices[i].FLAGS & 8) flags += "DontDelete ";
+            listDevices[i].flags = flags;
+
+            switch (listDevices[i].DIRECTION) {
+                case 1:
+                    listDevices[i].direction = "SENDER";
+                    break;
+                case 2:
+                    listDevices[i].direction = "RECEIVER";
+                    break;
+                default:
+                    listDevices[i].direction = "NONE";
+            }
+
+            listDevices[i].aes_active =  listDevices[i].AES_ACTIVE ? listDevices[i].AES_ACTIVE = '<span style="display:inline-block; vertical-align:bottom" class="ui-icon ui-icon-key"></span>' : '';
 
             if (names && names[listDevices[i].ADDRESS]) listDevices[i].Name = names[listDevices[i].ADDRESS].Name;
 
@@ -142,7 +183,21 @@ $(document).ready(function () {
         autoOpen: false,
         modal: true,
         width: 640,
-        height: 400
+        height: 400,
+        buttons: [
+            {
+                text: "putParamset",
+                click: function () {
+                    
+                }
+            },
+            {
+                text: "Abbrechen",
+                click: function () {
+                    $(this).dialog('close');
+                }
+            }
+        ]
     });
 
     // Tabs
@@ -155,18 +210,17 @@ $(document).ready(function () {
 
     // Geräte-Tabelle
     $("#grid-devices").jqGrid({
-        colNames: ['Name', 'ADDRESS', 'FIRMWARE', 'FLAGS', 'INTERFACE', 'PARENT', 'RF_ADDRESS', 'PARAMSETS', 'ROAMING', 'RX-MODE', 'TYPE', 'VERSION'],
+        colNames: ['Name', 'ADDRESS', 'FIRMWARE', 'FLAGS', 'INTERFACE', 'RF_ADDRESS', 'PARAMSETS', 'ROAMING', 'RX_MODE', 'TYPE', 'VERSION'],
         colModel: [
             {name:'Name', index: 'Name', width: 100},
             {name:'ADDRESS',index:'ADDRESS', width:70},
             {name:'FIRMWARE',index:'FIRMWARE', width:50},
-            {name:'FLAGS',index:'FLAGS', width:50},
+            {name:'flags',index:'FLAGS', width:50},
             {name:'INTERFACE',index:'INTERFACE', width:70},
-            {name:'PARENT',index:'PARENT', width:70},
             {name:'RF_ADDRESS',index:'RF_ADDRESS', width:70},
             {name:'params',index:'params', width:70},
             {name:'ROAMING',index:'ROAMING', width:70},
-            {name:'RX-MODE',index:'RX-MODE', width:70},
+            {name:'rx_mode',index:'RX_MODE', width:70},
             {name:'TYPE',index:'TYPE', width:100},
             {name:'VERSION',index:'VERSION', width:50},
 
@@ -234,7 +288,6 @@ $(document).ready(function () {
                 'AES_ACTIVE',
                 'DIRECTION',
                 'FLAGS',
-                'INDEX',
                 'LINK_SOURCE_ROLES',
                 'LINK_TARGET_ROLES',
                 'PARAMSETS',
@@ -244,13 +297,12 @@ $(document).ready(function () {
             colModel: [
                 {name: 'Name', index: 'Name', width: 100},
                 {name: 'ADDRESS', index: 'ADDRESS', width: 70},
-                {name: 'AES_ACTIVE', index: 'AES_ACTIVE', width: 50},
-                {name: 'DIRECTION', index: 'DIRECTION', width: 50},
-                {name: 'FLAGS', index: 'FLAGS', width: 50},
-                {name: 'INDEX', index: 'INDEX', width: 50},
-                {name: 'LINK_SOURCE_ROLES', index: 'LINK_SOURCE_ROLES', width: 100},
-                {name: 'LINK_TARGET_ROLES', index: 'LINK_TARGET_ROLES', width: 100},
-                {name: 'params', index: 'params', width: 100},
+                {name: 'aes_active', index: 'aes_active', width: 50},
+                {name: 'direction', index: 'direction', width: 50},
+                {name: 'flags', index: 'flags', width: 100},
+                {name: 'LINK_SOURCE_ROLES', index: 'LINK_SOURCE_ROLES', width: 100, hidden: true},
+                {name: 'LINK_TARGET_ROLES', index: 'LINK_TARGET_ROLES', width: 100, hidden: true},
+                {name: 'params', index: 'params', width: 70},
                 {name: 'TYPE', index: 'TYPE', width: 100},
                 {name: 'VERSION', index: 'VERSION', width: 50}
             ],

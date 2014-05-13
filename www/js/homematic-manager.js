@@ -107,6 +107,8 @@ $(document).ready(function () {
                 var elem = $input[0].nodeName;
                 var type = $input.attr('type');
 
+                console.log(elem, param);
+
                 // get value
                 var val;
                 if (elem == 'INPUT') {
@@ -118,7 +120,7 @@ $(document).ready(function () {
                 } else if (elem == 'SELECT') {
                     val = $input.find('option:selected').val();
                 }
-                values[parts[2]] = val;
+                values[param] = val;
             }
         });
         console.log(address, paramset, values);
@@ -156,7 +158,7 @@ $(document).ready(function () {
                     input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                     break;
                 case "ENUM":
-                    input = '<select id="paramset-select-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
+                    input = '<select id="paramset-input-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
                     for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
                         input += '<option value="' + i + '">' + desc[param].VALUE_LIST[i] + '</option>';
                     }

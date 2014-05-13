@@ -59,7 +59,38 @@ $(document).ready(function () {
         });
 
         $('body').on('click', 'button.paramset-setValue', function () {
-            console.log($(this).attr("id"));
+
+            // address paramset and param
+            var address = $("#edit-paramset-address").val();
+            var parts = $(this).attr("id").split("-", 3);
+            var param = parts[2];
+
+            // find input/select
+            var $input = $(this).parent().parent().find('[id$="' + param + '"]');
+            var elem = $input[0].nodeName;
+            var type = $input.attr('type');
+
+            // get value
+            var val;
+            if (elem == 'INPUT') {
+                if (type == 'checkbox') {
+                    val = $input.is(':checked');
+                } else {
+                    val = $input.val();
+                }
+            } else if (elem == 'SELECT') {
+                val = $input.find('option:selected').val();
+            }
+
+            // calculate value if unit is "100%"
+            if ($input.attr('data-unit') == '100%') {
+                val /= 100;
+            }
+            console.log(address, param, val);
+            socket.emit('setValue', address, param, val, function () {
+
+            });
+
         });
 
     }
@@ -77,37 +108,39 @@ $(document).ready(function () {
 
             // Calculate percent values
             if (desc[param].UNIT == "100%") {
-                desc[param].UNIT = "%";
+                var unit = "%";
                 data[param] *= 100;
+            } else {
+                var unit = desc[param].UNIT;
             }
 
             // Create Input-Field
             var input;
             switch (desc[param].TYPE) {
                 case "BOOL":
-                    input = '<input type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
+                    input = '<input id="paramset-checkbox-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
                     break;
                 case "INTEGER":
-                    input = '<input type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
+                    input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                     break;
                 case "FLOAT":
                 case "ENUM":
                     // TODO <select>
 
                 default:
-                    input = '<input type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + desc[param].UNIT;
+                    input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
             }
 
+            // Readonly?
             if (paramset == "VALUES" && (desc[param].OPERATIONS & 2)) {
-                $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + desc[param].UNIT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
+                $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + unit + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
             } else {
-                $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + desc[param].DEFAULT + desc[param].UNIT + '</td></tr>');
+                $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + desc[param].DEFAULT + unit + '</td></tr>');
             }
 
 
         }
 
-        // Hidden-Hilfsfelder
 
         // Dialog-Überschrift setzen
         if (regaNames && regaNames[config.daemons[daemon].ip]) {
@@ -117,6 +150,7 @@ $(document).ready(function () {
 
         $("div[aria-describedby='dialog-paramset'] span.ui-dialog-title").html(name + " PARAMSET " + address + " " + paramset);
 
+        // Hidden-Hilfsfelder
         $("#edit-paramset-address").val(address);
         $("#edit-paramset-paramset").val(paramset);
 

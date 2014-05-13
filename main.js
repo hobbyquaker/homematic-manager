@@ -85,9 +85,9 @@ function initSocket() {
             });
         });
 
-        socket.on("setValue", function (address, value, data, callback) {
+        socket.on("setValue", function (address, param, val, callback) {
             console.log("RPC setValue");
-            rpc.methodCall("setValue", [address, value, data], function (error, result) {
+            rpc.methodCall("setValue", [address, param, val], function (error, result) {
                 callback(error, result);
             });
         });

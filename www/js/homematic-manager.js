@@ -7,20 +7,20 @@ $(document).ready(function () {
     var regaNames;
     var hash;
 
-    socket.on("connect", function () {
-        console.log("connect");
+    socket.on('connect', function () {
+        console.log('connect');
         getConfig();
     });
 
     function getConfig() {
         socket.emit('getConfig', function (data) {
             config = data;
-            $("#select-bidcos-daemon").html('<option value="null">Bitte einen Daemon auswählen</option>');
+            $('#select-bidcos-daemon').html('<option value="null">Bitte einen Daemon auswählen</option>');
 
             hash = window.location.hash.slice(1);
 
             for (var daemon in config.daemons) {
-                $("#select-bidcos-daemon").append('<option value="' + daemon + '"' + (hash == daemon ? ' selected' : '') + '>' + daemon + ' (' + config.daemons[daemon].type + ' ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
+                $('#select-bidcos-daemon').append('<option value="' + daemon + '"' + (hash == daemon ? ' selected' : '') + '>' + daemon + ' (' + config.daemons[daemon].type + ' ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
             }
             initHandlers();
             getRegaNames();
@@ -48,12 +48,12 @@ $(document).ready(function () {
     }
 
     function initHandlers() {
-        $("#select-bidcos-daemon").change(function () {
+        $('#select-bidcos-daemon').change(function () {
             initDaemon();
         });
 
         $('body').on('click', 'button.paramset', function () {
-            var tmp = $(this).attr("id").split("_");
+            var tmp = $(this).attr('id').split('_');
             var address = tmp[1];
             var paramset = tmp[2];
             socket.emit('rpc', 'getParamset', [address, paramset], function (err, data) {
@@ -104,7 +104,7 @@ $(document).ready(function () {
     }
 
     function initDaemon() {
-        daemon = $("#select-bidcos-daemon option:selected").val();
+        daemon = $('#select-bidcos-daemon option:selected').val();
         if (daemon != 'null') {
             window.location.hash = '#' + daemon;
             $('#grid-devices').jqGrid('clearGridData');
@@ -183,20 +183,20 @@ $(document).ready(function () {
                 // Create Input-Field
                 var input;
                 switch (desc[param].TYPE) {
-                    case "BOOL":
+                    case 'BOOL':
                         input = '<input id="paramset-input-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
                         break;
-                    case "INTEGER":
+                    case 'INTEGER':
                         input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                         break;
-                    case "ENUM":
+                    case 'ENUM':
                         input = '<select id="paramset-input-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
                         for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
                             input += '<option value="' + i + '">' + desc[param].VALUE_LIST[i] + '</option>';
                         }
                         input += '</select>';
                         break;
-                    case "FLOAT":
+                    case 'FLOAT':
                     default:
                         input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                 }
@@ -219,7 +219,7 @@ $(document).ready(function () {
         if (regaNames && regaNames[config.daemons[daemon].ip]) {
             var names = regaNames[config.daemons[daemon].ip];
         }
-        var name = names[address].Name || "";
+        var name = names[address].Name || '';
 
         $('div[aria-describedby="dialog-paramset"] span.ui-dialog-title').html(name + ' PARAMSET ' + address + ' ' + paramset);
 
@@ -430,7 +430,7 @@ $(document).ready(function () {
 
                 var paramsets = '';
                 for (var j = 0; j < listDevices[i].PARAMSETS.length; j++) {
-                    if (listDevices[i].PARAMSETS[j] == "LINK") continue;
+                    if (listDevices[i].PARAMSETS[j] == 'LINK') continue;
                     var idButton = 'paramset_' + listDevices[i].ADDRESS + '_' + listDevices[i].PARAMSETS[j];
                     paramsets += '<button class="paramset" id="' + idButton + '">' + listDevices[i].PARAMSETS[j] + '</button>';
                 }

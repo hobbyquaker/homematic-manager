@@ -2,14 +2,14 @@
 
 "use strict";
 
-var fs = require("fs");
-var express = require("express");
-var socketio = require("socket.io");
-var xmlrpc = require("xmlrpc");
-var http = require("http");
+var fs = require('fs');
+var express = require('express');
+var socketio = require('socket.io');
+var xmlrpc = require('xmlrpc');
+var http = require('http');
 
 var config = loadConfig();
-var logStream = openLog(__dirname + "/log/hm-manager.log");
+var logStream = openLog(__dirname + '/log/hm-manager.log');
 
 var app;
 var server;
@@ -35,17 +35,17 @@ function initSocket() {
 
     io.sockets.on('connection', function (socket) {
 
-        socket.on("getConfig", function (callback) {
+        socket.on('getConfig', function (callback) {
             callback(config);
         });
 
-        socket.on("getRegaNames", function (callback) {
+        socket.on('getRegaNames', function (callback) {
             callback(regaCache);
         });
 
-        socket.on("bidcosConnect", function (d, callback) {
+        socket.on('bidcosConnect', function (d, callback) {
             daemon = d;
-            console.log("connect " + daemon);
+            console.log('connect ' + daemon);
             rpc = xmlrpc.createClient({
                 host: config.daemons[daemon].ip,
                 port: config.daemons[daemon].port,
@@ -57,20 +57,18 @@ function initSocket() {
 
         socket.on('rpc', function (method, paramArray, callback) {
             console.log("RPC " + method + " " + JSON.stringify(paramArray));
-
             switch (method) {
-                case 'listDevices':
-                    // Todo implement cache?
-                    // break;
-                default:
-                    rpc.methodCall(method, paramArray, function (error, result) {
-                        if (callback) {
-                            callback(error, result);
-                        }
-                    });
+            case 'listDevices':
+                // Todo implement cache?
+                // break;
+            default:
+                rpc.methodCall(method, paramArray, function (error, result) {
+                    if (callback) {
+                        callback(error, result);
+                    }
+                });
             }
         });
-
 
     });
 

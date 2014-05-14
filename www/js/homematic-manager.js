@@ -5,6 +5,7 @@ $(document).ready(function () {
     var config;
     var listDevices;
     var regaNames;
+    var hash;
 
     socket.on("connect", function () {
         console.log("connect");
@@ -16,12 +17,10 @@ $(document).ready(function () {
             config = data;
             $("#select-bidcos-daemon").html('<option value="null">Bitte einen Daemon auswählen</option>');
 
-            var vars = [];
-            if (window.location.href.indexOf('?') > -1)
-                vars = getUrlVars();
+            hash = window.location.hash.slice(1);
 
             for (var daemon in config.daemons) {
-                $("#select-bidcos-daemon").append('<option value="' + daemon + '"' + (vars['daemon'] == daemon ? ' selected' : '') + '>' + daemon + ' (' + config.daemons[daemon].type + ' ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
+                $("#select-bidcos-daemon").append('<option value="' + daemon + '"' + (hash == daemon ? ' selected' : '') + '>' + daemon + ' (' + config.daemons[daemon].type + ' ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
             }
             initHandlers();
             getRegaNames();
@@ -107,6 +106,7 @@ $(document).ready(function () {
     function initDaemon() {
         daemon = $("#select-bidcos-daemon option:selected").val();
         if (daemon != 'null') {
+            window.location.hash = '#' + daemon;
             $('#grid-devices').jqGrid('clearGridData');
             if (daemon !== 'null') {
                 $('#load_grid-devices').show();
@@ -117,6 +117,8 @@ $(document).ready(function () {
                     });
                 });
             }
+        } else {
+            window.location.hash = '';
         }
     }
 
@@ -457,5 +459,22 @@ $(document).ready(function () {
     });
 
     resizeGrids();
+
+    window.onhashchange = function () {
+        hash = window.location.hash.slice(1);
+        if (config.daemons[hash]) {
+            if (daemon != hash) {
+                daemon = hash;
+                $('#select-bidocs-daemon option').removeAttr('selected');
+                $('#select-bidcos-daemon option[value="' + daemon + '"]').attr('selected', true);
+                initDaemon();
+            }
+        } else {
+            daemon = null;
+            $('#select-bidocs-daemon option').removeAttr('selected');
+            initDaemon();
+        }
+
+    }
 
 });

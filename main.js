@@ -177,11 +177,7 @@ function initWebServer() {
     });
 
     log("webserver listening on port "+config.webServerPort);
-
-
-
 }
-
 
 function getRegaNames(ip) {
     console.log("loading rega names from " + ip);
@@ -237,6 +233,9 @@ function regaScript(ip, file, callback) {
 
 
 function loadConfig() {
+    if (!fs.existsSync(__dirname + "/config.json")) {
+        fs.writeFileSync(__dirname + "/config.json", fs.readFileSync(__dirname + "/config-default.json"));
+    }
     return JSON.parse(fs.readFileSync(__dirname + "/config.json"));
 }
 

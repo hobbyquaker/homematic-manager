@@ -55,6 +55,15 @@ function initSocket() {
 
         });
 
+        socket.on('rpc', function (method, paramArray, callback) {
+            console.log("RPC " + method + " " + JSON.stringify(paramArray));
+            rpc.methodCall(method, paramArray, function (error, result) {
+                if (callback) {
+                    callback(error, result);
+                }
+            })
+        });
+
         socket.on("listDevices", function (callback) {
            // TODO fix or remove caching?
            // if (rpcCache[daemon] && rpcCache[daemon].listDevices) {

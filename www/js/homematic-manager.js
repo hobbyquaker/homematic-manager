@@ -12,7 +12,7 @@ $(document).ready(function () {
     });
 
     function getConfig() {
-        socket.emit("getConfig", function (data) {
+        socket.emit('getConfig', function (data) {
             config = data;
             $("#select-bidcos-daemon").html('<option value="null">Bitte einen Daemon auswählen</option>');
 
@@ -43,7 +43,7 @@ $(document).ready(function () {
     }
 
     function getRegaNames() {
-        socket.emit("getRegaNames", function (names) {
+        socket.emit('getRegaNames', function (names) {
             regaNames = names;
         });
     }
@@ -57,9 +57,9 @@ $(document).ready(function () {
             var tmp = $(this).attr("id").split("_");
             var address = tmp[1];
             var paramset = tmp[2];
-            socket.emit("getParamset", address, paramset, function (err, data) {
+            socket.emit('rpc', 'getParamset', [address, paramset], function (err, data) {
                 // TODO catch errors
-                socket.emit("getParamsetDescription", address, paramset, function (err2, data2) {
+                socket.emit('rpc', 'getParamsetDescription', [address, paramset], function (err2, data2) {
                     console.log(data, data2);
                     // TODO catch errors
                     paramsetDialog(data, data2, address, paramset);
@@ -70,8 +70,8 @@ $(document).ready(function () {
         $('body').on('click', 'button.paramset-setValue', function () {
 
             // address paramset and param
-            var address = $("#edit-paramset-address").val();
-            var parts = $(this).attr("id").split("-", 3);
+            var address = $('#edit-paramset-address').val();
+            var parts = $(this).attr('id').split('-', 3);
             var param = parts[2];
 
             // find input/select
@@ -96,7 +96,7 @@ $(document).ready(function () {
                 val /= 100;
             }
 
-            socket.emit('setValue', address, param, val, function (err, res) {
+            socket.emit('rpc', 'setValue', [address, param, val], function (err, res) {
                 // TODO catch errors
                 console.log(err);
                 console.log(res);
@@ -106,12 +106,12 @@ $(document).ready(function () {
 
     function initDaemon() {
         daemon = $("#select-bidcos-daemon option:selected").val();
-        if (daemon != "null") {
-            $("#grid-devices").jqGrid("clearGridData");
-            if (daemon !== "null") {
-                $("#load_grid-devices").show();
-                socket.emit("bidcosConnect", daemon, function () {
-                    socket.emit("listDevices", function (err, data) {
+        if (daemon != 'null') {
+            $('#grid-devices').jqGrid('clearGridData');
+            if (daemon !== 'null') {
+                $('#load_grid-devices').show();
+                socket.emit('bidcosConnect', daemon, function () {
+                    socket.emit('rpc', 'listDevices', [], function (err, data) {
                         listDevices = data;
                         buildGridDevices();
                     });
@@ -155,7 +155,7 @@ $(document).ready(function () {
             }
         });
         console.log(address, paramset, values);
-        socket.emit('putParamset', address, paramset, values, function (err, res) {
+        socket.emit('rpc', 'putParamset', [address, paramset, values], function (err, res) {
             // Todo catch errors
         });
     }
@@ -163,16 +163,16 @@ $(document).ready(function () {
     function paramsetDialog(data, desc, address, paramset) {
 
         // Tabelle befüllen
-        $("#table-paramset").html('<tr><th>Param</th><th>Value</th><th>Default</th><th></th></tr>');
+        $('#table-paramset').html('<tr><th>Param</th><th>Value</th><th>Default</th><th></th></tr>');
         for (var param in data) {
 
             if (desc[param]) {
                 // Dirty workaround for encoding problem
-                if (desc[param].UNIT == "�C") desc[param].UNIT = "°C";
+                if (desc[param].UNIT == '�C') desc[param].UNIT = '°C';
 
                 // Calculate percent values
-                if (desc[param].UNIT == "100%") {
-                    var unit = "%";
+                if (desc[param].UNIT == '100%') {
+                    var unit = '%';
                     data[param] *= 100;
                 } else {
                     var unit = desc[param].UNIT;
@@ -200,14 +200,14 @@ $(document).ready(function () {
                 }
 
                 // Paramset VALUES?
-                if (paramset == "VALUES" && (desc[param].OPERATIONS & 2)) {
-                    $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
+                if (paramset == 'VALUES' && (desc[param].OPERATIONS & 2)) {
+                    $('#table-paramset').append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
                 } else {
-                    $("#table-paramset").append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + desc[param].DEFAULT + '</td></tr>');
+                    $('#table-paramset').append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + desc[param].DEFAULT + '</td></tr>');
                 }
 
             } else {
-                $("#table-paramset").append('<tr><td>' + param + '</td><td colspan = "3">' + data[param] + '</td></tr>');
+                $('#table-paramset').append('<tr><td>' + param + '</td><td colspan = "3">' + data[param] + '</td></tr>');
             }
 
         }
@@ -219,13 +219,13 @@ $(document).ready(function () {
         }
         var name = names[address].Name || "";
 
-        $("div[aria-describedby='dialog-paramset'] span.ui-dialog-title").html(name + " PARAMSET " + address + " " + paramset);
+        $('div[aria-describedby="dialog-paramset"] span.ui-dialog-title').html(name + ' PARAMSET ' + address + ' ' + paramset);
 
         // Hidden-Hilfsfelder
-        $("#edit-paramset-address").val(address);
-        $("#edit-paramset-paramset").val(paramset);
+        $('#edit-paramset-address').val(address);
+        $('#edit-paramset-paramset').val(paramset);
 
-        $("#dialog-paramset").dialog("open");
+        $('#dialog-paramset').dialog('open');
     }
 
     function buildGridDevices() {
@@ -237,45 +237,45 @@ $(document).ready(function () {
                 listDevices[i].RF_ADDRESS = parseInt(listDevices[i].RF_ADDRESS, 10).toString(16);
             }
 
-            var rx_mode = "";
-            if (listDevices[i].RX_MODE & 1) rx_mode += "ALWAYS ";
-            if (listDevices[i].RX_MODE & 2) rx_mode += "BURST ";
-            if (listDevices[i].RX_MODE & 4) rx_mode += "CONFIG ";
-            if (listDevices[i].RX_MODE & 8) rx_mode += "WAKEUP ";
-            if (listDevices[i].RX_MODE & 16) rx_mode += "LAZY_CONFIG ";
+            var rx_mode = '';
+            if (listDevices[i].RX_MODE & 1) rx_mode += 'ALWAYS ';
+            if (listDevices[i].RX_MODE & 2) rx_mode += 'BURST ';
+            if (listDevices[i].RX_MODE & 4) rx_mode += 'CONFIG ';
+            if (listDevices[i].RX_MODE & 8) rx_mode += 'WAKEUP ';
+            if (listDevices[i].RX_MODE & 16) rx_mode += 'LAZY_CONFIG ';
             listDevices[i].rx_mode = rx_mode;
 
-            var flags = "";
-            if (listDevices[i].FLAGS & 1) flags += "Visible ";
-            if (listDevices[i].FLAGS & 2) flags += "Internal ";
-            if (listDevices[i].FLAGS & 8) flags += "DontDelete ";
+            var flags = '';
+            if (listDevices[i].FLAGS & 1) flags += 'Visible ';
+            if (listDevices[i].FLAGS & 2) flags += 'Internal ';
+            if (listDevices[i].FLAGS & 8) flags += 'DontDelete ';
             listDevices[i].flags = flags;
 
             switch (listDevices[i].DIRECTION) {
                 case 1:
-                    listDevices[i].direction = "SENDER";
+                    listDevices[i].direction = 'SENDER';
                     break;
                 case 2:
-                    listDevices[i].direction = "RECEIVER";
+                    listDevices[i].direction = 'RECEIVER';
                     break;
                 default:
-                    listDevices[i].direction = "NONE";
+                    listDevices[i].direction = 'NONE';
             }
 
             listDevices[i].aes_active =  listDevices[i].AES_ACTIVE ? listDevices[i].AES_ACTIVE = '<span style="display:inline-block; vertical-align:bottom" class="ui-icon ui-icon-key"></span>' : '';
 
             if (names && names[listDevices[i].ADDRESS]) listDevices[i].Name = names[listDevices[i].ADDRESS].Name;
 
-            var paramsets = "";
+            var paramsets = '';
             for (var j = 0; j < listDevices[i].PARAMSETS.length; j++) {
                 paramsets += '<button class="paramset" id="paramset_' + listDevices[i].ADDRESS + '_' + listDevices[i].PARAMSETS[j] + '">' + listDevices[i].PARAMSETS[j] + '</button>';
             }
             listDevices[i].params = paramsets;
             if (!listDevices[i].PARENT) {
-                $("#grid-devices").jqGrid('addRowData', i, listDevices[i]);
+                $('#grid-devices').jqGrid('addRowData', i, listDevices[i]);
             }
         }
-        $("#grid-devices").trigger('reloadGrid');
+        $('#grid-devices').trigger('reloadGrid');
     }
 
 
@@ -284,14 +284,14 @@ $(document).ready(function () {
     //
 
     // Dialogs
-    $("#dialog-paramset").dialog({
+    $('#dialog-paramset').dialog({
         autoOpen: false,
         modal: true,
         width: 640,
         height: 400,
         buttons: [
             {
-                text: "putParamset",
+                text: 'putParamset',
                 click: function () {
                     putParamset();
                 }
@@ -300,15 +300,15 @@ $(document).ready(function () {
     });
 
     // Tabs
-    $("#tabs-main").tabs({
+    $('#tabs-main').tabs({
         create: function () {
-            $("#tabs-main ul.ui-tabs-nav").prepend('<li><select id="select-bidcos-daemon"></select></li>');
-            $("#tabs-main ul.ui-tabs-nav").prepend('<li class="header">HomeMatic-Manager</li>');
+            $('#tabs-main ul.ui-tabs-nav').prepend('<li><select id="select-bidcos-daemon"></select></li>');
+            $('#tabs-main ul.ui-tabs-nav').prepend('<li class="header">HomeMatic-Manager</li>');
         }
     });
 
     // Geräte-Tabelle
-    $("#grid-devices").jqGrid({
+    $('#grid-devices').jqGrid({
         colNames: ['Name', 'ADDRESS', 'FIRMWARE', 'FLAGS', 'INTERFACE', 'RF_ADDRESS', 'PARAMSETS', 'ROAMING', 'RX_MODE', 'TYPE', 'VERSION'],
         colModel: [
             {name:'Name', index: 'Name', width: 100},
@@ -324,17 +324,17 @@ $(document).ready(function () {
             {name:'VERSION',index:'VERSION', width:50},
 
         ],
-        datatype:   "local",
+        datatype:   'local',
         rowNum:     25,
         autowidth:  true,
-        width:      "100%",
+        width:      '100%',
         height:     600,
         rowList:    [25, 50, 100, 500],
         pager:      $('#pager-devices'),
         sortname:   'timestamp',
         viewrecords: true,
-        sortorder:  "desc",
-        caption:    "Geräte",
+        sortorder:  'desc',
+        caption:    'Geräte',
         subGrid:    true,
         subGridRowExpanded: function(grid_id, row_id) {
             subGridChannels(grid_id, row_id);
@@ -351,7 +351,7 @@ $(document).ready(function () {
     });
 
     // Direktverknüpfungs-Tabelle
-    $("#grid-pairing").jqGrid({
+    $('#grid-pairing').jqGrid({
         colNames:['Address', 'Address-Partner', 'Description'],
         colModel:[
             {name:'Address',index:'Address', width:100},
@@ -360,13 +360,13 @@ $(document).ready(function () {
         ],
         rowNum:     10,
         autowidth:  true,
-        width:      "100%",
+        width:      '100%',
         rowList:    [10,20,30],
         pager:      $('#pager-pairing'),
         sortname:   'timestamp',
         viewrecords: true,
-        sortorder:  "desc",
-        caption:    "Direktverknüpfungen"
+        sortorder:  'desc',
+        caption:    'Direktverknüpfungen'
     })
     .navGrid('#pager-pairing')
     .jqGrid('filterToolbar',{
@@ -377,10 +377,10 @@ $(document).ready(function () {
     });
 
     function subGridChannels(grid_id, row_id) {
-        var subgrid_table_id = "channels_" + row_id + "_t";
-        $("#" + grid_id).html("<table id='" + subgrid_table_id + "''></table>");
+        var subgrid_table_id = 'channels_' + row_id + '_t';
+        $('#' + grid_id).html('<table id="' + subgrid_table_id + '"></table>');
         var gridConf = {
-            datatype: "local",
+            datatype: 'local',
             colNames: [
                 'Name',
                 'ADDRESS',
@@ -407,14 +407,14 @@ $(document).ready(function () {
             ],
             rowNum: 1000000,
             autowidth: true,
-            height: "auto",
+            height: 'auto',
             width: 1200,
-            sortorder: "desc",
+            sortorder: 'desc',
             viewrecords: true,
             ignoreCase: true,
             shrinkToFit: true
         };
-        $("#" + subgrid_table_id).jqGrid(gridConf);
+        $('#' + subgrid_table_id).jqGrid(gridConf);
 
         if (regaNames && regaNames[config.daemons[daemon].ip]) {
             var names = regaNames[config.daemons[daemon].ip];
@@ -426,14 +426,14 @@ $(document).ready(function () {
 
                 if (names && names[listDevices[i].ADDRESS]) listDevices[i].Name = names[listDevices[i].ADDRESS].Name;
 
-                var paramsets = "";
+                var paramsets = '';
                 for (var j = 0; j < listDevices[i].PARAMSETS.length; j++) {
                     if (listDevices[i].PARAMSETS[j] == "LINK") continue;
                     var idButton = 'paramset_' + listDevices[i].ADDRESS + '_' + listDevices[i].PARAMSETS[j];
                     paramsets += '<button class="paramset" id="' + idButton + '">' + listDevices[i].PARAMSETS[j] + '</button>';
                 }
                 listDevices[i].params = paramsets;
-                $("#" + subgrid_table_id).jqGrid('addRowData', i, listDevices[i]);
+                $('#' + subgrid_table_id).jqGrid('addRowData', i, listDevices[i]);
 
 
             }
@@ -441,7 +441,7 @@ $(document).ready(function () {
 
     }
 
-    $(".ui-jqgrid-titlebar-close").hide();
+    $('.ui-jqgrid-titlebar-close').hide();
 
     function resizeGrids() {
         var x = $(window).width();
@@ -449,7 +449,7 @@ $(document).ready(function () {
         if (x < 1024) x = 1024;
         if (y < 640) y = 640;
 
-        $("#grid-devices, #grid-pairing").setGridHeight(y - 186).setGridWidth(x - 60);
+        $('#grid-devices, #grid-pairing').setGridHeight(y - 186).setGridWidth(x - 60);
     }
 
     $(window).resize(function() {

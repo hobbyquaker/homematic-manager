@@ -6,7 +6,7 @@
 
 * Repository clonen oder Zip-File herunterladen und auspacken
 * Node-Module installieren: ``npm install``
-* IP Adressen auf der die rfd/hs485d erreichbar sind in config.json anpassen
+* IP Adressen auf der die rfd/hs485d erreichbar sind in config-default.json anpassen
 
 ### Starten
 

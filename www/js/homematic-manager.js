@@ -15,12 +15,31 @@ $(document).ready(function () {
         socket.emit("getConfig", function (data) {
             config = data;
             $("#select-bidcos-daemon").html('<option value="null">Bitte einen Daemon auswählen</option>');
+
+            var vars = [];
+            if (window.location.href.indexOf('?') > -1)
+                vars = getUrlVars();
+
             for (var daemon in config.daemons) {
-                $("#select-bidcos-daemon").append('<option value="' + daemon + '">' + daemon + ' (' + config.daemons[daemon].type + ' ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
+                $("#select-bidcos-daemon").append('<option value="' + daemon + '"' + (vars['daemon'] == daemon ? ' selected' : '') + '>' + daemon + ' (' + config.daemons[daemon].type + ' ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
             }
             initHandlers();
             getRegaNames();
+            initDaemon();
         });
+    }
+
+    function getUrlVars()
+    {
+        var vars = [], hash;
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for (var i = 0; i < hashes.length; i++)
+        {
+            hash = hashes[i].split('=');
+            vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+        return vars;
     }
 
     function getRegaNames() {
@@ -31,17 +50,7 @@ $(document).ready(function () {
 
     function initHandlers() {
         $("#select-bidcos-daemon").change(function () {
-            daemon = $("#select-bidcos-daemon option:selected").val();
-            $("#grid-devices").jqGrid("clearGridData");
-            if (daemon !== "null") {
-                $("#load_grid-devices").show();
-                socket.emit("bidcosConnect", daemon, function () {
-                    socket.emit("listDevices", function (err, data) {
-                        listDevices = data;
-                        buildGridDevices();
-                    });
-                });
-            }
+            initDaemon();
         });
 
         $('body').on('click', 'button.paramset', function () {
@@ -89,10 +98,26 @@ $(document).ready(function () {
 
             socket.emit('setValue', address, param, val, function (err, res) {
                 // TODO catch errors
+                console.log(err);
+                console.log(res);
             });
-
         });
+    }
 
+    function initDaemon() {
+        daemon = $("#select-bidcos-daemon option:selected").val();
+        if (daemon != "null") {
+            $("#grid-devices").jqGrid("clearGridData");
+            if (daemon !== "null") {
+                $("#load_grid-devices").show();
+                socket.emit("bidcosConnect", daemon, function () {
+                    socket.emit("listDevices", function (err, data) {
+                        listDevices = data;
+                        buildGridDevices();
+                    });
+                });
+            }
+        }
     }
 
     function putParamset() {

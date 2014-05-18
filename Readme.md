@@ -1,9 +1,10 @@
-# HomeMatic Manager 0.0.1
+# HomeMatic Manager 0.0.2
 
 ## Dokumentation
 
 ### Installation
 
+* homematic-manager benötigt eine Node.js Installation
 * Repository clonen oder Zip-File herunterladen und auspacken
 * Node-Module installieren: ``npm install``
 * IP Adressen auf der die rfd/hs485d erreichbar sind in config-default.json anpassen
@@ -26,7 +27,9 @@
 
 ### 0.0.2
 
-*
+* (Anli) rudimentäre RPC Konsole
+* (Anli) Direktverknüpfungen werden angezeigt
+* (Hobbyquaker) Geräte/Kanal-Paramsets können editiert werden
 
 
 ## Lizenz

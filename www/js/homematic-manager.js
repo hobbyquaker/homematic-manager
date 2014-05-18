@@ -102,6 +102,13 @@ $(document).ready(function () {
                 console.log(res);
             });
         });
+
+        $('body').on('click', 'button.deletelink', function () {
+            var tmp = $(this).attr("id").split("_");
+            var sender = tmp[1];
+            var receiver = tmp[2];
+            deleteLinkDialog(sender, receiver, $(this).attr("params"));
+        });
     }
 
     function initDaemon() {
@@ -235,6 +242,30 @@ $(document).ready(function () {
         $('#dialog-paramset').dialog('open');
     }
 
+    function deleteLinkDialog(sender, receiver, params) {
+
+        // Dialog-Überschrift setzen
+        if (regaNames && regaNames[config.daemons[daemon].ip]) {
+            var names = regaNames[config.daemons[daemon].ip];
+        }
+        var sendername = names[sender].Name || "";
+        var receivername = names[receiver].Name || "";
+        var arrparams = JSON.parse(params);
+
+        $('div[aria-describedby="dialog-paramset"] span.ui-dialog-title').html('Verknüpfung zwischen ' + sender + ' und ' + receiver + ' löschen');
+
+        $('#table-deletelink').html('<tr><td>Sender:</td><td>' + sender + ' (' + sendername + ')</td></tr>');
+        $('#table-deletelink').append('<tr><td>Empfänger:</td><td>' + receiver + ' (' + receivername + ')</td></tr>');
+        $('#table-deletelink').append('<tr><td>Name:</td><td>' + arrparams.NAME + '</td></tr>');
+        $('#table-deletelink').append('<tr><td>Beschreibung:</td><td>' + arrparams.DESCRIPTION + '</td></tr>');
+
+        // Hidden-Hilfsfelder
+        $('#deletelink-sender').val(sender);
+        $('#deletelink-receiver').val(receiver);
+
+        $('#dialog-deletelink').dialog('open');
+    }
+
     function buildGridDevices() {
         if (regaNames && regaNames[config.daemons[daemon].ip]) {
             var names = regaNames[config.daemons[daemon].ip];
@@ -300,7 +331,9 @@ $(document).ready(function () {
                 listLinks[i].Sendername = names[listLinks[i].SENDER].Name;
             if (names && names[listLinks[i].RECEIVER])
                 listLinks[i].Receivername = names[listLinks[i].RECEIVER].Name;
-
+            var actions = '<button class="editlink" id="action-editlink_' + listLinks[i].SENDER + '_' + listLinks[i].RECEIVER + '" params=\'' + JSON.stringify(listLinks[i]) + '\'>bearbeiten</button>';
+            actions += '<button class="deletelink" id="action-deletelink_' + listLinks[i].SENDER + '_' + listLinks[i].RECEIVER + '" params=\'' + JSON.stringify(listLinks[i]) + '\'>löschen</button>';
+            listLinks[i].ACTIONS = actions;
             $('#grid-links').jqGrid('addRowData', i, listLinks[i]);
         }
         $('#grid-links').trigger('reloadGrid');
@@ -322,6 +355,20 @@ $(document).ready(function () {
                 text: 'putParamset',
                 click: function () {
                     putParamset();
+                }
+            }
+        ]
+    });
+    $('#dialog-deletelink').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 640,
+        height: 400,
+        buttons: [
+            {
+                text: 'löschen',
+                click: function () {
+                    deleteLink();
                 }
             }
         ]
@@ -379,14 +426,15 @@ $(document).ready(function () {
 
     // Direktverknüpfungs-Tabelle
     $('#grid-links').jqGrid({
-        colNames:['Sendername', 'Address', 'Receivername', 'Address-Partner', 'Name', 'Description'],
+        colNames:['Sendername', 'Address', 'Receivername', 'Address-Partner', 'Name', 'Description', 'Aktionen'],
         colModel:[
             {name:'Sendername', index:'Sendername', width:100},
             {name:'SENDER', index:'SENDER', width:50},
             {name:'Receivername', index:'Receivername', width:100},
             {name:'RECEIVER', index:'RECEIVER', width:50},
             {name:'NAME', index:'NAME', width:150},
-            {name:'DESCRIPTION', index:'DESCRIPTION', width:150}
+            {name:'DESCRIPTION', index:'DESCRIPTION', width:150},
+            {name:'ACTIONS', index:'ACTIONS', width:80}
         ],
         rowNum:     10,
         autowidth:  true,

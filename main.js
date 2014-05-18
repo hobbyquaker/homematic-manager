@@ -56,22 +56,23 @@ function initSocket() {
         });
 
         socket.on('rpc', function (method, paramArray, callback) {
-            console.log("RPC " + method + " " + JSON.stringify(paramArray));
-            switch (method) {
-            case 'listDevices':
-                // Todo implement cache?
-                // break;
-            default:
-                rpc.methodCall(method, paramArray, function (error, result) {
-                    if (callback) {
-                        callback(error, result);
-                    }
-                });
+            if (method) {
+                console.log("RPC " + method + " " + JSON.stringify(paramArray));
+                switch (method) {
+                    case 'listDevices':
+                    // Todo implement cache?
+                    // break;
+                    default:
+                        rpc.methodCall(method, paramArray, function (error, result) {
+                            if (callback) {
+                                callback(error, result);
+                            }
+                        });
+                        break;
+                }
             }
         });
-
     });
-
 }
 
 function initWebServer() {

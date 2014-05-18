@@ -23,18 +23,20 @@
     <div id="tabs-main">
         <ul>
             <li><a href="#tab-devices">Geräte</a></li>
-            <li><a href="#tab-pairing">Direktverknüpfungen</a></li>
+            <li><a href="#tab-links">Direktverknüpfungen</a></li>
             <li><a href="#tab-console">Konsole</a></li>
         </ul>
         <div id="tab-devices">
             <table id="grid-devices"></table>
             <div id="pager-devices"></div>
         </div>
-        <div id="tab-pairing">
-            <table id="grid-pairing"></table>
-            <div id="pager-pairing"></div>
+        <div id="tab-links">
+            <table id="grid-links"></table>
+            <div id="pager-links"></div>
         </div>
         <div id="tab-console">
+            <div><input id="txtcommand" type="text" style="width: 500px;"><input id="txtparams" type="text" style="width: 500px;"><button id="btncommand">Befehl senden</button></div>
+            <div><textarea id="txtcmdanswer" style="width: 100%; height: 500px;"></textarea></div>
         </div>
     </div>
     <div id="dialog-paramset">

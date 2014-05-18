@@ -4,6 +4,7 @@ $(document).ready(function () {
     var daemon;
     var config;
     var listDevices;
+    var listLinks;
     var regaNames;
     var hash;
 
@@ -114,6 +115,10 @@ $(document).ready(function () {
                     socket.emit('rpc', 'listDevices', [], function (err, data) {
                         listDevices = data;
                         buildGridDevices();
+                    });
+                    socket.emit('rpc', 'getLinks', [], function (err, data) {
+                        listLinks = data;
+                        buildGridLinks();
                     });
                 });
             }
@@ -280,6 +285,27 @@ $(document).ready(function () {
         $('#grid-devices').trigger('reloadGrid');
     }
 
+    function buildGridLinks() {
+        if (regaNames && regaNames[config.daemons[daemon].ip]) {
+            var names = regaNames[config.daemons[daemon].ip];
+        }
+        for (var i = 0, len = listLinks.length; i < len; i++) {
+            /*var flags = '';
+            if (listLinks[i].FLAGS & 1) flags += 'Visible ';
+            if (listLinks[i].FLAGS & 2) flags += 'Internal ';
+            if (listLinks[i].FLAGS & 8) flags += 'DontDelete ';
+            listLinks[i].flags = flags;*/
+
+            if (names && names[listLinks[i].SENDER])
+                listLinks[i].Sendername = names[listLinks[i].SENDER].Name;
+            if (names && names[listLinks[i].RECEIVER])
+                listLinks[i].Receivername = names[listLinks[i].RECEIVER].Name;
+
+            $('#grid-links').jqGrid('addRowData', i, listLinks[i]);
+        }
+        $('#grid-links').trigger('reloadGrid');
+    }
+
 
     //
     //      initialize UI elements
@@ -323,8 +349,7 @@ $(document).ready(function () {
             {name:'ROAMING',index:'ROAMING', width:70},
             {name:'rx_mode',index:'RX_MODE', width:70},
             {name:'TYPE',index:'TYPE', width:100},
-            {name:'VERSION',index:'VERSION', width:50},
-
+            {name:'VERSION',index:'VERSION', width:50}
         ],
         datatype:   'local',
         rowNum:     25,
@@ -353,24 +378,27 @@ $(document).ready(function () {
     });
 
     // Direktverknüpfungs-Tabelle
-    $('#grid-pairing').jqGrid({
-        colNames:['Address', 'Address-Partner', 'Description'],
+    $('#grid-links').jqGrid({
+        colNames:['Sendername', 'Address', 'Receivername', 'Address-Partner', 'Name', 'Description'],
         colModel:[
-            {name:'Address',index:'Address', width:100},
-            {name:'Address-Partner',index:'Address-Partner', width:100},
-            {name:'Description',index:'Description', width:100},
+            {name:'Sendername', index:'Sendername', width:100},
+            {name:'SENDER', index:'SENDER', width:50},
+            {name:'Receivername', index:'Receivername', width:100},
+            {name:'RECEIVER', index:'RECEIVER', width:50},
+            {name:'NAME', index:'NAME', width:150},
+            {name:'DESCRIPTION', index:'DESCRIPTION', width:150}
         ],
         rowNum:     10,
         autowidth:  true,
         width:      '100%',
         rowList:    [10,20,30],
-        pager:      $('#pager-pairing'),
+        pager:      $('#pager-links'),
         sortname:   'timestamp',
         viewrecords: true,
         sortorder:  'desc',
         caption:    'Direktverknüpfungen'
     })
-    .navGrid('#pager-pairing')
+    .navGrid('#pager-links')
     .jqGrid('filterToolbar',{
         defaultSearch:'cn',
         autosearch: true,
@@ -436,11 +464,8 @@ $(document).ready(function () {
                 }
                 listDevices[i].params = paramsets;
                 $('#' + subgrid_table_id).jqGrid('addRowData', i, listDevices[i]);
-
-
             }
         }
-
     }
 
     $('.ui-jqgrid-titlebar-close').hide();
@@ -451,8 +476,17 @@ $(document).ready(function () {
         if (x < 1024) x = 1024;
         if (y < 640) y = 640;
 
-        $('#grid-devices, #grid-pairing').setGridHeight(y - 186).setGridWidth(x - 60);
+        $('#grid-devices, #grid-links').setGridHeight(y - 186).setGridWidth(x - 60);
     }
+
+    //Konsole
+    $('#btncommand').button();
+    $('#btncommand').click(function() {
+        console.log($('#txtcommand').val());
+        socket.emit('rpc', $('#txtcommand').val(), [], function (err, data) {
+            $('#txtcmdanswer').val(JSON.stringify(data));
+        });
+    });
 
     $(window).resize(function() {
         resizeGrids();
@@ -462,6 +496,8 @@ $(document).ready(function () {
 
     window.onhashchange = function () {
         hash = window.location.hash.slice(1);
+        console.log(hash);
+        console.log(config.daemons);
         if (config.daemons[hash]) {
             if (daemon != hash) {
                 daemon = hash;

@@ -21,7 +21,9 @@
 * Geräte tauschen
 * Konfigurieren von Geräten
 * Zuordnung Geräte/Interfaces
+* Funk-Schnittstellen hinzufügen/löschen
 * RPC Konsole
+* Geräte deaktiveren/aktivieren (Ablernen mit speichern aller Paramsets und Links, schwierig in Verbindung mit Rega...)
 
 ## Changelog
 

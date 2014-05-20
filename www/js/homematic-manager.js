@@ -8,6 +8,298 @@ $(document).ready(function () {
     var regaNames;
     var hash;
 
+    var rpcMethods = {
+        activateLinkParamset: {
+			rfd: true,
+			hs485d: false,
+			params: [
+                // String address, String peer_address, Boolean long_press
+                { name: 'address', type: 'address' },
+                { name: 'peer_address', type: 'address' },
+                { name: 'long_press', type: 'boolean' }
+			]
+		},
+        addDevice: {
+			rfd: true,
+			hs485d: false,
+			params: [
+			]
+		},
+        addLink: {
+			rfd: true,
+			hs485d: true,
+			params: [
+                // String sender, String receiver, String name, String description
+                { name: 'sender', type: 'address' },
+                { name: 'receiver', type: 'address' },
+                { name: 'name', type: 'string', optional: ['rfd', 'hs485d'] },
+                { name: 'description', type: 'string', optional: ['rfd', 'hs485d'] }
+            ]
+		},
+        changekey: {
+			rfd: true,
+			hs485d: false,
+			params: [
+			]
+		},
+        clearConfigCache: {
+			rfd: true,
+			hs485d: true,
+			params: [
+			]
+		},
+        deleteDevice: {
+			rfd: true,
+			hs485d: true,
+			params: [
+                { name: 'address', type: 'address' },
+                {
+                    name: 'flags',
+                    type: 'integer',
+                    bitmask: {
+                        '1': 'DELETE_FLAG_RESET',
+                        '2': 'DELETE_FLAG_FORCE',
+                        '4': 'DELETE_FLAG_DEFER'
+                    }
+                }
+			]
+		},
+        abortDeleteDevice: {
+            rfd: true,
+            hs485d: false,
+            params: [
+                { name: 'address', type: 'address' }
+            ]
+        },
+        determineParameter: {
+			rfd: true,
+			hs485d: false,
+			params: [
+                // String address, String paramset_key, String parameter_id
+                { name: 'address', type: 'address' },
+                { name: 'paramset_key', type: 'string' },
+                { name: 'parameter_id', type: 'string' }
+			]
+		},
+        getDeviceDescription: {
+			rfd: true,
+			hs485d: true,
+			params: [
+                { name: 'address', type: 'address' }
+			]
+		},
+        getInstallMode: {
+			rfd: true,
+			hs485d: false,
+			params: [
+			]
+		},
+        getKeyMismatchDevice: {
+			rfd: true,
+			hs485d: false,
+			params: [
+			]
+		},
+        getLinkInfo: {
+			rfd: true,
+			hs485d: true,
+			params: [
+                { name: 'sender', type: 'address' },
+                { name: 'receiver', type: 'address' }
+            ]
+		},
+        getLinkPeers: {
+			rfd: true,
+			hs485d: true,
+			params: [
+			]
+		},
+        getLinks: {
+			rfd: true,
+			hs485d: true,
+			params: [
+                { name: 'address', type: 'address' },
+                {
+                    name: 'flags',
+                    type: 'integer',
+                    bitmask: {
+                        '1': 'GL_FLAG_GROUP',
+                        '2': 'GL_FLAG_SENDER_PARAMSET',
+                        '4': 'GL_FLAG_RECEIVER_PARAMSET'
+                    },
+                    optional: ['rfd', 'hs485d']
+                }
+            ]
+		},
+        getParamset: {
+			rfd: true,
+			hs485d: true,
+			params: [
+                { name: 'address', type: 'address' },
+                { name: 'paramset_key', type: 'string' },
+                { name: 'mode', type: 'integer', optional: ['rfd'] }
+            ]
+		},
+        getParamsetDescription: {
+			rfd: true,
+			hs485d: true,
+			params: [
+                { name: 'address', type: 'address' },
+                { name: 'paramset_type', type: 'string' }
+            ]
+		},
+        getParamsetId: {
+			rfd: true,
+			hs485d: true,
+			params: [
+                { name: 'address', type: 'address' },
+                { name: 'type', type: 'string' }
+            ]
+		},
+        getValue: {
+			rfd: true,
+			hs485d: true,
+			params: [
+                { name: 'address', type: 'address' },
+                { name: 'value_key', type: 'string' },
+                { name: 'mode', type: 'integer', optional: ['rfd'] }
+            ]
+		},
+        /*init: {
+			rfd: true,
+			hs485d: true,
+			params: [
+			]
+		},*/
+        listDevices: {
+			rfd: true,
+			hs485d: true,
+			params: []
+		},
+        listTeams: {
+			rfd: true,
+			hs485d: false,
+			params: [
+			]
+		},
+        logLevel: {
+			rfd: true,
+			hs485d: true,
+			params: [
+			]
+		},
+        putParamset: {
+			rfd: true,
+			hs485d: true,
+			params: [
+                { name: 'address', type: 'string' },
+                { name: 'paramset_key', type: 'string' },
+                { name: 'set', type: 'paramset' }
+            ]
+		},
+        removeLink: {
+			rfd: true,
+			hs485d: true,
+			params: [
+                { name: 'sender', type: 'address' },
+                { name: 'receiver', type: 'address' }
+			]
+		},
+        reportValueUsage: {
+			rfd: true,
+			hs485d: true,
+			params: [
+			]
+		},
+        restoreConfigToDevice: {
+			rfd: true,
+			hs485d: false,
+			params: [
+			]
+		},
+        rssiInfo: {
+			rfd: true,
+			hs485d: false,
+			params: [
+			]
+		},
+        searchDevices: {
+			rfd: false,
+			params: [
+			],
+			hs485d: true,
+			params: [
+			]
+		},
+        setInstallMode: {
+			rfd: true,
+			hs485d: false,
+			params: [
+			]
+		},
+        setLinkInfo: {
+			rfd: true,
+			hs485d: true,
+			params: [
+               // String sender, String receiver, String name,  String description
+                { name: 'sender', type: 'address' },
+                { name: 'receiver', type: 'address' },
+                { name: 'name', type: 'string' },
+                { name: 'description', type: 'string' }
+			]
+		},
+        setTeam: {
+			rfd: true,
+			hs485d: false,
+			params: [
+			]
+		},
+        setTempKey: {
+			rfd: true,
+			hs485d: false,
+			params: [
+			]
+		},
+        setValue: {
+			rfd: true,
+			hs485d: true,
+			params: [
+                { name: 'address', type: 'string' },
+                { name: 'value_key', type: 'string' },
+                { name: 'value', type: 'mixed' }
+            ]
+		},
+        'system.listMethods': {
+			rfd: true,
+			hs485d: true,
+			params: []
+		},
+        'system.methodHelp': {
+			rfd: true,
+			hs485d: true,
+			params: [
+			]
+		},
+        /*'system.multicall': {
+			rfd: true,
+			hs485d: true,
+			params: [
+			]
+		},*/
+        updateFirmware: {
+			rfd: true,
+			hs485d: true,
+			params: [
+			]
+		},
+        listBidcosInterfaces: {
+			rfd: true,
+			hs485d: false,
+			params: [
+			]
+		}
+    };
+
     socket.on('connect', function () {
         console.log('connect');
         getConfig();
@@ -132,6 +424,7 @@ $(document).ready(function () {
         } else {
             window.location.hash = '';
         }
+        buildRpcSelect();
     }
 
     function putParamset() {
@@ -347,6 +640,8 @@ $(document).ready(function () {
     // Dialogs
     $('#dialog-paramset').dialog({
         autoOpen: false,
+			params: [
+			],
         modal: true,
         width: 640,
         height: 400,
@@ -361,6 +656,8 @@ $(document).ready(function () {
     });
     $('#dialog-deletelink').dialog({
         autoOpen: false,
+			params: [
+			],
         modal: true,
         width: 640,
         height: 400,
@@ -421,7 +718,11 @@ $(document).ready(function () {
         defaultSearch:'cn',
         autosearch: true,
         searchOnEnter: false,
-        enableClear: false
+			params: [
+			],
+        enableClear: false,
+			params: [
+			]
     });
 
     // Direktverknüpfungs-Tabelle
@@ -451,7 +752,11 @@ $(document).ready(function () {
         defaultSearch:'cn',
         autosearch: true,
         searchOnEnter: false,
-        enableClear: false
+			params: [
+			],
+        enableClear: false,
+			params: [
+			]
     });
 
     function subGridChannels(grid_id, row_id) {
@@ -528,20 +833,64 @@ $(document).ready(function () {
     }
 
     //Konsole
-    $('#btncommand').button();
-    $('#btncommand').click(function() {
-        console.log($('#txtcommand').val());
-        socket.emit('rpc', $('#txtcommand').val(), [], function (err, data) {
-            $('#txtcmdanswer').val(JSON.stringify(data));
-        });
-    });
+    var $consoleRpcMethod = $('#console-rpc-method');
+    var $consoleRpcSend = $('#console-rpc-send');
+    var $consoleRpcResponse = $('#console-rpc-response');
 
+    function buildRpcSelect() {
+        $consoleRpcMethod.html('');
+        $consoleRpcResponse.html('');
+        if (daemon == 'null') {
+            $consoleRpcSend.attr('disabled', true).button('refresh');
+            return;
+        } else {
+            $consoleRpcSend.removeAttr('disabled').button('refresh');
+        }
+        var daemonName = config.daemons[daemon].type;
+        switch (daemonName) {
+            case 'BidCos-RF':
+                var daemonType = 'rfd';
+                break;
+            case 'BidCos-Wired':
+                var daemonType = 'hs485d';
+                break;
+            default:
+                var daemonType = 'unknown';
+        }
+        for (var method in rpcMethods) {
+            if (rpcMethods[method][daemonType]) {
+                $consoleRpcMethod.append('<option value="' + method + '">' + method + '</option>');
+            }
+        }
+    }
+
+    $consoleRpcSend
+        .attr('disabled', true)
+        .button()
+        .click(function() {
+            var method = $consoleRpcMethod.find('option:selected').val();
+            try {
+                var params = JSON.parse($('#console-rpc-params').val());
+            } catch (e) {
+                alert('Parsing params: ' + e);
+                return;
+            }
+            $consoleRpcResponse.html('...');
+            console.log('rpc', method, params);
+            socket.emit('rpc', method, params, function (err, data) {
+                $consoleRpcResponse.html(JSON.stringify(data, null, "  "));
+            });
+        });
+
+
+    // Grid resize
     $(window).resize(function() {
         resizeGrids();
     });
-
     resizeGrids();
 
+
+    // Navigation
     window.onhashchange = function () {
         hash = window.location.hash.slice(1);
         console.log(hash);
@@ -558,7 +907,6 @@ $(document).ready(function () {
             $('#select-bidocs-daemon option').removeAttr('selected');
             initDaemon();
         }
-
     }
 
 });

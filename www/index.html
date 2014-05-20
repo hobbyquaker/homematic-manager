@@ -35,8 +35,21 @@
             <div id="pager-links"></div>
         </div>
         <div id="tab-console">
-            <div><input id="txtcommand" type="text" style="width: 500px;"><input id="txtparams" type="text" style="width: 500px;"><button id="btncommand">Befehl senden</button></div>
-            <div><textarea id="txtcmdanswer" style="width: 100%; height: 500px;"></textarea></div>
+            <div><select id="console-rpc-method"></select><button id="console-rpc-send">Befehl senden</button></div>
+            <div>
+                <h3>Params</h3>
+                <div id="console-json-params">
+                    <span style="font-weight: bold;">JSON</span>
+                    <textarea id="console-rpc-params" style="width: 100%; height: 100px;">[]</textarea>
+                </div>
+                <div id="console-form-params" style="display: none;">
+
+                </div>
+            </div>
+            <div>
+                <h3>Response</h3>
+                <textarea id="console-rpc-response" style="width: 100%; height: 500px;" disabled="disabled"></textarea>
+            </div>
         </div>
     </div>
     <div id="dialog-paramset">

@@ -25,6 +25,9 @@
 
 ## Changelog
 
+### 0.0.4
+* (Hobbyquaker) RPC-Konsole überarbeitet, Dropdown für Methoden
+
 ### 0.0.3
 
 * (Anli) Buttons für Linkaktionen, Löschen-Dialog

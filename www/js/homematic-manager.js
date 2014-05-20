@@ -487,6 +487,7 @@ $(document).ready(function () {
 
                 // Create Input-Field
                 var input;
+                var defaultVal = desc[param].DEFAULT;
                 switch (desc[param].TYPE) {
                     case 'BOOL':
                         input = '<input id="paramset-input-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
@@ -500,6 +501,7 @@ $(document).ready(function () {
                             input += '<option value="' + i + '"' + (data[param] == i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
                         }
                         input += '</select>';
+                        defaultVal = desc[param].VALUE_LIST[defaultVal];
                         break;
                     case 'FLOAT':
                     default:
@@ -510,7 +512,7 @@ $(document).ready(function () {
                 if (paramset == 'VALUES' && (desc[param].OPERATIONS & 2)) {
                     $('#table-paramset').append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
                 } else {
-                    $('#table-paramset').append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + desc[param].DEFAULT + '</td></tr>');
+                    $('#table-paramset').append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + defaultVal + '</td></tr>');
                 }
 
             } else {

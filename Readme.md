@@ -1,4 +1,4 @@
-# HomeMatic Manager 0.0.2
+# HomeMatic Manager
 
 ## Dokumentation
 
@@ -24,6 +24,10 @@
 * RPC Konsole
 
 ## Changelog
+
+### 0.0.3
+
+* (Anli) Buttons für Linkaktionen, Löschen-Dialog
 
 ### 0.0.2
 

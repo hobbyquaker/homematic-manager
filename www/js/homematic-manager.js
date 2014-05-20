@@ -9,6 +9,13 @@ $(document).ready(function () {
     var hash;
 
     var rpcMethods = {
+        abortDeleteDevice: {
+            rfd: true,
+            hs485d: false,
+            params: [
+                { name: 'address', type: 'address' }
+            ]
+        },
         activateLinkParamset: {
 			rfd: true,
 			hs485d: false,
@@ -64,13 +71,6 @@ $(document).ready(function () {
                 }
 			]
 		},
-        abortDeleteDevice: {
-            rfd: true,
-            hs485d: false,
-            params: [
-                { name: 'address', type: 'address' }
-            ]
-        },
         determineParameter: {
 			rfd: true,
 			hs485d: false,
@@ -171,6 +171,12 @@ $(document).ready(function () {
 			params: [
 			]
 		},*/
+        listBidcosInterfaces: {
+            rfd: true,
+            hs485d: false,
+            params: [
+            ]
+        },
         listDevices: {
 			rfd: true,
 			hs485d: true,
@@ -289,12 +295,6 @@ $(document).ready(function () {
         updateFirmware: {
 			rfd: true,
 			hs485d: true,
-			params: [
-			]
-		},
-        listBidcosInterfaces: {
-			rfd: true,
-			hs485d: false,
 			params: [
 			]
 		}

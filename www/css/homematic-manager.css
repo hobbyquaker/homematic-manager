@@ -32,7 +32,7 @@ li.header {
     margin-top: -1px !important;
 }
 
-.paramset {
+.paramset, .editlink, .deletelink {
     font-size: 11px !important;
 }
 

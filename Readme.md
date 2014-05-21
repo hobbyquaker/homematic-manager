@@ -27,6 +27,11 @@
 
 ## Changelog
 
+### 0.0.5
+* (Hobbyquaker) Button und Select Styles, Lade-Anzeigen
+* (Hobbyquaker) jqGrid Update, Spalten ausblenden
+* (Hobbyquaker) Vorbereitung Grid-Buttons
+
 ### 0.0.4
 * (Hobbyquaker) RPC-Konsole überarbeitet, Dropdown für Methoden
 

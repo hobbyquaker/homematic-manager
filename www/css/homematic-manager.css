@@ -48,3 +48,23 @@ li.header {
     text-align: left;
     font-weight: bold;
 }
+
+.ui-multiselect.rpc-method {
+    height: 2.15em;
+    padding-top: 0px;
+    margin-right: 4px;
+}
+
+.ui-multiselect.select-daemon {
+    height: 1.9em;
+    margin-top: 1px;
+    margin-right: 2px;
+}
+
+button.paramset {
+
+}
+
+button.paramset span.ui-button-text {
+    padding: 1px 3px 1px 3px;
+}

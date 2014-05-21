@@ -153,6 +153,14 @@ function regaScript(ip, file, callback) {
     });
 }
 
+function saveJson(file, obj) {
+
+}
+
+function loadJson(file) {
+
+    return obj;
+}
 
 
 function loadConfig() {

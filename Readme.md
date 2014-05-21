@@ -27,6 +27,10 @@
 
 ## Changelog
 
+### 0.0.6
+* (Hobbyquaker) Hilfe- und Einstellungs-Dialog
+* (Hobbyquaker) Style überarbeitet, bessere Platzausnutzung
+
 ### 0.0.5
 * (Hobbyquaker) Button und Select Styles, Lade-Anzeigen
 * (Hobbyquaker) jqGrid Update, Spalten ausblenden

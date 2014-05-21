@@ -1,8 +1,35 @@
+html {
+    height: 100%;
+}
+
 body {
     font-size: 12px;
-    min-width: 1008px;
+    min-width: 1200px;
     min-height: 584px;
+    margin: 0;
+    padding: 0;
+    height: 100%;
 
+}
+
+#tabs-main {
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+
+}
+
+.ui-tabs-nav {
+    border-radius: 0;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+
+.ui-tabs-panel {
+    border: none;
+    padding: 8px !important;
 }
 
 .header {
@@ -10,7 +37,7 @@ body {
     line-height: 29px;
 }
 
-a.ui-tabs-anchor:focus {
+a.ui-tabs-anchor:focus, .ui-button:focus {
     outline: none;
 }
 
@@ -67,4 +94,20 @@ button.paramset {
 
 button.paramset span.ui-button-text {
     padding: 1px 3px 1px 3px;
+}
+
+.console-container {
+    padding-right: 6px;
+}
+
+textarea {
+    padding-right: -6px;
+    border: 1px solid #c5dbec;
+}
+
+.menu-button {
+    float: right;
+    height: 26px;
+    width: 26px;
+    margin: 1px 2px 1px 2px;
 }

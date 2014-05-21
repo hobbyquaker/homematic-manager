@@ -475,8 +475,9 @@ $(document).ready(function () {
 
         // Tabelle befüllen
         $('#table-paramset').html('<tr><th>Param</th><th>Value</th><th>Default</th><th></th></tr>');
+        var count = 0;
         for (var param in data) {
-
+            count += 1;
             if (desc[param]) {
                 // Dirty workaround for encoding problem
                 if (desc[param].UNIT == '�C') desc[param].UNIT = '°C';
@@ -525,6 +526,9 @@ $(document).ready(function () {
 
         }
 
+        if (count == 0) {
+            $('#table-paramset').remove();
+        }
 
         // Dialog-Überschrift setzen
         if (regaNames && regaNames[config.daemons[daemon].ip]) {
@@ -537,6 +541,9 @@ $(document).ready(function () {
         // Hidden-Hilfsfelder
         $('#edit-paramset-address').val(address);
         $('#edit-paramset-paramset').val(paramset);
+
+        // Buttons
+        $('button.paramset-setValue:not(.ui-button)').button();
 
         $('#dialog-paramset').dialog('open');
     }
@@ -690,8 +697,33 @@ $(document).ready(function () {
                 selectedList: 1
             });
 
+            $(".ui-tabs-nav").
+                append("<button title='Hilfe' class='menu-button' id='button-help'></button>").
+                append("<button title='Einstellungen' value='Theme wählen' class='menu-button' id='button-config'></button>").
+                append("<span style='visibility: hidden; width:15px; height:15px; padding-top:5px; margin-right:10px; float:right;'><span title='Kommunikation' id='ajaxIndicator' style='width:15px; height: 15px;' class='ui-icon ui-icon-transfer-e-w'></span></span>");
+
+            $('#button-help').button({
+                text: false,
+                icons: {
+                    primary: 'ui-icon-help'
+                }
+            }).click(function () {
+
+            });
+
+            $('#button-config').button({
+                text: false,
+                icons: {
+                    primary: 'ui-icon-gear'
+                }
+            }).click(function () {
+
+            });
+
         }
     });
+
+
 
     // Geräte-Tabelle
     var $gridDevices = $('#grid-devices');
@@ -893,10 +925,10 @@ $(document).ready(function () {
     function resizeGrids() {
         var x = $(window).width();
         var y = $(window).height();
-        if (x < 1024) x = 1024;
-        if (y < 640) y = 640;
+        if (x < 1200) x = 1200;
+        if (y < 600) y = 600;
 
-        $('#grid-devices, #grid-links').setGridHeight(y - 186).setGridWidth(x - 60);
+        $('#grid-devices, #grid-links').setGridHeight(y - 148).setGridWidth(x - 18);
     }
 
     //Konsole

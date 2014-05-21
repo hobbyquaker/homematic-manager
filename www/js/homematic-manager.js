@@ -899,7 +899,7 @@ $(document).ready(function () {
                 {name: 'LINK_TARGET_ROLES', index: 'LINK_TARGET_ROLES', width: 100, hidden: true},
                 {name: 'params', index: 'params', width: 70},
                 {name: 'TYPE', index: 'TYPE', width: 100},
-                {name: 'VERSION', index: 'VERSION', width: 50}
+                {name: 'VERSION', index: 'VERSION', width: 50, hidden: true}
             ],
             rowNum: 1000000,
             autowidth: true,

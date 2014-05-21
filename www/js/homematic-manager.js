@@ -1,5 +1,7 @@
 $(document).ready(function () {
 
+    var version = '0.0.6';
+
     var socket = io.connect();
     var daemon;
     var config;
@@ -154,6 +156,12 @@ $(document).ready(function () {
             params: [
                 { name: 'address', type: 'address' },
                 { name: 'type', type: 'string' }
+            ]
+        },
+        getServiceMessages: {
+            rfd: true,
+            hs485d: false,
+            params: [
             ]
         },
         getValue: {
@@ -651,11 +659,23 @@ $(document).ready(function () {
     //      initialize UI elements
     //
 
+    $('.version').html(version);
+
     // Dialogs
+    $('#dialog-help').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 640,
+        height: 400
+    });
+    $('#dialog-config').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 640,
+        height: 400
+    });
     $('#dialog-paramset').dialog({
         autoOpen: false,
-        params: [
-        ],
         modal: true,
         width: 720,
         height: 400,
@@ -670,8 +690,6 @@ $(document).ready(function () {
     });
     $('#dialog-deletelink').dialog({
         autoOpen: false,
-        params: [
-        ],
         modal: true,
         width: 640,
         height: 400,
@@ -708,7 +726,7 @@ $(document).ready(function () {
                     primary: 'ui-icon-help'
                 }
             }).click(function () {
-
+                $('#dialog-help').dialog('open');
             });
 
             $('#button-config').button({
@@ -717,7 +735,7 @@ $(document).ready(function () {
                     primary: 'ui-icon-gear'
                 }
             }).click(function () {
-
+                $('#dialog-config').dialog('open');
             });
 
         }
@@ -886,7 +904,7 @@ $(document).ready(function () {
             rowNum: 1000000,
             autowidth: true,
             height: 'auto',
-            width: 1200,
+            width: 1000,
             sortorder: 'desc',
             viewrecords: true,
             ignoreCase: true,
@@ -925,7 +943,7 @@ $(document).ready(function () {
     function resizeGrids() {
         var x = $(window).width();
         var y = $(window).height();
-        if (x < 1200) x = 1200;
+        if (x < 1020) x = 1020;
         if (y < 600) y = 600;
 
         $('#grid-devices, #grid-links').setGridHeight(y - 148).setGridWidth(x - 18);

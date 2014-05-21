@@ -4,7 +4,7 @@ html {
 
 body {
     font-size: 12px;
-    min-width: 1200px;
+    min-width: 1020px;
     min-height: 584px;
     margin: 0;
     padding: 0;
@@ -37,7 +37,7 @@ body {
     line-height: 29px;
 }
 
-a.ui-tabs-anchor:focus, .ui-button:focus {
+a.ui-tabs-anchor:focus, .ui-button:focus, #dialog-help a:focus {
     outline: none;
 }
 

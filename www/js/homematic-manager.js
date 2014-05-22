@@ -19,53 +19,69 @@ $(document).ready(function () {
             rfd: true,
             hs485d: false,
             params: [
-                { name: 'address', type: 'address' }
-            ]
+                { name: 'address', type: 'device_address' }
+            ],
+            help: "Diese Methode bricht einen anhängigen Löschvorgang für ein Gerät ab.<br>Es können nur Löschvorgänge abgebrochen werden, die mit dem Flag DELETE_FLAG_DEFER ausgeführt wurden."
         },
         activateLinkParamset: {
             rfd: true,
             hs485d: false,
             params: [
-                // String address, String peer_address, Boolean long_press
-                { name: 'address', type: 'address' },
-                { name: 'peer_address', type: 'address' },
+                { name: 'address', type: 'device_address' },
+                { name: 'peer_address', type: 'device_address' },
                 { name: 'long_press', type: 'boolean' }
-            ]
+            ],
+            help: "Mit dieser Methode wird ein Link-Parameterset aktiviert. Das logische Gerät verhält sich dann so als ob es direkt von dem entsprechenden zugeordneten Gerät angesteuert worden wäre. Hiermit kann z.B. ein Link-Parameter-Set getestet werden. Der Parameter address ist die Addresses des anzusprechenden logischen Gerätes. Der Parameter peer_address ist die Addresse des Kommunikationspartners, dessen Link-Parameter-Set aktiviert werden soll. Der Parameter long_press gibt an, ob das Parameterset für den langen Tastendruck aktiviert werden soll."
         },
         addDevice: {
             rfd: true,
             hs485d: false,
             params: [
-            ]
+                { name: 'address', type: 'device_address' },
+                { name: 'mode', type: 'integer', optional: ['rfd'] }
+            ],
+            help: "Diese Methode lernt ein Gerät anhand seiner Seriennummer an die CCU an. Diese Funktion wird nicht von jedem Gerät unterstützt. Rückgabewert ist die DeviceDescription des neu angelernten Geräts.<br>Der optionale Parameter mode bestimmt die Art des Installations-Modus:<br>1 = Normaler Installations-Modus<br>2 = Während des Anlernens werden in den Parametersets „MASTER“ default Parameter gesetzt und alle besehenden Verknüpfungen werden gelöscht."
         },
         addLink: {
             rfd: true,
             hs485d: true,
             params: [
                 // String sender, String receiver, String name, String description
-                { name: 'sender', type: 'address' },
-                { name: 'receiver', type: 'address' },
+                { name: 'sender', type: 'device_address' },
+                { name: 'receiver', type: 'device_address' },
                 { name: 'name', type: 'string', optional: ['rfd', 'hs485d'] },
                 { name: 'description', type: 'string', optional: ['rfd', 'hs485d'] }
-            ]
+            ],
+            help: "Diese Methode erstellt eine Kommunikationsbeziehung zwischen zwei logischen Geräten. Die Parameter sender und receiver bezeichnen die beiden zu verknüpfenden Partner. Die Parameter name und description sind optional und beschreiben die Verknüpfung näher."
+        },
+        addVirtualDeviceInstance: {
+            rfd: true,
+            hs485d: false,
+            params: [],
+            help: "nicht von eQ-3 dokumentiert :-("
+
         },
         changekey: {
             rfd: true,
             hs485d: false,
             params: [
-            ]
+                { name: 'passphrase', type: 'string' }
+            ],
+            help: "Diese Methode ändert den vom Schnittstellenprozess verwendeten AES-Schlüssel. Der Schlüssel wird ebenfalls in allen angelernten Geräten getauscht."
         },
         clearConfigCache: {
             rfd: true,
             hs485d: true,
             params: [
-            ]
+                { name: 'address', type: 'device_address' }
+            ],
+            help: "Diese Methode löscht alle zu einem Gerät in der CCU gespeicherten Konfigurationsdaten. Diese werden nicht sofort wieder vom Gerät abgefragt, sondern wenn sie das nächste mal benötigt werden."
         },
         deleteDevice: {
             rfd: true,
             hs485d: true,
             params: [
-                { name: 'address', type: 'address' },
+                { name: 'address', type: 'device_address' },
                 {
                     name: 'flags',
                     type: 'integer',
@@ -75,56 +91,71 @@ $(document).ready(function () {
                         '4': 'DELETE_FLAG_DEFER'
                     }
                 }
-            ]
+            ],
+            help: "Diese Methode löscht ein Gerät aus dem Schnittstellenprozess.<br>Der Parameter address ist die Addresse des zu löschenden Gerätes.<br>Flags ist ein bitweises oder folgender Werte:<ul><li>DELETE_FLAG_RESET Das Gerät wird vor dem Löschen in den Werkszustand zurückgesetzt </li><li>DELETE_FLAG_FORCE Das Gerät wird auch gelöscht, wenn es nicht erreichbar ist </li><li>DELETE_FLAG_DEFER Wenn das Gerät nicht erreichbar ist, wird es bei nächster Gelegenheit gelöscht</li></ul>"
         },
         determineParameter: {
             rfd: true,
             hs485d: false,
             params: [
                 // String address, String paramset_key, String parameter_id
-                { name: 'address', type: 'address' },
+                { name: 'address', type: 'device_address' },
                 { name: 'paramset_key', type: 'string' },
                 { name: 'parameter_id', type: 'string' }
-            ]
+            ],
+            help: "Mit dieser Methode wird ein Parameter eines Parameter-Sets automatisch bestimmt. Der Parameter kann bei erfolgreicher Ausführung anschließend sofort über getParamset gelesen werden.<br>Der Parameter address ist die Addresses eines logischen Gerätes.<br>Der Parameter paramset_key ist „MASTER“, „VALUES“ oder die Adresse eines Kommunikationspartners für das entsprechende Link-Parameter-Set (siehe getLinkPeers). Der Parameter parameter_id bestimmt den automatisch zu bestimmenden Parameter."
         },
         getDeviceDescription: {
             rfd: true,
             hs485d: true,
             params: [
-                { name: 'address', type: 'address' }
-            ]
+                { name: 'address', type: 'device_address' }
+            ],
+            help: "Diese Methode gibt die Gerätebeschreibung des als address übergebenen Gerätes zurück."
         },
         getInstallMode: {
             rfd: true,
             hs485d: false,
             params: [
-            ]
+            ],
+            help: "Diese Methode gibt die verbliebene Restzeit in Sekunden im Anlernmodus zurück. Der Wert  0 bedeutet, der Anlernmodus ist nicht aktiv."
         },
         getKeyMismatchDevice: {
             rfd: true,
             hs485d: false,
             params: [
-            ]
+                { name: 'reset', type: 'bool' }
+            ],
+            help: "Diese Methode gibt die Seriennummer des letzten Gerätes zurück, das aufgrund eines falschen AES-Schlüssels nicht angelernt werden konnte. Mit reset=true wird diese Information im Schnittstellenprozess zurückgesetzt."
+        },
+        getLGWStatus: {
+            rfd: false,
+            hs485d: true,
+            params: [],
+            help: "Gibt den Status des Wired-LAN-Gateways zurück."
         },
         getLinkInfo: {
             rfd: true,
             hs485d: true,
             params: [
-                { name: 'sender', type: 'address' },
-                { name: 'receiver', type: 'address' }
-            ]
+                { name: 'sender', type: 'device_address' },
+                { name: 'receiver', type: 'device_address' }
+            ],
+            help: "Diese Methode gibt die Seriennummer des letzten Gerätes zurück, das aufgrund eines falschen AES-Schlüssels nicht angelernt werden konnte. Mit reset=true wird diese Information im Schnittstellenprozess zurückgesetzt."
         },
         getLinkPeers: {
             rfd: true,
             hs485d: true,
             params: [
-            ]
+                { name: 'address', type: 'device_address' }
+            ],
+            help: "Diese Methode gibt alle einem logischen Gerät zugeordneten Kommunikationspartner zurück. Die zurückgegebenen Werte können als Parameter paramset_key für getParamset() und putParamset() verwendet werden. Der Parameter address ist die Adresse eines logischen Gerätes."
         },
         getLinks: {
             rfd: true,
             hs485d: true,
             params: [
-                { name: 'address', type: 'address' },
+                { name: 'address', type: 'device_address' },
                 {
                     name: 'flags',
                     type: 'integer',
@@ -135,22 +166,24 @@ $(document).ready(function () {
                     },
                     optional: ['rfd', 'hs485d']
                 }
-            ]
+            ],
+            help: "Diese Methode gibt alle einem logischen Kanal oder Gerät zugeordneten Kommunikationsbeziehungen zurück.<br>Der Parameter address ist die Kanal- oder Geräteadresse des logischen Objektes, auf das sich die Abfrage bezieht. Bei address=="" werden alle Kommunikationsbeziehungen des gesamten Schnittstellenprozesses zurückgegeben.<br>Der Parameter flags ist ein bitweises oder folgender Werte:<ul><li>GL_FLAG_GROUP Wenn address einen Kanal bezeichnet, der sich in einer Gruppe befindet, werden die Kommunikationsbeziehungen für alle Kanäle der Gruppe zurückgegeben.</li><li>GL_FLAG_SENDER_PARAMSET Das Feld SENDER_PARAMSET des Rückgabewertes wird gefüllt. </li><li>GL_FLAG_RECEIVER_PARAMSET Das Feld RECEIVER_PARAMSET des Rückgabewertes wird gefüllt.</li></ul>flags ist optional. Defaultwert ist 0x00."
         },
         getParamset: {
             rfd: true,
             hs485d: true,
             params: [
-                { name: 'address', type: 'address' },
+                { name: 'address', type: 'device_address' },
                 { name: 'paramset_key', type: 'string' },
                 { name: 'mode', type: 'integer', optional: ['rfd'] }
-            ]
+            ],
+            help : "Mit dieser Methode wird ein komplettes Parameter-Set für ein logisches Gerät gelesen. Der Parameter address ist die Addresses eines logischen Gerätes. Der Parameter paramset_key ist „MASTER“, „VALUES“ oder die Adresse eines Kommunikationspartners für das entsprechende Link-Parameter-Set (siehe getLinkPeers).<br>Dem optionalen Parameter mode können folgende Werte übergeben werden (nur rfd):<ul><li>0 default: Keien Auswirkung, die Funktion verhält sicht wie der Aufruf ohne mode</li><li>1 UndefinedValues: Jeder Eintrag inerhalb des zurückgelieferten Paramset ins eine Struktur mit folgendem Aufbau:<br>„UNDEFINED“(Boolean) Flag ob der angeforderte Wert initial gesetzt wurde und somit wahrscheinlich nicht der Realität entspricht oder ob der Wert von einem Gerät empfangen wurde, true = Wert wurde initial gesetzt und noch nicht verändert, false = der Wert wurde neu gesetzt <br>„VALUE“(ValueType) Wert des angeforderten Parameter.<br>UndefindeValues kann nur für Parameter aus dem Parameterset „VALUES“ abgefragt werden."
         },
         getParamsetDescription: {
             rfd: true,
             hs485d: true,
             params: [
-                { name: 'address', type: 'address' },
+                { name: 'address', type: 'device_address' },
                 { name: 'paramset_type', type: 'string' }
             ]
         },
@@ -158,7 +191,7 @@ $(document).ready(function () {
             rfd: true,
             hs485d: true,
             params: [
-                { name: 'address', type: 'address' },
+                { name: 'address', type: 'device_address' },
                 { name: 'type', type: 'string' }
             ]
         },
@@ -172,10 +205,15 @@ $(document).ready(function () {
             rfd: true,
             hs485d: true,
             params: [
-                { name: 'address', type: 'address' },
+                { name: 'address', type: 'device_address' },
                 { name: 'value_key', type: 'string' },
                 { name: 'mode', type: 'integer', optional: ['rfd'] }
             ]
+        },
+        getVersion: {
+            rfd: true,
+            hs485d: false,
+            params: []
         },
         /*init: {
          rfd: true,
@@ -186,10 +224,14 @@ $(document).ready(function () {
         listBidcosInterfaces: {
             rfd: true,
             hs485d: false,
-            params: [
-            ]
+            params: []
         },
         listDevices: {
+            rfd: true,
+            hs485d: true,
+            params: []
+        },
+        listReplaceableDevices: {
             rfd: true,
             hs485d: true,
             params: []
@@ -210,7 +252,7 @@ $(document).ready(function () {
             rfd: true,
             hs485d: true,
             params: [
-                { name: 'address', type: 'string' },
+                { name: 'address', type: 'device_address' },
                 { name: 'paramset_key', type: 'string' },
                 { name: 'set', type: 'paramset' }
             ]
@@ -219,9 +261,14 @@ $(document).ready(function () {
             rfd: true,
             hs485d: true,
             params: [
-                { name: 'sender', type: 'address' },
-                { name: 'receiver', type: 'address' }
+                { name: 'sender', type: 'device_address' },
+                { name: 'receiver', type: 'device_address' }
             ]
+        },
+        replaceDevice: {
+            rfd: true,
+            hs485d: true,
+            params: []
         },
         reportValueUsage: {
             rfd: true,
@@ -243,11 +290,15 @@ $(document).ready(function () {
         },
         searchDevices: {
             rfd: false,
-            params: [
-            ],
             hs485d: true,
             params: [
             ]
+        },
+        setBidcosInterface: {
+            rfd: true,
+            hs485d: false,
+            params: []
+
         },
         setInstallMode: {
             rfd: true,
@@ -255,27 +306,41 @@ $(document).ready(function () {
             params: [
             ]
         },
+        setInterfaceClock: {
+            rfd: true,
+            hs485d: false,
+            params: []
+        },
         setLinkInfo: {
             rfd: true,
             hs485d: true,
             params: [
                 // String sender, String receiver, String name,  String description
-                { name: 'sender', type: 'address' },
-                { name: 'receiver', type: 'address' },
+                { name: 'sender', type: 'device_address' },
+                { name: 'receiver', type: 'device_address' },
                 { name: 'name', type: 'string' },
                 { name: 'description', type: 'string' }
             ]
+        },
+        setRFLGWInfoLED: {
+            rfd: true,
+            hs485d: false,
+            params: []
         },
         setTeam: {
             rfd: true,
             hs485d: false,
             params: [
+                // channel_address, String team_address
+                { name: 'channel_address', type: 'channel_address' },
+                { name: 'team_address', type: 'team_address' }
             ]
         },
         setTempKey: {
             rfd: true,
             hs485d: false,
             params: [
+                { name: 'passphrase', type: 'string' }
             ]
         },
         setValue: {
@@ -296,6 +361,7 @@ $(document).ready(function () {
             rfd: true,
             hs485d: true,
             params: [
+                { name: 'method', type: 'string' }
             ]
         },
         /*'system.multicall': {
@@ -308,6 +374,7 @@ $(document).ready(function () {
             rfd: true,
             hs485d: true,
             params: [
+                { name: 'device', type: 'device_address' },
             ]
         }
     };
@@ -420,6 +487,8 @@ $(document).ready(function () {
         daemon = $('#select-bidcos-daemon option:selected').val();
         $gridDevices.jqGrid('clearGridData');
         $gridLinks.jqGrid('clearGridData');
+        $gridRssi.jqGrid('clearGridData');
+        $gridInterfaces.jqGrid('clearGridData');
         $("#del-device").addClass("ui-state-disabled");
         $("#edit-device").addClass("ui-state-disabled");
         if (daemon != 'null' && config.daemons[daemon]) {
@@ -431,18 +500,18 @@ $(document).ready(function () {
             var type = config.daemons[daemon].type;
 
             if (type == 'BidCos-Wired') {
-                $('#grid-devices').jqGrid('hideCol', 'roaming');
-                $('#grid-devices').jqGrid('hideCol', 'rx_mode');
-                $('#grid-devices').jqGrid('hideCol', 'RF_ADDRESS');
-                $('#grid-devices').jqGrid('hideCol', 'INTERFACE');
+                $('.rfd-only').hide();
+                $gridDevices.jqGrid('hideCol', 'roaming');
+                $gridDevices.jqGrid('hideCol', 'rx_mode');
+                $gridDevices.jqGrid('hideCol', 'RF_ADDRESS');
+                $gridDevices.jqGrid('hideCol', 'INTERFACE');
                 resizeGrids();
-
-
             } else {
-                $('#grid-devices').jqGrid('showCol', 'roaming');
-                $('#grid-devices').jqGrid('showCol', 'RX_MODE');
-                $('#grid-devices').jqGrid('showCol', 'RF_ADDRESS');
-                $('#grid-devices').jqGrid('showCol', 'INTERFACE');
+                $('.rfd-only').show();
+                $gridDevices.jqGrid('showCol', 'roaming');
+                $gridDevices.jqGrid('showCol', 'RX_MODE');
+                $gridDevices.jqGrid('showCol', 'RF_ADDRESS');
+                $gridDevices.jqGrid('showCol', 'INTERFACE');
                 resizeGrids();
             }
 
@@ -853,6 +922,7 @@ $(document).ready(function () {
             $('[id^="channels_"][id$="_t"]').jqGrid('resetSelection');
         },
         gridComplete: function () {
+            $('button.paramset:not(.ui-button)').button();
             $('#del-device').addClass('ui-state-disabled');
             $('#edit-device').addClass('ui-state-disabled');
         }
@@ -1021,6 +1091,7 @@ $(document).ready(function () {
     // Direktverknüpfungs-Tabelle
     var $gridLinks = $('#grid-links');
     $gridLinks.jqGrid({
+        datatype: 'local',
         colNames:['Sendername', 'Address', 'Receivername', 'Address-Partner', 'Name', 'Description', 'Aktionen'],
         colModel:[
             {name:'Sendername', index:'Sendername', width:100},

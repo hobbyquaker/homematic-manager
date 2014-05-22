@@ -72,6 +72,20 @@ function initSocket() {
                 }
             }
         });
+
+        socket.on('saveJson', function (file, obj, callback) {
+            console.log('saveJson ' + file);
+            saveJson(file, obj, function (err) {
+                if (callback) callback(err);
+            });
+        });
+
+        socket.on('loadJson', function (file, obj, callback) {
+            console.log('saveJson ' + file);
+            loadJson(file, function (err, data) {
+                callback(err, data);
+            });
+        });
     });
 }
 
@@ -153,13 +167,18 @@ function regaScript(ip, file, callback) {
     });
 }
 
-function saveJson(file, obj) {
-
+function saveJson(file, obj, callback) {
+    fs.writeFile(__dirname + '/' + config.datastorePath + name, JSON.stringify(obj), function (err) {
+        if (callback) {
+            callback(err);
+        }
+    });
 }
 
-function loadJson(file) {
-
-    return obj;
+function loadJson(file, callback) {
+    fs.readFile(__dirname + '/' + config.datastorePath + name, function (err, data) {
+        callback(err, data);
+    });
 }
 
 

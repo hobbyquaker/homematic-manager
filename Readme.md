@@ -27,6 +27,10 @@
 
 ## Changelog
 
+### 0.0.7
+* (Hobbyquaker) RSSI und Interfaces
+* (Hobbyquaker) Geräte-Tabelle überarbeiten: Spalten-Sortierung, Spalten-Breite, ...
+
 ### 0.0.6
 * (Hobbyquaker) Hilfe- und Einstellungs-Dialog
 * (Hobbyquaker) Style überarbeitet, bessere Platzausnutzung

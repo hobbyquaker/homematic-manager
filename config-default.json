@@ -19,5 +19,6 @@
             "port": 2000,
             "isCcu": false
         }
-    }
+    },
+    "datastorePath": "datastore/"
 }

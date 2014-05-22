@@ -20,6 +20,7 @@ $.jgrid.extend({
 			beforeShowForm: null,
 			afterShowForm: null,
 			afterSubmitForm: null,
+            afterChange: null,
 			closeOnEscape : true,
 			ShrinkToFit : false,
 			jqModal : false,
@@ -104,6 +105,9 @@ $.jgrid.extend({
 							if(p.ShrinkToFit===true) {
 								$($t).jqGrid("setGridWidth",$t.grid.width-0.001,true);
 							}
+                            if (p.afterChange) {
+                                p.afterChange();
+                            }
 						}
 						return this;
 					});

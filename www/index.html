@@ -6,10 +6,12 @@
     <link rel="stylesheet" href="css/redmond/jquery-ui.min.css" type="text/css"/>
     <link rel="stylesheet" href="css/ui.jqgrid.css" type="text/css"/>
     <link rel="stylesheet" href="css/jquery.multiselect-1.13.css" type="text/css"/>
+    <link rel="stylesheet" href="css/jquery.multiselect.filter.css" type="text/css"/>
     <link rel="stylesheet" href="css/homematic-manager.css" type="text/css"/>
     <script src="js/jquery-1.11.0.min.js" type="text/javascript"></script>
     <script src="js/jquery-ui-1.10.3.full.min.js" type="text/javascript"></script>
     <script src="js/jquery.multiselect-1.13.min.js" type="text/javascript"></script>
+    <script src="js/jquery.multiselect.filter-1.5pre.js" type="text/javascript"></script>
     <script src="js/i18n/grid.locale-de.js" type="text/javascript"></script>
     <script src="js/jquery.jqGrid.min.js" type="text/javascript"></script>
     <script src="js/grid.setcolumns.js" type="text/javascript"></script>
@@ -34,22 +36,32 @@
             <div id="pager-links"></div>
         </div>
         <div id="tab-console">
-            <div><select id="console-rpc-method"></select><button id="console-rpc-send">Befehl senden</button></div>
             <div>
-                <h3>Params</h3>
-                <div class="console-container" id="console-json-params">
-                    <span style="font-weight: bold;">JSON</span>
-                    <textarea id="console-rpc-params" style="width: 100%; height: 100px;">[]</textarea>
-                </div>
-                <div class="console-container" id="console-form-params" style="display: none;">
-
-                </div>
+                <div style="float:left; width: 235px; padding-top: 2px;"><select id="console-rpc-method"></select></div>
+                <div style="float:right; width: 126px;"><button id="console-rpc-send">Befehl senden</button></div>
+                <div style="padding-top: 2px; margin-left: 235px; margin-right: 132px;"><input id="console-rpc-params" size="60" value="" class="ui-widget ui-state-default ui-corner-all" style="height: 24px; width: 100%"></div>
             </div>
-            <div>
-                <h3>Response</h3>
-                <div class="console-container">
-                    <textarea id="console-rpc-response" style="width: 100%; height: 500px;" disabled="disabled"></textarea>
+            <div style="clear: both"></div>
+            <div style="width: 100%">
+                <div class="console-container" style="float: left; width: 49%">
+                    <h3>Params</h3>
+                    <div id="console-form-params">
+
+                    </div>
                 </div>
+                <div class="console-container" style="float: right; width: 49%">
+                    <h3>Response <span id="console-rpc-error" style="color: red;"></span></h3>
+                 <textarea id="console-rpc-response" style="width: 100%; height: 250px;" disabled="disabled"></textarea>
+                </div>
+
+            </div>
+            <div style="clear: both;">
+                <div style="padding: 4px; margin-top: 12px; width: 98%;">
+                    <h3>Dokumentation</h3>
+                    <h3 id="console-rpc-method-heading"></h3>
+                    <div id="console-rpc-method-help"></div>
+                </div>
+
             </div>
         </div>
         <div id="tab-rssi">

@@ -27,6 +27,9 @@
 
 ## Changelog
 
+### 0.0.8
+* (Hobbyquaker) Konsole überarbeitet, fast fertig...
+
 ### 0.0.7
 * (Hobbyquaker) RSSI und Interfaces
 * (Hobbyquaker) Geräte-Tabelle überarbeiten: Spalten-Sortierung, Spalten-Breite, ...

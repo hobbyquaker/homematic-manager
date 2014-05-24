@@ -20,12 +20,18 @@
 * Anlernen/Ablernen von Geräten
 * Geräte tauschen
 * Konfigurieren von Geräten
-* Zuordnung Geräte/Interfaces
-* Funk-Schnittstellen hinzufügen/löschen
+* Zuordnung Geräte zu Funk-Schnittstellen, Roaming aktivieren/deaktivieren
 * RPC Konsole
 * Geräte deaktiveren/aktivieren (Ablernen mit speichern aller Paramsets und Links, schwierig in Verbindung mit Rega...)
 
 ## Changelog
+
+### 0.1.0
+* (Hobbyquaker) RSSI Tabelle überarbeitet, dynamische Spalten für Interfaces
+* (Hobbyquaker) Interfaces-Tabelle in Tab Funk verschoben
+* (Hobbyquaker) Spalte Aktionen aus Verknüpfungs-Tabelle entfernt, Buttons unten Links eingebaut
+* (Hobbyquaker) Erster daemon wird automatisch selektiert
+* (Hobbyquaker) Daemon-Dropdown wird ausgeblendet falls nur ein daemon vorhanden ist
 
 ### 0.0.8
 * (Hobbyquaker) Konsole überarbeitet, fast fertig...

@@ -413,8 +413,8 @@ $(document).ready(function () {
             hs485d: true,
             params: [
                 // String sender, String receiver, String name,  String description
-                { name: 'sender', type: 'device_address' },
-                { name: 'receiver', type: 'device_address' },
+                { name: 'sender', type: 'channel_address' },
+                { name: 'receiver', type: 'channel_address' },
                 { name: 'name', type: 'string' },
                 { name: 'description', type: 'string' }
             ],
@@ -611,6 +611,9 @@ $(document).ready(function () {
         $gridInterfaces.jqGrid('clearGridData');
         $("#del-device").addClass("ui-state-disabled");
         $("#edit-device").addClass("ui-state-disabled");
+        $("#edit-link").addClass("ui-state-disabled");
+        $("#play-link").addClass("ui-state-disabled");
+        $("#del-link").addClass("ui-state-disabled");
         if (daemon != 'null' && config.daemons[daemon]) {
             window.location.hash = '#' + daemon;
 
@@ -621,17 +624,17 @@ $(document).ready(function () {
 
             if (type == 'BidCos-Wired') {
                 $('.rfd-only').hide();
-                $gridDevices.jqGrid('hideCol', 'roaming');
+                //$gridDevices.jqGrid('hideCol', 'roaming');
                 $gridDevices.jqGrid('hideCol', 'rx_mode');
-                $gridDevices.jqGrid('hideCol', 'RF_ADDRESS');
-                $gridDevices.jqGrid('hideCol', 'INTERFACE');
+                //$gridDevices.jqGrid('hideCol', 'RF_ADDRESS');
+                //$gridDevices.jqGrid('hideCol', 'INTERFACE');
                 resizeGrids();
             } else {
                 $('.rfd-only').show();
-                $gridDevices.jqGrid('showCol', 'roaming');
-                $gridDevices.jqGrid('showCol', 'RX_MODE');
-                $gridDevices.jqGrid('showCol', 'RF_ADDRESS');
-                $gridDevices.jqGrid('showCol', 'INTERFACE');
+                //$gridDevices.jqGrid('showCol', 'roaming');
+                $gridDevices.jqGrid('showCol', 'rx_mode');
+                //$gridDevices.jqGrid('showCol', 'RF_ADDRESS');
+                //$gridDevices.jqGrid('showCol', 'INTERFACE');
                 resizeGrids();
             }
 
@@ -642,6 +645,7 @@ $(document).ready(function () {
                     if (config.daemons[daemon].type == 'BidCos-RF') {
                         socket.emit('rpc', daemon, 'listBidcosInterfaces', [], function (err, data) {
                             listInterfaces = data;
+                            initGridRssi();
                             socket.emit('rpc', daemon, 'rssiInfo', [], function (err, data) {
                                 listRssi = data;
                                 buildGridRssi();
@@ -799,6 +803,8 @@ $(document).ready(function () {
 
     function buildGridRssi() {
 
+        // TODO Roaming Checkbox
+
         indexDevices = {};
 
         var j = 0;
@@ -816,10 +822,35 @@ $(document).ready(function () {
             if (listDevices[i].TYPE == 'HM-RCV-50') continue;
             if (listDevices[i].ADDRESS.slice(0, 1) == '*') continue;
             indexDevices[listDevices[i].ADDRESS] = listDevices[i];
-            var line = $.extend(true, {}, listDevices[i]);
+            var line = {};
+            for (var k = 0, ifaceLen = listInterfaces.length; k < ifaceLen; k++) {
+                if (listRssi[listDevices[i].ADDRESS] && listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS]) {
+                    line[listInterfaces[k].ADDRESS + '_0'] = (listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][0] != 65536
+                                                            ? listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][0]
+                                                            : '');
+                    line[listInterfaces[k].ADDRESS + '_1'] = (listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1] != 65536
+                                                            ? listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1]
+                                                            : '');
+                    line[listInterfaces[k].ADDRESS + '_set'] = '<input type="button" class="interface-set" data-device="' + listDevices[i].ADDRESS + '" data-iface="' + listInterfaces[k].ADDRESS + '">';
+                } else {
+                    line[listInterfaces[k].ADDRESS + '_0'] = '';
+                    line[listInterfaces[k].ADDRESS + '_1'] = '';
+                    line[listInterfaces[k].ADDRESS + '_set'] = '';
+                }
+            }
+            var line = $.extend(true, line, listDevices[i]);
             $gridRssi.jqGrid('addRowData', j++, line);
         }
         $gridRssi.trigger('reloadGrid');
+        $('.interface-set').not('.ui-button').button({
+            text: false,
+            icons: {
+                // TODO Icon funktioniert nicht
+                primary: 'ui-icon-signal-diag'
+            }
+        }).click(function () {
+            alert($(this).attr('data-device') + ' -> ' + $(this).attr('data-iface'));
+        });
     }
 
 
@@ -901,9 +932,9 @@ $(document).ready(function () {
                 listLinks[i].Sendername = names[listLinks[i].SENDER].Name;
             if (names && names[listLinks[i].RECEIVER])
                 listLinks[i].Receivername = names[listLinks[i].RECEIVER].Name;
-            var actions = '<button class="editlink" id="action-editlink_' + listLinks[i].SENDER + '_' + listLinks[i].RECEIVER + '" params=\'' + JSON.stringify(listLinks[i]) + '\'>bearbeiten</button>';
+            /*var actions = '<button class="editlink" id="action-editlink_' + listLinks[i].SENDER + '_' + listLinks[i].RECEIVER + '" params=\'' + JSON.stringify(listLinks[i]) + '\'>bearbeiten</button>';
             actions += '<button class="deletelink" id="action-deletelink_' + listLinks[i].SENDER + '_' + listLinks[i].RECEIVER + '" params=\'' + JSON.stringify(listLinks[i]) + '\'>löschen</button>';
-            listLinks[i].ACTIONS = actions;
+            listLinks[i].ACTIONS = actions;*/
             $gridLinks.jqGrid('addRowData', i, listLinks[i]);
         }
         $gridLinks.trigger('reloadGrid');
@@ -959,6 +990,7 @@ $(document).ready(function () {
 
     // Tabs
     $('#tabs-main').tabs({
+        activate: resizeGrids,
         create: function () {
             $('#tabs-main ul.ui-tabs-nav').prepend('<li><select id="select-bidcos-daemon"></select></li>');
             $('#tabs-main ul.ui-tabs-nav').prepend('<li class="header">HomeMatic-Manager</li>');
@@ -995,7 +1027,7 @@ $(document).ready(function () {
     // Geräte-Tabelle
     var $gridDevices = $('#grid-devices');
     $gridDevices.jqGrid({
-        colNames: ['Name', 'ADDRESS', 'TYPE', 'FIRMWARE', 'PARAMSETS', 'FLAGS', /*'INTERFACE', 'RF_ADDRESS',*/ /*'ROAMING',*/ 'RX_MODE', 'VERSION'],
+        colNames: ['Name', 'ADDRESS', 'TYPE', 'FIRMWARE', 'PARAMSETS', 'FLAGS', /*'INTERFACE', 'RF_ADDRESS',*/ /*'ROAMING',*/ 'RX_MODE'/*, 'VERSION'*/],
         colModel: [
             {name:'Name', index: 'Name', width: 224, fixed: false},
             {name:'ADDRESS',index:'ADDRESS', width:110, fixed: true},
@@ -1007,7 +1039,7 @@ $(document).ready(function () {
             //{name:'RF_ADDRESS',index:'RF_ADDRESS', width:70},
             //{name:'roaming',index:'roaming', width:30, hidden: true},
             {name:'rx_mode',index:'RX_MODE', width:150, fixed: true},
-            {name:'VERSION',index:'VERSION', width:60, fixed: true, align:'right'}
+            //{name:'VERSION',index:'VERSION', width:60, fixed: true, align:'right'}
         ],
         datatype:   'local',
         rowNum:     25,
@@ -1045,7 +1077,7 @@ $(document).ready(function () {
         add: false,
         del: false,
         refresh: false
-    }).jqGrid('navButtonAdd', '#pager-devices', {
+    })/*.jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
         buttonicon: 'ui-icon-calculator',
         onClickButton: function () {
@@ -1068,7 +1100,7 @@ $(document).ready(function () {
         id: 'choose-columns',
         title: 'Geräte löschen',
         cursor: 'pointer'
-    }).jqGrid('navButtonAdd', '#pager-devices', {
+    })*/.jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
         buttonicon: 'ui-icon-trash',
         onClickButton: function () {
@@ -1107,7 +1139,7 @@ $(document).ready(function () {
         caption: '',
         buttonicon: 'ui-icon-plus',
         onClickButton: function () {
-            alert('add');
+            alert('anlernen');
         },
         position: 'first',
         id: 'add-device',
@@ -1138,7 +1170,7 @@ $(document).ready(function () {
                 'AES_ACTIVE',
                 //'LINK_SOURCE_ROLES',
                 //'LINK_TARGET_ROLES',
-                'VERSION'
+                //'VERSION'
             ],
             colModel: [
                 {name: 'Name', index: 'Name', width: 222, fixed: false},
@@ -1147,10 +1179,10 @@ $(document).ready(function () {
                 {name: 'direction', index: 'direction', width: 80, fixed: true},
                 {name: 'params', index: 'params', width: 120, fixed: true},
                 {name: 'flags', index: 'flags', width: 150, fixed: true},
-                {name: 'aes_active', index: 'aes_active', width: 150, fixed: true, hidden: (config.daemons[daemon].type == 'BidCos-Wired')},
+                {name: 'aes_active', index: 'aes_active', width: 148, fixed: true, hidden: (config.daemons[daemon].type == 'BidCos-Wired')}
                 //{name: 'LINK_SOURCE_ROLES', index: 'LINK_SOURCE_ROLES', width: 100, hidden: true},
                 //{name: 'LINK_TARGET_ROLES', index: 'LINK_TARGET_ROLES', width: 100, hidden: true},
-                {name: 'VERSION', index: 'VERSION', width: 58, fixed: true, align: 'right'}
+                //{name: 'VERSION', index: 'VERSION', width: 58, fixed: true, align: 'right'}
             ],
             rowNum: 1000000,
             autowidth: true,
@@ -1205,15 +1237,15 @@ $(document).ready(function () {
     var $gridLinks = $('#grid-links');
     $gridLinks.jqGrid({
         datatype: 'local',
-        colNames:['Sendername', 'Address', 'Receivername', 'Address-Partner', 'Name', 'Description', 'Aktionen'],
+        colNames:['SENDER Name', 'SENDER', 'RECEIVER Name', 'RECEIVER', 'NAME', 'DESCRIPTION'/*, 'Aktionen'*/],
         colModel:[
             {name:'Sendername', index:'Sendername', width:100},
             {name:'SENDER', index:'SENDER', width:50},
             {name:'Receivername', index:'Receivername', width:100},
             {name:'RECEIVER', index:'RECEIVER', width:50},
             {name:'NAME', index:'NAME', width:150},
-            {name:'DESCRIPTION', index:'DESCRIPTION', width:150},
-            {name:'ACTIONS', index:'ACTIONS', width:80}
+            {name:'DESCRIPTION', index:'DESCRIPTION', width:150}
+            //{name:'ACTIONS', index:'ACTIONS', width:80}
         ],
         rowNum:     25,
         autowidth:  true,
@@ -1223,59 +1255,167 @@ $(document).ready(function () {
         sortname:   'timestamp',
         viewrecords: true,
         sortorder:  'desc',
-        caption:    'Direktverknüpfungen'
-    }).navGrid('#pager-links')
-    .jqGrid('filterToolbar', {
-        defaultSearch:'cn',
-        autosearch: true,
-        searchOnEnter: false,
-        enableClear: false
-    });
-
-
-    // RSSI Tabelle
-    var $gridRssi = $('#grid-rssi');
-    $gridRssi.jqGrid({
-        colNames: ['Name', 'ADDRESS', 'TYPE', 'INTERFACE', 'RF_ADDRESS', 'ROAMING'],
-        colModel: [
-            {name:'Name', index: 'Name', width: 224, fixed: false},
-            {name:'ADDRESS',index:'ADDRESS', width:110, fixed: true},
-            {name:'TYPE',index:'TYPE', width:140, fixed: false},
-            {name:'INTERFACE',index:'INTERFACE', width:70},
-            {name:'RF_ADDRESS',index:'RF_ADDRESS', width:70},
-            {name:'roaming',index:'ROAMING', width:60, fixed: true},
-        ],
-        datatype:   'local',
-        rowNum:     25,
-        autowidth:  true,
-        width:      '1000',
-        height:     600,
-        rowList:    [25, 50, 100, 500],
-        pager:      $('#pager-rssi'),
-        sortname:   'timestamp',
-        viewrecords: true,
-        sortorder:  'desc',
-        caption:    'RSSI',
-        subGrid:    true,
-        subGridOptions: {
-            expandOnLoad: false
-        },
-        subGridRowExpanded: function(grid_id, row_id) {
-            subGridRssi(grid_id, row_id);
-        },
+        caption:    'Direktverknüpfungen',
         onSelectRow: function (rowid, iRow, iCol, e) {
-
-        },
-        gridComplete: function () {
-
+            $('#del-link').removeClass('ui-state-disabled');
+            $('#edit-link').removeClass('ui-state-disabled');
+            $('#play-link').removeClass('ui-state-disabled');
         }
-    }).navGrid('#pager-rssi', {
+    }).navGrid('#pager-links', {
         search: false,
         edit: false,
         add: false,
         del: false,
         refresh: false
+    })
+    .jqGrid('filterToolbar', {
+        defaultSearch:'cn',
+        autosearch: true,
+        searchOnEnter: false,
+        enableClear: false
+    }).jqGrid('navButtonAdd', '#pager-links', {
+        caption: '',
+        buttonicon: 'ui-icon-trash',
+        onClickButton: function () {
+            var sender = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_SENDER"]').html();
+            var receiver = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_RECEIVER"]').html();
+            alert('del link ' + sender + ' -> ' + receiver);
+        },
+        position: 'first',
+        id: 'del-link',
+        title: 'Direktverknüpfung löschen',
+        cursor: 'pointer'
+    }).jqGrid('navButtonAdd', '#pager-links', {
+        caption: '',
+        buttonicon: 'ui-icon-pencil',
+        onClickButton: function () {
+            var sender = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_SENDER"]').html();
+            var receiver = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_RECEIVER"]').html();
+            alert('edit link ' + sender + ' -> ' + receiver);
+        },
+        position: 'first',
+        id: 'edit-link',
+        title: 'Direktverknüpfung bearbeiten',
+        cursor: 'pointer'
+    }).jqGrid('navButtonAdd', '#pager-links', {
+        caption: '',
+        buttonicon: 'ui-icon-play',
+        onClickButton: function () {
+            var sender = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_SENDER"]').html();
+            var receiver = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_RECEIVER"]').html();
+            alert('activate link ' + sender + ' -> ' + receiver);
+        },
+        position: 'first',
+        id: 'play-link',
+        title: 'Direktverknüpfung testen',
+        cursor: 'pointer'
+    }).jqGrid('navButtonAdd', '#pager-links', {
+        caption: '',
+        buttonicon: 'ui-icon-plus',
+        onClickButton: function () {
+            alert('add link');
+        },
+        position: 'first',
+        id: 'add-link',
+        title: 'Direktverknüpfung anlegen',
+        cursor: 'pointer'
     });
+
+
+    // RSSI Tabelle
+    var $gridRssi = $('#grid-rssi');
+    function initGridRssi() {
+        console.log(listInterfaces);
+        var colNamesRssi = ['Name', 'ADDRESS', 'TYPE', 'INTERFACE', 'RF_ADDRESS', 'ROAMING'];
+        var colModelRssi = [
+            // TODO Name und Type fixed:false - Überschrifts und Inhaltsspalten stimmen nicht mehr... :-(
+            {name:'Name', index: 'Name', width: 220, fixed: true},
+            {name:'ADDRESS',index:'ADDRESS', width: 84, fixed: true},
+            {name:'TYPE',index:'TYPE', width: 140, fixed: true},
+            {name:'INTERFACE',index:'INTERFACE', width: 84, fixed: true},
+            {name:'RF_ADDRESS',index:'RF_ADDRESS', width: 75, fixed: true},
+            {name:'roaming',index:'ROAMING', width: 57, fixed: true, search: false}
+        ];
+
+        var groupHeaders = [];
+
+        for (var i = 0; i < listInterfaces.length; i++) {
+            colNamesRssi.push('<- dBm');
+            colNamesRssi.push('-> dBm');
+            colNamesRssi.push(' ');
+            colModelRssi.push({
+                name: listInterfaces[i].ADDRESS + '_0',
+                index: listInterfaces[i].ADDRESS + '_0',
+                width: 47,
+                fixed: true,
+                search: false,
+                align: 'right'
+            });
+            colModelRssi.push({
+                name: listInterfaces[i].ADDRESS + '_1',
+                index: listInterfaces[i].ADDRESS + '_1',
+                width: 47,
+                fixed: true,
+                search: false,
+                align: 'right'
+            });
+            colModelRssi.push({
+                name: listInterfaces[i].ADDRESS + '_set',
+                index: listInterfaces[i].ADDRESS + '_set',
+                width: 28,
+                fixed: true,
+                search: false
+            });
+            groupHeaders.push({startColumnName: listInterfaces[i].ADDRESS + '_0', numberOfColumns: 3, titleText: listInterfaces[i].ADDRESS + ' (' + listInterfaces[i].TYPE + ')'});
+        }
+
+        $gridRssi.jqGrid({
+            colNames: colNamesRssi,
+            colModel: colModelRssi,
+            datatype:   'local',
+            rowNum:     25,
+            autowidth:  false,
+            width:      '1000',
+            height:     600,
+            rowList:    [25, 50, 100, 500],
+            pager:      $('#pager-rssi'),
+            sortname:   'timestamp',
+            viewrecords: true,
+            sortorder:  'desc',
+            caption:    'RSSI',
+            subGrid:    true,
+            subGridOptions: {
+                expandOnLoad: false
+            },
+            subGridRowExpanded: function(grid_id, row_id) {
+                subGridRssi(grid_id, row_id);
+            },
+            onSelectRow: function (rowid, iRow, iCol, e) {
+
+            },
+            gridComplete: function () {
+
+            }
+        }).navGrid('#pager-rssi', {
+            search: false,
+            edit: false,
+            add: false,
+            del: false,
+            refresh: false
+        }).jqGrid('filterToolbar', {
+            defaultSearch:'cn',
+            autosearch: true,
+            searchOnEnter: false,
+            enableClear: false
+        }).jqGrid('setGroupHeaders', {
+            useColSpanStyle: true,
+            groupHeaders: groupHeaders
+        });
+        $('#gbox_grid-rssi .ui-jqgrid-titlebar-close').hide();
+
+        resizeGrids();
+    }
+
 
     function subGridRssi(grid_id, row_id) {
         var subgrid_table_id = 'rssi' + row_id + '_t';
@@ -1287,8 +1427,7 @@ $(document).ready(function () {
                 'ADDRESS',
                 'TYPE',
                 'RSSI parent [dBm]',
-                'RSSI child [dBm]',
-                'Aktionen'
+                'RSSI child [dBm]'
             ],
             colModel: [
                 {name: 'Name', index: 'Name', width: 222, fixed: false},
@@ -1296,7 +1435,6 @@ $(document).ready(function () {
                 {name: 'TYPE', index: 'TYPE', width: 140, fixed: false},
                 {name: 'RSSI-Receive', index: 'RSSI-Receive', width: 140, fixed: false, align: 'right'},
                 {name: 'RSSI-Send', index: 'RSSI-Send', width: 140, fixed: false, align: 'right'},
-                {name: 'Aktionen', index: 'Aktionen', width: 140, fixed: false}
             ],
             rowNum: 1000000,
             autowidth: true,
@@ -1333,7 +1471,6 @@ $(document).ready(function () {
     }
 
     // Interfaces-Tabelle
-    // RSSI Tabelle
     var $gridInterfaces = $('#grid-interfaces');
     $gridInterfaces.jqGrid({
         /*
@@ -1347,24 +1484,22 @@ $(document).ready(function () {
          TYPE: "CCU2"
          */
 
-        colNames: ['ADDRESS', 'CONNECTED', 'DEFAULT', 'DESCRIPTION', 'DUTY_CYCLE', 'FIRMWARE_VERSION', 'TYPE'],
+        colNames: ['ADDRESS', 'DESCRIPTION', 'TYPE', 'FIRMWARE_VERSION', 'CONNECTED', 'DEFAULT', 'DUTY_CYCLE'],
         colModel: [
             {name:'ADDRESS',index:'ADDRESS', width:110, fixed: true},
+            {name:'DESCRIPTION',index:'DESCRIPTION', width:150, fixed: false},
+            {name:'TYPE',index:'TYPE', width:70, fixed: false},
+            {name:'FIRMWARE_VERSION',index:'FIRMWARE_VERSION', width:130, fixed: true},
             {name:'CONNECTED',index:'CONNECTED', width:110, fixed: true},
             {name:'DEFAULT',index:'DEFAULT', width:110, fixed: true},
-            {name:'DESCRIPTION',index:'DESCRIPTION', width:110, fixed: true},
-            {name:'DUTY_CYCLE',index:'DUTY_CYCLE', width:110, fixed: true},
-            {name:'FIRMWARE_VERSION',index:'FIRMWARE_VERSION', width:140, fixed: false},
-            {name:'TYPE',index:'TYPE', width:70}
-
+            {name:'DUTY_CYCLE',index:'DUTY_CYCLE', width:110, fixed: true, align: 'right'}
         ],
         datatype:   'local',
         rowNum:     25,
         autowidth:  true,
         width:      '1000',
-        height:     600,
+        height:     'auto',
         rowList:    [25, 50, 100, 500],
-        pager:      $('#pager-interfaces'),
         sortname:   'timestamp',
         viewrecords: true,
         sortorder:  'desc',
@@ -1374,20 +1509,19 @@ $(document).ready(function () {
         },
         gridComplete: function () {
 
-        }
-    }).navGrid('#pager-interfaces', {
-        search: false,
-        edit: false,
-        add: false,
-        del: false,
-        refresh: false
+        },
+        hiddengrid: true
     });
 
+    $('#gbox_grid-interfaces .ui-jqgrid-titlebar-close').click(function () {
+        setTimeout(resizeGrids, 250);
+    });
+
+    $('#gbox_grid-devices .ui-jqgrid-titlebar-close').hide();
+    $('#gbox_grid-links .ui-jqgrid-titlebar-close').hide();
 
 
 
-
-    $('.ui-jqgrid-titlebar-close').hide();
 
     function resizeGrids() {
         var x = $(window).width();
@@ -1395,7 +1529,25 @@ $(document).ready(function () {
         if (x < 1200) x = 1200;
         if (y < 600) y = 600;
 
-        $('#grid-devices, #grid-links, #grid-rssi, #grid-interfaces').setGridHeight(y - 148).setGridWidth(x - 18);
+        $('#grid-devices, #grid-links').setGridHeight(y - 148).setGridWidth(x - 18);
+        $('#grid-interfaces')/*.setGridHeight(y - 99)*/.setGridWidth(x - 18);
+        $('#grid-rssi').setGridHeight(y - (177 + $('#gbox_grid-interfaces').height())).setGridWidth(x - 18);
+
+        /*
+
+        // funktioniert nicht mit gruppierten Headers :-(
+        // .updateColumns depreacted :-((
+
+
+        var table = $("#grid-rssi")[0];
+        var r = table.rows[0], selftable = table;
+        if (r) {
+            $("td", r).each(function (k) {
+                $(this).css('width', selftable.grid.headers[k].width + 'px');
+            });
+            table.grid.cols = r.cells;
+        }
+        */
     }
 
     //Konsole

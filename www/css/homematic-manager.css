@@ -116,3 +116,12 @@ textarea {
     width: 356px;
     padding: 2px 4px;
 }
+
+#gbox_grid-interfaces {
+    margin-bottom: 4px;
+}
+
+.interface-set {
+    margin: 0 !important;
+    padding: 2px 10px 3px 10px !important;
+}

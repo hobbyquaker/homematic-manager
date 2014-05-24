@@ -610,6 +610,7 @@ $(document).ready(function () {
         $gridRssi.jqGrid('clearGridData');
         $gridInterfaces.jqGrid('clearGridData');
         $("#del-device").addClass("ui-state-disabled");
+        $("#replace-device").addClass("ui-state-disabled");
         $("#edit-device").addClass("ui-state-disabled");
         $("#edit-link").addClass("ui-state-disabled");
         $("#play-link").addClass("ui-state-disabled");
@@ -1059,8 +1060,10 @@ $(document).ready(function () {
         onSelectRow: function (rowid, iRow, iCol, e) {
             if ($('#grid-devices tr#' + rowid + ' td[aria-describedby="grid-devices_flags"]').html().match(/DontDelete/)) {
                 $('#del-device').addClass('ui-state-disabled');
+                $('#replace-device').addClass('ui-state-disabled');
             } else {
                 $('#del-device').removeClass('ui-state-disabled');
+                $('#replace-device').removeClass('ui-state-disabled');
             }
 
             $('#edit-device').removeClass('ui-state-disabled');
@@ -1069,6 +1072,7 @@ $(document).ready(function () {
         gridComplete: function () {
             $('button.paramset:not(.ui-button)').button();
             $('#del-device').addClass('ui-state-disabled');
+            $('#replace-device').addClass('ui-state-disabled');
             $('#edit-device').addClass('ui-state-disabled');
         }
     }).navGrid('#pager-devices', {
@@ -1113,6 +1117,17 @@ $(document).ready(function () {
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
+        buttonicon: 'ui-icon-transfer-e-w',
+        onClickButton: function () {
+            var address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
+            alert('replace ' + address);
+        },
+        position: 'first',
+        id: 'replace-device',
+        title: 'Gerät tauschen',
+        cursor: 'pointer'
+    }).jqGrid('navButtonAdd', '#pager-devices', {
+        caption: '',
         buttonicon: 'ui-icon-pencil',
         onClickButton: function () {
             var devSelected = $gridDevices.jqGrid('getGridParam','selrow');
@@ -1153,6 +1168,7 @@ $(document).ready(function () {
     });
 
     $('#del-device').addClass('ui-state-disabled');
+    $('#replace-device').addClass('ui-state-disabled');
     $('#edit-device').addClass('ui-state-disabled');
 
     function subGridChannels(grid_id, row_id) {
@@ -1201,6 +1217,7 @@ $(document).ready(function () {
 
                 $('#del-device').addClass('ui-state-disabled');
                 $('#edit-device').removeClass('ui-state-disabled');
+                $('#replace-device').removeClass('ui-state-disabled');
             },
             gridComplete: function () {
                 $('button.paramset:not(.ui-button)').button();
@@ -1325,7 +1342,6 @@ $(document).ready(function () {
     // RSSI Tabelle
     var $gridRssi = $('#grid-rssi');
     function initGridRssi() {
-        console.log(listInterfaces);
         var colNamesRssi = ['Name', 'ADDRESS', 'TYPE', 'INTERFACE', 'RF_ADDRESS', 'ROAMING'];
         var colModelRssi = [
             // TODO Name und Type fixed:false - Überschrifts und Inhaltsspalten stimmen nicht mehr... :-(

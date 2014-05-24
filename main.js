@@ -2,6 +2,8 @@
 
 "use strict";
 
+var version = '0.1.0';
+
 var fs = require('fs');
 var express = require('express');
 var socketio = require('socket.io');
@@ -9,6 +11,8 @@ var xmlrpc = require('xmlrpc');
 var http = require('http');
 
 var config = loadConfig();
+config.version = version;
+
 var logStream = openLog(__dirname + '/log/hm-manager.log');
 
 var app;
@@ -19,11 +23,19 @@ var rpc;
 var daemon;
 var rpcCache = {};
 var regaCache = {};
+var rpcClients = {};
 
 initWebServer();
 initSocket();
 
 for (var daemon in config.daemons) {
+
+    rpcClients[daemon] = xmlrpc.createClient({
+        host: config.daemons[daemon].ip,
+        port: config.daemons[daemon].port,
+        path: '/'
+    });
+
     if (config.daemons[daemon].isCcu && !regaCache[config.daemons[daemon].ip]) {
         regaCache[config.daemons[daemon].ip] = {};
         getRegaNames(config.daemons[daemon].ip);
@@ -43,33 +55,16 @@ function initSocket() {
             callback(regaCache);
         });
 
-        socket.on('bidcosConnect', function (d, callback) {
-            daemon = d;
-            console.log('connect ' + daemon);
-            rpc = xmlrpc.createClient({
-                host: config.daemons[daemon].ip,
-                port: config.daemons[daemon].port,
-                path: '/'
-            });
-           callback();
-
-        });
-
-        socket.on('rpc', function (method, paramArray, callback) {
+        socket.on('rpc', function (daemon, method, paramArray, callback) {
             if (method) {
-                console.log("RPC " + method + " " + JSON.stringify(paramArray));
-                switch (method) {
-                    case 'listDevices':
-                    // Todo implement cache?
-                    // break;
-                    default:
-                        rpc.methodCall(method, paramArray, function (error, result) {
-                            if (callback) {
-                                callback(error, result);
-                            }
-                        });
-                        break;
-                }
+                console.log('RPC ' + daemon + ' ' + method + ' ' + JSON.stringify(paramArray));
+
+                rpcClients[daemon].methodCall(method, paramArray, function (error, result) {
+                    if (callback) {
+                        callback(error, result);
+                    }
+                });
+
             }
         });
 

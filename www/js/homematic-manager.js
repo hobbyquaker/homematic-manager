@@ -1,8 +1,6 @@
 ;(function ($) {
 $(document).ready(function () {
 
-    var version = '0.0.8';
-
     var socket = io.connect();
     var daemon;
     var config;
@@ -485,6 +483,8 @@ $(document).ready(function () {
     function getConfig() {
         socket.emit('getConfig', function (data) {
             config = data;
+            $('.version').html(config.version);
+
             $('#select-bidcos-daemon').html('<option value="null">Bitte einen Daemon auswählen</option>');
 
             hash = window.location.hash.slice(1);
@@ -529,9 +529,9 @@ $(document).ready(function () {
             var tmp = $(this).attr('id').split('_');
             var address = tmp[1];
             var paramset = tmp[2];
-            socket.emit('rpc', 'getParamset', [address, paramset], function (err, data) {
+            socket.emit('rpc', daemon, 'getParamset', [address, paramset], function (err, data) {
                 // TODO catch errors
-                socket.emit('rpc', 'getParamsetDescription', [address, paramset], function (err2, data2) {
+                socket.emit('rpc', daemon, 'getParamsetDescription', [address, paramset], function (err2, data2) {
                     // TODO catch errors
                     paramsetDialog(data, data2, address, paramset);
                     $('#load_grid-devices').hide();
@@ -569,7 +569,7 @@ $(document).ready(function () {
                 val /= 100;
             }
 
-            socket.emit('rpc', 'setValue', [address, param, val], function (err, res) {
+            socket.emit('rpc', daemon, 'setValue', [address, param, val], function (err, res) {
                 // TODO catch errors
             });
         });
@@ -614,26 +614,25 @@ $(document).ready(function () {
                 resizeGrids();
             }
 
-            socket.emit('bidcosConnect', daemon, function () {
-                socket.emit('rpc', 'listDevices', [], function (err, data) {
-                    listDevices = data;
-                    socket.emit('rpc', 'getLinks', [], function (err, data) {
-                        listLinks = data;
-                        if (config.daemons[daemon].type == 'BidCos-RF') {
-                            socket.emit('rpc', 'listBidcosInterfaces', [], function (err, data) {
-                                listInterfaces = data;
-                                socket.emit('rpc', 'rssiInfo', [], function (err, data) {
-                                    listRssi = data;
-                                    buildGridRssi();
-                                });
-                                buildGridInterfaces();
+            socket.emit('rpc', daemon, 'listDevices', [], function (err, data) {
+                listDevices = data;
+                socket.emit('rpc', daemon, 'getLinks', [], function (err, data) {
+                    listLinks = data;
+                    if (config.daemons[daemon].type == 'BidCos-RF') {
+                        socket.emit('rpc', daemon, 'listBidcosInterfaces', [], function (err, data) {
+                            listInterfaces = data;
+                            socket.emit('rpc', daemon, 'rssiInfo', [], function (err, data) {
+                                listRssi = data;
+                                buildGridRssi();
                             });
-                        }
-                        buildGridLinks();
-                    });
-                    buildGridDevices();
+                            buildGridInterfaces();
+                        });
+                    }
+                    buildGridLinks();
                 });
+                buildGridDevices();
             });
+
         } else {
             window.location.hash = '';
         }
@@ -672,7 +671,7 @@ $(document).ready(function () {
                 values[param] = val;
             }
         });
-        socket.emit('rpc', 'putParamset', [address, paramset, values], function (err, res) {
+        socket.emit('rpc', daemon, 'putParamset', [address, paramset, values], function (err, res) {
             // Todo catch errors
         });
     }
@@ -894,7 +893,6 @@ $(document).ready(function () {
     //      initialize UI elements
     //
 
-    $('.version').html(version);
 
     // Dialogs
     $('#dialog-help').dialog({
@@ -1549,7 +1547,7 @@ $(document).ready(function () {
         var param0 = $('#param_0').val();
         if (method == 'setValue' && $(elem).attr('id') == 'param_0' && param0) {
             $('#param_1').val('...').attr('disabled', true);
-            socket.emit('rpc', 'getParamsetDescription', [param0, 'VALUES'], function (err, data) {
+            socket.emit('rpc', daemon, 'getParamsetDescription', [param0, 'VALUES'], function (err, data) {
                 var selectOptions = '<option value="">Bitte auswählen</option>';
                 setValueParamsetDescription = data;
                 for (var dp in data) {
@@ -1648,7 +1646,7 @@ $(document).ready(function () {
                 return;
             }
             $consoleRpcResponse.html('...');
-            socket.emit('rpc', method, params, function (err, data) {
+            socket.emit('rpc', daemon, method, params, function (err, data) {
                 if (err) {
                     $('#console-rpc-error').html('Error: ' + err.faultString);
                 } else {

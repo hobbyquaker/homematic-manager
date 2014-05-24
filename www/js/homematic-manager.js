@@ -496,14 +496,24 @@ $(document).ready(function () {
             config = data;
             $('.version').html(config.version);
 
-            $('#select-bidcos-daemon').html('<option value="null">Bitte einen Daemon auswählen</option>');
-
             hash = window.location.hash.slice(1);
 
+            var count = 0;
             for (var daemon in config.daemons) {
+                count += 1;
                 $('#select-bidcos-daemon').append('<option value="' + daemon + '"' + (hash == daemon ? ' selected' : '') + '>' + daemon + ' (' + config.daemons[daemon].type + ' ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
             }
-            $('#select-bidcos-daemon').multiselect('refresh');
+
+            if (count == 1) {
+                $('#select-bidcos-daemon').hide();
+            } else {
+                $('#select-bidcos-daemon').multiselect({
+                    classes: 'select-daemon',
+                    multiple: false,
+                    header: false,
+                    selectedList: 1
+                });
+            }
             initHandlers();
             getRegaNames();
             initDaemon();
@@ -952,12 +962,7 @@ $(document).ready(function () {
         create: function () {
             $('#tabs-main ul.ui-tabs-nav').prepend('<li><select id="select-bidcos-daemon"></select></li>');
             $('#tabs-main ul.ui-tabs-nav').prepend('<li class="header">HomeMatic-Manager</li>');
-            $('#select-bidcos-daemon').multiselect({
-                classes: 'select-daemon',
-                multiple: false,
-                header: false,
-                selectedList: 1
-            });
+
 
             $(".ui-tabs-nav").
                 append("<button title='Hilfe' class='menu-button' id='button-help'></button>").

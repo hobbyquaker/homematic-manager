@@ -1329,7 +1329,7 @@ $(document).ready(function () {
         var colNamesRssi = ['Name', 'ADDRESS', 'TYPE', 'INTERFACE', 'RF_ADDRESS', 'ROAMING'];
         var colModelRssi = [
             // TODO Name und Type fixed:false - Überschrifts und Inhaltsspalten stimmen nicht mehr... :-(
-            {name:'Name', index: 'Name', width: 220, fixed: true},
+            {name:'Name', index: 'Name', width: 250, fixed: true},
             {name:'ADDRESS',index:'ADDRESS', width: 84, fixed: true},
             {name:'TYPE',index:'TYPE', width: 140, fixed: true},
             {name:'INTERFACE',index:'INTERFACE', width: 84, fixed: true},
@@ -1426,15 +1426,15 @@ $(document).ready(function () {
                 'Name',
                 'ADDRESS',
                 'TYPE',
-                'RSSI parent [dBm]',
-                'RSSI child [dBm]'
+                '<- dBm',
+                '-> dBm'
             ],
             colModel: [
-                {name: 'Name', index: 'Name', width: 222, fixed: false},
-                {name: 'ADDRESS', index: 'ADDRESS', width: 110, fixed: true},
-                {name: 'TYPE', index: 'TYPE', width: 140, fixed: false},
-                {name: 'RSSI-Receive', index: 'RSSI-Receive', width: 140, fixed: false, align: 'right'},
-                {name: 'RSSI-Send', index: 'RSSI-Send', width: 140, fixed: false, align: 'right'},
+                {name: 'Name', index: 'Name', width: 248, fixed: true},
+                {name: 'ADDRESS', index: 'ADDRESS', width: 84, fixed: true},
+                {name: 'TYPE', index: 'TYPE', width: 140, fixed: true},
+                {name: 'RSSI-Receive', index: 'RSSI-Receive', width: 47, fixed: true, align: 'right'},
+                {name: 'RSSI-Send', index: 'RSSI-Send', width: 47, fixed: true, align: 'right'},
             ],
             rowNum: 1000000,
             autowidth: true,

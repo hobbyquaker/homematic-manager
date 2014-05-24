@@ -1,4 +1,11 @@
-//
+/**
+ *      homematic-manager
+ *
+ *  Copyright (c) 2014 Anli, Hobbyquaker
+ *
+ *  CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+ *
+ */
 
 "use strict";
 
@@ -14,6 +21,7 @@ var config = loadConfig();
 config.version = version;
 
 var logStream = openLog(__dirname + '/log/hm-manager.log');
+var logStdout = !process.argv[2];
 
 var app;
 var server;
@@ -21,9 +29,11 @@ var io;
 var rpc;
 
 var daemon;
-var rpcCache = {};
+
 var regaCache = {};
 var rpcClients = {};
+
+
 
 initWebServer();
 initSocket();
@@ -57,7 +67,7 @@ function initSocket() {
 
         socket.on('rpc', function (daemon, method, paramArray, callback) {
             if (method) {
-                console.log('RPC ' + daemon + ' ' + method + ' ' + JSON.stringify(paramArray));
+                log('RPC ' + daemon + ' ' + method + '(' + JSON.stringify(paramArray).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
 
                 rpcClients[daemon].methodCall(method, paramArray, function (error, result) {
                     if (callback) {
@@ -69,14 +79,14 @@ function initSocket() {
         });
 
         socket.on('saveJson', function (file, obj, callback) {
-            console.log('saveJson ' + file);
+            log('saveJson ' + file);
             saveJson(file, obj, function (err) {
                 if (callback) callback(err);
             });
         });
 
         socket.on('loadJson', function (file, obj, callback) {
-            console.log('saveJson ' + file);
+            log('saveJson ' + file);
             loadJson(file, function (err, data) {
                 callback(err, data);
             });
@@ -95,25 +105,24 @@ function initWebServer() {
     // redirect socket.io logging to log file
     io.set('logger', {
         debug: function(obj) {
-            log("socket.io debug: "+obj);
+            //log('socket.io debug: ' + obj);
         },
         info: function(obj) {
-            log("socket.io info: "+obj);
+            log('socket.io info: ' + obj);
         },
         error: function(obj) {
-            log("socket.io error: "+obj);
+            log('socket.io error: ' + obj);
         },
         warn: function(obj) {
-            log("socket.io warn: "+obj);
+            log('socket.io warn: ' + obj);
         }
     });
 
-    log("webserver listening on port "+config.webServerPort);
+    log('webserver listening on port ' + config.webServerPort);
 }
 
 function getRegaNames(ip) {
-    console.log("loading rega names from " + ip);
-    regaScript(ip, "reganames.fn", function (res) {
+    regaScript(ip, 'reganames.fn', function (res) {
         regaCache[ip] = res;
     });
 }
@@ -121,7 +130,7 @@ function getRegaNames(ip) {
 function regaScript(ip, file, callback) {
     fs.readFile(__dirname + '/' + file, 'utf8', function (err, script) {
         if (err) {
-            console.log("regaScript " + err);
+            log('readFile ' + file + ' ' + err);
             return false;
         }
         var post_options = {
@@ -134,8 +143,9 @@ function regaScript(ip, file, callback) {
                 'Content-Length': script.length
             }
         };
+        log('ReGa ' + ip + ' ' + file);
         var post_req = http.request(post_options, function(res) {
-            var data = "";
+            var data = '';
             res.setEncoding('utf8');
             res.on('data', function (chunk) {
                 data += chunk.toString();
@@ -147,13 +157,13 @@ function regaScript(ip, file, callback) {
                     var result = JSON.parse(stdout);
                     callback(result);
                 } catch (e) {
-                    console.log("regaScript error " + e);
+                    log('ReGa ' + ip + ' ' + e);
                 }
             });
         });
 
         post_req.on('error', function (e) {
-            console.log("regaScript POST " + e);
+            log('ReGa ' + ip + ' ' + e);
         });
 
         post_req.write(script);
@@ -163,7 +173,7 @@ function regaScript(ip, file, callback) {
 }
 
 function saveJson(file, obj, callback) {
-    fs.writeFile(__dirname + '/' + config.datastorePath + name, JSON.stringify(obj), function (err) {
+    fs.writeFile(__dirname + '/' + config.datastorePath + file, JSON.stringify(obj), function (err) {
         if (callback) {
             callback(err);
         }
@@ -171,33 +181,37 @@ function saveJson(file, obj, callback) {
 }
 
 function loadJson(file, callback) {
-    fs.readFile(__dirname + '/' + config.datastorePath + name, function (err, data) {
+    fs.readFile(__dirname + '/' + config.datastorePath + file, function (err, data) {
         callback(err, data);
     });
 }
 
 
 function loadConfig() {
-    if (!fs.existsSync(__dirname + "/config.json")) {
-        fs.writeFileSync(__dirname + "/config.json", fs.readFileSync(__dirname + "/config-default.json"));
+    if (!fs.existsSync(__dirname + '/config.json')) {
+        fs.writeFileSync(__dirname + '/config.json', fs.readFileSync(__dirname + '/config-default.json'));
     }
-    return JSON.parse(fs.readFileSync(__dirname + "/config.json"));
+    return JSON.parse(fs.readFileSync(__dirname + '/config.json'));
 }
 
 function openLog(logfile) {
     return fs.createWriteStream(logfile, {
-        flags: "a", encoding: "utf8", mode: 420
+        flags: 'a', encoding: 'utf8', mode: 420
     });
 }
 
 function log(msg) {
-    logStream.write(msg + "\n");
+    if (logStdout) {
+        console.log(msg);
+    }
+    logStream.write(msg + '\n');
 }
 
 function stop() {
-    log("terminating");
+    log('terminating');
     process.exit(0);
 }
 
 process.on('SIGINT', stop);
 process.on('SIGTERM', stop);
+

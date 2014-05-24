@@ -1,3 +1,12 @@
+/**
+ *      homematic-manager
+ *
+ *  Copyright (c) 2014 Anli, Hobbyquaker
+ *
+ *  CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+ *
+ */
+
 var daemon = require("daemonize2").setup({
     main: "main.js",
     name: "hm-manager",

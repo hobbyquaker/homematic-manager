@@ -1,3 +1,14 @@
+/**
+ *      homematic-manager
+ *
+ *  Copyright (c) 2014 Anli, Hobbyquaker
+ *
+ *  CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+ *
+ */
+
+"use strict";
+
 ;(function ($) {
 $(document).ready(function () {
 
@@ -1645,6 +1656,7 @@ $(document).ready(function () {
                 alert('Parsing params: ' + e);
                 return;
             }
+
             $consoleRpcResponse.html('...');
             socket.emit('rpc', daemon, method, params, function (err, data) {
                 if (err) {

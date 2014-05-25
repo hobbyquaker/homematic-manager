@@ -15,6 +15,7 @@ var fs = require('fs');
 var express = require('express');
 var socketio = require('socket.io');
 var xmlrpc = require('xmlrpc');
+var multicall = require('xmlrpc-multicall');
 var http = require('http');
 
 var config = loadConfig();
@@ -33,10 +34,11 @@ var daemon;
 var regaCache = {};
 var rpcClients = {};
 
-
+var rpcServer;
 
 initWebServer();
 initSocket();
+initRpcServer();
 
 for (var daemon in config.daemons) {
 
@@ -46,12 +48,38 @@ for (var daemon in config.daemons) {
         path: '/'
     });
 
+    if (config.daemons[daemon].init) {
+        log("RPC init on " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port);
+        rpcClients[daemon].methodCall('init', ['http://' + config.rpcListenIp + ':9090', 'hmm'], function (err, data) { });
+    }
+
+
     if (config.daemons[daemon].isCcu && !regaCache[config.daemons[daemon].ip]) {
         regaCache[config.daemons[daemon].ip] = {};
         getRegaNames(config.daemons[daemon].ip);
     }
 }
 
+function initRpcServer() {
+    rpcServer = xmlrpc.createServer({ host: config.rpcListenIp, port: 9090 });
+    multicall(rpcServer);
+
+    log('RPC server listening on port 9090');
+
+    rpcServer.on('NotFound', function(method, params) {
+        console.log('RPC ' + method + ' undefined');
+    });
+
+    rpcServer.on('system.listMethods', function(method, params, callback) {
+        console.log('RPC ' + method + ' undefined');
+        callback(null, ['']);
+    });
+
+    rpcServer.on('listDevices', function(method, params, callback) {
+        console.log('RPC ' + method + ' undefined');
+        callback(null, ['']);
+    });
+}
 
 function initSocket() {
 
@@ -208,8 +236,22 @@ function log(msg) {
 }
 
 function stop() {
+    for (var daemon in config.daemons) {
+
+
+        if (config.daemons[daemon].init) {
+            log("RPC stop init on " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port);
+            rpcClients[daemon].methodCall('init', ['http://' + config.rpcListenIp + ':9090', ''], function (err, data) {
+
+            });
+        }
+
+
+    }
     log('terminating');
-    process.exit(0);
+    setTimeout(function () {
+        process.exit(0);
+    }, 2000);
 }
 
 process.on('SIGINT', stop);

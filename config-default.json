@@ -1,11 +1,13 @@
 {
     "webServerPort": 8081,
+    "rpcListenIp": "172.16.23.134",
     "daemons": {
         "Funk-Zuhause": {
             "type": "BidCos-RF",
             "ip": "172.16.23.3",
             "port": 2001,
-            "isCcu": true
+            "isCcu": true,
+            "init": true
         },
         "Wired-Zuhause": {
             "type": "BidCos-Wired",

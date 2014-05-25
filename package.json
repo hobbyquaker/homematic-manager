@@ -9,6 +9,7 @@
         "express": "~4.1.0",
         "socket.io": "~0.9.0",
         "xmlrpc": "~1.2.0",
+        "xmlrpc-multicall": "~0.0.1",
         "daemonize2": "~0.4.2"
     }
 }

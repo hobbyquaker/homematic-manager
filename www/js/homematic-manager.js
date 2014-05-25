@@ -595,12 +595,6 @@ $(document).ready(function () {
             });
         });
 
-        $('body').on('click', 'button.deletelink', function () {
-            var tmp = $(this).attr("id").split("_");
-            var sender = tmp[1];
-            var receiver = tmp[2];
-            deleteLinkDialog(sender, receiver, $(this).attr("params"));
-        });
     }
 
     function initDaemon() {
@@ -779,28 +773,27 @@ $(document).ready(function () {
         $('#dialog-paramset').dialog('open');
     }
 
-    function deleteLinkDialog(sender, receiver, params) {
+    function deleteLinkDialog(sender, receiver, name, desc, rowId) {
 
-        // Dialog-Überschrift setzen
         if (regaNames && regaNames[config.daemons[daemon].ip]) {
             var names = regaNames[config.daemons[daemon].ip];
         }
         var sendername = names[sender].Name || "";
         var receivername = names[receiver].Name || "";
-        var arrparams = JSON.parse(params);
 
-        $('div[aria-describedby="dialog-paramset"] span.ui-dialog-title').html('Verknüpfung zwischen ' + sender + ' und ' + receiver + ' löschen');
+        $('div[aria-describedby="dialog-delete-link"] span.ui-dialog-title').html('Direktverknüpfung zwischen ' + sender + ' und ' + receiver + ' löschen');
 
-        $('#table-deletelink').html('<tr><td>Sender:</td><td>' + sender + ' (' + sendername + ')</td></tr>');
-        $('#table-deletelink').append('<tr><td>Empfänger:</td><td>' + receiver + ' (' + receivername + ')</td></tr>');
-        $('#table-deletelink').append('<tr><td>Name:</td><td>' + arrparams.NAME + '</td></tr>');
-        $('#table-deletelink').append('<tr><td>Beschreibung:</td><td>' + arrparams.DESCRIPTION + '</td></tr>');
+        $('#table-delete-link').html('<tr><td>Sender:</td><td>' + sender + ' (' + sendername + ')</td></tr>');
+        $('#table-delete-link').append('<tr><td>Empfänger:</td><td>' + receiver + ' (' + receivername + ')</td></tr>');
+        $('#table-delete-link').append('<tr><td>Name:</td><td>' + name + '</td></tr>');
+        $('#table-delete-link').append('<tr><td>Beschreibung:</td><td>' + desc + '</td></tr>');
 
         // Hidden-Hilfsfelder
-        $('#deletelink-sender').val(sender);
-        $('#deletelink-receiver').val(receiver);
+        $('#delete-link-sender').val(sender);
+        $('#delete-link-receiver').val(receiver);
+        $('#delete-link-rowid').val(rowId);
 
-        $('#dialog-deletelink').dialog('open');
+        $('#dialog-delete-link').dialog('open');
     }
 
     function buildGridRssi() {
@@ -1009,16 +1002,25 @@ $(document).ready(function () {
             }
         ]
     });
-    $('#dialog-deletelink').dialog({
+    $('#dialog-delete-link').dialog({
         autoOpen: false,
         modal: true,
         width: 640,
         height: 400,
         buttons: [
             {
-                text: 'löschen',
+                text: 'Löschen',
                 click: function () {
-                    deleteLink();
+                    // TODO RPC
+                    alert('removeLink(' + $('#delete-link-sender').val() + ', ' + $('#delete-link-receiver').val() + ')');
+                    // TODO remove Grid row
+                    $(this).dialog('close');
+                }
+            },
+            {
+                text: 'Abbrechen',
+                click: function () {
+                    $(this).dialog('close');
                 }
             }
         ]
@@ -1356,9 +1358,12 @@ $(document).ready(function () {
         caption: '',
         buttonicon: 'ui-icon-trash',
         onClickButton: function () {
-            var sender = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_SENDER"]').html();
-            var receiver = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_RECEIVER"]').html();
-            alert('del link ' + sender + ' -> ' + receiver);
+            var rowId = $gridLinks.jqGrid('getGridParam','selrow')
+            var sender = $('#grid-links tr#' + rowId + ' td[aria-describedby="grid-links_SENDER"]').html();
+            var receiver = $('#grid-links tr#' + rowId + ' td[aria-describedby="grid-links_RECEIVER"]').html();
+            var name = $('#grid-links tr#' + rowId + ' td[aria-describedby="grid-links_NAME"]').html();
+            var desc = $('#grid-links tr#' + rowId + ' td[aria-describedby="grid-links_DESCRIPTION"]').html();
+            deleteLinkDialog(sender, receiver, name, desc, rowId);
         },
         position: 'first',
         id: 'del-link',

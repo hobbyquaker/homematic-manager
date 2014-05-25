@@ -804,8 +804,6 @@ $(document).ready(function () {
 
     function buildGridRssi() {
 
-        // TODO Roaming Checkbox
-
         indexDevices = {};
 
         var j = 0;
@@ -832,27 +830,63 @@ $(document).ready(function () {
                     line[listInterfaces[k].ADDRESS + '_1'] = (listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1] != 65536
                                                             ? listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1]
                                                             : '');
-                    line[listInterfaces[k].ADDRESS + '_set'] = '<input type="button" class="interface-set" data-device="' + listDevices[i].ADDRESS + '" data-iface="' + listInterfaces[k].ADDRESS + '">';
+                    if (listDevices[i].INTERFACE == listInterfaces[k].ADDRESS) {
+                        line[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '" checked="checked">';
+                    } else {
+                        line[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '">';
+                    }
                 } else {
                     line[listInterfaces[k].ADDRESS + '_0'] = '';
                     line[listInterfaces[k].ADDRESS + '_1'] = '';
                     line[listInterfaces[k].ADDRESS + '_set'] = '';
                 }
+
+            }
+            if (listDevices[i].ROAMING == 0) {
+                line['roaming'] = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox">';
+            } else {
+                line['roaming'] = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox" checked="checked">';
             }
             var line = $.extend(true, line, listDevices[i]);
             $gridRssi.jqGrid('addRowData', j++, line);
         }
         $gridRssi.trigger('reloadGrid');
-        $('.interface-set').not('.ui-button').button({
-            text: false,
-            icons: {
-                // TODO Icon funktioniert nicht
-                primary: 'ui-icon-signal-diag'
-            }
-        }).click(function () {
-            alert($(this).attr('data-device') + ' -> ' + $(this).attr('data-iface'));
-        });
+
     }
+
+    $('body').on('click', '.interface-set', function () {
+        var i = $(this).attr('data-device-index');
+        var ifaceIndex = $(this).attr('data-iface-index');
+        var rowId = $(this).parent().parent().attr('id');
+        var rowData = $gridRssi.jqGrid('getRowData', rowId);
+        rowData.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox">';
+        rowData.INTERFACE = listInterfaces[$(this).attr('data-iface-index')].ADDRESS;
+        for (var k = 0; k < listInterfaces.length; k++) {
+            rowData[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '"' + (k == ifaceIndex ? ' checked="checked"' : '') + '>';
+        }
+        $gridRssi.jqGrid('setRowData', rowId, rowData);
+
+        // Todo Implement RPC
+        alert('setBidcosInterface ' + $(this).attr('data-device') + ' ' + listInterfaces[$(this).attr('data-iface-index')].ADDRESS + ' false');
+    });
+
+    $('body').on('change', '.checkbox-roaming', function () {
+        var checked = $(this).is(':checked');
+        var i = $(this).attr('data-device-index');
+        var rowId = $(this).parent().parent().attr('id');
+        var rowData = $gridRssi.jqGrid('getRowData', rowId);
+        rowData.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox"' + (checked ? ' checked="checked"' : '') + '>';
+        rowData.INTERFACE = listInterfaces[0].ADDRESS;
+        if (checked) {
+            for (var k = 0; k < listInterfaces.length; k++) {
+                rowData[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '"' + (k == 0 ? ' checked="checked"' : '') + '>';
+            }
+        }
+        $gridRssi.jqGrid('setRowData', rowId, rowData);
+
+        // Todo Implement RPC
+        alert('setBidcosInterface ' + $(this).attr('data-device') + ' ' + listInterfaces[0].ADDRESS + ' ' + $(this).is(':checked'));
+    });
 
 
     function buildGridInterfaces() {
@@ -1350,7 +1384,7 @@ $(document).ready(function () {
             {name:'TYPE',index:'TYPE', width: 140, fixed: true},
             {name:'INTERFACE',index:'INTERFACE', width: 84, fixed: true},
             {name:'RF_ADDRESS',index:'RF_ADDRESS', width: 75, fixed: true},
-            {name:'roaming',index:'ROAMING', width: 57, fixed: true, search: false}
+            {name:'roaming',index:'ROAMING', width: 57, fixed: true, search: false, align: 'center'}
         ];
 
         var groupHeaders = [];
@@ -1380,7 +1414,8 @@ $(document).ready(function () {
                 index: listInterfaces[i].ADDRESS + '_set',
                 width: 28,
                 fixed: true,
-                search: false
+                search: false,
+                align: 'center'
             });
             groupHeaders.push({startColumnName: listInterfaces[i].ADDRESS + '_0', numberOfColumns: 3, titleText: listInterfaces[i].ADDRESS + ' (' + listInterfaces[i].TYPE + ')'});
         }

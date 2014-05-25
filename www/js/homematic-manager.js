@@ -613,6 +613,7 @@ $(document).ready(function () {
         $("#replace-device").addClass("ui-state-disabled");
         $("#edit-device").addClass("ui-state-disabled");
         $("#edit-link").addClass("ui-state-disabled");
+        $("#rename-link").addClass("ui-state-disabled");
         $("#play-link").addClass("ui-state-disabled");
         $("#del-link").addClass("ui-state-disabled");
         if (daemon != 'null' && config.daemons[daemon]) {
@@ -1140,6 +1141,16 @@ $(document).ready(function () {
         cursor: 'pointer'
     })*/.jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
+        buttonicon: 'ui-icon-refresh',
+        onClickButton: function () {
+            alert('refresh devices');
+        },
+        position: 'first',
+        id: 'refresh-device',
+        title: 'Aktualisieren',
+        cursor: 'pointer'
+    }).jqGrid('navButtonAdd', '#pager-devices', {
+        caption: '',
         buttonicon: 'ui-icon-trash',
         onClickButton: function () {
             var address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
@@ -1309,8 +1320,15 @@ $(document).ready(function () {
         caption:    'Direktverknüpfungen',
         onSelectRow: function (rowid, iRow, iCol, e) {
             $('#del-link').removeClass('ui-state-disabled');
+            $('#rename-link').removeClass('ui-state-disabled');
             $('#edit-link').removeClass('ui-state-disabled');
             $('#play-link').removeClass('ui-state-disabled');
+        },
+        gridComplete: function () {
+            $('#del-link').addClass('ui-state-disabled');
+            $('#rename-link').addClass('ui-state-disabled');
+            $('#edit-link').addClass('ui-state-disabled');
+            $('#play-link').addClass('ui-state-disabled');
         }
     }).navGrid('#pager-links', {
         search: false,
@@ -1326,6 +1344,16 @@ $(document).ready(function () {
         enableClear: false
     }).jqGrid('navButtonAdd', '#pager-links', {
         caption: '',
+        buttonicon: 'ui-icon-refresh',
+        onClickButton: function () {
+            alert('refresh link');
+        },
+        position: 'first',
+        id: 'refresh-link',
+        title: 'Aktualisieren',
+        cursor: 'pointer'
+    }).jqGrid('navButtonAdd', '#pager-links', {
+        caption: '',
         buttonicon: 'ui-icon-trash',
         onClickButton: function () {
             var sender = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_SENDER"]').html();
@@ -1338,7 +1366,7 @@ $(document).ready(function () {
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-links', {
         caption: '',
-        buttonicon: 'ui-icon-pencil',
+        buttonicon: 'ui-icon-gear',
         onClickButton: function () {
             var sender = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_SENDER"]').html();
             var receiver = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_RECEIVER"]').html();
@@ -1347,6 +1375,18 @@ $(document).ready(function () {
         position: 'first',
         id: 'edit-link',
         title: 'Direktverknüpfung bearbeiten',
+        cursor: 'pointer'
+    }).jqGrid('navButtonAdd', '#pager-links', {
+        caption: '',
+        buttonicon: 'ui-icon-pencil',
+        onClickButton: function () {
+            var sender = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_SENDER"]').html();
+            var receiver = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_RECEIVER"]').html();
+            alert('rename link ' + sender + ' -> ' + receiver);
+        },
+        position: 'first',
+        id: 'rename-link',
+        title: 'Direktverknüpfung umbenennen',
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-links', {
         caption: '',
@@ -1461,6 +1501,16 @@ $(document).ready(function () {
         }).jqGrid('setGroupHeaders', {
             useColSpanStyle: true,
             groupHeaders: groupHeaders
+        }).jqGrid('navButtonAdd', '#pager-rssi', {
+            caption: '',
+            buttonicon: 'ui-icon-refresh',
+            onClickButton: function () {
+                alert('refresh rssi');
+            },
+            position: 'first',
+            id: 'refresh-rssi',
+            title: 'Aktualisieren',
+            cursor: 'pointer'
         });
         $('#gbox_grid-rssi .ui-jqgrid-titlebar-close').hide();
 

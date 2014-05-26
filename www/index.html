@@ -75,6 +75,20 @@
         <input type="hidden" id="edit-paramset-address" value=""/>
         <input type="hidden" id="edit-paramset-paramset" value=""/>
     </div>
+    <div id="dialog-linkparamset">
+        <table>
+            <tr>
+                <td>
+                    <table id="table-paramset1"></table>
+                </td>
+                <td>
+                    <table id="table-paramset2"></table>
+                </td>
+            </tr>
+        </table>
+        <input type="hidden" id="edit-linkparamset-sender" value=""/>
+        <input type="hidden" id="edit-linkparamset-receiver" value=""/>
+    </div>
     <div id="dialog-delete-link" title="Direktverknüpfung löschen">
         <table id="table-delete-link"></table>
         <input type="hidden" id="delete-link-sender" value=""/>
@@ -91,6 +105,23 @@
         <input type="hidden" id="rename-link-receiver" value=""/>
     </div>
     <div id="dialog-add-device" title="Gerät anlernen">
+
+    </div>
+    <div id="dialog-add-link" title="Direktverknüpfung anlegen">
+        <table>
+            <tr>
+                <td>Sender</td>
+                <td><select id="select-link-sender"></select></td>
+            </tr>
+            <tr style="font-size: 9px">
+                <td>LINK_SOURCE_ROLES</td>
+                <td id="link-source-roles"></td>
+            </tr>
+            <tr>
+                <td>Empfänger</td>
+                <td><select id="select-link-receiver" multiple="multiple"></select></td>
+            </tr>
+        </table>
 
     </div>
     <div id="dialog-del-device" title="Gerät löschen">

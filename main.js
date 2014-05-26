@@ -38,7 +38,7 @@ var rpcServer;
 
 initWebServer();
 initSocket();
-initRpcServer();
+//initRpcServer();
 
 for (var daemon in config.daemons) {
 

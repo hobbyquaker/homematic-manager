@@ -17,6 +17,9 @@ $(document).ready(function () {
     var config;
     var listDevices;
     var indexDevices;
+    var indexChannels = {};
+    var indexSourceRoles = {};
+    var indexTargetRoles = {};
     var listLinks;
     var listRssi;
     var listInterfaces;
@@ -598,6 +601,8 @@ $(document).ready(function () {
     }
 
     function initDaemon() {
+        indexSourceRoles = {};
+        indexTargetRoles = {};
         daemon = $('#select-bidcos-daemon option:selected').val();
         $gridDevices.jqGrid('clearGridData');
         $gridLinks.jqGrid('clearGridData');
@@ -652,6 +657,24 @@ $(document).ready(function () {
                     buildGridLinks();
                 });
                 buildGridDevices();
+                for (var i = 0; i < listDevices.length; i++) {
+                    indexChannels[listDevices[i].ADDRESS] = listDevices[i];
+                    if (listDevices[i].LINK_SOURCE_ROLES) {
+                        var roles = listDevices[i].LINK_SOURCE_ROLES.split(' ');
+                        for (var j = 0; j < roles.length; j++) {
+                            if (!indexSourceRoles[roles[j]]) indexSourceRoles[roles[j]] = [];
+                            indexSourceRoles[roles[j]].push(listDevices[i].ADDRESS);
+                        }
+                    }
+                    if (listDevices[i].LINK_TARGET_ROLES) {
+                        var roles = listDevices[i].LINK_TARGET_ROLES.split(' ');
+                        for (var j = 0; j < roles.length; j++) {
+                            if (!indexTargetRoles[roles[j]]) indexTargetRoles[roles[j]] = [];
+                            indexTargetRoles[roles[j]].push(listDevices[i].ADDRESS);
+                        }
+                    }
+
+                }
             });
 
         } else {
@@ -697,27 +720,119 @@ $(document).ready(function () {
         });
     }
 
+    function linkparamsetDialog(data1, desc1, data2, desc2, sender, receiver) {
+        // Tabelle befüllen
+        $('#table-paramset').show().html('<tr><th>Param</th><th>Value</th><th>Default</th><th></th></tr>');
+        var count = 0;
+        for (var param in data1) {
+            var unit = '';
+            count += 1;
+            if (desc1[param]) {
+                // Dirty workaround for encoding problem
+                if (desc1[param].UNIT == '�C') desc1[param].UNIT = '°C';
+
+                var defaultVal = desc1[param].DEFAULT;
+
+                // Calculate percent values
+                if (desc1[param].UNIT == '100%') {
+                    unit = '%';
+                    data1[param] *= 100;
+                    defaultVal *= 100;
+
+                } else {
+                    unit = desc1[param].UNIT;
+                }
+
+                // Create Input-Field
+                var input;
+
+                switch (desc1[param].TYPE) {
+                    case 'BOOL':
+                        input = '<input id="linkparamset-input-' + param + '" type="checkbox" value="true"' + (data1[param] ? ' checked="checked"' : '') + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
+                        break;
+                    case 'INTEGER':
+                        input = '<input data1-unit="' + desc1[param].UNIT + '" id="linkparamset-input-' + param + '" type="number" min="' + desc1[param].MIN + '" max="' + desc1[param].MAX + '" value="' + data1[param] + '"' + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        break;
+                    case 'ENUM':
+                        input = '<select id="linkparamset-input-' + param + '"' + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
+                        for (var i = desc1[param].MIN; i <= desc1[param].MAX; i++) {
+                            input += '<option value="' + i + '"' + (data1[param] == i ? ' selected="selected"' : '') + '>' + desc1[param].VALUE_LIST[i] + '</option>';
+                        }
+                        input += '</select>';
+                        defaultVal = desc1[param].VALUE_LIST[defaultVal];
+                        break;
+                    case 'FLOAT':
+                    default:
+                        input = '<input data1-unit="' + desc1[param].UNIT + '" id="linkparamset-input-' + param + '" type="text" value="' + data1[param] + '"' + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                }
+
+                // Paramset VALUES?
+                if (linkparamset == 'VALUES' && (desc1[param].OPERATIONS & 2)) {
+                    $('#table-linkparamset1').append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc1[param].DEFAULT + '</td><td><button class="linkparamset-setValue" id="linkparamset-setValue-' + param + '">setValue</button></td></tr>');
+                } else {
+                    $('#table-linkparamset1').append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + defaultVal + unit + '</td></tr>');
+                }
+
+            } else {
+                $('#table-linkparamset1').append('<tr><td>' + param + '</td><td colspan = "3">' + data1[param] + '</td></tr>');
+            }
+
+        }
+
+        if (count == 0) {
+            $('#table-linkparamset1').hide();
+        }
+
+        // Dialog-Überschrift setzen
+        if (regaNames && regaNames[config.daemons[daemon].ip]) {
+            var names = regaNames[config.daemons[daemon].ip];
+        }
+        var name = names[sender].Name || '';
+
+        if (names[receiver]) {
+            name = names[receiver].Name + ' -> ' + name;
+        }
+        //name += ' (PARAMSET ' + address + ' ' + paramset + ')';
+
+
+        $('div[aria-describedby="dialog-linkparamset"] span.ui-dialog-title').html(name);
+
+        // Hidden-Hilfsfelder
+        $('#edit-linkparamset-sender').val(sender);
+        $('#edit-linkparamset-receiver').val(receiver);
+
+        // Buttons
+        $('button.paramset-setValue:not(.ui-button)').button();
+
+        $('#dialog-linkparamset').dialog('open');
+    }
+
     function paramsetDialog(data, desc, address, paramset) {
         // Tabelle befüllen
         $('#table-paramset').show().html('<tr><th>Param</th><th>Value</th><th>Default</th><th></th></tr>');
         var count = 0;
         for (var param in data) {
+            var unit = '';
             count += 1;
             if (desc[param]) {
                 // Dirty workaround for encoding problem
                 if (desc[param].UNIT == '�C') desc[param].UNIT = '°C';
 
+                var defaultVal = desc[param].DEFAULT;
+
                 // Calculate percent values
                 if (desc[param].UNIT == '100%') {
-                    var unit = '%';
+                    unit = '%';
                     data[param] *= 100;
+                    defaultVal *= 100;
+
                 } else {
-                    var unit = desc[param].UNIT;
+                    unit = desc[param].UNIT;
                 }
 
                 // Create Input-Field
                 var input;
-                var defaultVal = desc[param].DEFAULT;
+
                 switch (desc[param].TYPE) {
                     case 'BOOL':
                         input = '<input id="paramset-input-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
@@ -742,7 +857,7 @@ $(document).ready(function () {
                 if (paramset == 'VALUES' && (desc[param].OPERATIONS & 2)) {
                     $('#table-paramset').append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
                 } else {
-                    $('#table-paramset').append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + defaultVal + '</td></tr>');
+                    $('#table-paramset').append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + defaultVal + unit + '</td></tr>');
                 }
 
             } else {
@@ -759,9 +874,18 @@ $(document).ready(function () {
         if (regaNames && regaNames[config.daemons[daemon].ip]) {
             var names = regaNames[config.daemons[daemon].ip];
         }
-        var name = names[address].Name || '';
+        var name;
+        if (names && names[address]) {
+            name = names[address].Name || '';
+        }
 
-        $('div[aria-describedby="dialog-paramset"] span.ui-dialog-title').html(name + ' PARAMSET ' + address + ' ' + paramset);
+        if (names && names[paramset]) {
+            name = names[paramset].Name + ' -> ' + name;
+        }
+        name += ' (PARAMSET ' + address + ' ' + paramset + ')';
+
+
+        $('div[aria-describedby="dialog-paramset"] span.ui-dialog-title').html(name);
 
         // Hidden-Hilfsfelder
         $('#edit-paramset-address').val(address);
@@ -991,8 +1115,22 @@ $(document).ready(function () {
     $('#dialog-paramset').dialog({
         autoOpen: false,
         modal: true,
-        width: 720,
-        height: 400,
+        width: 800,
+        height: 480,
+        buttons: [
+            {
+                text: 'putParamset',
+                click: function () {
+                    putParamset();
+                }
+            }
+        ]
+    });
+    $('#dialog-linkparamset').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 960,
+        height: 480,
         buttons: [
             {
                 text: 'putParamset',
@@ -1025,6 +1163,114 @@ $(document).ready(function () {
             }
         ]
     });
+
+    $('#dialog-add-link').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 800,
+        height: 480,
+        buttons: [
+            {
+                text: 'Anlegen und Bearbeiten',
+                click: function () {
+                    // TODO RPC
+                    var targets = $('#select-link-receiver').val();
+
+                    for (var i = 0; i < targets.length; i++) {
+                        alert('addLink(' + $('#select-link-sender').val() + ', ' + targets[i] + ')');
+
+                        // TODO eins nach dem anderen... Callback oder synchron?
+                        alert('edit paramset!');
+                    }
+
+
+                    $(this).dialog('close');
+                }
+            },{
+                text: 'Anlegen',
+                click: function () {
+                    // TODO RPC
+                    var targets = $('#select-link-receiver').val();
+
+                    for (var i = 0; i < targets.length; i++) {
+                        alert('addLink(' + $('#select-link-sender').val() + ', ' + targets[i] + ')');
+                    }
+
+                    $(this).dialog('close');
+                }
+            },
+            {
+                text: 'Abbrechen',
+                click: function () {
+                    $(this).dialog('close');
+                }
+            }
+        ]
+    });
+
+    $('#select-link-sender').change(function () {
+        var sender = $(this).val();
+        if (sender != "null") {
+            var roles = indexChannels[sender].LINK_SOURCE_ROLES.split(' ');
+            var targets = [];
+            $('#link-source-roles').html('');
+            $('#link-source-roles').html(indexChannels[sender].LINK_SOURCE_ROLES);
+
+            for (var i = 0; i < roles.length; i++) {
+                for (var role in indexTargetRoles[roles[i]]) {
+                    var address = indexTargetRoles[roles[i]][role];
+                    if (targets.indexOf(address) == -1) {
+                        targets.push(address);
+                    }
+                }
+            }
+            var names;
+            if (regaNames && regaNames[config.daemons[daemon].ip]) {
+                names = regaNames[config.daemons[daemon].ip];
+            }
+
+            var selectOptions = '';
+            for (var i = 0; i < targets.length; i++) {
+                var name;
+                if (names[targets[i]]) {
+                    name = ' ' + names[targets[i]].Name;
+                } else {
+                    name = '';
+                }
+                selectOptions += '<option value="'+ targets[i] + '">' + targets[i] + name + '</option>';
+            }
+            $('#select-link-receiver').html(selectOptions);
+
+            $('#select-link-receiver').multiselect('refresh');
+            $('#select-link-receiver').multiselect('enable');
+        } else {
+
+            $('#select-link-receiver').multiselect('disable');
+            $('#link-source-roles').html('');
+        }
+    });
+
+    $('#select-link-sender').multiselect({
+        classes: 'link-sender',
+        multiple: false,
+        //header: false,
+        selectedList: 1,
+        minWidth: 480
+    }).multiselectfilter({
+            autoReset: true,
+            placeholder: ''
+        });
+    $('#select-link-receiver').multiselect({
+        classes: 'link-receiver',
+        multiple: true,
+        minWidth: 480,
+        //header: false,
+        selectedList: 2,
+        noneSelectedText: "Bitte einen oder mehrere Kanäle auswählen"
+    }).multiselectfilter({
+            autoReset: true,
+            placeholder: ''
+        });
 
     // Tabs
     $('#tabs-main').tabs({
@@ -1375,7 +1621,17 @@ $(document).ready(function () {
         onClickButton: function () {
             var sender = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_SENDER"]').html();
             var receiver = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_RECEIVER"]').html();
-            alert('edit link ' + sender + ' -> ' + receiver);
+            $('#load_grid-links').show();
+            socket.emit('rpc', daemon, 'getParamset', [receiver, sender], function (err, data) {
+                // TODO catch errors
+                socket.emit('rpc', daemon, 'getParamsetDescription', [receiver, sender], function (err2, data2) {
+                    // TODO catch errors
+                    paramsetDialog(data, data2, receiver, sender);
+                    $('#load_grid-links').hide();
+
+                });
+            });
+            //alert('edit link ' + sender + ' -> ' + receiver);
         },
         position: 'first',
         id: 'edit-link',
@@ -1409,7 +1665,20 @@ $(document).ready(function () {
         caption: '',
         buttonicon: 'ui-icon-plus',
         onClickButton: function () {
-            alert('add link');
+            var selectOptions = '<option value="null">Bitte einen Kanal auswählen</option>';
+            var names = regaNames[config.daemons[daemon].ip];
+            for (var j = 0, len = listDevices.length; j < len; j++) {
+                if (!listDevices[j].PARENT) continue;
+                if (listDevices[j].ADDRESS.match(/:0$/)) continue;
+                if (!listDevices[j].LINK_SOURCE_ROLES) continue;
+                selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + names[listDevices[j].ADDRESS].Name + '</option>';
+            }
+            $('#select-link-sender').html(selectOptions).multiselect('refresh');
+            $('#select-link-receiver').html('').multiselect('refresh').multiselect('disable');
+            $('#link-source-roles').html('');
+            $('#link-target-roles').html('');
+
+            $('#dialog-add-link').dialog('open');
         },
         position: 'first',
         id: 'add-link',
@@ -1748,7 +2017,11 @@ $(document).ready(function () {
                     for (var j = 0, len = listDevices.length; j < len; j++) {
                         if (listDevices[j].PARENT) continue;
                         if (listDevices[j].ADDRESS.match(/BidCoS/)) continue;
-                        selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + names[listDevices[j].ADDRESS].Name + '</option>';
+                        var name = '';
+                        if (names && names[listDevices[j].ADDRESS]) {
+                            name = names[listDevices[j].ADDRESS].Name;
+                        }
+                        selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + name + '</option>';
                     }
                     form += '<tr><td><label for="param_' + i + '">' + params[i].name + '</label></td><td></td><td><select class="param-search" name="param_' + i + '" id="param_' + i + '" class="">' + selectOptions + '</select></td></tr>';
                     break;

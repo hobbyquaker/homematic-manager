@@ -35,10 +35,10 @@ var regaCache = {};
 var rpcClients = {};
 
 var rpcServer;
+var rpcServerStarted;
 
 initWebServer();
 initSocket();
-//initRpcServer();
 
 for (var daemon in config.daemons) {
 
@@ -49,6 +49,7 @@ for (var daemon in config.daemons) {
     });
 
     if (config.daemons[daemon].init) {
+        if (!rpcServerStarted) initRpcServer();
         log("RPC init on " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port);
         rpcClients[daemon].methodCall('init', ['http://' + config.rpcListenIp + ':9090', 'hmm'], function (err, data) { });
     }
@@ -61,6 +62,7 @@ for (var daemon in config.daemons) {
 }
 
 function initRpcServer() {
+    rpcServerStarted = true;
     rpcServer = xmlrpc.createServer({ host: config.rpcListenIp, port: 9090 });
     multicall(rpcServer);
 
@@ -75,9 +77,9 @@ function initRpcServer() {
         callback(null, ['']);
     });
 
-    rpcServer.on('listDevices', function(method, params, callback) {
-        console.log('RPC ' + method + ' undefined');
-        callback(null, ['']);
+    rpcServer.on('listDevices', function(err, params, callback) {
+        console.log('RPC listDevices ' + params);
+        callback(null, ' ');
     });
 }
 

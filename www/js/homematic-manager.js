@@ -1830,7 +1830,10 @@ $(document).ready(function () {
         var address = $('#grid-rssi tr#' + row_id + ' td[aria-describedby="grid-rssi_ADDRESS"]').html();
         var partners = listRssi[address];
         var i = 0;
-        var names = regaNames[config.daemons[daemon].ip];
+        var names = [];
+        if (regaNames && regaNames[config.daemons[daemon].ip]) {
+            names = regaNames[config.daemons[daemon].ip];
+        }
         for (var partner in partners) {
             var obj = {
                 ADDRESS: partner,

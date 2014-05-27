@@ -8,8 +8,7 @@
     "dependencies": {
         "express": "~4.1.0",
         "socket.io": "~0.9.0",
-        "xmlrpc": "~1.2.0",
-        "xmlrpc-multicall": "~0.0.1",
+        "xmlrpc": "https://github.com/hobbyquaker/node-xmlrpc/tarball/78bc4c1217c014efacbb2fe0bf666e530be01ed9",
         "daemonize2": "~0.4.2"
     }
 }

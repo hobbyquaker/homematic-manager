@@ -15,7 +15,7 @@ var fs = require('fs');
 var express = require('express');
 var socketio = require('socket.io');
 var xmlrpc = require('xmlrpc');
-var multicall = require('xmlrpc-multicall');
+
 var http = require('http');
 
 var config = loadConfig();
@@ -64,7 +64,7 @@ for (var daemon in config.daemons) {
 function initRpcServer() {
     rpcServerStarted = true;
     rpcServer = xmlrpc.createServer({ host: config.rpcListenIp, port: 9090 });
-    multicall(rpcServer);
+    //multicall(rpcServer);
 
     log('RPC server listening on port 9090');
 
@@ -72,8 +72,18 @@ function initRpcServer() {
         console.log('RPC ' + method + ' undefined');
     });
 
-    rpcServer.on('system.listMethods', function(method, params, callback) {
-        console.log('RPC ' + method + ' undefined');
+    rpcServer.on('system.multicall', function(method, params, callback) {
+        console.log('RPC multicall ' + JSON.stringify(params[0]));
+        var response = [];
+        for (var i = 0; i < params[0].length; i++) {
+            response.push(methods[params[0][i].methodName](null, params[0][i].params));
+        }
+        callback(null, response);
+    });
+
+
+    rpcServer.on('system.listMethods', function(err, params, callback) {
+        console.log('RPC listMethods ' + params);
         callback(null, ['']);
     });
 
@@ -81,6 +91,18 @@ function initRpcServer() {
         console.log('RPC listDevices ' + params);
         callback(null, ' ');
     });
+
+    rpcServer.on('event', function(err, params, callback) {
+
+        callback(null, methods.event(err, params));
+    });
+}
+
+var methods = {
+    event: function (err, params) {
+        console.log('RPC event ' + params);
+        return '';
+    }
 }
 
 function initSocket() {

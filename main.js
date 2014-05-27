@@ -50,7 +50,7 @@ for (var daemon in config.daemons) {
 
     if (config.daemons[daemon].init) {
         if (!rpcServerStarted) initRpcServer();
-        log("RPC init on " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port);
+        log("RPC -> " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' init ' + JSON.stringify(['http://' + config.rpcListenIp + ':9090', 'hmm']));
         rpcClients[daemon].methodCall('init', ['http://' + config.rpcListenIp + ':9090', 'hmm'], function (err, data) { });
     }
 
@@ -64,16 +64,14 @@ for (var daemon in config.daemons) {
 function initRpcServer() {
     rpcServerStarted = true;
     rpcServer = xmlrpc.createServer({ host: config.rpcListenIp, port: 9090 });
-    //multicall(rpcServer);
 
     log('RPC server listening on port 9090');
 
     rpcServer.on('NotFound', function(method, params) {
-        console.log('RPC ' + method + ' undefined');
+        console.log('RPC <- method ' + method + ' undefined!');
     });
 
     rpcServer.on('system.multicall', function(method, params, callback) {
-        console.log('RPC multicall ' + JSON.stringify(params[0]));
         var response = [];
         for (var i = 0; i < params[0].length; i++) {
             response.push(methods[params[0][i].methodName](null, params[0][i].params));
@@ -81,29 +79,39 @@ function initRpcServer() {
         callback(null, response);
     });
 
-
     rpcServer.on('system.listMethods', function(err, params, callback) {
-        console.log('RPC listMethods ' + params);
-        callback(null, ['']);
+        callback(null, methods.listMethods(err, params));
     });
-
-    rpcServer.on('listDevices', function(err, params, callback) {
-        console.log('RPC listDevices ' + params);
-        callback(null, ' ');
-    });
-
     rpcServer.on('event', function(err, params, callback) {
-
         callback(null, methods.event(err, params));
     });
+    rpcServer.on('listDevices', function(err, params, callback) {
+        callback(null, methods.listDevices(err, params));
+    });
+    rpcServer.on('newDevices', function(err, params, callback) {
+        callback(null, methods.newDevices(err, params));
+    });
+
 }
 
 var methods = {
+    listMethods: function (err, params) {
+        console.log('RPC <- system.listMethods ' + JSON.stringify(params));
+        return [''];
+    },
     event: function (err, params) {
-        console.log('RPC event ' + params);
+        console.log('RPC <- event ' + JSON.stringify(params));
+        return '';
+    },
+    listDevices: function (err, params) {
+        console.log('RPC <- listDevices ' + JSON.stringify(params));
+        return [''];
+    },
+    newDevices: function (err, params) {
+        console.log('RPC <- newDevices ' + JSON.stringify(params));
         return '';
     }
-}
+};
 
 function initSocket() {
 
@@ -119,7 +127,7 @@ function initSocket() {
 
         socket.on('rpc', function (daemon, method, paramArray, callback) {
             if (method) {
-                log('RPC ' + daemon + ' ' + method + '(' + JSON.stringify(paramArray).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
+                log('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method + '(' + JSON.stringify(paramArray).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
 
                 rpcClients[daemon].methodCall(method, paramArray, function (error, result) {
                     if (callback) {
@@ -264,7 +272,7 @@ function stop() {
 
 
         if (config.daemons[daemon].init) {
-            log("RPC stop init on " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port);
+            log("RPC -> " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' init ' + JSON.stringify(['http://' + config.rpcListenIp + ':9090', '']));
             rpcClients[daemon].methodCall('init', ['http://' + config.rpcListenIp + ':9090', ''], function (err, data) {
 
             });

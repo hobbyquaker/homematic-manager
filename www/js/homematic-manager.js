@@ -55,7 +55,7 @@ $(document).ready(function () {
                 { name: 'mode', type: 'integer', optional: ['rfd'] }
             ],
             returns: 'DeviceDescription',
-            help: "Diese Methode lernt ein Gerät anhand seiner Seriennummer an die CCU an. Diese Funktion wird nicht von jedem Gerät unterstützt. Rückgabewert ist die DeviceDescription des neu angelernten Geräts.<br>Der optionale Parameter mode bestimmt die Art des Installations-Modus:<br>1 = Normaler Installations-Modus<br>2 = Während des Anlernens werden in den Parametersets „MASTER“ default Parameter gesetzt und alle besehenden Verknüpfungen werden gelöscht."
+            help: "Diese Methode lernt ein Gerät anhand seiner Seriennummer an die CCU an. Diese Funktion wird nicht von jedem Gerät unterstützt. Rückgabewert ist die DeviceDescription des neu angelernten Geräts.<br>Der optionale Parameter mode bestimmt die Art des Installations-Modus:<br>1 = Normaler Installations-Modus<br>2 = Während des Anlernens werden in den Parametersets „MASTER“ default Parameter gesetzt und alle bestehenden Verknüpfungen werden gelöscht."
         },
         addLink: {
             rfd: true,
@@ -399,7 +399,7 @@ $(document).ready(function () {
                 { name: 'mode', type: 'integer', optional: ['rfd'] }
             ],
             returns: '',
-            help: "Diese Methode aktiviert und deaktiviert den Installations-Modus, in dem neue Geräte an der HomeMatic-CCU angemeldet werden können.<br>Der Parameter on bestimmt, ob der Installations-Modus aktiviert oder deaktiviert werden soll.<br>Der Parameter time bestimmt die Zeit in Sekunden die der Installations-Modus aktiviert ist<br>Der Parameter mode bestimmt die Art des Installations-Modus:<ul><li>1 = Normaler Installations-Modus</li><li>2 = Während des Anlernens werden in den Parametersets „MASTER“</li></ul>"
+            help: "Diese Methode aktiviert und deaktiviert den Installations-Modus, in dem neue Geräte an der HomeMatic-CCU angemeldet werden können.<br>Der Parameter on bestimmt, ob der Installations-Modus aktiviert oder deaktiviert werden soll.<br>Der Parameter time bestimmt die Zeit in Sekunden die der Installations-Modus aktiviert ist<br>Der Parameter mode bestimmt die Art des Installations-Modus:<ul><li>1 = Normaler Installations-Modus</li><li>2 = Während des Anlernens werden in den Parametersets „MASTER“ default Parameter gesetzt und alle bestehenden Verknüpfungen werden gelöscht.</li></ul>"
         },
         setInterfaceClock: {
             rfd: true,
@@ -1258,6 +1258,7 @@ $(document).ready(function () {
         classes: 'link-sender',
         multiple: false,
         //header: false,
+        height: 400,
         selectedList: 1,
         minWidth: 480
     }).multiselectfilter({
@@ -1269,6 +1270,7 @@ $(document).ready(function () {
         multiple: true,
         minWidth: 480,
         //header: false,
+        height: 400,
         selectedList: 2,
         noneSelectedText: "Bitte einen oder mehrere Kanäle auswählen"
     }).multiselectfilter({
@@ -1326,7 +1328,7 @@ $(document).ready(function () {
             //{name:'INTERFACE',index:'INTERFACE', width:70},
             //{name:'RF_ADDRESS',index:'RF_ADDRESS', width:70},
             //{name:'roaming',index:'roaming', width:30, hidden: true},
-            {name:'rx_mode',index:'RX_MODE', width:150, fixed: true},
+            {name:'rx_mode',index:'RX_MODE', width:150, fixed: true}
             //{name:'VERSION',index:'VERSION', width:60, fixed: true, align:'right'}
         ],
         datatype:   'local',
@@ -1480,7 +1482,7 @@ $(document).ready(function () {
                 'DIRECTION',
                 'PARAMSETS',
                 'FLAGS',
-                'AES_ACTIVE',
+                'AES_ACTIVE'
                 //'LINK_SOURCE_ROLES',
                 //'LINK_TARGET_ROLES',
                 //'VERSION'
@@ -1658,7 +1660,7 @@ $(document).ready(function () {
         buttonicon: 'ui-icon-play',
         onClickButton: function () {
             var sender = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_SENDER"]').html();
-            var receiver = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_RECEIVER"]').html();
+            var receiver = $('#grid-links').find('tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_RECEIVER"]').html();
             alert('activate link ' + sender + ' -> ' + receiver);
         },
         position: 'first',
@@ -1675,7 +1677,7 @@ $(document).ready(function () {
                 if (!listDevices[j].PARENT) continue;
                 if (listDevices[j].ADDRESS.match(/:0$/)) continue;
                 if (!listDevices[j].LINK_SOURCE_ROLES) continue;
-                selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + names[listDevices[j].ADDRESS].Name + '</option>';
+                selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + (names[listDevices[j].ADDRESS] ? ' ' + names[listDevices[j].ADDRESS].Name : '') + '</option>';
             }
             $('#select-link-sender').html(selectOptions).multiselect('refresh');
             $('#select-link-receiver').html('').multiselect('refresh').multiselect('disable');
@@ -1813,7 +1815,7 @@ $(document).ready(function () {
                 {name: 'ADDRESS', index: 'ADDRESS', width: 84, fixed: true},
                 {name: 'TYPE', index: 'TYPE', width: 140, fixed: true},
                 {name: 'RSSI-Receive', index: 'RSSI-Receive', width: 47, fixed: true, align: 'right'},
-                {name: 'RSSI-Send', index: 'RSSI-Send', width: 47, fixed: true, align: 'right'},
+                {name: 'RSSI-Send', index: 'RSSI-Send', width: 47, fixed: true, align: 'right'}
             ],
             rowNum: 1000000,
             autowidth: true,
@@ -1941,6 +1943,7 @@ $(document).ready(function () {
         classes: 'rpc-method',
         multiple: false,
         //header: false,
+        height: 500,
         selectedList: 1
     }).multiselectfilter({
         autoReset: true,

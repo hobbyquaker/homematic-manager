@@ -38,7 +38,6 @@ var rpcServer;
 var rpcServerStarted;
 
 initWebServer();
-initSocket();
 
 for (var daemon in config.daemons) {
 
@@ -63,12 +62,13 @@ for (var daemon in config.daemons) {
 
 function initRpcServer() {
     rpcServerStarted = true;
-    rpcServer = xmlrpc.createServer({ host: config.rpcListenIp, port: 9090 });
+    rpcServer = xmlrpc.createServer({ host: config.rpcListenIp, port: config.rpcListenPort });
 
-    log('RPC server listening on port 9090');
+    log('RPC server listening on ' + config.rpcListenIp + ':' + config.rpcListenPort);
 
     rpcServer.on('NotFound', function(method, params) {
-        console.log('RPC <- method ' + method + ' undefined!');
+        console.log('RPC <- undefined method ' + method + ' ' + JSON.stringify(params));
+        io.sockets.emit('rpc', method, params);
     });
 
     rpcServer.on('system.multicall', function(method, params, callback) {
@@ -89,6 +89,7 @@ function initRpcServer() {
 var methods = {
     event: function (err, params) {
         console.log('RPC <- event ' + JSON.stringify(params));
+        io.sockets.emit('rpc', 'event', params);
         return '';
     }
 };
@@ -141,6 +142,7 @@ function initWebServer() {
     server.listen(config.webServerPort);
 
     io = socketio.listen(server);
+    initSocket();
 
     // redirect socket.io logging to log file
     io.set('logger', {

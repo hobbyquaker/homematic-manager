@@ -494,6 +494,10 @@ $(document).ready(function () {
         getConfig();
     });
 
+    socket.on('rpc', function (method, params) {
+        console.log('rpc <- ' + method + ' ' + JSON.stringify(params));
+    });
+
     function getConfig() {
         socket.emit('getConfig', function (data) {
             config = data;

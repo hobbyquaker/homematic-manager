@@ -1,6 +1,7 @@
 {
     "webServerPort": 8081,
     "rpcListenIp": "172.16.23.134",
+    "rpcListenPort": 9090,
     "daemons": {
         "Funk-Zuhause": {
             "type": "BidCos-RF",

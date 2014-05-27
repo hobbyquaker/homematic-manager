@@ -26,6 +26,11 @@
 
 ## Changelog
 
+### 0.2.0
+* (Hobbyquaker) RPC init
+* (Hobbyquaker) Tabelle "Ereignisse"
+
+
 ### 0.1.0
 * (Hobbyquaker) RSSI Tabelle überarbeitet, dynamische Spalten für Interfaces
 * (Hobbyquaker) Interfaces-Tabelle in Tab Funk verschoben

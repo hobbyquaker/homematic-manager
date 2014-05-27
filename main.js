@@ -79,36 +79,16 @@ function initRpcServer() {
         callback(null, response);
     });
 
-    rpcServer.on('system.listMethods', function(err, params, callback) {
-        callback(null, methods.listMethods(err, params));
-    });
     rpcServer.on('event', function(err, params, callback) {
         callback(null, methods.event(err, params));
     });
-    rpcServer.on('listDevices', function(err, params, callback) {
-        callback(null, methods.listDevices(err, params));
-    });
-    rpcServer.on('newDevices', function(err, params, callback) {
-        callback(null, methods.newDevices(err, params));
-    });
+
 
 }
 
 var methods = {
-    listMethods: function (err, params) {
-        console.log('RPC <- system.listMethods ' + JSON.stringify(params));
-        return [''];
-    },
     event: function (err, params) {
         console.log('RPC <- event ' + JSON.stringify(params));
-        return '';
-    },
-    listDevices: function (err, params) {
-        console.log('RPC <- listDevices ' + JSON.stringify(params));
-        return [''];
-    },
-    newDevices: function (err, params) {
-        console.log('RPC <- newDevices ' + JSON.stringify(params));
         return '';
     }
 };

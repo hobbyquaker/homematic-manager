@@ -494,8 +494,53 @@ $(document).ready(function () {
         getConfig();
     });
 
+    var eventCount = 0;
+
     socket.on('rpc', function (method, params) {
-        console.log('rpc <- ' + method + ' ' + JSON.stringify(params));
+        switch (method) {
+            case 'event':
+                var daemonIdent = params[0];
+                if (daemonIdent != config.daemons[daemon].ident) break;
+                var address = params[1];
+                var param = params[2];
+                var value = params[3];
+                var _index = $gridEvents.jqGrid('getGridParam', '_index');
+                var rowNum = $gridEvents.jqGrid('getGridParam', 'rowNum') - 1;
+                var keys = Object.keys(_index);
+                if (keys.length > rowNum) {
+                    var toDelete = keys.splice(0, keys.length - rowNum);
+                    for (var i = 0; i < toDelete.length; i++) {
+                        $gridEvents.jqGrid('delRowData', toDelete[i]);
+                    }
+                }
+                var timestamp = new Date();
+                var ts = timestamp.getFullYear() + '-' +
+                    ("0" + (timestamp.getMonth() + 1).toString(10)).slice(-2) + '-' +
+                    ("0" + (timestamp.getDate()).toString(10)).slice(-2) + ' ' +
+                    ("0" + (timestamp.getHours()).toString(10)).slice(-2) + ':' +
+                    ("0" + (timestamp.getMinutes()).toString(10)).slice(-2) + ':' +
+                    ("0" + (timestamp.getSeconds()).toString(10)).slice(-2);
+
+                var name = '';
+                if (regaNames && regaNames[config.daemons[daemon].ip] && regaNames[config.daemons[daemon].ip][address]) {
+                    name = regaNames[config.daemons[daemon].ip][address].Name;
+                }
+
+                $gridEvents.jqGrid('addRowData', eventCount++, {
+                    Timestamp: ts,
+                    Name: name,
+                    ADDRESS: address,
+                    PARAM: param,
+                    VALUE: value
+                }, 'first');
+
+
+
+                $gridEvents.trigger('reloadGrid');
+
+                break;
+            default:
+        }
     });
 
     function getConfig() {
@@ -1311,6 +1356,41 @@ $(document).ready(function () {
     });
 
 
+    // Servicemeldungs-Tabelle
+
+
+    // Event-Tabelle
+    var $gridEvents = $('#grid-events');
+    $gridEvents.jqGrid({
+        colNames: [
+            'Zeit',
+            'Name',
+            'ADDRESS',
+            'PARAM',
+            'VALUE'
+        ],
+        colModel: [
+            {name:'Timestamp', index: 'Timestamp', width: 100, fixed: false, sortable: false},
+            {name:'Name', index: 'Name', width: 224, fixed: false, sortable: false},
+            {name:'ADDRESS',index:'ADDRESS', width:90, fixed: false, sortable: false},
+            {name:'PARAM', index: 'PARAM', width: 160, fixed: false, sortable: false},
+            {name:'VALUE',index:'VALUE', width:110, fixed: false, sortable: false}
+        ],
+        datatype:   'local',
+        rowNum:     1000,
+        autowidth:  true,
+        width:      '1000',
+        height:     600,
+        sortname:   'Timestamp',
+        sortorder:  'desc',
+        rowList:    [1000],
+        caption:    'Ereignisse'
+    }).jqGrid('filterToolbar', {
+        defaultSearch: 'cn',
+        autosearch: true,
+        searchOnEnter: false,
+        enableClear: false
+    });
 
     // Geräte-Tabelle
     var $gridDevices = $('#grid-devices');
@@ -1901,6 +1981,7 @@ $(document).ready(function () {
 
     $('#gbox_grid-devices .ui-jqgrid-titlebar-close').hide();
     $('#gbox_grid-links .ui-jqgrid-titlebar-close').hide();
+    $('#gbox_grid-events .ui-jqgrid-titlebar-close').hide();
 
 
 
@@ -1911,7 +1992,8 @@ $(document).ready(function () {
         if (x < 1200) x = 1200;
         if (y < 600) y = 600;
 
-        $('#grid-devices, #grid-links').setGridHeight(y - 148).setGridWidth(x - 18);
+        $('#grid-devices, #grid-links, #grid-messages').setGridHeight(y - 148).setGridWidth(x - 18);
+        $('#grid-events').setGridHeight(y - 122).setGridWidth(x - 18);
         $('#grid-interfaces')/*.setGridHeight(y - 99)*/.setGridWidth(x - 18);
         $('#grid-rssi').setGridHeight(y - (177 + $('#gbox_grid-interfaces').height())).setGridWidth(x - 18);
 

@@ -30,6 +30,7 @@ var io;
 var rpc;
 
 var daemon;
+var daemonIndex = [];
 
 var regaCache = {};
 var rpcClients = {};
@@ -38,27 +39,35 @@ var rpcServer;
 var rpcServerStarted;
 
 initWebServer();
-
-for (var daemon in config.daemons) {
-
-    rpcClients[daemon] = xmlrpc.createClient({
-        host: config.daemons[daemon].ip,
-        port: config.daemons[daemon].port,
-        path: '/'
-    });
-
-    if (config.daemons[daemon].init) {
-        if (!rpcServerStarted) initRpcServer();
-        log("RPC -> " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' init ' + JSON.stringify(['http://' + config.rpcListenIp + ':9090', 'hmm']));
-        rpcClients[daemon].methodCall('init', ['http://' + config.rpcListenIp + ':9090', 'hmm'], function (err, data) { });
-    }
+initDaemons();
 
 
-    if (config.daemons[daemon].isCcu && !regaCache[config.daemons[daemon].ip]) {
-        regaCache[config.daemons[daemon].ip] = {};
-        getRegaNames(config.daemons[daemon].ip);
+function initDaemons() {
+    var count = 0;
+    for (var daemon in config.daemons) {
+
+        rpcClients[daemon] = xmlrpc.createClient({
+            host: config.daemons[daemon].ip,
+            port: config.daemons[daemon].port,
+            path: '/'
+        });
+
+        if (config.daemons[daemon].init) {
+            if (!rpcServerStarted) initRpcServer();
+            log("RPC -> " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' init ' + JSON.stringify(['http://' + config.rpcListenIp + ':' + config.rpcListenPort, 'hmm_' + count]));
+            rpcClients[daemon].methodCall('init', ['http://' + config.rpcListenIp + ':' + config.rpcListenPort, 'hmm_' + count], function (err, data) { });
+        }
+
+        if (config.daemons[daemon].isCcu && !regaCache[config.daemons[daemon].ip]) {
+            regaCache[config.daemons[daemon].ip] = {};
+            getRegaNames(config.daemons[daemon].ip);
+        }
+        config.daemons[daemon].ident = 'hmm_' + count;
+        daemonIndex[count++] = daemon;
     }
 }
+
+
 
 function initRpcServer() {
     rpcServerStarted = true;
@@ -74,7 +83,12 @@ function initRpcServer() {
     rpcServer.on('system.multicall', function(method, params, callback) {
         var response = [];
         for (var i = 0; i < params[0].length; i++) {
-            response.push(methods[params[0][i].methodName](null, params[0][i].params));
+            if (methods[params[0][i].methodName]) {
+                response.push(methods[params[0][i].methodName](null, params[0][i].params));
+            } else {
+                response.push('');
+            }
+
         }
         callback(null, response);
     });
@@ -251,16 +265,10 @@ function log(msg) {
 
 function stop() {
     for (var daemon in config.daemons) {
-
-
         if (config.daemons[daemon].init) {
-            log("RPC -> " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' init ' + JSON.stringify(['http://' + config.rpcListenIp + ':9090', '']));
-            rpcClients[daemon].methodCall('init', ['http://' + config.rpcListenIp + ':9090', ''], function (err, data) {
-
-            });
+            log("RPC -> " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' init ' + JSON.stringify(['http://' + config.rpcListenIp + ':' + config.rpcListenPort, '']));
+            rpcClients[daemon].methodCall('init', ['http://' + config.rpcListenIp + ':' + config.rpcListenPort, ''], function (err, data) {});
         }
-
-
     }
     log('terminating');
     setTimeout(function () {

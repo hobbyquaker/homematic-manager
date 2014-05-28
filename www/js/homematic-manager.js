@@ -642,7 +642,7 @@ $(document).ready(function () {
                 val /= 100;
             }
 
-            socket.emit('rpc', daemon, 'setValue', [address, param, val], function (err, res) {
+            socket.emit('rpc', daemon, 'setValue', [address, param, '' + val], function (err, res) {
                 // TODO catch errors
             });
         });
@@ -743,6 +743,7 @@ $(document).ready(function () {
                 var param = parts[2];
                 var elem = $input[0].nodeName;
                 var type = $input.attr('type');
+                var dataType = $input.attr('data-type');
 
                 // get value
                 var val;
@@ -760,12 +761,35 @@ $(document).ready(function () {
                 if ($input.attr('data-unit') == '100%') {
                     val /= 100;
                 }
+                switch (dataType) {
+
+                        // TODO
+                        // Setzen der MASTER Paramsets funktioniert nicht. :-((
+                        // Hängt das am Datentyp??
+                        // Die XML RPC Bibliothek übersetzt Numerische Werte in int oder double je nachdem
+                        // ob bei einem modulo 1 ein rest übrig bleibt. Könnte das Problem sein, vielleicht,
+                        // aber vielleicht auch nicht, bei VALUE Paramsets funktioniert es seltsamerweise ja...
+
+                    case 'BOOL':
+                        if (val == 'true') val = true;
+                        if (val == 'false') val = false;
+                        break;
+                    case 'INTEGER':
+                        val = parseInt(val, 10);
+                        break;
+                    case 'FLOAT':
+                        val = parseFloat(val);
+                        break;
+                    case 'STRING':
+                    default:
+                        val = '' + val;
+                }
 
                 values[param] = val;
             }
         });
         socket.emit('rpc', daemon, 'putParamset', [address, paramset, values], function (err, res) {
-            // Todo catch errors
+            console.log(err, res);
         });
     }
 
@@ -800,7 +824,7 @@ $(document).ready(function () {
                         input = '<input id="linkparamset-input-' + param + '" type="checkbox" value="true"' + (data1[param] ? ' checked="checked"' : '') + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
                         break;
                     case 'INTEGER':
-                        input = '<input data1-unit="' + desc1[param].UNIT + '" id="linkparamset-input-' + param + '" type="number" min="' + desc1[param].MIN + '" max="' + desc1[param].MAX + '" value="' + data1[param] + '"' + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        input = '<input data-unit="' + desc1[param].UNIT + '" id="linkparamset-input-' + param + '" type="number" min="' + desc1[param].MIN + '" max="' + desc1[param].MAX + '" value="' + data1[param] + '"' + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                         break;
                     case 'ENUM':
                         input = '<select id="linkparamset-input-' + param + '"' + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
@@ -812,7 +836,7 @@ $(document).ready(function () {
                         break;
                     case 'FLOAT':
                     default:
-                        input = '<input data1-unit="' + desc1[param].UNIT + '" id="linkparamset-input-' + param + '" type="text" value="' + data1[param] + '"' + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        input = '<input data-unit="' + desc1[param].UNIT + '" id="linkparamset-input-' + param + '" type="text" value="' + data1[param] + '"' + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                 }
 
                 // Paramset VALUES?
@@ -884,13 +908,13 @@ $(document).ready(function () {
 
                 switch (desc[param].TYPE) {
                     case 'BOOL':
-                        input = '<input id="paramset-input-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
+                        input = '<input data-type="BOOL" id="paramset-input-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
                         break;
                     case 'INTEGER':
-                        input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        input = '<input data-type="INTEGER" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                         break;
                     case 'ENUM':
-                        input = '<select id="paramset-input-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
+                        input = '<select data-type="INTEGER" id="paramset-input-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
                         for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
                             input += '<option value="' + i + '"' + (data[param] == i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
                         }
@@ -898,8 +922,10 @@ $(document).ready(function () {
                         defaultVal = desc[param].VALUE_LIST[defaultVal];
                         break;
                     case 'FLOAT':
+                        input = '<input data-type="FLOAT" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        break;
                     default:
-                        input = '<input data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        input = '<input data-type="STRING" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                 }
 
                 // Paramset VALUES?
@@ -1739,7 +1765,7 @@ $(document).ready(function () {
         onClickButton: function () {
             var sender = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_SENDER"]').html();
             var receiver = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_RECEIVER"]').html();
-            alert('activate link ' + sender + ' -> ' + receiver);
+            socket.emit('rpc', daemon, 'activateLinkParamset', [receiver, sender]);
         },
         position: 'first',
         id: 'play-link',
@@ -2119,14 +2145,22 @@ $(document).ready(function () {
                     for (var j = 0, len = listDevices.length; j < len; j++) {
                         if (!listDevices[j].PARENT) continue;
                         if (listDevices[j].ADDRESS.match(/:0$/)) continue;
-                        selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + names[listDevices[j].ADDRESS].Name + '</option>';
+                        var name = '';
+                        if (names && names[listDevices[j].ADDRESS]) {
+                            name = names[listDevices[j].ADDRESS].Name;
+                        }
+                        selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + name + '</option>';
                     }
                     form += '<tr><td><label for="param_' + i + '">' + params[i].name + '</label></td><td></td><td><select class="param-search" name="param_' + i + '" id="param_' + i + '" class="">' + selectOptions + '</select></td></tr>';
                     break;
                 case 'address':
                     var selectOptions = '<option value="">Bitte auswählen</option>';
                     for (var j = 0, len = listDevices.length; j < len; j++) {
-                        selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + names[listDevices[j].ADDRESS].Name + '</option>';
+                        var name = '';
+                        if (names && names[listDevices[j].ADDRESS]) {
+                            name = names[listDevices[j].ADDRESS].Name;
+                        }
+                        selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + name + '</option>';
                     }
                     form += '<tr><td><label for="param_' + i + '">' + params[i].name + '</label></td><td></td><td><select class="param-search" name="param_' + i + '" id="param_' + i + '" class="">' + selectOptions + '</select></td></tr>';
                     break;

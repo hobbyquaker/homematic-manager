@@ -121,6 +121,13 @@ function initSocket() {
         });
 
         socket.on('rpc', function (daemon, method, paramArray, callback) {
+            if (!rpcClients[daemon]) {
+                log('RPC unknown daemon ' + daemon);
+                if (callback) {
+                    callback('unknown daemon', null);
+                }
+                return;
+            }
             if (method) {
                 log('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method + '(' + JSON.stringify(paramArray).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
 

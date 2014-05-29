@@ -1639,7 +1639,7 @@ $(document).ready(function () {
 
                 $('#del-device').addClass('ui-state-disabled');
                 $('#edit-device').removeClass('ui-state-disabled');
-                $('#replace-device').removeClass('ui-state-disabled');
+                $('#replace-device').addClass('ui-state-disabled');
             },
             gridComplete: function () {
                 $('button.paramset:not(.ui-button)').button();

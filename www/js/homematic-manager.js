@@ -809,9 +809,11 @@ $(document).ready(function () {
     function putLinkParamset(dialog) {
         var sender = $('#edit-linkparamset-sender').val();
         var receiver = $('#edit-linkparamset-receiver').val();
+        $('body').addClass('wait');
         putLinkParamsetInt('sender-receiver', sender, receiver, function(err, res) {
             putLinkParamsetInt('receiver-sender', receiver, sender, function(err2, res2) {
                 dialog.dialog('close');
+                $('body').removeClass('wait');
             });
         });
     }
@@ -1819,7 +1821,7 @@ $(document).ready(function () {
         caption: '',
         buttonicon: 'ui-icon-trash',
         onClickButton: function () {
-            var rowId = $gridLinks.jqGrid('getGridParam','selrow')
+            var rowId = $gridLinks.jqGrid('getGridParam','selrow');
             var sender = $('#grid-links tr#' + rowId + ' td[aria-describedby="grid-links_SENDER"]').html();
             var receiver = $('#grid-links tr#' + rowId + ' td[aria-describedby="grid-links_RECEIVER"]').html();
             var name = $('#grid-links tr#' + rowId + ' td[aria-describedby="grid-links_NAME"]').html();

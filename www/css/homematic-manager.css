@@ -129,3 +129,7 @@ textarea {
 .ui-tooltip.ui-widget-content ul{
     padding-left: 20px;
 }
+
+.wait {
+    cursor: wait !important;
+}

@@ -1817,6 +1817,12 @@ $(document).ready(function () {
     // RSSI Tabelle
     var $gridRssi = $('#grid-rssi');
     function initGridRssi() {
+
+        if ($gridRssi.hasClass('ui-jqgrid-btable')) {
+            $gridRssi.jqGrid('GridUnload');
+            $gridRssi = $('#grid-rssi');
+        }
+
         var colNamesRssi = ['Name', 'ADDRESS', 'TYPE', 'INTERFACE', 'RF_ADDRESS', 'ROAMING'];
         var colModelRssi = [
             // TODO Name und Type fixed:false - Überschrifts und Inhaltsspalten stimmen nicht mehr... :-(
@@ -1860,6 +1866,7 @@ $(document).ready(function () {
             });
             groupHeaders.push({startColumnName: listInterfaces[i].ADDRESS + '_0', numberOfColumns: 3, titleText: listInterfaces[i].ADDRESS + ' (' + listInterfaces[i].TYPE + ')'});
         }
+
 
         $gridRssi.jqGrid({
             colNames: colNamesRssi,

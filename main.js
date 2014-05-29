@@ -101,7 +101,7 @@ function initRpcServer() {
 
 var methods = {
     event: function (err, params) {
-        npm log('RPC <- event ' + JSON.stringify(params));
+        log('RPC <- event ' + JSON.stringify(params));
         io.sockets.emit('rpc', 'event', params);
         return '';
     }

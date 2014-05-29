@@ -23,6 +23,7 @@ $(document).ready(function () {
     var listLinks;
     var listRssi;
     var listInterfaces;
+    var listMessages;
     var regaNames;
     var hash;
 
@@ -534,9 +535,30 @@ $(document).ready(function () {
                     VALUE: value
                 }, 'first');
 
-
-
                 $gridEvents.trigger('reloadGrid');
+
+                // Service-Meldung?
+                if (address.slice(-2) == ':0') {
+                    var done;
+                    if (value == true) {
+                        // Muss Meldung hinzugefügt werden?
+                        done = false;
+                        for (var i = 0; i < listMessages; i++) {
+                            if (listMessages[i][0] == address) {
+                                done = true;
+                            }
+                        }
+                    } else {
+                        // Muss Meldung gelöscht werden?
+                        done = true;
+                        for (var i = 0; i < listMessages; i++) {
+                            if (listMessages[i][0] == address) {
+                                done = false;
+                            }
+                        }
+                    }
+                    if (!done) refreshGridMessages();
+                }
 
                 break;
             default:
@@ -671,6 +693,7 @@ $(document).ready(function () {
         $gridLinks.jqGrid('clearGridData');
         $gridRssi.jqGrid('clearGridData');
         $gridInterfaces.jqGrid('clearGridData');
+        $gridMessages.jqGrid('clearGridData');
         $("#del-device").addClass("ui-state-disabled");
         $("#replace-device").addClass("ui-state-disabled");
         $("#edit-device").addClass("ui-state-disabled");
@@ -714,6 +737,10 @@ $(document).ready(function () {
                             initGridRssi();
                             socket.emit('rpc', daemon, 'rssiInfo', [], function (err, data) {
                                 listRssi = data;
+                                socket.emit('rpc', daemon, 'getServiceMessages', [], function (err, data) {
+                                    listMessages = data;
+                                    buildGridMessages();
+                                });
                                 buildGridRssi();
                             });
                             buildGridInterfaces();
@@ -1097,6 +1124,34 @@ $(document).ready(function () {
         // Todo Implement RPC
         alert('setBidcosInterface ' + $(this).attr('data-device') + ' ' + listInterfaces[0].ADDRESS + ' ' + $(this).is(':checked'));
     });
+
+    function buildGridMessages() {
+        if (regaNames && regaNames[config.daemons[daemon].ip]) {
+            var names = regaNames[config.daemons[daemon].ip];
+        }
+        $gridMessages.jqGrid('clearGridData');
+        for (var i = 0, len = listMessages.length; i < len; i++) {
+            var deviceAddress = listMessages[i][0].slice(0, listMessages[i][0].length - 2);
+            var name = '';
+            if (names && names[deviceAddress]) name = names[deviceAddress].Name;
+            var obj = {
+                Name: name,
+                ADDRESS: listMessages[i][0],
+                DeviceAddress: deviceAddress,
+                Message: listMessages[i][1]
+            };
+            $gridMessages.jqGrid('addRowData', i, obj);
+        }
+        $('#message-count').html(listMessages.length);
+        $gridMessages.trigger('reloadGrid');
+    }
+
+    function refreshGridMessages() {
+        socket.emit('rpc', daemon, 'getServiceMessages', [], function (err, data) {
+            listMessages = data;
+            buildGridMessages();
+        });
+    }
 
 
     function buildGridInterfaces() {
@@ -1984,20 +2039,37 @@ $(document).ready(function () {
 
     }
 
+    // Servicemeldungen-Tabelle
+    var $gridMessages = $('#grid-messages');
+    $gridMessages.jqGrid({
+        colNames: ['Name', 'ADDRESS', 'DeviceAddress', 'Message'],
+        colModel: [
+            {name:'Name',index:'Name', width:420, fixed: true},
+            {name:'ADDRESS',index:'ADDRESS', width:110, fixed: true},
+            {name:'DeviceAddress',index:'DeviceAddress', width:110, fixed: true},
+            {name:'Message',index:'Message', width:150, fixed: false}
+        ],
+        datatype:   'local',
+        rowNum:     1000,
+        autowidth:  true,
+        width:      '1000',
+        height:     'auto',
+        rowList:    [21000],
+        sortname:   'timestamp',
+        viewrecords: true,
+        sortorder:  'desc',
+        caption:    'Service Messages',
+        onSelectRow: function (rowid, iRow, iCol, e) {
+
+        },
+        gridComplete: function () {
+
+        }
+    });
+
     // Interfaces-Tabelle
     var $gridInterfaces = $('#grid-interfaces');
     $gridInterfaces.jqGrid({
-        /*
-
-         ADDRESS: "JEQ0739174"
-         CONNECTED: true
-         DEFAULT: true
-         DESCRIPTION: "CCU2-Coprocessor"
-         DUTY_CYCLE: 0
-         FIRMWARE_VERSION: "1.0.11"
-         TYPE: "CCU2"
-         */
-
         colNames: ['ADDRESS', 'DESCRIPTION', 'TYPE', 'FIRMWARE_VERSION', 'CONNECTED', 'DEFAULT', 'DUTY_CYCLE'],
         colModel: [
             {name:'ADDRESS',index:'ADDRESS', width:110, fixed: true},
@@ -2034,6 +2106,7 @@ $(document).ready(function () {
     $('#gbox_grid-devices .ui-jqgrid-titlebar-close').hide();
     $('#gbox_grid-links .ui-jqgrid-titlebar-close').hide();
     $('#gbox_grid-events .ui-jqgrid-titlebar-close').hide();
+    $('#gbox_grid-messages .ui-jqgrid-titlebar-close').hide();
 
 
 

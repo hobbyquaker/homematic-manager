@@ -1866,7 +1866,7 @@ $(document).ready(function () {
                 search: false,
                 align: 'center'
             });
-            groupHeaders.push({startColumnName: listInterfaces[i].ADDRESS + '_0', numberOfColumns: 3, titleText: listInterfaces[i].ADDRESS + ' (' + listInterfaces[i].TYPE + ')'});
+            groupHeaders.push({startColumnName: listInterfaces[i].ADDRESS + '_0', numberOfColumns: 3, titleText: listInterfaces[i].ADDRESS + '<br/><span style="font-size: 9px;">(' + listInterfaces[i].DESCRIPTION + ')</span>'});
         }
 
 

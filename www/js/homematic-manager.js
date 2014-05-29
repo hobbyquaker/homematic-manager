@@ -688,6 +688,7 @@ $(document).ready(function () {
 
             if (type == 'BidCos-Wired') {
                 $('.rfd-only').hide();
+                $('#play-link').hide();
                 //$gridDevices.jqGrid('hideCol', 'roaming');
                 $gridDevices.jqGrid('hideCol', 'rx_mode');
                 //$gridDevices.jqGrid('hideCol', 'RF_ADDRESS');
@@ -695,6 +696,7 @@ $(document).ready(function () {
                 resizeGrids();
             } else {
                 $('.rfd-only').show();
+                $('#play-link').show();
                 //$gridDevices.jqGrid('showCol', 'roaming');
                 $gridDevices.jqGrid('showCol', 'rx_mode');
                 //$gridDevices.jqGrid('showCol', 'RF_ADDRESS');

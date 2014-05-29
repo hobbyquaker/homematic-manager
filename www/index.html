@@ -16,8 +16,9 @@
     <script src="js/jquery.jqGrid.min.js" type="text/javascript"></script>
     <script src="js/grid.setcolumns.js" type="text/javascript"></script>
     <script src="../socket.io/socket.io.js"></script>
-    <script src="js/homematic-manager.js"></script>
     <script src="js/help_linkParamset.js"></script>
+    <script src="js/rpc_methods.js"></script>
+    <script src="js/homematic-manager.js"></script>
 </head>
 <body>
     <div id="tabs-main">
@@ -26,7 +27,7 @@
             <li><a href="#tab-links">Verknüpfungen</a></li>
             <li class="rfd-only"><a href="#tab-rssi">Funk</a></li>
             <li><a href="#tab-console">Konsole</a></li>
-            <li class="rfd-only"><a href="#tab-messages">Meldungen</a></li>
+            <li class="rfd-only"><a href="#tab-messages">Meldungen (<span id="message-count">0</span>)</a></li>
             <li><a href="#tab-events">Ereignisse</a></li>
         </ul>
         <div id="tab-devices">
@@ -81,10 +82,10 @@
         <input type="hidden" id="edit-paramset-address" value=""/>
         <input type="hidden" id="edit-paramset-paramset" value=""/>
     </div>
-    <div id="dialog-linkparamset">
-        <h4>Sender Paramset</h4>
+    <div id="dialog-linkparamset" title="Direktverknüpfung bearbeiten">
+        <h3>Sender Paramset</h3>
         <table id="table-linkparamset1"></table>
-        <h4>Receiver Paramset</h4>
+        <h3>Receiver Paramset</h3>
         <table id="table-linkparamset2"></table>
         <input type="hidden" id="edit-linkparamset-sender" value=""/>
         <input type="hidden" id="edit-linkparamset-receiver" value=""/>

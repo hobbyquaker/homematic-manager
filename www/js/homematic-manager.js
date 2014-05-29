@@ -577,7 +577,7 @@ $(document).ready(function () {
                             switch (type) {
                                 case 'checkbox':
                                     if (val === true || val === 'true' || val > 0) {
-                                        $this.attr('checked', true);
+                                        $this.prop('checked', true);
                                     } else {
                                         $this.removeAttr('checked');
                                     }

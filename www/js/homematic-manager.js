@@ -517,6 +517,41 @@ $(document).ready(function () {
         });
     }
 
+    function editLinkDialog(data, sender, receiver) {
+
+        // Dialog-Überschrift setzen
+        if (regaNames && regaNames[config.daemons[daemon].ip]) {
+            var names = regaNames[config.daemons[daemon].ip];
+        }
+        var name = (names && names[sender] ? names[sender].Name : '');
+
+        if (names && names[receiver]) {
+            name = names[receiver].Name + ' -> ' + name;
+        }
+
+        if (name == '') {
+            name += ' (PARAMSET ' + sender + ' ' + receiver + ')';
+        }
+
+        // Tabelle befüllen
+        var elem = $('#table-edit-link');
+        elem.show().html('<tr><td>Sender</td><td>' + (names && names[sender] ? names[sender].Name + ' (' + sender + ')' : sender) + '</td></tr>');
+        elem.append('<tr><td>Receiver</td><td>' + (names && names[receiver] ? names[receiver].Name + ' (' + receiver + ')' : receiver) + '</td></tr>');
+        elem.append('<tr><td>Name</td><td><input id="edit-link-input-name" type="text" value="' + data['NAME'] + '" size="80"/></td></tr>');
+        elem.append('<tr><td>Description</td><td><input id="edit-link-input-description" type="text" value="' + data['DESCRIPTION'] + '" size="80"/></td></tr>');
+
+        $('div[aria-describedby="dialog-edit-link"] span.ui-dialog-title').html(name);
+
+        // Hidden-Hilfsfelder
+        $('#edit-link-sender').val(sender);
+        $('#edit-link-receiver').val(receiver);
+
+        // Buttons
+        $('button.paramset-setValue:not(.ui-button)').button();
+
+        $('#dialog-edit-link').dialog('open');
+    }
+
     function buildParamsetTable(elem, data, desc, direction) {
         elem.show().html('<tr><th>Param</th><th>&nbsp;</th><th>Value</th><th>Default</th><th></th></tr>');
         var count = 0;
@@ -882,6 +917,7 @@ $(document).ready(function () {
     }
 
     function buildGridLinks() {
+        $gridLinks.jqGrid('clearGridData');
         if (regaNames && regaNames[config.daemons[daemon].ip]) {
             var names = regaNames[config.daemons[daemon].ip];
         }
@@ -964,6 +1000,33 @@ $(document).ready(function () {
                     alert('removeLink(' + $('#delete-link-sender').val() + ', ' + $('#delete-link-receiver').val() + ')');
                     // TODO remove Grid row
                     $(this).dialog('close');
+                }
+            },
+            {
+                text: 'Abbrechen',
+                click: function () {
+                    $(this).dialog('close');
+                }
+            }
+        ]
+    });
+    $('#dialog-edit-link').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 640,
+        height: 400,
+        buttons: [
+            {
+                text: 'OK',
+                click: function () {
+                    $(this).dialog('close');
+                    socket.emit('rpc', daemon, 'setLinkInfo', [$('#edit-link-sender').val(), $('#edit-link-receiver').val(), $('#edit-link-input-name').val(), $('#edit-link-input-description').val()], function (err, res) {
+                        //todo error handling
+                        socket.emit('rpc', daemon, 'getLinks', [], function (err, data) {
+                            listLinks = data;
+                            buildGridLinks();
+                        });
+                    });
                 }
             },
             {
@@ -1389,8 +1452,6 @@ $(document).ready(function () {
         $('button.paramset:not(.ui-button)').button();
     }
 
-
-
     // Direktverknüpfungs-Tabelle
     var $gridLinks = $('#grid-links');
     $gridLinks.jqGrid({
@@ -1496,7 +1557,10 @@ $(document).ready(function () {
         onClickButton: function () {
             var sender = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_SENDER"]').html();
             var receiver = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_RECEIVER"]').html();
-            alert('rename link ' + sender + ' -> ' + receiver);
+            socket.emit('rpc', daemon, 'getLinkInfo', [sender, receiver], function (err, data) {
+                // TODO catch errors
+                editLinkDialog(data, sender, receiver);
+            });
         },
         position: 'first',
         id: 'rename-link',

@@ -139,7 +139,7 @@ var rpcMethods = {
             { name: 'receiver', type: 'device_address' }
         ],
         returns: 'Array',
-        help: "Diese Methode gibt die Seriennummer des letzten Gerätes zurück, das aufgrund eines falschen AES-Schlüssels nicht angelernt werden konnte. Mit reset=true wird diese Information im Schnittstellenprozess zurückgesetzt."
+        help: "Diese Methode gibt den Namen und die Beschreibung für eine bestehende Kommunikationsbeziehung zurück. Die Parameter sender_address und receiver_address bezeichnen die beiden verknüpften Partner."
     },
     getLinkPeers: {
         rfd: true,

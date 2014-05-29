@@ -860,11 +860,9 @@ $(document).ready(function () {
                 } else {
                     $('#table-linkparamset1').append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + defaultVal + unit + '</td></tr>');
                 }
-
             } else {
                 $('#table-linkparamset1').append('<tr><td>' + param + '</td><td colspan = "3">' + data1[param] + '</td></tr>');
             }
-
         }
 
         if (count == 0) {
@@ -897,7 +895,7 @@ $(document).ready(function () {
 
     function paramsetDialog(data, desc, address, paramset) {
         // Tabelle befüllen
-        $('#table-paramset').show().html('<tr><th>Param</th><th>Value</th><th>Default</th><th></th></tr>');
+        $('#table-paramset').show().html('<tr><th>Param</th><th>&nbsp;</th><th>Value</th><th>Default</th><th></th></tr>');
         var count = 0;
         for (var param in data) {
             var unit = '';
@@ -920,6 +918,8 @@ $(document).ready(function () {
 
                 // Create Input-Field
                 var input;
+                var helpentry = help_linkParamset[param.replace('SHORT_', '').replace('LONG_', '')];
+                var help = (helpentry ? helpentry.helpText : '');
 
                 switch (desc[param].TYPE) {
                     case 'BOOL':
@@ -932,6 +932,19 @@ $(document).ready(function () {
                         input = '<select data-val-prev="' + data[param] + '" data-type="INTEGER" id="paramset-input-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
                         for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
                             input += '<option value="' + i + '"' + (data[param] == i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
+                            if (helpentry) {
+                                if (i == desc[param].MIN) {
+                                    help += '<br/><ul>';
+                                }
+                                if (helpentry.params[desc[param].VALUE_LIST[i]]) {
+                                    help += '<li><strong>' + desc[param].VALUE_LIST[i] + '</strong>: ' + helpentry.params[desc[param].VALUE_LIST[i]] + (i < desc[param].MAX ? '<br/>' : '');
+                                } else {
+                                    help += '<li><strong>' + desc[param].VALUE_LIST[i] + '</strong>: ?';
+                                }
+                                if (i == desc[param].MAX) {
+                                    help += '</ul>';
+                                }
+                            }
                         }
                         input += '</select>';
                         defaultVal = desc[param].VALUE_LIST[defaultVal];
@@ -945,13 +958,13 @@ $(document).ready(function () {
 
                 // Paramset VALUES?
                 if (paramset == 'VALUES' && (desc[param].OPERATIONS & 2)) {
-                    $('#table-paramset').append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
+                    $('#table-paramset').append('<tr><td>' + param + '</td><td><img src="images/help.png" title="' + help + '"></td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
                 } else {
-                    $('#table-paramset').append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + defaultVal + unit + '</td></tr>');
+                    $('#table-paramset').append('<tr><td>' + param + '</td><td><img src="images/help.png" title="' + help + '"></td><td>' + input + '</td><td colspan="2">' + defaultVal + unit + '</td></tr>');
                 }
 
             } else {
-                $('#table-paramset').append('<tr><td>' + param + '</td><td colspan = "3">' + data[param] + '</td></tr>');
+                $('#table-paramset').append('<tr><td>' + param + '</td><td colspan = "4">' + data[param] + '</td></tr>');
             }
 
         }
@@ -985,6 +998,11 @@ $(document).ready(function () {
         $('button.paramset-setValue:not(.ui-button)').button();
 
         $('#dialog-paramset').dialog('open');
+        $('#dialog-paramset').tooltip({
+            content: function () {
+                return $(this).prop('title');
+            }
+        });
     }
 
     function deleteLinkDialog(sender, receiver, name, desc, rowId) {

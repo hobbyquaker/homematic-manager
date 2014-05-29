@@ -420,7 +420,10 @@ $(document).ready(function () {
         if (names && names[receiver]) {
             name = names[receiver].Name + ' -> ' + name;
         }
-        //name += ' (PARAMSET ' + address + ' ' + paramset + ')';
+
+        if (name == '') {
+            name += ' (PARAMSET ' + sender + ' ' + receiver + ')';
+        }
 
         $('div[aria-describedby="dialog-linkparamset"] span.ui-dialog-title').html(name);
 

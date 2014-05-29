@@ -12,11 +12,10 @@
 var version = '0.2.0';
 
 var fs = require('fs');
+var http = require('http');
 var express = require('express');
 var socketio = require('socket.io');
 var xmlrpc = require('xmlrpc');
-
-var http = require('http');
 
 var config = loadConfig();
 config.version = version;
@@ -76,7 +75,7 @@ function initRpcServer() {
     log('RPC server listening on ' + config.rpcListenIp + ':' + config.rpcListenPort);
 
     rpcServer.on('NotFound', function(method, params) {
-        console.log('RPC <- undefined method ' + method + ' ' + JSON.stringify(params));
+        log('RPC <- undefined method ' + method + ' ' + JSON.stringify(params));
         io.sockets.emit('rpc', method, params);
     });
 
@@ -102,7 +101,7 @@ function initRpcServer() {
 
 var methods = {
     event: function (err, params) {
-        console.log('RPC <- event ' + JSON.stringify(params));
+        npm log('RPC <- event ' + JSON.stringify(params));
         io.sockets.emit('rpc', 'event', params);
         return '';
     }

@@ -624,6 +624,7 @@ $(document).ready(function () {
             var $input = $(this).parent().parent().find('[id$="' + param + '"]');
             var elem = $input[0].nodeName;
             var type = $input.attr('type');
+            var dataType = $input.attr('data-type');
 
             // get value
             var val;
@@ -637,12 +638,25 @@ $(document).ready(function () {
                 val = $input.find('option:selected').val();
             }
 
+
             // calculate value if unit is "100%"
             if ($input.attr('data-unit') == '100%') {
                 val /= 100;
             }
 
-            socket.emit('rpc', daemon, 'setValue', [address, param, '' + val], function (err, res) {
+            switch (dataType) {
+
+                case "FLOAT":
+                    val = {explicitDouble: parseFloat(val)};
+                    break;
+                case "INTEGER":
+                    val = parseFloat(val, 10);
+                    break;
+                default:
+                    val = '' + val;
+            }
+
+            socket.emit('rpc', daemon, 'setValue', [address, param, val], function (err, res) {
                 // TODO catch errors
             });
         });
@@ -736,6 +750,7 @@ $(document).ready(function () {
         var address = $('#edit-paramset-address').val();
         var paramset = $('#edit-paramset-paramset').val();
         var values = {};
+        var count = 0;
         $('[id^="paramset-input"]').each(function () {
             var $input = $(this);
             if (!$input.is(':disabled')) {
@@ -744,6 +759,7 @@ $(document).ready(function () {
                 var elem = $input[0].nodeName;
                 var type = $input.attr('type');
                 var dataType = $input.attr('data-type');
+                var dataValPrev = $input.attr('data-val-prev');
 
                 // get value
                 var val;
@@ -757,18 +773,13 @@ $(document).ready(function () {
                     val = $input.find('option:selected').val();
                 }
 
+                if (val == dataValPrev || (val === true && dataValPrev === 'true') || (val === false && dataValPrev === 'false')) return;
+
                 // calculate value if unit is "100%"
                 if ($input.attr('data-unit') == '100%') {
                     val /= 100;
                 }
                 switch (dataType) {
-
-                        // TODO
-                        // Setzen der MASTER Paramsets funktioniert nicht. :-((
-                        // Hängt das am Datentyp??
-                        // Die XML RPC Bibliothek übersetzt Numerische Werte in int oder double je nachdem
-                        // ob bei einem modulo 1 ein rest übrig bleibt. Könnte das Problem sein, vielleicht,
-                        // aber vielleicht auch nicht, bei VALUE Paramsets funktioniert es seltsamerweise ja...
 
                     case 'BOOL':
                         if (val == 'true') val = true;
@@ -778,7 +789,7 @@ $(document).ready(function () {
                         val = parseInt(val, 10);
                         break;
                     case 'FLOAT':
-                        val = parseFloat(val);
+                        val = {explicitDouble: parseFloat(val)};
                         break;
                     case 'STRING':
                     default:
@@ -786,11 +797,15 @@ $(document).ready(function () {
                 }
 
                 values[param] = val;
+                count += 1;
             }
         });
-        socket.emit('rpc', daemon, 'putParamset', [address, paramset, values], function (err, res) {
-            console.log(err, res);
-        });
+        if (count > 0) {
+            socket.emit('rpc', daemon, 'putParamset', [address, paramset, values], function (err, res) {
+                //console.log(err, res);
+            });
+        }
+
     }
 
     function linkparamsetDialog(data1, desc1, data2, desc2, sender, receiver) {
@@ -908,13 +923,13 @@ $(document).ready(function () {
 
                 switch (desc[param].TYPE) {
                     case 'BOOL':
-                        input = '<input data-type="BOOL" id="paramset-input-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
+                        input = '<input data-val-prev="' + data[param] + '" data-type="BOOL" id="paramset-input-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
                         break;
                     case 'INTEGER':
-                        input = '<input data-type="INTEGER" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        input = '<input data-val-prev="' + data[param] + '" data-type="INTEGER" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                         break;
                     case 'ENUM':
-                        input = '<select data-type="INTEGER" id="paramset-input-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
+                        input = '<select data-val-prev="' + data[param] + '" data-type="INTEGER" id="paramset-input-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
                         for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
                             input += '<option value="' + i + '"' + (data[param] == i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
                         }
@@ -922,10 +937,10 @@ $(document).ready(function () {
                         defaultVal = desc[param].VALUE_LIST[defaultVal];
                         break;
                     case 'FLOAT':
-                        input = '<input data-type="FLOAT" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        input = '<input data-val-prev="' + data[param] + '" data-type="FLOAT" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                         break;
                     default:
-                        input = '<input data-type="STRING" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        input = '<input data-val-prev="' + data[param] + '" data-type="STRING" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                 }
 
                 // Paramset VALUES?

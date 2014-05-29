@@ -403,13 +403,86 @@ $(document).ready(function () {
                 //console.log(err, res);
             });
         }
+    }
 
+    function putLinkParamset(dialog) {
+        var sender = $('#edit-linkparamset-sender').val();
+        var receiver = $('#edit-linkparamset-receiver').val();
+        putLinkParamsetInt('sender-receiver', sender, receiver, function(err, res) {
+            putLinkParamsetInt('receiver-sender', receiver, sender, function(err2, res2) {
+                dialog.dialog('close');
+            });
+        });
+    }
+
+    function putLinkParamsetInt(direction, channel1, channel2, callback) {
+        var values = {};
+        var count = 0;
+        $('[id^="linkparamset-input-' + direction + '"]').each(function () {
+            var $input = $(this);
+            if (!$input.is(':disabled')) {
+                var parts = $input.attr('id').split('-', 5);
+                var param = parts[4];
+                var elem = $input[0].nodeName;
+                var type = $input.attr('type');
+                var dataType = $input.attr('data-type');
+                var dataValPrev = $input.attr('data-val-prev');
+
+                // get value
+                var val;
+                if (elem == 'INPUT') {
+                    if (type == 'checkbox') {
+                        val = $input.is(':checked');
+                    } else {
+                        val = $input.val();
+                    }
+                } else if (elem == 'SELECT') {
+                    val = $input.find('option:selected').val();
+                }
+
+                if (val == dataValPrev || (val === true && dataValPrev === 'true') || (val === false && dataValPrev === 'false')) return;
+
+                // calculate value if unit is "100%"
+                if ($input.attr('data-unit') == '100%') {
+                    val /= 100;
+                }
+                switch (dataType) {
+
+                    case 'BOOL':
+                        if (val == 'true') val = true;
+                        if (val == 'false') val = false;
+                        break;
+                    case 'INTEGER':
+                        val = parseInt(val, 10);
+                        break;
+                    case 'FLOAT':
+                        val = {explicitDouble: parseFloat(val)};
+                        break;
+                    case 'STRING':
+                    default:
+                        val = '' + val;
+                }
+
+                values[param] = val;
+                count += 1;
+            }
+        });
+        if (count > 0) {
+            socket.emit('rpc', daemon, 'putParamset', [channel1, channel2, values], function (err, res) {
+                if (callback && typeof(callback) === 'function') {
+                    callback(err, res);
+                }
+            });
+        }
+        else if (callback && typeof(callback) === 'function') {
+            callback(err, res);
+        }
     }
 
     function linkparamsetDialog(data1, desc1, data2, desc2, sender, receiver) {
         // Tabelle befüllen
-        buildParamsetTable($('#table-linkparamset1'), data1, desc1);
-        buildParamsetTable($('#table-linkparamset2'), data2, desc2);
+        buildParamsetTable($('#table-linkparamset1'), data1, desc1, 'sender-receiver');
+        buildParamsetTable($('#table-linkparamset2'), data2, desc2, 'receiver-sender');
 
         // Dialog-Überschrift setzen
         if (regaNames && regaNames[config.daemons[daemon].ip]) {
@@ -442,7 +515,7 @@ $(document).ready(function () {
         });
     }
 
-    function buildParamsetTable(elem, data, desc) {
+    function buildParamsetTable(elem, data, desc, direction) {
         elem.show().html('<tr><th>Param</th><th>&nbsp;</th><th>Value</th><th>Default</th><th></th></tr>');
         var count = 0;
         for (var param in data) {
@@ -471,13 +544,13 @@ $(document).ready(function () {
 
                 switch (desc[param].TYPE) {
                     case 'BOOL':
-                        input = '<input id="linkparamset-input-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
+                        input = '<input id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
                         break;
                     case 'INTEGER':
-                        input = '<input data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        input = '<input data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                         break;
                     case 'ENUM':
-                        input = '<select id="linkparamset-input-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
+                        input = '<select id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
                         for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
                             input += '<option value="' + i + '"' + (data[param] == i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
                             if (helpentry) {
@@ -499,7 +572,7 @@ $(document).ready(function () {
                         break;
                     case 'FLOAT':
                     default:
-                        input = '<input data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        input = '<input data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                 }
                 var helpIcon = help ? '<img src="images/help.png" width="16" height="16" title="' + help + '">' : '';
 
@@ -871,7 +944,7 @@ $(document).ready(function () {
             {
                 text: 'putParamset',
                 click: function () {
-                    putParamset();
+                    putLinkParamset($(this));
                 }
             }
         ]

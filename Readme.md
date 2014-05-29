@@ -26,6 +26,10 @@
 
 ## Changelog
 
+### 0.2.1
+* (Hobbyquaker) RPC Double auch wenn keine Nachkommastellen vorhanden sind
+* (Hobbyquaker) Nur geänderte Werte in putParamset übernehmen
+
 ### 0.2.0
 * (Hobbyquaker) RPC init
 * (Hobbyquaker) Tabelle "Ereignisse"

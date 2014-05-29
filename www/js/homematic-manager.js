@@ -207,7 +207,7 @@ $(document).ready(function () {
                 { name: 'mode', type: 'integer', optional: ['rfd'] }
             ],
             returns: '',
-            help: "Mit dieser Methode wird ein komplettes Parameter-Set für ein logisches Gerät gelesen. Der Parameter address ist die Addresses eines logischen Gerätes. Der Parameter paramset_key ist „MASTER“, „VALUES“ oder die Adresse eines Kommunikationspartners für das entsprechende Link-Parameter-Set (siehe getLinkPeers).<br>Dem optionalen Parameter mode können folgende Werte übergeben werden (nur rfd):<ul><li>0 default: Keien Auswirkung, die Funktion verhält sicht wie der Aufruf ohne mode</li><li>1 UndefinedValues: Jeder Eintrag inerhalb des zurückgelieferten Paramset ins eine Struktur mit folgendem Aufbau:<br>„UNDEFINED“(Boolean) Flag ob der angeforderte Wert initial gesetzt wurde und somit wahrscheinlich nicht der Realität entspricht oder ob der Wert von einem Gerät empfangen wurde, true = Wert wurde initial gesetzt und noch nicht verändert, false = der Wert wurde neu gesetzt <br>„VALUE“(ValueType) Wert des angeforderten Parameter.<br>UndefindeValues kann nur für Parameter aus dem Parameterset „VALUES“ abgefragt werden."
+            help: "Mit dieser Methode wird ein komplettes Parameter-Set für ein logisches Gerät gelesen. Der Parameter address ist die Addresses eines logischen Gerätes. Der Parameter paramset_key ist „MASTER“, „VALUES“ oder die Adresse eines Kommunikationspartners für das entsprechende Link-Parameter-Set (siehe getLinkPeers).<br>Dem optionalen Parameter mode können folgende Werte übergeben werden (nur rfd):<ul><li>0 default: Keien Auswirkung, die Funktion verhält sicht wie der Aufruf ohne mode</li><li>1 UndefinedValues: Jeder Eintrag innerhalb des zurückgelieferten Paramset ins eine Struktur mit folgendem Aufbau:<br>„UNDEFINED“(Boolean) Flag ob der angeforderte Wert initial gesetzt wurde und somit wahrscheinlich nicht der Realität entspricht oder ob der Wert von einem Gerät empfangen wurde, true = Wert wurde initial gesetzt und noch nicht verändert, false = der Wert wurde neu gesetzt <br>„VALUE“(ValueType) Wert des angeforderten Parameter.<br>UndefindeValues kann nur für Parameter aus dem Parameterset „VALUES“ abgefragt werden."
         },
         getParamsetDescription: {
             rfd: true,
@@ -662,7 +662,6 @@ $(document).ready(function () {
                     // TODO catch errors
                     paramsetDialog(data, data2, address, paramset);
                     $('#load_grid-devices').hide();
-
                 });
             });
         });
@@ -871,78 +870,19 @@ $(document).ready(function () {
 
     function linkparamsetDialog(data1, desc1, data2, desc2, sender, receiver) {
         // Tabelle befüllen
-        $('#table-paramset').show().html('<tr><th>Param</th><th>Value</th><th>Default</th><th></th></tr>');
-        var count = 0;
-        for (var param in data1) {
-            var unit = '';
-            count += 1;
-            if (desc1[param]) {
-                // Dirty workaround for encoding problem
-                if (desc1[param].UNIT == '�C') desc1[param].UNIT = '°C';
-
-                var defaultVal = desc1[param].DEFAULT;
-
-                // Calculate percent values
-                if (desc1[param].UNIT == '100%') {
-                    unit = '%';
-                    data1[param] *= 100;
-                    defaultVal *= 100;
-
-                } else {
-                    unit = desc1[param].UNIT;
-                }
-
-                // Create Input-Field
-                var input;
-
-                switch (desc1[param].TYPE) {
-                    case 'BOOL':
-                        input = '<input id="linkparamset-input-' + param + '" type="checkbox" value="true"' + (data1[param] ? ' checked="checked"' : '') + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
-                        break;
-                    case 'INTEGER':
-                        input = '<input data-unit="' + desc1[param].UNIT + '" id="linkparamset-input-' + param + '" type="number" min="' + desc1[param].MIN + '" max="' + desc1[param].MAX + '" value="' + data1[param] + '"' + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
-                        break;
-                    case 'ENUM':
-                        input = '<select id="linkparamset-input-' + param + '"' + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
-                        for (var i = desc1[param].MIN; i <= desc1[param].MAX; i++) {
-                            input += '<option value="' + i + '"' + (data1[param] == i ? ' selected="selected"' : '') + '>' + desc1[param].VALUE_LIST[i] + '</option>';
-                        }
-                        input += '</select>';
-                        defaultVal = desc1[param].VALUE_LIST[defaultVal];
-                        break;
-                    case 'FLOAT':
-                    default:
-                        input = '<input data-unit="' + desc1[param].UNIT + '" id="linkparamset-input-' + param + '" type="text" value="' + data1[param] + '"' + (desc1[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
-                }
-
-                // Paramset VALUES?
-                if (linkparamset == 'VALUES' && (desc1[param].OPERATIONS & 2)) {
-                    $('#table-linkparamset1').append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc1[param].DEFAULT + '</td><td><button class="linkparamset-setValue" id="linkparamset-setValue-' + param + '">setValue</button></td></tr>');
-                } else {
-                    $('#table-linkparamset1').append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + defaultVal + unit + '</td></tr>');
-                }
-
-            } else {
-                $('#table-linkparamset1').append('<tr><td>' + param + '</td><td colspan = "3">' + data1[param] + '</td></tr>');
-            }
-
-        }
-
-        if (count == 0) {
-            $('#table-linkparamset1').hide();
-        }
+        buildParamsetTable($('#table-linkparamset1'), data1, desc1);
+        buildParamsetTable($('#table-linkparamset2'), data2, desc2);
 
         // Dialog-Überschrift setzen
         if (regaNames && regaNames[config.daemons[daemon].ip]) {
             var names = regaNames[config.daemons[daemon].ip];
         }
-        var name = names[sender].Name || '';
+        var name = names[sender] && names[sender].Name || '';
 
         if (names[receiver]) {
             name = names[receiver].Name + ' -> ' + name;
         }
         //name += ' (PARAMSET ' + address + ' ' + paramset + ')';
-
 
         $('div[aria-describedby="dialog-linkparamset"] span.ui-dialog-title').html(name);
 
@@ -954,6 +894,82 @@ $(document).ready(function () {
         $('button.paramset-setValue:not(.ui-button)').button();
 
         $('#dialog-linkparamset').dialog('open');
+        $('#dialog-linkparamset').tooltip({
+            content: function () {
+                return $(this).prop('title');
+            }
+        });
+    }
+
+    function buildParamsetTable(elem, data, desc) {
+        elem.show().html('<tr><th>Param</th><th>&nbsp;</th><th>Value</th><th>Default</th><th></th></tr>');
+        var count = 0;
+        for (var param in data) {
+            var unit = '';
+            count += 1;
+            if (desc[param]) {
+                // Dirty workaround for encoding problem
+                if (desc[param].UNIT == '�C') desc[param].UNIT = '°C';
+
+                var defaultVal = desc[param].DEFAULT;
+
+                // Calculate percent values
+                if (desc[param].UNIT == '100%') {
+                    unit = '%';
+                    data[param] *= 100;
+                    defaultVal *= 100;
+
+                } else {
+                    unit = desc[param].UNIT;
+                }
+
+                // Create Input-Field
+                var input;
+                var helpentry = help_linkParamset[param.replace('SHORT_', '').replace('LONG_', '')];
+                var help = (helpentry ? helpentry.helpText : '');
+
+                switch (desc[param].TYPE) {
+                    case 'BOOL':
+                        input = '<input id="linkparamset-input-' + param + '" type="checkbox" value="true"' + (data[param] ? ' checked="checked"' : '') + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>';
+                        break;
+                    case 'INTEGER':
+                        input = '<input data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + param + '" type="number" min="' + desc[param].MIN + '" max="' + desc[param].MAX + '" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        break;
+                    case 'ENUM':
+                        input = '<select id="linkparamset-input-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
+                        for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
+                            input += '<option value="' + i + '"' + (data[param] == i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
+                            if (helpentry) {
+                                if (i == desc[param].MIN) {
+                                    help += '<br/><ul>';
+                                }
+                                if (helpentry.params[desc[param].VALUE_LIST[i]]) {
+                                    help += '<li><strong>' + desc[param].VALUE_LIST[i] + '</strong>: ' + helpentry.params[desc[param].VALUE_LIST[i]] + (i < desc[param].MAX ? '<br/>' : '');
+                                } else {
+                                    help += '<li><strong>' + desc[param].VALUE_LIST[i] + '</strong>: ?';
+                                }
+                                if (i == desc[param].MAX) {
+                                    help += '</ul>';
+                                }
+                            }
+                        }
+                        input += '</select>';
+                        defaultVal = desc[param].VALUE_LIST[defaultVal];
+                        break;
+                    case 'FLOAT':
+                    default:
+                        input = '<input data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                }
+
+                elem.append('<tr><td>' + param + '</td><td><img src="images/help.png" title="' + help + '"></td><td>' + input + '</td><td colspan="2">' + defaultVal + unit + '</td></tr>');
+            } else {
+                elem.append('<tr><td>' + param + '</td><td colspan = "4">' + data[param] + '</td></tr>');
+            }
+        }
+
+        if (count == 0) {
+            elem.hide();
+        }
     }
 
     function paramsetDialog(data, desc, address, paramset) {
@@ -1014,7 +1030,6 @@ $(document).ready(function () {
             } else {
                 $('#table-paramset').append('<tr><td>' + param + '</td><td colspan = "3">' + data[param] + '</td></tr>');
             }
-
         }
 
         if (count == 0) {
@@ -1838,13 +1853,18 @@ $(document).ready(function () {
             var sender = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_SENDER"]').html();
             var receiver = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_RECEIVER"]').html();
             $('#load_grid-links').show();
-            socket.emit('rpc', daemon, 'getParamset', [receiver, sender], function (err, data) {
+            socket.emit('rpc', daemon, 'getParamset', [sender, receiver], function (err, data) {
                 // TODO catch errors
-                socket.emit('rpc', daemon, 'getParamsetDescription', [receiver, sender], function (err2, data2) {
+                socket.emit('rpc', daemon, 'getParamsetDescription', [sender, receiver], function (err2, data2) {
                     // TODO catch errors
-                    paramsetDialog(data, data2, receiver, sender);
-                    $('#load_grid-links').hide();
-
+                    socket.emit('rpc', daemon, 'getParamset', [receiver, sender], function (err3, data3) {
+                        // TODO catch errors
+                        socket.emit('rpc', daemon, 'getParamsetDescription', [receiver, sender], function (err4, data4) {
+                            // TODO catch errors
+                            linkparamsetDialog(data, data2, data3, data4, sender, receiver);
+                            $('#load_grid-links').hide();
+                        });
+                    });
                 });
             });
             //alert('edit link ' + sender + ' -> ' + receiver);

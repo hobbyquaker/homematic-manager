@@ -125,3 +125,7 @@ textarea {
     margin: 0 !important;
     padding: 2px 10px 3px 10px !important;
 }
+
+.ui-tooltip.ui-widget-content ul{
+    padding-left: 20px;
+}

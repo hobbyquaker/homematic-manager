@@ -877,9 +877,9 @@ $(document).ready(function () {
         if (regaNames && regaNames[config.daemons[daemon].ip]) {
             var names = regaNames[config.daemons[daemon].ip];
         }
-        var name = names[sender] && names[sender].Name || '';
+        var name = (names && names[sender] ? names[sender].Name : '');
 
-        if (names[receiver]) {
+        if (names && names[receiver]) {
             name = names[receiver].Name + ' -> ' + name;
         }
         //name += ' (PARAMSET ' + address + ' ' + paramset + ')';
@@ -960,8 +960,9 @@ $(document).ready(function () {
                     default:
                         input = '<input data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                 }
+                var helpIcon = help ? '<img src="images/help.png" width="16" height="16" title="' + help + '">' : '';
 
-                elem.append('<tr><td>' + param + '</td><td><img src="images/help.png" title="' + help + '"></td><td>' + input + '</td><td colspan="2">' + defaultVal + unit + '</td></tr>');
+                elem.append('<tr><td>' + param + '</td><td>' + helpIcon + '</td><td>' + input + '</td><td colspan="2">' + defaultVal + unit + '</td></tr>');
             } else {
                 elem.append('<tr><td>' + param + '</td><td colspan = "4">' + data[param] + '</td></tr>');
             }

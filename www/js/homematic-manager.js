@@ -1508,7 +1508,9 @@ $(document).ready(function () {
         onClickButton: function () {
             var sender = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_SENDER"]').html();
             var receiver = $('#grid-links tr#' + $gridLinks.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-links_RECEIVER"]').html();
-            socket.emit('rpc', daemon, 'activateLinkParamset', [receiver, sender]);
+            socket.emit('rpc', daemon, 'activateLinkParamset', [receiver, sender, false], function (err, data) {
+                console.log(err, data);
+            });
         },
         position: 'first',
         id: 'play-link',

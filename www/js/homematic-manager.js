@@ -919,6 +919,46 @@ $(document).ready(function () {
 
 
     // Dialogs
+    $('#dialog-rename').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 400,
+        height: 200,
+        buttons: [
+            {
+                text: 'Speichern',
+                click: function () {
+                    var $that = $(this);
+                    var renameAddress = $('#rename-address').val();
+                    var renameName = $('#rename-name').val();
+                    var rowid = $('#rename-rowid').val();
+                    var gridid = $('#rename-gridid').val();
+                    socket.emit('setName', daemon, renameAddress, renameName, function () {
+                        if (renameAddress.match(/:/)) {
+                            var $gridCh = $('#' + gridid);
+                            var rowData = $gridCh.jqGrid('getRowData', rowid);
+                            rowData.Name = renameName;
+                            $gridCh.jqGrid('setRowData', rowid, rowData);
+                            names[renameAddress] = renameName;
+                        } else {
+                            var rowData = $gridDevices.jqGrid('getRowData', rowid);
+                            rowData.Name = renameName;
+                            $gridDevices.jqGrid('setRowData', rowid, rowData);
+                            names[renameAddress] = renameName;
+                            names[renameAddress + ':0'] = renameName + ':0';
+                        }
+                        $that.dialog('close');
+                    });
+                }
+            },
+            {
+                text: 'Abbrechen',
+                click: function () {
+                    $(this).dialog('close');
+                }
+            }
+        ]
+    });
     $('#dialog-help').dialog({
         autoOpen: false,
         modal: true,
@@ -1315,10 +1355,18 @@ $(document).ready(function () {
                     }
                 });
                 var address = $('#' + chGrid + ' tr#' + chSelected + ' td[aria-describedby$="_ADDRESS"]').html();
+                var name = $('#' + chGrid + ' tr#' + chSelected + ' td[aria-describedby$="_Name"]').html();
+                var rowid = chSelected;
             } else {
                 var address = $('#grid-devices tr#' + devSelected + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
+                var name = $('#grid-devices tr#' + devSelected + ' td[aria-describedby="grid-devices_Name"]').html();
+                var rowid = devSelected;
             }
-            alert('edit ' + address);
+            $('#rename-rowid').val(rowid);
+            $('#rename-gridid').val(chGrid);
+            $('#rename-address').val(address);
+            $('#rename-name').val(name);
+            $('#dialog-rename').dialog('open');
         },
         position: 'first',
         id: 'edit-device',

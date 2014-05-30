@@ -16,6 +16,8 @@ var http = require('http');
 var express = require('express');
 var socketio = require('socket.io');
 var xmlrpc = require('xmlrpc');
+var Iconv  = require('iconv').Iconv;
+var iconv = new Iconv('UTF-8', 'ISO-8859-1');
 
 var config = loadConfig();
 config.version = version;
@@ -134,12 +136,20 @@ function initSocket() {
         });
 
         socket.on('setName', function (daemon, address, name, callback) {
-            log('setName ' + daemon + ' ' + address + ' ' + name);
             if (config.daemons[daemon].isCcu) {
                 regaNames[address] = name;
-                rega(config.daemons[daemon].ip, 'var dev = dom.GetObject(' + regaIDs[address] + ');\ndev.Name("' + name + '")', function () {});
+                if (!regaIDs[address]) {
+                    log('error: no rega id found for ' + address);
+                    return;
+                }
+                log('rega rename ' + regaIDs[address] + ' "' + name + '"');
+                rega(config.daemons[daemon].ip, 'var dev = dom.GetObject(' + regaIDs[address] + ');\ndev.Name("' + name + '");', function () {
+                    if (callback) callback();
+                });
             } else {
                 localNames[address] = name;
+                log('local rename ' + address + ' "' + name + '"');
+
                 saveJson('names.json', localNames, function () {
                     if (callback) callback();
                 });
@@ -228,11 +238,12 @@ function rega(ip, script, callback) {
         path: '/rega.exe',
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=iso-8859-1',
             'Content-Length': script.length
         }
     };
-    log('ReGa ' + ip + ' ' + script);
+
+    script = iconv.convert(script);
     var post_req = http.request(post_options, function(res) {
         var data = '';
         res.setEncoding('utf8');

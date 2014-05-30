@@ -32,7 +32,7 @@ foreach (sDevId, root.Devices().EnumUsedIDs()) {
         WriteLine(",");
         Write('"' # oChannel.Address() # '":{"ID":"' # oChannel.ID() # '","Name":"');
         WriteURL(oChannel.Name());
-        Write('}"');
+        Write('"}');
     }
 
 }

@@ -133,3 +133,19 @@ textarea {
 .wait {
     cursor: wait !important;
 }
+
+.event-column-1 {
+    width: 15%;
+}
+.event-column-2 {
+    width: 35%;
+}
+.event-column-3 {
+    width: 10%;
+}
+.event-column-4 {
+    width: 25%;
+}
+.event-column-5 {
+    width: 15%;
+}

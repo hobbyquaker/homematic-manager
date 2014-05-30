@@ -43,6 +43,7 @@ $(document).ready(function () {
                 var address = params[1];
                 var param = params[2];
                 var value = params[3];
+                /*
                 var _index = $gridEvents.jqGrid('getGridParam', '_index');
                 var rowNum = $gridEvents.jqGrid('getGridParam', 'rowNum') - 1;
                 var keys = Object.keys(_index);
@@ -52,6 +53,7 @@ $(document).ready(function () {
                         $gridEvents.jqGrid('delRowData', toDelete[i]);
                     }
                 }
+                */
                 var timestamp = new Date();
                 var ts = timestamp.getFullYear() + '-' +
                     ("0" + (timestamp.getMonth() + 1).toString(10)).slice(-2) + '-' +
@@ -65,6 +67,7 @@ $(document).ready(function () {
                     name = regaNames[config.daemons[daemon].ip][address].Name;
                 }
 
+                /*
                 $gridEvents.jqGrid('addRowData', eventCount++, {
                     Timestamp: ts,
                     Name: name,
@@ -74,6 +77,9 @@ $(document).ready(function () {
                 }, 'first');
 
                 $gridEvents.trigger('reloadGrid');
+                */
+
+                $('#event-table').prepend('<tr class="ui-widget-content jqgrow ui-row-ltr "><td class="event-column-1">' + ts + '</td><td class="event-column-2">' + name + '</td><td class="event-column-3">' + address + '</td><td class="event-column-4">' + param + '</td><td class="event-column-5">' + value + '</td></tr>');
 
                 // Service-Meldung?
                 if (address.slice(-2) == ':0') {
@@ -1158,8 +1164,8 @@ $(document).ready(function () {
 
             $(".ui-tabs-nav").
                 append("<button title='Hilfe' class='menu-button' id='button-help'></button>").
-                append("<button title='Einstellungen' value='Theme wählen' class='menu-button' id='button-config'></button>").
-                append("<span style='visibility: hidden; width:15px; height:15px; padding-top:5px; margin-right:10px; float:right;'><span title='Kommunikation' id='ajaxIndicator' style='width:15px; height: 15px;' class='ui-icon ui-icon-transfer-e-w'></span></span>");
+                append("<button title='Einstellungen' value='Theme wählen' class='menu-button' id='button-config'></button>");
+               // append("<span style='visibility: hidden; width:15px; height:15px; padding-top:5px; margin-right:10px; float:right;'><span title='Kommunikation' id='ajaxIndicator' style='width:15px; height: 15px;' class='ui-icon ui-icon-transfer-e-w'></span></span>");
 
             $('#button-help').button({
                 text: false,
@@ -1187,6 +1193,7 @@ $(document).ready(function () {
 
 
     // Event-Tabelle
+    /*
     var $gridEvents = $('#grid-events');
     $gridEvents.jqGrid({
         colNames: [
@@ -1218,6 +1225,7 @@ $(document).ready(function () {
         searchOnEnter: false,
         enableClear: false
     });
+*/
 
     // Geräte-Tabelle
     var $gridDevices = $('#grid-devices');
@@ -1775,6 +1783,7 @@ $(document).ready(function () {
     }
 
     // Servicemeldungen-Tabelle
+
     var $gridMessages = $('#grid-messages');
     $gridMessages.jqGrid({
         colNames: ['Name', 'ADDRESS', 'DeviceAddress', 'Message'],
@@ -1853,7 +1862,8 @@ $(document).ready(function () {
         if (y < 600) y = 600;
 
         $('#grid-devices, #grid-links, #grid-messages').setGridHeight(y - 148).setGridWidth(x - 18);
-        $('#grid-events').setGridHeight(y - 122).setGridWidth(x - 18);
+        $('#grid-events').css('height', (y - 122) + 'px').css('width', (x - 18) + 'px');
+        $('#grid-events-inner').css('height', (y - 162) + 'px');
         $('#grid-interfaces')/*.setGridHeight(y - 99)*/.setGridWidth(x - 18);
         $('#grid-rssi').setGridHeight(y - (177 + $('#gbox_grid-interfaces').height())).setGridWidth(x - 18);
 

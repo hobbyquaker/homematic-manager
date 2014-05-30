@@ -73,8 +73,35 @@
             <div id="pager-messages"></div>
         </div>
         <div id="tab-events">
-            <table id="grid-events"></table>
-            <div id="pager-events"></div>
+           <div id="grid-events" class="ui-jqgrid" style="display: block;">
+               <div class="ui-jqgrid-titlebar ui-jqgrid-caption ui-widget-header ui-corner-top ui-helper-clearfix">
+                   <div class="">
+                       <span class="ui-jqgrid-title">Events</span>
+                   </div>
+
+               </div>
+               <table style="width: 100%; border-collapse: collapse;" class="ui-widget ui-state-default ui-corner-bottom">
+                   <thead>
+                       <tr class="ui-jqgrid-labels ui-jqgrid-view ui-jqgrid-htable">
+                           <th class="event-column-1 ui-state-default ui-th-column ui-th-ltr">Timestamp</th>
+                           <th class="event-column-2 ui-state-default ui-th-column ui-th-ltr">Name</th>
+                           <th class="event-column-3 ui-state-default ui-th-column ui-th-ltr">ADDRESS</th>
+                           <th class="event-column-4 ui-state-default ui-th-column ui-th-ltr">PARAM</th>
+                           <th class="event-column-5 ui-state-default ui-th-column ui-th-ltr">VALUE</th>
+                       </tr>
+                   </thead>
+               </table>
+               <div id="grid-events-inner" style="width: 100%; overflow-y: scroll;">
+                   <table style="width: 100%; border-collapse: collapse; margin-top: -1px" class="ui-widget ui-state-default ui-corner-bottom">
+                       <tbody id="event-table">
+
+                       </tbody>
+                   </table>
+                   <!--<div class="ui-corner-bottom" style="position: absolute; width: calc(100% - 2px); height: 100%; margin-top: -1px; border: 1px solid #c5dbec;"></div>
+-->
+               </div>
+           </div>
+
         </div>
     </div>
     <div id="dialog-paramset">

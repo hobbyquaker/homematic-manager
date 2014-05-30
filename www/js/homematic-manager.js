@@ -784,8 +784,7 @@ $(document).ready(function () {
         }
         $gridRssi.jqGrid('setRowData', rowId, rowData);
 
-        // Todo Implement RPC
-        alert('setBidcosInterface ' + $(this).attr('data-device') + ' ' + listInterfaces[$(this).attr('data-iface-index')].ADDRESS + ' false');
+        socket.emit('rpc', daemon, 'setBidcosInterface', [$(this).attr('data-device'), listInterfaces[$(this).attr('data-iface-index')].ADDRESS, false], function () {});
     });
 
     $('body').on('change', '.checkbox-roaming', function () {
@@ -802,8 +801,7 @@ $(document).ready(function () {
         }
         $gridRssi.jqGrid('setRowData', rowId, rowData);
 
-        // Todo Implement RPC
-        alert('setBidcosInterface ' + $(this).attr('data-device') + ' ' + listInterfaces[0].ADDRESS + ' ' + $(this).is(':checked'));
+        socket.emit('rpc', daemon, 'setBidcosInterface', [$(this).attr('data-device'), listInterfaces[0].ADDRESS, $(this).is(':checked')], function () {});
     });
 
     function buildGridMessages() {

@@ -184,7 +184,6 @@ $(document).ready(function () {
     function getNames() {
         socket.emit('getNames', function (data) {
             names = data;
-            console.log(names);
         });
     }
 
@@ -1267,12 +1266,13 @@ $(document).ready(function () {
             if ($('#grid-devices tr#' + rowid + ' td[aria-describedby="grid-devices_flags"]').html().match(/DontDelete/)) {
                 $('#del-device').addClass('ui-state-disabled');
                 $('#replace-device').addClass('ui-state-disabled');
+                $('#edit-device').addClass('ui-state-disabled');
             } else {
                 $('#del-device').removeClass('ui-state-disabled');
                 $('#replace-device').removeClass('ui-state-disabled');
+                $('#edit-device').removeClass('ui-state-disabled');
             }
 
-            $('#edit-device').removeClass('ui-state-disabled');
             $('[id^="channels_"][id$="_t"]').jqGrid('resetSelection');
         },
         gridComplete: function () {
@@ -1367,7 +1367,7 @@ $(document).ready(function () {
             $('#rename-rowid').val(rowid);
             $('#rename-gridid').val(chGrid);
             $('#rename-address').val(address);
-            $('#rename-name').val(name);
+            $('#rename-name').val(name == '&nbsp;' ? '' : name);
             $('#dialog-rename').dialog('open');
         },
         position: 'first',
@@ -1440,7 +1440,15 @@ $(document).ready(function () {
                 $('#grid-devices').jqGrid('resetSelection');
 
                 $('#del-device').addClass('ui-state-disabled');
-                $('#edit-device').removeClass('ui-state-disabled');
+
+                var rowData = $('#' + this.id).jqGrid('getRowData', rowid);
+
+                if (rowData.Name.slice(-2) != ':0') {
+                    $('#edit-device').removeClass('ui-state-disabled');
+                } else {
+                    $('#edit-device').addClass('ui-state-disabled');
+                }
+
                 $('#replace-device').addClass('ui-state-disabled');
             },
             gridComplete: function () {

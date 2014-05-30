@@ -24,7 +24,7 @@ $(document).ready(function () {
     var listRssi;
     var listInterfaces;
     var listMessages;
-    var regaNames;
+    var names = {};
     var hash;
 
 
@@ -63,9 +63,8 @@ $(document).ready(function () {
                     ("0" + (timestamp.getSeconds()).toString(10)).slice(-2);
 
                 var name = '';
-                if (regaNames && regaNames[config.daemons[daemon].ip] && regaNames[config.daemons[daemon].ip][address]) {
-                    name = regaNames[config.daemons[daemon].ip][address].Name;
-                }
+                if (names && names[address]) name = names[address];
+
 
                 /*
                 $gridEvents.jqGrid('addRowData', eventCount++, {
@@ -165,7 +164,7 @@ $(document).ready(function () {
                 });
             }
             initHandlers();
-            getRegaNames();
+            getNames();
             initDaemon();
         });
     }
@@ -183,9 +182,9 @@ $(document).ready(function () {
         return vars;
     }
 
-    function getRegaNames() {
-        socket.emit('getRegaNames', function (names) {
-            regaNames = names;
+    function getNames() {
+        socket.emit('getNames', function (data) {
+            names = data;
         });
     }
 
@@ -493,18 +492,13 @@ $(document).ready(function () {
         buildParamsetTable($('#table-linkparamset2'), data2, desc2, 'receiver-sender');
 
         // Dialog-Überschrift setzen
-        if (regaNames && regaNames[config.daemons[daemon].ip]) {
-            var names = regaNames[config.daemons[daemon].ip];
-        }
-        var name = (names && names[sender] ? names[sender].Name : '');
+        var name = (names && names[sender] ? names[sender] : '');
 
         if (names && names[receiver]) {
-            name = names[receiver].Name + ' -> ' + name;
+            name = names[receiver] + ' -> ' + name;
         }
 
-        if (name == '') {
-            name += ' (PARAMSET ' + sender + ' ' + receiver + ')';
-        }
+        name += ' (PARAMSET ' + sender + ' ' + receiver + ')';
 
         $('div[aria-describedby="dialog-linkparamset"] span.ui-dialog-title').html(name);
 
@@ -526,18 +520,13 @@ $(document).ready(function () {
     function editLinkDialog(data, sender, receiver) {
 
         // Dialog-Überschrift setzen
-        if (regaNames && regaNames[config.daemons[daemon].ip]) {
-            var names = regaNames[config.daemons[daemon].ip];
-        }
-        var name = (names && names[sender] ? names[sender].Name : '');
+        var name = names[sender] || '';
 
-        if (names && names[receiver]) {
-            name = names[receiver].Name + ' -> ' + name;
+        if (names[receiver]) {
+            name = names[receiver] + ' -> ' + name;
         }
 
-        if (name == '') {
-            name += ' (PARAMSET ' + sender + ' ' + receiver + ')';
-        }
+        name += ' (PARAMSET ' + sender + ' ' + receiver + ')';
 
         // Tabelle befüllen
         var elem = $('#table-edit-link');
@@ -695,17 +684,8 @@ $(document).ready(function () {
         }
 
         // Dialog-Überschrift setzen
-        if (regaNames && regaNames[config.daemons[daemon].ip]) {
-            var names = regaNames[config.daemons[daemon].ip];
-        }
-        var name;
-        if (names && names[address]) {
-            name = names[address].Name || '';
-        }
+        var name = names[address] || '';
 
-        if (names && names[paramset]) {
-            name = names[paramset].Name + ' -> ' + name;
-        }
         name += ' (PARAMSET ' + address + ' ' + paramset + ')';
 
 
@@ -723,11 +703,8 @@ $(document).ready(function () {
 
     function deleteLinkDialog(sender, receiver, name, desc, rowId) {
 
-        if (regaNames && regaNames[config.daemons[daemon].ip]) {
-            var names = regaNames[config.daemons[daemon].ip];
-        }
-        var sendername = names[sender].Name || "";
-        var receivername = names[receiver].Name || "";
+        var sendername = names[sender] || "";
+        var receivername = names[receiver] || "";
 
         $('div[aria-describedby="dialog-delete-link"] span.ui-dialog-title').html('Direktverknüpfung zwischen ' + sender + ' und ' + receiver + ' löschen');
 
@@ -831,14 +808,11 @@ $(document).ready(function () {
     });
 
     function buildGridMessages() {
-        if (regaNames && regaNames[config.daemons[daemon].ip]) {
-            var names = regaNames[config.daemons[daemon].ip];
-        }
         $gridMessages.jqGrid('clearGridData');
         for (var i = 0, len = listMessages.length; i < len; i++) {
             var deviceAddress = listMessages[i][0].slice(0, listMessages[i][0].length - 2);
             var name = '';
-            if (names && names[deviceAddress]) name = names[deviceAddress].Name;
+            if (names && names[deviceAddress]) name = names[deviceAddress];
             var obj = {
                 Name: name,
                 ADDRESS: listMessages[i][0],
@@ -867,9 +841,6 @@ $(document).ready(function () {
     }
 
     function buildGridDevices() {
-        if (regaNames && regaNames[config.daemons[daemon].ip]) {
-            var names = regaNames[config.daemons[daemon].ip];
-        }
         for (var i = 0, len = listDevices.length; i < len; i++) {
             if (listDevices[i].RF_ADDRESS) {
                 listDevices[i].RF_ADDRESS = parseInt(listDevices[i].RF_ADDRESS, 10).toString(16);
@@ -907,7 +878,7 @@ $(document).ready(function () {
 
             listDevices[i].aes_active =  listDevices[i].AES_ACTIVE ? listDevices[i].AES_ACTIVE = '<span style="display:inline-block; vertical-align:bottom" class="ui-icon ui-icon-key"></span>' : '';
 
-            if (names && names[listDevices[i].ADDRESS]) listDevices[i].Name = names[listDevices[i].ADDRESS].Name;
+            if (names && names[listDevices[i].ADDRESS]) listDevices[i].Name = names[listDevices[i].ADDRESS];
 
             var paramsets = '';
             for (var j = 0; j < listDevices[i].PARAMSETS.length; j++) {
@@ -924,9 +895,6 @@ $(document).ready(function () {
 
     function buildGridLinks() {
         $gridLinks.jqGrid('clearGridData');
-        if (regaNames && regaNames[config.daemons[daemon].ip]) {
-            var names = regaNames[config.daemons[daemon].ip];
-        }
         for (var i = 0, len = listLinks.length; i < len; i++) {
             /*var flags = '';
              if (listLinks[i].FLAGS & 1) flags += 'Visible ';
@@ -934,10 +902,8 @@ $(document).ready(function () {
              if (listLinks[i].FLAGS & 8) flags += 'DontDelete ';
              listLinks[i].flags = flags;*/
 
-            if (names && names[listLinks[i].SENDER])
-                listLinks[i].Sendername = names[listLinks[i].SENDER].Name;
-            if (names && names[listLinks[i].RECEIVER])
-                listLinks[i].Receivername = names[listLinks[i].RECEIVER].Name;
+            if (names && names[listLinks[i].SENDER]) listLinks[i].Sendername = names[listLinks[i].SENDER];
+            if (names && names[listLinks[i].RECEIVER]) listLinks[i].Receivername = names[listLinks[i].RECEIVER];
             /*var actions = '<button class="editlink" id="action-editlink_' + listLinks[i].SENDER + '_' + listLinks[i].RECEIVER + '" params=\'' + JSON.stringify(listLinks[i]) + '\'>bearbeiten</button>';
             actions += '<button class="deletelink" id="action-deletelink_' + listLinks[i].SENDER + '_' + listLinks[i].RECEIVER + '" params=\'' + JSON.stringify(listLinks[i]) + '\'>löschen</button>';
             listLinks[i].ACTIONS = actions;*/
@@ -1104,16 +1070,12 @@ $(document).ready(function () {
                     }
                 }
             }
-            var names;
-            if (regaNames && regaNames[config.daemons[daemon].ip]) {
-                names = regaNames[config.daemons[daemon].ip];
-            }
 
             var selectOptions = '';
             for (var i = 0; i < targets.length; i++) {
                 var name;
                 if (names[targets[i]]) {
-                    name = ' ' + names[targets[i]].Name;
+                    name = ' ' + (names[targets[i]] || '');
                 } else {
                     name = '';
                 }
@@ -1437,15 +1399,12 @@ $(document).ready(function () {
         };
         $('#' + subgrid_table_id).jqGrid(gridConf);
 
-        if (regaNames && regaNames[config.daemons[daemon].ip]) {
-            var names = regaNames[config.daemons[daemon].ip];
-        }
 
         for (var i = 0, len = listDevices.length; i < len; i++) {
 
             if (listDevices[i].PARENT == listDevices[row_id].ADDRESS) {
 
-                if (names && names[listDevices[i].ADDRESS]) listDevices[i].Name = names[listDevices[i].ADDRESS].Name;
+                if (names && names[listDevices[i].ADDRESS]) listDevices[i].Name = names[listDevices[i].ADDRESS];
 
                 var paramsets = '';
                 for (var j = 0; j < listDevices[i].PARAMSETS.length; j++) {
@@ -1593,12 +1552,11 @@ $(document).ready(function () {
         buttonicon: 'ui-icon-plus',
         onClickButton: function () {
             var selectOptions = '<option value="null">Bitte einen Kanal auswählen</option>';
-            var names = regaNames[config.daemons[daemon].ip];
             for (var j = 0, len = listDevices.length; j < len; j++) {
                 if (!listDevices[j].PARENT) continue;
                 if (listDevices[j].ADDRESS.match(/:0$/)) continue;
                 if (!listDevices[j].LINK_SOURCE_ROLES) continue;
-                selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + (names[listDevices[j].ADDRESS] ? ' ' + names[listDevices[j].ADDRESS].Name : '') + '</option>';
+                selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + (names[listDevices[j].ADDRESS] || '') + '</option>';
             }
             $('#select-link-sender').html(selectOptions).multiselect('refresh');
             $('#select-link-receiver').html('').multiselect('refresh').multiselect('disable');
@@ -1764,14 +1722,10 @@ $(document).ready(function () {
         var address = $('#grid-rssi tr#' + row_id + ' td[aria-describedby="grid-rssi_ADDRESS"]').html();
         var partners = listRssi[address];
         var i = 0;
-        var names = [];
-        if (regaNames && regaNames[config.daemons[daemon].ip]) {
-            names = regaNames[config.daemons[daemon].ip];
-        }
         for (var partner in partners) {
             var obj = {
                 ADDRESS: partner,
-                Name: (names[partner] ? names[partner].Name : ''),
+                Name: (names[partner] ? names[partner] : ''),
                 TYPE: (indexDevices[partner] ? indexDevices[partner].TYPE : ''),
                 'RSSI-Receive': (partners[partner][0] == 65536 ? '' : partners[partner][0]),
                 'RSSI-Send': (partners[partner][1] == 65536 ? '' : partners[partner][1])
@@ -1943,7 +1897,6 @@ $(document).ready(function () {
         $('#console-rpc-params').val('');
         $('#console-rpc-error').html('');
         setValueDesc = null;
-        var names = regaNames[config.daemons[daemon].ip];
         var method = $consoleRpcMethod.val();
         $('#console-rpc-method-help').html(rpcMethods[method].help);
         var params = rpcMethods[method].params;
@@ -1977,10 +1930,8 @@ $(document).ready(function () {
                     for (var j = 0, len = listDevices.length; j < len; j++) {
                         if (listDevices[j].PARENT) continue;
                         if (listDevices[j].ADDRESS.match(/BidCoS/)) continue;
-                        var name = '';
-                        if (names && names[listDevices[j].ADDRESS]) {
-                            name = names[listDevices[j].ADDRESS].Name;
-                        }
+                        var name = names[listDevices[j].ADDRESS] || '';
+
                         selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + name + '</option>';
                     }
                     form += '<tr><td><label for="param_' + i + '">' + params[i].name + '</label></td><td></td><td><select class="param-search" name="param_' + i + '" id="param_' + i + '" class="">' + selectOptions + '</select></td></tr>';
@@ -1990,10 +1941,8 @@ $(document).ready(function () {
                     for (var j = 0, len = listDevices.length; j < len; j++) {
                         if (!listDevices[j].PARENT) continue;
                         if (listDevices[j].ADDRESS.match(/:0$/)) continue;
-                        var name = '';
-                        if (names && names[listDevices[j].ADDRESS]) {
-                            name = names[listDevices[j].ADDRESS].Name;
-                        }
+                        var name = names[listDevices[j].ADDRESS] || '';
+
                         selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + name + '</option>';
                     }
                     form += '<tr><td><label for="param_' + i + '">' + params[i].name + '</label></td><td></td><td><select class="param-search" name="param_' + i + '" id="param_' + i + '" class="">' + selectOptions + '</select></td></tr>';
@@ -2001,10 +1950,8 @@ $(document).ready(function () {
                 case 'address':
                     var selectOptions = '<option value="">Bitte auswählen</option>';
                     for (var j = 0, len = listDevices.length; j < len; j++) {
-                        var name = '';
-                        if (names && names[listDevices[j].ADDRESS]) {
-                            name = names[listDevices[j].ADDRESS].Name;
-                        }
+                        var name = names[listDevices[j].ADDRESS] || '';
+
                         selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + name + '</option>';
                     }
                     form += '<tr><td><label for="param_' + i + '">' + params[i].name + '</label></td><td></td><td><select class="param-search" name="param_' + i + '" id="param_' + i + '" class="">' + selectOptions + '</select></td></tr>';

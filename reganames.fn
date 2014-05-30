@@ -1,4 +1,4 @@
-!# reganames.fn 1.0 homematic-manager
+!# reganames.fn 1.1 homematic-manager
 !#
 !# Dieses Homematic-Script gibt eine Liste aller Geraete-/Kanal-Namen als JSON String aus
 !#
@@ -23,16 +23,16 @@ foreach (sDevId, root.Devices().EnumUsedIDs()) {
         WriteLine(',');
     }
 
-    Write('"' # oDevice.Address() # '":{"Name":"');
+    Write('"' # oDevice.Address() # '":"');
     WriteURL(oDevice.Name());
-    Write('"}');
+    Write('"');
 
     foreach(sChnId, oDevice.Channels()) {
         oChannel = dom.GetObject(sChnId);
         WriteLine(",");
-        Write('"' # oChannel.Address() # '":{"Name":"');
+        Write('"' # oChannel.Address() # '":"');
         WriteURL(oChannel.Name());
-        Write('"}');
+        Write('"');
     }
 
 }

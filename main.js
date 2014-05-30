@@ -31,7 +31,8 @@ var rpc;
 var daemon;
 var daemonIndex = [];
 
-var regaCache = {};
+var names = {};
+var namesLoaded = {};
 var rpcClients = {};
 
 var rpcServer;
@@ -57,8 +58,7 @@ function initDaemons() {
             rpcClients[daemon].methodCall('init', ['http://' + config.rpcListenIp + ':' + config.rpcListenPort, 'hmm_' + count], function (err, data) { });
         }
 
-        if (config.daemons[daemon].isCcu && !regaCache[config.daemons[daemon].ip]) {
-            regaCache[config.daemons[daemon].ip] = {};
+        if (config.daemons[daemon].isCcu) {
             getRegaNames(config.daemons[daemon].ip);
         }
         config.daemons[daemon].ident = 'hmm_' + count;
@@ -115,8 +115,8 @@ function initSocket() {
             callback(config);
         });
 
-        socket.on('getRegaNames', function (callback) {
-            callback(regaCache);
+        socket.on('getNames', function (callback) {
+            callback(names);
         });
 
         socket.on('rpc', function (daemon, method, paramArray, callback) {
@@ -184,8 +184,12 @@ function initWebServer() {
 }
 
 function getRegaNames(ip) {
+    if (namesLoaded[ip]) return;
+    namesLoaded[ip] = true;
     regaScript(ip, 'reganames.fn', function (res) {
-        regaCache[ip] = res;
+        for (var addr in res) {
+            names[addr] = res[addr];
+        }
     });
 }
 

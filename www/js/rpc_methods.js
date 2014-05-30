@@ -287,7 +287,7 @@ var rpcMethods = {
         rfd: true,
         hs485d: true,
         params: [
-            { name: 'address', type: 'device_address' },
+            { name: 'address', type: 'address' },
             { name: 'paramset_key', type: 'string' },
             { name: 'set', type: 'paramset' }
         ],

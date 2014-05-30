@@ -31,12 +31,19 @@ var rpc;
 var daemon;
 var daemonIndex = [];
 
-var names = {};
-var namesLoaded = {};
+var regaNames = {};
+var regaIDs = {};
+var regaNamesLoaded = {};
+var localNames = {};
+
 var rpcClients = {};
 
 var rpcServer;
 var rpcServerStarted;
+
+loadJson('names.json', function (err, data) {
+    if (!err) localNames = data;
+});
 
 initWebServer();
 initDaemons();
@@ -116,7 +123,27 @@ function initSocket() {
         });
 
         socket.on('getNames', function (callback) {
+            var names = {};
+            for (var addr in localNames) {
+                names[addr] = localNames[addr];
+            }
+            for (var addr in regaNames) {
+                names[addr] = regaNames[addr];
+            }
             callback(names);
+        });
+
+        socket.on('setName', function (daemon, address, name, callback) {
+            log('setName ' + daemon + ' ' + address + ' ' + name);
+            if (config.daemons[daemon].isCcu) {
+                regaNames[address] = name;
+                rega(config.daemons[daemon].ip, 'var dev = dom.GetObject(' + regaIDs[address] + ');\ndev.Name("' + name + '")', function () {});
+            } else {
+                localNames[address] = name;
+                saveJson('names.json', localNames, function () {
+                    if (callback) callback();
+                });
+            }
         });
 
         socket.on('rpc', function (daemon, method, paramArray, callback) {
@@ -184,13 +211,46 @@ function initWebServer() {
 }
 
 function getRegaNames(ip) {
-    if (namesLoaded[ip]) return;
-    namesLoaded[ip] = true;
+    if (regaNamesLoaded[ip]) return;
+    regaNamesLoaded[ip] = true;
     regaScript(ip, 'reganames.fn', function (res) {
         for (var addr in res) {
-            names[addr] = res[addr];
+            regaNames[addr] = res[addr].Name;
+            regaIDs[addr] = res[addr].ID;
         }
     });
+}
+
+function rega(ip, script, callback) {
+    var post_options = {
+        host: ip,
+        port: '8181',
+        path: '/rega.exe',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': script.length
+        }
+    };
+    log('ReGa ' + ip + ' ' + script);
+    var post_req = http.request(post_options, function(res) {
+        var data = '';
+        res.setEncoding('utf8');
+        res.on('data', function (chunk) {
+            data += chunk.toString();
+        });
+        res.on('end', function () {
+            if (callback) callback(data);
+        });
+    });
+
+    post_req.on('error', function (e) {
+        log('ReGa ' + ip + ' ' + e);
+    });
+
+    post_req.write(script);
+    post_req.end();
+
 }
 
 function regaScript(ip, file, callback) {
@@ -209,7 +269,7 @@ function regaScript(ip, file, callback) {
                 'Content-Length': script.length
             }
         };
-        log('ReGa ' + ip + ' ' + file);
+        log('ReGa ' + ip + ' script file: ' + file);
         var post_req = http.request(post_options, function(res) {
             var data = '';
             res.setEncoding('utf8');

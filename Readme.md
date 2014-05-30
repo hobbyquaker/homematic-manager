@@ -26,6 +26,13 @@
 
 ## Changelog
 
+### 0.3.0
+* (Anli) Hilfe-Popup im Direktverknüpfungsdialog
+* (Anli) activateLinkParamset korrigiert
+* (Anli) Name/Beschreibung von Direktverknüpfungen kann editiert werden
+* (Hobbyquaker) Event-Tabelle ohne jqGrid
+* (Hobbyquaker) Geräte und Kanäle können (um)benannnt werden
+
 ### 0.2.1
 * (Hobbyquaker) RPC Double auch wenn keine Nachkommastellen vorhanden sind
 * (Hobbyquaker) Nur geänderte Werte in putParamset übernehmen

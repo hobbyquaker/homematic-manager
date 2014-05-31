@@ -529,8 +529,8 @@ $(document).ready(function () {
 
         // Tabelle befüllen
         var elem = $('#table-edit-link');
-        elem.show().html('<tr><td>Sender</td><td>' + (names[daemon] && names[daemon][sender] ? names[daemon][sender].Name + ' (' + sender + ')' : sender) + '</td></tr>');
-        elem.append('<tr><td>Receiver</td><td>' + (names[daemon] && names[daemon][receiver] ? names[daemon][receiver].Name + ' (' + receiver + ')' : receiver) + '</td></tr>');
+        elem.show().html('<tr><td>Sender</td><td>' + sender + (names[daemon] && names[daemon][sender] ? ' (' + names[daemon][sender] + ')' : '') + '</td></tr>');
+        elem.append('<tr><td>Receiver</td><td>' + receiver + (names[daemon] && names[daemon][receiver] ? ' (' + names[daemon][receiver] +  ')' : '') + '</td></tr>');
         elem.append('<tr><td>Name</td><td><input id="edit-link-input-name" type="text" value="' + data['NAME'] + '" size="80"/></td></tr>');
         elem.append('<tr><td>Description</td><td><input id="edit-link-input-description" type="text" value="' + data['DESCRIPTION'] + '" size="80"/></td></tr>');
 
@@ -1076,10 +1076,14 @@ $(document).ready(function () {
             {
                 text: 'Löschen',
                 click: function () {
-                    // TODO RPC
-                    alert('removeLink(' + $('#delete-link-sender').val() + ', ' + $('#delete-link-receiver').val() + ')');
-                    // TODO remove Grid row
                     $(this).dialog('close');
+                    socket.emit('rpc', daemon, 'removeLink', [$('#delete-link-sender').val(), $('#delete-link-receiver').val()], function (err, res) {
+                        //todo error handling
+                        socket.emit('rpc', daemon, 'getLinks', [], function (err, data) {
+                            listLinks = data;
+                            buildGridLinks();
+                        });
+                    });
                 }
             },
             {
@@ -1128,14 +1132,36 @@ $(document).ready(function () {
                 text: 'Anlegen und Bearbeiten',
                 click: function () {
                     // TODO RPC
+                    var sender = $('#select-link-sender').val();
                     var targets = $('#select-link-receiver').val();
 
                     for (var i = 0; i < targets.length; i++) {
-                        alert('addLink(' + $('#select-link-sender').val() + ', ' + targets[i] + ')');
-
-                        // TODO eins nach dem anderen... Callback oder synchron?
-                        alert('edit paramset!');
+                        var receiver = targets[i];
+                        socket.emit('rpc', daemon, 'addLink', [$('#select-link-sender').val(), receiver, '', ''], function (err, res) {
+                            console.log(receiver);
+                            //todo error handling
+                            $('#load_grid-links').show();
+                            socket.emit('rpc', daemon, 'getParamset', [sender, receiver], function (err, data) {
+                                // TODO catch errors
+                                socket.emit('rpc', daemon, 'getParamsetDescription', [sender, receiver], function (err2, data2) {
+                                    // TODO catch errors
+                                    socket.emit('rpc', daemon, 'getParamset', [receiver, sender], function (err3, data3) {
+                                        // TODO catch errors
+                                        socket.emit('rpc', daemon, 'getParamsetDescription', [receiver, sender], function (err4, data4) {
+                                            // TODO catch errors
+                                            linkparamsetDialog(data, data2, data3, data4, sender, receiver);
+                                            $('#load_grid-links').hide();
+                                        });
+                                    });
+                                });
+                            });
+                        });
                     }
+
+                    socket.emit('rpc', daemon, 'getLinks', [], function (err, data) {
+                        listLinks = data;
+                        buildGridLinks();
+                    });
 
 
                     $(this).dialog('close');

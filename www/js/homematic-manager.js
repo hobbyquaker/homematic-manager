@@ -916,6 +916,75 @@ $(document).ready(function () {
 
 
     // Dialogs
+    $('#dialog-add-device').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 540,
+        height: 320,
+        buttons: [
+            {
+                text: 'Abbrechen',
+                click: function () {
+                    $(this).dialog('close');
+                }
+            }
+        ]
+    });
+    $('#dialog-add-countdown').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 400,
+        height: 200
+    });
+    $('#add-device-address-start').button().click(function () {
+        var mode = parseInt($('#add-device-mode').val(), 10);
+        var address = $('#add-device-address').val();
+    });
+
+    $('#add-device-time-start').button().click(function () {
+        var mode = parseInt($('#add-device-mode').val(), 10);
+        var time = parseInt($('#add-device-time').val(), 10);
+        if (isNaN(time)) time = 60;
+        if (time > 300) time = 300;
+        $('#add-countdown').html(time);
+        $('#dialog-add-device').dialog('close');
+        $('#dialog-add-countdown').dialog('open');
+        var addInterval = setInterval(function () {
+            time = time - 1;
+            $('#add-countdown').html(time);
+            if (time < 1) {
+                clearInterval(addInterval);
+                $('#dialog-add-countdown').dialog('close');
+            }
+        }, 1000);
+    });
+
+    $('#dialog-del-device').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 400,
+        height: 200,
+        buttons: [
+            {
+                text: 'Löschen',
+                click: function () {
+                    var $that = $(this);
+                    var address = $('#del-device-address').val();
+                    var flags = $('#del-device-flags').val();
+                    socket.emit('rpc', daemon, 'deleteDevice', [address, flags], function () {
+                        $that.dialog('close');
+                    });
+                }
+            },
+            {
+                text: 'Abbrechen',
+                click: function () {
+                    $(this).dialog('close');
+                }
+            }
+        ]
+    });
+
     $('#dialog-rename').dialog({
         autoOpen: false,
         modal: true,
@@ -1323,7 +1392,8 @@ $(document).ready(function () {
         buttonicon: 'ui-icon-trash',
         onClickButton: function () {
             var address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
-            alert('del ' + address);
+            $('#del-device-address').val(address);
+            $('#dialog-del-device').dialog('open');
         },
         position: 'first',
         id: 'del-device',
@@ -1376,7 +1446,7 @@ $(document).ready(function () {
         caption: '',
         buttonicon: 'ui-icon-plus',
         onClickButton: function () {
-            alert('anlernen');
+            $('#dialog-add-device').dialog('open');
         },
         position: 'first',
         id: 'add-device',

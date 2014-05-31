@@ -84,7 +84,7 @@ function initRpcServer() {
     log('RPC server listening on ' + config.rpcListenIp + ':' + config.rpcListenPort);
 
     rpcServer.on('NotFound', function(method, params) {
-        log('RPC <- undefined method ' + method + ' ' + JSON.stringify(params).slice(0,40));
+        log('RPC <- undefined method ' + method + ' ' + JSON.stringify(params).slice(0,80));
         io.sockets.emit('rpc', method, params);
     });
 
@@ -125,9 +125,6 @@ function initSocket() {
         });
 
         socket.on('getNames', function (callback) {
-            console.log('getNames');
-            console.log(localNames);
-            console.log(regaNames);
             var names = {};
             for (var daemon in localNames) {
                 names[daemon] = {};
@@ -236,10 +233,9 @@ function initWebServer() {
 }
 
 function getRegaNames(daemon) {
-    console.log('getRegaNames '+daemon);
     if (regaNamesLoaded[config.daemons[daemon].ip]) return;
+    log('getRegaNames ' + config.daemons[daemon].ip);
     regaNamesLoaded[config.daemons[daemon].ip] = true;
-    console.log('...')
     regaScript(config.daemons[daemon].ip, 'reganames.fn', function (res) {
         for (var addr in res) {
             if (!regaNames[config.daemons[daemon].ip]) regaNames[config.daemons[daemon].ip] = {};
@@ -247,7 +243,6 @@ function getRegaNames(daemon) {
             if (!regaIDs[config.daemons[daemon].ip]) regaIDs[config.daemons[daemon].ip] = {};
             regaIDs[config.daemons[daemon].ip][addr] = res[addr].ID;
         }
-        console.log(regaNames);
     });
 }
 

@@ -19,12 +19,15 @@
 * Direktverknüpfungen anlegen/löschen/bearbeiten
 * Anlernen/Ablernen von Geräten
 * Geräte tauschen
-* Konfigurieren von Geräten
-* Zuordnung Geräte zu Funk-Schnittstellen, Roaming aktivieren/deaktivieren
-* RPC Konsole
+* Konfigurieren von Geräten - erledigt
+* Zuordnung Geräte zu Funk-Schnittstellen, Roaming aktivieren/deaktivieren - erledigt
+* RPC Konsole - erledigt
 * Geräte deaktiveren/aktivieren (Ablernen mit speichern aller Paramsets und Links, schwierig in Verbindung mit Rega...)
 
 ## Changelog
+
+### 0.3.1
+* (Hobbyquaker) Zuordnung von Geräten zu Interfaces, Roaming aktivieren/deaktivieren
 
 ### 0.3.0
 * (Anli) Hilfe-Popup im Direktverknüpfungsdialog

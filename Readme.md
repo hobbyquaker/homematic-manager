@@ -11,9 +11,10 @@ auszuschalten und vieles mehr.
 ### Installation
 
 * homematic-manager benötigt eine Node.js Installation
-* Repository clonen oder Zip-File herunterladen und auspacken
+* Repository clonen oder [Zip-File](https://github.com/hobbyquaker/homematic-manager/archive/master.zip) herunterladen und auspacken
+* In das homematic-manager Verzeichnis wechseln
 * Node-Module installieren: ``npm install``
-* IP Adressen auf der die rfd/hs485d erreichbar sind in config-default.json anpassen
+* IP Adressen auf der die Schnttstellenprozesse rfd/hs485d erreichbar sind (CCU- bzw. BidCoS®-Service IP-Adresse) in config-default.json anpassen.
 
 **Hinweis für Installation auf Windows:**
  Die Installation des iconv-moduls bedingt, das python installiert wird.
@@ -118,3 +119,5 @@ Copyright (c) 2014 Anli, Hobbyquaker
 Der obige Urheberrechtsvermerk ist in allen Kopien oder Teilkopien der Software beizulegen.
 
 DIE SOFTWARE WIRD OHNE JEDE AUSDRÜCKLICHE ODER IMPLIZIERTE GARANTIE BEREITGESTELLT, EINSCHLIESSLICH DER GARANTIE ZUR BENUTZUNG FÜR DEN VORGESEHENEN ODER EINEM BESTIMMTEN ZWECK SOWIE JEGLICHER RECHTSVERLETZUNG, JEDOCH NICHT DARAUF BESCHRÄNKT. IN KEINEM FALL SIND DIE AUTOREN ODER COPYRIGHTINHABER FÜR JEGLICHEN SCHADEN ODER SONSTIGE ANSPRÜCHE HAFTBAR ZU MACHEN, OB INFOLGE DER ERFÜLLUNG EINES VERTRAGES, EINES DELIKTES ODER ANDERS IM ZUSAMMENHANG MIT DER SOFTWARE ODER SONSTIGER VERWENDUNG DER SOFTWARE ENTSTANDEN.
+
+HomeMatic und BidCoS sind eingetragene Warenzeichen der [eQ-3 AG](http://eq-3.de)

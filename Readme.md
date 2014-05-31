@@ -1,6 +1,12 @@
-# HomeMatic Manager
+# HomeMatic-Manager
 
 ## Dokumentation
+
+Der HomeMatic-Manager ist ein Web-Interface für die [HomeMatic](http://www.homematic.com)-Schnittstellenprozesse "rfd"
+und "hs485d". Mit dem HomeMatic-Manager ist es möglich Geräte an- und abzumelden, Geräte-Konfigurationen und
+Direktverknüpfungen zu Verwalten, Funk-Geräte zu bestimmten Interfaces zuzuordnen sowie das Roaming an- und
+auszuschalten und vieles mehr.
+
 
 ### Installation
 
@@ -9,22 +15,42 @@
 * Node-Module installieren: ``npm install``
 * IP Adressen auf der die rfd/hs485d erreichbar sind in config-default.json anpassen
 
+**Hinweis für Installation auf Windows:**
+ Die Installation des iconv-moduls bedingt, das python installiert wird.
+ Version muss kleiner als 3.0 sein, aktuell ist 2.7.6,
+ nach der Installation Umgebungsvariable setzen (in cmd-Shell z.B.:
+     ````set PYTHON=C:\Python27\python.exe````)
+ und erst dann ````npm install```` aufrufen
+
 ### Starten
 
 * ```node hm-manager.js start```
 * http://&lt;ip&gt;:8081 aufrufen
 
-## Ziele
+## Todo
 
-* Direktverknüpfungen anlegen/löschen/bearbeiten
-* Anlernen/Ablernen von Geräten
+* Direktverknüpfungen Easymodes
+* Direktverknüpfungen Profilvorlagen
+* Direktverknüpfungen kopieren
+* alle Direktverknüpfungen für Backup/Dokumentation exportieren/importieren
 * Geräte tauschen
-* Konfigurieren von Geräten - erledigt
-* Zuordnung Geräte zu Funk-Schnittstellen, Roaming aktivieren/deaktivieren - erledigt
-* RPC Konsole - erledigt
-* Geräte deaktiveren/aktivieren (Ablernen mit speichern aller Paramsets und Links, schwierig in Verbindung mit Rega...)
+* Alle Servicemeldungen auf einmal bestätigen
+* statt config.json bearbeiten Config-Dialog im UI
+* Konsole: dynamische Eingabefelder für putParamset
+* Geräte deaktiveren/aktivieren (Ablernen mit speichern aller Paramsets und Links - schwierig in Verbindung mit Rega...)
+* Doku, Doku, Doku
 
 ## Changelog
+
+### 0.9.0
+* (Anli) Direktverknüpfung anlegen
+* (Anli) Direktverknüpfung löschen
+* (Anli) Benennung Geräte edit-link-dialog angepasst
+* (Hobbyquaker) Aufgeräumt
+* (Hobbyquaker) einzelne Service-Meldung bestätigen
+* (Hobbyquaker) Geräte löschen, Geräte anlernen
+* (Hobbyquaker) Tabellen refreshen
+
 
 ### 0.3.1
 * (Hobbyquaker) Zuordnung von Geräten zu Interfaces, Roaming aktivieren/deaktivieren

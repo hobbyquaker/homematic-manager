@@ -9,7 +9,7 @@
 
 "use strict";
 
-var version = '0.3.0';
+var version = '0.9.0';
 
 var fs = require('fs');
 var http = require('http');
@@ -18,6 +18,10 @@ var socketio = require('socket.io');
 var xmlrpc = require('xmlrpc');
 var Iconv  = require('iconv').Iconv;
 var iconv = new Iconv('UTF-8', 'ISO-8859-1');
+
+// TODO auf iconv-lite umsteigen
+//var iconvLite = require('iconv-lite');
+//var encoding = require('encoding');
 
 var config = loadConfig();
 config.version = version;
@@ -75,8 +79,6 @@ function initDaemons() {
     }
 }
 
-
-
 function initRpcServer() {
     rpcServerStarted = true;
     rpcServer = xmlrpc.createServer({ host: config.rpcListenIp, port: config.rpcListenPort });
@@ -105,13 +107,28 @@ function initRpcServer() {
         callback(null, methods.event(err, params));
     });
 
-
+    rpcServer.on('newDevices', function(err, params, callback) {
+        callback(null, methods.newDevices(err, params));
+    });
+    rpcServer.on('deleteDevices', function(err, params, callback) {
+        callback(null, methods.deleteDevices(err, params));
+    });
 }
 
 var methods = {
     event: function (err, params) {
         log('RPC <- event ' + JSON.stringify(params));
         io.sockets.emit('rpc', 'event', params);
+        return '';
+    },
+    newDevices: function (err, params) {
+        log('RPC <- newDevices ' + JSON.stringify(params));
+        io.sockets.emit('rpc', 'newDevices', params);
+        return '';
+    },
+    deleteDevices: function (err, params) {
+        log('RPC <- deleteDevices ' + JSON.stringify(params));
+        io.sockets.emit('rpc', 'deleteDevices', params);
         return '';
     }
 };
@@ -144,14 +161,14 @@ function initSocket() {
 
         socket.on('setName', function (daemon, address, name, callback) {
             if (config.daemons[daemon].isCcu) {
-                if (!regaNames[daemon]) regaNames[daemon] = {};
-                regaNames[daemon][address] = name;
-                if (!regaIDs[daemon] || !regaIDs[daemon][address]) {
+                if (!regaNames[config.daemons[daemon].ip]) regaNames[daemon] = {};
+                regaNames[config.daemons[daemon].ip][address] = name;
+                if (!regaIDs[config.daemons[daemon].ip] || !regaIDs[config.daemons[daemon].ip][address]) {
                     log('error: no rega id found for ' + address);
                     return;
                 }
-                log('rega rename ' + regaIDs[daemon][address] + ' "' + name + '"');
-                rega(config.daemons[daemon].ip, 'var dev = dom.GetObject(' + regaIDs[daemon][address] + ');\ndev.Name("' + name + '");', function () {
+                log('rega rename ' + regaIDs[config.daemons[daemon].ip][address] + ' "' + name + '"');
+                rega(config.daemons[daemon].ip, 'var dev = dom.GetObject(' + regaIDs[config.daemons[daemon].ip][address] + ');\ndev.Name("' + name + '");', function () {
                     if (callback) callback();
                 });
             } else {
@@ -161,7 +178,6 @@ function initSocket() {
                 if (!address.match(/:/)) {
                     localNames[daemon][address + ':0'] = name + ':0';
                 }
-                console.log(localNames);
                 saveJson('names.json', localNames, function () {
                     if (callback) callback();
                 });
@@ -253,12 +269,18 @@ function rega(ip, script, callback) {
         path: '/rega.exe',
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=iso-8859-1',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=iso-8859-1;',
             'Content-Length': script.length
         }
     };
 
+    // TODO auf iconv-lite umsteigen
     script = iconv.convert(script);
+
+    //script = encoding.convert(script, 'UTF-8', 'ISO-8859-1');
+    //script = script.toString();
+
+    console.log(script);
     var post_req = http.request(post_options, function(res) {
         var data = '';
         res.setEncoding('utf8');
@@ -274,7 +296,7 @@ function rega(ip, script, callback) {
         log('ReGa ' + ip + ' ' + e);
     });
 
-    post_req.write(script);
+    post_req.write(script, 'ISO-8859-1');
     post_req.end();
 
 }
@@ -342,7 +364,6 @@ function loadJson(file, callback) {
     });
 }
 
-
 function loadConfig() {
     if (!fs.existsSync(__dirname + '/config.json')) {
         fs.writeFileSync(__dirname + '/config.json', fs.readFileSync(__dirname + '/config-default.json'));
@@ -378,4 +399,3 @@ function stop() {
 
 process.on('SIGINT', stop);
 process.on('SIGTERM', stop);
-

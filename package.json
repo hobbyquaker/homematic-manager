@@ -3,7 +3,7 @@
     "version": "0.3.0",
     "private": true,
     "dependencies": {
-        "iconv": "~2.1.4",
+        "encoding": "~0.1.8",
         "express": "~4.1.0",
         "socket.io": "~0.9.0",
         "xmlrpc": "https://github.com/hobbyquaker/node-xmlrpc/tarball/b5b97f2856b4bcbc1c6a1ec3aa99bd7f75eee3fc",

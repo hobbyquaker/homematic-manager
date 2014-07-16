@@ -19,7 +19,7 @@
         "Funk-Büro": {
             "type": "BidCos-RF",
             "ip": "10.0.12.5",
-            "port": 2000,
+            "port": 2001,
             "isCcu": false
         }
     },

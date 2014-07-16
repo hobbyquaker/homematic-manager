@@ -16,8 +16,9 @@ var http = require('http');
 var express = require('express');
 var socketio = require('socket.io');
 var xmlrpc = require('xmlrpc');
-var Iconv  = require('iconv').Iconv;
-var iconv = new Iconv('UTF-8', 'ISO-8859-1');
+/*var Iconv  = require('iconv-lite').Iconv;
+var iconv = new Iconv('UTF-8', 'ISO-8859-1');*/
+var encoding = require('encoding');
 
 var config = loadConfig();
 config.version = version;
@@ -263,7 +264,7 @@ function rega(ip, script, callback) {
         }
     };
 
-    script = iconv.convert(script);
+    script = encoding.convert(script, 'ISO-8859-1');
     var post_req = http.request(post_options, function(res) {
         var data = '';
         res.setEncoding('utf8');

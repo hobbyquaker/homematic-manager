@@ -9,7 +9,7 @@
 
 "use strict";
 
-var version = '0.3.0';
+var version = '0.9.0';
 
 var fs = require('fs');
 var http = require('http');
@@ -76,8 +76,6 @@ function initDaemons() {
     }
 }
 
-
-
 function initRpcServer() {
     rpcServerStarted = true;
     rpcServer = xmlrpc.createServer({ host: config.rpcListenIp, port: config.rpcListenPort });
@@ -85,7 +83,7 @@ function initRpcServer() {
     log('RPC server listening on ' + config.rpcListenIp + ':' + config.rpcListenPort);
 
     rpcServer.on('NotFound', function(method, params) {
-        log('RPC <- undefined method ' + method + ' ' + JSON.stringify(params).slice(0,40));
+        log('RPC <- undefined method ' + method + ' ' + JSON.stringify(params).slice(0,80));
         io.sockets.emit('rpc', method, params);
     });
 
@@ -106,13 +104,28 @@ function initRpcServer() {
         callback(null, methods.event(err, params));
     });
 
-
+    rpcServer.on('newDevices', function(err, params, callback) {
+        callback(null, methods.newDevices(err, params));
+    });
+    rpcServer.on('deleteDevices', function(err, params, callback) {
+        callback(null, methods.deleteDevices(err, params));
+    });
 }
 
 var methods = {
     event: function (err, params) {
         log('RPC <- event ' + JSON.stringify(params));
         io.sockets.emit('rpc', 'event', params);
+        return '';
+    },
+    newDevices: function (err, params) {
+        log('RPC <- newDevices ' + JSON.stringify(params));
+        io.sockets.emit('rpc', 'newDevices', params);
+        return '';
+    },
+    deleteDevices: function (err, params) {
+        log('RPC <- deleteDevices ' + JSON.stringify(params));
+        io.sockets.emit('rpc', 'deleteDevices', params);
         return '';
     }
 };
@@ -126,9 +139,6 @@ function initSocket() {
         });
 
         socket.on('getNames', function (callback) {
-            console.log('getNames');
-            console.log(localNames);
-            console.log(regaNames);
             var names = {};
             for (var daemon in localNames) {
                 names[daemon] = {};
@@ -148,14 +158,14 @@ function initSocket() {
 
         socket.on('setName', function (daemon, address, name, callback) {
             if (config.daemons[daemon].isCcu) {
-                if (!regaNames[daemon]) regaNames[daemon] = {};
-                regaNames[daemon][address] = name;
-                if (!regaIDs[daemon] || !regaIDs[daemon][address]) {
+                if (!regaNames[config.daemons[daemon].ip]) regaNames[daemon] = {};
+                regaNames[config.daemons[daemon].ip][address] = name;
+                if (!regaIDs[config.daemons[daemon].ip] || !regaIDs[config.daemons[daemon].ip][address]) {
                     log('error: no rega id found for ' + address);
                     return;
                 }
-                log('rega rename ' + regaIDs[daemon][address] + ' "' + name + '"');
-                rega(config.daemons[daemon].ip, 'var dev = dom.GetObject(' + regaIDs[daemon][address] + ');\ndev.Name("' + name + '");', function () {
+                log('rega rename ' + regaIDs[config.daemons[daemon].ip][address] + ' "' + name + '"');
+                rega(config.daemons[daemon].ip, 'var dev = dom.GetObject(' + regaIDs[config.daemons[daemon].ip][address] + ');\ndev.Name("' + name + '");', function () {
                     if (callback) callback();
                 });
             } else {
@@ -165,7 +175,6 @@ function initSocket() {
                 if (!address.match(/:/)) {
                     localNames[daemon][address + ':0'] = name + ':0';
                 }
-                console.log(localNames);
                 saveJson('names.json', localNames, function () {
                     if (callback) callback();
                 });
@@ -237,10 +246,9 @@ function initWebServer() {
 }
 
 function getRegaNames(daemon) {
-    console.log('getRegaNames '+daemon);
     if (regaNamesLoaded[config.daemons[daemon].ip]) return;
+    log('getRegaNames ' + config.daemons[daemon].ip);
     regaNamesLoaded[config.daemons[daemon].ip] = true;
-    console.log('...')
     regaScript(config.daemons[daemon].ip, 'reganames.fn', function (res) {
         for (var addr in res) {
             if (!regaNames[config.daemons[daemon].ip]) regaNames[config.daemons[daemon].ip] = {};
@@ -248,7 +256,6 @@ function getRegaNames(daemon) {
             if (!regaIDs[config.daemons[daemon].ip]) regaIDs[config.daemons[daemon].ip] = {};
             regaIDs[config.daemons[daemon].ip][addr] = res[addr].ID;
         }
-        console.log(regaNames);
     });
 }
 
@@ -259,7 +266,7 @@ function rega(ip, script, callback) {
         path: '/rega.exe',
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=iso-8859-1',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=iso-8859-1;',
             'Content-Length': script.length
         }
     };
@@ -348,7 +355,6 @@ function loadJson(file, callback) {
     });
 }
 
-
 function loadConfig() {
     if (!fs.existsSync(__dirname + '/config.json')) {
         fs.writeFileSync(__dirname + '/config.json', fs.readFileSync(__dirname + '/config-default.json'));
@@ -384,4 +390,3 @@ function stop() {
 
 process.on('SIGINT', stop);
 process.on('SIGTERM', stop);
-

@@ -36,24 +36,51 @@ $(document).ready(function () {
     var eventCount = 0;
 
     socket.on('rpc', function (method, params) {
-        switch (method) {
-            case 'event':
-                var daemonIdent = params[0];
-                if (daemonIdent != config.daemons[daemon].ident) break;
+        //console.log('RPC --> ' + method + ' ' + JSON.stringify(params));
+        var daemonIdent = params[0];
+        if (daemonIdent != config.daemons[daemon].ident) return;
+         switch (method) {
+             case 'newDevices':
+                 var devArr = params[1];
+                 $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html('Neue Geräte gemeldet');
+                 var count = 0;
+                 var output = '';
+                 for (var i = 0; i < devArr.length; i++) {
+                     if (devArr[i].ADDRESS.match(/:/)) continue;
+                     count += 1;
+                     output += '<br/>' + devArr[i].ADDRESS + ' (' + devArr[i].TYPE + ')';
+                 }
+                 $('#alert').html('<h3>' + count + ' neue' + (count == 1 ? 's': '') + ' Gerät' + (count == 1 ? '': 'e') + ' gemeldet:</h3>' + output);
+                 $("#dialog-alert").dialog('open');
+                 loadDevices(function () {
+                     loadLinks(function () {
+                         loadRfdStuff();
+                     });
+                 });
+                 break;
+             case 'deleteDevices':
+                 var devArr = params[1];
+                 $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html('Geräte abgemeldet');
+                var count = 0;
+                 var output = '';
+                 for (var i = 0; i < devArr.length; i++) {
+                     if (devArr[i].match(/:/)) continue;
+                     count += 1;
+                     output += '<br/>' + devArr[i];
+                 }
+                 $('#alert').html('<h3>' + count + ' Gerät' + (count == 1 ? '': 'e') + ' gelöscht:</h3>' + output);
+                 $("#dialog-alert").dialog('open');
+                 loadDevices(function () {
+                     loadLinks(function () {
+                         loadRfdStuff();
+                     });
+                 });
+                 break;
+             case 'event':
                 var address = params[1];
                 var param = params[2];
                 var value = params[3];
-                /*
-                var _index = $gridEvents.jqGrid('getGridParam', '_index');
-                var rowNum = $gridEvents.jqGrid('getGridParam', 'rowNum') - 1;
-                var keys = Object.keys(_index);
-                if (keys.length > rowNum) {
-                    var toDelete = keys.splice(0, keys.length - rowNum);
-                    for (var i = 0; i < toDelete.length; i++) {
-                        $gridEvents.jqGrid('delRowData', toDelete[i]);
-                    }
-                }
-                */
+
                 var timestamp = new Date();
                 var ts = timestamp.getFullYear() + '-' +
                     ("0" + (timestamp.getMonth() + 1).toString(10)).slice(-2) + '-' +
@@ -63,19 +90,6 @@ $(document).ready(function () {
                     ("0" + (timestamp.getSeconds()).toString(10)).slice(-2);
 
                 var name = names[daemon] && names[daemon][address] ? names[daemon][address] : '';
-
-
-                /*
-                $gridEvents.jqGrid('addRowData', eventCount++, {
-                    Timestamp: ts,
-                    Name: name,
-                    ADDRESS: address,
-                    PARAM: param,
-                    VALUE: value
-                }, 'first');
-
-                $gridEvents.trigger('reloadGrid');
-                */
 
                 $('#event-table').prepend('<tr class="ui-widget-content jqgrow ui-row-ltr "><td class="event-column-1">' + ts + '</td><td class="event-column-2">' + name + '</td><td class="event-column-3">' + address + '</td><td class="event-column-4">' + param + '</td><td class="event-column-5">' + value + '</td></tr>');
 
@@ -101,7 +115,6 @@ $(document).ready(function () {
                     }
                     if (!done) refreshGridMessages();
                 }
-
 
                 // Werte im UI aktualisieren
                 $('[data-address="' + address + '"][data-param="' + param + '"]').each(function () {
@@ -258,6 +271,64 @@ $(document).ready(function () {
 
     }
 
+    function loadDevices(callback) {
+        $('#load_grid-devices').show();
+        socket.emit('rpc', daemon, 'listDevices', [], function (err, data) {
+            $('#load_grid-devices').hide();
+            listDevices = data;
+            if (callback) callback();
+            buildGridDevices();
+            for (var i = 0; i < listDevices.length; i++) {
+                indexChannels[listDevices[i].ADDRESS] = listDevices[i];
+                if (listDevices[i].LINK_SOURCE_ROLES) {
+                    var roles = listDevices[i].LINK_SOURCE_ROLES.split(' ');
+                    for (var j = 0; j < roles.length; j++) {
+                        if (!indexSourceRoles[roles[j]]) indexSourceRoles[roles[j]] = [];
+                        indexSourceRoles[roles[j]].push(listDevices[i].ADDRESS);
+                    }
+                }
+                if (listDevices[i].LINK_TARGET_ROLES) {
+                    var roles = listDevices[i].LINK_TARGET_ROLES.split(' ');
+                    for (var j = 0; j < roles.length; j++) {
+                        if (!indexTargetRoles[roles[j]]) indexTargetRoles[roles[j]] = [];
+                        indexTargetRoles[roles[j]].push(listDevices[i].ADDRESS);
+                    }
+                }
+
+            }
+        });
+    }
+
+    function loadLinks(callback) {
+        $('#load_grid-links').show();
+        socket.emit('rpc', daemon, 'getLinks', [], function (err, data) {
+            listLinks = data;
+            if (callback) callback();
+            buildGridLinks();
+        });
+    }
+
+    function loadRfdStuff() {
+        if (config.daemons[daemon].type == 'BidCos-RF') {
+            $('#load_grid-interfaces').show();
+            socket.emit('rpc', daemon, 'listBidcosInterfaces', [], function (err, data) {
+                listInterfaces = data;
+                initGridRssi();
+                $('#load_grid-rssi').show();
+                socket.emit('rpc', daemon, 'rssiInfo', [], function (err, data) {
+                    listRssi = data;
+                    $('#load_grid-messages').show();
+                    socket.emit('rpc', daemon, 'getServiceMessages', [], function (err, data) {
+                        listMessages = data;
+                        buildGridMessages();
+                    });
+                    buildGridRssi();
+                });
+                buildGridInterfaces();
+            });
+        }
+    }
+
     function initDaemon() {
         indexSourceRoles = {};
         indexTargetRoles = {};
@@ -267,6 +338,8 @@ $(document).ready(function () {
         $gridRssi.jqGrid('clearGridData');
         $gridInterfaces.jqGrid('clearGridData');
         $gridMessages.jqGrid('clearGridData');
+        $("#accept-message").addClass("ui-state-disabled");
+        $("#accept-messages").addClass("ui-state-disabled");
         $("#del-device").addClass("ui-state-disabled");
         $("#replace-device").addClass("ui-state-disabled");
         $("#edit-device").addClass("ui-state-disabled");
@@ -277,8 +350,6 @@ $(document).ready(function () {
         if (daemon != 'null' && config.daemons[daemon]) {
             window.location.hash = '#' + daemon;
 
-            $('#load_grid-devices').show();
-            $('#load_grid-links').show();
 
             var type = config.daemons[daemon].type;
 
@@ -300,46 +371,10 @@ $(document).ready(function () {
                 resizeGrids();
             }
 
-            socket.emit('rpc', daemon, 'listDevices', [], function (err, data) {
-                listDevices = data;
-                socket.emit('rpc', daemon, 'getLinks', [], function (err, data) {
-                    listLinks = data;
-                    if (config.daemons[daemon].type == 'BidCos-RF') {
-                        socket.emit('rpc', daemon, 'listBidcosInterfaces', [], function (err, data) {
-                            listInterfaces = data;
-                            initGridRssi();
-                            socket.emit('rpc', daemon, 'rssiInfo', [], function (err, data) {
-                                listRssi = data;
-                                socket.emit('rpc', daemon, 'getServiceMessages', [], function (err, data) {
-                                    listMessages = data;
-                                    buildGridMessages();
-                                });
-                                buildGridRssi();
-                            });
-                            buildGridInterfaces();
-                        });
-                    }
-                    buildGridLinks();
+            loadDevices(function () {
+                loadLinks(function () {
+                    loadRfdStuff();
                 });
-                buildGridDevices();
-                for (var i = 0; i < listDevices.length; i++) {
-                    indexChannels[listDevices[i].ADDRESS] = listDevices[i];
-                    if (listDevices[i].LINK_SOURCE_ROLES) {
-                        var roles = listDevices[i].LINK_SOURCE_ROLES.split(' ');
-                        for (var j = 0; j < roles.length; j++) {
-                            if (!indexSourceRoles[roles[j]]) indexSourceRoles[roles[j]] = [];
-                            indexSourceRoles[roles[j]].push(listDevices[i].ADDRESS);
-                        }
-                    }
-                    if (listDevices[i].LINK_TARGET_ROLES) {
-                        var roles = listDevices[i].LINK_TARGET_ROLES.split(' ');
-                        for (var j = 0; j < roles.length; j++) {
-                            if (!indexTargetRoles[roles[j]]) indexTargetRoles[roles[j]] = [];
-                            indexTargetRoles[roles[j]].push(listDevices[i].ADDRESS);
-                        }
-                    }
-
-                }
             });
 
         } else {
@@ -721,6 +756,7 @@ $(document).ready(function () {
     }
 
     function buildGridRssi() {
+        $gridRssi.jqGrid('clearGridData');
 
         indexDevices = {};
 
@@ -784,8 +820,7 @@ $(document).ready(function () {
         }
         $gridRssi.jqGrid('setRowData', rowId, rowData);
 
-        // Todo Implement RPC
-        alert('setBidcosInterface ' + $(this).attr('data-device') + ' ' + listInterfaces[$(this).attr('data-iface-index')].ADDRESS + ' false');
+        socket.emit('rpc', daemon, 'setBidcosInterface', [$(this).attr('data-device'), listInterfaces[$(this).attr('data-iface-index')].ADDRESS, false], function () {});
     });
 
     $('body').on('change', '.checkbox-roaming', function () {
@@ -802,16 +837,19 @@ $(document).ready(function () {
         }
         $gridRssi.jqGrid('setRowData', rowId, rowData);
 
-        // Todo Implement RPC
-        alert('setBidcosInterface ' + $(this).attr('data-device') + ' ' + listInterfaces[0].ADDRESS + ' ' + $(this).is(':checked'));
+        socket.emit('rpc', daemon, 'setBidcosInterface', [$(this).attr('data-device'), listInterfaces[0].ADDRESS, $(this).is(':checked')], function () {});
     });
 
     function buildGridMessages() {
         $gridMessages.jqGrid('clearGridData');
+        $('#accept-message').addClass('ui-state-disabled');
+        $('#accept-messages').addClass('ui-state-disabled');
+        var acceptableMessages = false;
         for (var i = 0, len = listMessages.length; i < len; i++) {
             var deviceAddress = listMessages[i][0].slice(0, listMessages[i][0].length - 2);
             var name = '';
             if (names[daemon] && names[daemon][deviceAddress]) name = names[daemon][deviceAddress];
+            if (listMessages[i][1].match(/STICKY/)) acceptableMessages = true;
             var obj = {
                 Name: name,
                 ADDRESS: listMessages[i][0],
@@ -820,19 +858,23 @@ $(document).ready(function () {
             };
             $gridMessages.jqGrid('addRowData', i, obj);
         }
+        if (acceptableMessages) {
+            $('#accept-messages').removeClass('ui-state-disabled');
+        }
         $('#message-count').html(listMessages.length);
         $gridMessages.trigger('reloadGrid');
     }
 
     function refreshGridMessages() {
+        $('#load_grid-messages').show();
         socket.emit('rpc', daemon, 'getServiceMessages', [], function (err, data) {
             listMessages = data;
             buildGridMessages();
         });
     }
 
-
     function buildGridInterfaces() {
+        $gridInterfaces.jqGrid('clearGridData');
         for (var i = 0, len = listInterfaces.length; i < len; i++) {
             $gridInterfaces.jqGrid('addRowData', i, listInterfaces[i]);
         }
@@ -840,6 +882,7 @@ $(document).ready(function () {
     }
 
     function buildGridDevices() {
+        $gridDevices.jqGrid('clearGridData');
         for (var i = 0, len = listDevices.length; i < len; i++) {
             if (listDevices[i].RF_ADDRESS) {
                 listDevices[i].RF_ADDRESS = parseInt(listDevices[i].RF_ADDRESS, 10).toString(16);
@@ -912,12 +955,113 @@ $(document).ready(function () {
     }
 
 
+
     //
     //      initialize UI elements
     //
 
 
     // Dialogs
+    $('#dialog-add-device').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 540,
+        height: 320,
+        buttons: [
+            {
+                text: 'Abbrechen',
+                click: function () {
+                    $(this).dialog('close');
+                }
+            }
+        ]
+    });
+    $('#dialog-add-countdown').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 400,
+        height: 200
+    });
+    $('#dialog-alert').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 400,
+        height: 360,
+        buttons: [
+            {
+                text: 'OK',
+                click: function () {
+                    $(this).dialog('close');
+                }
+            }
+        ]
+    });
+    $('#add-device-address-start').button().click(function () {
+        $('#dialog-add-device').dialog('close');
+        var mode = parseInt($('#add-device-mode').val(), 10);
+        var address = $('#add-device-address').val();
+        socket.emit('rpc', daemon, 'addDevice', [address, mode], function (err, data) {
+            if (err) {
+                $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html('Gerät ' + address + ' anlernen');
+                $('#alert').html('<span style="font-weight: bold; color: red">Fehler:</span> ' + err.faultString);
+                $('#dialog-alert').dialog('open');
+            }
+        });
+    });
+
+    $('#add-device-time-start').button().click(function () {
+        var mode = parseInt($('#add-device-mode').val(), 10);
+        var time = parseInt($('#add-device-time').val(), 10);
+        if (isNaN(time)) time = 60;
+        if (time > 300) time = 300;
+        $('#dialog-add-device').dialog('close');
+        socket.emit('rpc', daemon, 'setInstallMode', [true, time, mode], function () {
+            $('#add-countdown').html(time);
+            $('#dialog-add-countdown').dialog('open');
+            var addInterval = setInterval(function () {
+                time = time - 1;
+                $('#add-countdown').html(time);
+                if (time < 1) {
+                    clearInterval(addInterval);
+                    $('#dialog-add-countdown').dialog('close');
+                }
+            }, 1000);
+        });
+    });
+
+    $('#dialog-del-device').dialog({
+        autoOpen: false,
+        modal: true,
+        width: 400,
+        height: 200,
+        buttons: [
+            {
+                text: 'Löschen',
+                click: function () {
+                    $('#dialog-del-device').dialog('close');
+                    var $that = $(this);
+                    var address = $('#del-device-address').val();
+                    var flags = $('#del-device-flags').val();
+                    socket.emit('rpc', daemon, 'deleteDevice', [address, flags], function (err, data) {
+                        if (err) {
+                            $('#alert').html('<span style="font-weight: bold; color: red">Fehler:</span> ' + err.faultString);
+                            $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html('Gerät ' + address + ' löschen');
+                            $('#dialog-alert').dialog('open');
+                        }
+
+                    });
+
+                }
+            },
+            {
+                text: 'Abbrechen',
+                click: function () {
+                    $(this).dialog('close');
+                }
+            }
+        ]
+    });
+
     $('#dialog-rename').dialog({
         autoOpen: false,
         modal: true,
@@ -1212,49 +1356,11 @@ $(document).ready(function () {
                 }
             }).click(function () {
                 $('#dialog-config').dialog('open');
-            });
+            })/* TODO Einstellungen im UI, kein bearbeiten der config.json*/.hide();
 
         }
     });
 
-
-    // Servicemeldungs-Tabelle
-
-
-    // Event-Tabelle
-    /*
-    var $gridEvents = $('#grid-events');
-    $gridEvents.jqGrid({
-        colNames: [
-            'Zeit',
-            'Name',
-            'ADDRESS',
-            'PARAM',
-            'VALUE'
-        ],
-        colModel: [
-            {name:'Timestamp', index: 'Timestamp', width: 100, fixed: false, sortable: false},
-            {name:'Name', index: 'Name', width: 224, fixed: false, sortable: false},
-            {name:'ADDRESS',index:'ADDRESS', width:90, fixed: false, sortable: false},
-            {name:'PARAM', index: 'PARAM', width: 160, fixed: false, sortable: false},
-            {name:'VALUE',index:'VALUE', width:110, fixed: false, sortable: false}
-        ],
-        datatype:   'local',
-        rowNum:     1000,
-        autowidth:  true,
-        width:      '1000',
-        height:     600,
-        sortname:   'Timestamp',
-        sortorder:  'desc',
-        rowList:    [1000],
-        caption:    'Ereignisse'
-    }).jqGrid('filterToolbar', {
-        defaultSearch: 'cn',
-        autosearch: true,
-        searchOnEnter: false,
-        enableClear: false
-    });
-*/
 
     // Geräte-Tabelle
     var $gridDevices = $('#grid-devices');
@@ -1313,34 +1419,11 @@ $(document).ready(function () {
         add: false,
         del: false,
         refresh: false
-    })/*.jqGrid('navButtonAdd', '#pager-devices', {
-        caption: '',
-        buttonicon: 'ui-icon-calculator',
-        onClickButton: function () {
-            $gridDevices.setColumns({
-                updateAfterCheck: true,
-                shrinkToFit: false,
-                onClose: function () {
-                    resizeGrids();
-                    // TODO Save hidden grids
-                },
-                colnameview: false,
-                beforeShowForm: function (id) {
-                    $('#ColTbl_grid-devices_2 tr:last').hide();
-                },
-                afterChange: resizeGrids
-
-            });
-        },
-        position: 'first',
-        id: 'choose-columns',
-        title: 'Geräte löschen',
-        cursor: 'pointer'
-    })*/.jqGrid('navButtonAdd', '#pager-devices', {
+    }).jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
         buttonicon: 'ui-icon-refresh',
         onClickButton: function () {
-            alert('refresh devices');
+            loadDevices();
         },
         position: 'first',
         id: 'refresh-device',
@@ -1351,13 +1434,14 @@ $(document).ready(function () {
         buttonicon: 'ui-icon-trash',
         onClickButton: function () {
             var address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
-            alert('del ' + address);
+            $('#del-device-address').val(address);
+            $('#dialog-del-device').dialog('open');
         },
         position: 'first',
         id: 'del-device',
         title: 'Gerät löschen',
         cursor: 'pointer'
-    }).jqGrid('navButtonAdd', '#pager-devices', {
+    })/* TODO Geräte tauschen .jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
         buttonicon: 'ui-icon-transfer-e-w',
         onClickButton: function () {
@@ -1368,7 +1452,7 @@ $(document).ready(function () {
         id: 'replace-device',
         title: 'Gerät tauschen',
         cursor: 'pointer'
-    }).jqGrid('navButtonAdd', '#pager-devices', {
+    })*/.jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
         buttonicon: 'ui-icon-pencil',
         onClickButton: function () {
@@ -1404,7 +1488,7 @@ $(document).ready(function () {
         caption: '',
         buttonicon: 'ui-icon-plus',
         onClickButton: function () {
-            alert('anlernen');
+            $('#dialog-add-device').dialog('open');
         },
         position: 'first',
         id: 'add-device',
@@ -1554,7 +1638,7 @@ $(document).ready(function () {
         caption: '',
         buttonicon: 'ui-icon-refresh',
         onClickButton: function () {
-            alert('refresh link');
+            loadLinks();
         },
         position: 'first',
         id: 'refresh-link',
@@ -1755,7 +1839,7 @@ $(document).ready(function () {
             caption: '',
             buttonicon: 'ui-icon-refresh',
             onClickButton: function () {
-                alert('refresh rssi');
+                loadRfdStuff();
             },
             position: 'first',
             id: 'refresh-rssi',
@@ -1832,21 +1916,71 @@ $(document).ready(function () {
             {name:'Message',index:'Message', width:150, fixed: false}
         ],
         datatype:   'local',
-        rowNum:     1000,
+        rowNum:     25,
         autowidth:  true,
         width:      '1000',
         height:     'auto',
-        rowList:    [21000],
+        rowList:    [25,50,100,500],
+        pager:      $('#pager-messages'),
         sortname:   'timestamp',
         viewrecords: true,
         sortorder:  'desc',
         caption:    'Service Messages',
         onSelectRow: function (rowid, iRow, iCol, e) {
-
+            if ($('#grid-messages tr#' + rowid + ' td[aria-describedby="grid-messages_Message"]').html().match(/STICKY/)) {
+                $('#accept-message').removeClass('ui-state-disabled');
+            } else {
+                $('#accept-message').addClass('ui-state-disabled');
+            }
         },
         gridComplete: function () {
 
         }
+    }).navGrid('#pager-messages', {
+        search: false,
+        edit: false,
+        add: false,
+        del: false,
+        refresh: false
+    }).jqGrid('filterToolbar', {
+        defaultSearch:'cn',
+        autosearch: true,
+        searchOnEnter: false,
+        enableClear: false
+    }).jqGrid('navButtonAdd', '#pager-messages', {
+        caption: '',
+        buttonicon: 'ui-icon-check',
+        onClickButton: function () {
+            // TODO Servicemeldung bestätigen
+            var address = $('#grid-messages tr#' + $gridMessages.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-messages_ADDRESS"]').html();
+            var key = $('#grid-messages tr#' + $gridMessages.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-messages_Message"]').html();
+            socket.emit('rpc', daemon, 'setValue', [address, key, false], function (err, data) {
+                if (!err) loadRfdStuff();
+            });
+        },
+        //position: 'first',
+        id: 'accept-message',
+        title: 'Meldungen bestätigen',
+        cursor: 'pointer'
+    }).jqGrid('navButtonAdd', '#pager-messages', {
+        caption: '',
+        buttonicon: 'ui-icon-circle-check',
+        onClickButton: function () {
+            // TODO Alle Servicemeldungen bestätigen
+            alert('TODO');
+        },
+        //position: 'first',
+        id: 'accept-messages',
+        title: 'Alle Meldungen bestätigen',
+        cursor: 'pointer'
+    }).jqGrid('navButtonAdd', '#pager-messages', {
+        caption: '',
+        buttonicon: 'ui-icon-refresh',
+        onClickButton: refreshGridMessages,
+        position: 'first',
+        id: 'refresh-messages',
+        title: 'Aktualisieren',
+        cursor: 'pointer'
     });
 
     // Interfaces-Tabelle
@@ -1891,8 +2025,6 @@ $(document).ready(function () {
     $('#gbox_grid-messages .ui-jqgrid-titlebar-close').hide();
 
 
-
-
     function resizeGrids() {
         var x = $(window).width();
         var y = $(window).height();
@@ -1900,8 +2032,8 @@ $(document).ready(function () {
         if (y < 600) y = 600;
 
         $('#grid-devices, #grid-links, #grid-messages').setGridHeight(y - 148).setGridWidth(x - 18);
-        $('#grid-events').css('height', (y - 122) + 'px').css('width', (x - 18) + 'px');
-        $('#grid-events-inner').css('height', (y - 162) + 'px');
+        $('#grid-events').css('height', (y - 84) + 'px').css('width', (x - 18) + 'px');
+        $('#grid-events-inner').css('height', (y - 104) + 'px');
         $('#grid-interfaces')/*.setGridHeight(y - 99)*/.setGridWidth(x - 18);
         $('#grid-rssi').setGridHeight(y - (177 + $('#gbox_grid-interfaces').height())).setGridWidth(x - 18);
 

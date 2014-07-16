@@ -136,7 +136,44 @@
         <input type="hidden" id="rename-gridid" value=""/>
     </div>
     <div id="dialog-add-device" title="Gerät anlernen">
+        <select id="add-device-mode">
+            <option value="1" selected="selected">Normaler Anlernmodus</option>
+            <option value="2">Default-Parameter in Paramset MASTER schreiben, bestehende Verknüpfungen löschen</option>
+        </select>
 
+        <table>
+            <tr>
+                <td colspan="3">
+                    <h3>Anlernmodus</h3>
+                </td>
+            </tr>
+            <tr>
+                <td>Dauer:</td>
+                <td><input type="number" id="add-device-time" value="60"/>s</td>
+                <td><input type="button" id="add-device-time-start" value="Anlernmodus aktivieren"/></td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <h3>Anlernen über Seriennummer <span style="font-weight: normal; font-size: 11px;">(nicht bei allen Geräten möglich)</span></h3>
+                </td>
+            </tr>
+            <tr>
+                <td>Seriennummer:</td>
+                <td><input type="text" id="add-device-address" value=""/></td>
+                <td><input type="button" id="add-device-address-start" value="Anlernen"/></td>
+            </tr>
+
+        </table>
+
+
+    </div>
+    <div id="dialog-add-countdown" title="Anlernmodus aktiv">
+        <br/><br/>
+        <h3 style="width: 100%; text-align: center;">Zeit verbleibend: <span id="add-countdown"></span>s</h3>
+    </div>
+    <div id="dialog-alert" title="">
+        <br/><br/>
+        <h3 style="width: 100%; text-align: center;"><span id="alert"></span></h3>
     </div>
     <div id="dialog-add-link" title="Direktverknüpfung anlegen">
         <table>
@@ -156,6 +193,11 @@
 
     </div>
     <div id="dialog-del-device" title="Gerät löschen">
+        <h4>Wollen Sie wirklich das Gerät <span id="del-device-name"></span> löschen?</h4>
+        <select id="del-device-flags">
+            <option value="5" selected="selected">Ablernen und Gerät auf Werkseinstellungen zurücksetzen</option>
+            <option value="4">Nur ablernen (Direktverknüpfungen bleiben erhalten)</option>
+        </select>
         <input type="hidden" id="del-device-address" value=""/>
     </div>
     <div id="dialog-edit-device" title="Gerät bearbeiten">

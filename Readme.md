@@ -1,30 +1,67 @@
-# HomeMatic Manager
+# HomeMatic-Manager
 
 ## Dokumentation
+
+Der HomeMatic-Manager ist ein Web-Interface für die [HomeMatic](http://www.homematic.com)-Schnittstellenprozesse "rfd"
+und "hs485d". Mit dem HomeMatic-Manager ist es möglich Geräte an- und abzumelden, Geräte-Konfigurationen und
+Direktverknüpfungen zu Verwalten, Funk-Geräte zu bestimmten Interfaces zuzuordnen sowie das Roaming an- und
+auszuschalten und vieles mehr.
+
 
 ### Installation
 
 * homematic-manager benötigt eine Node.js Installation
-* Repository clonen oder Zip-File herunterladen und auspacken
+* Repository clonen oder [Zip-File](https://github.com/hobbyquaker/homematic-manager/archive/master.zip) herunterladen und auspacken
+* In das homematic-manager Verzeichnis wechseln
 * Node-Module installieren: ``npm install``
-* IP Adressen auf der die rfd/hs485d erreichbar sind in config-default.json anpassen
+
+**Hinweis für Installation auf Windows:**
+ Die Installation des iconv-moduls bedingt, das python installiert wird.
+ Version muss kleiner als 3.0 sein, aktuell ist 2.7.6,
+ nach der Installation Umgebungsvariable setzen (in cmd-Shell z.B.:
+     ````set PYTHON=C:\Python27\python.exe````)
+ und erst dann ````npm install```` aufrufen
+
+
+### Konfiguration
+
+#### config.json (bzw. vor dem ersten Start config-default.json) bearbeiten:
+
+IP Adressen auf der die Schnttstellenprozesse rfd/hs485d erreichbar sind (CCU- bzw. BidCoS®-Service IP-Adresse) anpassen. Falls es sich um eine CCU handelt kann der Parameter ````isCcu```` auf ````true```` gesetzt werden, dann werden die Namen von Geräten und Kanälen aus der CCU-Logikschicht "ReGaHSS" ausgelesen. Ausserdem muss, falls bei einem Schnittstellenprozess der Parameter ````init```` auf ````true```` gesetzt wurde (notwendig um den Reiter "Ereignisse" zu nutzen), die IP-Adresse auf der der HomeMatic-Manager selbst erreichbar ist unter ````rpcListenIp```` eingetragen werden.
+
 
 ### Starten
 
 * ```node hm-manager.js start```
 * http://&lt;ip&gt;:8081 aufrufen
 
-## Ziele
+## Todo
 
-* Direktverknüpfungen anlegen/löschen/bearbeiten
-* Anlernen/Ablernen von Geräten
+* Direktverknüpfungen Easymodes
+* Direktverknüpfungen Profilvorlagen
+* Direktverknüpfungen kopieren
+* alle Direktverknüpfungen für Backup/Dokumentation exportieren/importieren
 * Geräte tauschen
-* Konfigurieren von Geräten
-* Zuordnung Geräte zu Funk-Schnittstellen, Roaming aktivieren/deaktivieren
-* RPC Konsole
-* Geräte deaktiveren/aktivieren (Ablernen mit speichern aller Paramsets und Links, schwierig in Verbindung mit Rega...)
+* Alle Servicemeldungen auf einmal bestätigen
+* statt config.json bearbeiten Config-Dialog im UI
+* Konsole: dynamische Eingabefelder für putParamset
+* Geräte deaktiveren/aktivieren (Ablernen mit speichern aller Paramsets und Links - schwierig in Verbindung mit Rega...)
+* Doku, Doku, Doku
 
 ## Changelog
+
+### 0.9.0
+* (Anli) Direktverknüpfung anlegen
+* (Anli) Direktverknüpfung löschen
+* (Anli) Benennung Geräte edit-link-dialog angepasst
+* (Hobbyquaker) Aufgeräumt
+* (Hobbyquaker) einzelne Service-Meldung bestätigen
+* (Hobbyquaker) Geräte löschen, Geräte anlernen
+* (Hobbyquaker) Tabellen refreshen
+
+
+### 0.3.1
+* (Hobbyquaker) Zuordnung von Geräten zu Interfaces, Roaming aktivieren/deaktivieren
 
 ### 0.3.0
 * (Anli) Hilfe-Popup im Direktverknüpfungsdialog
@@ -89,3 +126,5 @@ Copyright (c) 2014 Anli, Hobbyquaker
 Der obige Urheberrechtsvermerk ist in allen Kopien oder Teilkopien der Software beizulegen.
 
 DIE SOFTWARE WIRD OHNE JEDE AUSDRÜCKLICHE ODER IMPLIZIERTE GARANTIE BEREITGESTELLT, EINSCHLIESSLICH DER GARANTIE ZUR BENUTZUNG FÜR DEN VORGESEHENEN ODER EINEM BESTIMMTEN ZWECK SOWIE JEGLICHER RECHTSVERLETZUNG, JEDOCH NICHT DARAUF BESCHRÄNKT. IN KEINEM FALL SIND DIE AUTOREN ODER COPYRIGHTINHABER FÜR JEGLICHEN SCHADEN ODER SONSTIGE ANSPRÜCHE HAFTBAR ZU MACHEN, OB INFOLGE DER ERFÜLLUNG EINES VERTRAGES, EINES DELIKTES ODER ANDERS IM ZUSAMMENHANG MIT DER SOFTWARE ODER SONSTIGER VERWENDUNG DER SOFTWARE ENTSTANDEN.
+
+HomeMatic und BidCoS sind eingetragene Warenzeichen der [eQ-3 AG](http://eq-3.de)

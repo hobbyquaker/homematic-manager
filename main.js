@@ -9,7 +9,7 @@
 
 "use strict";
 
-var version = '0.9.0';
+var version = '0.9.1';
 
 var fs = require('fs');
 var http = require('http');

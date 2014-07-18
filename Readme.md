@@ -50,6 +50,9 @@ IP Adressen auf der die Schnttstellenprozesse rfd/hs485d erreichbar sind (CCU- b
 
 ## Changelog
 
+### 0.9.1
+* (Anli) Modul node-iconv entfernt
+
 ### 0.9.0
 * (Anli) Direktverknüpfung anlegen
 * (Anli) Direktverknüpfung löschen

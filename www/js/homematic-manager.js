@@ -253,7 +253,8 @@ $(document).ready(function () {
             }
 
             switch (dataType) {
-
+                case "BOOL":
+                    break;
                 case "FLOAT":
                     val = {explicitDouble: parseFloat(val)};
                     break;

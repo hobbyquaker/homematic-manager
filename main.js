@@ -9,16 +9,18 @@
 
 "use strict";
 
-var version = '0.9.1';
+var version = '0.9.2';
 
-var fs = require('fs');
-var http = require('http');
-var express = require('express');
-var socketio = require('socket.io');
-var xmlrpc = require('xmlrpc');
-/*var Iconv  = require('iconv-lite').Iconv;
-var iconv = new Iconv('UTF-8', 'ISO-8859-1');*/
-var encoding = require('encoding');
+var fs =        require('fs');
+var http =      require('http');
+var express =   require('express');
+var socketio =  require('socket.io');
+var xmlrpc =    require('homematic-xmlrpc');
+var binrpc =    require('binrpc');
+
+/*var Iconv  =  require('iconv-lite').Iconv;
+var iconv =     new Iconv('UTF-8', 'ISO-8859-1');*/
+var encoding =  require('encoding');
 
 var config = loadConfig();
 config.version = version;
@@ -32,16 +34,17 @@ var io;
 var rpc;
 
 var daemon;
-var daemonIndex = [];
+var daemonIndex =       [];
 
-var regaNames = {};
-var regaIDs = {};
-var regaNamesLoaded = {};
-var localNames = {};
+var regaNames =         {};
+var regaIDs =           {};
+var regaNamesLoaded =   {};
+var localNames =        {};
 
-var rpcClients = {};
+var rpcClients =        {};
 
 var rpcServer;
+var rpcServerBin;
 var rpcServerStarted;
 
 loadJson('names.json', function (err, data) {
@@ -51,12 +54,11 @@ loadJson('names.json', function (err, data) {
 initWebServer();
 initDaemons();
 
-
 function initDaemons() {
     var count = 0;
     for (var daemon in config.daemons) {
 
-        rpcClients[daemon] = xmlrpc.createClient({
+        rpcClients[daemon] = (config.daemons[daemon].isCcu ? binrpc : xmlrpc).createClient({
             host: config.daemons[daemon].ip,
             port: config.daemons[daemon].port,
             path: '/'
@@ -64,8 +66,9 @@ function initDaemons() {
 
         if (config.daemons[daemon].init) {
             if (!rpcServerStarted) initRpcServer();
-            log("RPC -> " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' init ' + JSON.stringify(['http://' + config.rpcListenIp + ':' + config.rpcListenPort, 'hmm_' + count]));
-            rpcClients[daemon].methodCall('init', ['http://' + config.rpcListenIp + ':' + config.rpcListenPort, 'hmm_' + count], function (err, data) { });
+            var protocol = config.daemons[daemon].isCcu ? 'xmlrpc_bin://' : 'http://';
+            log('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' init ' + JSON.stringify([protocol + config.rpcListenIp + ':' + (config.daemons[daemon].isCcu ? config.rpcListenPortBin : config.rpcListenPort), 'hmm_' + count]));
+            rpcClients[daemon].methodCall('init', [protocol + config.rpcListenIp + ':' + (config.daemons[daemon].isCcu ? config.rpcListenPortBin : config.rpcListenPort), 'hmm_' + count], function (err, data) { });
         }
 
         if (config.daemons[daemon].isCcu) {
@@ -77,10 +80,12 @@ function initDaemons() {
 }
 
 function initRpcServer() {
-    rpcServerStarted = true;
-    rpcServer = xmlrpc.createServer({ host: config.rpcListenIp, port: config.rpcListenPort });
+    rpcServerStarted =  true;
+    rpcServerBin =      binrpc.createServer({ host: config.rpcListenIp, port: config.rpcListenPortBin });
+    rpcServer =         xmlrpc.createServer({ host: config.rpcListenIp, port: config.rpcListenPort });
 
-    log('RPC server listening on ' + config.rpcListenIp + ':' + config.rpcListenPort);
+    log('XML-RPC server listening on ' + config.rpcListenIp + ':' + (config.rpcListenPort));
+    log('BIN-RPC server listening on ' + config.rpcListenIp + ':' + (config.rpcListenPortBin));
 
     rpcServer.on('NotFound', function(method, params) {
         log('RPC <- undefined method ' + method + ' ' + JSON.stringify(params).slice(0,80));
@@ -108,6 +113,35 @@ function initRpcServer() {
         callback(null, methods.newDevices(err, params));
     });
     rpcServer.on('deleteDevices', function(err, params, callback) {
+        callback(null, methods.deleteDevices(err, params));
+    });
+
+    rpcServerBin.on('NotFound', function(method, params) {
+        log('RPC <- undefined method ' + method + ' ' + JSON.stringify(params).slice(0,80));
+        io.sockets.emit('rpc', method, params);
+    });
+
+    rpcServerBin.on('system.multicall', function(method, params, callback) {
+        var response = [];
+        for (var i = 0; i < params[0].length; i++) {
+            if (methods[params[0][i].methodName]) {
+                response.push(methods[params[0][i].methodName](null, params[0][i].params));
+            } else {
+                response.push('');
+            }
+
+        }
+        callback(null, response);
+    });
+
+    rpcServerBin.on('event', function(err, params, callback) {
+        callback(null, methods.event(err, params));
+    });
+
+    rpcServerBin.on('newDevices', function(err, params, callback) {
+        callback(null, methods.newDevices(err, params));
+    });
+    rpcServerBin.on('deleteDevices', function(err, params, callback) {
         callback(null, methods.deleteDevices(err, params));
     });
 }
@@ -378,8 +412,9 @@ function log(msg) {
 function stop() {
     for (var daemon in config.daemons) {
         if (config.daemons[daemon].init) {
-            log("RPC -> " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' init ' + JSON.stringify(['http://' + config.rpcListenIp + ':' + config.rpcListenPort, '']));
-            rpcClients[daemon].methodCall('init', ['http://' + config.rpcListenIp + ':' + config.rpcListenPort, ''], function (err, data) {});
+            var protocol = config.daemons[daemon].isCcu ? 'xmlrpc_bin://' : 'http://';
+            log("RPC -> " + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' init ' + JSON.stringify([protocol + config.rpcListenIp + ':' + (config.daemons[daemon].isCcu ? config.rpcListenPortBin : config.rpcListenPort), '']));
+            rpcClients[daemon].methodCall('init', [protocol + config.rpcListenIp + ':' + (config.daemons[daemon].isCcu ? config.rpcListenPortBin : config.rpcListenPort), ''], function (err, data) {});
         }
     }
     log('terminating');

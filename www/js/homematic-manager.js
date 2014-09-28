@@ -162,7 +162,7 @@ $(document).ready(function () {
             var count = 0;
             for (var daemon in config.daemons) {
                 count += 1;
-                $('#select-bidcos-daemon').append('<option value="' + daemon + '"' + (hash == daemon ? ' selected' : '') + '>' + daemon + ' (' + config.daemons[daemon].type + ' ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
+                $('#select-bidcos-daemon').append('<option value="' + daemon + '"' + (hash == daemon ? ' selected' : '') + '>' + daemon + ' (' + (config.daemons[daemon].isCcu ? 'xmlrpc_bin://' : 'http://') + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
             }
 
             if (count == 1) {
@@ -271,6 +271,8 @@ $(document).ready(function () {
 
     }
 
+
+
     function loadDevices(callback) {
         $('#load_grid-devices').show();
         socket.emit('rpc', daemon, 'listDevices', [], function (err, data) {
@@ -300,6 +302,10 @@ $(document).ready(function () {
     }
 
     function loadLinks(callback) {
+        if (config.daemons[daemon].type == 'CUxD') {
+            if (callback) callback();
+            return;
+        }
         $('#load_grid-links').show();
         socket.emit('rpc', daemon, 'getLinks', [], function (err, data) {
             listLinks = data;
@@ -326,6 +332,8 @@ $(document).ready(function () {
                 });
                 buildGridInterfaces();
             });
+        } else {
+
         }
     }
 
@@ -353,16 +361,21 @@ $(document).ready(function () {
 
             var type = config.daemons[daemon].type;
 
+            $('.dselect').hide();
+
             if (type == 'BidCos-Wired') {
-                $('.rfd-only').hide();
+                $('.dselect.' + type).show();
                 $('#play-link').hide();
                 //$gridDevices.jqGrid('hideCol', 'roaming');
                 $gridDevices.jqGrid('hideCol', 'rx_mode');
                 //$gridDevices.jqGrid('hideCol', 'RF_ADDRESS');
                 //$gridDevices.jqGrid('hideCol', 'INTERFACE');
                 resizeGrids();
+            } else if (type == 'CUxD') {
+                $('.dselect.' + type).show();
+                $('#play-link').hide();
             } else {
-                $('.rfd-only').show();
+                $('.dselect').show();
                 $('#play-link').show();
                 //$gridDevices.jqGrid('showCol', 'roaming');
                 $gridDevices.jqGrid('showCol', 'rx_mode');
@@ -1529,7 +1542,7 @@ $(document).ready(function () {
                 {name: 'direction', index: 'direction', width: 80, fixed: true},
                 {name: 'params', index: 'params', width: 120, fixed: true},
                 {name: 'flags', index: 'flags', width: 150, fixed: true},
-                {name: 'aes_active', index: 'aes_active', width: 148, fixed: true, hidden: (config.daemons[daemon].type == 'BidCos-Wired')}
+                {name: 'aes_active', index: 'aes_active', width: 148, fixed: true, hidden: (config.daemons[daemon].type !== 'BidCos-RF')}
                 //{name: 'LINK_SOURCE_ROLES', index: 'LINK_SOURCE_ROLES', width: 100, hidden: true},
                 //{name: 'LINK_TARGET_ROLES', index: 'LINK_TARGET_ROLES', width: 100, hidden: true},
                 //{name: 'VERSION', index: 'VERSION', width: 58, fixed: true, align: 'right'}
@@ -2089,12 +2102,19 @@ $(document).ready(function () {
             default:
                 var daemonType = 'unknown';
         }
-        for (var method in rpcMethods) {
-            if (rpcMethods[method][daemonType]) {
+        socket.emit('rpc', daemon, 'system.listMethods', [], function (err, data) {
+            if (err) {
+                alert('system.listMethods\n' + JSON.stringify(err));
+                return;
+            }
+            for (var i = 0; i < data.length; i++) {
+                var method = data[i];
                 $consoleRpcMethod.append('<option value="' + method + '">' + method + '</option>');
             }
-        }
-        $consoleRpcMethod.multiselect('refresh');
+            $consoleRpcMethod.multiselect('refresh');
+        });
+
+
     }
 
     $consoleRpcMethod.change(function () {

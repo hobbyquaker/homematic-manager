@@ -2,38 +2,37 @@
 
 ## Dokumentation
 
-Der HomeMatic-Manager ist ein Web-Interface für die [HomeMatic](http://www.homematic.com)-Schnittstellenprozesse "rfd"
-und "hs485d". Mit dem HomeMatic-Manager ist es möglich Geräte an- und abzumelden, Geräte-Konfigurationen und
-Direktverknüpfungen zu Verwalten, Funk-Geräte zu bestimmten Interfaces zuzuordnen sowie das Roaming an- und
-auszuschalten und vieles mehr.
+Der HomeMatic-Manager ist ein Web-Interface für [HomeMatic](http://www.homematic.com)-Schnittstellenprozesse 
+(rfd, hs485d, CUxD, [Homegear](http://www.homegear.eu)). 
+
+Mit dem HomeMatic-Manager ist es möglich Geräte an- und abzumelden, Geräte-Konfigurationen und Direktverknüpfungen zu 
+Verwalten, Funk-Geräte zu bestimmten Interfaces zuzuordnen sowie das Roaming an- und auszuschalten und vieles mehr.
 
 
 ### Installation
 
-* homematic-manager benötigt eine Node.js Installation
+* homematic-manager benötigt eine [Node.js](http://nodejs.org/download/) Installation
 * Repository clonen oder [Zip-File](https://github.com/hobbyquaker/homematic-manager/archive/master.zip) herunterladen und auspacken
 * In das homematic-manager Verzeichnis wechseln
 * Node-Module installieren: ``npm install``
-
-**Hinweis für Installation auf Windows:**
- Die Installation des iconv-moduls bedingt, das python installiert wird.
- Version muss kleiner als 3.0 sein, aktuell ist 2.7.6,
- nach der Installation Umgebungsvariable setzen (in cmd-Shell z.B.:
-     ````set PYTHON=C:\Python27\python.exe````)
- und erst dann ````npm install```` aufrufen
-
 
 ### Konfiguration
 
 #### config.json (bzw. vor dem ersten Start config-default.json) bearbeiten:
 
-IP Adressen auf der die Schnttstellenprozesse rfd/hs485d erreichbar sind (CCU- bzw. BidCoS®-Service IP-Adresse) anpassen. Falls es sich um eine CCU handelt kann der Parameter ````isCcu```` auf ````true```` gesetzt werden, dann werden die Namen von Geräten und Kanälen aus der CCU-Logikschicht "ReGaHSS" ausgelesen. Ausserdem muss, falls bei einem Schnittstellenprozess der Parameter ````init```` auf ````true```` gesetzt wurde (notwendig um den Reiter "Ereignisse" zu nutzen), die IP-Adresse auf der der HomeMatic-Manager selbst erreichbar ist unter ````rpcListenIp```` eingetragen werden.
+IP Adressen auf der die Schnttstellenprozesse rfd/hs485d erreichbar sind (CCU- bzw. BidCoS®-Service IP-Adresse) anpassen. 
+Falls es sich um eine CCU handelt kann der Parameter ````isCcu```` auf ````true```` gesetzt werden, dann werden die Namen 
+von Geräten und Kanälen aus der CCU-Logikschicht "ReGaHSS" ausgelesen und das binäre RPC Protokoll anstatt XLM-RPC genutzt. 
+
+Ausserdem muss, falls bei einem Schnittstellenprozess der Parameter ````init```` auf ````true```` gesetzt wurde (notwendig 
+um den Reiter "Ereignisse" zu nutzen), die IP-Adresse auf der der HomeMatic-Manager selbst erreichbar ist unter 
+````rpcListenIp```` eingetragen werden.
 
 
-### Starten
+### HomeMatic Manager starten
 
-* ```node hm-manager.js start```
-* http://&lt;ip&gt;:8081 aufrufen
+* ```node hm-manager.js start``` 
+* [http://127.0.0.1:8081](http://127.0.0.1:8081) aufrufen
 
 ## Todo
 
@@ -49,6 +48,13 @@ IP Adressen auf der die Schnttstellenprozesse rfd/hs485d erreichbar sind (CCU- b
 * Doku, Doku, Doku
 
 ## Changelog
+
+### 0.9.2
+* (hfedcba) Don't convert boolean values to string (Homegear compatibility)
+* (Hobbyquaker) added CUxD support
+* (Hobbyquaker) added binary rpc support (you have to set listenPortBin in config.json!)
+* (Hobbyquaker) changed xmlrpc module source
+* (Hobbyquaker) prepared english translation
 
 ### 0.9.1
 * (Anli) Modul node-iconv entfernt

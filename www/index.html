@@ -23,12 +23,12 @@
 <body>
     <div id="tabs-main">
         <ul>
-            <li><a href="#tab-devices">Geräte</a></li>
-            <li><a href="#tab-links">Verknüpfungen</a></li>
-            <li class="rfd-only"><a href="#tab-rssi">Funk</a></li>
-            <li><a href="#tab-console">Konsole</a></li>
-            <li class="rfd-only"><a href="#tab-messages">Meldungen (<span id="message-count">0</span>)</a></li>
-            <li><a href="#tab-events">Ereignisse</a></li>
+            <li><a class="translate" href="#tab-devices">Devices</a></li>
+            <li class="dselect BidCos-RF BidCos-Wired"><a class="translate"  href="#tab-links">Links</a></li>
+            <li class="dselect BidCos-RF"><a class="translate" href="#tab-rssi">RSSI</a></li>
+            <li><a class="translate" href="#tab-console">RPC Console</a></li>
+            <li class="dselect BidCos-RF"><a  class="translate" href="#tab-messages">Service messages (<span id="message-count">0</span>)</a></li>
+            <li><a class="translate" href="#tab-events">Events</a></li>
         </ul>
         <div id="tab-devices">
             <table id="grid-devices"></table>
@@ -41,17 +41,17 @@
         <div id="tab-console">
             <div>
                 <div style="float:left; width: 235px; padding-top: 2px;"><select id="console-rpc-method"></select></div>
-                <div style="float:right; width: 126px;"><button id="console-rpc-send">Befehl senden</button></div>
+                <div style="float:right; width: 126px;"><button class="translate" id="console-rpc-send">Send request</button></div>
                 <div style="padding-top: 2px; margin-left: 235px; margin-right: 132px;"><input id="console-rpc-params" size="60" value="" class="ui-widget ui-state-default ui-corner-all" style="height: 24px; width: 100%"></div>
             </div>
             <div style="clear: both"></div>
             <div style="width: 100%">
                 <div class="console-container" style="float: left; width: 49%">
-                    <h3>Params</h3>
+                    <h3 class="translate">Parameters</h3>
                     <div id="console-form-params"></div>
                 </div>
                 <div class="console-container" style="float: right; width: 49%">
-                    <h3>Response <span id="console-rpc-error" style="color: red;"></span></h3>
+                    <h3><span class="translate">Response</span> <span id="console-rpc-error" style="color: red;"></span></h3>
                  <textarea id="console-rpc-response" style="width: 100%; height: 250px;" disabled="disabled"></textarea>
                 </div>
             </div>

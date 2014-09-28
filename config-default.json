@@ -2,6 +2,7 @@
     "webServerPort": 8081,
     "rpcListenIp": "172.16.23.134",
     "rpcListenPort": 9090,
+    "rpcListenPortBin": 9091,
     "daemons": {
         "Funk-Zuhause": {
             "type": "BidCos-RF",
@@ -14,7 +15,15 @@
             "type": "BidCos-Wired",
             "ip": "172.16.23.3",
             "port": 2000,
-            "isCcu": true
+            "isCcu": true,
+            "init": true
+        },
+        "CUxD-Zuhause": {
+            "type": "CUxD",
+            "ip": "172.16.23.3",
+            "port": 8701,
+            "isCcu": true,
+            "init": true
         },
         "Funk-Büro": {
             "type": "BidCos-RF",
@@ -23,5 +32,6 @@
             "isCcu": false
         }
     },
-    "datastorePath": "datastore/"
+    "datastorePath": "datastore/",
+    "language": "de"
 }

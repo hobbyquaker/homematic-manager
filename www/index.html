@@ -16,6 +16,7 @@
     <script src="js/jquery.jqGrid.min.js" type="text/javascript"></script>
     <script src="js/grid.setcolumns.js" type="text/javascript"></script>
     <script src="../socket.io/socket.io.js"></script>
+    <script src="js/language.js"></script>
     <script src="js/help_linkParamset.js"></script>
     <script src="js/rpc_methods.js"></script>
     <script src="js/homematic-manager.js"></script>
@@ -23,12 +24,12 @@
 <body>
     <div id="tabs-main">
         <ul>
-            <li><a class="translate" href="#tab-devices">Devices</a></li>
-            <li class="dselect BidCos-RF BidCos-Wired"><a class="translate"  href="#tab-links">Links</a></li>
-            <li class="dselect BidCos-RF"><a class="translate" href="#tab-rssi">RSSI</a></li>
-            <li><a class="translate" href="#tab-console">RPC Console</a></li>
-            <li class="dselect BidCos-RF"><a  class="translate" href="#tab-messages">Service messages (<span id="message-count">0</span>)</a></li>
-            <li><a class="translate" href="#tab-events">Events</a></li>
+            <li><a href="#tab-devices"><span class="translate">Devices</span></a></li>
+            <li class="dselect BidCos-RF BidCos-Wired"><a href="#tab-links"><span class="translate">Links</span></a></li>
+            <li class="dselect BidCos-RF"><a href="#tab-rssi"><span class="translate">RSSI</span></a></li>
+            <li><a href="#tab-console"><span class="translate">RPC Console</span></a></li>
+            <li class="dselect BidCos-RF"><a href="#tab-messages"><span class="translate">Service messages</span> (<span id="message-count">0</span>)</a></li>
+            <li><a href="#tab-events"><span class="translate">Events</span></a></li>
         </ul>
         <div id="tab-devices">
             <table id="grid-devices"></table>
@@ -41,7 +42,7 @@
         <div id="tab-console">
             <div>
                 <div style="float:left; width: 235px; padding-top: 2px;"><select id="console-rpc-method"></select></div>
-                <div style="float:right; width: 126px;"><button class="translate" id="console-rpc-send">Send request</button></div>
+                <div style="float:right; width: 126px;"><button class="" id="console-rpc-send"><span class="translate">Send request</span></button></div>
                 <div style="padding-top: 2px; margin-left: 235px; margin-right: 132px;"><input id="console-rpc-params" size="60" value="" class="ui-widget ui-state-default ui-corner-all" style="height: 24px; width: 100%"></div>
             </div>
             <div style="clear: both"></div>
@@ -200,10 +201,10 @@
         </select>
         <input type="hidden" id="del-device-address" value=""/>
     </div>
-    <div id="dialog-edit-device" title="Gerät bearbeiten">
+    <div id="dialog-edit-device" class="translateT" title="Edit device">
         <input type="hidden" id="edit-device-address" value=""/>
     </div>
-    <div id="dialog-help" title="Über HomeMatic Manager">
+    <div id="dialog-help" class="translateT" title="about HomeMatic Manager">
         <h3>Version <span class="version"></span></h3>
         <a href="https://github.com/hobbyquaker/homematic-manager" target="_blank">GitHub Projektseite</a>
         <h3>Lizenz</h3>
@@ -218,6 +219,6 @@
             ANDERS IM ZUSAMMENHANG MIT DER SOFTWARE ODER SONSTIGER VERWENDUNG DER SOFTWARE ENTSTANDEN.
         </p>
     </div>
-    <div id="dialog-config" title="Einstellungen"></div>
+    <div id="dialog-config" class="translateT" title="Settings"></div>
 </body>
 </html>

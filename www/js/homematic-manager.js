@@ -27,8 +27,6 @@ $(document).ready(function () {
     var names = {};
     var hash;
 
-
-
     socket.on('connect', function () {
         getConfig();
     });
@@ -42,7 +40,7 @@ $(document).ready(function () {
          switch (method) {
              case 'newDevices':
                  var devArr = params[1];
-                 $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html('Neue Geräte gemeldet');
+                 $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html(_('New devices'));
                  var count = 0;
                  var output = '';
                  for (var i = 0; i < devArr.length; i++) {
@@ -50,7 +48,7 @@ $(document).ready(function () {
                      count += 1;
                      output += '<br/>' + devArr[i].ADDRESS + ' (' + devArr[i].TYPE + ')';
                  }
-                 $('#alert').html('<h3>' + count + ' neue' + (count == 1 ? 's': '') + ' Gerät' + (count == 1 ? '': 'e') + ' gemeldet:</h3>' + output);
+                 $('#alert').html('<h3>' + count + ' ' + _('new') + ((count == 1 && language == 'de') ? 's': '') + ' ' + _('device') + (count == 1 ? '' : (language == 'de' ? 'e' : 's')) + ' ' + _('introduced') + ':</h3>' + output);
                  $("#dialog-alert").dialog('open');
                  loadDevices(function () {
                      loadLinks(function () {
@@ -60,7 +58,7 @@ $(document).ready(function () {
                  break;
              case 'deleteDevices':
                  var devArr = params[1];
-                 $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html('Geräte abgemeldet');
+                 $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html(_('Devices deleted'));
                 var count = 0;
                  var output = '';
                  for (var i = 0; i < devArr.length; i++) {
@@ -68,7 +66,7 @@ $(document).ready(function () {
                      count += 1;
                      output += '<br/>' + devArr[i];
                  }
-                 $('#alert').html('<h3>' + count + ' Gerät' + (count == 1 ? '': 'e') + ' gelöscht:</h3>' + output);
+                 $('#alert').html('<h3>' + count + ' ' + _('device') + (count == 1 ? '' : (language == 'de' ? 'e' : 's')) + ' ' + _('deleted') + ':</h3>' + output);
                  $("#dialog-alert").dialog('open');
                  loadDevices(function () {
                      loadLinks(function () {
@@ -175,6 +173,8 @@ $(document).ready(function () {
                     selectedList: 1
                 });
             }
+            language = config.language || 'en';
+            translate();
             initHandlers();
             getNames();
             initDaemon();
@@ -620,7 +620,7 @@ $(document).ready(function () {
 
                 // Create Input-Field
                 var input;
-                var helpentry = help_linkParamset[param.replace('SHORT_', '').replace('LONG_', '')];
+                var helpentry = help_linkParamset[language] && help_linkParamset[language][param.replace('SHORT_', '').replace('LONG_', '')];
                 var help = (helpentry ? helpentry.helpText : '');
 
                 switch (desc[param].TYPE) {
@@ -984,7 +984,7 @@ $(document).ready(function () {
         height: 320,
         buttons: [
             {
-                text: 'Abbrechen',
+                text: _('Cancel'),
                 click: function () {
                     $(this).dialog('close');
                 }
@@ -1004,7 +1004,7 @@ $(document).ready(function () {
         height: 360,
         buttons: [
             {
-                text: 'OK',
+                text: _('OK'),
                 click: function () {
                     $(this).dialog('close');
                 }
@@ -1017,8 +1017,8 @@ $(document).ready(function () {
         var address = $('#add-device-address').val();
         socket.emit('rpc', daemon, 'addDevice', [address, mode], function (err, data) {
             if (err) {
-                $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html('Gerät ' + address + ' anlernen');
-                $('#alert').html('<span style="font-weight: bold; color: red">Fehler:</span> ' + err.faultString);
+                $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html(_('pair Device') + ' ' + address);
+                $('#alert').html('<span style="font-weight: bold; color: red">' + _('Error') + ':</span> ' + err.faultString);
                 $('#dialog-alert').dialog('open');
             }
         });
@@ -1051,7 +1051,7 @@ $(document).ready(function () {
         height: 200,
         buttons: [
             {
-                text: 'Löschen',
+                text: _('Delete'),
                 click: function () {
                     $('#dialog-del-device').dialog('close');
                     var $that = $(this);
@@ -1060,7 +1060,7 @@ $(document).ready(function () {
                     socket.emit('rpc', daemon, 'deleteDevice', [address, flags], function (err, data) {
                         if (err) {
                             $('#alert').html('<span style="font-weight: bold; color: red">Fehler:</span> ' + err.faultString);
-                            $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html('Gerät ' + address + ' löschen');
+                            $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html(_('delete Device') + ' ' + address);
                             $('#dialog-alert').dialog('open');
                         }
 
@@ -1069,7 +1069,7 @@ $(document).ready(function () {
                 }
             },
             {
-                text: 'Abbrechen',
+                text: _('Cancel'),
                 click: function () {
                     $(this).dialog('close');
                 }
@@ -1084,7 +1084,7 @@ $(document).ready(function () {
         height: 200,
         buttons: [
             {
-                text: 'Speichern',
+                text: _('Save'),
                 click: function () {
                     var $that = $(this);
                     var renameAddress = $('#rename-address').val();
@@ -1112,7 +1112,7 @@ $(document).ready(function () {
                 }
             },
             {
-                text: 'Abbrechen',
+                text: _('Cancel'),
                 click: function () {
                     $(this).dialog('close');
                 }
@@ -1166,7 +1166,7 @@ $(document).ready(function () {
         height: 400,
         buttons: [
             {
-                text: 'Löschen',
+                text: _('Delete'),
                 click: function () {
                     $(this).dialog('close');
                     socket.emit('rpc', daemon, 'removeLink', [$('#delete-link-sender').val(), $('#delete-link-receiver').val()], function (err, res) {
@@ -1179,7 +1179,7 @@ $(document).ready(function () {
                 }
             },
             {
-                text: 'Abbrechen',
+                text: _('Cancel'),
                 click: function () {
                     $(this).dialog('close');
                 }
@@ -1193,7 +1193,7 @@ $(document).ready(function () {
         height: 400,
         buttons: [
             {
-                text: 'OK',
+                text: _('OK'),
                 click: function () {
                     $(this).dialog('close');
                     socket.emit('rpc', daemon, 'setLinkInfo', [$('#edit-link-sender').val(), $('#edit-link-receiver').val(), $('#edit-link-input-name').val(), $('#edit-link-input-description').val()], function (err, res) {
@@ -1206,7 +1206,7 @@ $(document).ready(function () {
                 }
             },
             {
-                text: 'Abbrechen',
+                text: _('Cancel'),
                 click: function () {
                     $(this).dialog('close');
                 }
@@ -1221,7 +1221,7 @@ $(document).ready(function () {
         height: 480,
         buttons: [
             {
-                text: 'Anlegen und Bearbeiten',
+                text: _('Create and edit'),
                 click: function () {
                     // TODO RPC
                     var sender = $('#select-link-sender').val();
@@ -1259,7 +1259,7 @@ $(document).ready(function () {
                     $(this).dialog('close');
                 }
             },{
-                text: 'Anlegen',
+                text: _('Create'),
                 click: function () {
                     // TODO RPC
                     var targets = $('#select-link-receiver').val();
@@ -1272,7 +1272,7 @@ $(document).ready(function () {
                 }
             },
             {
-                text: 'Abbrechen',
+                text: _('Cancel'),
                 click: function () {
                     $(this).dialog('close');
                 }
@@ -1336,7 +1336,7 @@ $(document).ready(function () {
         //header: false,
         height: 400,
         selectedList: 2,
-        noneSelectedText: "Bitte einen oder mehrere Kanäle auswählen"
+        noneSelectedText: _('Please choose one or more channels'), //"Bitte einen oder mehrere Kanäle auswählen"
     }).multiselectfilter({
             autoReset: true,
             placeholder: ''
@@ -1351,8 +1351,8 @@ $(document).ready(function () {
 
 
             $(".ui-tabs-nav").
-                append("<button title='Hilfe' class='menu-button' id='button-help'></button>").
-                append("<button title='Einstellungen' value='Theme wählen' class='menu-button' id='button-config'></button>");
+                append("<button title='Help' class='menu-button translateT' id='button-help'></button>").
+                append("<button title='Settings' value='Theme wählen' class='menu-button translateT' id='button-config'></button>");
                // append("<span style='visibility: hidden; width:15px; height:15px; padding-top:5px; margin-right:10px; float:right;'><span title='Kommunikation' id='ajaxIndicator' style='width:15px; height: 15px;' class='ui-icon ui-icon-transfer-e-w'></span></span>");
 
             $('#button-help').button({
@@ -1404,7 +1404,7 @@ $(document).ready(function () {
         sortname:   'timestamp',
         viewrecords: true,
         sortorder:  'desc',
-        caption:    'Geräte',
+        caption:    _('Devices'),
         subGrid:    true,
         subGridRowExpanded: function(grid_id, row_id) {
             subGridChannels(grid_id, row_id);
@@ -1442,7 +1442,7 @@ $(document).ready(function () {
         },
         position: 'first',
         id: 'refresh-device',
-        title: 'Aktualisieren',
+        title: _('Refresh'),
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
@@ -1454,7 +1454,7 @@ $(document).ready(function () {
         },
         position: 'first',
         id: 'del-device',
-        title: 'Gerät löschen',
+        title: _('Delete device'),
         cursor: 'pointer'
     })/* TODO Geräte tauschen .jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
@@ -1497,7 +1497,7 @@ $(document).ready(function () {
         },
         position: 'first',
         id: 'edit-device',
-        title: 'Gerät umbenennen',
+        title: _('Rename device'),
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
@@ -1507,7 +1507,7 @@ $(document).ready(function () {
         },
         position: 'first',
         id: 'add-device',
-        title: 'Geräte anlernen',
+        title: _('Pair devices'),
         cursor: 'pointer'
     }).jqGrid('filterToolbar', {
         defaultSearch: 'cn',
@@ -1624,7 +1624,7 @@ $(document).ready(function () {
         sortname:   'timestamp',
         viewrecords: true,
         sortorder:  'desc',
-        caption:    'Direktverknüpfungen',
+        caption:    _('Links'),
         onSelectRow: function (rowid, iRow, iCol, e) {
             $('#del-link').removeClass('ui-state-disabled');
             $('#rename-link').removeClass('ui-state-disabled');
@@ -1657,7 +1657,7 @@ $(document).ready(function () {
         },
         position: 'first',
         id: 'refresh-link',
-        title: 'Aktualisieren',
+        title: _('Refresh'),
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-links', {
         caption: '',
@@ -1672,7 +1672,7 @@ $(document).ready(function () {
         },
         position: 'first',
         id: 'del-link',
-        title: 'Direktverknüpfung löschen',
+        title: _('Delete Links'),
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-links', {
         caption: '',
@@ -1699,7 +1699,7 @@ $(document).ready(function () {
         },
         position: 'first',
         id: 'edit-link',
-        title: 'Direktverknüpfung bearbeiten',
+        title: _('edit Links'),
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-links', {
         caption: '',
@@ -1728,7 +1728,7 @@ $(document).ready(function () {
         },
         position: 'first',
         id: 'play-link',
-        title: 'Direktverknüpfung testen',
+        title: _('Test link'),
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-links', {
         caption: '',
@@ -1750,7 +1750,7 @@ $(document).ready(function () {
         },
         position: 'first',
         id: 'add-link',
-        title: 'Direktverknüpfung anlegen',
+        title: _('Create Link'),
         cursor: 'pointer'
     });
 
@@ -1940,7 +1940,7 @@ $(document).ready(function () {
         sortname:   'timestamp',
         viewrecords: true,
         sortorder:  'desc',
-        caption:    'Service Messages',
+        caption:    _('Service messages'),
         onSelectRow: function (rowid, iRow, iCol, e) {
             if ($('#grid-messages tr#' + rowid + ' td[aria-describedby="grid-messages_Message"]').html().match(/STICKY/)) {
                 $('#accept-message').removeClass('ui-state-disabled');
@@ -1975,7 +1975,7 @@ $(document).ready(function () {
         },
         //position: 'first',
         id: 'accept-message',
-        title: 'Meldungen bestätigen',
+        title: _('Acknowledge service messages'),
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-messages', {
         caption: '',
@@ -1986,7 +1986,7 @@ $(document).ready(function () {
         },
         //position: 'first',
         id: 'accept-messages',
-        title: 'Alle Meldungen bestätigen',
+        title: _('Acknowledge all service messages'),
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-messages', {
         caption: '',
@@ -1994,7 +1994,7 @@ $(document).ready(function () {
         onClickButton: refreshGridMessages,
         position: 'first',
         id: 'refresh-messages',
-        title: 'Aktualisieren',
+        title: _('Refresh'),
         cursor: 'pointer'
     });
 
@@ -2020,7 +2020,7 @@ $(document).ready(function () {
         sortname:   'timestamp',
         viewrecords: true,
         sortorder:  'desc',
-        caption:    'Interfaces',
+        caption:    _('Interfaces'),
         onSelectRow: function (rowid, iRow, iCol, e) {
 
         },
@@ -2087,7 +2087,7 @@ $(document).ready(function () {
 
     function buildRpcSelect() {
         $('#console-rpc-help').html('');
-        $consoleRpcMethod.html('<option value="null" selected="selected">Bitte eine Methode auswählen</option>');
+        $consoleRpcMethod.html('<option value="null" selected="selected">' + _('Please select method') + '</option>');
         $consoleRpcResponse.html('');
         if (daemon == 'null') {
             $consoleRpcSend.attr('disabled', true).button('refresh');
@@ -2136,7 +2136,7 @@ $(document).ready(function () {
         $('#console-rpc-error').html('');
         setValueDesc = null;
         var method = $consoleRpcMethod.val();
-        $('#console-rpc-method-help').html(rpcMethods[method].help);
+        $('#console-rpc-method-help').html(rpcMethods[method].help[language]);
         var params = rpcMethods[method].params;
         var heading = '<span style="color:#777">' + rpcMethods[method].returns + '</span> ' + method + '(';
         var paramArr = [];
@@ -2186,7 +2186,7 @@ $(document).ready(function () {
                     form += '<tr><td><label for="param_' + i + '">' + params[i].name + '</label></td><td></td><td><select class="param-search" name="param_' + i + '" id="param_' + i + '" class="">' + selectOptions + '</select></td></tr>';
                     break;
                 case 'address':
-                    var selectOptions = '<option value="">Bitte auswählen</option>';
+                    var selectOptions = '<option value="">' + _('Please select') + '</option>';
                     for (var j = 0, len = listDevices.length; j < len; j++) {
                         var name = names[daemon] && names[daemon][listDevices[j].ADDRESS] ? names[daemon][listDevices[j].ADDRESS] : '';
 
@@ -2195,7 +2195,7 @@ $(document).ready(function () {
                     form += '<tr><td><label for="param_' + i + '">' + params[i].name + '</label></td><td></td><td><select class="param-search" name="param_' + i + '" id="param_' + i + '" class="">' + selectOptions + '</select></td></tr>';
                     break;
                 case 'interface_address':
-                    var selectOptions = '<option value="">Bitte auswählen</option>';
+                    var selectOptions = '<option value="">' + _('Please select') + '</option>';
                     for (var j = 0, len = listInterfaces.length; j < len; j++) {
                         selectOptions += '<option value="' + listInterfaces[j].ADDRESS + '">' + listInterfaces[j].ADDRESS + ' ' + listInterfaces[j].TYPE + '</option>';
                     }

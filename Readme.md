@@ -41,6 +41,7 @@ um den Reiter "Ereignisse" zu nutzen), die IP-Adresse auf der der HomeMatic-Mana
 * Direktverknüpfungen kopieren
 * alle Direktverknüpfungen für Backup/Dokumentation exportieren/importieren
 * Geräte tauschen
+* Firmware Updates
 * Alle Servicemeldungen auf einmal bestätigen
 * statt config.json bearbeiten Config-Dialog im UI
 * Konsole: dynamische Eingabefelder für putParamset
@@ -48,6 +49,9 @@ um den Reiter "Ereignisse" zu nutzen), die IP-Adresse auf der der HomeMatic-Mana
 * Doku, Doku, Doku
 
 ## Changelog
+
+### 0.9.3
+* (hobbyquaker) working on english translation
 
 ### 0.9.2
 * (hfedcba) Don't convert boolean values to string (Homegear compatibility)

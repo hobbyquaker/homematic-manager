@@ -254,12 +254,13 @@ $(document).ready(function () {
 
             switch (dataType) {
                 case "BOOL":
+                    val = !!val;
                     break;
                 case "FLOAT":
                     val = {explicitDouble: parseFloat(val)};
                     break;
                 case "INTEGER":
-                    val = parseFloat(val, 10);
+                    val = parseInt(val, 10);
                     break;
                 default:
                     val = '' + val;

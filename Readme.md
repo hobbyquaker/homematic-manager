@@ -54,6 +54,7 @@ um den Reiter "Ereignisse" zu nutzen), die IP-Adresse auf der der HomeMatic-Mana
 * (Hobbyquaker) added CUxD support
 * (Hobbyquaker) added binary rpc support (you have to set listenPortBin in config.json!)
 * (Hobbyquaker) changed xmlrpc module source
+* (Hobbyquaker) RPC Console now uses system.listMethods to fill method select
 * (Hobbyquaker) prepared english translation
 
 ### 0.9.1

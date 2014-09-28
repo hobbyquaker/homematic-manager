@@ -1,54 +1,29 @@
 # HomeMatic-Manager
 
-[English language Readme](Readme.en.md)
+## Documentation
 
-## Dokumentation
-
-Der HomeMatic-Manager ist ein Web-Interface für [HomeMatic](http://www.homematic.com)-Schnittstellenprozesse 
+The HomeMatic-Manager is a web interface for [HomeMatic](http://www.homematic.com)-interface processes 
 (rfd, hs485d, CUxD, [Homegear](http://www.homegear.eu)). 
 
-Mit dem HomeMatic-Manager ist es möglich Geräte an- und abzumelden, Geräte-Konfigurationen und Direktverknüpfungen zu 
-Verwalten, Funk-Geräte zu bestimmten Interfaces zuzuordnen sowie das Roaming an- und auszuschalten und vieles mehr.
-
+With HomeMatic-Manager it's possible to pair and delete devices, do device configurations and manage links. Furthermore
+you can assign RF devices to specific interfaces, activate/deacativate roaming and many more.
 
 ### Installation
 
-* homematic-manager benötigt eine [Node.js](http://nodejs.org/download/) Installation
-* Repository clonen oder [Zip-File](https://github.com/hobbyquaker/homematic-manager/archive/master.zip) herunterladen und auspacken
-* In das homematic-manager Verzeichnis wechseln
-* Node-Module installieren: ``npm install``
+* homematic-manager needs a [Node.js](http://nodejs.org/download/) installation
+* clone the repository or download and unpack the [Zip-File](https://github.com/hobbyquaker/homematic-manager/archive/master.zip) 
+* change into the HomeMatic-Manager directory
+* install node modules: ``npm install``
 
-### Konfiguration
+### Configuration
 
-#### config.json (bzw. vor dem ersten Start config-default.json) bearbeiten:
+#### edit config.json (resepectivly config-default.json before the first start) 
 
-IP Adressen auf der die Schnttstellenprozesse rfd/hs485d erreichbar sind (CCU- bzw. BidCoS®-Service IP-Adresse) anpassen. 
-Falls es sich um eine CCU handelt kann der Parameter ````isCcu```` auf ````true```` gesetzt werden, dann werden die Namen 
-von Geräten und Kanälen aus der CCU-Logikschicht "ReGaHSS" ausgelesen und das binäre RPC Protokoll anstatt XLM-RPC genutzt. 
-
-Ausserdem muss, falls bei einem Schnittstellenprozess der Parameter ````init```` auf ````true```` gesetzt wurde (notwendig 
-um den Reiter "Ereignisse" zu nutzen), die IP-Adresse auf der der HomeMatic-Manager selbst erreichbar ist unter 
-````rpcListenIp```` eingetragen werden.
-
-
-### HomeMatic Manager starten
+### start HomeMatic-Manager 
 
 * ```node hm-manager.js start``` 
-* [http://127.0.0.1:8081](http://127.0.0.1:8081) aufrufen
+* open [http://127.0.0.1:8081](http://127.0.0.1:8081)
 
-## Todo
-
-* Direktverknüpfungen Easymodes
-* Direktverknüpfungen Profilvorlagen
-* Direktverknüpfungen kopieren
-* alle Direktverknüpfungen für Backup/Dokumentation exportieren/importieren
-* Geräte tauschen
-* Firmware Updates
-* Alle Servicemeldungen auf einmal bestätigen
-* statt config.json bearbeiten Config-Dialog im UI
-* Konsole: dynamische Eingabefelder für putParamset
-* Geräte deaktiveren/aktivieren (Ablernen mit speichern aller Paramsets und Links - schwierig in Verbindung mit Rega...)
-* Doku, Doku, Doku
 
 ## Changelog
 

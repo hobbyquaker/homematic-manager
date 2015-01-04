@@ -105,7 +105,6 @@
     // thx for the logic here ben alman
     _handler: function(e) {
       var term = $.trim(this.input[0].value.toLowerCase()),
-
       // speed up lookups
       rows = this.rows, inputs = this.inputs, cache = this.cache;
 
@@ -139,6 +138,12 @@
 
     _reset: function() {
       this.input.val('').trigger('keyup');
+    },
+
+    _allowInteraction: function() {
+      if ($(event.target).closest(".ui-multiselect-menu").length) {
+        return true;
+      }
     },
 
     updateCache: function() {

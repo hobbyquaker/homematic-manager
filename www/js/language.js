@@ -7,7 +7,7 @@ var translation = {
     "Save":             {"de": "Speichern"},
     "Create and edit":  {"de": "Anlegen und Bearbeiten"},
     "Create":           {"de": "Anlegen"},
-    "Please choose one or more channels":        {"de": "Bitte einen oder mehere Kanäle auswählen"},
+    "Please choose one or more channels":        {"de": "Bitte einen oder mehrere Kanäle auswählen"},
     "Refresh":          {"de": "Aktualisieren"},
     "Delete device":    {"de": "Gerät löschen"},
     "Rename device":    {"de": "Gerät umbenennen"},

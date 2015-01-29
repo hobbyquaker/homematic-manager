@@ -1326,9 +1326,9 @@ $(document).ready(function () {
         selectedList: 1,
         minWidth: 480
     }).multiselectfilter({
-            autoReset: true,
-            placeholder: ''
-        });
+        autoReset: true,
+        placeholder: 'Text eingeben, um zu suchen'
+    });
     $('#select-link-receiver').multiselect({
         classes: 'link-receiver',
         multiple: true,
@@ -1336,11 +1336,11 @@ $(document).ready(function () {
         //header: false,
         height: 400,
         selectedList: 2,
-        noneSelectedText: _('Please choose one or more channels'), //"Bitte einen oder mehrere Kanäle auswählen"
+        noneSelectedText: _('Please choose one or more channels') //"Bitte einen oder mehrere Kanäle auswählen"
     }).multiselectfilter({
-            autoReset: true,
-            placeholder: ''
-        });
+        autoReset: true,
+        placeholder: ''
+    });
 
     // Tabs
     $('#tabs-main').tabs({
@@ -1747,6 +1747,15 @@ $(document).ready(function () {
             $('#link-target-roles').html('');
 
             $('#dialog-add-link').dialog('open');
+
+            //fix damit der filter auch im dialog bedient werden kann, siehe http://stackoverflow.com/questions/16683512/jquery-ui-multiselect-widget-search-filter-not-receiving-focus-when-in-a-jquery
+            if ($.ui && $.ui.dialog && $.ui.dialog.prototype._allowInteraction) {
+                var ui_dialog_interaction = $.ui.dialog.prototype._allowInteraction;
+                $.ui.dialog.prototype._allowInteraction = function(e) {
+                    if ($(e.target).closest('.ui-multiselect-filter input').length) return true;
+                    return ui_dialog_interaction.apply(this, arguments);
+                };
+            }
         },
         position: 'first',
         id: 'add-link',

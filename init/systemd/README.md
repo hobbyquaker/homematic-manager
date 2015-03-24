@@ -8,11 +8,11 @@ How to install and use:
 * Edit `homematic-manager.service` to fit your install location, if it is not `/opt/homematic-manager`
 * Optional: if you chaned the user name from hm-man to something else, you need to edit the .service file to fit this username
 * Copy it to `/lib/systemd/system/homematic-manager.service`
-* Reload: `systemd daemon-reload`
-* Enable: `systemd enable homematic-manager`
+* Reload: `systemctl daemon-reload`
+* Enable: `systemctl enable homematic-manager`
 
 Use it the usual way:
-* `systemd start homematic-manager`
-* `systemd stop homematic-manager`
-* `systemd status homematic-manager`
+* `systemctl start homematic-manager`
+* `systemctl stop homematic-manager`
+* `systemctl status homematic-manager`
 

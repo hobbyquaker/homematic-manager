@@ -1,0 +1,17 @@
+[Unit]
+Description=HomeMatic Manager
+Before=runlevel2.target runlevel3.target runlevel4.target runlevel5.target shutdown.target
+After=remote-fs.target systemd-journald-dev-log.socket network-online.target
+Wants=network-online.target
+Conflicts=shutdown.target
+
+[Service]
+User=hm-man
+Type=forking
+PIDFile=/opt/homematic-manager/hm-manager.pid
+RemainAfterExit=yes
+ExecStart=/usr/bin/nodejs /opt/homematic-manager/hm-manager.js start
+ExecStop=/usr/bin/nodejs /opt/homematic-manager/hm-manager.js stop
+
+[Install]
+WantedBy=multi-user.target

@@ -24,7 +24,7 @@ Verwalten, Funk-Geräte zu bestimmten Interfaces zuzuordnen sowie das Roaming an
 
 IP Adressen auf der die Schnttstellenprozesse rfd/hs485d erreichbar sind (CCU- bzw. BidCoS®-Service IP-Adresse) anpassen. 
 Falls es sich um eine CCU handelt kann der Parameter ````isCcu```` auf ````true```` gesetzt werden, dann werden die Namen 
-von Geräten und Kanälen aus der CCU-Logikschicht "ReGaHSS" ausgelesen und das binäre RPC Protokoll anstatt XLM-RPC genutzt. 
+von Geräten und Kanälen aus der CCU-Logikschicht "ReGaHSS" ausgelesen und das binäre RPC Protokoll anstatt XML-RPC genutzt. 
 
 Ausserdem muss, falls bei einem Schnittstellenprozess der Parameter ````init```` auf ````true```` gesetzt wurde (notwendig 
 um den Reiter "Ereignisse" zu nutzen), die IP-Adresse auf der der HomeMatic-Manager selbst erreichbar ist unter 

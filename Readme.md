@@ -5,7 +5,7 @@
 ## Dokumentation
 
 Der HomeMatic-Manager ist ein Web-Interface für [HomeMatic](http://www.homematic.com)-Schnittstellenprozesse 
-(rfd, hs485d, CUxD, [Homegear](http://www.homegear.eu)). 
+(rfd, hs485d, [Homegear](http://www.homegear.eu)).
 
 Mit dem HomeMatic-Manager ist es möglich Geräte an- und abzumelden, Geräte-Konfigurationen und Direktverknüpfungen zu 
 Verwalten, Funk-Geräte zu bestimmten Interfaces zuzuordnen sowie das Roaming an- und auszuschalten und vieles mehr.
@@ -44,13 +44,17 @@ um den Reiter "Ereignisse" zu nutzen), die IP-Adresse auf der der HomeMatic-Mana
 * alle Direktverknüpfungen für Backup/Dokumentation exportieren/importieren
 * Geräte tauschen
 * Firmware Updates
-* Alle Servicemeldungen auf einmal bestätigen
 * statt config.json bearbeiten Config-Dialog im UI
 * Konsole: dynamische Eingabefelder für putParamset
 * Geräte deaktiveren/aktivieren (Ablernen mit speichern aller Paramsets und Links - schwierig in Verbindung mit Rega...)
 * Doku, Doku, Doku
 
 ## Changelog
+
+### 0.9.4
+* (Anli) Alle Servicemeldungen auf einmal bestätigen
+* (Anli) Hilfe ergänzt, Hilfs-Popups auch bei MASTER-Paramsets
+* (Anli) diverse Fixes
 
 ### 0.9.3
 * (hobbyquaker) working on english translation

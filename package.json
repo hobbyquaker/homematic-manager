@@ -1,7 +1,6 @@
 {
     "name": "homematic-manager",
-    "version": "0.9.2",
-    "private": true,
+    "version": "0.9.3",
     "dependencies": {
         "encoding": "~0.1.8",
         "express": "~4.1.0",

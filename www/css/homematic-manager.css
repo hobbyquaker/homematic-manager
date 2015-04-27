@@ -149,3 +149,23 @@ textarea {
 .event-column-5 {
     width: 15%;
 }
+
+.paramset-1 {
+    width: 300px;
+    text-align: left;
+}
+
+.paramset-2 {
+    width: 30px;
+    text-align: left;
+}
+
+.paramset-3 {
+    width: 330px;
+    text-align: left;
+}
+
+.paramset-4 {
+    width: 200px;
+    text-align: left;
+}

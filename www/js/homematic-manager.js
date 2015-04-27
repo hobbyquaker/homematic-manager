@@ -160,7 +160,8 @@ $(document).ready(function () {
             var count = 0;
             for (var daemon in config.daemons) {
                 count += 1;
-                $('#select-bidcos-daemon').append('<option value="' + daemon + '"' + (hash == daemon ? ' selected' : '') + '>' + daemon + ' (' + (config.daemons[daemon].isCcu ? 'xmlrpc_bin://' : 'http://') + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
+                //$('#select-bidcos-daemon').append('<option value="' + daemon + '"' + (hash == daemon ? ' selected' : '') + '>' + daemon + ' (' + (config.daemons[daemon].isCcu ? 'xmlrpc_bin://' : 'http://') + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
+                $('#select-bidcos-daemon').append('<option value="' + daemon + '"' + (hash == daemon ? ' selected' : '') + '>' + daemon + ' (' + 'http://' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')</option>');
             }
 
             if (count == 1) {
@@ -544,7 +545,7 @@ $(document).ready(function () {
         var name = (names[daemon] && names[daemon][sender] ? names[daemon][sender] : '');
 
         if (names[daemon] && names[daemon][receiver]) {
-            name = names[daemon][receiver] + ' -> ' + name;
+            name = name + ' -> ' + names[daemon][receiver];
         }
 
         name += ' (PARAMSET ' + sender + ' ' + receiver + ')';
@@ -560,6 +561,9 @@ $(document).ready(function () {
 
         $('#dialog-linkparamset').dialog('open');
         $('#dialog-linkparamset').tooltip({
+            open: function (event, ui) {
+                ui.tooltip.css("max-width", "500px");
+            },
             content: function () {
                 return $(this).prop('title');
             }
@@ -597,7 +601,8 @@ $(document).ready(function () {
     }
 
     function buildParamsetTable(elem, data, desc, direction) {
-        elem.show().html('<tr><th>Param</th><th>&nbsp;</th><th>Value</th><th>Default</th><th></th></tr>');
+        console.log('buildParamsetTable', data, desc, direction);
+        elem.show().html('<tr><th class="paramset-1">Param</th><th class="paramset-2">&nbsp;</th><th class="paramset-3">Value</th><th class="paramset-4">Default</th><th></th></tr>');
         var count = 0;
         for (var param in data) {
             var unit = '';
@@ -621,7 +626,12 @@ $(document).ready(function () {
                 // Create Input-Field
                 var input;
                 var helpentry = help_linkParamset[language] && help_linkParamset[language][param.replace('SHORT_', '').replace('LONG_', '')];
-                var help = (helpentry ? helpentry.helpText : '');
+                var help;
+                if (helpentry && helpentry.helpText) {
+                    help = helpentry.helpText;
+                } else {
+                    help = helpentry || '';
+                }
 
                 switch (desc[param].TYPE) {
                     case 'BOOL':
@@ -641,7 +651,7 @@ $(document).ready(function () {
                                 if (helpentry.params[desc[param].VALUE_LIST[i]]) {
                                     help += '<li><strong>' + desc[param].VALUE_LIST[i] + '</strong>: ' + helpentry.params[desc[param].VALUE_LIST[i]] + (i < desc[param].MAX ? '<br/>' : '');
                                 } else {
-                                    help += '<li><strong>' + desc[param].VALUE_LIST[i] + '</strong>: ?';
+                                    help += '<li><strong>' + desc[param].VALUE_LIST[i] + '</strong>';
                                 }
                                 if (i == desc[param].MAX) {
                                     help += '</ul>';
@@ -669,8 +679,10 @@ $(document).ready(function () {
     }
 
     function paramsetDialog(data, desc, address, paramset) {
+        console.log('paramsetDialog', data, desc, address, paramset);
+
         // Tabelle befüllen
-        $('#table-paramset').show().html('<tr><th>Param</th><th>Value</th><th>Default</th><th></th></tr>');
+        $('#table-paramset').show().html('<tr><th class="paramset-1">Param</th><th class="paramset-2">&nbsp;</th><th class="paramset-3">Value</th><th class="paramset-4">Default</th><th></th></tr>');
         var count = 0;
         for (var param in data) {
             var unit = '';
@@ -693,6 +705,13 @@ $(document).ready(function () {
 
                 // Create Input-Field
                 var input;
+                var helpentry = help_linkParamset[language] && help_linkParamset[language][param.replace('SHORT_', '').replace('LONG_', '')];
+                var help;
+                if (helpentry && helpentry.helpText) {
+                    help = helpentry.helpText;
+                } else {
+                    help = helpentry || '';
+                }
 
                 switch (desc[param].TYPE) {
                     case 'BOOL':
@@ -705,6 +724,24 @@ $(document).ready(function () {
                         input = '<select data-address="' + address + '" data-paramset="' + paramset + '" data-param="' + param + '" data-val-prev="' + data[param] + '" data-type="INTEGER" id="paramset-input-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
                         for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
                             input += '<option value="' + i + '"' + (data[param] == i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
+                            if (helpentry) {
+                                if (i == desc[param].MIN) {
+                                    help += '<br/><ul>';
+                                }
+                                if (helpentry.params[desc[param].VALUE_LIST[i]]) {
+                                    help += '<li><strong>' + desc[param].VALUE_LIST[i] + '</strong>: ' + helpentry.params[desc[param].VALUE_LIST[i]] + (i < desc[param].MAX ? '<br/>' : '');
+                                } else {
+                                    help += '<li><strong>' + desc[param].VALUE_LIST[i] + '</strong>';
+                                }
+                                if (i == desc[param].MAX) {
+                                    help += '</ul>';
+                                }
+                            }
+                        }
+                        if (param == 'DISPLAY_INFORMATION') {
+                            input += '<option value="2"' + (data[param] == 2 ? ' selected="selected"' : '') + '>VENT_POSITION</option>';
+                            input += '<option value="3"' + (data[param] == 3 ? ' selected="selected"' : '') + '>ACTUAL_TEMPERATURE</option>';
+
                         }
                         input += '</select>';
                         defaultVal = desc[param].VALUE_LIST[defaultVal];
@@ -716,15 +753,18 @@ $(document).ready(function () {
                         input = '<input data-address="' + address + '" data-paramset="' + paramset + '" data-param="' + param + '" data-val-prev="' + data[param] + '" data-type="STRING" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                 }
 
+                var helpIcon = help ? '<img src="images/help.png" width="16" height="16" title="' + help + '">' : '';
+
+
                 // Paramset VALUES?
                 if (paramset == 'VALUES' && (desc[param].OPERATIONS & 2)) {
-                    $('#table-paramset').append('<tr><td>' + param + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
+                    $('#table-paramset').append('<tr><td>' + param + '</td><td>' + helpIcon + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
                 } else {
-                    $('#table-paramset').append('<tr><td>' + param + '</td><td>' + input + '</td><td colspan="2">' + defaultVal + unit + '</td></tr>');
+                    $('#table-paramset').append('<tr><td>' + param + '</td><td>' + helpIcon + '</td><td>' + input + '</td><td colspan="2">' + defaultVal + unit + '</td></tr>');
                 }
 
             } else {
-                $('#table-paramset').append('<tr><td>' + param + '</td><td colspan = "3">' + data[param] + '</td></tr>');
+                $('#table-paramset').append('<tr><td>' + param + '</td><td>' + helpIcon + '</td><td colspan = "3">' + data[param] + '</td></tr>');
             }
         }
 
@@ -747,7 +787,16 @@ $(document).ready(function () {
         // Buttons
         $('button.paramset-setValue:not(.ui-button)').button();
 
+
         $('#dialog-paramset').dialog('open');
+        $('#dialog-paramset').tooltip({
+            open: function (event, ui) {
+                ui.tooltip.css("max-width", "500px");
+            },
+            content: function () {
+                return $(this).prop('title');
+            }
+        });
     }
 
     function deleteLinkDialog(sender, receiver, name, desc, rowId) {
@@ -1395,7 +1444,7 @@ $(document).ready(function () {
             //{name:'VERSION',index:'VERSION', width:60, fixed: true, align:'right'}
         ],
         datatype:   'local',
-        rowNum:     25,
+        rowNum:     100,
         autowidth:  true,
         width:      '1000',
         height:     600,
@@ -1456,7 +1505,8 @@ $(document).ready(function () {
         id: 'del-device',
         title: _('Delete device'),
         cursor: 'pointer'
-    })/* TODO Geräte tauschen .jqGrid('navButtonAdd', '#pager-devices', {
+    })/* TODO Geräte tauschen
+    .jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
         buttonicon: 'ui-icon-transfer-e-w',
         onClickButton: function () {
@@ -1467,7 +1517,34 @@ $(document).ready(function () {
         id: 'replace-device',
         title: 'Gerät tauschen',
         cursor: 'pointer'
-    })*/.jqGrid('navButtonAdd', '#pager-devices', {
+    })
+     .jqGrid('navButtonAdd', '#pager-devices', {
+         caption: '',
+         buttonicon: 'ui-icon-script',
+         onClickButton: function () {
+         var address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
+         alert('update ' + address);
+         },
+         position: 'first',
+         id: 'replace-device',
+         title: 'Update Firmware',
+         cursor: 'pointer'
+     })
+
+     .jqGrid('navButtonAdd', '#pager-devices', {
+         caption: '',
+         buttonicon: 'ui-icon-ui-icon-arrowstop-1-s',
+         onClickButton: function () {
+         var address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
+         alert('update ' + address);
+         },
+         position: 'first',
+         id: 'replace-device',
+         title: 'restoreConfigToDevice',
+         cursor: 'pointer'
+     })
+
+    */.jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
         buttonicon: 'ui-icon-pencil',
         onClickButton: function () {
@@ -1966,7 +2043,6 @@ $(document).ready(function () {
         caption: '',
         buttonicon: 'ui-icon-check',
         onClickButton: function () {
-            // TODO Servicemeldung bestätigen
             var address = $('#grid-messages tr#' + $gridMessages.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-messages_ADDRESS"]').html();
             var key = $('#grid-messages tr#' + $gridMessages.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-messages_Message"]').html();
             socket.emit('rpc', daemon, 'setValue', [address, key, false], function (err, data) {
@@ -1981,8 +2057,27 @@ $(document).ready(function () {
         caption: '',
         buttonicon: 'ui-icon-circle-check',
         onClickButton: function () {
-            // TODO Alle Servicemeldungen bestätigen
-            alert('TODO');
+            var acceptQueue = [];
+            for (var i = 0, len = listMessages.length; i < len; i++) {
+                var address = listMessages[i][0];
+                if (listMessages[i][1].match(/STICKY/)) {
+                    acceptQueue.push([address, listMessages[i][1], false]);
+                }
+            }
+
+            function popQueue() {
+                var params = acceptQueue.pop();
+                socket.emit('rpc', daemon, 'setValue', params, function (err, data) {
+                    if (acceptQueue.length > 0)  {
+                        popQueue();
+                    } else {
+                        loadRfdStuff();
+                    }
+                });
+            }
+
+            popQueue();
+
         },
         //position: 'first',
         id: 'accept-messages',
@@ -2383,6 +2478,42 @@ $(document).ready(function () {
             initDaemon();
         }
     }
+
+
+    $("#grid-devices").contextmenu({
+        delegate: ".jqgrow",
+        menu: [
+            {title: "Umbenennen", cmd: "rename", uiIcon: "ui-icon-pencil"},
+            {title: "MASTER Paramset", cmd: "paramsetMaster", uiIcon: "ui-icon-gear"},
+            {title: "VALUES Paramset", cmd: "paramsetValues", uiIcon: "ui-icon-gear"},
+            {title: "----"},
+            {title: "restoreConfigToDevice", cmd: "restoreConfigToDevice", uiIcon: "ui-icon-comment"},
+            {title: "clearConfigCache", cmd: "clearConfigCache", uiIcon: "ui-icon-refresh"},
+            {title: "----"},
+            {title: "updateFirmware", cmd: "updateFirmware", uiIcon: "ui-icon-script"},
+            {title: "Tauschen", cmd: "replace", uiIcon: "ui-icon-transfer-e-w"},
+            {title: "Löschen", cmd: "delete", uiIcon: "ui-icon-trash"}
+
+        ],
+        select: function(event, ui) {
+            alert("select " + ui.cmd + " on " + ui.target.text());
+        }
+    });
+
+    $("#grid-links").contextmenu({
+        delegate: ".jqgrow",
+        menu: [
+            {title: "Umbenennen", cmd: "rename", uiIcon: "ui-icon-pencil"},
+            {title: "LINK Paramset", cmd: "paramset", uiIcon: "ui-icon-gear"},
+            {title: "----"},
+            {title: "Löschen", cmd: "delete", uiIcon: "ui-icon-trash"}
+
+        ],
+        select: function(event, ui) {
+            alert("select " + ui.cmd + " on " + ui.target.attr('id'));
+        }
+    });
+
 
 });
 })(jQuery);

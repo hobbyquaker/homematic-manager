@@ -1,12 +1,47 @@
 {
-    "name": "homematic-manager",
-    "version": "0.9.3",
-    "dependencies": {
-        "encoding": "~0.1.8",
-        "express": "~4.1.0",
-        "socket.io": "~0.9.0",
-        "homematic-xmlrpc": ">=1.0.0",
-        "binrpc": ">=0.0.2",
-        "daemonize2": "~0.4.2"
-    }
+  "name": "homematic-manager",
+  "version": "1.0.1",
+  "private": true,
+  "dependencies": {
+    "daemonize2": "~0.4.2",
+    "encoding": "~0.1.8",
+    "express": "^4.12.3",
+    "homematic-xmlrpc": ">=1.0.0",
+    "socket.io": "^1.3.5"
+  },
+  "devDependencies": {
+    "html-entities": "^1.1.2"
+  },
+  "description": "The HomeMatic-Manager is a web interface for [HomeMatic](http://www.homematic.com)-interface processes \r (rfd, hs485d, [Homegear](http://www.homegear.eu)).",
+  "main": "hm-manager.js",
+  "bin": {
+    "hm-manager": "./hm-manager.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hobbyquaker/homematic-manager"
+  },
+  "keywords": [
+    "HomeMatic",
+    "BidCoS",
+    "eQ-3",
+    "rfd",
+    "hs485d",
+    "Homegear",
+    "RPC",
+    "Smarthome"
+  ],
+  "author": "Sebastian 'hobbyquaker' Raff <hq@ccu.io>",
+  "contributors": [
+    "André 'Anli' Litfin"
+
+  ],
+  "license": "CC-BY-NC 4.0",
+  "bugs": {
+    "url": "https://github.com/hobbyquaker/homematic-manager/issues"
+  },
+  "homepage": "https://github.com/hobbyquaker/homematic-manager"
 }

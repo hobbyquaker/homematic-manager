@@ -4,7 +4,7 @@ html {
 
 body {
     font-size: 12px;
-    min-width: 1200px;
+    min-width: 1024px;
     min-height: 584px;
     margin: 0;
     padding: 0;
@@ -50,7 +50,6 @@ tr.ui-row-ltr {
 #select-bidcos-daemon {
     margin-top: 4px;
     margin-right: 6px;
-    width: 360px;
 }
 
 li.header {
@@ -92,7 +91,12 @@ button.paramset {
 
 }
 
-button.paramset span.ui-button-text {
+button.paramset.link span.ui-button-text, #save-link-info span.ui-button-text {
+    font-size: 11px;
+    width: 100px;
+}
+
+button.paramset.device-table span.ui-button-text {
     padding: 1px 3px 1px 3px;
 }
 
@@ -168,4 +172,52 @@ textarea {
 .paramset-4 {
     width: 200px;
     text-align: left;
+}
+
+/*
+#tabs-main {
+    background: transparent;
+    border: none;
+}
+#tabs-main .ui-widget-header {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #c0c0c0;
+    -moz-border-radius: 0px;
+    -webkit-border-radius: 0px;
+    border-radius: 0px;
+}
+#tabs-main .ui-tabs-nav .ui-state-default {
+    background: transparent;
+    border: none;
+}
+#tabs-main .ui-tabs-nav .ui-state-active {
+    background: transparent url(../images/uiTabsArrow.png) no-repeat bottom center;
+    border: none;
+}
+#tabs-main .ui-tabs-nav .ui-state-default a {
+    color: #c0c0c0;
+}
+#tabs-main .ui-tabs-nav .ui-state-active a {
+    color: #459e00;
+}
+
+*/
+
+#table-easymode tr {
+    height: 24px;
+}
+
+.easymode-select-input {
+    margin-right: 4px;
+}
+
+.rssi-cell {
+    width: calc(100% + 4px);
+    height: 100%;
+    margin-left: -4px;
+    display: inline-block;
+    text-align: right;
+    padding-right: 2px;
+    padding-top: 3px;
 }

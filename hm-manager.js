@@ -1,9 +1,10 @@
+#!/usr/bin/env node
 /**
  *      homematic-manager
  *
- *  Copyright (c) 2014 Anli, Hobbyquaker
+ *  Copyright (c) 2014-2015 Anli, Hobbyquaker
  *
- *  CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+ *  MIT
  *
  */
 

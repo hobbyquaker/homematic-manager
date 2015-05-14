@@ -1,55 +1,84 @@
-# HomeMatic-Manager
+# HomeMatic Manager
 
 [English language Readme](Readme.en.md)
 
 ## Dokumentation
 
-Der HomeMatic-Manager ist ein Web-Interface für [HomeMatic](http://www.homematic.com)-Schnittstellenprozesse 
+Der HomeMatic Manager ist ein Web-Interface für [HomeMatic](http://www.homematic.com)-Schnittstellenprozesse
 (rfd, hs485d, [Homegear](http://www.homegear.eu)).
 
-Mit dem HomeMatic-Manager ist es möglich Geräte an- und abzumelden, Geräte-Konfigurationen und Direktverknüpfungen zu 
-Verwalten, Funk-Geräte zu bestimmten Interfaces zuzuordnen sowie das Roaming an- und auszuschalten und vieles mehr.
+Mit dem HomeMatic Manager ist es möglich Geräte an- und abzumelden, Geräte-Konfigurationen und Direktverknüpfungen zu
+Verwalten und vieles mehr.
 
 
 ### Installation
 
-* homematic-manager benötigt eine [Node.js](http://nodejs.org/download/) Installation
-* Repository clonen oder [Zip-File](https://github.com/hobbyquaker/homematic-manager/archive/master.zip) herunterladen und auspacken
-* In das homematic-manager Verzeichnis wechseln
-* Node-Module installieren: ``npm install``
+
+* homematic-manager setzt eine [Node.js](http://nodejs.org/download/) Installation inkl. npm voraus.
+* Installation: ````sudo npm install -g homematic-manager````
 
 ### Konfiguration
 
-#### config.json (bzw. vor dem ersten Start config-default.json) bearbeiten:
+#### conf/settings.json (bzw. vor dem ersten Start conf/settings-default.json) bearbeiten:
 
 IP Adressen auf der die Schnttstellenprozesse rfd/hs485d erreichbar sind (CCU- bzw. BidCoS®-Service IP-Adresse) anpassen. 
-Falls es sich um eine CCU handelt kann der Parameter ````isCcu```` auf ````true```` gesetzt werden, dann werden die Namen 
-von Geräten und Kanälen aus der CCU-Logikschicht "ReGaHSS" ausgelesen und das binäre RPC Protokoll anstatt XLM-RPC genutzt. 
 
-Ausserdem muss, falls bei einem Schnittstellenprozess der Parameter ````init```` auf ````true```` gesetzt wurde (notwendig 
-um den Reiter "Ereignisse" zu nutzen), die IP-Adresse auf der der HomeMatic-Manager selbst erreichbar ist unter 
-````rpcListenIp```` eingetragen werden.
+Ausserdem muss die IP-Adresse auf der der HomeMatic-Manager selbst erreichbar ist unter ````rpcListenIp```` eingetragen werden.
 
 
 ### HomeMatic Manager starten
 
-* ```node hm-manager.js start``` 
+* ```hm-manager start```
 * [http://127.0.0.1:8081](http://127.0.0.1:8081) aufrufen
 
 ## Todo
 
-* Direktverknüpfungen Easymodes
-* Direktverknüpfungen Profilvorlagen
-* Direktverknüpfungen kopieren
-* alle Direktverknüpfungen für Backup/Dokumentation exportieren/importieren
+* Anlernen mit temporären Key
+* Übersetzungen vervollständigen (fehlende Texte werden in Browser-Console gelistet)
+* stringtable und .js-Sprachfiles aus OCCU importieren, Übersetzung Servicemeldungen, Übersetzung Params aus MASTER-Paramsets
+* Direktverknüpfungen Profilvorlagen anlegen und anwenden
+* Direktverknüpfungen Easymodes vervollständigen (WINMATIC)
+* Direktverknüpfungen Easymodes Sonderbehandlung Wired (HMW_*)
+* Direktverknüpfungen Easymodes testen
+* Nach dem Anlernen im Dialog "new Device" direkt Name vergeben
 * Geräte tauschen
-* Firmware Updates
-* statt config.json bearbeiten Config-Dialog im UI
-* Konsole: dynamische Eingabefelder für putParamset
-* Geräte deaktiveren/aktivieren (Ablernen mit speichern aller Paramsets und Links - schwierig in Verbindung mit Rega...)
-* Doku, Doku, Doku
+* Geräte deaktiveren/aktivieren (Ablernen mit speichern aller Paramsets und Links für spätere Wiederherstellung?)
+* Mehrere (Link-)Paramsets auf einmal bearbeiten
+* STICKY_UNREACH automatisch bestätigen und für jedes Gerät einen Unreach-Counter speichern (Anzeige im Tab Funk)
+* RPC-Konsole: dynamische Eingabefelder für putParamset
+* Namen ändern direkt in den Grids ("inline-edit")?
+* i18n überarbeiten. Sprachfiles nach Sprachen auftrennen und nur notwendige Übersetzung laden
+* Übersetzungsmethode _() erweitern: Singular/Plural, printf-like string-insertion
+* Anderes Konzept ausdenken für Texte die in .html Datei stecken
+* CSS aus index.html entfernen und in homematic-manager.css packen
+* statt settings.json Config-Dialog im UI
+* Auftrennen Webserver und hm-manager, Plugin-Konzept
+#### Integration Schnittstellenprozesse
+* rfd/hs485d Konfiguration über UI (Interfaces hinzufügen/entfernen, Loglevel)
+* Sicherheitsschlüssel setzen
+* Prozessmanager integrieren für rfd/hs485d
+* Backup/Restore
+* Upload Firmwareupdate Dateien über UI
+
 
 ## Changelog
+
+### 1.0.2
+* (hobbyquaker) diverse Fixes und Verbesserungen
+
+### 1.0.1
+* (hobbyquaker) diverse Fixes und Verbesserungen
+* (hobbyquaker) cleanup, refactoring
+
+### 1.0.0
+* (hobbyquaker) Direktverknüpfungen Easymodes
+* (hobbyquaker) Kontext-Menüs
+* (hobbyquaker) CUxD/BIN-RPC Unterstützung rausgeworfen
+* (hobbyquaker) Rega Unterstützung rausgeworfen (Geräte-/Kanal-Namen können manuell über tools/import_rega_names.js importiert werden)
+* (hobbyquaker) RSSI-Tabelle Hintergrundfarben je nach RSSI-Wert
+* (hobbyquaker) Installation als Node-Modul
+* (hobbyquaker) diverse Fixes und Verbesserungen
+
 
 ### 0.9.4
 * (Anli) Alle Servicemeldungen auf einmal bestätigen
@@ -138,7 +167,7 @@ um den Reiter "Ereignisse" zu nutzen), die IP-Adresse auf der der HomeMatic-Mana
 
 ## Lizenz
 
-Copyright (c) 2014 Anli, Hobbyquaker
+Copyright (c) 2014, 2015 Anli, Hobbyquaker
 
 [CC BY-NC-SA 4.0](http://creativecommons.org/licenses/by-nc-sa/4.0/)
 

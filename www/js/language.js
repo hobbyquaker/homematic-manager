@@ -12,12 +12,12 @@ var translation = {
     "Delete device":    {"de": "Gerät löschen"},
     "Rename device":    {"de": "Gerät umbenennen"},
     "Pair devices":     {"de": "Geräte anlernen"},
-    "Links":            {"de": "Direktverknüpfungen"},
-    "Delete Links":     {"de": "Direktverknüpfung löschen"},
-    "edit Links":       {"de": "Direktverknüpfung bearbeiten"},
-    "Test link":        {"de": "Direktverknüpfung testen"},
-    "Create Link":      {"de": "Direktverknüpfung anlegen"},
-    "RSSI":             {"de": "RSSI"},
+    "Links":            {"de": "Verknüpfungen"},
+    "Delete link":     {"de": "Verknüpfung löschen"},
+    "Edit link":       {"de": "Verknüpfung bearbeiten"},
+    "Test link":        {"de": "Verknüpfung testen"},
+    "Create link":      {"de": "Verknüpfung anlegen"},
+    "RSSI":             {"de": "Funk"},
     "RPC Console":      {"de": "RPC Konsole"},
     "Service messages": {"de": "Servicemeldungen"},
     "Send request":     {"de": "Befehl senden"},
@@ -30,34 +30,29 @@ var translation = {
     "Interfaces":       {"de": "Interfaces"},
     "Edit device":      {"de": "Gerät bearbeiten"},
     "undefined":        {"de": "undefined"},
-    "Please select method":                 {"de": "Bitte eine Methode auswählen"}
+    "Please select method":                 {"de": "Bitte eine Methode auswählen"},
+    "saveAsNewTemplate":{"de":"als neue Profilvorlage speichern","en":"saveAsNewTemplate"},
+    "Replace device":{"de":"Gerät tauschen","en":"Replace device"},
+    "Update firmware":{"de":"Firmware aktualisieren","en":"Update firmware"},
+    "clearConfigCache":{"de":"clearConfigCache","en":"clearConfigCache"},
+    "restoreConfigToDevice":{"de":"restoreConfigToDevice","en":"restoreConfigToDevice"},
+    "Rename":{"de":"Umbenennen","en":"Rename"},
+    "MASTER Paramset":{"de":"MASTER Paramset","en":"MASTER Paramset"},
+    "updateFirmware":{"de":"Firmware aktualisieren","en":"updateFirmware"},
+    "Replace":{"de":"Gerät tauschen","en":"Replace"},
+    "VALUES Paramset":{"de":"VALUES Paramset","en":"VALUES Paramset"},
+    "Activate long": {"de": "Empfägnerprofil testen (langer Tastendruck)", "en": "Activate long"},
+    "Activate short":        {"de": "Empfängerprofil testen (kurzer Tastendruck)", "en": "Activate short"},
+    "putParamset":        {"de": "Parameter in Gerät übernehmen", "en": "putParamset"},
+    "New service message": {"de": "Neue Servicemeldung", "en":"New service message"},
+    "RPC execution": {"de": "RPC wird ausgeführt", "en": "RPC execution"},
+    "about HomeMatic Manager": {"de": "Über HomeMatic Manager", "en": "about HomeMatic Manager"},
+    "Loading HomeMatic Manager...": {"de": "Lade HomeMatic Manager...", "en": "Loading HomeMatic Manager..."},
+    "Check all": {"de": "Alle auswählen", "en": "Check all"},
+    "Uncheck all": {"de": "Auswahl entfernen", "en": "Uncheck all"}
 };
 
-var language = 'de';
 
-var missesTranslation = [];
 
-function _(word) {
-    if (translation[word]) {
-        if (translation[word][language]) {
-            return translation[word][language];
-        }
-    }
-    if (missesTranslation.indexOf(word) === -1) {
-        console.log('"' + word + '":        {"de": "' + word + '"},');
-        missesTranslation.push(word);
-    }
+var missesTranslation = {};
 
-    return word;
-}
-
-function translate() {
-    $('.translate').each(function () {
-        var $this = $(this);
-        $this.html(_($this.html()));
-    });
-    $('.translateT').each(function () {
-        var $this = $(this);
-        $this.attr('title', _($this.attr('title')));
-    });
-}

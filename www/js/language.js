@@ -1,4 +1,5 @@
 var translation = {
+    "Error":            {"de": "Fehler"},
     "Devices":          {"de": "Geräte"},
     "Events":           {"de": "Ereignisse"},
     "Cancel":           {"de": "Abbrechen"},

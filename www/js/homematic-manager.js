@@ -355,7 +355,7 @@ $(document).ready(function () {
             autoOpen: false,
             modal: true,
             width: 400,
-            height: 360,
+            height: 240,
             buttons: [
                 {
                     text: _('OK'),
@@ -441,26 +441,30 @@ $(document).ready(function () {
                 resizeGrids();
             }
 
-            getDevices(function () {
-                getLinks(function () {
-                    getRfdData();
-                });
+            getDevices(function (err) {
+                if (err) {
+                    dialogAlert(err.syscall + ' ' + daemon + ' (' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')<br><br><span style="color: red;">' + err.code + '</span>', _('Error'));
+                    return;
+                } else {
+                    getLinks(function () {
+                        getRfdData();
+                    });
+                    elementConsoleMethod();
+                }
             });
-
         } else {
             window.location.hash = '';
         }
-
-        elementConsoleMethod();
     }
 
     // Devices
     function getDevices(callback) {
         $('#load_grid-devices').show();
-        rpcAlert(daemon, 'listDevices', [], function (err, data) {
+        socket.emit('rpc', daemon, 'listDevices', [], function (err, data) {
             $('#load_grid-devices').hide();
             listDevices = data;
-            if (callback) callback();
+            if (callback) callback(err);
+            if (err) return;
             refreshGridDevices();
             for (var i = 0; i < listDevices.length; i++) {
                 indexChannels[listDevices[i].ADDRESS] = listDevices[i];
@@ -478,7 +482,6 @@ $(document).ready(function () {
                         indexTargetRoles[roles[j]].push(listDevices[i].ADDRESS);
                     }
                 }
-
             }
         });
     }
@@ -3093,15 +3096,21 @@ $(document).ready(function () {
     function rpcAlert(daemon, cmd, params, callback) {
         socket.emit('rpc', daemon, cmd, params, function (err, res) {
             if (err) {
-                alert(JSON.stringify(err));
+                alert(daemon + ' ' + cmd + '\n' + JSON.stringify(err));
             } else if (res.faultCode) {
-                alert(JSON.stringify(res));
+                alert(daemon + ' ' + cmd + '\n' + JSON.stringify(res));
             }
             if (typeof callback === 'function') callback(err, res);
         });
     }
 
     // Helper functions
+    function dialogAlert(text, title) {
+        title = title || '&nbsp';
+        $('#alert').html(text);
+        $dialogAlert.dialog('option', 'title', title);
+        $dialogAlert.dialog('open');
+    }
     function rssiColor(rssi) {
         if (typeof rssi === 'undefined' || rssi === '' || rssi == 65536) return '';
 

@@ -4,8 +4,10 @@ module.exports = function(grunt) {
         pkg: grunt.file.readJSON('package.json'),
         uglify: {
             build: {
-                src: 'www/js/jquery-ui-1.10.4.js',
-                dest: 'www/js/jquery-ui-1.10.4.min.js'
+                files: {
+                    'www/js/jquery-ui-1.10.4~1.min.js': ['www/js/jquery-ui-1.10.4~1.js'],
+                    'www/js/jquery.multiselect-1.13~1.min.js': ['www/js/jquery.multiselect-1.13~1.js']
+                }
             }
         }
     });

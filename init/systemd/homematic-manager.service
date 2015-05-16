@@ -8,10 +8,10 @@ Conflicts=shutdown.target
 [Service]
 User=hm-man
 Type=forking
-PIDFile=/opt/homematic-manager/hm-manager.pid
+PIDFile=/var/run/hm-manager.pid
 RemainAfterExit=yes
-ExecStart=/usr/bin/nodejs /opt/homematic-manager/hm-manager.js start
-ExecStop=/usr/bin/nodejs /opt/homematic-manager/hm-manager.js stop
+ExecStart=/usr/bin/nodejs /usr/local/bin/hm-manager start
+ExecStop=/usr/bin/nodejs /usr/local/bin/hm-manager stop
 
 [Install]
 WantedBy=multi-user.target

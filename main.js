@@ -1,15 +1,13 @@
 /**
  *      homematic-manager
  *
- *  Copyright (c) 2014 Anli, Hobbyquaker
+ *  Copyright (c) 2014, 2015 Anli, Hobbyquaker
  *
  *  CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
  *
  */
 
 "use strict";
-
-var version = '1.0.0';
 
 var fs =        require('fs');
 var http =      require('http');
@@ -19,19 +17,23 @@ var xmlrpc =    require('homematic-xmlrpc');
 
 var encoding =  require('encoding');
 
+var paths =    require('./lib/paths.js');
 
+var confDir = paths.confDir;
+var dataDir = paths.dataDir;
 
-if (!fs.existsSync(__dirname + '/conf/settings.json')) {
-    console.log('creating conf/settings.json');
-    fs.writeFileSync(__dirname + '/conf/settings.json', JSON.stringify(require('./conf/settings-default.json')));
+if (!fs.existsSync(confDir + 'hm-manager.json')) {
+    console.log('creating ' + confDir + 'hm-manager.json');
+    fs.writeFileSync(confDir + 'hm-manager.json', JSON.stringify(require('./settings-default.json'), null, '    '));
 }
-var config =    require('./conf/settings.json');
+
+var config =    require(confDir + 'hm-manager.json');
 var pkg =       require('./package.json');
 
 config.version = pkg.version;
 config.rpcListenIp = config.rpcListenIp || '127.0.0.1';
 config.rpcListenPort = config.rpcListenPort || 2015;
-config.datastorePath = config.datastorePath || 'data/';
+config.datastorePath = confDir;
 
 var app;
 var server;
@@ -231,7 +233,7 @@ function initWebServer() {
 
 
 function saveJson(file, obj, callback) {
-    fs.writeFile(__dirname + '/' + config.datastorePath + file, JSON.stringify(obj), function (err) {
+    fs.writeFile(dataDir + file, JSON.stringify(obj), function (err) {
         if (callback) {
             callback(err);
         }
@@ -239,7 +241,7 @@ function saveJson(file, obj, callback) {
 }
 
 function loadJson(file, callback) {
-    fs.readFile(__dirname + '/' + config.datastorePath + file, function (err, data) {
+    fs.readFile(dataDir + file, function (err, data) {
         if (err) {
             callback(err, null);
         } else {

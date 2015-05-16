@@ -2792,7 +2792,7 @@ $(document).ready(function () {
         $('#load_grid-messages').show();
         rpcAlert(daemon, 'getServiceMessages', [], function (err, data) {
             if (!err) {
-                listMessages = data;
+                listMessages = data || [];
                 refreshGridMessages();
             }
         });

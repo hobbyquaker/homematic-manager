@@ -7,12 +7,6 @@
       "ip": "127.0.0.1",
       "port": 2001,
       "init": true
-    },
-    "Wired": {
-      "type": "BidCos-Wired",
-      "ip": "127.0.0.1",
-      "port": 2000,
-      "init": true
     }
   },
   "language": "de"

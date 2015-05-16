@@ -1,31 +1,32 @@
-# HomeMatic Manager
+# Homematic Manager
+
+[Deutschsprachiges Readme](Readme.md)
 
 ## Documentation
 
-The HomeMatic Manager is a web interface for [HomeMatic](http://www.homematic.com)-interface processes
+The Homematic Manager is a web interface for [HomeMatic](http://www.homematic.com)-interface processes
 (rfd, hs485d, [Homegear](http://www.homegear.eu)).
 
-With HomeMatic Manager it's possible to pair and delete devices, do device configurations and manage links. Furthermore
+With Homematic Manager it's possible to pair and delete devices, do device configurations and manage links. Furthermore
 you can assign RF devices to specific interfaces, enable/disable roaming and many more.
 
 ### Installation
 
-* homematic-manager needs a [Node.js](http://nodejs.org/download/) installation
-* install: ```npm install -g homematic-manager```
+* Homematic Manager needs a [Node.js](http://nodejs.org/download/) installation
+* install: ```sudo npm install -g homematic-manager```
 
 ### Configuration
 
-* edit conf/settings.json (resepectivly conf/settings-default.json before the first start)
+* edit `~/.hm-manager/hm-manager.json` (respectively `/usr/local/lib/node_modules/homematic-manager/settings-default.json` before first start):
 
-### start HomeMatic-Manager 
+### start Homematic Manager
 
 * ```hm-manager start```
-* open [http://127.0.0.1:8081](http://127.0.0.1:8081)
 
 
 ## Changelog
 
-see [German language Readme](Readme.en)
+see [German language Readme](Readme.md)
 
 
 ## License

@@ -1,35 +1,68 @@
-# HomeMatic Manager
+# Homematic Manager
 
 [English language Readme](Readme.en.md)
 
 ## Dokumentation
 
-Der HomeMatic Manager ist ein Web-Interface für [HomeMatic](http://www.homematic.com)-Schnittstellenprozesse
+Der Homematic Manager ist ein Web-Interface für [HomeMatic](http://www.homematic.com)-Schnittstellenprozesse
 (rfd, hs485d, [Homegear](http://www.homegear.eu)).
 
-Mit dem HomeMatic Manager ist es möglich Geräte an- und abzumelden, Geräte-Konfigurationen und Direktverknüpfungen zu
+Mit dem Homematic Manager ist es möglich Geräte an- und abzumelden, Geräte-Konfigurationen und Direktverknüpfungen zu
 Verwalten und vieles mehr.
 
 
 ### Installation
 
-
-* homematic-manager setzt eine [Node.js](http://nodejs.org/download/) Installation inkl. npm voraus.
+* Homematic Manager setzt eine [Node.js](http://nodejs.org/download/) Installation inkl. npm voraus.
 * Installation: ````sudo npm install -g homematic-manager````
 
 ### Konfiguration
 
-#### conf/settings.json (bzw. vor dem ersten Start conf/settings-default.json) bearbeiten:
+Konfigurationsdatei `~/.hm-manager/hm-manager.json` (bzw. vor dem ersten Start `/usr/local/lib/node_modules/homematic-manager/settings-default.json`) bearbeiten:
 
 IP Adressen auf der die Schnttstellenprozesse rfd/hs485d erreichbar sind (CCU- bzw. BidCoS®-Service IP-Adresse) anpassen. 
 
 Ausserdem muss die IP-Adresse auf der der HomeMatic-Manager selbst erreichbar ist unter ````rpcListenIp```` eingetragen werden.
 
+Es können beliebig viele Schnittstellenprozesse konfiguriert werden.
 
-### HomeMatic Manager starten
+#### Beispielkonfiguration
+
+* HomeMatic CCU mit Funk und Wired, IP-Adresse 192.168.1.100
+* RaspberryPi auf dem (u.A.) der Homematic Manager läuft: 192.168.1.50
+* zweite HomeMatic CCU nur mit Funk im Büro (per VPN an Heimnetz angebunden), IP-Adresse 10.23.42.200
+
+```javascript
+{
+  "webServerPort": 8081,
+  "rpcListenIp": "192.168.1.50",
+  "daemons": {
+    "RF-Zuhause": {
+      "type": "BidCos-RF",
+      "ip": "192.168.100",
+      "port": 2001,
+      "init": true
+    },
+    "Wired-Zuhause": {
+      "type": "BidCos-Wired",
+      "ip": "192.168.100",
+      "port": 2000,
+      "init": true
+    },
+    "Funk-Büro": {
+      "type": "BidCos-RF",
+      "ip": "10.23.42.200",
+      "port": 2001,
+      "init": true
+    }
+  },
+  "language": "de"
+}
+```
+
+### Homematic Manager starten
 
 * ```hm-manager start```
-* [http://127.0.0.1:8081](http://127.0.0.1:8081) aufrufen
 
 ## Todo
 
@@ -50,10 +83,11 @@ Ausserdem muss die IP-Adresse auf der der HomeMatic-Manager selbst erreichbar is
 * i18n überarbeiten. Sprachfiles nach Sprachen auftrennen und nur notwendige Übersetzung laden
 * Übersetzungsmethode _() erweitern: Singular/Plural, printf-like string-insertion
 * Anderes Konzept ausdenken für Texte die in .html Datei stecken
-* CSS aus index.html entfernen und in homematic-manager.css packen
-* statt settings.json Config-Dialog im UI
+* Styles komplett aus index.html entfernen und in homematic-manager.css packen
+* index.html/homematic-manager.css - Refactoring Klassen und IDs
+* Config-Dialog im UI
+#### Integration in [Hmcon](https://github.com/hobbyquaker/hmcon)
 * Auftrennen Webserver und hm-manager, Plugin-Konzept
-#### Integration Schnittstellenprozesse
 * rfd/hs485d Konfiguration über UI (Interfaces hinzufügen/entfernen, Loglevel)
 * Sicherheitsschlüssel setzen
 * Prozessmanager integrieren für rfd/hs485d
@@ -63,14 +97,9 @@ Ausserdem muss die IP-Adresse auf der der HomeMatic-Manager selbst erreichbar is
 
 ## Changelog
 
-### 1.0.2
-* (hobbyquaker) diverse Fixes und Verbesserungen
-
-### 1.0.1
-* (hobbyquaker) diverse Fixes und Verbesserungen
+### 1.0.4
+* (hobbyquaker) Config-Datei nun in ~/.homematic-manager/hm-manager.json
 * (hobbyquaker) cleanup, refactoring
-
-### 1.0.0
 * (hobbyquaker) Direktverknüpfungen Easymodes
 * (hobbyquaker) Kontext-Menüs
 * (hobbyquaker) CUxD/BIN-RPC Unterstützung rausgeworfen

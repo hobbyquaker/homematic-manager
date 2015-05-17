@@ -6,6 +6,7 @@ if (!process.argv[2]) {
 }
 
 var fs = require('fs');
+var paths = require('../lib/paths.js');
 
 var http = require('http');
 
@@ -16,8 +17,8 @@ regaScript(ccuIp, 'reganames.fn', function (err, res) {
     if (err) {
         console.log(err);
     } else {
-        console.log('saving response in data/names.json');
-        fs.writeFileSync(__dirname + '/../data/names.json', JSON.stringify(res));
+        console.log('saving response in ' + paths.dataDir + 'names.json');
+        fs.writeFileSync(paths.dataDir + 'names.json', JSON.stringify(res));
         console.log('done.');
     }
 });

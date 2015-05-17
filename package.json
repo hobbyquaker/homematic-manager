@@ -1,6 +1,6 @@
 {
   "name": "homematic-manager",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "preferGlobal": true,
   "dependencies": {
     "daemonize2": "~0.4.2",

@@ -350,9 +350,21 @@ var rpcMethods = {
         help: {de: 'Diese Methode setzt ein Metadatum zu einem Objekt.<br><b>object_id</b> ist die Id des Metadaten-Objekts. Üblicherweise ist dies die Seriennummer eines Gerätes oder Kanals. Durch Übergabe einer beliebigen Id können aber auch eigene Metadaten-Objekte angelegt werden. <br><b>data_id</b> ist die Id des zu setzenden Metadatums. Diese Id kann frei gewählt werden. <br><b>value</b> ist eine beliebige Variable. Diese wird gespeichert und kann später mittels getMetadata() und getAllMetadata() wieder abgefragt werden.'}
     },
     setRFLGWInfoLED: {
-        params: [],
+        params: [
+            {
+                name: "mode",
+                type: "integer",
+                optional: ["rfd"],
+                values: {
+                    "0": "OFF",
+                    "1": "ON",
+                    "2": "FLASH_SLOW",
+                    "3": "FLASH_FAST"
+                }
+            }
+        ],
         returns: '',
-        help: {de: "leider nicht von eQ-3 dokumentiert."}
+        help: {de: "Steuert die LED von verbundenen LAN Gateways (HMLGW2) an."}
     },
     setTeam: {
         params: [

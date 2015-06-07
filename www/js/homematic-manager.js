@@ -57,6 +57,7 @@ $(document).ready(function () {
     var $linkSourceRoles =              $('#link-source-roles');
     var $selectLinkSender =             $('#select-link-sender');
     var $selectLinkReceiver =           $('#select-link-receiver');
+    var $selectReplace =                $('#select-replace');
 
     var $selectBidcosDaemon;    // assigned after ui initialization, see initTabs()
 
@@ -75,9 +76,14 @@ $(document).ready(function () {
     var $dialogRpc =                    $('#dialog-rpc');
     var $dialogHelp =                   $('#dialog-help');
     var $dialogConfig =                 $('#dialog-config');
+    var $dialogReplace =                $('#dialog-replace');
 
     // Entrypoint
     socket.on('connect', getConfig);
+
+    socket.on('disconnect', function () {
+        alert('disconnect');
+    });
 
     // Incoming Events
     socket.on('rpc', function (method, params) {
@@ -118,6 +124,15 @@ $(document).ready(function () {
                  getDevices(function () {
                      getLinks(function () {
                          getRfdData();
+                     });
+                 });
+                 break;
+             case 'replaceDevice':
+                 getNames(function () {
+                     getDevices(function () {
+                         getLinks(function () {
+                             getRfdData();
+                         });
                      });
                  });
                  break;
@@ -522,11 +537,13 @@ $(document).ready(function () {
                 $gridDevices.jqGrid('toggleSubGridRow', rowid);
             },
             onSelectRow: function (rowid, iRow, iCol, e) {
+                $('#reportValueUsage-0').addClass('ui-state-disabled');
+                $('#reportValueUsage-1').addClass('ui-state-disabled');
+
                 if ($('#grid-devices tr#' + rowid + ' td[aria-describedby="grid-devices_flags"]').html().match(/DontDelete/)) {
                     $('#del-device').addClass('ui-state-disabled');
                     $('#replace-device').addClass('ui-state-disabled');
                     $('#edit-device').addClass('ui-state-disabled');
-
                 } else {
                     $('#del-device').removeClass('ui-state-disabled');
                     $('#replace-device').removeClass('ui-state-disabled');
@@ -546,6 +563,8 @@ $(document).ready(function () {
                 $('#restore-device').addClass('ui-state-disabled');
                 $('#clear-device').addClass('ui-state-disabled');
                 $('#edit-device').addClass('ui-state-disabled');
+                $('#reportValueUsage-0').addClass('ui-state-disabled');
+                $('#reportValueUsage-1').addClass('ui-state-disabled');
             }
         }).navGrid('#pager-devices', {
             search: false,
@@ -569,65 +588,90 @@ $(document).ready(function () {
             id: 'del-device',
             title: _('Delete device'),
             cursor: 'pointer'
-        })/* TODO .jqGrid('navButtonAdd', '#pager-devices', {
-         caption: '',
-         buttonicon: 'ui-icon-transfer-e-w',
-         onClickButton: function () {
-         var address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
-         alert('todo replace ' + address);
-         },
-         position: 'first',
-         id: 'replace-device',
-         title: _('Replace device'),
-         cursor: 'pointer'
-         })*/.jqGrid('navButtonAdd', '#pager-devices', {
-                caption: '',
-                buttonicon: 'ui-icon-script',
-                onClickButton: updateFirmware,
-                position: 'first',
-                id: 'update-device',
-                title: _('Update firmware'),
-                cursor: 'pointer'
-            }).jqGrid('navButtonAdd', '#pager-devices', {
-                caption: '',
-                buttonicon: 'ui-icon-arrowrefresh-1-w',
-                onClickButton: clearConfigCache,
-                position: 'first',
-                id: 'clear-device',
-                title: _('clearConfigCache'),
-                cursor: 'pointer'
-            }).jqGrid('navButtonAdd', '#pager-devices', {
-                caption: '',
-                buttonicon: 'ui-icon-comment',
-                onClickButton: restoreConfigToDevice,
-                position: 'first',
-                id: 'restore-device',
-                title: _('restoreConfigToDevice'),
-                cursor: 'pointer'
-            }).jqGrid('navButtonAdd', '#pager-devices', {
-                caption: '',
-                buttonicon: 'ui-icon-pencil',
-                onClickButton: dialogRenameDevice,
-                position: 'first',
-                id: 'edit-device',
-                title: _('Rename device'),
-                cursor: 'pointer'
-            }).jqGrid('navButtonAdd', '#pager-devices', {
-                caption: '',
-                buttonicon: 'ui-icon-plus',
-                onClickButton: function () {
-                    $dialogAddDevice.dialog('open');
-                },
-                position: 'first',
-                id: 'add-device',
-                title: _('Pair devices'),
-                cursor: 'pointer'
-            }).jqGrid('filterToolbar', {
-                defaultSearch: 'cn',
-                autosearch: true,
-                searchOnEnter: false,
-                enableClear: false
-            });
+        }).jqGrid('navButtonAdd', '#pager-devices', {
+            caption: '',
+            buttonicon: 'ui-icon-transfer-e-w',
+            onClickButton: function () {
+                var address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
+                replaceDevice(address);
+            },
+            position: 'first',
+            id: 'replace-device',
+            title: _('Replace device'),
+            cursor: 'pointer'
+        }).jqGrid('navButtonAdd', '#pager-devices', {
+            caption: '',
+            buttonicon: 'ui-icon-script',
+            onClickButton: updateFirmware,
+            position: 'first',
+            id: 'update-device',
+            title: _('Update firmware'),
+            cursor: 'pointer'
+        }).jqGrid('navButtonAdd', '#pager-devices', {
+            caption: '',
+            buttonicon: 'ui-icon-arrowrefresh-1-w',
+            onClickButton: clearConfigCache,
+            position: 'first',
+            id: 'clear-device',
+            title: _('clearConfigCache'),
+            cursor: 'pointer'
+        }).jqGrid('navButtonAdd', '#pager-devices', {
+            caption: '',
+            buttonicon: 'ui-icon-comment',
+            onClickButton: restoreConfigToDevice,
+            position: 'first',
+            id: 'restore-device',
+            title: _('restoreConfigToDevice'),
+            cursor: 'pointer'
+        }).jqGrid('navButtonAdd', '#pager-devices', {
+            caption: '',
+            buttonicon: 'ui-icon-pin-w',
+            onClickButton: function () {
+                reportValueUsage(0);
+            },
+            position: 'first',
+            id: 'reportValueUsage-0',
+            title: _('reportValueUsage') + ' 0',
+            cursor: 'pointer'
+        }).jqGrid('navButtonAdd', '#pager-devices', {
+            caption: '',
+            buttonicon: 'ui-icon-pin-s',
+            onClickButton: function () {
+                reportValueUsage(1);
+            },
+            position: 'first',
+            id: 'reportValueUsage-1',
+            title: _('reportValueUsage') + ' 1',
+            cursor: 'pointer'
+        }).jqGrid('navButtonAdd', '#pager-devices', {
+            caption: '',
+            buttonicon: 'ui-icon-pencil',
+            onClickButton: dialogRenameDevice,
+            position: 'first',
+            id: 'edit-device',
+            title: _('Rename device'),
+            cursor: 'pointer'
+        }).jqGrid('navButtonAdd', '#pager-devices', {
+            caption: '',
+            buttonicon: 'ui-icon-plus',
+            onClickButton: function () {
+                $dialogAddDevice.dialog('open');
+            },
+            position: 'first',
+            id: 'add-device',
+            title: _('Pair devices'),
+            cursor: 'pointer'
+        }).jqGrid('filterToolbar', {
+            defaultSearch: 'cn',
+            autosearch: true,
+            searchOnEnter: false,
+            enableClear: false,
+            beforeSearch: function () {
+                var postdata = $gridDevices.jqGrid('getGridParam', 'postData');
+                console.log('beforeSearch', postdata);
+
+            }
+        });
         $gridDevices.contextmenu({
             delegate: "td.device-cell",
             menu: [
@@ -664,6 +708,9 @@ $(document).ready(function () {
                     case 'delete':
                         dialogDeleteDevice();
                         break;
+                    case 'replace':
+                        replaceDevice(address);
+                        break;
                     default:
                         alert("todo " + cmd + " on " + address);
                 }
@@ -674,6 +721,40 @@ $(document).ready(function () {
         $('#replace-device').addClass('ui-state-disabled');
         $('#edit-device').addClass('ui-state-disabled');
 
+        $dialogReplace.dialog({
+            autoOpen: false,
+            modal: true,
+            width: 540,
+            height: 320,
+            buttons: [
+                {
+                    text: _('Cancel'),
+                    click: function () {
+                        $(this).dialog('close');
+                    }
+                },
+                {
+                    text: _('Replace'),
+                    click: function () {
+                        var newAddress = $('#replace-new').val();
+                        var oldAddress = $selectReplace.val();
+                        $(this).dialog('close');
+                        rpcDialog(daemon, 'replaceDevice', [oldAddress, newAddress]);
+                    }
+                }
+            ]
+        });
+        $selectReplace.multiselect({
+            //classes: '',
+            multiple: false,
+            //header: false,
+            height: 160,
+            selectedList: 1,
+            minWidth: 480
+        }).multiselectfilter({
+            autoReset: true,
+            placeholder: ''
+        });
         $dialogAddDevice.dialog({
             autoOpen: false,
             modal: true,
@@ -853,14 +934,20 @@ $(document).ready(function () {
 
                     if (rowData.Name.slice(-2) != ':0') {
                         $('#edit-device').removeClass('ui-state-disabled');
+                        $('#reportValueUsage-0').removeClass('ui-state-disabled');
+                        $('#reportValueUsage-1').removeClass('ui-state-disabled');
+
                     } else {
                         $('#edit-device').addClass('ui-state-disabled');
+                        $('#reportValueUsage-0').addClass('ui-state-disabled');
+                        $('#reportValueUsage-1').addClass('ui-state-disabled');
                     }
 
                     $('#replace-device').addClass('ui-state-disabled');
                     $('#restore-device').addClass('ui-state-disabled');
                     $('#update-device').addClass('ui-state-disabled');
                     $('#clear-device').addClass('ui-state-disabled');
+
                 },
                 gridComplete: function () {
                     $('button.paramset:not(.ui-button)').button();
@@ -895,10 +982,26 @@ $(document).ready(function () {
             delegate: "td.channel-cell",
             menu: [
                 {title: _("Rename"), cmd: "rename", uiIcon: "ui-icon-pencil"},
+                //{title: _("addLink"), cmd: "addLink", uiIcon: "ui-icon-arrow-2-e-w"},
+                {title: _("reportValueUsage") + ' 1', cmd: "reportValueUsage-1", uiIcon: "ui-icon-pin-s"},
+                {title: _("reportValueUsage") + ' 0', cmd: "reportValueUsage-0", uiIcon: "ui-icon-pin-w"},
                 {title: _("MASTER Paramset"), cmd: "paramsetMaster", uiIcon: "ui-icon-gear"},
                 {title: _("VALUES Paramset"), cmd: "paramsetValues", uiIcon: "ui-icon-gear"}
 
             ],
+            beforeOpen: function(event, ui) {
+                var address = ui.target.parent().find('[aria-describedby$="_ADDRESS"]').text();
+
+                if (address.match(/:0$/)) {
+                    $body.contextmenu("enableEntry", 'rename', false);
+                    $body.contextmenu("enableEntry", 'reportValueUsage-0', false);
+                    $body.contextmenu("enableEntry", 'reportValueUsage-1', false);
+                } else {
+                    $body.contextmenu("enableEntry", 'rename', true);
+                    $body.contextmenu("enableEntry", 'reportValueUsage-0', true);
+                    $body.contextmenu("enableEntry", 'reportValueUsage-1', true);
+                }
+            },
             select: function(event, ui) {
                 var cmd = ui.cmd;
                 var address = ui.target.parent().find('[aria-describedby$="_ADDRESS"]').text();
@@ -911,6 +1014,12 @@ $(document).ready(function () {
                         break;
                     case 'rename':
                         dialogRenameDevice();
+                        break;
+                    case 'reportValueUsage-1':
+                        reportValueUsage(1);
+                        break;
+                    case 'reportValueUsage-0':
+                        reportValueUsage(0);
                         break;
                     default:
                         alert("todo " + cmd + " on " + address);
@@ -979,6 +1088,29 @@ $(document).ready(function () {
         $gridDevices.trigger('reloadGrid');
         $('button.paramset:not(.ui-button)').button();
     }
+    function replaceDevice() {
+        var address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
+        socket.emit('rpc', daemon, 'listReplaceableDevices', [address], function (err, data) {
+            if (err) {
+                alert(_('RPC error') + '\n\n' + JSON.stringify(err));
+                return;
+            }
+            if (data.length == 0) {
+                alert(_('Replace Device') + ':\n' + _('No suitable device available'));
+            } else {
+                $selectReplace.html('');
+                data.forEach(function (dev) {
+                    if (!dev.ADDRESS.match(/:[0-9]+$/)) {
+                        $selectReplace.append('<option value="' + dev.ADDRESS + '">' + names[dev.ADDRESS] + ' (' + dev.ADDRESS + ')</option>');
+                    }
+                });
+                $selectReplace.multiselect('refresh');
+                $('#replace-new').val(address);
+                $dialogReplace.dialog('open');
+            }
+
+        });
+    }
     function updateFirmware() {
         var address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
         rpcDialog(daemon, 'updateFirmware', [address]);
@@ -1015,6 +1147,39 @@ $(document).ready(function () {
         $('#rename-address').val(address);
         $('#rename-name').val(name == '&nbsp;' ? '' : name);
         $dialogRename.dialog('open');
+    }
+    function reportValueUsage(value) {
+        var devSelected = $gridDevices.jqGrid('getGridParam','selrow');
+        var chSelected = null;
+        var chGrid = null;
+        if (!devSelected) {
+            $('[id^="channels_"][id$="_t"]').each(function () {
+                if ($(this).jqGrid('getGridParam','selrow') > 0) {
+                    chSelected = $(this).jqGrid('getGridParam','selrow');
+                    chGrid = $(this).attr('id');
+                }
+            });
+            var address = $('#' + chGrid + ' tr#' + chSelected + ' td[aria-describedby$="_ADDRESS"]').html();
+        } else {
+            alert('device!');
+            return;
+        }
+        socket.emit('rpc', daemon, 'getParamsetDescription', [address, 'VALUES'], function (err, data) {
+            var param;
+            if (data.STATE) {
+                param = 'STATE';
+            } else if (data.LEVEL) {
+                param = 'LEVEL';
+            } else if (data.PRESS_SHORT) {
+                param = 'PRESS_SHORT';
+            } else if (data.MOTION) {
+                param = 'MOTION';
+            } else {
+                param = Object.keys(data)[0];
+            }
+            rpcDialog(daemon, 'reportValueUsage', [address, param, value]);
+        });
+
     }
     function dialogDeleteDevice() {
         var address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
@@ -2169,7 +2334,7 @@ $(document).ready(function () {
                 var $tpl = $('#linkparamset-input-receiver-sender-' + param);
                 var $copy = $tpl.clone();
                 $copy.removeAttr('id').addClass('easymode-param').attr('data-binds', options.combo);
-                return $copy[0].outerHTML;
+                return $copy && $copy[0] && $copy[0].outerHTML;
                 break;
         }
         return form;
@@ -3082,8 +3247,8 @@ $(document).ready(function () {
             $('#rpc-progress').hide();
             if (err) {
                 $('#rpc-message').html('<span style="color: red; font-weight: bold;">' + (err.faultString ? err.faultString : JSON.stringify(err)) + '</span>');
-            } else if (res !== '') {
-                $('#rpc-message').html('<span style="color: orange; font-weight: bold;">' + res.faultString + '</span>');
+            } else if (res && res.faultCode) {
+                $('#rpc-message').html('<span style="color: orange; font-weight: bold;">' + res.faultString + ' (' + res.faultCode + ')</span>');
             } else {
                 $('#rpc-message').html('<span style="color: green;">success</span><br>' + res);
                 setTimeout(function () {

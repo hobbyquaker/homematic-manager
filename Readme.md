@@ -10,7 +10,6 @@ Der Homematic Manager ist ein Web-Interface für [HomeMatic](http://www.homemati
 Mit dem Homematic Manager ist es möglich Geräte an- und abzumelden, Geräte-Konfigurationen und Direktverknüpfungen zu
 Verwalten und vieles mehr.
 
-
 ### Installation
 
 * Homematic Manager setzt eine [Node.js](http://nodejs.org/download/) Installation inkl. npm voraus.
@@ -26,6 +25,8 @@ Ausserdem muss die IP-Adresse auf der der HomeMatic-Manager selbst erreichbar is
 
 Es können beliebig viele Schnittstellenprozesse konfiguriert werden.
 
+Nach einer Änderung der Konfigurationsdatei muss der Homematic Manager neu gestartet werden.
+
 #### Beispielkonfiguration
 
 * HomeMatic CCU mit Funk und Wired, IP-Adresse 192.168.1.100
@@ -34,29 +35,31 @@ Es können beliebig viele Schnittstellenprozesse konfiguriert werden.
 
 ```javascript
 {
+  "language": "de",
   "webServerPort": 8081,
   "rpcListenIp": "192.168.1.50",
+  "rpcListenPort": "2015",
+  "rpcListenPortBin": "2016",
   "daemons": {
-    "RF-Zuhause": {
+    "rf_home": {
       "type": "BidCos-RF",
       "ip": "192.168.100",
       "port": 2001,
-      "init": true
+      "protocol": "binrpc"
     },
-    "Wired-Zuhause": {
+    "wired_home": {
       "type": "BidCos-Wired",
       "ip": "192.168.100",
       "port": 2000,
-      "init": true
+      "protocol": "binrpc"
     },
-    "Funk-Büro": {
+    "rf_office": {
       "type": "BidCos-RF",
       "ip": "10.23.42.200",
       "port": 2001,
-      "init": true
+      "protocol": "binrpc"
     }
-  },
-  "language": "de"
+  }
 }
 ```
 
@@ -64,8 +67,30 @@ Es können beliebig viele Schnittstellenprozesse konfiguriert werden.
 
 * ```hm-manager start```
 
+## FAQ
+
+#### Warum haben die Geräte alle keinen Namen?
+
+Weil die Schnittstellenprozesse nur mit den Adressen arbeiten. Du kannst allerdings im Homematic Manager den Geräten
+problemlos einen Namen zuweisen oder alle Namen von einer CCU importieren: ```node /usr/local/lib/node_modules/homematic-manager/tools/import_rega_names.js <CCU IP>```
+
+#### Wie kann ich den Status eines Aktors sehen oder einen Aktor schalten?
+
+Im Reiter Geräte das Gerät "aufklappen" (+ Icon links) und beim gewünschten Kanal auf den Button "Values" klicken.
+
+
+#### Was ist die RPC-Konsole?
+
+Wenn Du Dir diese Frage stellst ist die RPC-Konsole für Dich uninteressant :-)
+
+
+
+
 ## Todo
 
+* Multi-Edit: Mehrere (Link-)Paramsets auf einmal bearbeiten
+* Multi-Edit: AES für mehrere Kanäle (de)aktivieren
+* Multi-Edit: reportValueUsage auf mehreren Kanälen anwenden
 * Anlernen mit temporären Key
 * Übersetzungen vervollständigen (fehlende Texte werden in Browser-Console gelistet)
 * stringtable und .js-Sprachfiles aus OCCU importieren, Übersetzung Servicemeldungen, Übersetzung Params aus MASTER-Paramsets
@@ -74,9 +99,7 @@ Es können beliebig viele Schnittstellenprozesse konfiguriert werden.
 * Direktverknüpfungen Easymodes Sonderbehandlung Wired (HMW_*)
 * Direktverknüpfungen Easymodes testen
 * Nach dem Anlernen im Dialog "new Device" direkt Name vergeben
-* Geräte tauschen
 * Geräte deaktiveren/aktivieren (Ablernen mit speichern aller Paramsets und Links für spätere Wiederherstellung?)
-* Mehrere (Link-)Paramsets auf einmal bearbeiten
 * STICKY_UNREACH automatisch bestätigen und für jedes Gerät einen Unreach-Counter speichern (Anzeige im Tab Funk)
 * RPC-Konsole: dynamische Eingabefelder für putParamset
 * Namen ändern direkt in den Grids ("inline-edit")?
@@ -86,16 +109,19 @@ Es können beliebig viele Schnittstellenprozesse konfiguriert werden.
 * Styles komplett aus index.html entfernen und in homematic-manager.css packen
 * index.html/homematic-manager.css - Refactoring Klassen und IDs
 * Config-Dialog im UI
+
 #### Integration in [Hmcon](https://github.com/hobbyquaker/hmcon)
-* Auftrennen Webserver und hm-manager, Plugin-Konzept
-* rfd/hs485d Konfiguration über UI (Interfaces hinzufügen/entfernen, Loglevel)
-* Sicherheitsschlüssel setzen
-* Prozessmanager integrieren für rfd/hs485d
-* Backup/Restore
-* Upload Firmwareupdate Dateien über UI
+* Auftrennen Webserver und hm-manager
+
 
 
 ## Changelog
+
+### 1.0.8
+* (hobbyquaker) diverse Fixes und Verbesserungen
+* (hobbyquaker) Geräte tauschen
+* (hobbyquaker) reportValueUsage
+* (hobbyquaker) BINRPC wieder hinzugefügt
 
 ### 1.0.4
 * (hobbyquaker) Config-Datei nun in ~/.homematic-manager/hm-manager.json

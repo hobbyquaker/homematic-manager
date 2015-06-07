@@ -4,18 +4,17 @@
  *
  *  Copyright (c) 2014, 2015 Anli, Hobbyquaker
  *
- *  MIT
+ *  CC BY-NC-SA 4.0 http://creativecommons.org/licenses/by-nc-sa/4.0/
  *
  */
 
-var paths = require('./lib/paths.js');
+var config = require('./lib/config.js');
 
 var daemon = require('daemonize2').setup({
     main: 'main.js',
     name: 'hm-manager',
-    pidfile: paths.dataDir + 'hm-manager.pid'
+    pidfile: config.pidFile
 });
-
 
 switch (process.argv[2]) {
 
@@ -47,4 +46,5 @@ switch (process.argv[2]) {
 
     default:
         console.log('Usage: [start|stop|kill|restart|status]');
+        break;
 }

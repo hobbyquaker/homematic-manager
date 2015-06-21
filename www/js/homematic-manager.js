@@ -2433,11 +2433,20 @@ $(document).ready(function () {
                     $('[id="linkparamset-input-receiver-sender-' + id + '"]').val(val);
                 }
             }
+            var tmp;
             for (var param in options) {
-                $tableEasymode.append('<tr><td>' +
-                easymodes.lang[language].PNAME[options[param].desc] +
-                '</td><td style="font-size: 8px"></td><td>' +
-                elementEasyMode(options[param], data[options[param].combo[0]]) + '</td></tr>');
+                if (!options[param].combo) continue;
+
+                tmp = easymodes.lang[language].PNAME[options[param].desc] ||
+                    (
+                        easymodes.lang[language][receiverType] &&
+                        easymodes.lang[language][receiverType].GENERIC &&
+                        easymodes.lang[language][receiverType].GENERIC[options[param].desc]
+                    )
+                    ;
+
+                $tableEasymode.append('<tr><td>' + tmp + '</td><td style="font-size: 8px"></td><td>' +
+                 elementEasyMode(options[param],  data[options[param].combo[0]]) + '</td></tr>');
 
             }
 

@@ -2044,6 +2044,8 @@ $(document).ready(function () {
                     val = $input.find('option:selected').val();
                 }
 
+
+
                 // Überspringe Param falls keine Änderung stattgefunden hat
                 if (
                     (val === true && dataValPrev === 'true') ||
@@ -2051,6 +2053,8 @@ $(document).ready(function () {
                     (val == dataValPrev) ||
                     (!isNaN(dataValPrev) && parseFloat(dataValPrev) == parseFloat(val))
                 ) return;
+
+                console.log(param, val, elem, type, $input.attr('id'));
 
                 // aktualisiere data-val-prev - falls auf prn 0 (expert) zurückgeschaltet wird werden diese werte verwendet
                 $input.attr('data-val-prev', val);
@@ -2073,6 +2077,7 @@ $(document).ready(function () {
                         break;
                     case 'INTEGER':
                         val = parseInt(val, 10);
+                        if (isNaN(val)) val = 0;
                         break;
                     case 'FLOAT':
                         val = {explicitDouble: parseFloat(val)};
@@ -2406,7 +2411,7 @@ $(document).ready(function () {
             $('.easymode').hide();
 
             $('[id^="linkparamset-input-receiver-sender-"]').each(function () {
-                $(this).val($(this).attr('data-val-prev'));
+                $(this).val($(this).attr('data-val-prev') || "");
             });
 
             $('#table-linkparamset2').show();

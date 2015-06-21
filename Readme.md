@@ -86,36 +86,11 @@ Wenn Du Dir diese Frage stellst ist die RPC-Konsole für Dich uninteressant :-)
 
 
 
-## Todo
-
-* Multi-Edit: Mehrere (Link-)Paramsets auf einmal bearbeiten
-* Multi-Edit: AES für mehrere Kanäle (de)aktivieren
-* Multi-Edit: reportValueUsage auf mehreren Kanälen anwenden
-* Anlernen mit temporären Key
-* Übersetzungen vervollständigen (fehlende Texte werden in Browser-Console gelistet)
-* stringtable und .js-Sprachfiles aus OCCU importieren, Übersetzung Servicemeldungen, Übersetzung Params aus MASTER-Paramsets
-* Direktverknüpfungen Profilvorlagen anlegen und anwenden
-* Direktverknüpfungen Easymodes vervollständigen (WINMATIC)
-* Direktverknüpfungen Easymodes Sonderbehandlung Wired (HMW_*)
-* Direktverknüpfungen Easymodes testen
-* Nach dem Anlernen im Dialog "new Device" direkt Name vergeben
-* Geräte deaktiveren/aktivieren (Ablernen mit speichern aller Paramsets und Links für spätere Wiederherstellung?)
-* STICKY_UNREACH automatisch bestätigen und für jedes Gerät einen Unreach-Counter speichern (Anzeige im Tab Funk)
-* RPC-Konsole: dynamische Eingabefelder für putParamset
-* Namen ändern direkt in den Grids ("inline-edit")?
-* i18n überarbeiten. Sprachfiles nach Sprachen auftrennen und nur notwendige Übersetzung laden
-* Übersetzungsmethode _() erweitern: Singular/Plural, printf-like string-insertion
-* Anderes Konzept ausdenken für Texte die in .html Datei stecken
-* Styles komplett aus index.html entfernen und in homematic-manager.css packen
-* index.html/homematic-manager.css - Refactoring Klassen und IDs
-* Config-Dialog im UI
-
-#### Integration in [Hmcon](https://github.com/hobbyquaker/hmcon)
-* Auftrennen Webserver und hm-manager
-
-
-
 ## Changelog
+
+### 1.0.10
+* (hobbyquaker) diverse Fixes und Verbesserungen
+* (hobbyquaker) Easymodes für Empfängertyp SIGNAL_LED und SIGNAL_CHIME vervollständigt
 
 ### 1.0.8
 * (hobbyquaker) diverse Fixes und Verbesserungen

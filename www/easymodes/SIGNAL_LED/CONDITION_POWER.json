@@ -101,6 +101,23 @@
         ],
         "input": "EnterTime_h_m_s",
         "param": "SHORT_ONDELAY_TIME"
+      },
+      "2": {
+        "desc": "signal_kind",
+        "option": "SHORT_LONG",
+        "combo": [
+          "SHORT_ACT_TYPE",
+          "LONG_ACT_TYPE"
+        ],
+        "param": "SHORT_ACT_TYPE"
+      },
+      "3": {
+        "desc": "signal_count",
+        "combo": [
+          "SHORT_ACT_NUM",
+          "LONG_ACT_NUM"
+        ],
+        "param": "SHORT_ACT_NUM"
       }
     },
     "name": "signal_led_chime_active"

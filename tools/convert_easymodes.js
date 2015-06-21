@@ -18,7 +18,7 @@ var receivers = ['SWITCH', 'DIMMER', 'BLIND', 'ACTOR_SECURITY', 'ACTOR_WINDOW', 
     'VIRTUAL_DIMMER', 'WEATHER', 'WEATHER_RECEIVER', 'WINDOW_SWITCH_RECEIVER', /*'WINMATIC'*/, 'WS_TH'
 ];
 
-//var receivers = ['SIGNAL_LED'];
+var receivers = ['SIGNAL_LED'];
 
 var files = ['GENERIC', 'PNAME'];
 
@@ -161,6 +161,13 @@ function readFile(receiver, sender) {
             if (!obj[receiver][sender]) obj[receiver][sender] = {};
             if (!obj[receiver][sender][profile]) obj[receiver][sender][profile] = {params: {}, options: {}};
             obj[receiver][sender][profile].name = val;
+        } else if (match = line.match(/set SUBSET_([0-9]+)\(([A-Z_]+)\)\s+"?([^"]+)"?/)) {
+            var subset = match[1];
+            var param = match[2];
+            var val = match[3];
+
+            //TODO
+
         } else if (match = line.match(/incr prn/)) {
             prn += 1;
         } else if (match = line.match(/set pref ([0-9]+)$/)) {
@@ -188,4 +195,53 @@ function readFile(receiver, sender) {
         }
     });
 
+
+    if (receiver === 'SIGNAL_LED') {
+        pref = parseInt(Object.keys(obj[receiver][sender][1].options).sort().pop(), 10);
+        obj[receiver][sender][1].options[++pref] = {
+            "desc": "signal_kind",
+            "option": "SHORT_LONG",
+            "combo": [
+                "SHORT_ACT_TYPE",
+                "LONG_ACT_TYPE"
+            ],
+            "param": "SHORT_ACT_TYPE"
+        };
+        obj[receiver][sender][1].options[++pref] = {
+            "desc": "signal_count",
+            "combo": [
+                "SHORT_ACT_NUM",
+                "LONG_ACT_NUM"
+            ],
+            "param": "SHORT_ACT_NUM"
+        };
+
+        //console.log('\n\n', JSON.stringify(obj[receiver][sender], null, '  '), '\n\n');
+
+
+    } else if (receiver === 'SIGNAL_CHIME') {
+        pref = parseInt(Object.keys(obj[receiver][sender][1].options).sort().pop(), 10) || 0;
+        obj[receiver][sender][1].options[++pref] = {
+            "desc": "signal_kind",
+            "option": "SHORT_LONG",
+            "combo": [
+                "SHORT_ACT_TYPE",
+                "LONG_ACT_TYPE"
+            ],
+            "param": "SHORT_ACT_TYPE"
+        };
+        obj[receiver][sender][1].options[++pref] = {
+            "desc": "signal_kind_count",
+            "combo": [
+                "SHORT_ACT_NUM",
+                "LONG_ACT_NUM"
+            ],
+            "param": "SHORT_ACT_NUM"
+        };
+
+
+    }
+
 }
+
+

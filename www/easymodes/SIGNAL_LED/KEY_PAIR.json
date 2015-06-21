@@ -173,7 +173,16 @@
         "val": "1"
       }
     },
-    "options": {},
+    "options": {
+      "NaN": {
+        "desc": "signal_count",
+        "combo": [
+          "SHORT_ACT_NUM",
+          "LONG_ACT_NUM"
+        ],
+        "param": "SHORT_ACT_NUM"
+      }
+    },
     "name": "signal_led_chime_off"
   },
   "2": {

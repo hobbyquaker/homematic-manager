@@ -326,25 +326,26 @@ function initWebServer() {
 
     io = socketio.listen(server);
 
-    // redirect socket.io logging to log file
+    // FIXME redirect socket.io log
+    /*
     io.set('logger', {
         debug: function(obj) {
-            //log('socket.io debug: ' + obj);
+            log.debug('socket.io debug: ' + obj);
         },
         info: function(obj) {
-            log.debug('socket.io info: ' + obj);
+            log.info('socket.io info: ' + obj);
         },
         error: function(obj) {
-            log.debug('socket.io error: ' + obj);
+            log.error('socket.io error: ' + obj);
         },
         warn: function(obj) {
-            log.debug('socket.io warn: ' + obj);
+            log.error('socket.io warn: ' + obj);
         }
     });
-
+    */
     initSocket();
 
-    log.debug('webserver/socket.io listening on port ' + config.webServerPort);
+    log.info('webserver/socket.io listening on port ' + config.webServerPort);
 }
 
 

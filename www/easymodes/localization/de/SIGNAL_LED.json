@@ -1,0 +1,86 @@
+{
+  "CONDITION_X": {
+    "description_1": "Beim Senden des Schaltbefehls wird die Signalleuchte des Gongs eingeschaltet. Ist eine Verz&oumlgerungszeit eingestellt, wird die Leuchte erst nach Ablauf dieser Zeit geschaltet.",
+    "description_2": "Der Sensor ist deaktiviert.",
+    "descrHint": "Wann der Schaltbefehl vom Schaltaktor mit Leistungsmessung gesendet wird, wird am entsprechenden Kanal eingestellt."
+  },
+  "GENERIC": {
+    "signal_count": "Anzahl der Wiederholungen",
+    "signal_led_chime_active": "Signalleuchte aktiv",
+    "signal_led_chime_non_active": "Signalleuchte nicht aktiv",
+    "signal_led_chime_on": "Signalleuchte ein",
+    "signal_led_chime_off": "Signalleuchte aus",
+    "signal_kind": "Signalart",
+    "signal_option_red_long": "Rot - lang",
+    "signal_option_red_short": "Rot - kurz",
+    "signal_option_green_long": "Gr&uuml;n - lang",
+    "signal_option_green_short": "Gr&uuml;n - kurz",
+    "signal_option_orange_long": "Orange - lang",
+    "signal_option_orange_short": "Orange - kurz",
+    "button_inactive": "Taste deaktiviert"
+  },
+  "KEY": {
+    "description_1": "Mit einem kurzen oder langen Tastendruck wird die Signalleuchte des Gongs entsprechend des gewähten Modus geschaltet.",
+    "description_2": "Die Taste ist deaktiviert.",
+    "group_description_1": "Falls die Signalleuchte unerwünscht blinkt, kann sie mit dieser Taste ausgeschaltet werden.",
+    "group_description_2": "Mit einem kurzen oder langen Tastendruck wird die Signalleuchte des Gongs entsprechend des gewählten Modus geschaltet.",
+    "group_description_3": "Die Taste ist deaktiviert.",
+    "subset_1": "ein",
+    "subset_2": "ein / aus"
+  },
+  "MOTION_DETECTOR": {
+    "description_1": "Beim Auslösen des Sensors wird die Signalleuchte des Gongs eingeschaltet. Ist eine Verz&oumlgerungszeit eingestellt, wird die Leuchte erst nach Ablauf dieser Zeit geschaltet.<br/><br/>Beim Bewegungsmelder (Kanalparameter) wird ein Sendeabstande von <b>dynamisch</b> und ein Mindestsendeabstand von <b>15s</b> empfohlen.",
+    "description_2": "Der Bewegungsmelder ist deaktiviert."
+  },
+  "PULSE_SENSOR": {
+    "description_1": "Beim Senden des Schaltbefehls wird die Signalleuchte des Gongs eingeschaltet. Ist eine Verz&oumlgerungszeit eingestellt, wird die Leuchte erst nach Ablauf dieser Zeit geschaltet.",
+    "description_2": "Der Sensor ist deaktiviert."
+  },
+  "SENSOR_WINDOW": {
+    "description_1": "<span class=\"translated\">Beim Bet&auml;tigen des Fensters wird die Signalleuchte des Gongs entsprechend der gew&auml;hlten Richtung geschaltet. <span/><br/><br/>",
+    "description_2": "Diese Verknüpfung wird deaktiviert",
+    "subset_1": "Offen - ein / Zu - aus",
+    "subset_2": "Offen - aus / Zu - ein",
+    "subset_3": "Offen - ein",
+    "subset_4": "Zu - ein",
+    "subset_5": "&Auml;nderung - ein"
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "<span class=\"translated\">Beim Bet&auml;tigen des Kontakts wird die Signalleuchte des Gongs entsprechend der gew&auml;hlten Richtung geschaltet. <span/><br/><br/>",
+    "description_2": "Der Kontakt ist deaktiviert.",
+    "subset_1": "Offen - ein / Zu - aus",
+    "subset_2": "Offen - aus / Zu - ein",
+    "subset_3": "Offen - ein",
+    "subset_4": "Zu - ein",
+    "subset_5": "&Auml;nderung - ein"
+  },
+  "SMOKE_DETECTOR_TEAM": {
+    "description_1": "Beim Auslösen des Rauchmelders wird die Signalleuchte des Gongs geschaltet.",
+    "description_2": "Der Rauchmelder ist deaktiviert."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "<span class=\"translated\">Beim Bet&auml;tigen des Schaltkontakts wird die Signalleuchte des Gongs entsprechend des gew&auml;hlten Modus geschaltet. <span/><br/><br/>",
+    "description_2": "Das Schaltinterface ist deaktiviert.",
+    "subset_1": "ein / aus",
+    "subset_2": "ein"
+  },
+  "TILT_SENSOR": {
+    "description_1": "Beim Betätigen des Schaltkontakts wird die Signalleuchte des Gongs entsprechend der gewählten Richtung geschaltet.",
+    "description_2": "Der Tiltsensor ist deaktiviert.",
+    "subset_1": "Offen - ein / Zu - aus",
+    "subset_2": "Offen - aus / Zu - ein",
+    "subset_3": "&Ouml;ffnen",
+    "subset_4": "Schlie&szlig;en",
+    "subset_5": "&Auml;ndern"
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "Mit einem kurzen oder langen Tastendruck wird die Signalleuchte des Gongs eingeschaltet. Ist eine Verz&oumlgerungszeit eingestellt, wird die Signalleuchte erst nach Ablauf dieser Zeit geschaltet.",
+    "description_2": "Die virtuelle Taste ist deaktiviert."
+  },
+  "WATERDETECTIONSENSOR": {
+    "description_1": "<span class=\"translated\">Bei Feuchtigkeit wird die Signalleuchte des Gongs entsprechend der gew&auml;hlten Richtung geschaltet.<span/><br/><br/>",
+    "description_2": "Der Wassermelder ist deaktiviert.",
+    "subset_1": "Feuchtigkeit - ein / Trocken - aus",
+    "subset_2": "Feuchtigkeit - aus / Trocken - ein"
+  }
+}

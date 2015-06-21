@@ -1,0 +1,14 @@
+{
+  "GENERIC": {
+    "switch_off": "Kapiyi kapat",
+    "switch_on": "Kapiyi ac",
+    "switch_on_off": "Kapiyi ac / OTOMATIK kapat",
+    "switch_on_off_toggle": ""
+  },
+  "KEY": {
+    "description_1": "Tusa kisa süre basildiginda kapi acilir. Tusa uzun süre basildiginda <b>Kapiyi ac / OTOMATIK kapat<b> fonksiyonunu uygular.",
+    "description_2": "Tusa kisa süre basildiginda kapi kapanir. Tusa uzun süre basildiginda <b>Kapiyi ac / OTOMATIK kapat<b> fonksiyonunu uygular.",
+    "description_3": "Tusa kisa veya uzun süre basildiginda kapi acilir. Kapi tahrikinden ayarlanabilen bir süre dolduktan sonra kapi kendiliginden kapanir.",
+    "description_4": ""
+  }
+}

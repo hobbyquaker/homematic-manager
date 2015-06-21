@@ -1,0 +1,144 @@
+{
+  "0": {
+    "params": {},
+    "options": {},
+    "name": "expert"
+  },
+  "1": {
+    "params": {
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_TIME": {
+        "val": "1200"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_LEVEL": {
+        "val": "1.0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "2 "
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2 "
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_RAMPON_TIME": {
+        "val": "0.5"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Bei erh&ouml;htem CO2-Gehalt der Luft wird der Schalter f&uuml;r die eingestellte Zeit eingeschaltet."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_1(UI_DESCRIPTION)  "
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "1"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "ON_THRESHOLD",
+        "combo": [
+          "SHORT_COND_VALUE_LO"
+        ]
+      },
+      "2": {
+        "desc": "RAMPON_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "SHORT_RAMPON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPON_TIME"
+      },
+      "3": {
+        "desc": "ON_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "4": {
+        "desc": "ON_LEVEL",
+        "option": "DIM_ONLEVEL",
+        "combo": [
+          "SHORT_ON_LEVEL",
+          "LONG_ON_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_ON_LEVEL"
+      }
+    },
+    "name": "dimmer_on"
+  }
+}

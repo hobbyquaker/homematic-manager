@@ -1,0 +1,25 @@
+{
+  "0": {
+    "params": {},
+    "options": {},
+    "name": "expert"
+  },
+  "1": {
+    "params": {
+      "UI_HINT": {
+        "readonly": true,
+        "val": "0"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "no"
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "no"
+      }
+    },
+    "options": {},
+    "name": "no_profile"
+  }
+}

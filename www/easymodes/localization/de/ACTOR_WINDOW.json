@@ -1,0 +1,94 @@
+{
+  "GENERIC": {
+    "closeWindow": "Fenster - Schlie&szlig;en / Stopp",
+    "closeWindowA": "Fenster - Schlie&szlig;en ohne Stopp-Option",
+    "openWindow": "Fenster - L&uuml;ftungsstellung / Stopp",
+    "openWindowA": "Fenster - Zeitl&uuml;ften ohne Stopp-Option",
+    "openWindowB": "Fenster - &Ouml;ffnen ohne Stopp-Option",
+    "toggleWindow": "Fenster - Nat&uuml;rliches L&uuml;ften / Stopp / Schlie&szlig;en",
+    "toggleWindowA": "Fenster - Nat&uuml;rliches L&uuml;ften / Schlie&szlig;en / ohne Stopp-Option",
+    "automaticWindow": "Fenster - Automatikbetrieb",
+    "stopWindow": "Fenster - Stopp",
+    "windowAiring": "Fenster - Spaltl&uuml;ften / Stopp",
+    "windowPosition": "Fenster - Positionsfahrt / Stopp",
+    "windowAiringTime": "Fenster - Zeitl&uuml;ften / Stopp",
+    "windowNaturalAiring": "Fenster - Nat&uuml;rliches L&uuml;ften / Stopp"
+  },
+  "KEY": {
+    "description_1": "Mit einem Tastendruck wird das Fenster geschlossen. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Schließen verzögert.",
+    "description_2": "Mit einem Tastendruck wird das Fenster in Lüftungsstellung (100%) geöffnet. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_3": "Mit einem Tastendruck wird das geöffnete Fenster geschlossen, ein geschlossenes Fenster wird in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Ein Tastendruck während der Fahrt, stoppt das Fenster. Der folgende Tastendruck bewirkt eine Umkehrung des vorherigen Fahrbefehls. Zusätzlich wählbare Verzögerungszeiten verzögern das Öffnen bzw. Schließen.",
+    "description_4": "Mit einem Tastendruck wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Wird die Taste gedrückt, wenn das Fenster bereits in Lüftungsstellung steht, startet nur die Zeit neu.",
+    "description_5": "Mit einem Tastendruck wird die Fahrt des Fensters angehalten.",
+    "description_6": "Mit einem Tastendruck wird das Fenster in die gewählte Öffnungsposition gefahren. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_7": "Mit einem Tastendruck wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Ein Tastendruck während der Fahrt stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_8": "Mit einem Tastendruck wird das Fenster in die gewählte Öffnungsposition gefahren. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_9": "Mit einem Tastendruck wird das Fenster in die gewählte Öffnungsposition gefahren und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_10": "Diese Verknüpfung wird deaktiviert."
+  },
+  "MOTION_DETECTOR": {
+    "description_1": "Bei erkannter Bewegung wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen.",
+    "description_2": "Bei erkannter Bewegung stoppt das Fenster seine Fahrt.",
+    "description_3": "Diese Verknüpfung wird deaktiviert"
+  },
+  "RAINDETECTOR": {
+    "description_1": "Beginnt es zu regnen, wird das Fenster geschlossen. Durch die optional wählbare Verzögerungszeit wird das Schließen verzögert.",
+    "description_2": "Bei Regen wird das Fenster geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen.",
+    "description_3": "Diese Verknüpfung wird deaktiviert"
+  },
+  "SENSOR_FOR_CARBON_DIOXIDE": {
+    "description_1": "Bei erhöhtem CO2-Gehalt der Raumluft wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen.",
+    "description_2": "Diese Verknüpfung wird deaktiviert.",
+    "CO2_low": "leicht erh&ouml;hte CO2-Konzentration",
+    "CO2_high": "stark erh&ouml;hte CO2-Konzentration"
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Beim Schließen des Schließerkontaktes wird das Fenster geschlossen. Das Öffnen des Schließerkontaktes während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Schließen verzögert.",
+    "description_2": "Beim Schließen des Schließerkontaktes wird das Fenster in Lüftungsstellung (100%) geöffnet. Das Öffnen des Schließerkontaktes während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_3": "Beim Schließen des Schließerkontaktes wird das Fenster geschlossen. Beim Öffnen des Schließerkontaktes wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Zusätzlich wählbare Verzögerungszeiten verzögern das Öffnen bzw. Schließen.",
+    "description_4": "Beim Öffnen und Schließen des Schließerkontaktes wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Beim Umschalten, wenn das Fenster bereits in Lüftungsstellung steht, startet nur die Zeit neu.",
+    "description_5": "Beim Umschalten des Schließerkontaktes wird die Fahrt des Fensters angehalten.",
+    "description_6": "Beim Schließen des Schließerkontaktes wird das Fenster in die gewählte Öffnungsposition gefahren und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Das Öffnen des Schließerkontaktes während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_7": "Beim Schließen des Schließerkontaktes wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen.Das Öffnen des Schließerkontaktes während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_8": "Beim Schließen des Schließerkontaktes wird das Fenster in die gewählte Öffnungsposition gefahren. Das Öffnen des Schließerkontaktes während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_9": "Beim Schließen des Schließerkontaktes wird das Fenster in die gewählte Öffnungsposition gefahren und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Das Öffnen des Schließerkontaktes während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_10": "Diese Verknüpfung wird deaktiviert."
+  },
+  "SMOKE_DETECTOR_TEAM": {
+    "description_1": "Bei Feueralarm wird das Fenster für die festgelegte Zeit geöffnet und nach Ablauf der gewählten Zeit oder nach Bestätigung des Alarms am Auslösenden oder einem Rauchmelder der gleichen Gruppe, automatisch wieder geschlossen.",
+    "description_2": "Bei Feueralarm wird das Fenster sofort geschlossen.",
+    "description_3": "Diese Verknüpfung wird deaktiviert",
+    "subset_1": "nur ausl&ouml;sender Rauchmelder",
+    "subset_2": "Rauchmelder der gleichen Gruppe"
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "Beim Betätigen des Schalters wird das Fenster geschlossen. Eine Betätigung während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Schließen verzögert.",
+    "description_2": "Beim Betätigen des Schalters wird das Fenster in Lüftungsstellung (100%) geöffnet. Eine Betätigung während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_3": "Beim Betätigen des Schalters wird das geöffnete Fenster geschlossen, ein geschlossenes Fenster wird in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Eine Betätigung während der Fahrt, stoppt das Fenster. Der folgende Tastendruck bewirkt eine Umkehrung des vorherigen Fahrbefehls. Zusätzlich wählbare Verzögerungszeiten verzögern das Öffnen bzw. Schließen.",
+    "description_4": "Beim Betätigen des Schalters wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Eine Betätigung, wenn das Fenster bereits in Lüftungsstellung steht, startet nur die Zeit neu.",
+    "description_5": "Beim Betätigen des Schalters wird die Fahrt des Fensters angehalten.",
+    "description_6": "Beim Betätigen des Schalters wird das Fenster in die gewählte Öffnungsposition gefahren. Eine Betätigung während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_7": "Beim Betätigen des Schalters wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Eine Betätigung während der Fahrt stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_8": "Beim Betätigen des Schalters wird das Fenster in die gewählte Öffnungsposition gefahren. Eine Betätigung während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_9": "Beim Betätigen des Schalters wird das Fenster in die gewählte Öffnungsposition gefahren und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Eine Betätigung während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_10": "Diese Verknüpfung wird deaktiviert."
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "Mit einem Tastendruck wird das Fenster geschlossen. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Schließen verzögert.",
+    "description_2": "Mit einem Tastendruck wird das Fenster in Lüftungsstellung (100%) geöffnet. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_3": "Mit einem Tastendruck wird das geöffnete Fenster geschlossen, ein geschlossenes Fenster wird in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Ein Tastendruck während der Fahrt, stoppt das Fenster. Der folgende Tastendruck bewirkt eine Umkehrung des vorherigen Fahrbefehls. Zusätzlich wählbare Verzögerungszeiten verzögern das Öffnen bzw. Schließen.",
+    "description_4": "Mit einem Tastendruck wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Wird die Taste gedrückt, wenn das Fenster bereits in Lüftungsstellung steht, startet nur die Zeit neu.",
+    "description_5": "Mit einem Tastendruck wird die Fahrt des Fensters angehalten.",
+    "description_6": "Mit einem Tastendruck wird das Fenster in die gewählte Öffnungsposition gefahren. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_7": "Mit einem Tastendruck wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Ein Tastendruck während der Fahrt stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_8": "Mit einem Tastendruck wird das Fenster in die gewählte Öffnungsposition gefahren. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_9": "Mit einem Tastendruck wird das Fenster in die gewählte Öffnungsposition gefahren und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+    "description_10": "Diese Verknüpfung wird deaktiviert."
+  },
+  "WEATHER": {
+    "description_1": "Wird die eingestellte Windstärke überschritten, schließt das Fenster.",
+    "description_2": "Wird die eingestellte Windstärke unterschritten, wird das Fenster geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen.",
+    "description_3": "Wird die eingestellte Windstärke überschritten, wird das Fenster geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen.",
+    "description_4": "Diese Verknüpfung wird deaktiviert"
+  }
+}

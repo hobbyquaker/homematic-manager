@@ -1,0 +1,29 @@
+{
+  "GENERIC": {
+    "dim_down": "Dimmer - dunkler",
+    "dim_up": "Dimmer - heller",
+    "dimmer_off": "Dimmer - aus",
+    "dimmer_off_darker": "Dimmer - aus / dunkler",
+    "dimmer_on": "Dimmer - ein",
+    "dimmer_on_brighter": "Dimmer - ein / heller",
+    "dimmer_on_off": "Dimmer - ein / aus",
+    "dimmer_on_off_b_d": "Dimmer - ein / aus &amp; heller / dunkler",
+    "not_active": "nicht aktiv",
+    "sleep_well": "Einschlaflicht",
+    "wake_up_light": "Aufwachlicht"
+  },
+  "VIRTUAL_DIMMER": {
+    "description_1": "Mit einem kurzen Tastendruck wird das Licht auf den festgelegten Helligkeitswert eingeschaltet. Ein langer Tastendruck dimmt das Licht hoch.",
+    "description_2": "Mit einem kurzen Tastendruck wird das Licht ausgeschaltet. Ein langer Tastendruck dimmt das Licht herunter.",
+    "description_3": "Mit einem kurzen Tastendruck wechselt das Licht zwischen dem festgelegten Helligkeitswert und \"aus\". Ein langer Tastendruck dimmt das Licht abwechselnd hoch- und herunter.",
+    "description_4": "Das Licht wird durch kurzen oder langen Tastendruck für die festgelegte Zeit eingeschaltet. In der Verzögerung wird der Pegel zur Vorwarnung leicht abgesenkt, um anschließend langsam bis auf \"aus\" herunter zu dimmen.",
+    "description_5": "Mit einem kurzen Tastendruck wird das Licht auf den festgelegten Helligkeitswert eingeschaltet und nach der festgelegten Zeit langsam auf \"aus\" heruntergedimmt. Ein langer Tastendruck dimmt das Licht abwechselnd hoch- und herunter.",
+    "description_6": "Das Licht wechselt im festgelegten Takt endlos zwischen den beiden Helligkeitswerten.",
+    "description_7": "Mit einem kurzen Tastendruck wird das Licht langsam auf den festgelegten Helligkeitswert hochgedimmt. Ein langer Tastendruck dimmt das Licht abwechselnd hoch- und herunter.",
+    "description_8": "Das Licht wird durch kurzen oder langen Tastendruck auf den festgelegten Helligkeitswert eingeschaltet.",
+    "description_9": "Das Licht wird durch kurzen oder langen Tastendruck ausgeschaltet.",
+    "description_10": "Das Licht wird durch kurzen oder langen Tastendruck hochgedimmt.",
+    "description_11": "Das Licht wird durch kurzen oder langen Tastendruck heruntergedimmt.",
+    "description_12": "Die Taste ist nicht aktiv."
+  }
+}

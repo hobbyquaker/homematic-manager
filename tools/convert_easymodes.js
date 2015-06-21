@@ -7,8 +7,10 @@
  *      Please configure occuPath, languages and receivers!
  */
 
+
 var occuPath = '/home/basti/occu/';
 var langs = ['de', 'en', 'tr'];
+//var langs = ['de'];
 var receivers = ['SWITCH', 'DIMMER', 'BLIND', 'ACTOR_SECURITY', 'ACTOR_WINDOW', 'ALARMACTUATOR',
     'CLIMATECONTROL_RECEIVER', 'CLIMATECONTROL_RT_RECEIVER', 'CLIMATECONTROL_VENT_DRIVE',
     'DDC', 'HMW_BLIND', 'HMW_DIMMER', 'HMW_INPUT_OUTPUT', 'HMW_SWITCH', 'KEYMATIC',
@@ -16,15 +18,19 @@ var receivers = ['SWITCH', 'DIMMER', 'BLIND', 'ACTOR_SECURITY', 'ACTOR_WINDOW', 
     'VIRTUAL_DIMMER', 'WEATHER', 'WEATHER_RECEIVER', 'WINDOW_SWITCH_RECEIVER', /*'WINMATIC'*/, 'WS_TH'
 ];
 
+//var receivers = ['SIGNAL_LED'];
+
 var files = ['GENERIC', 'PNAME'];
 
 var fs = require('fs');
+var mkdirp = require('mkdirp');
 var Entities = require('html-entities').AllHtmlEntities;
 var entities = new Entities();
 
 var easymodePath = occuPath + '/WebUI/www/config/easymodes/';
 
 var obj = {lang: {}};
+
 
 files.forEach(function (file) {
     langs.forEach(function (lang) {
@@ -41,6 +47,7 @@ files.forEach(function (file) {
         obj.lang[lang][file] = data;
     });
 });
+
 
 receivers.forEach(function (receiver) {
     langs.forEach(function (lang) {
@@ -76,11 +83,45 @@ receivers.forEach(function (receiver) {
     }
 });
 
+for (var elem in obj) {
+    if (elem == 'lang') {
+        var langs = obj[elem];
+        for (var lang in langs) {
+            var dir = __dirname + '/../www/easymodes/localization/' + lang;
+            mkdirp(dir);
+            console.log(lang);
+            for (var trans in langs[lang]) {
+                var file = dir + '/' + trans + '.json';
+                console.log('writing', file);
+                fs.writeFileSync(file, JSON.stringify(langs[lang][trans], null, '  '));
+
+            }
+        }
+
+    } else {
+        mkdirp(__dirname + '/../www/easymodes/' + elem);
+
+        var dev = obj[elem];
+        for (var partner in dev) {
+            var file = __dirname + '/../www/easymodes/' + elem + '/' + partner + '.json';
+            if (dev[partner]) {
+                console.log('writing ' + file);
+                fs.writeFileSync(file, JSON.stringify(dev[partner] , null, '  '));
+
+            }
+        }
+
+    }
+
+}
+
+
+/*
 console.log('writing www/js/easymodes.js');
-
-fs.writeFileSync(__dirname + '/../www/js/easymodes.js', 'var easymodes=' + JSON.stringify(obj /*, null, '  '*/) + ';\n');
-
+fs.writeFileSync(__dirname + '/../www/js/easymodes_test.js', 'var easymodes=' + JSON.stringify(obj , null, '  ') + ';\n');
 console.log('done.');
+*/
+
 
 function readFile(receiver, sender) {
     if (typeof obj[receiver] === 'undefined') obj[receiver] = {};

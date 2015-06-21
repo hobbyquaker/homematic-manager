@@ -1,0 +1,47 @@
+{
+  "GENERIC": {
+    "security_on": "Ventilation lock On",
+    "security_off": "Ventilation lock Off",
+    "security_toggle": "Ventilation lock On / Off",
+    "paramDescr": "engl Modus&nbsp;&nbsp;",
+    "mode0": "engl Ignoriere Schaltbefehl",
+    "mode1": "engl Ein",
+    "mode2": "engl Aus"
+  },
+  "KEY": {
+    "description_1": "A keystroke will activate the ventilation lock (security).",
+    "description_2": "A keystroke will deactivate the ventilation lock (security).",
+    "description_3": "A keystroke will change the state of the ventilation lock (security).",
+    "description_4": "This direct link is deactivated."
+  },
+  "RAINDETECTOR": {
+    "description_1": "When it starts raining, the ventilation lock (security) will be activated",
+    "description_2": "When it starts raining, the ventilation lock (security) will be deactivated.",
+    "description_3": "When it starts raining, the ventilation lock (security) will be activated. When the rain detector is drain again, the ventilation lock will be deactivated.",
+    "description_4": "This direct link is deactivated."
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Closing the shutter contact will activate the ventilation lock (security)",
+    "description_2": "Closing the shutter contact will deactivate the ventilation lock (security).",
+    "description_3": "Closing the shutter contact will activate the ventilation lock (security). Opening the shutter contact will deactivate the ventilation lock",
+    "description_4": "This direct link is deactivated."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "Toggling the switch will activate the ventilation lock (security).",
+    "description_2": "Toggling the switch will deactivate the ventilation lock (security).",
+    "description_3": "Toggling the switch will change the state of the ventilation lock (security).",
+    "description_4": "This direct link is deactivated."
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "A keystroke will activate the ventilation lock (security).",
+    "description_2": "A keystroke will deactivate the ventilation lock (security).",
+    "description_3": "A keystroke will change the state of the ventilation lock (security).",
+    "description_4": "This direct link is deactivated."
+  },
+  "WEATHER": {
+    "description_1": "When the entered wind strength is reached, the ventilation lock (security) will be activated.",
+    "description_2": "Below the entered wind strength, the ventilation lock (security) will be deactivated.",
+    "description_3": "When the entered wind strength is reached, the ventilation lock (security) will be activated. Below the entered wind strength, the ventilation lock (security) will be deactivated again.",
+    "description_4": "This direct link is deactivated."
+  }
+}

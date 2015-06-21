@@ -1,0 +1,152 @@
+{
+  "CAPACITIVE_FILLING_LEVEL_SENSOR": {
+    "description_1": "When the maximum fill level will be exceeded or falls below switching can be performed accordingly.",
+    "description_2": "When the minimum fill level will be exceeded or falls below switching can be performed accordingly.",
+    "subset_1": "fallen below - on / exceeded - off",
+    "subset_2": "fallen below - off / exceeded - on",
+    "subset_3": "fallen below - on / exceeded - off",
+    "subset_4": "fallen below - off / exceeded - on",
+    "upperFillLevel": "Upper fill level",
+    "lowerFillLevel": "Lower fill level"
+  },
+  "CONDITION_X": {
+    "description_1": "The switch will be switched on when the upper limit is received.",
+    "description_2": "The switch will be switched off when the lower limit is received.",
+    "description_3": "When the upper limit is received the switch will be switched on, when the lower limit is received it will be turned off. This function is equal to a classic master/slave application.",
+    "descrHint": "You can define a time for sending a switching command via the switch actuator at the corresponding channel.",
+    "descrHintMS": "To activate the profile, please define for the corresponding channel of the switch actuator that a switching command will be send if the selected value will be exceeded or falls below the threshold."
+  },
+  "GENERIC": {
+    "switch_off": "Switch - off",
+    "switch_on": "Switch - on",
+    "switch_on_off": "Switch - on/off",
+    "switch_on_off_toggle": "Switch - on/off/toggle"
+  },
+  "KEY": {
+    "description_1": "With a short or long button press the switch will be toggled on for the set time. If a delay is set switching will be performed after the delay time has expired.",
+    "description_2": "With a short or long button press the switch will be toggled off for the set time. If a delay is set switching will be performed after the delay time has expired.",
+    "description_3": "With a short or long button press the switch will be toggled on or off for the set time (toggle function). If a delay is set switching will be performed after the delay time has expired.",
+    "description_4": "With a short or long button press the switch will be toggled on for the set time."
+  },
+  "MOTION_DETECTOR": {
+    "description_1": "When the sensor is triggered the switch will be switched on at least for the time set. If a delay is set switching will be performed after the delay time has expired.",
+    "description_2": "When the sensor is triggered the switch will be switched on without delay at least for the time set.",
+    "description_3": "The motion detector is not active.",
+    "md_on_time": "Switch-on time (duration in status \"on\")",
+    "md_min_on_time": "Minimum switch-on time",
+    "hint0a": "<b>Attention!</b> The selected switch-on time of the actuator is shorter than the minimum transmission interval of",
+    "hint0b": "s.",
+    "hint1a": "As the next movement will be send in ",
+    "hint1b": "s, the actuator will switch off previously."
+  },
+  "PULSE_SENSOR": {
+    "description_1": "When the switching command is transmitted the switch will be switched on for the time set. If a delay is set switching will be performed after the delay time has expired.",
+    "description_2": "When the switching command is transmitted the switch will be switched off for the time set. If a delay is set switching will be performed after the delay time has expired.",
+    "description_3": "When the switching command is transmitted the switch will be switched on or off for the time set (toggle function). If a delay is set switching will be performed after the delay time has expired.",
+    "description_4": "When the switching command is transmitted the switch will be switched on for the time set."
+  },
+  "RAINDETECTOR": {
+    "description_1": "In case of rain the light will be switched on to the defined brightness value, in case of dry conditions it will be switched off. This function can be reversed.",
+    "subset_1": "Dry - on / Rain - off",
+    "subset_2": "Dry - off / Rain - on"
+  },
+  "ROTARY_HANDLE_SENSOR": {
+    "description_1": "When the switch contact is opened the switch will be switched on and switched off when the contact is closed. This function can be reversed.",
+    "description_2": "The switch will be switched on if the defined change signal is recognized.",
+    "subset_1": "Open - on / Closed - off",
+    "subset_2": "Open - off / Closed - on",
+    "subset_3": "Close",
+    "subset_4": "Tilt",
+    "subset_5": "open wide",
+    "subset_6": "tilt or open wide",
+    "subset_7": "every change",
+    "def_open_a": "tilt or wide open",
+    "def_open_b": "wide open",
+    "at": "on"
+  },
+  "SENSOR_FOR_CARBON_DIOXIDE": {
+    "description_1": "In case of increased CO2 concentrations in the room air the switch will be switched on for the set time.",
+    "description_2": "The CO2 sensor is not active.",
+    "CO2_low": "slightly increased CO2 concentration",
+    "CO2_high": "heavily increased CO2 concentration"
+  },
+  "SENSOR_WINDOW": {
+    "description_1": "When the contact is opened the switch will be switched on and switched off when the contact is closed. This function can be reversed.",
+    "description_2": "The switch will be switched on for the time set if the change signal is recognized.",
+    "subset_1": "Open - on / Closed - off",
+    "subset_2": "Open - off / Closed - on",
+    "subset_3": "Open",
+    "subset_4": "Close",
+    "subset_5": "Change",
+    "at": "on"
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "When the contact is opened the switch will be switched on and switched off when the contact is closed. This function can be reversed.",
+    "description_2": "The switch will be switched on for the time set if the change signal is recognized.",
+    "subset_1": "Open - on / Closed - off",
+    "subset_2": "Open - off / Closed - on",
+    "subset_3": "Open",
+    "subset_4": "Close",
+    "subset_5": "Change",
+    "at": "on"
+  },
+  "SMOKE_DETECTOR_TEAM": {
+    "description_1": "In case of fire alarm the switch will be switched on for the set time. If the alarm will be confirmed by the triggering device or a smoke detector of the same group the switch will be switched off.",
+    "subset_1": "only triggering smoke detector",
+    "subset_2": "smoke detector of the same group"
+  },
+  "SWITCH": {
+    "description_1": "By pressing the device button the switch will be switched on for the set time. If a delay is set switching will be performed after the delay time has expired.",
+    "description_2": "By pressing the device button the switch will be switched off for the set time. If a delay is set switching will be performed after the delay time has expired.",
+    "description_3": "By pressing the device button the switch will be switched on or off for the set time (toggle function). If a delay is set switching will be performed after the delay time has expired.",
+    "description_4": "By pressing the device button the switch will be switched on for the set time."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "By pressing the switch contact the switch changes for the set time to the other status.",
+    "description_2": "<span class=\"translated\">By pressing the switch contact the switch turns on the light for the set time. If the switch contact is pressed again while the light is switched on, the time count begins anew./span><br/><br/>",
+    "description_3": "By pressing the switch contact the switch will be switched on for a defined time set.",
+    "description_4": "By pressing the switch contact the switch will be switched off for a defined time set.",
+    "description_5": "The switch contact operates like a normal switch "
+  },
+  "TILT_SENSOR": {
+    "description_1": "When the switch contact is opened the switch will be switched on and switched off when the contact is closed. This function can be reversed.",
+    "description_2": "The switch will be switched on if the defined change signal is recognized.",
+    "description_3": "When the garage door is opened the switch will be switched on and switched off when it is closed again.",
+    "subset_1": "Open - on / Closed - off",
+    "subset_2": "Open - off / Closed - on",
+    "subset_3": "Close",
+    "subset_4": "Open",
+    "subset_5": "Change",
+    "at": "on"
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "With a short or long button press the switch will be toggled on for the set time. If a delay is set switching will be performed after the delay time has expired.",
+    "description_2": "With a short or long button press the switch will be toggled off for the set time. If a delay is set switching will be performed after the delay time has expired.",
+    "description_3": "With a short or long button press the switch will be toggled on or off for the set time (toggle function). If a delay is set switching will be performed after the delay time has expired.",
+    "description_4": "With a short or long button press the switch will be toggled on for the set time."
+  },
+  "WATERDETECTIONSENSOR": {
+    "description_1": "In case of humidity the switch will be switched on for the set time. This function can be reversed.",
+    "description_2": "When the humidity changes the switch will be switched on for the set time.",
+    "subset_1": "Dry - on / Humidity - off",
+    "subset_2": "Dry - off / Humidity - on",
+    "subset_3": "switch on in case of absolute dry conditions",
+    "subset_4": "switch on in case of humidity",
+    "subset_5": "switch on at water level from 1.5 mm",
+    "subset_6": "switch on in case of humidity or water level from 1.5 mm",
+    "subset_7": "switch on at every change",
+    "subset_8": "switch off in case of absolute dry conditions",
+    "subset_9": "switch off in case of humidity",
+    "subset_10": "switch off at water level from 1.5 mm",
+    "subset_11": "switch off in case of humidity or water level from 1.5 mm",
+    "subset_12": "switch off at every change",
+    "moisty": "already at low humidity level",
+    "watery": "only at water level from 1.5 mm"
+  },
+  "WEATHER": {
+    "description_1": "In case of strong winds the switch will be switched on. In case of light winds it will be switched off. This function can be reversed.",
+    "description_2": "When the defined wind velocity is reached the switch will be switched on for the time set.",
+    "subset_1": "Strong wind - off / light wind - on",
+    "subset_2": "Strong wind - on / light wind - off"
+  }
+}

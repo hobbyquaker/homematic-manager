@@ -1,0 +1,47 @@
+{
+  "GENERIC": {
+    "security_on": "Havalandirma kilidini ac",
+    "security_off": "Havalandirma kilidini kapat",
+    "security_toggle": "Havalandirma kilidini ac/kapat",
+    "paramDescr": "Mod&nbsp;&nbsp;",
+    "mode0": "Degistirme komutunu yoksay",
+    "mode1": "Ac",
+    "mode2": "Kapali"
+  },
+  "KEY": {
+    "description_1": "Havalandirma kilidi (güvenlik) tusa bir kere basildiginda etkinlesir.",
+    "description_2": "Havalandirma kilidi (güvenlik) tusa bir kere basildiginda devre disi kalir.",
+    "description_3": "Havalandirma kilidinin durumu (güvenlik) tusa bir kere basildiginda tersine cevrilir.",
+    "description_4": "Bu direkt baglanti devre disi birakilir."
+  },
+  "RAINDETECTOR": {
+    "description_1": "Yagmur yagmaya basladiginda havalandirma kilidi (güvenlik) etkinlestirilir.",
+    "description_2": "Yagmur yagmaya basladiginda havalandirma kilidi (güvenlik) devre disi birakilir.",
+    "description_3": "Yagmur yagmaya basladiginda havalandirma kilidi (güvenlik) etkinlestirilir. Yagmur sensörü kurur kurmaz havalandirma kilidi devre disi birakilir.",
+    "description_4": "Bu direkt baglanti devre disi birakilir."
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Kilit kontagi kapatildiginda havalandirma kilidi (güvenlik) etkinlestirilir.",
+    "description_2": "Kilit kontagi kapatildiginda havalandirma kilidi (güvenlik) devre disi birakilir.",
+    "description_3": "Kilit kontagi kapatildiginda havalandirma kilidi (güvenlik) etkinlestirilir. Kilit kontagi acildiginda havalandirma kilidi devre disi birakilir.",
+    "description_4": "Bu direkt baglanti devre disi birakilir."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "Saltere basildiginda havalandirma kilidi (güvenlik) etkinlestirilir.",
+    "description_2": "Saltere basildiginda havalandirma kilidi (güvenlik) devre disi kalir.",
+    "description_3": "Saltere basildiginda havalandirma kilidinin (güvenlik) durumu degisir.",
+    "description_4": "Bu baglanti devre disi birakilir."
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "Havalandirma kilidi (güvenlik) tusa bir kere basildiginda etkinlesir.",
+    "description_2": "Havalandirma kilidi (güvenlik) tusa bir kere basildiginda devre disi kalir.",
+    "description_3": "Havalandirma kilidinin durumu (güvenlik) tusa bir kere basildiginda tersine cevrilir.",
+    "description_4": "Bu direkt baglanti devre disi birakilir."
+  },
+  "WEATHER": {
+    "description_1": "Ayarlanan rüzgar siddeti asilirsa havalandirma kilidi (güvenlik) etkinlesir.",
+    "description_2": "Ayarlanan rüzgar siddetine ulasilmazsa havalandirma kilidi (güvenlik) devre disi kalir.",
+    "description_3": "Ayarlanan rüzgar siddeti asilirsa havalandirma kilidi (güvenlik) etkinlesir. Ayarlanan rüzgar siddetine yine ulasilmazsa havalandirma kilidi (güvenlik) devre disi kalir.",
+    "description_4": "Bu direkt baglanti devre disi birakilir."
+  }
+}

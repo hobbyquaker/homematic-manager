@@ -1,0 +1,11 @@
+{
+  "GENERIC": {
+    "dummy": "dummy"
+  },
+  "WEATHER": {
+    "dummy": "dummy"
+  },
+  "WEATHER_TRANSMIT": {
+    "dummy": "dummy"
+  }
+}

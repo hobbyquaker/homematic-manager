@@ -1,0 +1,137 @@
+{
+  "CONDITION_X": {
+    "description_1": "Durum göstergesinin ekrani üst sinir degere ulasildiginda acilir.",
+    "description_2": "Durum göstergesinin ekrani alt sinir degere ulasildiginda kapanir.",
+    "description_3": "Durum göstergesinin ekrani üst sinir degere ulasildiginda acilir, alt sinir degere ulasildiginda ise kapanir. Bu fonksiyon klasik Master/Slave uygulamasiyla aynidir.",
+    "descrHint": "Salter aktüatörü tarafindan uygun performans ölcümüyle degistirme komutunun iletim zamani, ilgili kanaldan ayarlanir.",
+    "descrHintMS": "Profilin etkili olabilmesi icin performans ölcümüne sahip salter aktüatörünün ilgili kanali, secilen deger asildiginda ya da bunun altinda kalindiginda bir degistirme komutu iletilecek sekilde ayarlanmalidir."
+  },
+  "GENERIC": {
+    "switch_off": "G&ouml;sterge - kapat",
+    "switch_on": "G&ouml;sterge - ac",
+    "switch_on_off": "G&ouml;sterge - ac/kapat",
+    "switch_on_off_toggle": "G&ouml;sterge - ac/kapat/toggle"
+  },
+  "KEY": {
+    "description_1": "Tusa kisa veya uzun süre basildiginda durum göstergesinin ekrani secilen moda göre acilir.",
+    "description_2": "Tusa kisa veya uzun süre basildiginda durum göstergesinin ekrani secilen moda göre kapanir."
+  },
+  "MOTION_DETECTOR": {
+    "description_1": "Sensör devreye girdiginde ekran en azindan belirlenen süre boyunca acik kalir. Bir gecikme süresi ayarlanmissa, ekran bu süre dolduktan sonra acilir.",
+    "description_2": "Hareket alarmi etkin degil.",
+    "md_on_time": "Acik kalma s&uuml;resi (\"acik\" durumunda ki bekleme s&uuml;resi)",
+    "md_min_on_time": "Minimum-acik kalma s&uuml;resi",
+    "hint0a": "<b>DIKKAT!</b>Akt&uuml;at&ouml;r&uuml;n secilen acik kalma s&uuml;resi su minimum iletim araligindan daha k&uuml;c&uuml;kt&uuml;r  ",
+    "hint0b": "s.",
+    "hint1a": "Sonraki hareket ilk olarak",
+    "hint1b": "s iletildikten sonra, akt&uuml;at&ouml;r &ouml;ncesinde kapanir."
+  },
+  "PULSE_SENSOR": {
+    "description_1": "Degistirme komutu iletildiginde ekran en azindan belirlenen süre boyunca acik kalir.",
+    "description_2": "Degistirme komutu iletildiginde ekran en azindan belirlenen süre boyunca kapali kalir.",
+    "description_3": "Degistirme komutu iletildiginde ekran en azindan belirlenen süre boyunca acik veya kapali kalir (Toggle fonksiyonu)."
+  },
+  "RAINDETECTOR": {
+    "description_1": "Yagmur yagdiginda gösterge salter yönüne göre ayarlanir.",
+    "subset_1": "Kuru - durum 0 / yagmur - durum 1",
+    "subset_2": "Kuru - durum 1 / yagmur - durum 0"
+  },
+  "ROTARY_HANDLE_SENSOR": {
+    "description_1": "Salter kontagi acildiginda ekran acilir ve kontak kapatildiginda da kapanir. Bu fonksiyon tersine de cevrilebilir.",
+    "description_2": "Belirlenen degistirme sinyali algilandiginda ekran acilir.",
+    "subset_1": "Acik - ac/kapali - kapat",
+    "subset_2": "Acik - kapat/kapali - ac",
+    "subset_3": "Kapat",
+    "subset_4": "Devir",
+    "subset_5": "tamamen ac",
+    "subset_6": "Devir ya da tamamen ac",
+    "subset_7": "her degisiklik",
+    "def_open_a": "devrilmis veya tamamen acik",
+    "def_open_b": "tamamen acik",
+    "at": "'da"
+  },
+  "SENSOR_FOR_CARBON_DIOXIDE": {
+    "description_1": "Odadaki havanin CO2 orani yükselmisse ekran belirlenen süre icin acilir.",
+    "description_2": "CO2 sensörü etkin degil.",
+    "CO2_low": "hafif artmis CO2 konsantrasyonu",
+    "CO2_high": "cok artmis CO2 konsantrasyonu"
+  },
+  "SENSOR_WINDOW": {
+    "description_1": "Pencere acildiginda ekran acilir ve kontak kapatildiginda da kapanir. Bu fonksiyon tersine de cevrilebilir.",
+    "description_2": "Degistirme sinyali algilandiginda ekran belirlenen süre boyunca acik kalir.",
+    "description_3": "Pencere acildiginda ekran belirlenen süre boyunca acik kalir.",
+    "subset_1": "Acik - ac/kapali - kapat",
+    "subset_2": "Acik - kapat/kapali - ac",
+    "subset_3": "Acma",
+    "subset_4": "Kapat",
+    "subset_5": "Degistir",
+    "at": "'da"
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Kontak acildiginda ekran acilir ve kontak kapatildiginda da kapanir. Bu fonksiyon tersine de cevrilebilir.",
+    "description_2": "Degistirme sinyali algilandiginda ekran belirlenen süre boyunca acik kalir.",
+    "subset_1": "Acik - ac/kapali - kapat",
+    "subset_2": "Acik - kapat/kapali - ac",
+    "subset_3": "Acma",
+    "subset_4": "Kapat",
+    "subset_5": "Degistir",
+    "at": "'da"
+  },
+  "SMOKE_DETECTOR_TEAM": {
+    "description_1": "Yangin alarmi durumunda ekran belirlenen süre boyunca acik kalir. Alarm onayi tetikleyenden ya da ayni gruptaki bir duman alarmindan onaylanirsa, ekran tekrar kapanir.",
+    "subset_1": "sadece tetikleyen duman alarmi",
+    "subset_2": "Ayni gruba ait duman alarmi"
+  },
+  "SWITCH": {
+    "description_1": "Cihaz tusuna bir kere basilarak salter belirlenen süre icin acik konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_2": "Cihaz tusuna bir kere basilarak salter belirlenen süre icin kapali konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_3": "Cihaz tusuna bir kere basilarak salter belirlenen süre icin acik veya kapali konumuna getirilir (Toggle fonksiyonu). Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_4": "Cihaz tusuna bir kere basilarak salter belirlenen süre icin acik konumuna getirilir."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "Salter kontagina basildiginda durum göstergesinin ekrani acilir.",
+    "description_2": "Salter kontagina basildiginda durum göstergesinin ekrani kapanir.",
+    "description_3": "Salter kontagina basildiginda ekran en azindan belirlenen süre boyunca acik veya kapali kalir (Toggle fonksiyonu)."
+  },
+  "TILT_SENSOR": {
+    "description_1": "Salter kontagi acildiginda ekran acilir ve kontak kapatildiginda da kapanir. Bu fonksiyon tersine de cevrilebilir.",
+    "description_2": "Belirlenen degistirme sinyali algilandiginda ekran acilir.",
+    "description_3": "Garaj kapisi acildiginda gösterge acilir ve kapi kapatildiginda da kapanir.",
+    "subset_1": "Acik - ac/kapali - kapat",
+    "subset_2": "Acik - kapat/kapali - ac",
+    "subset_3": "Kapat",
+    "subset_4": "Acma",
+    "subset_5": "Degistir",
+    "at": "'da"
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "Tusa kisa veya uzun bir süre basildiginda salter belirlenen süre icin acik konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_2": "Tusa kisa veya uzun bir süre basildiginda salter belirlenen süre icin kapali konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_3": "Tusa kisa veya uzun süre basarak salter belirlenen süre boyunca acilir veya kapatilir (Toggle fonksiyonu). Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_4": "Tusa kisa veya uzun bir süre basildiginda salter belirlenen süre icin acik konumuna getirilir."
+  },
+  "WATERDETECTIONSENSOR": {
+    "description_1": "Nemli havada ekran belirlenen süre boyunca acik kalir. Bu fonksiyon tersine de cevrilebilir.",
+    "description_2": "Nem orani degistiginde ekran belirlenen süre boyunca acik kalir.",
+    "subset_1": "Kuru - ac / nem - kapat",
+    "subset_2": "Kuru - kapat / nem - ac",
+    "subset_3": "mutlak kurulukta acilir",
+    "subset_4": "nemde acilir",
+    "subset_5": "1,5 mm su seviyesi itibariyle acilir",
+    "subset_6": "1,5 mm su seviyesi itibariyle veya nemde acilir",
+    "subset_7": "her degisiklikte acilir",
+    "subset_8": "mutlak kurulukta kapanir",
+    "subset_9": "nemde kapanir",
+    "subset_10": "1,5 mm su seviyesi itibariyle kapanir",
+    "subset_11": "1,5 mm su seviyesi itibariyle veya nemde kapanir",
+    "subset_12": "her degisiklikte kapanir",
+    "moisty": "hafif nem de",
+    "watery": "1,5 mm su seviyesi itibariyle"
+  },
+  "WEATHER": {
+    "description_1": "Siddetli rüzgar durumunda gösterge acilir, zayif rüzgarda ise kapatilir. Bu fonksiyon tersine de cevrilebilir.",
+    "description_2": "Belirlenen rüzgar hizina ulasildiginda gösterge belirlenen süre boyunca acik kalir.",
+    "subset_1": "R&uuml;zgar siddetli - kapali / r&uuml;zgar zayif - acik",
+    "subset_2": "R&uuml;zgar siddetli - acik / r&uuml;zgar zayif - kapali"
+  }
+}

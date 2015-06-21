@@ -1,0 +1,320 @@
+{
+  "0": {
+    "params": {},
+    "options": {},
+    "name": "expert"
+  },
+  "1": {
+    "params": {
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "val": "0.0"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_1(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "1"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "ONDELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_ONDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ONDELAY_TIME"
+      },
+      "2": {
+        "desc": "ON_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      }
+    },
+    "name": "switch_on"
+  },
+  "2": {
+    "params": {
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_ON_TIME": {
+        "readonly": true,
+        "val": "111600"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "val": "111600"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_2(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "2"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "OFFDELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_OFFDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFFDELAY_TIME"
+      },
+      "2": {
+        "desc": "OFF_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_OFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFF_TIME"
+      }
+    },
+    "name": "switch_off"
+  },
+  "3": {
+    "params": {
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "val": "0.0"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "val": "111600"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_3(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "3"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "ONDELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_ONDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ONDELAY_TIME"
+      },
+      "2": {
+        "desc": "ON_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "3": {
+        "desc": "OFFDELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_OFFDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFFDELAY_TIME"
+      },
+      "4": {
+        "desc": "OFF_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_OFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFF_TIME"
+      }
+    },
+    "name": "switch_on_off"
+  }
+}

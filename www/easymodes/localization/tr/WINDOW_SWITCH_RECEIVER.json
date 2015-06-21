@@ -1,0 +1,23 @@
+{
+  "EXPERT": {
+    "dummy": "dummy"
+  },
+  "GENERIC": {
+    "temperature_lowering_value": "D&uuml;s&uuml;rme sicakligi"
+  },
+  "KEY": {
+    "description_1": "NIL"
+  },
+  "ROTARY_HANDLE_SENSOR": {
+    "description_1": "Pencere acildiginda düsürme sicakligi etkinlesir."
+  },
+  "SENSOR_WINDOW": {
+    "description_1": "Pencere acildiginda düsürme sicakligi etkinlesir."
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Kontak acildiginda düsürme sicakligi etkinlesir."
+  },
+  "TILT_SENSOR": {
+    "description_1": "Kontak acildiginda düsürme sicakligi etkinlesir."
+  }
+}

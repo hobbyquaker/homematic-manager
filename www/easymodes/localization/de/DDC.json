@@ -1,0 +1,14 @@
+{
+  "GENERIC": {
+    "switch_off": "T&uuml;r zu",
+    "switch_on": "T&uuml;r auf",
+    "switch_on_off": "T&uuml;r auf / AUTO zu",
+    "switch_on_off_toggle": ""
+  },
+  "KEY": {
+    "description_1": "Mit einem kurzen Tastendruck wird die Tür geöffnet. Ein langer Tastendruck führt die Funktion <b>Tür Auf / AUTO zu<b> aus.",
+    "description_2": "Mit einem kurzen Tastendruck wird die Tür geschlossen. Ein langer Tastendruck führt die Funktion <b>Tür Auf / AUTO zu<b> aus.",
+    "description_3": "Mit einem kurzen oder langen Tastendruck wird die Tür geöffnet. Nach einer am Türantrieb einstellbaren Zeit, schießt die Tür selbständig.",
+    "description_4": ""
+  }
+}

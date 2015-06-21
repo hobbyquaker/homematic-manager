@@ -1,0 +1,23 @@
+{
+  "EXPERT": {
+    "dummy": "dummy"
+  },
+  "GENERIC": {
+    "temperature_lowering_value": "Reduction temperature:"
+  },
+  "KEY": {
+    "description_1": "NIL"
+  },
+  "ROTARY_HANDLE_SENSOR": {
+    "description_1": "When the window is opened the reduction temperature will be activated."
+  },
+  "SENSOR_WINDOW": {
+    "description_1": "When the window is opened the reduction temperature will be activated."
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "When the contact is opened the reduction temperature will be activated."
+  },
+  "TILT_SENSOR": {
+    "description_1": "When the contact is opened the reduction temperature will be activated."
+  }
+}

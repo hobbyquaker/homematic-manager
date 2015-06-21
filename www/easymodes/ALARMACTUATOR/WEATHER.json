@@ -1,0 +1,98 @@
+{
+  "0": {
+    "params": {},
+    "options": {},
+    "name": "expert"
+  },
+  "1": {
+    "params": {
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0 "
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "val": "50"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_TIME": {
+        "val": "120"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "0 "
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "0  "
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Wenn die eingestellte Windgeschwindigkeit erreicht wird, schaltet der Alarm f&uuml;r die eingestellte Zeit ein."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_1(UI_DESCRIPTION)\t"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "1"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "ON_TIME",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ]
+      }
+    },
+    "name": "alarm_on"
+  }
+}

@@ -1,0 +1,153 @@
+{
+  "0": {
+    "params": {},
+    "options": {},
+    "name": "expert"
+  },
+  "1": {
+    "params": {
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "val": "255"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "val": "100"
+      },
+      "SHORT_ON_TIME": {
+        "val": "300.0"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0.0"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "val": "1"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "val": "1"
+      },
+      "SHORT_ON_LEVEL": {
+        "val": "1.0"
+      },
+      "SHORT_RAMPON_TIME": {
+        "val": "0.5"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "val": "0.5"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Beim Ausl&ouml;sen des Sensors wird das Licht mindestens f&uuml;r die eingestellte Zeit eingeschaltet.&nbsp;"
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_1(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "1"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "RAMPOFF_TIME",
+        "combo": [
+          "SHORT_RAMPOFF_TIME",
+          "LONG_RAMPOFF_TIME"
+        ],
+        "option": "RAMPTIME",
+        "input": "EnterBrightness",
+        "param": "SHORT_COND_VALUE_LO"
+      }
+    },
+    "name": "dimmer_on} / \\${light_stairway"
+  },
+  "2": {
+    "params": {
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Der Bewegungsmelder ist au&szlig;er Betrieb."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_2(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "2"
+      }
+    },
+    "options": {},
+    "name": "no_action"
+  }
+}

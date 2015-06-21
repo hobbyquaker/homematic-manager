@@ -1,0 +1,41 @@
+{
+  "GENERIC": {
+    "door_lock": "T&uuml;r verriegeln",
+    "door_lock_proof": "T&uuml;r verriegeln (sabotagesicher)",
+    "door_lock_unlock": "verriegeln / entriegeln",
+    "door_lock_open": "verriegeln / &ouml;ffnen",
+    "door_lock_toggle": "Verriegelung toggeln",
+    "door_open": "T&uuml;r &ouml;ffnen",
+    "door_unlock": "T&uuml;r entriegeln",
+    "door_unlock_open": "entriegeln / &ouml;ffnen"
+  },
+  "KEY": {
+    "description_1": "Mit einem kurzen oder langen Tastendruck wird die Tür entriegelt. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+    "description_2": "Mit einem kurzen oder langen Tastendruck wird die Tür verriegelt.",
+    "description_3": "Mit einem kurzen oder langen Tastendruck wird die Tür geöffnet. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+    "description_4": "Mit einem kurzen Tastendruck wird die Tür verriegelt. Mit einem langen Tastendruck wird die Tür entriegelt. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+    "description_5": "Mit einem kurzen Tastendruck wird die Tür verriegelt. Mit einem langen Tastendruck wird die Tür geöffnet. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+    "description_6": "Mit einem kurzen Tastendruck wird die Tür entriegelt. Mit einem langen Tastendruck wird die Tür geöffnet. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+    "description_7": "Mit einem kurzen oder langen Tastendruck wird die Tür, je nach aktuellem Zustand, entweder ent- oder verriegelt."
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Nach dem Schließen der Tür wird sie unverzüglich verriegelt. Die Tür kann durch Entfernen des Kontakts geöffnet werden (nicht sabotagesicher).",
+    "description_2": "Nach dem Schließen der Tür wird sie unverzüglich verriegelt. Die Tür kann durch Entfernen des Kontakts nicht geöffnet werden (sabotagesicher).",
+    "description_3": "Der Kontakt ist außer Betrieb."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "Beim Betätigen des Schalters wird die  Tür  geöffnet. Nach der festgelegten Zeit wird sie wieder verriegelt.",
+    "description_2": "Beim Betätigen des Schalters wird die  Tür  entriegelt. Nach der festgelegten Zeit wird sie wieder verriegelt.",
+    "description_3": "Beim Betätigen des Schalters wird die  Tür  verriegelt.",
+    "description_4": "Beim Betätigen des Schalters wird die Tür, je nach aktuellem Zustand, entweder ent- oder verriegelt."
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "Mit einem kurzen oder langen Tastendruck wird die Tür entriegelt. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+    "description_2": "Mit einem kurzen oder langen Tastendruck wird die Tür verriegelt.",
+    "description_3": "Mit einem kurzen oder langen Tastendruck wird die Tür geöffnet. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+    "description_4": "Mit einem kurzen Tastendruck wird die Tür verriegelt. Mit einem langen Tastendruck wird die Tür entriegelt. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+    "description_5": "Mit einem kurzen Tastendruck wird die Tür verriegelt. Mit einem langen Tastendruck wird die Tür geöffnet. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+    "description_6": "Mit einem kurzen Tastendruck wird die Tür entriegelt. Mit einem langen Tastendruck wird die Tür geöffnet. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+    "description_7": "Mit einem kurzen oder langen Tastendruck wird die Tür, je nach aktuellem Zustand, entweder ent- oder verriegelt."
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "CONDITION_X": {
+    "description_1": "Das Licht wird bei Empfang des oberen Grenzwerts auf den festgelegten Helligkeitswert eingeschaltet.",
+    "description_2": "Das Licht wird bei Empfang des unteren Grenzwerts auf den festgelegten Helligkeitswert ausgeschaltet.",
+    "description_3": "Das Licht wird bei Empfang des oberen Grenzwerts ein-, bei Empfang des unteren Grenzwerts ausgeschaltet. Diese Funktion entspricht der klassischen Master/Slave-Anwendung.",
+    "descrHint": "Wann der Schaltbefehl vom Schaltaktor mit Leistungsmessung gesendet wird, wird am entsprechenden Kanal eingestellt.",
+    "descrHintMS": "Damit das Profil wirksam wird, muss der enstprechende Kanal des Schaltaktors mit Leistungsmessung so eingestellt werden, daß bei Über- und Unterschreiten des gewählten Wertes ein Schaltbefehl gesendet wird."
+  },
+  "DIMMER": {
+    "description_1": "Mit einem kurzen Tastendruck wird das Licht auf den festgelegten Helligkeitswert eingeschaltet. Ein langer Tastendruck dimmt das Licht hoch.",
+    "description_2": "Mit einem kurzen Tastendruck wird das Licht ausgeschaltet. Ein langer Tastendruck dimmt das Licht herunter.",
+    "description_3": "Mit einem kurzen Tastendruck wechselt das Licht zwischen dem festgelegten Helligkeitswert und \"aus\". Ein langer Tastendruck dimmt das Licht abwechselnd hoch- und herunter.",
+    "description_4": "Das Licht wird durch kurzen oder langen Tastendruck für die festgelegte Zeit eingeschaltet. In der Ausschaltverzögerung wird der Pegel zur Vorwarnung leicht abgesenkt, um anschließend langsam bis auf \"aus\" herunter zu dimmen.",
+    "description_5": "Mit einem kurzen Tastendruck wird das Licht auf den festgelegten Helligkeitswert eingeschaltet und nach der festgelegten Zeit langsam auf \"aus\" heruntergedimmt. Ein langer Tastendruck dimmt das Licht abwechselnd hoch- und herunter.",
+    "description_6": "Das Licht wechselt im festgelegten Takt endlos zwischen den beiden Helligkeitswerten.",
+    "description_7": "Mit einem kurzen Tastendruck wird das Licht langsam auf den festgelegten Helligkeitswert hochgedimmt. Ein langer Tastendruck dimmt das Licht abwechselnd hoch- und herunter.",
+    "description_8": "Das Licht wird durch kurzen oder langen Tastendruck auf den festgelegten Helligkeitswert eingeschaltet.",
+    "description_9": "Das Licht wird durch kurzen oder langen Tastendruck ausgeschaltet.",
+    "description_10": "Das Licht wird durch kurzen oder langen Tastendruck hochgedimmt.",
+    "description_11": "Das Licht wird durch kurzen oder langen Tastendruck heruntergedimmt.",
+    "description_12": "Die interne Gerätetaste ist nicht aktiv."
+  },
+  "GENERIC": {
+    "dim_down": "Dimmer - dunkler",
+    "dim_up": "Dimmer - heller",
+    "dimmer_off": "Dimmer - aus",
+    "dimmer_off_darker": "Dimmer - aus/dunkler",
+    "dimmer_on": "Dimmer - ein",
+    "dimmer_on_brighter": "Dimmer - ein/heller",
+    "dimmer_on_off": "Dimmer - ein/aus",
+    "dimmer_on_off_b_d": "Dimmer - ein/aus &amp; heller/dunkler",
+    "sleep_well": "Einschlaflicht",
+    "wake_up_light": "Aufwachlicht"
+  },
+  "KEY": {
+    "description_1": "Mit einem kurzen Tastendruck wird das Licht auf den festgelegten Helligkeitswert eingeschaltet. Ein langer Tastendruck dimmt das Licht hoch.",
+    "description_2": "Mit einem kurzen Tastendruck wird das Licht ausgeschaltet. Ein langer Tastendruck dimmt das Licht herunter.",
+    "description_3": "Mit einem kurzen Tastendruck wechselt das Licht zwischen dem festgelegten Helligkeitswert und \"aus\". Ein langer Tastendruck dimmt das Licht abwechselnd hoch- und herunter.",
+    "description_4": "Das Licht wird durch kurzen oder langen Tastendruck für die festgelegte Zeit eingeschaltet. In der Ausschaltverzögerung wird der Pegel zur Vorwarnung leicht abgesenkt, um anschließend langsam bis auf \"aus\" herunter zu dimmen.",
+    "description_5": "Mit einem kurzen Tastendruck wird das Licht auf den festgelegten Helligkeitswert eingeschaltet und nach der festgelegten Zeit langsam auf \"aus\" heruntergedimmt. Ein langer Tastendruck dimmt das Licht abwechselnd hoch- und herunter.",
+    "description_6": "Das Licht wechselt im festgelegten Takt endlos zwischen den beiden Helligkeitswerten.",
+    "description_7": "Mit einem kurzen Tastendruck wird das Licht langsam auf den festgelegten Helligkeitswert hochgedimmt. Ein langer Tastendruck dimmt das Licht abwechselnd hoch- und herunter.",
+    "description_8": "Das Licht wird durch kurzen oder langen Tastendruck auf den festgelegten Helligkeitswert eingeschaltet.",
+    "description_9": "Das Licht wird durch kurzen oder langen Tastendruck ausgeschaltet.",
+    "description_10": "Das Licht wird durch kurzen oder langen Tastendruck hochgedimmt.",
+    "description_11": "Das Licht wird durch kurzen oder langen Tastendruck heruntergedimmt."
+  },
+  "MOTION_DETECTOR": {
+    "description_1": "Beim Auslösen des Sensors wird das Licht mindestens für die festgelegte Zeit eingeschaltet.",
+    "description_2": "Der Bewegungsmelder ist nicht aktiv",
+    "md_on_time": "Einschaltdauer (Verweildauer im Zustand \"ein\")",
+    "md_min_on_time": "Mindest-Einschaltdauer",
+    "hint0a": "<b>ACHTUNG!</b> Die gew&auml;hlte Einschaltdauer des Aktors ist kleiner als der Mindestsendeabstand von  ",
+    "hint0b": "s. W&auml;hlen Sie einen Wert, der gr&ouml;&szlig;er ist als dieser Abstand.",
+    "hint1a": "Da die n&auml;chste Bewegung erst in ",
+    "hint1b": "s gesendet wird, schaltet sich der Aktor sonst vorher ab und erst nach Ablauf des Mindestsendeabstandes wieder ein."
+  },
+  "PULSE_SENSOR": {
+    "description_1": "Beim Senden des Schaltbefehls wird das Licht für die festgelegte Zeit auf den festgelegten Helligkeitswert eingeschaltet.",
+    "description_2": "Beim Senden des Schaltbefehls wird das Licht nach der festgelegten Verzögerung ausgeschaltet.",
+    "description_3": "Beim Senden des Schaltbefehls wird das Licht entweder ein- oder ausgeschaltet."
+  },
+  "RAINDETECTOR": {
+    "description_1": "Bei Regen wird das Licht auf den festgelegten Helligkeitswert eingeschaltet und bei Trockenheit ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "subset_1": "Trocken - ein / Regen - aus",
+    "subset_2": "Trocken - aus / Regen - ein"
+  },
+  "ROTARY_HANDLE_SENSOR": {
+    "description_1": "Beim Öffnen des Fensters wird das Licht auf den festgelegten Helligkeitswert eingeschaltet und beim Schließen wieder ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_2": "Beim Öffnen und Schließen des Fensters wird das Licht für eine bestimmte Zeit auf den festgelegten Helligkeitswert eingeschaltet.",
+    "open": "ganz offen",
+    "tilt_open": "gekippt oder ganz offen",
+    "subset_1": "Offen - aus / Zu - ein",
+    "subset_2": "Offen - ein / Zu - aus",
+    "subset_3": "Schlie&szlig;en",
+    "subset_4": "Kippen",
+    "subset_5": "&Ouml;ffnen",
+    "subset_6": "Kippen oder &Ouml;ffnen",
+    "subset_7": "jede &Auml;nderung",
+    "at": "beim"
+  },
+  "SENSOR_FOR_CARBON_DIOXIDE": {
+    "description_1": "Bei erhöhtem CO2-Gehalt der Raumluft wird der Dimmer für die festgelegte Zeit eingeschaltet.",
+    "CO2_low": "leicht erh&ouml;hte CO2-Konzentration",
+    "CO2_high": "stark erh&ouml;hte CO2-Konzentration"
+  },
+  "SENSOR_WINDOW": {
+    "description_1": "Beim Öffnen des Fensters wird das Licht auf den festgelegten Helligkeitswert eingeschaltet und beim Schließen ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_2": "Beim Öffnen und Schließen des Fensters wird das Licht für eine bestimmte Zeit auf den festgelegten Helligkeitswert eingeschaltet.",
+    "description_3": "Beim Öffnen des Fensters  wird das Licht für eine bestimmte Zeit auf den festgelegten Helligkeitswert eingeschaltet.",
+    "subset_1": "Offen - aus / Zu - ein",
+    "subset_2": "Offen - ein / Zu - aus",
+    "subset_3": "Schlie&szlig;en",
+    "subset_4": "&Ouml;ffnen",
+    "subset_5": "&Auml;ndern",
+    "at": "beim"
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Beim Öffnen des Kontakts wird das Licht auf den festgelegten Helligkeitswert eingeschaltet und beim Schließen ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_2": "Beim Öffnen und Schließen wird das Licht für eine bestimmte Zeit auf den festgelegten Helligkeitswert eingeschaltet.",
+    "subset_1": "Offen - aus / Zu - ein",
+    "subset_2": "Offen - ein / Zu - aus",
+    "subset_3": "Schlie&szlig;en",
+    "subset_4": "&Ouml;ffnen",
+    "subset_5": "&Auml;ndern",
+    "at": "beim"
+  },
+  "SMOKE_DETECTOR_TEAM": {
+    "description_1": "Bei Feueralarm wird das Licht für die festgelegte Zeit auf den festgelegten Helligkeitswert eingeschaltet.  Erfolgt die Bestätigung des Alarms am Auslösenden oder einem Rauchmelder der gleichen Gruppe, wird das Licht wieder ausgeschaltet.",
+    "description_2": "Die angeschlossene Leuchte gibt für die festgelegte Zeit Alarm.  Erfolgt die Bestätigung des Alarms am Auslösenden oder einem Rauchmelder der gleichen Gruppe, wird die Alarmmeldung beendet.",
+    "subset_1": "nur ausl&ouml;sender Rauchmelder",
+    "subset_2": "Rauchmelder der gleichen Gruppe",
+    "subset_3": "nur ausl&ouml;sender Rauchmelder",
+    "subset_4": "Rauchmelder der gleichen Gruppe"
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "Beim Betätigen des Schalters wechselt das Licht in den jeweils anderen Zustand. Bei nochmaligem Betätigen während der Rampenzeit, wird sofort der festgelegte Helligkeitsendwert eingeschaltet.",
+    "description_2": "Beim Betätigen des Schalters wird das Licht für die festgelegte Zeit auf den festgelegten Helligkeitswert eingeschaltet. Dieses Profil kann auch als Treppenhauslicht genutzt werden.",
+    "description_3": "Beim Betätigen des Schalters wird das Licht ausgeschaltet."
+  },
+  "TILT_SENSOR": {
+    "description_1": "Beim Öffnen, z.B des Garagentores, wird das Licht auf den festgelegten Helligkeitswert ein- und beim Schließen ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_2": "Beim Öffnen oder Schließen wird das Licht für eine bestimmte Zeit auf den festgelegten Helligkeitswert eingeschaltet. Bei jedem Zustandswechsel beginnt diese Zeit erneut von vorne.",
+    "subset_1": "Offen - aus / Zu - ein",
+    "subset_2": "Offen - ein / Zu - aus",
+    "subset_3": "Schlie&szlig;en",
+    "subset_4": "&Ouml;ffnen",
+    "subset_5": "&Auml;ndern",
+    "at": "beim"
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "Mit einem kurzen Tastendruck wird das Licht auf den festgelegten Helligkeitswert eingeschaltet. Ein langer Tastendruck dimmt das Licht hoch.",
+    "description_2": "Mit einem kurzen Tastendruck wird das Licht ausgeschaltet. Ein langer Tastendruck dimmt das Licht herunter.",
+    "description_3": "Mit einem kurzen Tastendruck wechselt das Licht zwischen dem festgelegten Helligkeitswert und \"aus\". Ein langer Tastendruck dimmt das Licht abwechselnd hoch- und herunter.",
+    "description_4": "Das Licht wird durch kurzen oder langen Tastendruck für die festgelegte Zeit eingeschaltet. In der Ausschaltverzögerung wird der Pegel zur Vorwarnung leicht abgesenkt, um anschließend langsam bis auf \"aus\" herunter zu dimmen.",
+    "description_5": "Mit einem kurzen Tastendruck wird das Licht auf den festgelegten Helligkeitswert eingeschaltet und nach der festgelegten Zeit langsam auf \"aus\" heruntergedimmt. Ein langer Tastendruck dimmt das Licht abwechselnd hoch- und heruntergedimmt.",
+    "description_6": "Das Licht wechselt im festgelegten Takt endlos zwischen den beiden Helligkeitswerten.",
+    "description_7": "Mit einem kurzen Tastendruck wird das Licht langsam auf den festgelegten Helligkeitswert hochgedimmt. Ein langer Tastendruck dimmt das Licht abwechselnd hoch- und herunter.",
+    "description_8": "ein kurzer oder langer Tastendruck schaltet das Licht auf den festgelegten Helligkeitswert ein.",
+    "description_9": "ein kurzer oder langer Tastendruck schaltet das Licht aus.",
+    "description_10": "ein kurzer oder langer Tastendruck dimmt das Licht hoch.",
+    "description_11": "ein kurzer oder langer Tastendruck dimmt das Licht herunter."
+  },
+  "WATERDETECTIONSENSOR": {
+    "description_1": "Bei Feuchtigkeit wird das Licht auf den festgelegten Helligkeitswert ein- und bei Trockenheit ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_2": "Bei Änderung der Feuchtigkeit wird das Licht für die festgelegte Zeit auf den festgelegten Helligkeitswert ein- oder ausgeschaltet.",
+    "subset_1": "Trocken - ein / Feuchtigkeit - aus",
+    "subset_2": "Trocken - aus / Feuchtigkeit - ein",
+    "subset_3": "ein bei absoluter Trockenheit",
+    "subset_4": "ein bei Feuchtigkeit",
+    "subset_5": "ein bei Wasserstand ab 1,5 mm",
+    "subset_6": "ein bei Feuchtigkeit oder Wasserstand ab 1,5 mm",
+    "subset_7": "ein bei jeder &Auml;nderung",
+    "subset_8": "aus bei absoluter Trockenheit",
+    "subset_9": "aus bei Feuchtigkeit",
+    "subset_10": "aus bei Wasserstand ab 1,5 mm",
+    "subset_11": "aus bei Feuchtigkeit oder Wasserstand ab 1,5 mm",
+    "subset_12": "aus bei jeder &Auml;nderung",
+    "moisty": "schon bei leichter Feuchtigkeit",
+    "watery": "erst ab 1,5 mm Wasserstand"
+  }
+}

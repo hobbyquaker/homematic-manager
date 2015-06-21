@@ -1,0 +1,36 @@
+{
+  "0": {
+    "params": {},
+    "options": {},
+    "name": "expert"
+  },
+  "1": {
+    "params": {
+      "TEMPERATUR_WINDOW_OPEN_VALUE": {
+        "val": "12"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Beim &Ouml;ffnen des Fensters wird die Temperatur auf die Absenktemperatur eingestellt."
+      },
+      "UI_TEMPLATE": {
+        "val": "TEMPERATUR_WINDOW_OPEN_VALUE"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "1"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "TEMPERATURE_LOWERING_VALUE",
+        "combo": [
+          "TEMPERATUR_WINDOW_OPEN_VALUE"
+        ],
+        "input": "EnterTemp",
+        "param": "TEMPERATUR_WINDOW_OPEN_VALUE"
+      }
+    },
+    "name": "temperature_lowering_value"
+  }
+}

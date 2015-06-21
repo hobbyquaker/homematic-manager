@@ -1,0 +1,47 @@
+{
+  "GENERIC": {
+    "security_on": "L&uuml;ftungssperre Ein",
+    "security_off": "L&uuml;ftungssperre Aus",
+    "security_toggle": "L&uuml;ftungssperre Ein / Aus",
+    "paramDescr": "Modus&nbsp;&nbsp;",
+    "mode0": "Ignoriere Schaltbefehl",
+    "mode1": "Ein",
+    "mode2": "Aus"
+  },
+  "KEY": {
+    "description_1": "Mit einem Tastendruck wird die Lüftungssperre (Sicherheit) aktiviert.",
+    "description_2": "Mit einem Tastendruck wird die Lüftungssperre (Sicherheit) deaktiviert.",
+    "description_3": "Mit einem Tastendruck wird der Zustand der Lüftungssperre (Sicherheit) umgekehrt.",
+    "description_4": "Diese Direktverknüpfung wird deaktiviert."
+  },
+  "RAINDETECTOR": {
+    "description_1": "Beginnt es zu regnen, wird die Lüftungssperre (Sicherheit) aktiviert.",
+    "description_2": "Beginnt es zu regnen, wird die Lüftungssperre (Sicherheit) deaktiviert.",
+    "description_3": "Beginnt es zu regnen, wird die Lüftungssperre (Sicherheit) aktiviert. Sobald der Regensensor wieder trocken ist, wird die Lüftungssperre deaktiviert.",
+    "description_4": "Diese Direktverknüpfung wird deaktiviert."
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Beim Schließen des Schließerkontaktes wird die Lüftungssperre (Sicherheit) aktiviert",
+    "description_2": "Beim Schließen des Schließerkontaktes wird die Lüftungssperre (Sicherheit) deaktiviert.",
+    "description_3": "Beim Schließen des Schließerkontaktes wird die Lüftungssperre (Sicherheit) aktiviert. Beim Öffnen des Schließerkontaktes wird die Lüftungssperre deaktiviert.",
+    "description_4": "Diese Direktverknüpfung wird deaktiviert."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "Beim Betätigen des Schalters, wird die Lüftungssperre (Sicherheit) aktiviert.",
+    "description_2": "Beim Betätigen des Schalters, wird die Lüftungssperre (Sicherheit) deaktiviert.",
+    "description_3": "Beim Betätigen des Schalters wechselt der Zustand der Lüftungssperre (Sicherheit).",
+    "description_4": "Die Verknüpfung wird deaktiviert"
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "Mit einem Tastendruck wird die Lüftungssperre (Sicherheit) aktiviert.",
+    "description_2": "Mit einem Tastendruck wird die Lüftungssperre (Sicherheit) deaktiviert.",
+    "description_3": "Mit einem Tastendruck wird der Zustand der Lüftungssperre (Sicherheit) umgekehrt.",
+    "description_4": "Diese Direktverknüpfung wird deaktiviert."
+  },
+  "WEATHER": {
+    "description_1": "Wird die eingestellte Windstärke überschritten, wird die Lüftungssperre (Sicherheit) aktiviert.",
+    "description_2": "Wird die eingestellte Windstärke unterschritten, wird die Lüftungssperre (Sicherheit) deaktiviert.",
+    "description_3": "Wird die eingestellte Windstärke überschritten, wird die Lüftungssperre (Sicherheit) aktiviert. Wird die Windstärke wieder unterschritten, wird die Lüftungssperre (Sicherheit) deaktiviert.",
+    "description_4": "Diese Direktverknüpfung wird deaktiviert."
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "0": {
+    "params": {},
+    "options": {},
+    "name": "expert"
+  },
+  "1": {
+    "params": {
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "val": "255"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "val": "100"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_TIME": {
+        "val": "120"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "val": "1"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2 "
+      },
+      "LONG_ACTION_TYPE": {
+        "val": "0"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Beim Ausl&ouml;sen des Sensors wird der Alarm mindestens f&uuml;r die eingestellte Zeit eingeschaltet. Ist eine Einschaltverz&ouml;gerungszeit eingestellt, so wird der Alarm erst nach Ablauf dieser Zeit eingeschaltet.<br /> "
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_1(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "1"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "ON_TIME_MODE",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ],
+        "input": "EnterBrightness",
+        "param": "SHORT_COND_VALUE_LO"
+      }
+    },
+    "name": "alarm_on"
+  }
+}

@@ -1,0 +1,3752 @@
+{
+  "0": {
+    "params": {},
+    "options": {},
+    "name": "expert"
+  },
+  "1": {
+    "params": {
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_DIM_MAX_LEVEL": {
+        "val": "1.0"
+      },
+      "LONG_DIM_MIN_LEVEL": {
+        "val": "0.0"
+      },
+      "LONG_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_TIME": {
+        "val": "0.0"
+      },
+      "LONG_ON_LEVEL": {
+        "val": "1.0"
+      },
+      "LONG_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "LONG_ON_TIME": {
+        "val": "111600.0"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_RAMPOFF_TIME": {
+        "val": "0.5"
+      },
+      "LONG_RAMPON_TIME": {
+        "val": "0.5"
+      },
+      "LONG_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_DIM_MAX_LEVEL": {
+        "val": "1.0"
+      },
+      "SHORT_DIM_MIN_LEVEL": {
+        "val": "0.0"
+      },
+      "SHORT_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "val": "0.0"
+      },
+      "SHORT_ON_LEVEL": {
+        "val": "1.0"
+      },
+      "SHORT_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600.0"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "val": "0.5"
+      },
+      "SHORT_RAMPON_TIME": {
+        "val": "0.5"
+      },
+      "SHORT_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Mit einem kurzen Tastendruck wird das Licht auf die eingestellte Helligkeit eingeschaltet. Mit einem langen Tastendruck wird das Licht hochgedimmt."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_1(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "1"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "RAMPON_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "SHORT_RAMPON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPON_TIME"
+      },
+      "2": {
+        "desc": "ON_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "3": {
+        "desc": "ON_LEVEL",
+        "option": "DIM_ONLEVEL",
+        "combo": [
+          "SHORT_ON_LEVEL",
+          "LONG_ON_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_ON_LEVEL"
+      },
+      "4": {
+        "desc": "DIM_MAX_LEVEL",
+        "option": "DIM_ONLEVEL",
+        "combo": [
+          "LONG_DIM_MAX_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "LONG_DIM_MAX_LEVEL"
+      }
+    },
+    "name": "dimmer_on_brighter"
+  },
+  "2": {
+    "params": {
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "5"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_DIM_MIN_LEVEL": {
+        "val": "0.0"
+      },
+      "LONG_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "5"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "6"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_BLINK": {
+        "val": "0"
+      },
+      "LONG_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "val": "0.0"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_ON_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_MIN_LEVEL": {
+        "val": "0.1"
+      },
+      "LONG_ON_TIME": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_RAMPOFF_TIME": {
+        "val": "0.5"
+      },
+      "LONG_RAMPON_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "SHORT_DIM_MIN_LEVEL": {
+        "val": "0.0"
+      },
+      "SHORT_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "6"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "val": "0"
+      },
+      "SHORT_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0.0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_ON_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "SHORT_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_MIN_LEVEL": {
+        "val": "0.1"
+      },
+      "SHORT_ON_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "val": "0.5"
+      },
+      "SHORT_RAMPON_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Mit einem kurzen Tastendruck wird das Licht ausgeschaltet. Mit einem langen Tastendruck wird das Licht runtergedimmt."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_2(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "2"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "OFFDELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_OFFDELAY_TIME",
+          "LONG_OFFDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "LONG_OFFDELAY_TIME"
+      },
+      "2": {
+        "desc": "OFFDELAY_BLINK",
+        "combo": [
+          "SHORT_OFFDELAY_BLINK",
+          "LONG_OFFDELAY_BLINK"
+        ]
+      },
+      "3": {
+        "desc": "RAMPOFF_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "SHORT_RAMPOFF_TIME",
+          "LONG_RAMPOFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPOFF_TIME"
+      },
+      "4": {
+        "desc": "DIM_MIN_LEVEL",
+        "option": "DIM_OFFLEVEL",
+        "combo": [
+          "SHORT_DIM_MIN_LEVEL",
+          "LONG_DIM_MIN_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "LONG_DIM_MIN_LEVEL"
+      }
+    },
+    "name": "dimmer_off_darker"
+  },
+  "3": {
+    "params": {
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "6"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_DIM_MAX_LEVEL": {
+        "val": "1.0"
+      },
+      "LONG_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "5"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "6"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_BLINK": {
+        "val": "0"
+      },
+      "LONG_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "val": "0.0"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_ON_LEVEL": {
+        "val": "1.0"
+      },
+      "LONG_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "LONG_ON_TIME": {
+        "val": "111600.0"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_RAMPOFF_TIME": {
+        "val": "0.5"
+      },
+      "LONG_RAMPON_TIME": {
+        "val": "0.5"
+      },
+      "LONG_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_DIM_MAX_LEVEL": {
+        "val": "1.0"
+      },
+      "SHORT_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "6"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "val": "0"
+      },
+      "SHORT_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0.0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_ON_LEVEL": {
+        "val": "1.0"
+      },
+      "SHORT_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600.0"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "val": "0.5"
+      },
+      "SHORT_RAMPON_TIME": {
+        "val": "0.5"
+      },
+      "SHORT_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Mit einem kurzen Tastendruck wechselt das Licht zwischen der eingestellten Helligkeit und aus. Mit einem langen Tastendruck wird das Licht abwechselnd hoch- und runtergedimmt."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_3(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "3"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "RAMPON_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "SHORT_RAMPON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPON_TIME"
+      },
+      "2": {
+        "desc": "ON_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "3": {
+        "desc": "ON_LEVEL",
+        "option": "DIM_ONLEVEL",
+        "combo": [
+          "SHORT_ON_LEVEL",
+          "LONG_ON_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_ON_LEVEL"
+      },
+      "4": {
+        "desc": "OFFDELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_OFFDELAY_TIME",
+          "LONG_OFFDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "LONG_OFFDELAY_TIME"
+      },
+      "5": {
+        "desc": "OFFDELAY_BLINK",
+        "combo": [
+          "SHORT_OFFDELAY_BLINK",
+          "LONG_OFFDELAY_BLINK"
+        ]
+      },
+      "6": {
+        "desc": "RAMPOFF_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "SHORT_RAMPOFF_TIME",
+          "LONG_RAMPOFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPOFF_TIME"
+      },
+      "7": {
+        "desc": "DIM_MAX_LEVEL",
+        "option": "DIM_ONLEVEL",
+        "combo": [
+          "LONG_DIM_MAX_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "LONG_DIM_MAX_LEVEL"
+      }
+    },
+    "name": "dimmer_on_off_b_d"
+  },
+  "4": {
+    "params": {
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_BLINK": {
+        "val": "0"
+      },
+      "LONG_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "val": "20.0"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_TIME": {
+        "val": "0.0"
+      },
+      "LONG_ON_LEVEL": {
+        "val": "0.9"
+      },
+      "LONG_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "LONG_ON_TIME": {
+        "val": "120.0"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_RAMPOFF_TIME": {
+        "val": "20.0"
+      },
+      "LONG_RAMPON_TIME": {
+        "val": "0.5"
+      },
+      "LONG_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "SHORT_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "val": "0"
+      },
+      "SHORT_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "20.0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "val": "0.0"
+      },
+      "SHORT_ON_LEVEL": {
+        "val": "0.9"
+      },
+      "SHORT_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "SHORT_ON_TIME": {
+        "val": "120.0"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "val": "20.0"
+      },
+      "SHORT_RAMPON_TIME": {
+        "val": "0.5"
+      },
+      "SHORT_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Das Licht wird durch kurzen oder langen Tastendruck f&uuml;r die eingestellte Zeit eingeschaltet. In der Ausschaltverz&ouml;gerung wird der Pegel zur Vorwarnung leicht abgesenkt, um anschlie&szlig;end langsam bis auf aus runterzudimmen."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_4(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "4"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "RAMPON_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "SHORT_RAMPON_TIME",
+          "LONG_RAMPON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPON_TIME"
+      },
+      "2": {
+        "desc": "ON_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "3": {
+        "desc": "ON_LEVEL",
+        "option": "DIM_ONLEVEL",
+        "combo": [
+          "SHORT_ON_LEVEL",
+          "LONG_ON_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_ON_LEVEL"
+      },
+      "4": {
+        "desc": "OFFDELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_OFFDELAY_TIME",
+          "LONG_OFFDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFFDELAY_TIME"
+      },
+      "5": {
+        "desc": "OFFDELAY_BLINK",
+        "combo": [
+          "SHORT_OFFDELAY_BLINK",
+          "LONG_OFFDELAY_BLINK"
+        ]
+      },
+      "6": {
+        "desc": "RAMPOFF_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "SHORT_RAMPOFF_TIME",
+          "LONG_RAMPOFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPOFF_TIME"
+      }
+    },
+    "name": "light_stairway"
+  },
+  "5": {
+    "params": {
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "6"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_ON_LEVEL": {
+        "val": "0.5"
+      },
+      "LONG_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "LONG_ON_TIME": {
+        "val": "1800.0"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_RAMPOFF_TIME": {
+        "val": "1800.0"
+      },
+      "LONG_RAMPON_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "SHORT_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_ON_LEVEL": {
+        "val": "0.5"
+      },
+      "SHORT_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "SHORT_ON_TIME": {
+        "val": "1800.0"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "val": "1800.0"
+      },
+      "SHORT_RAMPON_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Mit einem kurzen Tastendruck wird das Licht auf die eingestellte Helligkeit eingeschaltet und nach der eingestellten Zeit langsam auf aus runtergedimmt. Mit einem langen Tastendruck wird das Licht abwechselnd hoch- und runtergedimmt."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_5(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "5"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "ON_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "2": {
+        "desc": "ON_LEVEL",
+        "option": "DIM_ONLEVEL",
+        "combo": [
+          "SHORT_ON_LEVEL",
+          "LONG_ON_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_ON_LEVEL"
+      },
+      "3": {
+        "desc": "RAMPOFF_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "SHORT_RAMPOFF_TIME",
+          "LONG_RAMPOFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPOFF_TIME"
+      }
+    },
+    "name": "sleep_well"
+  },
+  "6": {
+    "params": {
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_LEVEL": {
+        "val": "0.0"
+      },
+      "LONG_OFF_TIME": {
+        "val": "1.0"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_ON_LEVEL": {
+        "val": "1.0"
+      },
+      "LONG_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "LONG_ON_TIME": {
+        "val": "1.0"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_RAMPOFF_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_RAMPON_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "SHORT_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "val": "1.0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_ON_LEVEL": {
+        "val": "1.0"
+      },
+      "SHORT_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "SHORT_ON_TIME": {
+        "val": "1.0"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_RAMPON_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Das Licht wechselt im eingestellten Takt endlos zwischen den beiden Helligkeitswerten."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_6(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "6"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "ON_TIME",
+        "option": "BLINK",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "2": {
+        "desc": "ON_LEVEL",
+        "option": "DIM_ONLEVEL",
+        "combo": [
+          "SHORT_ON_LEVEL",
+          "LONG_ON_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_ON_LEVEL"
+      },
+      "3": {
+        "desc": "OFF_TIME",
+        "option": "BLINK",
+        "combo": [
+          "SHORT_OFF_TIME",
+          "LONG_OFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFF_TIME"
+      },
+      "4": {
+        "desc": "OFF_LEVEL",
+        "option": "DIM_OFFLEVEL",
+        "combo": [
+          "SHORT_OFF_LEVEL",
+          "LONG_OFF_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_OFF_LEVEL"
+      }
+    },
+    "name": "blink"
+  },
+  "7": {
+    "params": {
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "6"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "5"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "6"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_ON_LEVEL": {
+        "val": "0.8"
+      },
+      "LONG_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "LONG_ON_TIME": {
+        "val": "111600.0"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_RAMPOFF_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_RAMPON_TIME": {
+        "val": "60.0"
+      },
+      "LONG_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "SHORT_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "6"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_ON_LEVEL": {
+        "val": "0.8"
+      },
+      "SHORT_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600.0"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_RAMPON_TIME": {
+        "val": "60.0"
+      },
+      "SHORT_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Mit einem kurzen Tastendruck wird das Licht langsam auf die eingestellten Helligkeit hochgedimmt. Mit einem langen Tastendruck wird das Licht abwechselnd hoch- und runtergedimmt."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_7(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "7"
+      }
+    },
+    "options": {
+      "4": {
+        "desc": "RAMPON_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "LONG_RAMPON_TIME",
+          "SHORT_RAMPON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPON_TIME"
+      },
+      "5": {
+        "desc": "ON_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "6": {
+        "desc": "ON_LEVEL",
+        "option": "DIM_ONLEVEL",
+        "combo": [
+          "SHORT_ON_LEVEL",
+          "LONG_ON_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_ON_LEVEL"
+      }
+    },
+    "name": "wake_up_light"
+  },
+  "8": {
+    "params": {
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_ON_LEVEL": {
+        "val": "1.0"
+      },
+      "LONG_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "LONG_ON_TIME": {
+        "val": "111600.0"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_RAMPOFF_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_RAMPON_TIME": {
+        "val": "0.5"
+      },
+      "LONG_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "SHORT_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_ON_LEVEL": {
+        "val": "1.0"
+      },
+      "SHORT_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600.0"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_RAMPON_TIME": {
+        "val": "0.5"
+      },
+      "SHORT_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Das Licht wird durch kurzen oder langen Tastendruck auf die eingestellten Helligkeit eingeschaltet."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_8(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "8"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "RAMPON_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "LONG_RAMPON_TIME",
+          "SHORT_RAMPON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPON_TIME"
+      },
+      "2": {
+        "desc": "ON_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "3": {
+        "desc": "ON_LEVEL",
+        "option": "DIM_ONLEVEL",
+        "combo": [
+          "SHORT_ON_LEVEL",
+          "LONG_ON_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_ON_LEVEL"
+      }
+    },
+    "name": "dimmer_on"
+  },
+  "9": {
+    "params": {
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "5"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "6"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_OFFDELAY_BLINK": {
+        "val": "0"
+      },
+      "LONG_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "val": "0.0"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_ON_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "LONG_ON_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_RAMPOFF_TIME": {
+        "val": "0.5"
+      },
+      "LONG_RAMPON_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "SHORT_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "6"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "val": "0"
+      },
+      "SHORT_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0.0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_ON_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "SHORT_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "SHORT_ON_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "val": "0.5"
+      },
+      "SHORT_RAMPON_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Das Licht wird durch kurzen oder langen Tastendruck ausgeschaltet."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_9(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "9"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "OFFDELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_OFFDELAY_TIME",
+          "LONG_OFFDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "LONG_OFFDELAY_TIME"
+      },
+      "2": {
+        "desc": "OFFDELAY_BLINK",
+        "combo": [
+          "SHORT_OFFDELAY_BLINK",
+          "LONG_OFFDELAY_BLINK"
+        ]
+      },
+      "3": {
+        "desc": "RAMPOFF_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "SHORT_RAMPOFF_TIME",
+          "LONG_RAMPOFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPOFF_TIME"
+      }
+    },
+    "name": "dimmer_off"
+  },
+  "10": {
+    "params": {
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_DIM_MAX_LEVEL": {
+        "val": "1.0"
+      },
+      "LONG_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_ON_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "LONG_ON_TIME": {
+        "val": "111600.0"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_RAMPOFF_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_RAMPON_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_DIM_MAX_LEVEL": {
+        "val": "1.0"
+      },
+      "SHORT_DIM_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_ON_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "SHORT_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600.0"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_RAMPON_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Das Licht wird durch kurzen oder langen Tastendruck hochgedimmt."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_10(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "10"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "ON_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "2": {
+        "desc": "DIM_MAX_LEVEL",
+        "option": "DIM_ONLEVEL",
+        "combo": [
+          "SHORT_DIM_MAX_LEVEL",
+          "LONG_DIM_MAX_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "LONG_DIM_MAX_LEVEL"
+      }
+    },
+    "name": "dim_up"
+  },
+  "11": {
+    "params": {
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "5"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_DIM_MIN_LEVEL": {
+        "val": "0.0"
+      },
+      "LONG_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "5"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "6"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "LONG_ON_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "LONG_ON_TIME": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_RAMPOFF_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_RAMPON_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_DIM_MAX_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "SHORT_DIM_MIN_LEVEL": {
+        "val": "0.0"
+      },
+      "SHORT_DIM_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "6"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_OFFDELAY_NEWTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_OLDTIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_OFFDELAY_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600.0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_ON_LEVEL": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "SHORT_ON_LEVEL_PRIO": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_MIN_LEVEL": {
+        "readonly": true,
+        "val": "0.1"
+      },
+      "SHORT_ON_TIME": {
+        "readonly": true,
+        "val": "1.0"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_RAMPON_TIME": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "SHORT_RAMP_START_STEP": {
+        "readonly": true,
+        "val": "0.05"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Das Licht wird durch kurzen oder langen Tastendruck runtergedimmt."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_11(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "11"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "DIM_MIN_LEVEL",
+        "option": "DIM_OFFLEVEL",
+        "combo": [
+          "SHORT_DIM_MIN_LEVEL",
+          "LONG_DIM_MIN_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "LONG_DIM_MIN_LEVEL"
+      }
+    },
+    "name": "dim_down"
+  },
+  "12": {
+    "params": {
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Die Taste ist nicht aktiv."
+      },
+      "UI_VIRTUAL": {
+        "readonly": true,
+        "val": "1"
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_12(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "12"
+      }
+    },
+    "options": {},
+    "name": "not_active"
+  }
+}

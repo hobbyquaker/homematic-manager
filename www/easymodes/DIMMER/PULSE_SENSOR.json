@@ -1,0 +1,403 @@
+{
+  "0": {
+    "params": {},
+    "options": {},
+    "name": "expert"
+  },
+  "1": {
+    "params": {
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600.0"
+      },
+      "SHORT_RAMPON_TIME": {
+        "val": "0.5"
+      },
+      "SHORT_ON_LEVEL": {
+        "val": "1.0"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Beim Senden des Schaltbefehls wird das Licht f&uuml;r die gew&auml;hlte Zeit auf die eingestellte Helligkeit eingeschaltet."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_1(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "1"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "RAMPON_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "SHORT_RAMPON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPON_TIME"
+      },
+      "2": {
+        "desc": "ON_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "3": {
+        "desc": "ON_LEVEL",
+        "option": "DIM_ONLEVEL",
+        "combo": [
+          "SHORT_ON_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_ON_LEVEL"
+      }
+    },
+    "name": "dimmer_on"
+  },
+  "2": {
+    "params": {
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "6"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "4 "
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "6"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600.0"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "val": "0.5"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0.0"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "val": "0 "
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Beim Senden des Schaltbefehls wird das Licht ausgeschaltet."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_2(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "2"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "OFFDELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_OFFDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFFDELAY_TIME"
+      },
+      "2": {
+        "desc": "OFFDELAY_BLINK",
+        "combo": [
+          "SHORT_OFFDELAY_BLINK",
+          "LONG_OFFDELAY_BLINK"
+        ]
+      },
+      "3": {
+        "desc": "RAMPOFF_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "SHORT_RAMPOFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPOFF_TIME"
+      }
+    },
+    "name": "dimmer_off"
+  },
+  "3": {
+    "params": {
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "4 "
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "6"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600.0"
+      },
+      "SHORT_RAMPOFF_TIME": {
+        "val": "0.5"
+      },
+      "SHORT_RAMPON_TIME": {
+        "val": "0.5"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0.0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0.0"
+      },
+      "SHORT_OFFDELAY_BLINK": {
+        "val": "0 "
+      },
+      "SHORT_ON_LEVEL": {
+        "val": "1.0"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Beim Senden des Schaltbefehls wird das Licht entweder ein- oder ausgeschaltet."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_3(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "3"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "RAMPON_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "SHORT_RAMPON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPON_TIME"
+      },
+      "2": {
+        "desc": "ON_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "3": {
+        "desc": "ON_LEVEL",
+        "option": "DIM_ONLEVEL",
+        "combo": [
+          "SHORT_ON_LEVEL",
+          "LONG_ON_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_ON_LEVEL"
+      },
+      "4": {
+        "desc": "OFFDELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_OFFDELAY_TIME",
+          "LONG_OFFDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFFDELAY_TIME"
+      },
+      "5": {
+        "desc": "OFFDELAY_BLINK",
+        "combo": [
+          "SHORT_OFFDELAY_BLINK",
+          "LONG_OFFDELAY_BLINK"
+        ]
+      },
+      "6": {
+        "desc": "RAMPOFF_TIME",
+        "option": "RAMPTIME",
+        "combo": [
+          "SHORT_RAMPOFF_TIME",
+          "LONG_RAMPOFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_RAMPOFF_TIME"
+      }
+    },
+    "name": "dimmer_on_off"
+  }
+}

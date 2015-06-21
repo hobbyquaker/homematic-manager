@@ -1,0 +1,41 @@
+{
+  "GENERIC": {
+    "door_lock": "lock door",
+    "door_lock_proof": "lock door (sabotage-proof)",
+    "door_lock_unlock": "lock / unlock",
+    "door_lock_open": "lock / open",
+    "door_lock_toggle": "toggle locking",
+    "door_open": "open door",
+    "door_unlock": "unlock door",
+    "door_unlock_open": "unlock / open"
+  },
+  "KEY": {
+    "description_1": "With a short or long button press the door will be unlocked. The door will be locked again automatically after the time set.",
+    "description_2": "With a short or long button press the door will be locked.",
+    "description_3": "With a short or long button press the door will be opened. The door will be locked again automatically after the time set.",
+    "description_4": "With a short button press the door will be locked. With a long button press the door will be unlocked. The door will be locked again automatically after the time set.",
+    "description_5": "With a short button press the door will be locked. With a long button press the door will be opened. The door will be locked again automatically after the time set.",
+    "description_6": "With a short button press the door will be unlocked. With a long button press the door will be opened. The door will be locked again automatically after the time set.",
+    "description_7": "With a short or long button press the door will be locked or unlocked, depending on the current status."
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "After the door is closed it will be locked immediately. The door can be opened by removing the contact (not sabotage-proof).",
+    "description_2": "After the door is closed it will be locked immediately. The door can not be opened by removing the contact (sabotage-proof).",
+    "description_3": "The contact is out of operation."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "By operating the switch the door will be opened. It will be locked again after the time set.",
+    "description_2": "By operating the switch the door will be unlocked. It will be locked again after the time set.",
+    "description_3": "<span class=\"translated\">By operating the switch the door will be locked.",
+    "description_4": "By operating the switch the door will be locked or unlocked, depending on the current status."
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "With a short or long button press the door will be unlocked. The door will be locked again automatically after the time set.",
+    "description_2": "With a short or long button press the door will be locked.",
+    "description_3": "With a short or long button press the door will be opened. The door will be locked again automatically after the time set.",
+    "description_4": "With a short button press the door will be locked. With a long button press the door will be unlocked. The door will be locked again automatically after the time set.",
+    "description_5": "With a short button press the door will be locked. With a long button press the door will be opened. The door will be locked again automatically after the time set.",
+    "description_6": "With a short button press the door will be unlocked. With a long button press the door will be opened. The door will be locked again automatically after the time set.",
+    "description_7": "With a short or long button press the door will be locked or unlocked, depending on the current status."
+  }
+}

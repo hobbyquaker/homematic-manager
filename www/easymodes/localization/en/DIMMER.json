@@ -1,0 +1,162 @@
+{
+  "CONDITION_X": {
+    "description_1": "When the upper limit is received the light will be switched on to the set brightness values.",
+    "description_2": "When the lower limit is received the light will be switched off to the defined brightness value.",
+    "description_3": "When the upper limit is received the light will be switched on, when the lower limit is received it will be turned off. This function is equal to a classic master/slave application.",
+    "descrHint": "You can define a time for sending a switching command via the switch actuator at the corresponding channel.",
+    "descrHintMS": "To activate the profile, please define for the corresponding channel of the switch actuator that a switching command will be send if the selected value will be exceeded or falls below the threshold."
+  },
+  "DIMMER": {
+    "description_1": "With a short button press the light will be switched on to the set brightness values. With a long button press the dimmed light will get brighter.",
+    "description_2": "With a short button press the light will be switched off. With a long button press the light will be dimmed darker.",
+    "description_3": "With a short button press the light changes between the set brightness value and \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_4": "With a short or long button press the light will be switched on for the set time. During the off-delay the warning level will be slightly lowered to dim slowly to the status \"off\" afterwards.",
+    "description_5": "With a short button press the light will be switched on to the defined brightness value and afterwards dimmed to \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_6": "<span class=\"translated\">The light continuously changes in a defined interval between the two brightness values./span><br/><br/>",
+    "description_7": "With a short button press the light will be switched on to the set brightness value. With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_8": "With a short or long button press the light will be switched on to the defined brightness value.",
+    "description_9": "The light will be switched off by a short or long button press.",
+    "description_10": "The light will be dimmed brighter by a short or long button press.",
+    "description_11": "The light will be dimmed darker by a short or long button press.",
+    "description_12": "The internal key is not active."
+  },
+  "GENERIC": {
+    "dim_down": "Dimmer - darker",
+    "dim_up": "Dimmer - brighter",
+    "dimmer_off": "Dimmer - off",
+    "dimmer_off_darker": "Dimmer - off/darker",
+    "dimmer_on": "Dimmer - on",
+    "dimmer_on_brighter": "Dimmer - on/brighter",
+    "dimmer_on_off": "Dimmer - on/off",
+    "dimmer_on_off_b_d": "Dimmer - on/off &amp; brighter/darker",
+    "sleep_well": "Sleep light",
+    "wake_up_light": "Wake up light"
+  },
+  "KEY": {
+    "description_1": "With a short button press the light will be switched on to the set brightness value. With a long button press the dimmed light will get brighter.",
+    "description_2": "With a short button press the light will be switched off. With a long button press the light will be dimmed darker.",
+    "description_3": "With a short button press the light changes between the set brightness value and \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_4": "With a short or long button press the light will be switched on for the set time. During the off-delay the warning level will be slightly lowered to dim slowly to the status \"off\" afterwards.",
+    "description_5": "With a short button press the light will be switched on to the defined brightness value and afterwards dimmed to \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_6": "<span class=\"translated\">The light continuously changes in a defined interval between the two brightness values./span><br/><br/>",
+    "description_7": "With a short button press the light will be switched on to the set brightness value. With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_8": "With a short or long button press the light will be switched on to the defined brightness value.",
+    "description_9": "The light will be switched off by a short or long button press.",
+    "description_10": "The light will be dimmed brighter by a short or long button press.",
+    "description_11": "The light will be dimmed darker by a short or long button press."
+  },
+  "MOTION_DETECTOR": {
+    "description_1": "When the sensor is triggered the light will be switched on at least for the time set.",
+    "description_2": "The motion detector is not active.",
+    "md_on_time": "Switch-on time (duration in status &quot;on&quot;)",
+    "md_min_on_time": "Minimum switch-on time",
+    "hint0a": "<b>Attention!</b> The selected switch-on time of the actuator is shorter than the minimum transmission interval of ",
+    "hint0b": "s. Please select a value that is longer than this interval.",
+    "hint1a": "As the next movement will be send in ",
+    "hint1b": "s, the actuator will otherwise switch off before and only switch on after the minimum transmission interval has expired."
+  },
+  "PULSE_SENSOR": {
+    "description_1": "When a switching command is transmitted the light will be switched on to the defined brightness value.",
+    "description_2": "When a switching command is transmitted the light will be switched off after a defined delay.",
+    "description_3": "When a switching command is transmitted the light will be switched on or off."
+  },
+  "RAINDETECTOR": {
+    "description_1": "In case of rain the light will be switched on to the defined brightness value, in case of dry conditions it will be switched off. This function can be reversed.",
+    "subset_1": "Dry - on / Rain - off",
+    "subset_2": "Dry - off / Rain - on"
+  },
+  "ROTARY_HANDLE_SENSOR": {
+    "description_1": "When the window is opened the light will be switched on to the defined brightness value and switched off when the window is closed. This function can be reversed.",
+    "description_2": "When the window is opened or closed the light will be switched on for the set time to the defined brightness value.",
+    "open": "wide open",
+    "tilt_open": "tilt or wide open",
+    "subset_1": "Open - off / Closed - on",
+    "subset_2": "Open - on / Closed - off",
+    "subset_3": "Close",
+    "subset_4": "Tilt",
+    "subset_5": "Open",
+    "subset_6": "tilt or open",
+    "subset_7": "every change",
+    "at": "on"
+  },
+  "SENSOR_FOR_CARBON_DIOXIDE": {
+    "description_1": "In case of increased CO2 concentrations in the room air the dimmer will be switched on for the set time.",
+    "CO2_low": "slightly increased CO2 concentration",
+    "CO2_high": "heavily increased CO2 concentration"
+  },
+  "SENSOR_WINDOW": {
+    "description_1": "When the window is opened the light will be switched on to the defined brightness value and switched off when the window is closed. This function can be reversed.",
+    "description_2": "When the window is opened or closed the light will be switched on for the set time to the defined brightness value.",
+    "description_3": "When the window is opened the light will be switched on for the set time to the defined brightness value.",
+    "subset_1": "Open - off / Closed - on",
+    "subset_2": "Open - on / Closed - off",
+    "subset_3": "Close",
+    "subset_4": "Open",
+    "subset_5": "Change",
+    "at": "on"
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "When the contact is opened the light will be switched on to the defined brightness value and switched off when the window is closed. This function can be reversed.",
+    "description_2": "When the contact is opened or closed the light will be switched on for the set time to the defined brightness value.",
+    "subset_1": "Open - off / Closed - on",
+    "subset_2": "Open - on / Closed - off",
+    "subset_3": "Close",
+    "subset_4": "Open",
+    "subset_5": "Change",
+    "at": "on"
+  },
+  "SMOKE_DETECTOR_TEAM": {
+    "description_1": "In case of fire alarm the light will be switched on for the set time to the defined brightness value. If the alarm will be confirmed by the triggering device or a smoke detector of the same group the light will be switched off again.",
+    "description_2": "The connected light gives an alarm for the set time. If the alarm will be confirmed by the triggering device or a smoke detector of the same group the alarm will be stopped.",
+    "subset_1": "only triggering smoke detector",
+    "subset_2": "smoke detector of the same group",
+    "subset_3": "only triggering smoke detector",
+    "subset_4": "smoke detector of the same group"
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "By operating the switch the light changes to the other status. If the switch is operated during the ramp time the device changes to the set maximum brightness value immediately.",
+    "description_2": "<span class=\"translated\">By operating the switch the light will be switched on for the set time to the defined brightness value. This profile can also be used as staircase light./span><br/><br/>",
+    "description_3": "By operating the switch the light will be switched off."
+  },
+  "TILT_SENSOR": {
+    "description_1": "When e.g. the garage door is opened the light will be switched on to the defined brightness value and switched off when the garage door is closed. This function can be reversed.",
+    "description_2": "When opening or closing, the light will be switched on for the set time to the defined brightness value.</span><br/><br/> Whenever the status is changed the time starts again.",
+    "subset_1": "Open - off / Closed - on",
+    "subset_2": "Open - on / Closed - off",
+    "subset_3": "Close",
+    "subset_4": "Open",
+    "subset_5": "Change",
+    "at": "on"
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "With a short button press the light will be switched on to the set brightness value. With a long button press the dimmed light will get brighter.",
+    "description_2": "With a short button press the light will be switched off. With a long button press the light will be dimmed darker.",
+    "description_3": "With a short button press the light changes between the set brightness value and \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_4": "With a short or long button press the light will be switched on for the set time. During the off-delay the warning level will be slightly lowered to dim slowly to the status \"off\" afterwards.",
+    "description_5": "With a short button press the light will be switched on to the defined brightness value and afterwards dimmed to \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_6": "<span class=\"translated\">The light continuously changes in a defined interval between the two brightness values./span><br/><br/>",
+    "description_7": "With a short button press the light will be switched on to the set brightness value. With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_8": "a short or long button press switches the light on to the defined brightness value.",
+    "description_9": "a short or long button press switches the light off.",
+    "description_10": "a short or long button press dims the light brighter.",
+    "description_11": "a short or long button press dims the light darker."
+  },
+  "WATERDETECTIONSENSOR": {
+    "description_1": "In case of humidity the light will be switched on to the defined brightness value, in case of dry conditions it will be switched off. This function can be reversed.",
+    "description_2": "When the humidity level changes the light will be switched on or off for the set time to the defined brightness value.",
+    "subset_1": "Dry - on / Humidity - off",
+    "subset_2": "Dry - off / Humidity - on",
+    "subset_3": "switch on in case of absolute dry conditions",
+    "subset_4": "switch on in case of humidity",
+    "subset_5": "switch on at water level from 1.5 mm",
+    "subset_6": "switch on in case of humidity or water level from 1.5 mm",
+    "subset_7": "switch on at every change",
+    "subset_8": "switch off in case of absolute dry conditions",
+    "subset_9": "switch off in case of humidity",
+    "subset_10": "switch off at water level from 1.5 mm",
+    "subset_11": "switch off in case of humidity or water level from 1.5 mm",
+    "subset_12": "switch off at every change",
+    "moisty": "already at low humidity level",
+    "watery": "only at water level from 1.5 mm"
+  }
+}

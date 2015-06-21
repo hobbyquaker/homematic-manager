@@ -1,0 +1,496 @@
+{
+  "0": {
+    "params": {},
+    "options": {},
+    "name": "expert"
+  },
+  "1": {
+    "params": {
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "val": "0"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_JT_REFOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "SHORT_JT_REFON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_LEVEL": {
+        "val": "1"
+      },
+      "SHORT_MAX_TIME_FIRST_DIR": {
+        "readonly": true,
+        "val": "25.5"
+      },
+      "SHORT_DRIVING_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_1(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "1"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "UP_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "2": {
+        "desc": "UP_DELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_ONDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ONDELAY_TIME"
+      },
+      "3": {
+        "desc": "ON_LEVEL",
+        "option": "BLIND_LEVEL",
+        "combo": [
+          "SHORT_ON_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_ON_LEVEL"
+      }
+    },
+    "name": "open_up"
+  },
+  "2": {
+    "params": {
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_TIME": {
+        "readonly": true,
+        "val": "111600"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0"
+      },
+      "SHORT_OFF_TIME": {
+        "val": "111600"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "8"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "7"
+      },
+      "SHORT_JT_REFOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_JT_REFON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "val": "0"
+      },
+      "SHORT_ON_LEVEL": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_MAX_TIME_FIRST_DIR": {
+        "readonly": true,
+        "val": "25.5"
+      },
+      "SHORT_DRIVING_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_2(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "2"
+      }
+    },
+    "options": {
+      "3": {
+        "desc": "DOWN_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_OFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFF_TIME"
+      },
+      "4": {
+        "desc": "DOWN_DELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_OFFDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFFDELAY_TIME"
+      },
+      "5": {
+        "desc": "OFF_LEVEL",
+        "option": "BLIND_LEVEL",
+        "combo": [
+          "SHORT_OFF_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_OFF_LEVEL"
+      }
+    },
+    "name": "close_down"
+  },
+  "3": {
+    "params": {
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "val": "0"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0"
+      },
+      "SHORT_OFF_TIME": {
+        "val": "111600"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "8"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "7"
+      },
+      "SHORT_JT_REFOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_JT_REFON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "val": "0"
+      },
+      "SHORT_ON_LEVEL": {
+        "val": "1"
+      },
+      "SHORT_MAX_TIME_FIRST_DIR": {
+        "readonly": true,
+        "val": "25.5"
+      },
+      "SHORT_DRIVING_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_3(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "3"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "UP_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "2": {
+        "desc": "UP_DELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_ONDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ONDELAY_TIME"
+      },
+      "3": {
+        "desc": "ON_LEVEL",
+        "option": "BLIND_LEVEL",
+        "combo": [
+          "SHORT_ON_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_ON_LEVEL"
+      },
+      "4": {
+        "desc": "DOWN_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_OFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFF_TIME"
+      },
+      "5": {
+        "desc": "DOWN_DELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_OFFDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFFDELAY_TIME"
+      },
+      "6": {
+        "desc": "OFF_LEVEL",
+        "option": "BLIND_LEVEL",
+        "combo": [
+          "SHORT_OFF_LEVEL"
+        ],
+        "input": "EnterPercent",
+        "param": "SHORT_OFF_LEVEL"
+      }
+    },
+    "name": "open_close_up_down"
+  }
+}

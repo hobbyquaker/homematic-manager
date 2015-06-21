@@ -1,0 +1,94 @@
+{
+  "GENERIC": {
+    "closeWindow": "Window - Close / Stop",
+    "closeWindowA": "Window - Close without stop option",
+    "openWindow": "Window - Open / Stop",
+    "openWindowA": "Window - Timed ventilation without stop option",
+    "openWindowB": "Window - Open without stop option",
+    "toggleWindow": "Window - Natural ventilation / Stop / Close",
+    "toggleWindowA": "Window - Natural ventilation / Close / without stop option",
+    "automaticWindow": "Window - Automatic",
+    "stopWindow": "Window - Stop",
+    "windowAiring": "Window - Night ventilation / Stop",
+    "windowAiringTime": "Window - Timed ventilation / Stop",
+    "windowPosition": "Window - Position movement / Stop",
+    "windowNaturalAiring": "Window - Natural ventilation / Stop"
+  },
+  "KEY": {
+    "description_1": "A keystroke will close the window. During window movement a keystroke will stop the window. An optional delay time will delay the closing.",
+    "description_2": "A keystroke will open the window 100%. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+    "description_3": "A keystroke will close an open window or will open a locked window 100% and close it automatically after the selected time elapsed. During window movement a keystroke will stop the window. The following keystroke causes a reversal of the previous driving direction. Optional delay times will delay the opening respectively closing.",
+    "description_4": "A keystroke will open the window 100% and close it automatically after the selected time elapsed. If the window is already 100% open, each keystroke will restart the timer.",
+    "description_5": "A keystroke will stop window movement.",
+    "description_6": "A keystroke will drive the window into the selected opening position. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+    "description_7": "A keystroke will open the window 100% and close it automatically after the selected time elapsed. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+    "description_8": "A keystroke will drive the window into the selected opening position. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+    "description_9": "A keystroke will drive the window into the selected opening position and close it automatically after the selected time elapsed. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+    "description_10": "This direct link will be deactivated."
+  },
+  "MOTION_DETECTOR": {
+    "description_1": "When the sensor detects movement the window will open 100%. After the selected time elapsed the window will be closed automatically.",
+    "description_2": "When the sensor detects movement the window will stop immediately.",
+    "description_3": "This direct link will be deactivated."
+  },
+  "RAINDETECTOR": {
+    "description_1": "When it starts raining, the window will be closed. An optional delay time will delay the closing.",
+    "description_2": "When it starts raining, the window will be opened and closed automatically after the selected time elapsed.",
+    "description_3": "This direct link will be deactivated."
+  },
+  "SENSOR_FOR_CARBON_DIOXIDE": {
+    "description_1": "In case of increased CO2 concentrations in the room air the window will open 100% for ventilation and will close automatically after the selected time elapsed.",
+    "description_2": "This direct link will be deactivated.",
+    "CO2_low": "slightly increased CO2 concentration",
+    "CO2_high": "heavily increased CO2 concentration"
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Closing the shutter contact will close the window. Toggling the switch during window movement will stop the window. An optional delay time will delay the closing.",
+    "description_2": "Closing the shutter contact will open the window 100%. Opening the switch during window movement will stop the window. An optional delay time will delay the opening.",
+    "description_3": "Closing the shutter contact will close the window. Closing the shutter contact will open the window 100% and close it automatically after the selected time elapsed. Optional delay times will delay the opening respectively closing.",
+    "description_4": "Opening or closing the shutter contact will open the window 100% and close it automatically after the selected time elapsed. Opening the switch, if the window is already 100% open, will restart the timer.",
+    "description_5": "Toggling the shutter contact will stop window movement.",
+    "description_6": "Closing the shutter contact will drive the window into the selected opening position. Opening the switch during window movement will stop the window. An optional delay time will delay the opening.",
+    "description_7": "",
+    "description_8": "Closing the shutter contact will drive the window into the selected opening position. Opening the switch during window movement will stop the window. An optional delay time will delay the opening.",
+    "description_9": "Closing the shutter contact will drive the window into the selected opening position and close it automatically after the selected time elapsed. Opening the switch during window movement will stop the window. An optional delay time will delay the opening.",
+    "description_10": "This direct link will be deactivated."
+  },
+  "SMOKE_DETECTOR_TEAM": {
+    "description_1": "In case of fire alarm the window will open.  After the selected time elapsed or after confirmation of the alarm on any smoke detector of the same group, the window will be closed automatically.",
+    "description_2": "In case of fire alarm the window will close immediately.",
+    "description_3": "This direct link will be deactivated.",
+    "subset_1": "only triggering smoke detector",
+    "subset_2": "smoke detector of the same group"
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "Toggling the switch will close the window. Toggling the switch during window movement will stop the window. An optional delay time will delay the closing.",
+    "description_2": "Toggling the switch will open the window 100%. Toggling the switch during window movement will stop the window. An optional delay time will delay the opening.",
+    "description_3": "Toggling the switch will close an open window or will open a locked window 100% and close it automatically after the selected time elapsed. Toggling the switch during window movement will stop the window. The following keystroke causes a reversal of the previous driving direction. Optional delay times will delay the opening respectively closing.",
+    "description_4": "Toggling the switch will open the window 100% and close it automatically after the selected time elapsed. Toggling the switch, if the window is already 100% open, will restart the timer.",
+    "description_5": "Toggling the switch will stop window movement.",
+    "description_6": "Toggling the switch will drive the window into the selected opening position. Toggling the switch during window movement will stop the window. An optional delay time will delay the opening.",
+    "description_7": "Toggling the switch will open the window 100% and close it automatically after the selected time elapsed. Toggling the switch during window movement will stop the window. An optional delay time will delay the opening.",
+    "description_8": "Toggling the switch will drive the window into the selected opening position. Toggling the switch during window movement will stop the window. An optional delay time will delay the opening.",
+    "description_9": "Toggling the switch will drive the window into the selected opening position and close it automatically after the selected time elapsed. Toggling the switch during window movement will stop the window. An optional delay time will delay the opening.",
+    "description_10": "This direct link will be deactivated."
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "A keystroke will close the window. During window movement a keystroke will stop the window. An optional delay time will delay the closing.",
+    "description_2": "A keystroke will open the window 100%. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+    "description_3": "A keystroke will close an open window or will open a locked window 100% and close it automatically after the selected time elapsed. During window movement a keystroke will stop the window. The following keystroke causes a reversal of the previous driving direction. Optional delay times will delay the opening respectively closing.",
+    "description_4": "A keystroke will open the window 100% and close it automatically after the selected time elapsed. If the window is already 100% open, each keystroke will restart the timer.",
+    "description_5": "A keystroke will stop window movement.",
+    "description_6": "A keystroke will drive the window into the selected opening position. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+    "description_7": "A keystroke will open the window 100% and close it automatically after the selected time elapsed. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+    "description_8": "A keystroke will drive the window into the selected opening position. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+    "description_9": "A keystroke will drive the window into the selected opening position and close it automatically after the selected time elapsed. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+    "description_10": "This direct link will be deactivated."
+  },
+  "WEATHER": {
+    "description_1": "When the entered wind strength is reached the window will be closed.",
+    "description_2": "Below the entered wind strength the window will be opened. After the selected time elapsed the window will be closed automatically.",
+    "description_3": "When the entered wind strength is reached the window will be opened. After the selected time elapsed the window will be closed automatically.",
+    "description_4": "This direct link will be deactivated."
+  }
+}

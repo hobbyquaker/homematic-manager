@@ -1,0 +1,23 @@
+{
+  "EXPERT": {
+    "dummy": "dummy"
+  },
+  "GENERIC": {
+    "temperature_lowering_value": "Absenktemperatur"
+  },
+  "KEY": {
+    "description_1": "NIL"
+  },
+  "ROTARY_HANDLE_SENSOR": {
+    "description_1": "Beim Öffnen des Fensters wird die Absenktemperatur aktiviert."
+  },
+  "SENSOR_WINDOW": {
+    "description_1": "Beim Öffnen des Fensters wird die Absenktemperatur aktiviert."
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Beim Öffnen des Kontakts wird die Absenktemperatur aktiviert."
+  },
+  "TILT_SENSOR": {
+    "description_1": "Beim Öffnen des Kontakts wird die Absenktemperatur aktiviert."
+  }
+}

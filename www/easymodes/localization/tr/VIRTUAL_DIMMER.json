@@ -1,0 +1,29 @@
+{
+  "GENERIC": {
+    "dim_down": "Isik ayar salteri - karart",
+    "dim_up": "Isik ayar salteri - aydinlat",
+    "dimmer_off": "Isik ayar salteri - kapat",
+    "dimmer_off_darker": "Isik ayar salteri - kapat/karart",
+    "dimmer_on": "Isik ayar salteri - ac",
+    "dimmer_on_brighter": "Isik ayar salteri - ac/aydinlat",
+    "dimmer_on_off": "Isik ayar salteri - ac/kapat",
+    "dimmer_on_off_b_d": "Isik ayar salteri - ac/kapat &amp; aydinlat/karart",
+    "not_active": "etkin degil",
+    "sleep_well": "Uyku isigi",
+    "wake_up_light": "Uyanma isigi"
+  },
+  "VIRTUAL_DIMMER": {
+    "description_1": "Tusa kisa bir süre basildiginda isik belirlenen aydinlik derecesine getirilir. Tusa uzun süre basildiginda ise isik daha da aydinlatilir.",
+    "description_2": "Tusa kisa bir süre basildiginda isik kapatilir. Tusa uzun süre basildiginda ise isik kisilir.",
+    "description_3": "Tusa kisa bir süre basildiginda isik belirlenen aydinlik derecesi ile kapali konum arasinda degisir. Tusa uzun süre basildiginda ise isik bir kisilir bir aydinlanir.",
+    "description_4": "Tusa kisa veya uzun süre basildiginda isik belirlenen süre boyunca acilir. Isigi yavasca kapanana kadar kismak icin ön uyari seviyesi gecikmede hafifce düsürülür.",
+    "description_5": "Tusa kisa bir süre basildiginda isik belirlenen aydinlik derecesinde acilir ve belirlenen süre sonunda da yavasca kapanana kadar kisilir. Tusa uzun süre basildiginda ise isik bir kisilir bir aydinlanir.",
+    "description_6": "Isik belirlenen döngüde iki aydinlik derecesi arasinda sürekli degisir.",
+    "description_7": "Tusa kisa bir süre basildiginda isik belirlenen aydinlik derecesine yavasca acilir. Tusa uzun süre basildiginda ise isik bir kisilir bir aydinlanir.",
+    "description_8": "Tusa kisa veya uzun süre basildiginda isik belirlenen aydinlik derecesinde acilir.",
+    "description_9": "Tusa kisa veya uzun süre basildiginda isik kapanir.",
+    "description_10": "Tusa kisa veya uzun süre basildiginda isik aydinlatilir.",
+    "description_11": "Tusa kisa veya uzun süre basildiginda isik kisilir.",
+    "description_12": "Tus etkin degil."
+  }
+}

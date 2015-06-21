@@ -1,0 +1,137 @@
+{
+  "CONDITION_X": {
+    "description_1": "Das Display der Statusanzeige wird bei Empfang des oberen Grenzwerts eingeschaltet.",
+    "description_2": "Das Display der Statusanzeige wird bei Empfang des unteren Grenzwerts ausgeschaltet.",
+    "description_3": "Das Display der Statusanzeige wird bei Empfang des oberen Grenzwerts ein-, bei Empfang des unteren Grenzwerts ausgeschaltet. Diese Funktion entspricht der klassischen Master/Slave-Anwendung.",
+    "descrHint": "Wann der Schaltbefehl vom Schaltaktor mit Leistungsmessung gesendet wird, wird am entsprechenden Kanal eingestellt.",
+    "descrHintMS": "Damit das Profil wirksam wird, muss der enstprechende Kanal des Schaltaktors mit Leistungsmessung so eingestellt werden, daß bei Über- und Unterschreiten des gewählten Wertes ein Schaltbefehl gesendet wird."
+  },
+  "GENERIC": {
+    "switch_off": "Zeige - aus",
+    "switch_on": "Zeige - ein",
+    "switch_on_off": "Zeige - ein / aus",
+    "switch_on_off_toggle": "Zeige - ein / aus / Toggle"
+  },
+  "KEY": {
+    "description_1": "Mit einem kurzen oder langen Tastendruck wird das Display der Statusanzeige eingeschaltet.",
+    "description_2": "Mit einem kurzen oder langen Tastendruck wird das Display der Statusanzeige ausgeschaltet."
+  },
+  "MOTION_DETECTOR": {
+    "description_1": "Beim Auslösen des Sensors wird das Display mindestens für die festgelegte Zeit eingeschaltet. Ist eine Verz&oumlgerungszeit eingestellt, wird es erst nach Ablauf dieser Zeit geschaltet.",
+    "description_2": "Der Bewegungsmelder ist nicht aktiv",
+    "md_on_time": "Einschaltdauer (Verweildauer im Zustand \"ein\")",
+    "md_min_on_time": "Mindest-Einschaltdauer",
+    "hint0a": "<b>ACHTUNG!</b> Die gew&auml;hlte Einschaltdauer des Aktors ist kleiner als der Mindestsendeabstand von  ",
+    "hint0b": "s.",
+    "hint1a": "Da die n&auml;chste Bewegung erst in",
+    "hint1b": "s gesendet wird, schaltet sich der Aktor vorher ab."
+  },
+  "PULSE_SENSOR": {
+    "description_1": "Beim Senden des Schaltbefehls wird das Display für die festgelegte Zeit eingeschaltet.",
+    "description_2": "Beim Senden des Schaltbefehls wird das Display für die festgelegte Zeit ausgeschaltet.",
+    "description_3": "Beim Senden des Schaltbefehls wird das Display für die festgelegte Zeit ein- oder ausgeschaltet (Toggle-Funktion)."
+  },
+  "RAINDETECTOR": {
+    "description_1": "Bei Regen wird die Anzeige je nach Schaltrichtung gesetzt.",
+    "subset_1": "Trocken - Zustand 0 / Regen - Zustand 1",
+    "subset_2": "Trocken - Zustand 1 / Regen - Zustand 0"
+  },
+  "ROTARY_HANDLE_SENSOR": {
+    "description_1": "Beim Öffnen des Schaltkontakts wird das Display ein- und beim Schließen ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_2": "Beim Erkennen des festgelegten Änderungssignals wird das Display eingeschaltet.",
+    "subset_1": "Offen - ein / Zu - aus",
+    "subset_2": "Offen - aus / Zu - ein",
+    "subset_3": "Schlie&szlig;en",
+    "subset_4": "Kippen",
+    "subset_5": "ganz &Ouml;ffnen",
+    "subset_6": "Kippen oder ganz &Ouml;ffnen",
+    "subset_7": "jede &Auml;nderung",
+    "def_open_a": "gekippt oder ganz offen",
+    "def_open_b": "ganz offen",
+    "at": "beim"
+  },
+  "SENSOR_FOR_CARBON_DIOXIDE": {
+    "description_1": "Bei erhöhtem CO2-Gehalt der Raumluft wird das Display für die festgelegte Zeit eingeschaltet.",
+    "description_2": "Der CO2-Sensor ist nicht aktiv.",
+    "CO2_low": "leicht erh&ouml;hte CO2-Konzentration",
+    "CO2_high": "stark erh&ouml;hte CO2-Konzentration"
+  },
+  "SENSOR_WINDOW": {
+    "description_1": "Beim Öffnen des Fensters wird das Display ein- und beim Schließen ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_2": "Beim Erkennen des Änderungssignals wird das Display für eine festgelegte Zeit eingeschaltet.",
+    "description_3": "Beim Öffnen des Fensters wird das Display für eine festgelegte Zeit eingeschaltet.",
+    "subset_1": "Offen - ein / Zu - aus",
+    "subset_2": "Offen - aus / Zu - ein",
+    "subset_3": "&Ouml;ffnen",
+    "subset_4": "Schlie&szlig;en",
+    "subset_5": "&Auml;ndern",
+    "at": "beim"
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Beim Öffnen des Kontakts wird das Display ein- und beim Schließen ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_2": "Beim Erkennen des Änderungssignals wird das Display für eine festgelegte Zeit eingeschaltet.",
+    "subset_1": "Offen - ein / Zu - aus",
+    "subset_2": "Offen - aus / Zu - ein",
+    "subset_3": "&Ouml;ffnen",
+    "subset_4": "Schlie&szlig;en",
+    "subset_5": "&Auml;ndern",
+    "at": "beim"
+  },
+  "SMOKE_DETECTOR_TEAM": {
+    "description_1": "Bei Feueralarm wird das Display für die festgelegte Zeit eingeschaltet. Erfolgt die Bestätigung des Alarms am Auslösenden oder einem Rauchmelder der gleichen Gruppe, wird das Display ausgeschaltet.",
+    "subset_1": "nur ausl&ouml;sender Rauchmelder",
+    "subset_2": "Rauchmelder der gleichen Gruppe"
+  },
+  "SWITCH": {
+    "description_1": "Mit einem Druck auf die Gerätetaste wird der Schalter für die festgelegte Zeit eingeschaltet. Ist eine Verz&oumlgerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_2": "Mit einem Druck auf die Gerätetaste wird der Schalter für die festgelegte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_3": "Mit einem Druck auf die Gerätetaste wird der Schalter für die festgelegte Zeit ein- oder ausgeschaltet (Toggle-Funktion). Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_4": "Mit einem Druck auf die Gerätetaste wird der Schalter für die festgelegte Zeit eingeschaltet."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "Beim Betätigen des Schaltkontakts wird das Display der Statusanzeige eingeschaltet.",
+    "description_2": "Beim Betätigen des Schaltkontakts wird das Display der Statusanzeige ausgeschaltet.",
+    "description_3": "Beim Betätigen des Schaltkontakts wird das Display für die festgelegte Zeit ein- oder ausgeschaltet (Toggle-Funktion)."
+  },
+  "TILT_SENSOR": {
+    "description_1": "Beim Öffnen des Schaltkontakts wird das Display ein- und beim Schließen ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_2": "Beim Erkennen des festgelegten Änderungssignals wird das Display eingeschaltet.",
+    "description_3": "Beim Öffnen des Garagentors wird die Anzeige ein- und beim Schließen ausgeschaltet.",
+    "subset_1": "Offen - ein / Zu - aus",
+    "subset_2": "Offen - aus / Zu - ein",
+    "subset_3": "Schlie&szlig;en",
+    "subset_4": "&Ouml;ffnen",
+    "subset_5": "&Auml;ndern",
+    "at": "beim"
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die festgelegte Zeit eingeschaltet. Ist eine Verz&oumlgerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_2": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die festgelegte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_3": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die festgelegte Zeit ein- oder ausgeschaltet (Toggle-Funktion). Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_4": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die festgelegte Zeit eingeschaltet."
+  },
+  "WATERDETECTIONSENSOR": {
+    "description_1": "Bei Feuchtigkeit wird das Display für die festgelegte Zeit eingeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_2": "Bei Änderung der Feuchtigkeit wird das Display für die festgelegte Zeit eingeschaltet.",
+    "subset_1": "Trocken - ein / Feuchtigkeit - aus",
+    "subset_2": "Trocken - aus / Feuchtigkeit - ein",
+    "subset_3": "ein bei absoluter Trockenheit",
+    "subset_4": "ein bei Feuchtigkeit",
+    "subset_5": "ein bei Wasserstand ab 1,5 mm",
+    "subset_6": "ein bei Feuchtigkeit oder Wasserstand ab 1,5 mm",
+    "subset_7": "ein bei jeder &Auml;nderung",
+    "subset_8": "aus bei absoluter Trockenheit",
+    "subset_9": "aus bei Feuchtigkeit",
+    "subset_10": "aus bei Wasserstand ab 1,5 mm",
+    "subset_11": "aus bei Feuchtigkeit oder Wasserstand ab 1,5 mm",
+    "subset_12": "aus bei jeder &Auml;nderung",
+    "moisty": "schon bei leichter Feuchtigkeit",
+    "watery": "erst ab 1,5 mm Wasserstand"
+  },
+  "WEATHER": {
+    "description_1": "Bei starkem Wind wird die Anzeige ein- und bei schwachem Wind ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_2": "Wenn die festgelegte Windgeschwindigkeit erreicht wird, schaltet die Anzeige für die festgelegte Zeit ein.",
+    "subset_1": "Wind stark - aus / Wind schwach - ein",
+    "subset_2": "Wind stark - ein / Wind schwach - aus"
+  }
+}

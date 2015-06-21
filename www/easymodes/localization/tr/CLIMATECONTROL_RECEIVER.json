@@ -1,0 +1,11 @@
+{
+  "CLIMATECONTROL_REGULATOR": {
+    "dummy": "dummy"
+  },
+  "GENERIC": {
+    "dummy": "dummy"
+  },
+  "THERMALCONTROL_TRANSMIT": {
+    "dummy": "dummy"
+  }
+}

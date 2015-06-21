@@ -1,0 +1,29 @@
+{
+  "GENERIC": {
+    "dim_down": "Dimmer - darker",
+    "dim_up": "Dimmer - brighter",
+    "dimmer_off": "Dimmer - off",
+    "dimmer_off_darker": "Dimmer - off / darker",
+    "dimmer_on": "Dimmer - on",
+    "dimmer_on_brighter": "Dimmer - on / brighter",
+    "dimmer_on_off": "Dimmer - on / off",
+    "dimmer_on_off_b_d": "Dimmer - on/off &amp; brighter/darker",
+    "not_active": "inactive",
+    "sleep_well": "Sleep light",
+    "wake_up_light": "Wake up light"
+  },
+  "VIRTUAL_DIMMER": {
+    "description_1": "With a short button press the light will be switched on to the set brightness value. With a long button press the dimmed light will get brighter.",
+    "description_2": "With a short button press the light will be switched off. With a long button press the light will be dimmed darker.",
+    "description_3": "With a short button press the light changes between the set brightness value and \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_4": "With a short or long button press the light will be switched on for the set time. During the delay the warning level will be slightly lowered to dim slowly to the status \"off\" afterwards.",
+    "description_5": "With a short button press the light will be switched on to the defined brightness value and afterwards dimmed to \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_6": "<span class=\"translated\">The light continuously changes in a defined interval between the two brightness values./span><br/><br/>",
+    "description_7": "With a short button press the light will be switched on to the set brightness value. With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_8": "With a short or long button press the light will be switched on to the defined brightness value.",
+    "description_9": "The light will be switched off by a short or long button press.",
+    "description_10": "The light will be dimmed brighter by a short or long button press.",
+    "description_11": "The light will be dimmed darker by a short or long button press.",
+    "description_12": "The button is not active."
+  }
+}

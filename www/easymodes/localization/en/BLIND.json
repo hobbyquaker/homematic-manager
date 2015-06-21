@@ -1,0 +1,79 @@
+{
+  "BLIND": {
+    "description_1": "With a short button press the awning / shutter will be moved up completely for the time set. If a delay is set the awning / shutter will be moved up after the delay time has expired. With a long button press the awning / shutter will be moved up as long as the button will be pressed.",
+    "description_2": "With a short button press the awning / shutter will be moved down completely for the time set. If a delay is set the awning / shutter will be moved up after the delay time has expired. With a long button press the awning / shutter will be moved down as long as the button will be pressed.",
+    "description_3": "With a short button press the awning / shutter will be moved up or down completely (toggle function) for the time set. If a delay is set the awning / shutter will be moved up after the delay time has expired. With a long button press the awning / shutter will be moved for as long as the button will be pressed.",
+    "description_4": "With a short button press the awning / shutter will be moved to the desired position for the time set. If a delay is set the awning / shutter will be moved up after the delay time has expired. With a long button press the awning / shutter will be moved for as long as the button will be pressed.",
+    "subset_1": "moved up",
+    "subset_2": "moved down",
+    "subset_3": "changing between moved up and moved down"
+  },
+  "CONDITION_X": {
+    "description_1": "When the upper limit is received, the awning / shutter will be moved up for the time set. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired.",
+    "description_2": "When the upper limit is received, the awning / shutter will be moved down for the time set. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired.",
+    "description_3": "When the upper limit is received, the awning / shutter will be moved down for the time set. If the lower limit is received, the awning / shutter will be moved up again.",
+    "descrHint": "You can define a time for sending a switching command via the switch actuator at the corresponding channel.",
+    "descrHintMS": "To activate the profile, please define for the corresponding channel of the switch actuator that a switching command will be send if the selected value will be exceeded or falls below the threshold."
+  },
+  "GENERIC": {
+    "close_down": "closed / down",
+    "close_down_stopover": "closed / down & stopover",
+    "open_close_up_down": "open / closed & up / down",
+    "open_up": "open / up",
+    "open_up_stopover": "open / up & stopover",
+    "target_position": "move to position",
+    "driving_mode_0": "directly",
+    "driving_mode_1": "above the upper final position (accuracy run)",
+    "driving_mode_2": "above the lower final position (accuracy run)",
+    "driving_mode_3": "above the next final position (accuracy run)",
+    "up_equal_down": "<div style=\"padding:10\"><br/>The switch-on times for &quot;Up&quot; and &quot;Down&quot;<br/>can not be selected at the same time!</div>"
+  },
+  "KEY": {
+    "description_1": "With a short button press the awning / shutter will be moved up completely for the time set. If a delay is set the awning / shutter will be moved up after the delay time has expired. With a long button press the awning / shutter will be moved up as long as the button will be pressed.",
+    "description_2": "With a short button press the awning / shutter will be moved down completely for the time set. If a delay is set the awning / shutter will be moved up after the delay time has expired. With a long button press the awning / shutter will be moved down as long as the button will be pressed.",
+    "description_3": "With a short button press the awning / shutter will be moved up or down completely (toggle function) for the time set. If a delay is set the awning / shutter will be moved up after the delay time has expired. With a long button press the awning / shutter will be moved for as long as the button will be pressed.",
+    "description_4": "With a short button press the awning / shutter will be moved to the desired position for the time set. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired. With a long button press the awning / shutter will be moved for as long as the button will be pressed.",
+    "subset_1": "moved up",
+    "subset_2": "moved down",
+    "subset_3": "changing between moved up and moved down"
+  },
+  "PULSE_SENSOR": {
+    "description_1": "When a switching command is transmitted the awning / shutter will be moved up completely for the time set. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired.",
+    "description_2": "When a switching command is transmitted the awning / shutter will be moved down completely for the time set. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired.",
+    "description_3": "When a switching command is transmitted the awning / shutter will be moved up or down completely (toggle function) for the time set. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired."
+  },
+  "RAINDETECTOR": {
+    "description_1": "In case of dry conditions the awning / shutter will be moved up completely for the time set. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired.",
+    "description_2": "In case of rain the awning / shutter will be moved down completely for the time set. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired."
+  },
+  "SENSOR_FOR_CARBON_DIOXIDE": {
+    "description_1": "In case of increased CO2 concentrations in the room air the awning / shutter will be moved up for the set time.",
+    "description_2": "The CO2 sensor is not active.",
+    "CO2_low": "slightly increased CO2 concentration",
+    "CO2_high": "heavily increased CO2 concentration"
+  },
+  "SMOKE_DETECTOR_TEAM": {
+    "description_1": "When the smoke detector is triggered the awning / shutter will be moved up completely for the time set. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired.",
+    "description_2": "When the smoke detector is triggered the awning / shutter will be moved down completely for the time set. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "By operating the switch the awning / shutter will be moved up completely. If the switch is operated in the meantime the awning / shutter will be stopped. By operating the switch again, the awning / shutter will continue to move. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired.",
+    "description_2": "By operating the switch the awning / shutter will be moved down completely. If the switch is operated in the meantime the awning / shutter will be stopped. By operating the switch again, the awning / shutter will continue to move. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired.",
+    "description_3": "By operating the switch the awning / shutter will be moved up or down completely (toggle function) for the time set. If the switch is operated in the meantime the awning / shutter will be stopped. By operating the switch again, the awning / shutter will move into the other direction. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired.",
+    "description_4": "By operating the switch the awning / shutter will be moved up completely. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired. If the switch is operated in the meantime the awning / shutter will be stopped. By operating the switch again, the awning / shutter will continue to move.",
+    "description_5": "By operating the switch the awning / shutter will be moved down completely. If a delay is set the awning / shutter will be moved to the desired position after the delay time has expired. If the switch is operated in the meantime the awning / shutter will be stopped. By operating the switch again, the awning / shutter will continue to move."
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "With a short button press the awning / shutter will be moved up completely for the time set. If a delay is set the awning / shutter will be moved up after the delay time has expired. With a long button press the awning / shutter will be moved up as long as the button will be pressed.",
+    "description_2": "With a short button press the awning / shutter will be moved down completely for the time set. If a delay is set the awning / shutter will be moved up after the delay time has expired. With a long button press the awning / shutter will be moved down as long as the button will be pressed.",
+    "description_3": "With a short button press the awning / shutter will be moved up or down completely (toggle function) for the time set. If a delay is set the awning / shutter will be moved up after the delay time has expired. With a long button press the awning / shutter will be moved for as long as the button will be pressed.",
+    "description_4": "With a short button press the awning / shutter will be moved to the desired position for the time set. If a delay is set the awning / shutter will be moved up after the delay time has expired. With a long button press the awning / shutter will be moved into the direction of the desired position as long as the button will be pressed.",
+    "subset_1": "moved up",
+    "subset_2": "moved down",
+    "subset_3": "changing between moved up and moved down"
+  },
+  "WEATHER": {
+    "description_1": "When the entered wind strength is reached the awning / shutter will be moved up for the set time.",
+    "description_2": "When the entered wind strength is reached the awning / shutter will be moved down for the set time."
+  }
+}

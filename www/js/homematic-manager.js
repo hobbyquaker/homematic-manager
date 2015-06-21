@@ -29,6 +29,8 @@ $(document).ready(function () {
     var names = {};
     var hash;
 
+    var easymodes = {lang: {}};
+
     var linkReceiverData;
     var linkReceiverDesc;
     var linkSenderType;
@@ -254,6 +256,18 @@ $(document).ready(function () {
             config = data;
             $('.version').html(config.version);
             language = config.language || 'de';
+
+            $.getJSON('easymodes/localization/' + language + '/GENERIC.json', function (data) {
+                console.log('easymode generic', data);
+                if (!easymodes.lang[language]) easymodes.lang[language] = {};
+                easymodes.lang[language].GENERIC = data;
+                $.getJSON('easymodes/localization/' + language + '/PNAME.json', function (data) {
+                    console.log('easymode pname', data);
+                    easymodes.lang[language].PNAME = data;
+                    console.log('easymodes', easymodes);
+                });
+            });
+
             translate();
 
             initTabs();
@@ -2098,78 +2112,105 @@ $(document).ready(function () {
         linkSenderType = senderType;
         linkReceiverType = receiverType;
 
-        //console.log('dialogLinkparamset ' + sender + ' (' + senderType + ') ' + receiver + ' (' + receiverType + ')');
+        console.log('dialogLinkparamset ' + sender + ' (' + senderType + ') ' + receiver + ' (' + receiverType + ')');
 
-        var profiles = easymodes[receiverType] && easymodes[receiverType][senderType];
-        if (!profiles) profiles = {"0":{"params":{},"name":"expert"}};
 
-        // Profil-Select befüllen
-        $selectLinkparamsetProfile.html('');
-        for (var id in profiles) {
-            var selected;
-            var name = (easymodes.lang[language] &&
-                easymodes.lang[language][receiverType] &&
-                easymodes.lang[language][receiverType].GENERIC &&
-                easymodes.lang[language][receiverType].GENERIC[profiles[id].name])
-                ||
-                (easymodes.lang[language] &&
-                easymodes.lang[language].GENERIC &&
-                easymodes.lang[language].GENERIC && easymodes.lang[language].GENERIC[profiles[id].name])
-                ||
-                profiles[id].name;
 
-            if (data2.UI_HINT == id) {
-                selected = ' selected';
-            } else {
-                selected = '';
-            }
-            $selectLinkparamsetProfile.append('<option value="' + id + '"' + selected + '>' + name + '</option>')
+
+        if (easymodes[receiverType] && easymodes[receiverType][senderType]) {
+            createEasymodes();
+        } else {
+            var translationFile = 'easymodes/localization/' + language + '/' + receiverType + '.json';
+            var easymodeFile = 'easymodes/' + receiverType + '/' + senderType + '.json';
+
+            $.getJSON(translationFile, function (data) {
+                console.log('easymode translation', translationFile, data);
+                easymodes.lang[language][receiverType] = data;
+                $.getJSON(easymodeFile, function (data) {
+                    console.log('easymode', easymodeFile, data);
+                    if (!easymodes[receiverType]) easymodes[receiverType] = {};
+                    easymodes[receiverType][senderType] = data;
+                    console.log('easymodes', easymodes);
+                    createEasymodes();
+                });
+            });
 
         }
 
-        $selectLinkparamsetProfile.multiselect('refresh');
+        function createEasymodes() {
+            var profiles = easymodes[receiverType] && easymodes[receiverType][senderType];
+            if (!profiles) profiles = {"0":{"params":{},"name":"expert"}};
 
-        // Tabelle befüllen
-        formLinkParamset($('#table-linkparamset1'), data1, desc1, 'sender-receiver', senderType, receiverType);
-        formLinkParamset($('#table-linkparamset2'), data2, desc2, 'receiver-sender', senderType, receiverType, profiles);
+            // Profil-Select befüllen
+            $selectLinkparamsetProfile.html('');
+            for (var id in profiles) {
+                var selected;
+                var name = (easymodes.lang[language] &&
+                    easymodes.lang[language][receiverType] &&
+                    easymodes.lang[language][receiverType].GENERIC &&
+                    easymodes.lang[language][receiverType].GENERIC[profiles[id].name])
+                    ||
+                    (easymodes.lang[language] &&
+                    easymodes.lang[language].GENERIC &&
+                    easymodes.lang[language].GENERIC && easymodes.lang[language].GENERIC[profiles[id].name])
+                    ||
+                    profiles[id].name;
 
-        // Dialog-Überschrift setzen
-        var name = (names && names[sender] ? names[sender] : '');
+                if (data2.UI_HINT == id) {
+                    selected = ' selected';
+                } else {
+                    selected = '';
+                }
+                $selectLinkparamsetProfile.append('<option value="' + id + '"' + selected + '>' + name + '</option>')
 
-        if (names[receiver]) {
-            name = name + ' -> ' + names[receiver];
+            }
+
+            $selectLinkparamsetProfile.multiselect('refresh');
+
+            // Tabelle befüllen
+            formLinkParamset($('#table-linkparamset1'), data1, desc1, 'sender-receiver', senderType, receiverType);
+            formLinkParamset($('#table-linkparamset2'), data2, desc2, 'receiver-sender', senderType, receiverType, profiles);
+
+            // Dialog-Überschrift setzen
+            var name = (names && names[sender] ? names[sender] : '');
+
+            if (names[receiver]) {
+                name = name + ' -> ' + names[receiver];
+            }
+
+            name += ' (PARAMSET ' + sender + ' ' + receiver + ')';
+
+            $('div[aria-describedby="dialog-linkparamset"] span.ui-dialog-title').html(name);
+
+            // Hidden-Hilfsfelder
+            $('#edit-linkparamset-sender').val(sender);
+            $('#edit-linkparamset-receiver').val(receiver);
+            $('#link-sender-params').attr('data-address', sender);
+            $('#link-receiver-params').attr('data-address', receiver);
+            $('#link-sender').html(names[sender] + ' (' + sender + ')');
+            $('#link-receiver').html(names[receiver] + ' (' + receiver + ')');
+
+            // Buttons
+            $('button.paramset-setValue:not(.ui-button)').button();
+
+            $('button.linkparamset-save').button('disable');
+
+            $('.linkparamset-input, .easymode-param, #linkparamset-profile').change(function () {
+                $('button.linkparamset-save').button('enable');
+            });
+
+            $dialogLinkparamset.dialog('open');
+            $dialogLinkparamset.tooltip({
+                open: function (event, ui) {
+                    ui.tooltip.css("max-width", "500px");
+                },
+                content: function () {
+                    return $(this).prop('title');
+                }
+            });
         }
 
-        name += ' (PARAMSET ' + sender + ' ' + receiver + ')';
 
-        $('div[aria-describedby="dialog-linkparamset"] span.ui-dialog-title').html(name);
-
-        // Hidden-Hilfsfelder
-        $('#edit-linkparamset-sender').val(sender);
-        $('#edit-linkparamset-receiver').val(receiver);
-        $('#link-sender-params').attr('data-address', sender);
-        $('#link-receiver-params').attr('data-address', receiver);
-        $('#link-sender').html(names[sender] + ' (' + sender + ')');
-        $('#link-receiver').html(names[receiver] + ' (' + receiver + ')');
-
-        // Buttons
-        $('button.paramset-setValue:not(.ui-button)').button();
-
-        $('button.linkparamset-save').button('disable');
-
-        $('.linkparamset-input, .easymode-param, #linkparamset-profile').change(function () {
-            $('button.linkparamset-save').button('enable');
-        });
-
-        $dialogLinkparamset.dialog('open');
-        $dialogLinkparamset.tooltip({
-            open: function (event, ui) {
-                ui.tooltip.css("max-width", "500px");
-            },
-            content: function () {
-                return $(this).prop('title');
-            }
-        });
     }
     function elementEasyMode(options, val) {
         //console.log('elementEasyMode', options, val)

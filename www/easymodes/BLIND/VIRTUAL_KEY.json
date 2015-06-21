@@ -1,0 +1,1127 @@
+{
+  "0": {
+    "params": {},
+    "options": {},
+    "name": "expert"
+  },
+  "1": {
+    "params": {
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50 "
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "val": "0"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME": {
+        "readonly": true,
+        "val": "111600"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_JT_REFOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "SHORT_JT_REFON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_LEVEL": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_MAX_TIME_FIRST_DIR": {
+        "readonly": true,
+        "val": "25.5"
+      },
+      "SHORT_DRIVING_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_REFOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_REFON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_TIME": {
+        "val": "111600"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_OFF_TIME": {
+        "readonly": true,
+        "val": "111600"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1 "
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "LONG_JT_REFOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "LONG_JT_REFON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_LEVEL": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_MAX_TIME_FIRST_DIR": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_DRIVING_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Mit einem kurzen Tastendruck f&auml;hrt die Jalousie/Markise/Rolllade f&uuml;r die eingestellte Zeit ganz hoch. Ist eine Hochfahrverz&ouml;gerungszeit eingestellt, so wird die Jalousie/Markise/Rolllade erst nach Ablauf dieser Zeit hochgefahren. Mit einem langen Tastendruck f&auml;hrt die Jalousie/Markise/Rolllade nur so lange hoch wie die Taste gedr&uuml;ckt ist. "
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_1(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "1"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "UP_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "2": {
+        "desc": "UP_DELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_ONDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ONDELAY_TIME"
+      }
+    },
+    "name": "open_up"
+  },
+  "2": {
+    "params": {
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_TIME": {
+        "readonly": true,
+        "val": "111600"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0"
+      },
+      "SHORT_OFF_TIME": {
+        "val": "111600"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "6"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "7"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_REFOFF": {
+        "readonly": true,
+        "val": "7"
+      },
+      "SHORT_JT_REFON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ON_LEVEL": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_MAX_TIME_FIRST_DIR": {
+        "readonly": true,
+        "val": "25.5"
+      },
+      "SHORT_DRIVING_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_REFOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_REFON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_TIME": {
+        "readonly": true,
+        "val": "111600"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_OFF_TIME": {
+        "val": "111600"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "5"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "5"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "6"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "5"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "7"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_REFOFF": {
+        "readonly": true,
+        "val": "7"
+      },
+      "LONG_JT_REFON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_LEVEL": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_MAX_TIME_FIRST_DIR": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_DRIVING_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Mit einem kurzen Tastendruck f&auml;hrt die Jalousie/Markise/Rolllade f&uuml;r die eingestellte Zeit ganz runter. Ist eine Runterfahrverz&ouml;gerungszeit eingestellt, so wird die Jalousie/Markise/Rolllade erst nach Ablauf dieser Zeit runtergefahren. Mit einem langen Tastendruck f&auml;hrt die Jalousie/Markise/Rolllade nur so lange runter wie die Taste gedr&uuml;ckt ist. "
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_2(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "2"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "DOWN_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_OFF_TIME",
+          "LONG_OFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFF_TIME"
+      },
+      "2": {
+        "desc": "DOWN_DELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_OFFDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFFDELAY_TIME"
+      }
+    },
+    "name": "close_down"
+  },
+  "3": {
+    "params": {
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_REFOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_REFON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_DRIVING_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "6"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "5"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_JT_REFOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "LONG_JT_REFON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "LONG_MAX_TIME_FIRST_DIR": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_OFF_TIME": {
+        "val": "111600"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_LEVEL": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_ON_TIME": {
+        "val": "111600"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50 "
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_DRIVING_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "6"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "5"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_JT_REFOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "SHORT_JT_REFON": {
+        "readonly": true,
+        "val": "4"
+      },
+      "SHORT_MAX_TIME_FIRST_DIR": {
+        "readonly": true,
+        "val": "25.5"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME": {
+        "val": "111600"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "val": "0"
+      },
+      "SHORT_ON_LEVEL": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Mit einem kurzen Tastendruck f&auml;hrt die Jalousie/Markise/Rolllade im Wechsel ganz hoch bzw. ganz runter (Togglefunktion). Ist eine Hoch- oder Runterfahrverz&ouml;gerungszeit eingestellt, so wird die Jalousie/Markise/Rolllade erst nach Ablauf dieser Zeit gefahren. Bei einem langen Tastendruck f&auml;hrt die Jalousie/Markise/Rolllade so lange wie die Taste gedr&uuml;ckt ist."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_3(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "3"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "DOWN_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_OFF_TIME",
+          "LONG_OFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFF_TIME"
+      },
+      "2": {
+        "desc": "UP_TIME",
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "3": {
+        "desc": "UP_DELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_ONDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ONDELAY_TIME"
+      },
+      "4": {
+        "desc": "DOWN_DELAY_TIME",
+        "option": "DELAY",
+        "combo": [
+          "SHORT_OFFDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFFDELAY_TIME"
+      }
+    },
+    "name": "open_close_up_down"
+  },
+  "4": {
+    "params": {
+      "LONG_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "LONG_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50"
+      },
+      "LONG_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_REFOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_CT_REFON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_DRIVING_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_ON": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "LONG_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "LONG_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "LONG_JT_REFOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "LONG_JT_REFON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "LONG_MAX_TIME_FIRST_DIR": {
+        "readonly": true,
+        "val": "0.5"
+      },
+      "LONG_MULTIEXECUTE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_OFFDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_OFF_TIME": {
+        "val": "111600"
+      },
+      "LONG_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ONDELAY_TIME": {
+        "readonly": true,
+        "val": "0"
+      },
+      "LONG_ON_LEVEL": {
+        "readonly": true,
+        "val": "1"
+      },
+      "LONG_ON_TIME": {
+        "val": "111600"
+      },
+      "LONG_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ACTION_TYPE": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_COND_VALUE_HI": {
+        "readonly": true,
+        "val": "100"
+      },
+      "SHORT_COND_VALUE_LO": {
+        "readonly": true,
+        "val": "50 "
+      },
+      "SHORT_CT_OFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_OFFDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_ONDELAY": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_RAMPON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFOFF": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_CT_REFON": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_DRIVING_MODE": {
+        "val": "0"
+      },
+      "SHORT_JT_OFF": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_OFFDELAY": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ON": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_JT_ONDELAY": {
+        "readonly": true,
+        "val": "2"
+      },
+      "SHORT_JT_RAMPOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "SHORT_JT_RAMPON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_JT_REFOFF": {
+        "readonly": true,
+        "val": "8"
+      },
+      "SHORT_JT_REFON": {
+        "readonly": true,
+        "val": "3"
+      },
+      "SHORT_MAX_TIME_FIRST_DIR": {
+        "readonly": true,
+        "val": "25.5"
+      },
+      "SHORT_OFFDELAY_TIME": {
+        "val": "0"
+      },
+      "SHORT_OFF_LEVEL": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_OFF_TIME": {
+        "val": "111600"
+      },
+      "SHORT_OFF_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "SHORT_ONDELAY_TIME": {
+        "val": "0"
+      },
+      "SHORT_ON_LEVEL": {
+        "readonly": true,
+        "val": "1"
+      },
+      "SHORT_ON_TIME": {
+        "val": "111600"
+      },
+      "SHORT_ON_TIME_MODE": {
+        "readonly": true,
+        "val": "0"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Mit einem kurzen Tastendruck f&auml;hrt die Jalousie/Markise/Rolllade f&uuml;r die eingestellte Zeit zur gew&uuml;nschten Position. Ist eine entsprechende Fahrverz&ouml;gerungszeit eingestellt, so wird die Jalousie/Markise/Rolllade erst nach Ablauf dieser Zeit gefahren. Mit einem langen Tastendruck f&auml;hrt die Jalousie/Markise/Rolllade nur so lange in die Richtung der gew&uuml;nschten Position wie die Taste gedr&uuml;ckt ist. "
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_4(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "4"
+      }
+    },
+    "options": {
+      "1": {
+        "desc": "JUMPTARGET"
+      },
+      "2": {
+        "desc": "DRIVING_MODE",
+        "combo": [
+          "SHORT_DRIVING_MODE"
+        ]
+      },
+      "5": {
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_ON_TIME",
+          "LONG_ON_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ON_TIME"
+      },
+      "6": {
+        "option": "LENGTH_OF_STAY",
+        "combo": [
+          "SHORT_OFF_TIME",
+          "LONG_OFF_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFF_TIME"
+      },
+      "7": {
+        "option": "DELAY",
+        "combo": [
+          "SHORT_ONDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_ONDELAY_TIME"
+      },
+      "8": {
+        "option": "DELAY",
+        "combo": [
+          "SHORT_OFFDELAY_TIME"
+        ],
+        "input": "EnterTime_h_m_s",
+        "param": "SHORT_OFFDELAY_TIME"
+      }
+    },
+    "name": "target_position"
+  }
+}

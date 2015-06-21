@@ -1,0 +1,52 @@
+{
+  "0": {
+    "params": {},
+    "options": {},
+    "name": "expert"
+  },
+  "1": {
+    "params": {
+      "SHORT_CONTROL_RC": {
+        "val": "1"
+      },
+      "SHORT_TEMPERATUR_RC": {
+        "val": "17.00"
+      },
+      "LONG_CONTROL_RC": {
+        "val": "0"
+      },
+      "LONG_TEMPERATUR_RC": {
+        "val": "17.00"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Expertenprofil"
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "Expertenprofil"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "1"
+      }
+    },
+    "options": {
+      "1": {
+        "combo": [
+          "SHORT_CONTROL_RC",
+          "LONG_CONTROL_RC"
+        ]
+      },
+      "2": {
+        "combo": [
+          "SHORT_TEMPERATUR_RC",
+          "LONG_TEMPERATUR_RC"
+        ],
+        "input": "EnterTemp",
+        "param": "SHORT_TEMPERATUR_RC"
+      }
+    },
+    "name": "mode"
+  }
+}

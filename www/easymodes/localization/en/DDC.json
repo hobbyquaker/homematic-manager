@@ -1,0 +1,14 @@
+{
+  "GENERIC": {
+    "switch_off": "Door open",
+    "switch_on": "Door closed",
+    "switch_on_off": "Door open / AUTO closed",
+    "switch_on_off_toggle": ""
+  },
+  "KEY": {
+    "description_1": "With a short button press the door will be opened. A long button press will activate the function <b>Door open / AUTO closed<b>.",
+    "description_2": "With a short button press the door will be closed. A long button press will activate the function <b>Door open / AUTO closed<b>.",
+    "description_3": "With a short or long button press the door will be opened. The door will be closed automatically according to a defined time that can be adjusted via the door lock drive.",
+    "description_4": ""
+  }
+}

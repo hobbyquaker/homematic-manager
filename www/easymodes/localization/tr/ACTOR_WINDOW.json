@@ -1,0 +1,94 @@
+{
+  "GENERIC": {
+    "closeWindow": "Pencere - Kapat / durdur",
+    "closeWindowA": "Pencere - Durdurma secenegi olmadan kapat",
+    "openWindow": "Pencere - Havalandirma konumu / durdur",
+    "openWindowA": "Pencere - Durdurma secenegi olmadan zamanli havalandirma",
+    "openWindowB": "Pencere - Durdurma secenegi olmadan acma",
+    "toggleWindow": "Pencere - Dogal havalandirma / durdur / kapat",
+    "toggleWindowA": "Pencere - Dogal havalandirma / durdurma secenegi / olmadan kapatma",
+    "automaticWindow": "Pencere - Otomatik mod",
+    "stopWindow": "Pencere - Durdur",
+    "windowAiring": "Pencere - Aralikli havalandirma / durdur",
+    "windowPosition": "Pencere - Pozisyona s&uuml;r&uuml;s / durdur",
+    "windowAiringTime": "Pencere - Zamanli havalandirma / durdur",
+    "windowNaturalAiring": "Pencere - Dogal havalandirma / durdur"
+  },
+  "KEY": {
+    "description_1": "Pencere tusa bir kere basilarak kapatilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde kapatma islemi geciktirilir.",
+    "description_2": "Pencere tusa bir kere basilarak havalandirma konumunda (%100) acilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_3": "Acik pencere tusa bir kere basilarak kapatilir, kapali bir pencere ise havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da tekrar kapanir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Tusa bir kere daha basildiginda bir önceki sürüs komutu tersine gerceklesir. Ek olarak secilebilen gecikme süreleri acilma veya kapanma islemini geciktirir.",
+    "description_4": "Tusa bir kere basildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Pencere havalandirma konumundayken tusa basilirsa sadece zaman yeniden baslar.",
+    "description_5": "Pencere tusa bir kere basilarak durdurulur.",
+    "description_6": "Tusa bir kere basildiginda pencere istenen acilma pozisyonuna hareket ettirilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_7": "Tusa bir kere basildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_8": "Tusa bir kere basildiginda pencere istenen acilma pozisyonuna hareket ettirilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_9": "Tusa bir kere basildiginda pencere istenen havalandirma konumuna gelir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_10": "Bu baglanti devre disi birakilir."
+  },
+  "MOTION_DETECTOR": {
+    "description_1": "Hareket algilandiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir.",
+    "description_2": "Hareket algilandiginda pencere hareketini durdurur.",
+    "description_3": "Bu baglanti devre disi birakilir."
+  },
+  "RAINDETECTOR": {
+    "description_1": "Yagmur yagmaya basladiginda pencere kapanir. Opsiyonel secilebilen gecikme zamani sayesinde kapatma islemi geciktirilir.",
+    "description_2": "Yagmur yagdiginda pencere acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir.",
+    "description_3": "Bu baglanti devre disi birakilir."
+  },
+  "SENSOR_FOR_CARBON_DIOXIDE": {
+    "description_1": "Odadaki havada CO2 orani yüksekse pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir.",
+    "description_2": "Bu baglanti devre disi birakilir.",
+    "CO2_low": "hafif artmis CO2 konsantrasyonu",
+    "CO2_high": "cok artmis CO2 konsantrasyonu"
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Kilit kontagi kapatildiginda pencere de kapanir. Kilit kontaginin hareket sirasinda acilmasi pencereyi durdurur. Opsiyonel secilebilen gecikme zamani sayesinde kapatma islemi geciktirilir.",
+    "description_2": "Kilit kontagi kapatildiginda pencere havalandirma konumunda (%100) acilir. Kilit kontaginin hareket sirasinda acilmasi pencereyi durdurur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_3": "Kilit kontagi kapatildiginda pencere de kapanir. Kilit kontagi acildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Ek olarak secilebilen gecikme süreleri acilma veya kapanma islemini geciktirir.",
+    "description_4": "Kilit kontagi acildiginda ve kapatildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Pencere havalandirma konumundayken baska bir konuma degistirildiginde sadece zaman yeniden baslar.",
+    "description_5": "Kilit kontagi baska bir konuma gecirildiginde pencerenin hareketi durdurulur.",
+    "description_6": "Kilit kontagi kapatildiginda pencere istenen havalandirma konumuna gelir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Kilit kontaginin hareket sirasinda acilmasi pencereyi durdurur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_7": "Kilit kontagi kapatildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Kilit kontagi hareket sirasinda acilirsa pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_8": "Kilit kontagi kapatildiginda pencere istenen acilma pozisyonunu hareket ettirilir. Kilit kontaginin hareket sirasinda acilmasi pencereyi durdurur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_9": "Kilit kontagi kapatildiginda pencere istenen havalandirma konumuna gelir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Kilit kontaginin hareket sirasinda acilmasi pencereyi durdurur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_10": "Bu baglanti devre disi birakilir."
+  },
+  "SMOKE_DETECTOR_TEAM": {
+    "description_1": "Bir yangin alarmi durumunda pencere belirlenen süre boyunca acilir ve secilen bu süre dolduktan veya tetikleyicideki alarma ya da ayni gruptaki duman alarmina basildiktan sonra otomatik olarak tekrar kapanir.",
+    "description_2": "Bir yangin alarmi halinde pencere hemen kapanir.",
+    "description_3": "Bu baglanti devre disi birakilir.",
+    "subset_1": "sadece tetikleyen duman alarmi",
+    "subset_2": "Ayni gruba ait duman alarmi"
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "Saltere basildiginda pencere de kapanir. Buna hareket sirasinda basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde kapatma islemi geciktirilir.",
+    "description_2": "Saltere basildiginda pencere havalandirma konumunda (%100) acilir. Buna hareket sirasinda basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_3": "Saltere basildiginda acik pencere kapanir, kapali bir pencere ise havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da tekrar kapanir. Buna hareket sirasinda basildiginda pencere durur. Tusa bir kere daha basildiginda bir önceki sürüs komutu tersine gerceklesir. Ek olarak secilebilen gecikme süreleri acilma veya kapanma islemini geciktirir.",
+    "description_4": "Saltere basildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Buna pencere havalandirma konumundayken basildiginda sadece zaman yeniden baslar.",
+    "description_5": "Saltere basildiginda pencerenin hareketi durdurulur.",
+    "description_6": "Saltere basildiginda pencere istenen acilma pozisyonunu hareket ettirilir. Buna hareket sirasinda basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_7": "Saltere basildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Buna hareket sirasinda basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_8": "Saltere basildiginda pencere istenen acilma pozisyonunu hareket ettirilir. Buna hareket sirasinda basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_9": "Saltere basildiginda pencere istenen havalandirma konumuna gelir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Buna hareket sirasinda basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_10": "Bu baglanti devre disi birakilir."
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "Pencere tusa bir kere basilarak kapatilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde kapatma islemi geciktirilir.",
+    "description_2": "Pencere tusa bir kere basilarak havalandirma konumunda (%100) acilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_3": "Acik pencere tusa bir kere basilarak kapatilir, kapali bir pencere ise havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da tekrar kapanir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Tusa bir kere daha basildiginda bir önceki sürüs komutu tersine gerceklesir. Ek olarak secilebilen gecikme süreleri acilma veya kapanma islemini geciktirir.",
+    "description_4": "Tusa bir kere basildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Pencere havalandirma konumundayken tusa basilirsa sadece zaman yeniden baslar.",
+    "description_5": "Pencere tusa bir kere basilarak durdurulur.",
+    "description_6": "Tusa bir kere basildiginda pencere istenen acilma pozisyonuna hareket ettirilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_7": "Tusa bir kere basildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_8": "Tusa bir kere basildiginda pencere istenen acilma pozisyonuna hareket ettirilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_9": "Tusa bir kere basildiginda pencere istenen havalandirma konumuna gelir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir.",
+    "description_10": "Bu baglanti devre disi birakilir."
+  },
+  "WEATHER": {
+    "description_1": "Ayarlanan rüzgar siddeti asilirsa havalandirma pencere kapanir.",
+    "description_2": "Ayarlanan rüzgar siddetine ulasilmazsa pencere acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir.",
+    "description_3": "Ayarlanan rüzgar siddeti asilirsa pencere acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir.",
+    "description_4": "Bu baglanti devre disi birakilir."
+  }
+}

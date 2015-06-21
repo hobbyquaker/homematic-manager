@@ -1,0 +1,41 @@
+{
+  "GENERIC": {
+    "door_lock": "Kapiyi kilitle",
+    "door_lock_proof": "Kapiyi kilitle (sabotaja karsi g&uuml;venli)",
+    "door_lock_unlock": "kilitle / kilidi ac",
+    "door_lock_open": "kilitle / ac",
+    "door_lock_toggle": "Kilitlemeyi tetikle",
+    "door_open": "Kapiyi acma",
+    "door_unlock": "Kapi kilidini ac",
+    "door_unlock_open": "kildi ac / ac"
+  },
+  "KEY": {
+    "description_1": "Tusa kisa veya uzun süre basildiginda kapinin kilidi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir.",
+    "description_2": "Tusa kisa veya uzun süre basildiginda kapi kilitlenir.",
+    "description_3": "Tusa kisa veya uzun süre basildiginda kapi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir.",
+    "description_4": "Tusa kisa süre basildiginda kapi kilitlenir. Tusa uzun süre basildiktan sonra kapinin kilidi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir.",
+    "description_5": "Tusa kisa süre basildiginda kapi kilitlenir. Tusa uzun süre basildiginda kapi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir.",
+    "description_6": "Tusa kisa süre basildiginda kapinin kilidi acilir. Tusa uzun süre basildiginda kapi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir.",
+    "description_7": "Tusa kisa veya uzun süre basildiginda kapi güncel duruma göre ya kilitlenir ya da kilit acilir."
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Kapi kapandiktan sonra hemen kilitlenir. Kontak cikarilarak kapi acilabilir (sabotaja karsi güvenli degil).",
+    "description_2": "Kapi kapandiktan sonra hemen kilitlenir. Kontak cikarilarak kapi acilabilir (sabotaja karsi güvenli).",
+    "description_3": "Kontak devre disi."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "Saltere basildiginda kapi acilir. Belirlenen süre sonunda ise tekrar kilitlenir.",
+    "description_2": "Saltere basildiginda kapinin kildi acilir. Belirlenen süre sonunda ise tekrar kilitlenir.",
+    "description_3": "Saltere basildiginda kapi kilitlenir.",
+    "description_4": "Saltere basildiginda kapi güncel duruma göre ya kilitlenir ya da kilit acilir."
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "Tusa kisa veya uzun süre basildiginda kapinin kilidi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir.",
+    "description_2": "Tusa kisa veya uzun süre basildiginda kapi kilitlenir.",
+    "description_3": "Tusa kisa veya uzun süre basildiginda kapi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir.",
+    "description_4": "Tusa kisa süre basildiginda kapi kilitlenir. Tusa uzun süre basildiktan sonra kapinin kilidi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir.",
+    "description_5": "Tusa kisa süre basildiginda kapi kilitlenir. Tusa uzun süre basildiginda kapi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir.",
+    "description_6": "Tusa kisa süre basildiginda kapinin kilidi acilir. Tusa uzun süre basildiginda kapi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir.",
+    "description_7": "Tusa kisa veya uzun süre basildiginda kapi güncel duruma göre ya kilitlenir ya da kilit acilir."
+  }
+}

@@ -88,6 +88,11 @@ Wenn Du Dir diese Frage stellst ist die RPC-Konsole für Dich uninteressant :-)
 
 ## Changelog
 
+### 1.0.11
+* (hobbyquaker) Fix https://github.com/hobbyquaker/homematic-manager/issues/33 (hoffentlich)
+* (hobbyquaker) Umbenennen eines Geräts und aller Kanäle gleichzeitig
+* (hobbyquaker) reportValueUsage auf allen Datenpunkten eines Kanals
+
 ### 1.0.10
 * (hobbyquaker) diverse Fixes und Verbesserungen
 * (hobbyquaker) Easymodes für Empfängertyp SIGNAL_LED und SIGNAL_CHIME vervollständigt

@@ -115,6 +115,10 @@ function initRpcClients() {
                 rpcClients[_daemon].on('connect', function () {
                     init(_daemon);
                 });
+                rpcClients[_daemon].on('error', function (e) {
+                    log.error(e);
+                });
+
             } else {
                 init(_daemon);
             }

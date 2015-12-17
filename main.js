@@ -90,7 +90,11 @@ function initRpcClients() {
                 init(daemon);
             } else if (elapsed > 29000) {
                 log.debug('RPC -> ping ' + daemon + ' ' + elapsed);
-                rpcClients[daemon].methodCall('ping', ['hmm']);
+                rpcClients[daemon].methodCall('ping', ['hmm'], function (err, res) {
+                    if (err) {
+                        log.error('RPC -> ping', err)
+                    }
+                });
             }
         }
     }

@@ -828,6 +828,7 @@ $(document).ready(function () {
                         var gridid = $('#rename-gridid').val();
                         socket.emit('setName', renameAddress, renameName, function () {
                             if (renameAddress.match(/:/)) {
+                                // Rename Channel
                                 var $gridCh = $('#' + gridid);
                                 var rowData = $gridCh.jqGrid('getRowData', rowid);
                                 rowData.Name = renameName;
@@ -837,19 +838,39 @@ $(document).ready(function () {
                                 refreshGridLinks();
 
                             } else {
+                                // Rename Device
                                 var rowData = $gridDevices.jqGrid('getRowData', rowid);
                                 rowData.Name = renameName;
                                 $gridDevices.jqGrid('setRowData', rowid, rowData);
+
                                 if (!names) names = {};
                                 names[renameAddress] = renameName;
                                 names[renameAddress + ':0'] = renameName + ':0';
 
+                                var renameChildren = $('#rename-children').is(':checked');
+                                var children = indexChannels[renameAddress].CHILDREN;
+
                                 for (var i = 0; i < listDevices.length; i++) {
-                                    if (listDevices[i].ADDRESS == renameAddress) {
+                                    if (listDevices[i].ADDRESS === renameAddress) {
                                         listDevices[i].Name = renameName;
-                                        break;
+                                    }
+                                    if (renameChildren && (children.indexOf(listDevices[i].ADDRESS) !== -1)) {
+                                        listDevices[i].Name = renameName + ':' + children.indexOf(listDevices[i].ADDRESS);
                                     }
                                 }
+
+                                if (renameChildren) {
+                                    children.forEach(function (child) {
+                                        names[child] = renameName + ':' + children.indexOf(child);
+                                        console.log('setName', child, names[child]);
+                                        socket.emit('setName', child, names[child]);
+                                    });
+                                }
+
+                                var scrollPosition = $gridDevices.closest(".ui-jqgrid-bdiv").scrollTop();
+                                $gridDevices.jqGrid('toggleSubGridRow', rowid);
+                                $gridDevices.jqGrid('toggleSubGridRow', rowid);
+                                $gridDevices.closest(".ui-jqgrid-bdiv").scrollTop(scrollPosition);
 
                                 if (config.daemons[daemon].type !== 'BidCos-Wired') {
                                     refreshGridRssi();
@@ -1151,14 +1172,19 @@ $(document).ready(function () {
             var address = $('#' + chGrid + ' tr#' + chSelected + ' td[aria-describedby$="_ADDRESS"]').html();
             var name = $('#' + chGrid + ' tr#' + chSelected + ' td[aria-describedby$="_Name"]').html();
             var rowid = chSelected;
+            $('#rename-device-only').hide();
+
         } else {
             var address = $('#grid-devices tr#' + devSelected + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
             var name = $('#grid-devices tr#' + devSelected + ' td[aria-describedby="grid-devices_Name"]').html();
             var rowid = devSelected;
+            $('#rename-device-only').show();
+
         }
         $('#rename-rowid').val(rowid);
         $('#rename-gridid').val(chGrid);
         $('#rename-address').val(address);
+        $('#rename-children').removeAttr('checked');
         $('#rename-name').val(name == '&nbsp;' ? '' : name);
         $dialogRename.dialog('open');
     }
@@ -1166,6 +1192,7 @@ $(document).ready(function () {
         var devSelected = $gridDevices.jqGrid('getGridParam','selrow');
         var chSelected = null;
         var chGrid = null;
+        value = value || 0;
         if (!devSelected) {
             $('[id^="channels_"][id$="_t"]').each(function () {
                 if ($(this).jqGrid('getGridParam','selrow') > 0) {
@@ -1175,23 +1202,28 @@ $(document).ready(function () {
             });
             var address = $('#' + chGrid + ' tr#' + chSelected + ' td[aria-describedby$="_ADDRESS"]').html();
         } else {
-            alert('device!');
+            alert('error: reportValueUsage on Device');
             return;
         }
+
         socket.emit('rpc', daemon, 'getParamsetDescription', [address, 'VALUES'], function (err, data) {
-            var param;
-            if (data.STATE) {
-                param = 'STATE';
-            } else if (data.LEVEL) {
-                param = 'LEVEL';
-            } else if (data.PRESS_SHORT) {
-                param = 'PRESS_SHORT';
-            } else if (data.MOTION) {
-                param = 'MOTION';
-            } else {
-                param = Object.keys(data)[0];
+            var queue = [];
+            for (var param in data) {
+                queue.push(param);
             }
-            rpcDialog(daemon, 'reportValueUsage', [address, param, value]);
+
+            function popQueue() {
+                if (queue.length > 0) {
+                    var param = queue.pop();
+                    console.log('reportValueUsage', address, param, value);
+                    socket.emit('rpc', daemon, 'reportValueUsage', [address, param, value], function (err, data) {
+                        popQueue();
+                    });
+                }
+            }
+
+            popQueue();
+
         });
 
     }

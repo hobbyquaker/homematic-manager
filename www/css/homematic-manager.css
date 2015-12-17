@@ -221,3 +221,7 @@ textarea {
     padding-right: 2px;
     padding-top: 3px;
 }
+
+#rename-device-only {
+    padding-top: 12px;
+}

@@ -165,14 +165,15 @@
     <div id="dialog-rename" title="Umbenennen">
         <br/>
         <input type="text" id="rename-name" value="" size="56"/>
+        <div id="rename-device-only"><label for="rename-children"><input type="checkbox" id="rename-children"/><span class="translate">Kanäle überschreiben</span></label></div>
         <input type="hidden" id="rename-address" value=""/>
         <input type="hidden" id="rename-rowid" value=""/>
         <input type="hidden" id="rename-gridid" value=""/>
     </div>
     <div id="dialog-add-device" title="Gerät anlernen">
         <select id="add-device-mode">
-            <option value="1" selected="selected">Normaler Anlernmodus</option>
-            <option value="2">Default-Parameter in Paramset MASTER schreiben, bestehende Verknüpfungen löschen</option>
+            <option value="1" selected="selected" class="translate">Normaler Anlernmodus</option>
+            <option value="2" class="translate">Default-Parameter in Paramset MASTER schreiben, bestehende Verknüpfungen löschen</option>
         </select>
 
         <table>

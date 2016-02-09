@@ -1,0 +1,16 @@
+{
+  "GENERIC": {
+    "choose_Mode": "Select mode",
+    "jumpToColor": "Set color",
+    "lblShortKeyPress": "Short key press",
+    "lblLongKeyPress": "Long key press",
+    "lblMode": "Mode",
+    "optionIncColor": "Increase color value",
+    "optionDecColor": "Decrease color value",
+    "optionToggleColor": "Increase / decrease color value"
+  },
+  "KEY": {
+    "description_1": "You can define the mode of the button here. There are the following options: increase the color value, decrease the color value and - depending on the button press counter -  alternate between increasing and decreasing of the color value.",
+    "description_2": "You can set the button for activating a particular color value here. You can set a color value for the short and for the long button press separately. "
+  }
+}

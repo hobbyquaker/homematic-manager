@@ -1,0 +1,23 @@
+{
+  "GENERIC": {
+    "inc_Program": "Erh&ouml;he Programmnummer",
+    "dec_Program": "Verringere Programmnummer",
+    "set_Program": "Setze Programmnummer",
+    "lblColorValueMin": "Farbwert Start",
+    "lblColorValueMax": "Farbwert Ende",
+    "lblShortKeyPress": "Kurzer Tastendruck",
+    "lblLongKeyPress": "Langer Tastendruck",
+    "optionPrg0": "Aus",
+    "optionPrg1": "Langsamer Durchlauf",
+    "optionPrg2": "Normaler Durchlauf",
+    "optionPrg3": "Schneller Durchlauf",
+    "optionPrg4": "Lagerfeuer",
+    "optionPrg5": "Wasserfall",
+    "optionPrg6": "TV-Simulation"
+  },
+  "KEY": {
+    "description_1": "Mit einem langen Tastendruck können Sie die Nummer des Farbwechselprogramms verringern. Ein kurzer Tastendruck schaltet die Programmfunktion aus.",
+    "description_2": "Mit einem langen Tastendruck können Sie die Nummer des Farbwechselprogramms  erhöhen. Ein kurzer Tastendruck wählt das Program 'Normaler Durchlauf'",
+    "description_3": "Hier können Sie ein Programm festlegen, welches bei kurzen und langem Tastendruck aktiviert wird."
+  }
+}

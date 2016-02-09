@@ -1,0 +1,26 @@
+{
+  "GENERIC": {
+    "switch_off": "Switch - off",
+    "switch_on": "Switch - on",
+    "switch_on_off": "Switch - on / off",
+    "switch_toggle": "Switch toggle"
+  },
+  "KEY_TRANSCEIVER": {
+    "description_1": "With a short or long button press the switch will be switched on for the set time.",
+    "description_2": "With a short or long button press the switch will be switched off for the set time.",
+    "description_3": "With a short or long button press the switch will be switched on or off for the set time (toggle function).",
+    "description_4": "With a short or long button press the switch will be switched on or off for the set time.",
+    "description_5": "With a short or long button press the switch will be switched on or off for the set time."
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "tr Beim Öffnen des Kontakts wird der Schalter in den entgegengesetzten Zustand geschaltet.",
+    "description_2": "tr Beim Öffnen des Kontakts wird der Schalter ein- und beim Schließen ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_3": "tr Beim Erkennen des Änderungssignals wird der Schalter für eine festgelegte Zeit eingeschaltet.",
+    "subset_1": "Offen - ein / Zu - aus",
+    "subset_2": "Offen - aus / Zu - ein",
+    "subset_3": "&Ouml;ffnen",
+    "subset_4": "Schlie&szlig;en",
+    "subset_5": "&Auml;ndern",
+    "at": "beim"
+  }
+}

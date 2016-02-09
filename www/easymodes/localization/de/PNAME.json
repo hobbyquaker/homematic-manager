@@ -42,5 +42,18 @@
   "UP_TIME": "Verweildauer im Zustand \"Oben\"",
   "WINDOW_OPEN_LEVEL": "Kippen auf Kippweite",
   "WINDOW_OPEN_TIME": "Verweildauer im Zustand \"Gekippt\"",
-  "WINDOW_RUNNING_SPEED": "Fahrgeschwindigkeit"
+  "WINDOW_RUNNING_SPEED": "Fahrgeschwindigkeit",
+  "ONDELAY_TIME_BASE": "Einheit Einschaltverzögerung",
+  "ONDELAY_TIME_FACTOR": "Wert Einschaltverzögerung",
+  "ONDELAY_TIME_FACTOR_DESCR": "Einschaltverzögerung",
+  "ON_TIME_BASE": "Einheit Einschaltdauer",
+  "ON_TIME_FACTOR_DESCR": "Einschaltdauer (Verweildauer im Zustand \"ein\")",
+  "ON_TIME_FACTOR": "Wert Einschaltdauer",
+  "OFFDELAY_TIME_BASE": "Einheit Ausschaltverzögerung",
+  "OFFDELAY_TIME_FACTOR": "Wert Ausschaltverzögerung",
+  "OFFDELAY_TIME_FACTOR_DESCR": "Ausschaltverzögerung",
+  "OFF_TIME_BASE": "Einheit Ausschaltdauer",
+  "OFF_TIME_FACTOR_DESCR": "Ausschaltdauer (Verweildauer im Zustand \"aus\")",
+  "OFF_TIME_FACTOR": "Wert Ausschaltdauer",
+  "TEMPERATURE_RC": "Temperatur"
 }

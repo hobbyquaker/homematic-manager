@@ -1,0 +1,16 @@
+{
+  "GENERIC": {
+    "choose_Mode": "Mod sec",
+    "jumpToColor": "Renk ata",
+    "lblShortKeyPress": "Kisa tus basimi",
+    "lblLongKeyPress": "Uzun tus basimi",
+    "lblMode": "Mod",
+    "optionIncColor": "Renk numarasini y%FCkselt",
+    "optionDecColor": "Renk numarasini azalt",
+    "optionToggleColor": "Renk numarasini y%FCkselt / azalt"
+  },
+  "KEY": {
+    "description_1": "Burada tusun modunu ayarlayabilirsiniz. Asagidaki secenekler mevcut: Renk degerini y%FCkselt, renk degerini azalt ve renk degerini degisimli olarak y%FCkselt veya azalt, tus basimi sayacina bagli.",
+    "description_2": "Burada kisa ve uzun tus basimi icin bir tusu bir renkle atayabilirsiniz."
+  }
+}

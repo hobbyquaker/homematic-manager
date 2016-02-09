@@ -1,0 +1,62 @@
+{
+  "0": {
+    "params": {},
+    "options": {},
+    "name": "expert"
+  },
+  "1": {
+    "params": {
+      "SHORT_ACT_HSV_COLOR_VALUE": {
+        "val": "253"
+      },
+      "LONG_ACT_HSV_COLOR_VALUE": {
+        "val": "253"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Mit einem kurzen oder langen Tastendruck wird ....."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_1(UI_DESCRIPTION)\t"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "1"
+      }
+    },
+    "options": {
+      "1": {
+        "combo": [
+          "SHORT_ACT_HSV_COLOR_VALUE",
+          "LONG_ACT_HSV_COLOR_VALUE"
+        ]
+      }
+    },
+    "name": "choose_Mode"
+  },
+  "2": {
+    "params": {
+      "SHORT_ACT_HSV_COLOR_VALUE": {
+        "val": "0"
+      },
+      "LONG_ACT_HSV_COLOR_VALUE": {
+        "val": "0"
+      },
+      "UI_DESCRIPTION": {
+        "readonly": true,
+        "val": "Mit einem kurzen oder langen Tastendruck wird ....."
+      },
+      "UI_TEMPLATE": {
+        "readonly": true,
+        "val": "$PROFILE_2(UI_DESCRIPTION)"
+      },
+      "UI_HINT": {
+        "readonly": true,
+        "val": "2"
+      }
+    },
+    "options": {},
+    "name": "jumpToColor"
+  }
+}

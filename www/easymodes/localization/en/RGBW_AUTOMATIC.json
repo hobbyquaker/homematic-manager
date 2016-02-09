@@ -1,0 +1,23 @@
+{
+  "GENERIC": {
+    "inc_Program": "Increase program number",
+    "dec_Program": "Decrease program number",
+    "set_Program": "Set program",
+    "lblColorValueMin": "Color value start",
+    "lblColorValueMax": "Color value end",
+    "lblShortKeyPress": "Short keypress",
+    "lblLongKeyPress": "Long keypress",
+    "optionPrg0": "Off",
+    "optionPrg1": "Slow cycle",
+    "optionPrg2": "Normal cycle",
+    "optionPrg3": "Fast cycle",
+    "optionPrg4": "Bonfire",
+    "optionPrg5": "Waterfall",
+    "optionPrg6": "TV-Simulation"
+  },
+  "KEY": {
+    "description_1": "A long button press will decrease the number of the colour program. A brief button press will stop the program.",
+    "description_2": "A long button press will increase the number of the colour program. A brief button press will select the program 'Normal cycle'",
+    "description_3": "You can set the program for the brief and long button press here."
+  }
+}

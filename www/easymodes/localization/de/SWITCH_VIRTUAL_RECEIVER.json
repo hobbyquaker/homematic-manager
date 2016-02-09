@@ -1,0 +1,26 @@
+{
+  "GENERIC": {
+    "switch_off": "Schalter aus",
+    "switch_on": "Schalter ein",
+    "switch_on_off": "Schalter ein / aus",
+    "switch_toggle": "Schalter toggle"
+  },
+  "KEY_TRANSCEIVER": {
+    "description_1": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die festgelegte Zeit eingeschaltet. Ist eine Verz&oumlgerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_2": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die festgelegte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_3": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die festgelegte Zeit ein- oder ausgeschaltet (Toggle-Funktion). Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_4": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die festgelegte Zeit ein- bzw. ausgeschaltet.",
+    "description_5": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die festgelegte Zeit aus- bzw. eingeschaltet."
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "Beim Öffnen des Kontakts wird der Schalter in den entgegengesetzten Zustand geschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_2": "Beim Öffnen des Kontakts wird der Schalter ein- und beim Schließen ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+    "description_3": "Beim Erkennen des Änderungssignals wird der Schalter für eine festgelegte Zeit eingeschaltet.",
+    "subset_1": "Offen - ein / Zu - aus",
+    "subset_2": "Offen - aus / Zu - ein",
+    "subset_3": "&Ouml;ffnen",
+    "subset_4": "Schlie&szlig;en",
+    "subset_5": "&Auml;ndern",
+    "at": "beim"
+  }
+}

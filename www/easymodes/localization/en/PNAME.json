@@ -42,5 +42,18 @@
   "UP_TIME": "Duration for status \"Up\"",
   "WINDOW_OPEN_LEVEL": "Tilt to tilt level",
   "WINDOW_OPEN_TIME": "Duration for status \"Tilt\"",
-  "WINDOW_RUNNING_SPEED": "Speed"
+  "WINDOW_RUNNING_SPEED": "Speed",
+  "ONDELAY_TIME_BASE": "Unit switch on delay",
+  "ONDELAY_TIME_FACTOR": "Value switch on delay",
+  "ONDELAY_TIME_FACTOR_DESCR": "Switch on delay",
+  "ON_TIME_BASE": "Unit switch-on time",
+  "ON_TIME_FACTOR_DESCR": "Switch-on time (duration in status \"on\")",
+  "ON_TIME_FACTOR": "Value switch-on time",
+  "OFFDELAY_TIME_BASE": "Unit switch off delay",
+  "OFFDELAY_TIME_FACTOR": "Value switch off delay",
+  "OFFDELAY_TIME_FACTOR_DESCR": "Switch off delay",
+  "OFF_TIME_BASE": "Unit switch-off time",
+  "OFF_TIME_FACTOR_DESCR": "Switch-off time (duration in status \"off\")",
+  "OFF_TIME_FACTOR": "Value switch-off time",
+  "TEMPERATURE_RC": "Temperature"
 }

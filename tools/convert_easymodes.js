@@ -8,7 +8,7 @@
  */
 
 
-var occuPath = '/home/basti/occu/';
+var occuPath = '/Users/basti/PhpstormProjects/homematic-manager/occu/occu/';
 var langs = ['de', 'en', 'tr'];
 //var langs = ['de'];
 var receivers = ['SWITCH', 'DIMMER', 'BLIND', 'ACTOR_SECURITY', 'ACTOR_WINDOW', 'ALARMACTUATOR',
@@ -18,7 +18,7 @@ var receivers = ['SWITCH', 'DIMMER', 'BLIND', 'ACTOR_SECURITY', 'ACTOR_WINDOW', 
     'VIRTUAL_DIMMER', 'WEATHER', 'WEATHER_RECEIVER', 'WINDOW_SWITCH_RECEIVER', /*'WINMATIC'*/, 'WS_TH'
 ];
 
-var receivers = ['SIGNAL_LED'];
+var receivers = ['RGBW_AUTOMATIC', 'RGBW_COLOR', 'SWITCH_VIRTUAL_RECEIVER'];
 
 var files = ['GENERIC', 'PNAME'];
 

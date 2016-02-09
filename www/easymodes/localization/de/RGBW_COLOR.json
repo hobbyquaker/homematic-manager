@@ -1,0 +1,16 @@
+{
+  "GENERIC": {
+    "choose_Mode": "W&auml;hle Modus",
+    "jumpToColor": "Setze Farbe",
+    "lblShortKeyPress": "Kurzer Tastendruck",
+    "lblLongKeyPress": "Langer Tastendruck",
+    "lblMode": "Modus",
+    "optionIncColor": "Erh&ouml;he Farbwert",
+    "optionDecColor": "Verringere Farbwert",
+    "optionToggleColor": "Erh&ouml;he / verringere Farbwert"
+  },
+  "KEY": {
+    "description_1": "Hier können Sie den Modus der Taste einstellen. Es gibt folgende Möglichkeiten: Farbwert erhöhen, Farbwert verringern und Farbwert abwechselnd erhöhen oder verringern, abhängig vom Tastendruckzähler.",
+    "description_2": "Hier können Sie eine Taste mit einer Farbe für den kurzen und langen Tastendruck belegen"
+  }
+}

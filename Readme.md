@@ -79,14 +79,14 @@ problemlos einen Namen zuweisen oder alle Namen von einer CCU importieren: ```no
 Im Reiter Geräte das Gerät "aufklappen" (+ Icon links) und beim gewünschten Kanal auf den Button "Values" klicken.
 
 
-#### Was ist die RPC-Konsole?
-
-Wenn Du Dir diese Frage stellst ist die RPC-Konsole für Dich uninteressant :-)
-
-
-
 
 ## Changelog
+
+### 1.0.12
+* (hobbyquaker) Service-Message Popup für RSSI_* Nachrichten unterbunden
+* (hobbyquaker) neue Config-Option disableServiceMsgPopup
+* (hobbyquaker) Easymodes für Empfängertypen RGBW_AUTOMATIC, RGBW_COLOR und SWITCH_VIRTUAL_RECEIVER
+* (hobbyquaker) Fehler abgefangen beim erzeugen der Easymode Formulare
 
 ### 1.0.11
 * (hobbyquaker) Fix https://github.com/hobbyquaker/homematic-manager/issues/33 (hoffentlich)

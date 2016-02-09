@@ -83,13 +83,13 @@ Im Reiter Geräte das Gerät "aufklappen" (+ Icon links) und beim gewünschten K
 ## Changelog
 
 ### 1.0.12
-* (hobbyquaker) Service-Message Popup für RSSI_* Nachrichten unterbunden Fix #34
+* (hobbyquaker) Service-Message Popup für RSSI_* Nachrichten unterbunden Fix https://github.com/hobbyquaker/homematic-manager/issues/34
 * (hobbyquaker) neue Config-Option disableServiceMsgPopup
 * (hobbyquaker) Easymodes für Empfängertypen RGBW_AUTOMATIC, RGBW_COLOR und SWITCH_VIRTUAL_RECEIVER (ungetestet)
 * (hobbyquaker) Fehler abgefangen beim erzeugen der Easymode Formulare
 
 ### 1.0.11
-* (hobbyquaker) Fix #33 (hoffentlich)
+* (hobbyquaker) Fix https://github.com/hobbyquaker/homematic-manager/issues/33 (hoffentlich)
 * (hobbyquaker) Umbenennen eines Geräts und aller Kanäle gleichzeitig
 * (hobbyquaker) reportValueUsage auf allen Datenpunkten eines Kanals
 

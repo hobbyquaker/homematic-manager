@@ -156,7 +156,7 @@ $(document).ready(function () {
                 $('#event-table').prepend('<tr class="ui-widget-content jqgrow ui-row-ltr "><td class="event-column-1">' + ts + '</td><td class="event-column-2">' + name + '</td><td class="event-column-3">' + address + '</td><td class="event-column-4">' + param + '</td><td class="event-column-5">' + value + '</td></tr>');
 
                 // Service-Meldung?
-                if (address.slice(-2) == ':0') {
+                if (address.slice(-2) === ':0' && (param !== 'RSSI_PEER' && param !== 'RSSI_DEVICE')) {
                     var done;
                     if (value) {
                         // Muss Meldung hinzugefügt werden?
@@ -168,7 +168,7 @@ $(document).ready(function () {
                         }
 
                         // Dialog für neue Servicemeldung anzeigen
-                        if (!done) {
+                        if (!done && !config.disableServiceMsgPopup) {
                             var devAddress = address.slice(0, -2);
                             var devName = names && names[devAddress] ? names[devAddress] : '';
                             $('#service-device').html(devName + ' (' + devAddress + ')');
@@ -2169,7 +2169,12 @@ $(document).ready(function () {
                     easymodes[receiverType][senderType] = data;
                     console.log('easymodes', easymodes);
                     createEasymodes();
+                }).fail(function () {
+                    console.log('TODO! Easymode fail');
+                    createEasymodes();
                 });
+            }).fail(function () {
+                console.log('TODO! Easymode translation fail');
             });
 
         }

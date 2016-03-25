@@ -10,5 +10,62 @@
     "dimmer_on_off_b_d": "Dimmer - on/off &amp; brighter/darker",
     "sleep_well": "Sleep light",
     "wake_up_light": "Wake up light"
+  },
+  "INPUT_OUTPUT_0": {
+    "description_1": "By pressing the switch contact the light changes to the other status. If the switch contact is pressed again during the ramp time the maximum value will be set immediately.",
+    "description_2": "By pressing the switch contact the light will be switched on for the set time to the defined brightness value. If the switch contact is pressed again during the ramp time the maximum value will be set immediately.",
+    "description_3": "By pressing the switch contact the light will be switched off after the delay time as defined. If the switch contact is pressed again during the ramp time the light will be switched off immediately.",
+    "description_4": "By pressing the switch contact the light will be switched on for the set time. During the off-delay the warning level will be slightly lowered to dim slowly to the status \"off\" afterwards.",
+    "description_5": "By pressing the switch contact the light will be switched on to the defined brightness value and afterwards dimmed slowly to \"off\".",
+    "description_6": "By pressing the switch contact the light will be dimmed brighter to the defined brightness value.",
+    "description_7": "<span class=\"translated\">The light continuously changes in a defined interval between the two brightness values./span><br/><br/>"
+  },
+  "INPUT_OUTPUT_1": {
+    "description_1": "With a short button press the light will be switched on to the set brightness value. With a long button press the light will be dimmed brighter.",
+    "description_2": "With a short button press the light will be switched off. With a long button press the light will be dimmed darker.",
+    "description_3": "With a short button press the light changes between the set brightness value and \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_4": "With a short or long button press the light will be switched on for the set time. During the off-delay the warning level will be slightly lowered to dim slowly to the status \"off\" afterwards.",
+    "description_5": "With a short button press the light will be switched on to the defined brightness value and afterwards dimmed to \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_6": "<span class=\"translated\">The light continuously changes in a defined interval between the two brightness values./span><br/><br/>",
+    "description_7": "With a short button press the light will be dimmed slowly to the set brightness value. With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_8": "With a short or long button press the light will be switched on to the defined brightness value.",
+    "description_9": "The light will be switched off by a short or long button press.",
+    "description_10": "The light will be dimmed brighter by a short or long button press.",
+    "description_11": "The light will be dimmed darker by a short or long button press."
+  },
+  "KEY_0": {
+    "description_1": "By pressing the switch contact the light changes to the other status. If the switch contact is pressed again during the ramp time the maximum value will be set immediately.",
+    "description_2": "By pressing the switch contact the light will be switched on for the set time to the defined brightness value. If the switch contact is pressed again during the ramp time the maximum value will be set immediately.",
+    "description_3": "By pressing the switch contact the light will be switched off after the delay time as defined. If the switch contact is pressed again during the ramp time the light will be switched off immediately.",
+    "description_4": "By pressing the switch contact the light will be switched on for the set time. During the off-delay the warning level will be slightly lowered to dim slowly to the status \"off\" afterwards.",
+    "description_5": "By pressing the switch contact the light will be switched on to the defined brightness value and afterwards dimmed slowly to \"off\".",
+    "description_6": "By pressing the switch contact the light will be dimmed brighter to the defined brightness value.",
+    "description_7": "<span class=\"translated\">The light continuously changes in a defined interval between the two brightness values./span><br/><br/>"
+  },
+  "KEY_1": {
+    "description_1": "With a short button press the light will be switched on to the set brightness value. With a long button press the light will be dimmed brighter.",
+    "description_2": "With a short button press the light will be switched off. With a long button press the light will be dimmed darker.",
+    "description_3": "With a short button press the light changes between the set brightness value and \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_4": "With a short or long button press the light will be switched on for the set time. During the off-delay the warning level will be slightly lowered to dim slowly to the status \"off\" afterwards.",
+    "description_5": "With a short button press the light will be switched on to the defined brightness value and afterwards dimmed to \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_6": "<span class=\"translated\">The light continuously changes in a defined interval between the two brightness values./span><br/><br/>",
+    "description_7": "With a short button press the light will be dimmed slowly to the set brightness value. With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_8": "With a short or long button press the light will be switched on to the defined brightness value.",
+    "description_9": "The light will be switched off by a short or long button press.",
+    "description_10": "The light will be dimmed brighter by a short or long button press.",
+    "description_11": "The light will be dimmed darker by a short or long button press."
+  },
+  "VIRTUAL_KEY_1": {
+    "description_1": "With a short button press the light will be switched on to the set brightness value. With a long button press the light will be dimmed brighter.",
+    "description_2": "With a short button press the light will be switched off. With a long button press the light will be dimmed darker.",
+    "description_3": "With a short button press the light changes between the set brightness value and \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_4": "With a short or long button press the light will be switched on for the set time. During the off-delay the warning level will be slightly lowered to dim slowly to the status \"off\" afterwards.",
+    "description_5": "With a short button press the light will be switched on to the defined brightness value and afterwards dimmed to \"off\". With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_6": "<span class=\"translated\">The light continuously changes in a defined interval between the two brightness values./span><br/><br/>",
+    "description_7": "With a short button press the light will be dimmed slowly to the set brightness value. With a long button press the light will be dimmed brighter and darker alternately.",
+    "description_8": "With a short or long button press the light will be switched on to the defined brightness value.",
+    "description_9": "The light will be switched off by a short or long button press.",
+    "description_10": "The light will be dimmed brighter by a short or long button press.",
+    "description_11": "The light will be dimmed darker by a short or long button press."
   }
 }

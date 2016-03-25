@@ -11,5 +11,50 @@
     "driving_mode_2": "alt son konum &uuml;zerinde (hassasiyet hareketi)",
     "driving_mode_3": "direkt",
     "up_equal_down": "<div style=\"padding:10\"><br/>Bu &ouml;zellikler ayni anda ayarlanamaz!</div>"
+  },
+  "INPUT_OUTPUT_0": {
+    "description_1": "Saltere basildiginda tente / panjur tamamen yukari kalkar. Hareket sirasinda saltere tekrar basildiginda hareket durdurulur. Bir kere daha basildiginda harekete tekrar baslanir. Eger bir yukari hareket gecikme zamani ayarlanmissa gölgelik bu süre dolduktan sonra hareket ettirilir.",
+    "description_2": "Saltere basildiginda tente / panjur tamamen asagi iner. Hareket sirasinda saltere tekrar basildiginda hareket durdurulur. Bir kere daha basildiginda harekete tekrar baslanir. Eger bir asagi hareket gecikme zamani ayarlanmissa güneslik bu süre dolduktan sonra hareket ettirilir.",
+    "description_3": "Saltere her basildiginda tente / panjur degiserek ya tamamen yukari kalkar ya da tamamen asagi iner (Toggle fonksiyonu). Hareket sirasinda saltere tekrar basildiginda tente / panjur bir an icin durur. Saltere tekrar basildiginda hareket yönü degisir. Bir gecikme süresi ayarlanmissa, güneslik bu süre dolduktan sonra hareket ettirilir.",
+    "description_4": "Saltere her basildiginda tente / panjur istenen pozisyona hareket eder. Uygun bir gecikme süresi ayarlanmissa güneslik bu süre dolduktan sonra hareket ettirilir. Bu hareket sirasinda saltere tekrar basildiginda hareket durdurulur. Bir kere daha basildiginda ise hareket tekrar baslatilir.",
+    "subset_1": "yukari kaldirildi",
+    "subset_2": "asagi indirildi",
+    "subset_3": "degisimli yukari kaldir / asagi indir"
+  },
+  "INPUT_OUTPUT_1": {
+    "description_1": "Tusa kisa bir süre basildiginda tente / panjur belirlenen süre boyunca yukari kalkar. Bir gecikme süresi ayarlanmissa, güneslik bu süre dolduktan sonra hareket ettirilir. Tusa uzun süre basildiginda tente / panjur sadece tusa basildigi süre boyunca yukari kalkar.",
+    "description_2": "Tusa kisa bir süre basildiginda tente / panjur belirlenen süre boyunca asagi iner. Bir asagi indirme gecikme süresi ayarlanmissa, güneslik bu süre dolduktan sonra hareket ettirilir. Tusa uzun süre basildiginda tente / panjur sadece tusa basildigi süre boyunca asagi iner.",
+    "description_3": "Tusa kisa bir süre basildiginda tente / panjur ya tamamen yukari kalkar ya da tamamen asagi iner (Toggle fonksiyonu). Bir yukari kaldirma veya asagi indirme gecikme süresi ayarlanmissa, güneslik bu süre dolduktan sonra hareket ettirilir. Tusa uzun süre basildiginda tente / panjur sadece tusa basildigi süre boyunca hareket eder.",
+    "description_4": "Tusa kisa bir süre basildiginda tente / panjur belirlenen süre boyunca istenen pozisyona gelir. Uygun bir hareket gecikme süresi ayarlanmissa, güneslik bu süre dolduktan sonra hareket ettirilir. Tusa uzun süre basildiginda tente / panjur sadece tusa basildigi süre boyunca istenen pozisyon yönünde hareket eder.",
+    "subset_1": "yukari kaldirildi",
+    "subset_2": "asagi indirildi",
+    "subset_3": "degisimli yukari kaldir / asagi indir"
+  },
+  "KEY_0": {
+    "description_1": "Saltere basildiginda tente / panjur tamamen yukari kalkar. Hareket sirasinda saltere tekrar basildiginda hareket durdurulur. Bir kere daha basildiginda harekete tekrar baslanir. Eger bir gecikme zamani ayarlanmissa gölgelik bu süre dolduktan sonra hareket ettirilir.",
+    "description_2": "Saltere basildiginda tente / panjur tamamen asagi iner. Hareket sirasinda saltere tekrar basildiginda hareket durdurulur. Bir kere daha basildiginda harekete tekrar baslanir. Eger bir gecikme zamani ayarlanmissa güneslik bu süre dolduktan sonra asagi indirilir.",
+    "description_3": "Saltere her basildiginda tente / panjur degiserek ya tamamen yukari kalkar ya da tamamen asagi iner (Toggle fonksiyonu). Hareket sirasinda saltere tekrar basildiginda güneslik bir an icin durur. Saltere tekrar basildiginda hareket yönü degisir. Bir gecikme süresi ayarlanmissa, tente / panjur bu süre dolduktan sonra hareket ettirilir.",
+    "description_4": "Saltere her basildiginda tente / panjur istenen pozisyona hareket eder. Uygun bir hareket gecikme süresi ayarlanmissa güneslik bu süre dolduktan sonra hareket ettirilir. Bu hareket sirasinda saltere tekrar basildiginda hareket durdurulur. Bir kere daha basildiginda ise hareket tekrar baslatilir.",
+    "subset_1": "yukari kaldirildi",
+    "subset_2": "asagi indirildi",
+    "subset_3": "degisimli yukari kaldir / asagi indir"
+  },
+  "KEY_1": {
+    "description_1": "Tusa kisa bir süre basildiginda tente / panjur belirlenen süre boyunca yukari kalkar. Bir yukari hareket gecikme süresi ayarlanmissa, tente / panjur bu süre dolduktan sonra yukari hareket ettirilir. Tusa uzun süre basildiginda tente / panjur sadece tusa basildigi süre boyunca yukari kalkar.",
+    "description_2": "Tusa kisa bir süre basildiginda tente / panjur belirlenen süre boyunca asagi iner. Bir asagi hareket gecikme süresi ayarlanmissa, tente / panjur bu süre dolduktan sonra asagi hareket ettirilir. Tusa uzun süre basildiginda tente / panjur sadece tusa basildigi süre boyunca asagi kalkar.",
+    "description_3": "Tusa kisa bir süre basildiginda tente / panjur ya tamamen yukari kalkar ya da tamamen asagi iner (Toggle fonksiyonu). Bir yukari kaldirma veya asagi indirme gecikme süresi ayarlanmissa, tente / panjur bu süre dolduktan sonra hareket ettirilir. Tusa uzun süre basildiginda tente / panjur sadece tusa basildigi süre boyunca hareket eder.",
+    "description_4": "Tusa kisa bir süre basildiginda tente / panjur belirlenen süre boyunca istenen pozisyona gelir. Uygun bir hareket gecikme süresi ayarlanmissa, tente / panjur bu süre dolduktan sonra hareket ettirilir. Tusa uzun süre basildiginda tente / panjur sadece tusa basildigi süre boyunca istenen pozisyon yönünde hareket eder.",
+    "subset_1": "yukari kaldirildi",
+    "subset_2": "asagi indirildi",
+    "subset_3": "degisimli yukari kaldir / asagi indir"
+  },
+  "VIRTUAL_KEY_1": {
+    "description_1": "Tusa kisa bir süre basildiginda tente / panjur belirlenen süre boyunca yukari kalkar. Bir yukari hareket gecikme süresi ayarlanmissa, tente / panjur bu süre dolduktan sonra yukari hareket ettirilir. Tusa uzun süre basildiginda tente / panjur sadece tusa basildigi süre boyunca yukari kalkar.",
+    "description_2": "Tusa kisa bir süre basildiginda tente / panjur belirlenen süre boyunca asagi iner. Bir asagi hareket gecikme süresi ayarlanmissa, tente / panjur bu süre dolduktan sonra asagi hareket ettirilir. Tusa uzun süre basildiginda tente / panjur sadece tusa basildigi süre boyunca asagi kalkar.",
+    "description_3": "Tusa kisa bir süre basildiginda tente / panjur ya tamamen yukari kalkar ya da tamamen asagi iner (Toggle fonksiyonu). Bir yukari kaldirma veya asagi indirme gecikme süresi ayarlanmissa, tente / panjur bu süre dolduktan sonra hareket ettirilir. Tusa uzun süre basildiginda tente / panjur sadece tusa basildigi süre boyunca hareket eder.",
+    "description_4": "Tusa kisa bir süre basildiginda tente / panjur belirlenen süre boyunca istenen pozisyona gelir. Uygun bir hareket gecikme süresi ayarlanmissa, tente / panjur bu süre dolduktan sonra hareket ettirilir. Tusa uzun süre basildiginda tente / panjur sadece tusa basildigi süre boyunca istenen pozisyon yönünde hareket eder.",
+    "subset_1": "yukari kaldirildi",
+    "subset_2": "asagi indirildi",
+    "subset_3": "degisimli yukari kaldir / asagi indir"
   }
 }

@@ -4,5 +4,35 @@
     "switch_on": "Salter - ac",
     "switch_on_off": "Salter - ac/kapat",
     "switch_on_off_toggle": "Salter - ac/kapat/toggle"
+  },
+  "INPUT_OUTPUT_0": {
+    "description_1": "Salter kontagina basildiginda salter istenen süre boyunca diger duruma gecer. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_2": "Salter kontagina basildiginda isik istenen süre boyunca acilir. Eger salter kontagina bir-fazinda tekrar basilirsa, zaman sayaci bastan saymaya baslar.",
+    "description_3": "Salter kontagina basildiginda salter istenen süre boyunca acilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_4": "Salter kontagina basildiginda salter istenen süre boyunca kapatilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+  },
+  "INPUT_OUTPUT_1": {
+    "description_1": "Tusa kisa veya uzun süre basarak salter istenen süre boyunca acilir veya kapatilir (Toggle fonksiyonu). Bir acma veya gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_2": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin acik konumuna getirilir. Eger tusa bir-fazinda tekrar basilirsa, zaman sayaci bastan saymaya baslar.",
+    "description_3": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin acik konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_4": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin kapali konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+  },
+  "KEY_0": {
+    "description_1": "Salter kontagina basildiginda salter istenen süre boyunca diger duruma gecer. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_2": "Salter kontagina basildiginda isik istenen süre boyunca acilir. Eger salter kontagina bir-fazinda tekrar basilirsa, zaman sayaci bastan saymaya baslar.",
+    "description_3": "Salter kontagina basildiginda salter istenen süre boyunca acilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_4": "Salter kontagina basildiginda salter istenen süre boyunca kapatilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+  },
+  "KEY_1": {
+    "description_1": "Tusa kisa veya uzun süre basarak salter istenen süre boyunca acilir veya kapatilir (Toggle fonksiyonu).  Bir acma veya gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_2": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin acik konumuna getirilir. Eger tusa bir-fazinda tekrar basilirsa, zaman sayaci bastan saymaya baslar.",
+    "description_3": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin acik konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_4": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin kapali konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+  },
+  "VIRTUAL_KEY_1": {
+    "description_1": "Tusa kisa veya uzun süre basarak salter istenen süre boyunca acilir veya kapatilir (Toggle fonksiyonu).  Bir acma veya gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_2": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin acik konumuna getirilir. Eger tusa bir-fazinda tekrar basilirsa, zaman sayaci bastan saymaya baslar.",
+    "description_3": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin acik konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir.",
+    "description_4": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin kapali konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
   }
 }

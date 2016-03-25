@@ -1,0 +1,88 @@
+{
+  "CONDITION_X": {
+    "description_1": "Degistirme komutu iletildiginde gong calar. Bir gecikme süresi ayarlanmissa, gong bu süre dolduktan sonra calmaya baslar.",
+    "description_2": "Sensör etkin degil.",
+    "descrHint": "Salter aktüatörü tarafindan uygun performans ölcümüyle degistirme komutunun iletim zamani, ilgili kanaldan ayarlanir."
+  },
+  "GENERIC": {
+    "signal_led_chime_active": "Gong etkin",
+    "signal_led_chime_non_active": "Gong etkin degil",
+    "signal_led_chime_on": "Gong acik",
+    "signal_led_chime_off": "Gong kapali",
+    "button_inactive": "Tus etkin degil",
+    "signal_kind": "Sinyal t&uuml;r&uuml;",
+    "signal_short": "kisa",
+    "signal_long": "uzun",
+    "sound_nr": "Ton No. ",
+    "iterations": "Tekrar sayisi ",
+    "volume": "Ses siddeti"
+  },
+  "KEY": {
+    "description_1": "Tusa kisa veya uzun süre basildiginda gong secilen moda göre kapanir.",
+    "description_2": "Tus etkin degildir.",
+    "group_description_1": "Eger gong istenmeyen bir zamanda devreye girmisse, bu tusla kapatilabilir.",
+    "group_description_2": "Tusa kisa veya uzun süre basildiginda gong secilen moda göre kapanir.",
+    "group_description_3": "Tus etkin degil.",
+    "subset_1": "ac",
+    "subset_2": "ac/kapat"
+  },
+  "MOTION_DETECTOR": {
+    "description_1": "Hareket alarmi devreye girdiginde gong calmaya baslar. Eger bir gecikme zamani ayarlanmissa, gong bu süre dolduktan sonra calar.<br/><br/>Hareket alarminda (kanal parametresi) iletim araligi secenegi <b>dinamik</b> konumunda olmali ve en az <b>15s'lik</b> bir minimum aralik ayarlanmalidir.",
+    "description_2": "Hareket alarmi devre disi."
+  },
+  "PULSE_SENSOR": {
+    "description_1": "Degistirme komutu iletildiginde gong calar. Bir gecikme süresi ayarlanmissa, gong bu süre dolduktan sonra calmaya baslar.",
+    "description_2": "Sensör etkin degil."
+  },
+  "SENSOR_WINDOW": {
+    "description_1": "<span class=\"translated\">Pencereye basildiginda gong secilen y&ouml;ne g&ouml;re calmaya baslar.<span/><br/><br/>",
+    "description_2": "Bu baglanti devre disi birakilir.",
+    "subset_1": "Acik - ac/kapali - kapat",
+    "subset_2": "Acik - kapat/kapali - ac",
+    "subset_3": "Acik - ac",
+    "subset_4": "Kapat - ac",
+    "subset_5": "Degisiklik - ac"
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "<span class=\"translated\">Kontaga basildiginda gong secilen y&ouml;ne g&ouml;re calmaya baslar.<span/><br/><br/>",
+    "description_2": "Kontak etkin degil.",
+    "subset_1": "Acik - ac/kapali - kapat",
+    "subset_2": "Acik - kapat/kapali - ac",
+    "subset_3": "Acik - ac",
+    "subset_4": "Kapat - ac",
+    "subset_5": "Degisiklik - ac"
+  },
+  "SMOKE_DETECTOR_TEAM": {
+    "description_1": "Duman alarmi devreye girdiginde gong etkinlesir.",
+    "description_2": "Duman alarmi etkin degil."
+  },
+  "SMOKE_DETECTOR_TEAM_V2": {
+    "description_1": "Duman alarmi devreye girdiginde gong etkinlesir.",
+    "description_2": "Duman alarmi etkin degil."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "<span class=\"translated\">Salter kontagina basildiginda gong secilen moda g&ouml;re calmaya baslar.<span/><br/><br/>",
+    "description_2": "Salter arayüzü etkin degil.",
+    "subset_1": "ac/kapat",
+    "subset_2": "ac"
+  },
+  "TILT_SENSOR": {
+    "description_1": "Salter kontagina basildiginda gong secilen yöne göre calmaya baslar.",
+    "description_2": "Egim sensörü etkin degil.",
+    "subset_1": "Acik - ac/kapali - kapat",
+    "subset_2": "Acik - kapat/kapali - ac",
+    "subset_3": "Acma",
+    "subset_4": "Kapat",
+    "subset_5": "Degistir"
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "Tusa kisa veya uzun süre basildiginda gong calar.  Bir gecikme süresi ayarlanmissa, gong bu süre dolduktan sonra calmaya baslar.",
+    "description_2": "Görsel tus etkin degildir."
+  },
+  "WATERDETECTIONSENSOR": {
+    "description_1": "<span class=\"translated\">Nemli havada gong secilen y&ouml;ne dogru calar.<span/><br/><br/>",
+    "description_2": "Su alarmi etkin degil.",
+    "subset_1": "Nemli hava- ac/kuru hava - kapat",
+    "subset_2": "Nemli hava- kapat /kuru hava - ac"
+  }
+}

@@ -10,5 +10,62 @@
     "dimmer_on_off_b_d": "Isik ayar salteri - ac/kapat &amp; aydinlat/karart",
     "sleep_well": "Uyku isigi",
     "wake_up_light": "Uyanma isigi"
+  },
+  "INPUT_OUTPUT_0": {
+    "description_1": "Salter kontagina basildiginda isik diger duruma gecer. Rampa süresinde buna tekrar basildiginda hemen ilgili uc deger ayarlanir.",
+    "description_2": "Salter kontagina basildiginda isik belirlenen süre boyunca istenen aydinlik degerine ayarlanir. Rampa süresinde buna tekrar basildiginda hemen ilgili uc deger ayarlanir.",
+    "description_3": "Salter kontagina basildiginda isik belirlenen gecikme süresinden sonra kapanir. Rampa süresinde buna tekrar basildiginda ise isik hemen kapatilir.",
+    "description_4": "Salter kontagina basildiginda isik belirlenen süre boyunca acik kalir.  Daha sonra tekrar \"kapat\" konumuna yavasca kisilmasi icin kapatma gecikmesinde ön uyari seviyesi hafif düsürülür.",
+    "description_5": "Salter kontagina basildiginda isik belirlenen aydinlik derecesinde acilir ve belirlenen süre sonunda da yavasca \"kapat\" konumuna kadar kisilir.",
+    "description_6": "Salter kontagina basildiginda isik belirlenen süre boyunca aydinlatilir.",
+    "description_7": "Isik belirlenen döngüde iki aydinlik derecesi arasinda sürekli degisir."
+  },
+  "INPUT_OUTPUT_1": {
+    "description_1": "Tusa kisa bir süre basildiginda isik belirlenen aydinlikta acilir. Tusa uzun süre basildiginda isik daha da aydinlatilir.",
+    "description_2": "Tusa kisa bir süre basildiginda isik kapatilir. Tusa uzun süre basilarak isik kisilir.",
+    "description_3": "Tusa kisa bir süre basildiginda isik belirlenen aydinlikla \"kapat\" konumu arasinda degisir. Tusa uzun süre basildiginda isik degiserek bir aydinlatilir bir kisilir.",
+    "description_4": "Tusa kisa veya uzun süre basildiginda isik belirlenen süre boyunca acilir. Isigi yavasca kapanana kadar kismak icin ön uyari seviyesi kapatma gecikmesinde hafifce düsürülür.",
+    "description_5": "Tusa kisa bir süre basildiginda isik belirlenen aydinlikta acilir ve belirlenen süre sonunda da yavasca \"kapat\" konumuna kadar kisilir. Tusa uzun süre basildiginda isik degiserek bir aydinlatilir bir kisilir.",
+    "description_6": "Isik belirlenen döngüde iki aydinlik derecesi arasinda sürekli degisir.",
+    "description_7": "Tusa kisa bir süre basildiginda isik belirlenen aydinlikta yavasca acilir. Tusa uzun süre basildiginda isik degiserek bir aydinlatilir bir kisilir.",
+    "description_8": "Tusa kisa veya uzun süre basildiginda isik belirlenen aydinlikta acilir.",
+    "description_9": "Tusa kisa veya uzun süre basildiginda isik kapanir.",
+    "description_10": "Tusa kisa veya uzun süre basildiginda isik aydinlatilir.",
+    "description_11": "Tusa kisa veya uzun süre basildiginda isik kisilir."
+  },
+  "KEY_0": {
+    "description_1": "Salter kontagina basildiginda isik diger duruma gecer. Rampa süresinde buna tekrar basildiginda hemen ilgili uc deger ayarlanir.",
+    "description_2": "Salter kontagina basildiginda isik belirlenen süre boyunca istenen aydinlikta ayarlanir. Rampa süresinde buna tekrar basildiginda hemen ilgili uc deger ayarlanir.",
+    "description_3": "Salter kontagina basildiginda isik belirlenen gecikme süresinden sonra kapanir. Rampa süresinde buna tekrar basildiginda ise isik hemen kapatilir.",
+    "description_4": "Salter kontagina basildiginda isik belirlenen süre boyunca acik kalir.  Daha sonra tekrar \"kapat\" konumuna yavasca kisilmasi icin kapatma gecikmesinde ön uyari seviyesi hafif düsürülür.",
+    "description_5": "Salter kontagina basildiginda isik belirlenen aydinlikta acilir ve belirlenen süre sonunda da yavasca \"kapat\" konumuna kadar kisilir.",
+    "description_6": "Salter kontagina basildiginda isik belirlenen süre boyunca aydinlatilir.",
+    "description_7": "Isik belirlenen döngüde iki aydinlik derecesi arasinda sürekli degisir."
+  },
+  "KEY_1": {
+    "description_1": "Tusa kisa bir süre basildiginda isik belirlenen aydinlikta acilir. Tusa uzun süre basildiginda isik daha da aydinlatilir.",
+    "description_2": "Tusa kisa bir süre basildiginda isik kapatilir. Tusa uzun süre basilarak isik kisilir.",
+    "description_3": "Tusa kisa bir süre basildiginda isik belirlenen aydinlikla \"kapat\" konumu arasinda degisir. Tusa uzun süre basildiginda isik degiserek bir aydinlatilir bir kisilir.",
+    "description_4": "Tusa kisa veya uzun süre basildiginda isik belirlenen süre boyunca acilir. Isigi yavasca kapanana kadar kismak icin ön uyari seviyesi kapatma gecikmesinde hafifce düsürülür.",
+    "description_5": "Tusa kisa bir süre basildiginda isik belirlenen aydinlikta acilir ve belirlenen süre sonunda da yavasca \"kapat\" konumuna kadar kisilir. Tusa uzun süre basildiginda isik degiserek bir aydinlatilir bir kisilir.",
+    "description_6": "Isik belirlenen döngüde iki aydinlik derecesi arasinda sürekli degisir.",
+    "description_7": "Tusa kisa bir süre basildiginda isik belirlenen aydinlikta yavasca acilir. Tusa uzun süre basildiginda isik degiserek bir aydinlatilir bir kisilir.",
+    "description_8": "Tusa kisa veya uzun süre basildiginda isik belirlenen aydinlikta acilir.",
+    "description_9": "Tusa kisa veya uzun süre basildiginda isik kapanir.",
+    "description_10": "Tusa kisa veya uzun süre basildiginda isik aydinlatilir.",
+    "description_11": "Tusa kisa veya uzun süre basildiginda isik kisilir."
+  },
+  "VIRTUAL_KEY_1": {
+    "description_1": "Tusa kisa bir süre basildiginda isik belirlenen aydinlikta acilir. Tusa uzun süre basildiginda isik daha da aydinlatilir.",
+    "description_2": "Tusa kisa bir süre basildiginda isik kapatilir. Tusa uzun süre basilarak isik kisilir.",
+    "description_3": "Tusa kisa bir süre basildiginda isik belirlenen aydinlikla \"kapat\" konumu arasinda degisir. Tusa uzun süre basildiginda isik degiserek bir aydinlatilir bir kisilir.",
+    "description_4": "Tusa kisa veya uzun süre basildiginda isik belirlenen süre boyunca acilir. Isigi yavasca kapanana kadar kismak icin ön uyari seviyesi kapatma gecikmesinde hafifce düsürülür.",
+    "description_5": "Tusa kisa bir süre basildiginda isik belirlenen aydinlikta acilir ve belirlenen süre sonunda da yavasca \"kapat\" konumuna kadar kisilir. Tusa uzun süre basildiginda isik degiserek bir aydinlatilir bir kisilir.",
+    "description_6": "Isik belirlenen döngüde iki aydinlik derecesi arasinda sürekli degisir.",
+    "description_7": "Tusa kisa bir süre basildiginda isik belirlenen aydinlikta yavasca acilir. Tusa uzun süre basildiginda isik degiserek bir aydinlatilir bir kisilir.",
+    "description_8": "Tusa kisa veya uzun süre basildiginda isik belirlenen aydinlikta acilir.",
+    "description_9": "Tusa kisa veya uzun süre basildiginda isik kapanir.",
+    "description_10": "Tusa kisa veya uzun süre basildiginda isik aydinlatilir.",
+    "description_11": "Tusa kisa veya uzun süre basildiginda isik kisilir."
   }
 }

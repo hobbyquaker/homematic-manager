@@ -10,5 +10,62 @@
     "dimmer_on_off_b_d": "Dimmer - ein/aus &amp; heller/dunkler",
     "sleep_well": "Einschlaflicht",
     "wake_up_light": "Aufwachlicht"
+  },
+  "INPUT_OUTPUT_0": {
+    "description_1": "Beim Betätigen des Schaltkontakts wechselt das Licht in den jeweils anderen Zustand. Bei nochmaligem Betätigen während der Rampenzeit wird sofort der jeweilige Endwert eingestellt.",
+    "description_2": "Beim Betätigen des Schaltkontakts wird das Licht für die festgelegte Zeit auf den gewünschten Helligkeitswert gestellt. Bei nochmaligem Betätigen während der Rampenzeit wird sofort der jeweilige Endwert eingestellt.",
+    "description_3": "Beim Betätigen des Schaltkontakts wird das Licht nach der festgelegten Verzögerungszeit ausgeschaltet. Bei nochmaligem Betätigen während der Rampenzeit wird das Licht sofort ausgeschaltet.",
+    "description_4": "Beim Betätigen des Schaltkontakts wird das Licht für die festgelegte Zeit eingeschaltet. In der Ausschaltverzögerung wird der Pegel zur Vorwarnung leicht abgesenkt, um anschließend langsam bis auf \"aus\" herunter zu dimmen.",
+    "description_5": "Beim Betätigen des Schaltkontakts wird das Licht auf den festgelegten Helligkeitswert geschaltet und nach der festgelegten Zeit langsam auf \"aus\" herunter gedimmt.",
+    "description_6": "Beim Betätigen des Schaltkontakts wird das Licht langsam auf die festgelegte Helligkeit hoch gedimmt.",
+    "description_7": "Das Licht wechselt im festgelegten Takt endlos zwischen den beiden Helligkeitswerten."
+  },
+  "INPUT_OUTPUT_1": {
+    "description_1": "Mit einem kurzen Tastendruck wird das Licht auf die festgelegte Helligkeit eingeschaltet. Mit einem langen Tastendruck wird das Licht hochgedimmt.",
+    "description_2": "Mit einem kurzen Tastendruck wird das Licht ausgeschaltet. Mit einem langen Tastendruck wird das Licht heruntergedimmt.",
+    "description_3": "Mit einem kurzen Tastendruck wechselt das Licht zwischen der festgelegten Helligkeit und \"aus\". Mit einem langen Tastendruck wird das Licht abwechselnd hoch- und heruntergedimmt.",
+    "description_4": "Das Licht wird durch kurzen oder langen Tastendruck für die festgelegte Zeit eingeschaltet. In der Ausschaltverzögerung wird der Pegel zur Vorwarnung leicht abgesenkt, um anschließend langsam bis auf \"aus\" herunterzudimmen.",
+    "description_5": "Mit einem kurzen Tastendruck wird das Licht auf die festgelegte Helligkeit eingeschaltet und nach der festgelegten Zeit langsam auf \"aus\" heruntergedimmt. Mit einem langen Tastendruck wird das Licht abwechselnd hoch- und heruntergedimmt.",
+    "description_6": "Das Licht wechselt im festgelegten Takt endlos zwischen den beiden Helligkeitswerten.",
+    "description_7": "Mit einem kurzen Tastendruck wird das Licht langsam auf die festgelegte Helligkeit hochgedimmt. Mit einem langen Tastendruck wird das Licht abwechselnd hoch- und heruntergedimmt.",
+    "description_8": "Das Licht wird durch kurzen oder langen Tastendruck auf die festgelegte Helligkeit eingeschaltet.",
+    "description_9": "Das Licht wird durch kurzen oder langen Tastendruck ausgeschaltet.",
+    "description_10": "Das Licht wird durch kurzen oder langen Tastendruck hochgedimmt.",
+    "description_11": "Das Licht wird durch kurzen oder langen Tastendruck heruntergedimmt."
+  },
+  "KEY_0": {
+    "description_1": "Beim Betätigen des Schaltkontakts wechselt das Licht in den jeweils anderen Zustand. Bei nochmaligem Betätigen während der Rampenzeit, wird sofort der jeweilige Endwert eingestellt.",
+    "description_2": "Beim Betätigen des Schaltkontakts wird das Licht für die festgelegte Zeit auf die gewünschte Helligkeit gestellt. Bei nochmaligem Betätigen während der Rampenzeit, wird sofort der jeweilige Endwert eingestellt.",
+    "description_3": "Beim Betätigen des Schaltkontakts wird das Licht nach der festgelegten Verzögerungszeit ausgeschaltet. Bei nochmaligem Betätigen während der Rampenzeit, wird das Licht sofort ausgeschaltet.",
+    "description_4": "Beim Betätigen des Schaltkontakts wird das Licht für die festgelegte Zeit eingeschaltet. In der Ausschaltverzögerung wird der Pegel zur Vorwarnung leicht abgesenkt, um anschließend langsam bis auf \"aus\" herunter zu dimmen.",
+    "description_5": "Beim Betätigen des Schaltkontakts wird das Licht auf die festgelegte Helligkeit geschaltet und nach der festgelegten Zeit langsam auf \"aus\" herunter gedimmt.",
+    "description_6": "Beim Betätigen des Schaltkontakts wird das Licht langsam auf die festgelegte Helligkeit hoch gedimmt.",
+    "description_7": "Das Licht wechselt im festgelegten Takt endlos zwischen den beiden Helligkeitswerten."
+  },
+  "KEY_1": {
+    "description_1": "Mit einem kurzen Tastendruck wird das Licht auf die festgelegte Helligkeit eingeschaltet. Mit einem langen Tastendruck wird das Licht hochgedimmt.",
+    "description_2": "Mit einem kurzen Tastendruck wird das Licht ausgeschaltet. Mit einem langen Tastendruck wird das Licht heruntergedimmt.",
+    "description_3": "Mit einem kurzen Tastendruck wechselt das Licht zwischen der festgelegten Helligkeit und \"aus\". Mit einem langen Tastendruck wird das Licht abwechselnd hoch- und heruntergedimmt.",
+    "description_4": "Das Licht wird durch kurzen oder langen Tastendruck für die festgelegte Zeit eingeschaltet. In der Ausschaltverzögerung wird der Pegel zur Vorwarnung leicht abgesenkt, um anschließend langsam bis auf \"aus\" herunterzudimmen.",
+    "description_5": "Mit einem kurzen Tastendruck wird das Licht auf die festgelegte Helligkeit eingeschaltet und nach der festgelegten Zeit langsam auf \"aus\" heruntergedimmt. Mit einem langen Tastendruck wird das Licht abwechselnd hoch- und heruntergedimmt.",
+    "description_6": "Das Licht wechselt im festgelegten Takt endlos zwischen den beiden Helligkeitswerten.",
+    "description_7": "Mit einem kurzen Tastendruck wird das Licht langsam auf die festgelegte Helligkeit hochgedimmt. Mit einem langen Tastendruck wird das Licht abwechselnd hoch- und heruntergedimmt.",
+    "description_8": "Das Licht wird durch kurzen oder langen Tastendruck auf die festgelegten Helligkeit eingeschaltet.",
+    "description_9": "Das Licht wird durch kurzen oder langen Tastendruck ausgeschaltet.",
+    "description_10": "Das Licht wird durch kurzen oder langen Tastendruck hochgedimmt.",
+    "description_11": "Das Licht wird durch kurzen oder langen Tastendruck heruntergedimmt."
+  },
+  "VIRTUAL_KEY_1": {
+    "description_1": "Mit einem kurzen Tastendruck wird das Licht auf die festgelegte Helligkeit eingeschaltet. Mit einem langen Tastendruck wird das Licht hochgedimmt.",
+    "description_2": "Mit einem kurzen Tastendruck wird das Licht ausgeschaltet. Mit einem langen Tastendruck wird das Licht heruntergedimmt.",
+    "description_3": "Mit einem kurzen Tastendruck wechselt das Licht zwischen der festgelegten Helligkeit und \"aus\". Mit einem langen Tastendruck wird das Licht abwechselnd hoch- und heruntergedimmt.",
+    "description_4": "Das Licht wird durch kurzen oder langen Tastendruck für die festgelegte Zeit eingeschaltet. In der Ausschaltverzögerung wird der Pegel zur Vorwarnung leicht abgesenkt, um anschließend langsam bis auf \"aus\" herunterzudimmen.",
+    "description_5": "Mit einem kurzen Tastendruck wird das Licht auf die festgelegte Helligkeit eingeschaltet und nach der festgelegten Zeit langsam auf \"aus\" heruntergedimmt. Mit einem langen Tastendruck wird das Licht abwechselnd hoch- und heruntergedimmt.",
+    "description_6": "Das Licht wechselt im festgelegten Takt endlos zwischen den beiden Helligkeitswerten.",
+    "description_7": "Mit einem kurzen Tastendruck wird das Licht langsam auf die festgelegte Helligkeit hochgedimmt. Mit einem langen Tastendruck wird das Licht abwechselnd hoch- und heruntergedimmt.",
+    "description_8": "Das Licht wird durch kurzen oder langen Tastendruck auf die festgelegte Helligkeit eingeschaltet.",
+    "description_9": "Das Licht wird durch kurzen oder langen Tastendruck ausgeschaltet.",
+    "description_10": "Das Licht wird durch kurzen oder langen Tastendruck hochgedimmt.",
+    "description_11": "Das Licht wird durch kurzen oder langen Tastendruck heruntergedimmt."
   }
 }

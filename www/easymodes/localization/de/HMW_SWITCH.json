@@ -4,5 +4,35 @@
     "switch_on": "Schalter - ein",
     "switch_on_off": "Schalter - ein / aus",
     "switch_on_off_toggle": "Schalter - ein / aus / Toggle"
+  },
+  "INPUT_OUTPUT_0": {
+    "description_1": "Beim Betätigen des Schaltkontakts wechselt der Schalter für die gewünschte Zeit in den jeweils anderen Zustand. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_2": "Beim Betätigen des Schaltkontakts wird das Licht für die gewünschte Zeit eingeschaltet. Wird der Schaltkontakt während der ein-Phase nochmal betätigt, beginnt die Zeitzählung von vorne.",
+    "description_3": "Beim Betätigen des Schaltkontakts wird der Schalter für die gewünschte Zeit eingeschaltet. Ist eine Verz&oumlgerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_4": "Beim Betätigen des Schaltkontakts wird der Schalter für die gewünschte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit ."
+  },
+  "INPUT_OUTPUT_1": {
+    "description_1": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit ein- oder ausgeschaltet (Toggle-Funktion). Ist eine ein- oder Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_2": "Mit einem kurzen oder langen Tastendruck schaltet der Schalter für die gewünschte Zeit ein. Wird der Taster während der ein-Phase nochmal betätigt, beginnt die Zeitzählung von vorne.",
+    "description_3": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit eingeschaltet. Ist eine Verz&oumlgerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_4": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit ."
+  },
+  "KEY_0": {
+    "description_1": "Beim Betätigen des Schaltkontakts wechselt der Schalter für die gewünschte Zeit in den jeweils anderen Zustand. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_2": "Beim Betätigen des Schaltkontakts wird das Licht für die gewünschte Zeit eingeschaltet. Wird der Schaltkontakt während der ein-Phase nochmal betätigt, beginnt die Zeitzählung von vorne.",
+    "description_3": "Beim Betätigen des Schaltkontakts wird der Schalter für die gewünschte Zeit eingeschaltet. Ist eine Verz&oumlgerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_4": "Beim Betätigen des Schaltkontakts wird der Schalter für die gewünschte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit ."
+  },
+  "KEY_1": {
+    "description_1": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit ein- oder ausgeschaltet (Toggle-Funktion).  Ist eine ein- oder Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_2": "Mit einem kurzen oder langen Tastendruck schaltet der Schalter für die gewünschte Zeit ein. Wird der Taster während der ein-Phase nochmal betätigt, beginnt die Zeitzählung von vorne.",
+    "description_3": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit eingeschaltet. Ist eine Verz&oumlgerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_4": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit ."
+  },
+  "VIRTUAL_KEY_1": {
+    "description_1": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit ein- oder ausgeschaltet (Toggle-Funktion).  Ist eine ein- oder Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_2": "Mit einem kurzen oder langen Tastendruck schaltet der Schalter für die gewünschte Zeit ein. Wird der Taster während der ein-Phase nochmal betätigt, beginnt die Zeitzählung von vorne.",
+    "description_3": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit eingeschaltet. Ist eine Verz&oumlgerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+    "description_4": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit ."
   }
 }

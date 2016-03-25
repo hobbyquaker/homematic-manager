@@ -1,0 +1,88 @@
+{
+  "CONDITION_X": {
+    "description_1": "Beim Senden des Schaltbefehls ertönt der Gong. Ist eine Verzögerungszeit eingestellt, wird der Gong erst nach Ablauf dieser Zeit geschaltet.",
+    "description_2": "Der Sensor ist deaktiviert.",
+    "descrHint": "Wann der Schaltbefehl vom Schaltaktor mit Leistungsmessung gesendet wird, wird am entsprechenden Kanal eingestellt."
+  },
+  "GENERIC": {
+    "signal_led_chime_active": "Gong aktiv",
+    "signal_led_chime_non_active": "Gong nicht aktiv",
+    "signal_led_chime_on": "Gong ein",
+    "signal_led_chime_off": "Gong aus",
+    "button_inactive": "Taste deaktiviert",
+    "signal_kind": "Signalart",
+    "signal_short": "kurz",
+    "signal_long": "lang",
+    "sound_nr": "Klang Nr. ",
+    "iterations": "Anzahl der Wiederholungen ",
+    "volume": "Lautst&auml;rke"
+  },
+  "KEY": {
+    "description_1": "Mit einem kurzen oder langen Tastendruck wird der Gong entsprechend des gewählten Modus geschaltet.",
+    "description_2": "Die Taste ist deaktiviert.",
+    "group_description_1": "Falls der Gong unerwünscht ausgelöst wurde, kann er mit dieser Taste ausgeschaltet werden.",
+    "group_description_2": "Mit einem kurzen oder langen Tastendruck wird der Gong entsprechend des gewählten Modus geschaltet.",
+    "group_description_3": "Die Taste ist deaktiviert.",
+    "subset_1": "ein",
+    "subset_2": "ein / aus"
+  },
+  "MOTION_DETECTOR": {
+    "description_1": "Beim Auslösen des Bewegungsmelders ertönt der Gong. Ist eine Verzögerungszeit eingestellt, wird der Gong erst nach Ablauf dieser Zeit geschaltet.<br/><br/>Beim Bewegungsmelder (Kanalparameter) wird ein Sendeabstand von <b>dynamisch</b> und ein Mindestsendeabstand von <b>15s</b> empfohlen.",
+    "description_2": "Der Bewegungsmelder ist deaktiviert."
+  },
+  "PULSE_SENSOR": {
+    "description_1": "Beim Senden des Schaltbefehls ertönt der Gong. Ist eine Verzögerungszeit eingestellt, wird der Gong erst nach Ablauf dieser Zeit geschaltet.",
+    "description_2": "Der Sensor ist deaktiviert."
+  },
+  "SENSOR_WINDOW": {
+    "description_1": "<span class=\"translated\">Beim Bet&auml;tigen des Fensters wird der Gong entsprechend der gew&auml;hlten Richtung geschaltet.<span/><br/><br/>",
+    "description_2": "Diese Verknüpfung wird deaktiviert.",
+    "subset_1": "Offen - ein / Zu - aus",
+    "subset_2": "Offen - aus / Zu - ein",
+    "subset_3": "Offen - ein",
+    "subset_4": "Zu - ein",
+    "subset_5": "&Auml;nderung - ein"
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "<span class=\"translated\">Beim Bet&auml;tigen des Kontakts wird der Gong entsprechend der gew&auml;hlten Richtung geschaltet.<span/><br/><br/>",
+    "description_2": "Der Kontakt ist deaktiviert.",
+    "subset_1": "Offen - ein / Zu - aus",
+    "subset_2": "Offen - aus / Zu - ein",
+    "subset_3": "Offen - ein",
+    "subset_4": "Zu - ein",
+    "subset_5": "&Auml;nderung - ein"
+  },
+  "SMOKE_DETECTOR_TEAM": {
+    "description_1": "Beim Auslösen des Rauchmelders wird der Gong aktiviert.",
+    "description_2": "Der Rauchmelder ist deaktiviert."
+  },
+  "SMOKE_DETECTOR_TEAM_V2": {
+    "description_1": "Beim Auslösen des Rauchmelders wird der Gong aktiviert.",
+    "description_2": "Der Rauchmelder ist deaktiviert."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "<span class=\"translated\">Beim Bet&auml;tigen des Schaltkontakts wird der Gong entsprechend des gew&auml;hlten Modus geschaltet.<span/><br/><br/>",
+    "description_2": "Das Schaltinterface ist deaktiviert.",
+    "subset_1": "ein / aus",
+    "subset_2": "ein"
+  },
+  "TILT_SENSOR": {
+    "description_1": "Beim Betätigen des Schaltkontakts wird der Gong entsprechend der gewählten Richtung geschaltet.",
+    "description_2": "Der Tiltsensor ist deaktiviert.",
+    "subset_1": "Offen - ein / Zu - aus",
+    "subset_2": "Offen - aus / Zu - ein",
+    "subset_3": "&Ouml;ffnen",
+    "subset_4": "Schlie&szlig;en",
+    "subset_5": "&Auml;ndern"
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "Mit einem kurzen oder langen Tastendruck ertönt der Gong.  Ist eine Verzögerungszeit eingestellt, wird der Gong erst nach Ablauf dieser Zeit geschaltet.",
+    "description_2": "Die virtuelle Taste ist deaktiviert."
+  },
+  "WATERDETECTIONSENSOR": {
+    "description_1": "<span class=\"translated\">Bei Feuchtigkeit wird der Gong entsprechend der gew&auml;hlten Richtung geschaltet.<span/><br/><br/>",
+    "description_2": "Der Wassermelder ist deaktiviert.",
+    "subset_1": "Feuchtigkeit - ein / Trocken - aus",
+    "subset_2": "Feuchtigkeit - aus / Trocken - ein"
+  }
+}

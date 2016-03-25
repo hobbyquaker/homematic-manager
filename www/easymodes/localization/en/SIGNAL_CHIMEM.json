@@ -1,0 +1,88 @@
+{
+  "CONDITION_X": {
+    "description_1": "The chime will sound when a switching command is transmitted. If a delay is set the chime will be triggered after the delay time has expired.",
+    "description_2": "The sensor is deactivated.",
+    "descrHint": "You can define a time for sending a switching command via the switch actuator at the corresponding channel."
+  },
+  "GENERIC": {
+    "signal_led_chime_active": "Chime active",
+    "signal_led_chime_non_active": "Chime inactive",
+    "signal_led_chime_on": "Chime on",
+    "signal_led_chime_off": "Chime off",
+    "button_inactive": "Deactivate button",
+    "signal_kind": "Signal type",
+    "signal_short": "short",
+    "signal_long": "long",
+    "sound_nr": "Sound no. ",
+    "iterations": "Number of repetitions ",
+    "volume": "Volume"
+  },
+  "KEY": {
+    "description_1": "With a short or long button press the chime will be triggered according to the selected mode.",
+    "description_2": "The button is deactivated.",
+    "group_description_1": "If the chime is triggered accidentally it can be turned off with this button.",
+    "group_description_2": "With a short or long button press the chime will be triggered according to the selected mode.",
+    "group_description_3": "The button is deactivated.",
+    "subset_1": "on",
+    "subset_2": "on / off"
+  },
+  "MOTION_DETECTOR": {
+    "description_1": "The chime will sound when the motion detector is triggered. If a delay time is set, the chime will be triggered after the time has expired.<br/><br/>The transmission interval of the motion detector (channel parameter) should be set to <b>dynamic</b> and the minimum transmission interval should be <b>15s</b> .",
+    "description_2": "The motion detector is deactivated."
+  },
+  "PULSE_SENSOR": {
+    "description_1": "The chime will sound when a switching command is transmitted. If a delay is set the chime will be triggered after the delay time has expired.",
+    "description_2": "The sensor is deactivated."
+  },
+  "SENSOR_WINDOW": {
+    "description_1": "When the window is operated the chime will be triggered according to the selected direction.",
+    "description_2": "This direct link will be deactivated.",
+    "subset_1": "Open - on / Closed - off",
+    "subset_2": "Open - off / Closed - on",
+    "subset_3": "Open - on",
+    "subset_4": "Closed - on",
+    "subset_5": "Change - on"
+  },
+  "SHUTTER_CONTACT": {
+    "description_1": "When the contact is operated the chime will be triggered according to the selected direction.",
+    "description_2": "The contact is deactivated.",
+    "subset_1": "Open - on / Closed - off",
+    "subset_2": "Open - off / Closed - on",
+    "subset_3": "Open - on",
+    "subset_4": "Closed - on",
+    "subset_5": "Change - on"
+  },
+  "SMOKE_DETECTOR_TEAM": {
+    "description_1": "The chime will be activated when the smoke detector is triggered.",
+    "description_2": "The smoke detector is deactivated."
+  },
+  "SMOKE_DETECTOR_TEAM_V2": {
+    "description_1": "The chime will be activated when the smoke detector is triggered.",
+    "description_2": "The smoke detector is deactivated."
+  },
+  "SWITCH_INTERFACE": {
+    "description_1": "By pressing the switch contact the chime will be triggered according to the selected mode.",
+    "description_2": "The switching interface is deactivated.",
+    "subset_1": "on / off",
+    "subset_2": "on"
+  },
+  "TILT_SENSOR": {
+    "description_1": "When the switch contact is operated the chime will be triggered according to the selected direction.",
+    "description_2": "The tilt sensor is deactivated.",
+    "subset_1": "Open - on / Closed - off",
+    "subset_2": "Open - off / Closed - on",
+    "subset_3": "Open",
+    "subset_4": "Close",
+    "subset_5": "Change"
+  },
+  "VIRTUAL_KEY": {
+    "description_1": "With a long or short button press the chime will sound. If a delay is set the chime will be triggered after the delay time has expired.",
+    "description_2": "The virtual button is deactivated."
+  },
+  "WATERDETECTIONSENSOR": {
+    "description_1": "In case of humidity the chime will be triggered according to the selected operating mode.",
+    "description_2": "The water sensor is deactivated.",
+    "subset_1": "Humidity - on / dry - off",
+    "subset_2": "Humidity - off / dry - on"
+  }
+}

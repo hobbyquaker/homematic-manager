@@ -20,6 +20,10 @@ var receivers = ['SWITCH', 'DIMMER', 'BLIND', 'ACTOR_SECURITY', 'ACTOR_WINDOW', 
 
 var receivers = ['RGBW_AUTOMATIC', 'RGBW_COLOR', 'SWITCH_VIRTUAL_RECEIVER'];
 
+var receivers = ['HMW_BLIND', 'HMW_DIMMER', 'HMW_INPUT_OUTPUT', 'HMW_SWITCH'];
+
+var receivers = ['SIGNAL_CHIMEM', 'SIGNAL_LEDM'];
+
 var files = ['GENERIC', 'PNAME'];
 
 var fs = require('fs');
@@ -55,7 +59,7 @@ receivers.forEach(function (receiver) {
             var files = fs.readdirSync(easymodePath + '/' + receiver + '/localization/' + lang + '/');
             var data = {};
             for (var index in files) {
-                var match = files[index].match(/^([A-Z_]+)\.txt/);
+                var match = files[index].match(/^([A-Z0-9_]+)\.txt/);
                 if (match) {
                     console.log('reading', easymodePath + '/' + receiver + '/localization/' + lang + '/' + files[index]);
                     var content = fs.readFileSync(easymodePath + '/' + receiver + '/localization/' + lang + '/' + files[index]);
@@ -77,7 +81,7 @@ receivers.forEach(function (receiver) {
     var files = fs.readdirSync(easymodePath + receiver);
     for (var index in files) {
         var match;
-        if (match = files[index].match(/^([A-Z_]+)\.tcl$/)) {
+        if (match = files[index].match(/^([A-Z0-9_]+)\.tcl$/)) {
             readFile(receiver, match[1]);
         }
     }

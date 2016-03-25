@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <title>HomeMatic Manager</title>
     <link rel="stylesheet" href="css/redmond/jquery-ui.min.css" type="text/css"/>
-    <link rel="stylesheet" href="css/ui.jqgrid.css" type="text/css"/>
+   <!-- <link rel="stylesheet" href="css/ui.jqgrid.css" type="text/css"/>-->
+    <link rel="stylesheet" href="bower_components/free-jqgrid/css/ui.jqgrid.min.css" type="text/css"/>
     <link rel="stylesheet" href="css/jquery.multiselect-1.13.css" type="text/css"/>
     <link rel="stylesheet" href="css/jquery.multiselect.filter.css" type="text/css"/>
     <link rel="stylesheet" href="css/homematic-manager.css" type="text/css"/>
@@ -15,14 +16,21 @@
     <script src="js/jquery.multiselect.filter.js" type="text/javascript"></script>
     <script src="js/jquery.ui-contextmenu.min.js"></script>
 
+    <!--
     <script src="js/i18n/grid.locale-de.js" type="text/javascript"></script>
     <script src="js/jquery.jqGrid.min.js" type="text/javascript"></script>
     <script src="js/grid.setcolumns.js" type="text/javascript"></script>
+    -->
+    <script src="bower_components/free-jqgrid/js/i18n/grid.locale-de.min.js"></script>
+    <script src="bower_components/free-jqgrid/js/jquery.jqgrid.min.js"></script>
+    <script src="bower_components/free-jqgrid/js/grid.grouping.js"></script>
+
 
     <script src="../socket.io/socket.io.js"></script>
 
     <script src="js/help_linkParamset.js"></script>
     <script src="js/rpc_methods.js"></script>
+    <script src="js/deviceImages.js"></script>
     <!--<script src="js/easymodes.js"></script>-->
 
     <script src="js/language.js"></script>
@@ -115,15 +123,17 @@
         </div>
     </div>
     <div id="dialog-paramset">
+        <select id="select-paramset-multiselect" multiple></select>
         <table id="table-paramset"></table>
         <input type="hidden" id="edit-paramset-address" value=""/>
         <input type="hidden" id="edit-paramset-paramset" value=""/>
     </div>
     <div id="dialog-linkparamset" title="Direktverknüpfung bearbeiten">
+        <select id="select-linkparamset-multiselect" multiple></select>
         <div id="div-edit-link" style="padding-top: 4px; padding-bottom: 14px">
             <div style="display:inline-block">
-                <b>Name:</b> <input id="edit-link-input-name" type="text" value="" size="44"/>
-                <b>Beschreibung: </b><input id="edit-link-input-description" type="text" value="" size="50"/>
+                <b>Name:</b> <input id="edit-link-input-name" type="text" value="" size="32"/>
+                <b>Beschreibung: </b><input id="edit-link-input-description" type="text" value="" size="32"/>
             </div>
             <button id="save-link-info" style="float:right;">Übernehmen</button>
         </div>
@@ -213,15 +223,15 @@
     <div id="dialog-add-link" title="Direktverknüpfung anlegen">
         <table>
             <tr>
-                <td>Sender</td>
-                <td><select id="select-link-sender"></select></td>
+                <td class="translate">Sender</td>
+                <td><select id="select-link-sender" multiple="multiple"></select></td>
             </tr>
             <tr style="font-size: 9px">
                 <td>LINK_SOURCE_ROLES</td>
                 <td id="link-source-roles"></td>
             </tr>
             <tr>
-                <td>Empfänger</td>
+                <td class="translate">Receiver</td>
                 <td><select id="select-link-receiver" multiple="multiple"></select></td>
             </tr>
         </table>
@@ -265,6 +275,9 @@
         <span id="rpc-command"></span>
         <div style="height: 12px; padding: 6px" ><img id="rpc-progress" src="images/ajax-loader.gif"></div>
         <span id="rpc-message"></span>
+    </div>
+    <div id="dialog-disconnect" class="translateT" class="translateT" title="Disconnected">
+        <h3 class="translate">Disconnected</h3>
     </div>
     <div id="dialog-servicemessage" class="translateT" title="New service message">
         <span id="service-device"></span><br/><br>

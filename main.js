@@ -99,7 +99,7 @@ function initRpcClients() {
         }
     }
 
-    var count = 0;
+    var count = 0; //Math.floor(Math.random() * 65536);
     for (var daemon in config.daemons) {
         config.daemons[daemon].ident = 'hmm_' + count;
 

@@ -122,7 +122,7 @@ var rpcMethods = {
     },
     getLinks: {
         params: [
-            { name: 'address', type: 'device_address' },
+            { name: 'address', type: 'address' },
             {
                 name: 'flags',
                 type: 'integer',

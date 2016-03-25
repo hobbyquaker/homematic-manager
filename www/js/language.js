@@ -26,6 +26,23 @@ var translation = {
     "Response":         {"de": "Antwort"},
     "Help":             {"de": "Hilfe"},
     "Settings":         {"de": "Einstellungen"},
+    "Please choose one or more links": {"de": "mehrere Verknüpfungen bearbeiten"},
+    "Kanäle überschreiben": {"de": "Kanäle überschreiben", "en": "Overwrite channels"},
+    "Normaler Anlernmodus": {"de": "Normaler Anlernmodus", "en": "Normal pairing mode"},
+    "Default-Parameter in Paramset MASTER schreiben, bestehende Verknüpfungen löschen": {
+        "en": "Write defaults to MASTER paramset, delete existing links",
+        "de": "Default-Parameter in Paramset MASTER schreiben, bestehende Verknüpfungen löschen"
+    },
+    "Sender": {"de": "Sender", "en": "Sender"},
+    "Receiver": {"de": "Empfänger", "en": "Receiver"},
+    "Ablernen und Gerät auf Werkseinstellungen zurücksetzen": {"de": "Ablernen und Gerät auf Werkseinstellungen zurücksetzen", "en": "Unpair and factory reset device"},
+    "Nur ablernen (Direktverknüpfungen bleiben erhalten)": {"de": "Nur ablernen (Direktverknüpfungen bleiben erhalten)", "en": "Unpair only and keep existing links"},
+    "Falls Gerät nicht erreichbar:": {"de": "Falls Gerät nicht erreichbar:", "en": "If device is unreachable:"},
+    "bei nächster Gelegenheit löschen": {"de": "bei nächster Gelegenheit löschen", "en": "Delete later if possible"},
+    "Nur aus Schnittstellenprozess löschen": {"de": "Nur aus Schnittstellenprozess löschen", "en": "Delete from interface process only"},
+    "Disconnected": {"de": "Verbindung unterbrpchen"},
+    "Which device do you want to replace?": {"de": "Welches Gerät wollen sie ersetzen?"},
+    "Gerät löschen": {"de": "Gerät löschen", "en": "Delete device"},
     "Acknowledge service messages":         {"de": "Servicemeldung bestätigen"},
     "Acknowledge all service messages":     {"de": "Alle Servicemeldungen bestätigen"},
     "Interfaces":       {"de": "Interfaces"},
@@ -52,8 +69,6 @@ var translation = {
     "Check all": {"de": "Alle auswählen", "en": "Check all"},
     "Uncheck all": {"de": "Auswahl entfernen", "en": "Uncheck all"}
 };
-
-
 
 var missesTranslation = {};
 

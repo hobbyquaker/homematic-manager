@@ -78,9 +78,23 @@ problemlos einen Namen zuweisen oder alle Namen von einer CCU importieren: ```no
 
 Im Reiter Geräte das Gerät "aufklappen" (+ Icon links) und beim gewünschten Kanal auf den Button "Values" klicken.
 
+#### Wie kopiere ich (Link-)Paramsets von einem Gerät/Kanal auf einen oder mehrere andere?
+
+Öffne das Paramset bzw. die Verknüpfung die Du als Vorlage nutzen willst, wähle im Dropdown oben die Ziel-Geräte/Kanäle/Verknüpfungen
+und klicke auf putParamset.
 
 
 ## Changelog
+
+### 1.0.13
+* (hobbyquaker) Mehrere (Link-)Paramsets auf einmal bearbeiten
+* (hobbyquaker) Geräte Thumbnails
+* (hobbyquaker) Fix mehrfache Einträge im Daemon-Dropdown nach Verbindungsabbruch
+* (hobbyquaker) Fix Easymode UI_HINT
+* (hobbyquaker) Sonderbehandlung Anlernen von Wired Geräten (RPC searchDevices statt addDevice)
+* (hobbyquaker) Easymodes ergänzt, Sonderbehandlung Wired Verknüpfungen (PUSH_BUTTON vs SWITCH)
+* (hobbyquaker) Diverse Fixes und Korrekturen
+
 
 ### 1.0.12
 * (hobbyquaker) Service-Message Popup für RSSI_* Nachrichten unterbunden Fix https://github.com/hobbyquaker/homematic-manager/issues/34

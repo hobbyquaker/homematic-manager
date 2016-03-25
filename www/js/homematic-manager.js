@@ -16,6 +16,8 @@ $(document).ready(function () {
 
     var socket = io.connect();
     var daemon;
+    var daemonType;
+    var daemonDevices = {};
     var config;
     var listDevices;
     var indexDevices;
@@ -28,6 +30,7 @@ $(document).ready(function () {
     var listMessages;
     var names = {};
     var hash;
+    var firstLoad = true;
 
     var easymodes = {lang: {}};
 
@@ -60,12 +63,15 @@ $(document).ready(function () {
     var $selectLinkSender =             $('#select-link-sender');
     var $selectLinkReceiver =           $('#select-link-receiver');
     var $selectReplace =                $('#select-replace');
+    var $selectParamsetMultiselect =    $('#select-paramset-multiselect');
+    var $selectLinkParamsetMultiselect =    $('#select-linkparamset-multiselect');
 
     var $selectBidcosDaemon;    // assigned after ui initialization, see initTabs()
 
     var $tabsMain =                     $('#tabs-main');
 
     var $dialogLinkparamset =           $('#dialog-linkparamset');
+    var $dialogDisconnect =             $('#dialog-disconnect');
     var $dialogAddDevice =              $('#dialog-add-device');
     var $dialogAddCountdown =           $('#dialog-add-countdown');
     var $dialogDelDevice =              $('#dialog-del-device');
@@ -84,7 +90,7 @@ $(document).ready(function () {
     socket.on('connect', getConfig);
 
     socket.on('disconnect', function () {
-        alert('disconnect');
+        $dialogDisconnect.dialog('open');
     });
 
     // Incoming Events
@@ -103,7 +109,7 @@ $(document).ready(function () {
                      count += 1;
                      output += '<br/>' + devArr[i].ADDRESS + ' (' + devArr[i].TYPE + ')';
                  }
-                 $('#alert').html('<h3>' + count + ' ' + _('new') + ((count == 1 && language == 'de') ? 's': '') + ' ' + _('device') + (count == 1 ? '' : (language == 'de' ? 'e' : 's')) + ' ' + _('introduced') + ':</h3>' + output);
+                 $('#alert').html('<h3>' + count + ' ' + _('new') + ' ' + _('device') + (count == 1 ? '' : (language == 'de' ? 'e' : 's')) + ' ' + _('introduced') + ':</h3>' + output);
                  $("#dialog-alert").dialog('open');
                  getDevices(function () {
                      getLinks(function () {
@@ -156,6 +162,7 @@ $(document).ready(function () {
                 $('#event-table').prepend('<tr class="ui-widget-content jqgrow ui-row-ltr "><td class="event-column-1">' + ts + '</td><td class="event-column-2">' + name + '</td><td class="event-column-3">' + address + '</td><td class="event-column-4">' + param + '</td><td class="event-column-5">' + value + '</td></tr>');
 
                 // Service-Meldung?
+                if (!listMessages) listMessages = [];
                 if (address.slice(-2) === ':0' && (param !== 'RSSI_PEER' && param !== 'RSSI_DEVICE')) {
                     var done;
                     if (value) {
@@ -251,20 +258,33 @@ $(document).ready(function () {
     }
 
     // Common
+    function unselect() {
+        if (window.getSelection) {
+            if (window.getSelection().empty) {  // Chrome
+                window.getSelection().empty();
+            } else if (window.getSelection().removeAllRanges) {  // Firefox
+                window.getSelection().removeAllRanges();
+            }
+        } else if (document.selection) {  // IE?
+            document.selection.empty();
+        }
+    }
     function getConfig() {
+        firstLoad = true;
+        //console.log('getConfig');
         socket.emit('getConfig', function (data) {
             config = data;
             $('.version').html(config.version);
             language = config.language || 'de';
 
             $.getJSON('easymodes/localization/' + language + '/GENERIC.json', function (data) {
-                console.log('easymode generic', data);
+                //console.log('easymode generic', data);
                 if (!easymodes.lang[language]) easymodes.lang[language] = {};
                 easymodes.lang[language].GENERIC = data;
                 $.getJSON('easymodes/localization/' + language + '/PNAME.json', function (data) {
-                    console.log('easymode pname', data);
+                    //console.log('easymode loaded pname', data);
                     easymodes.lang[language].PNAME = data;
-                    console.log('easymodes', easymodes);
+                    //console.log('easymodes', easymodes);
                 });
             });
 
@@ -284,6 +304,7 @@ $(document).ready(function () {
             hash = tmp[1];
 
             var count = 0;
+            $selectBidcosDaemon.html('');
             for (var daemon in config.daemons) {
                 count += 1;
                 $selectBidcosDaemon.append('<option value="' + daemon + '"' + (hash == daemon ? ' selected' : '') + '>' + daemon + /*' (' + 'http://' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')*/ '</option>');
@@ -300,7 +321,6 @@ $(document).ready(function () {
                 });
             }
 
-
             $('#select-bidcos-daemon option').removeAttr('selected');
             $('#select-bidcos-daemon option[value="' + tmp[1] + '"]').attr('selected', true);
             if (tmp[2]) {
@@ -311,6 +331,7 @@ $(document).ready(function () {
             getNames(function () {
                 initDaemon();
                 // at this point everything should be initialized
+                $dialogDisconnect.dialog('close');
                 $('#loader').hide('fade');
             });
 
@@ -368,12 +389,20 @@ $(document).ready(function () {
 
     }
     function initDialogsMisc() {
+        $dialogDisconnect.dialog({
+            modal: true,
+            autoOpen: false,
+            closeOnEscape: false,
+            open: function(event, ui) {
+                $(this).parent().children().children('.ui-dialog-titlebar-close').hide();
+            }
+        });
         $dialogRpc.dialog({
             modal: true,
             autoOpen: false,
             closeOnEscape: false,
             open: function(event, ui) {
-                $(".ui-dialog-titlebar-close", ui.dialog || ui).hide();
+                $(this).parent().children().children('.ui-dialog-titlebar-close').hide();
             }
         });
         $dialogServicemessage.dialog({
@@ -427,11 +456,17 @@ $(document).ready(function () {
         $("#play-link-long").addClass("ui-state-disabled");
         $("#del-link").addClass("ui-state-disabled");
 
+        var tmp = window.location.hash.slice(1).split('/');
+
+        if (tmp[1] && firstLoad) daemon = tmp[1];
+        firstLoad = false;
+
         if (daemon && config.daemons[daemon]) {
 
-            var type = config.daemons[daemon].type;
+            var type = daemonType = config.daemons[daemon].type;
 
-            var tmp = window.location.hash.slice(1).split('/');
+
+
             var tmpHash = '#/' + daemon;
 
             if (type === 'BidCos-Wired' && (tmp[2] === 'rssi' || tmp[2] === 'messages')) {
@@ -490,6 +525,9 @@ $(document).ready(function () {
     function getDevices(callback) {
         $('#load_grid-devices').show();
         socket.emit('rpc', daemon, 'listDevices', [], function (err, data) {
+            indexChannels = {};
+            indexSourceRoles = {};
+            indexTargetRoles = {};
             $('#load_grid-devices').hide();
             listDevices = data;
             if (callback) callback(err);
@@ -516,8 +554,9 @@ $(document).ready(function () {
     }
     function initGridDevices() {
         $gridDevices.jqGrid({
-            colNames: ['Name', 'ADDRESS', 'TYPE', 'FIRMWARE', 'PARAMSETS', 'FLAGS', /*'INTERFACE', 'RF_ADDRESS',*/ /*'ROAMING',*/ 'RX_MODE'/*, 'VERSION'*/],
+            colNames: ['', 'Name', 'ADDRESS', 'TYPE', 'FIRMWARE', 'PARAMSETS', 'FLAGS', /*'INTERFACE', 'RF_ADDRESS',*/ /*'ROAMING',*/ 'RX_MODE'/*, 'VERSION'*/],
             colModel: [
+                {name:'img', index: 'img', width: 22, fixed: true, classes: 'device-cell', align: 'center'},
                 {name:'Name', index: 'Name', width: 224, fixed: false, classes: 'device-cell'},
                 {name:'ADDRESS',index:'ADDRESS', width:110, fixed: true, classes: 'device-cell'},
                 {name:'TYPE',index:'TYPE', width:140, fixed: false, classes: 'device-cell'},
@@ -543,6 +582,7 @@ $(document).ready(function () {
             caption:    _('Devices'),
             subGrid:    true,
             ignoreCase: true,
+            //multiselect: true,
             subGridRowExpanded: function(grid_id, row_id) {
                 subGridChannels(grid_id, row_id);
             },
@@ -570,6 +610,7 @@ $(document).ready(function () {
                 $('[id^="channels_"][id$="_t"]').jqGrid('resetSelection');
             },
             gridComplete: function () {
+                $gridDevices.jqGrid('hideCol', 'cb');
                 $('button.paramset:not(.ui-button)').button();
                 $('#del-device').addClass('ui-state-disabled');
                 $('#replace-device').addClass('ui-state-disabled');
@@ -645,7 +686,7 @@ $(document).ready(function () {
             },
             position: 'first',
             id: 'reportValueUsage-0',
-            title: _('reportValueUsage') + ' 0',
+            title: 'reportValueUsage' + ' 0',
             cursor: 'pointer'
         }).jqGrid('navButtonAdd', '#pager-devices', {
             caption: '',
@@ -655,7 +696,7 @@ $(document).ready(function () {
             },
             position: 'first',
             id: 'reportValueUsage-1',
-            title: _('reportValueUsage') + ' 1',
+            title: 'reportValueUsage' + ' 1',
             cursor: 'pointer'
         }).jqGrid('navButtonAdd', '#pager-devices', {
             caption: '',
@@ -669,7 +710,12 @@ $(document).ready(function () {
             caption: '',
             buttonicon: 'ui-icon-plus',
             onClickButton: function () {
-                $dialogAddDevice.dialog('open');
+                if (daemonType === 'BidCos-Wired') {
+                    rpcDialog(daemon, 'searchDevices', ['']);
+                } else {
+                    $dialogAddDevice.dialog('open');
+                }
+
             },
             position: 'first',
             id: 'add-device',
@@ -682,7 +728,7 @@ $(document).ready(function () {
             enableClear: false,
             beforeSearch: function () {
                 var postdata = $gridDevices.jqGrid('getGridParam', 'postData');
-                console.log('beforeSearch', postdata);
+                //console.log('beforeSearch', postdata);
 
             }
         });
@@ -862,7 +908,7 @@ $(document).ready(function () {
                                 if (renameChildren) {
                                     children.forEach(function (child) {
                                         names[child] = renameName + ':' + children.indexOf(child);
-                                        console.log('setName', child, names[child]);
+                                        //console.log('setName', child, names[child]);
                                         socket.emit('setName', child, names[child]);
                                     });
                                 }
@@ -955,6 +1001,42 @@ $(document).ready(function () {
                 sortorder: 'desc',
                 viewrecords: true,
                 ignoreCase: true,
+                //multiselect: true,
+                /*beforeSelectRow: function (rowid, e) {
+                    if (e.toElement.className === 'cbox' && !e.shiftKey) return true;
+                    if (!e.ctrlKey && !e.shiftKey && !e.metaKey) {
+                        $subgrid.jqGrid('resetSelection');
+                        return true;
+                    } else if (e.shiftKey) {
+                        var initialRowSelect = $subgrid.jqGrid('getGridParam', 'selrow');
+                        $subgrid.jqGrid('resetSelection');
+    
+                        var CurrentSelectIndex = $subgrid.jqGrid('getInd', rowid);
+                        var InitialSelectIndex = $subgrid.jqGrid('getInd', initialRowSelect);
+                        var startID = "";
+                        var endID = "";
+                        if (CurrentSelectIndex > InitialSelectIndex) {
+                            startID = initialRowSelect;
+                            endID = rowid;
+                        } else {
+                            startID = rowid;
+                            endID = initialRowSelect;
+                        }
+
+                        for (var i = startID; i <= endID; i++) {
+                            console.log(i);
+                            $subgrid.jqGrid('setSelection', i, i !== startID);
+                        }
+
+                        unselect();
+                        return false;
+
+                    } else if (e.ctrlKey || e.metaKey) {
+                        console.log('meta', rowid)
+                        //$subgrid.jqGrid('setSelection', rowid, false);
+                        return true;
+                    }
+                },*/
                 onSelectRow: function (rowid, e) {
 
                     // unselect other subgrids but not myself
@@ -985,6 +1067,7 @@ $(document).ready(function () {
 
                 },
                 gridComplete: function () {
+                    //$subgrid.jqGrid('hideCol', 'cb');
                     $('button.paramset:not(.ui-button)').button();
                 }
             };
@@ -1018,8 +1101,8 @@ $(document).ready(function () {
             menu: [
                 {title: _("Rename"), cmd: "rename", uiIcon: "ui-icon-pencil"},
                 //{title: _("addLink"), cmd: "addLink", uiIcon: "ui-icon-arrow-2-e-w"},
-                {title: _("reportValueUsage") + ' 1', cmd: "reportValueUsage-1", uiIcon: "ui-icon-pin-s"},
-                {title: _("reportValueUsage") + ' 0', cmd: "reportValueUsage-0", uiIcon: "ui-icon-pin-w"},
+                {title: ("reportValueUsage") + ' 1', cmd: "reportValueUsage-1", uiIcon: "ui-icon-pin-s"},
+                {title: ("reportValueUsage") + ' 0', cmd: "reportValueUsage-0", uiIcon: "ui-icon-pin-w"},
                 {title: _("MASTER Paramset"), cmd: "paramsetMaster", uiIcon: "ui-icon-gear"},
                 {title: _("VALUES Paramset"), cmd: "paramsetValues", uiIcon: "ui-icon-gear"}
 
@@ -1116,6 +1199,7 @@ $(document).ready(function () {
             listDevices[i].params = paramsets;
             if (!listDevices[i].PARENT) {
                 listDevices[i]._id = i;
+                listDevices[i].img = '<img class="device-image" src="' + (deviceImages[listDevices[i].TYPE] || deviceImages.DEVICE) + '">';
                 rowData.push(listDevices[i]);
             }
         }
@@ -1215,7 +1299,7 @@ $(document).ready(function () {
             function popQueue() {
                 if (queue.length > 0) {
                     var param = queue.pop();
-                    console.log('reportValueUsage', address, param, value);
+                    //console.log('reportValueUsage', address, param, value);
                     socket.emit('rpc', daemon, 'reportValueUsage', [address, param, value], function (err, data) {
                         popQueue();
                     });
@@ -1347,6 +1431,22 @@ $(document).ready(function () {
         // Buttons
         $('button.paramset-setValue:not(.ui-button)').button();
 
+        $selectParamsetMultiselect.html('');
+        var tmpName;
+        for (var a in indexChannels) {
+            if (a === address) continue;
+            if (indexChannels[address].TYPE !== indexChannels[a].TYPE) continue;
+            if ((indexChannels[address].PARENT === '') && (indexChannels[a].PARENT !== '')) continue;
+            if ((indexChannels[address].PARENT !== '') && (indexChannels[a].PARENT === '')) continue;
+            if (names[a]) {
+                tmpName = names[a] + ' (' + a + ')';
+            } else {
+                tmpName = a;
+            }
+            $selectParamsetMultiselect.append('<option value="' + a + '">' + tmpName + '</option>');
+        }
+        $selectParamsetMultiselect.multiselect('refresh');
+
 
         $dialogParamset.dialog('open');
         $dialogParamset.tooltip({
@@ -1373,6 +1473,21 @@ $(document).ready(function () {
                 }
             ]
         });
+        $selectParamsetMultiselect.multiselect({
+            classes: 'paramset-multi',
+            multiple: true,
+            //header: false,
+            height: 400,
+            selectedList: 2,
+            minWidth: 480,
+            noneSelectedText: _('Please choose one or more channels'), //"Bitte einen oder mehrere Kanäle auswählen",
+            checkAllText: _('Check all'),
+            uncheckAllText: _('Uncheck all')
+        }).multiselectfilter({
+            autoReset: true,
+            placeholder: ''
+        });
+
         $body.on('click', 'button.paramset', function () {
             $('#load_grid-devices').show();
             var address = $(this).attr('data-address');
@@ -1448,6 +1563,9 @@ $(document).ready(function () {
         var paramset = $('#edit-paramset-paramset').val();
         var values = {};
         var count = 0;
+        var multi = $selectParamsetMultiselect.val()
+        var isMulti = !!multi;
+
         $('[id^="paramset-input"]').each(function () {
             var $input = $(this);
             if (!$input.is(':disabled')) {
@@ -1457,6 +1575,8 @@ $(document).ready(function () {
                 var type = $input.attr('type');
                 var dataType = $input.attr('data-type');
                 var dataValPrev = $input.attr('data-val-prev');
+
+
 
                 // get value
                 var val;
@@ -1470,8 +1590,8 @@ $(document).ready(function () {
                     val = $input.find('option:selected').val();
                 }
 
-                // changes only
-                if (val == dataValPrev || (val === true && dataValPrev === 'true') || (val === false && dataValPrev === 'false')) return;
+                // changes only if not multiselect
+                if (!isMulti && (val == dataValPrev || (val === true && dataValPrev === 'true') || (val === false && dataValPrev === 'false'))) return;
 
                 // todo update ui if channel aes_active is changed
 
@@ -1504,8 +1624,11 @@ $(document).ready(function () {
                 count += 1;
             }
         });
-        if (count > 0) {
-            rpcAlert(daemon, 'putParamset', [address, paramset, values]);
+        if (count > 0 || isMulti) {
+            rpcDialog(daemon, 'putParamset', [address, paramset, values]);
+            multi.forEach(function (a) {
+                rpcDialog(daemon, 'putParamset', [a, paramset, values]);
+            });
         }
     }
 
@@ -1525,14 +1648,16 @@ $(document).ready(function () {
     function initGridLinks() {
         $gridLinks.jqGrid({
             datatype: 'local',
-            colNames:['SENDER Name', 'SENDER', 'RECEIVER Name', 'RECEIVER', 'NAME', 'DESCRIPTION'/*, 'Aktionen'*/],
+            colNames:['SENDER Name', 'SENDER', 'TYPE', 'RECEIVER Name', 'RECEIVER', 'TYPE', 'NAME', 'DESCRIPTION'/*, 'Aktionen'*/],
             colModel:[
                 {name:'Sendername', index:'Sendername', width:100, classes: 'link-cell'},
                 {name:'SENDER', index:'SENDER', width:50, classes: 'link-cell'},
+                {name:'SENDER_TYPE', index:'SENDER_TYPE', width:50, classes: 'link-cell'},
                 {name:'Receivername', index:'Receivername', width:100, classes: 'link-cell'},
                 {name:'RECEIVER', index:'RECEIVER', width:50, classes: 'link-cell'},
-                {name:'NAME', index:'NAME', width:150, classes: 'link-cell'},
-                {name:'DESCRIPTION', index:'DESCRIPTION', width:150, classes: 'link-cell'}
+                {name:'RECEIVER_TYPE', index:'RECEIVER_TYPE', width:50, classes: 'link-cell'},
+                {name:'NAME', index:'NAME', width:100, classes: 'link-cell'},
+                {name:'DESCRIPTION', index:'DESCRIPTION', width:100, classes: 'link-cell'}
                 //{name:'ACTIONS', index:'ACTIONS', width:80}
             ],
             rowNum:     100,
@@ -1545,6 +1670,41 @@ $(document).ready(function () {
             sortorder:  'desc',
             caption:    _('Links'),
             ignoreCase: true,
+            /* multiselect: true,
+            beforeSelectRow: function (rowid, e) {
+                if (!e.ctrlKey && !e.shiftKey && !e.metaKey) {
+                    $gridLinks.jqGrid('resetSelection');
+                    return true;
+                } else if (e.shiftKey) {
+                    var initialRowSelect = $gridLinks.jqGrid('getGridParam', 'selrow');
+                    $gridLinks.jqGrid('resetSelection');
+
+                    var CurrentSelectIndex = $gridLinks.jqGrid('getInd', rowid);
+                    var InitialSelectIndex = $gridLinks.jqGrid('getInd', initialRowSelect);
+                    var startID = "";
+                    var endID = "";
+                    if (CurrentSelectIndex > InitialSelectIndex) {
+                        startID = initialRowSelect;
+                        endID = rowid;
+                    } else {
+                        startID = rowid;
+                        endID = initialRowSelect;
+                    }
+
+                    for (var i = startID; i <= endID; i++) {
+                        console.log(i);
+                        $gridLinks.jqGrid('setSelection', i, i !== startID);
+                    }
+
+                    unselect();
+                    return false;
+
+                } else if (e.ctrlKey || e.metaKey) {
+                    console.log('meta', rowid)
+                    //$subgrid.jqGrid('setSelection', rowid, false);
+                    return true;
+                }
+            },*/
             onSelectRow: function (rowid, iRow, iCol, e) {
                 $('#del-link').removeClass('ui-state-disabled');
                 $('#rename-link').removeClass('ui-state-disabled');
@@ -1560,6 +1720,7 @@ $(document).ready(function () {
                 getLink(sender, receiver, row);
             },
             gridComplete: function () {
+                $gridLinks.jqGrid('hideCol', 'cb');
                 $('#del-link').addClass('ui-state-disabled');
                 $('#rename-link').addClass('ui-state-disabled');
                 $('#edit-link').addClass('ui-state-disabled');
@@ -1641,7 +1802,7 @@ $(document).ready(function () {
             caption: '',
             buttonicon: 'ui-icon-plus',
             onClickButton: function () {
-                var selectOptions = '<option value="null">Bitte einen Kanal auswählen</option>';
+                var selectOptions = '';
                 for (var j = 0, len = listDevices.length; j < len; j++) {
                     if (!listDevices[j].PARENT) continue;
                     if (listDevices[j].ADDRESS.match(/:0$/)) continue;
@@ -1810,20 +1971,26 @@ $(document).ready(function () {
                     click: function () {
                         var sender = $selectLinkSender.val();
                         var targets = $selectLinkReceiver.val();
-
+                        $(this).dialog('close');
                         for (var i = 0; i < targets.length; i++) {
                             var receiver = targets[i];
-                            rpcDialog(daemon, 'addLink', [sender, receiver, '', '']);
+                            if (i !== (targets.length - 1)) {
+                                rpcDialog(daemon, 'addLink', [sender, receiver, '', '']);
+                            } else {
+                                rpcDialog(daemon, 'addLink', [sender, receiver, '', ''], function () {
+
+                                    rpcAlert(daemon, 'getLinks', [], function (err, data) {
+                                        if (!err) {
+                                            listLinks = data;
+                                            refreshGridLinks();
+                                        }
+                                    });
+                                });
+                            }
+
                         }
 
-                        rpcAlert(daemon, 'getLinks', [], function (err, data) {
-                            if (!err) {
-                                listLinks = data;
-                                refreshGridLinks();
-                            }
-                        });
 
-                        $(this).dialog('close');
                     }
                 },
                 {
@@ -1842,6 +2009,11 @@ $(document).ready(function () {
         for (var i = 0, len = listLinks.length; i < len; i++) {
             if (names[listLinks[i].SENDER]) listLinks[i].Sendername = names[listLinks[i].SENDER];
             if (names[listLinks[i].RECEIVER]) listLinks[i].Receivername = names[listLinks[i].RECEIVER];
+
+            listLinks[i].SENDER_TYPE = indexChannels[listLinks[i].SENDER] && indexChannels[listLinks[i].SENDER].TYPE;
+            listLinks[i].RECEIVER_TYPE = indexChannels[listLinks[i].RECEIVER] && indexChannels[listLinks[i].RECEIVER].TYPE;
+
+
 
             listLinks[i]._id = i;
             rowData.push(listLinks[i]);
@@ -1880,8 +2052,25 @@ $(document).ready(function () {
                 }
             ]
         });
+
+        $selectLinkParamsetMultiselect.multiselect({
+            classes: 'link-multi',
+            multiple: true,
+            //header: false,
+            height: 400,
+            selectedList: 2,
+            minWidth: 560,
+            noneSelectedText: _('Please choose one or more links'), //"Bitte einen oder mehrere Kanäle auswählen",
+            checkAllText: _('Check all'),
+            uncheckAllText: _('Uncheck all')
+        }).multiselectfilter({
+            autoReset: true,
+            placeholder: ''
+        });
+
         $selectLinkparamsetProfile.change(function () {
-            var prn = parseInt($(this).val(), 10);
+            var prn = parseInt($(this).val(), 10) || 0;
+            //console.log("$('#linkparamset-input-receiver-sender-UI_HINT').val(" + prn + ");")
             $('#linkparamset-input-receiver-sender-UI_HINT').val(prn);
             formEasyMode(linkReceiverData, linkReceiverDesc, 'receiver-sender', linkSenderType, linkReceiverType, prn);
         });
@@ -1893,11 +2082,25 @@ $(document).ready(function () {
         });
         $selectLinkSender.change(function () {
             var sender = $(this).val();
-            if (sender != "null") {
-                var roles = indexChannels[sender].LINK_SOURCE_ROLES.split(' ');
+            if (sender && sender.length) {
+                var roles = indexChannels[sender[0]].LINK_SOURCE_ROLES.split(' ');
                 var targets = [];
-                $linkSourceRoles.html('');
-                $linkSourceRoles.html(indexChannels[sender].LINK_SOURCE_ROLES);
+                $linkSourceRoles.html(indexChannels[sender[0]].LINK_SOURCE_ROLES);
+
+                if (sender.length === 1) {
+                    var selectOptions = '';
+                    for (var j = 0, len = listDevices.length; j < len; j++) {
+                        if (!listDevices[j].PARENT) continue;
+                        if (listDevices[j].ADDRESS.match(/:0$/)) continue;
+                        if (!listDevices[j].LINK_SOURCE_ROLES) continue;
+                        if (listDevices[j].TYPE  !== indexChannels[sender[0]].TYPE) continue;
+                        selectOptions += '<option value="' + listDevices[j].ADDRESS + '"' +
+                            (sender[0] === listDevices[j].ADDRESS ? ' selected' : '') +
+                            '>' + listDevices[j].ADDRESS + ' ' + (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '') + '</option>';
+                    }
+                    $selectLinkSender.html(selectOptions).multiselect('refresh');
+
+                }
 
                 for (var i = 0; i < roles.length; i++) {
                     for (var role in indexTargetRoles[roles[i]]) {
@@ -1912,11 +2115,11 @@ $(document).ready(function () {
                 for (var i = 0; i < targets.length; i++) {
                     var name;
                     if (names[targets[i]]) {
-                        name = ' ' + (names[targets[i]] || '');
+                        name = names[targets[i]] || '';
                     } else {
                         name = '';
                     }
-                    selectOptions += '<option value="'+ targets[i] + '">' + targets[i] + name + '</option>';
+                    selectOptions += '<option value="'+ targets[i] + '">' + targets[i] + ' ' + name + '</option>';
                 }
                 $selectLinkReceiver.html(selectOptions);
                 $('.add-link-create').button('disable');
@@ -1925,18 +2128,31 @@ $(document).ready(function () {
                 $selectLinkReceiver.multiselect('refresh');
                 $selectLinkReceiver.multiselect('enable');
             } else {
-
+                var selectOptions = '';
+                for (var j = 0, len = listDevices.length; j < len; j++) {
+                    if (!listDevices[j].PARENT) continue;
+                    if (listDevices[j].ADDRESS.match(/:0$/)) continue;
+                    if (!listDevices[j].LINK_SOURCE_ROLES) continue;
+                    selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' +
+                        listDevices[j].ADDRESS + ' ' +
+                        (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '') +
+                        '</option>';
+                }
+                $selectLinkSender.html(selectOptions).multiselect('refresh');
                 $selectLinkReceiver.multiselect('disable');
                 $linkSourceRoles.html('');
             }
         });
         $selectLinkSender.multiselect({
             classes: 'link-sender',
-            multiple: false,
+            multiple: true,
             //header: false,
             height: 400,
-            selectedList: 1,
-            minWidth: 480
+            selectedList: 2,
+            minWidth: 480,
+            noneSelectedText: _('Please choose one or more channels'), //"Bitte einen oder mehrere Kanäle auswählen",
+            checkAllText: _('Check all'),
+            uncheckAllText: _('Uncheck all')
         }).multiselectfilter({
             autoReset: true,
             placeholder: ''
@@ -1944,10 +2160,10 @@ $(document).ready(function () {
         $selectLinkReceiver.multiselect({
             classes: 'link-receiver',
             multiple: true,
-            minWidth: 480,
             //header: false,
             height: 400,
             selectedList: 2,
+            minWidth: 480,
             noneSelectedText: _('Please choose one or more channels'), //"Bitte einen oder mehrere Kanäle auswählen",
             checkAllText: _('Check all'),
             uncheckAllText: _('Uncheck all')
@@ -2054,6 +2270,8 @@ $(document).ready(function () {
     function putLinkParamset(direction, channel1, channel2, callback) {
         var values = {};
         var count = 0;
+        var multi = $selectLinkParamsetMultiselect.val();
+        var isMulti = !!multi;
         $('[id^="linkparamset-input-' + direction + '"]').each(function () {
             var $input = $(this);
             if (!$input.is(':disabled')) {
@@ -2076,17 +2294,15 @@ $(document).ready(function () {
                     val = $input.find('option:selected').val();
                 }
 
-
-
-                // Überspringe Param falls keine Änderung stattgefunden hat
-                if (
+                // Überspringe Param falls keine Änderung stattgefunden hat und kein Multiedit stattfindet
+                if (!isMulti && (
                     (val === true && dataValPrev === 'true') ||
                     (val === false && dataValPrev === 'false') ||
                     (val == dataValPrev) ||
                     (!isNaN(dataValPrev) && parseFloat(dataValPrev) == parseFloat(val))
-                ) return;
+                )) return;
 
-                console.log(param, val, elem, type, $input.attr('id'));
+                //console.log(param, val, elem, type, $input.attr('id'));
 
                 // aktualisiere data-val-prev - falls auf prn 0 (expert) zurückgeschaltet wird werden diese werte verwendet
                 $input.attr('data-val-prev', val);
@@ -2108,8 +2324,7 @@ $(document).ready(function () {
                         }
                         break;
                     case 'INTEGER':
-                        val = parseInt(val, 10);
-                        if (isNaN(val)) val = 0;
+                        val = parseInt(val, 10) || 0;
                         break;
                     case 'FLOAT':
                         val = {explicitDouble: parseFloat(val)};
@@ -2123,19 +2338,20 @@ $(document).ready(function () {
             }
         });
 
-        if (count > 0) {
-            console.log('putParamset', channel1, channel2, values);
-            rpcDialog(daemon, 'putParamset', [channel1, channel2, values], function (err, res) {
-                if (typeof callback === 'function') {
-                    callback(err, res);
-                }
-            });
+        if (count > 0 || isMulti) {
+            rpcDialog(daemon, 'putParamset', [channel1, channel2, values]);
+            if (isMulti) {
+                multi.forEach(function (link) {
+                    var tmp = link.split(';');
+                    rpcDialog(daemon, 'putParamset', [tmp[0], tmp[1], values]);
+                });
+            }
         } else if (typeof(callback) === 'function') {
             callback(null, null);
         }
     }
     function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver) {
-        console.log('dialogLinkparamset', sender, receiver);
+        //console.log('dialogLinkparamset', sender, receiver);
         $('#save-link-info').button('disable');
         $('#edit-link-input-name').val(data0.NAME);
         $('#edit-link-input-description').val(data0.DESCRIPTION);
@@ -2146,38 +2362,76 @@ $(document).ready(function () {
         var senderType = indexChannels[sender] && indexChannels[sender].TYPE;
         var receiverType = indexChannels[receiver] && indexChannels[receiver].TYPE;
 
-        linkSenderType = senderType;
-        linkReceiverType = receiverType;
+        $selectLinkParamsetMultiselect.html('');
+        listLinks.forEach(function (link) {
+            if (link.RECEIVER === receiver && link.SENDER === sender) return;
+            if (indexChannels[link.RECEIVER].TYPE !== receiverType) return;
+            if (indexChannels[link.SENDER].TYPE !== senderType) return;
+            var name = (link.NAME ? link.NAME + ' - ' : '') +
+                (names[link.SENDER] ? names[link.SENDER] + ' (' + link.SENDER + ')' : link.SENDER) +
+                    ' -> ' +
+                (names[link.RECEIVER] ? names[link.RECEIVER] + ' (' + link.RECEIVER + ')' : link.RECEIVER);
+            //console.log(name);
+            $selectLinkParamsetMultiselect.append('<option value="' + link.SENDER + ';' + link.RECEIVER + '">' + name + '</option>')
+        });
 
-        console.log('dialogLinkparamset ' + sender + ' (' + senderType + ') ' + receiver + ' (' + receiverType + ')');
+        $selectLinkParamsetMultiselect.multiselect('refresh');
 
+        if (daemonType === 'BidCos-Wired') {
+            receiverType = 'HMW_' + receiverType;
 
-
-
-        if (easymodes[receiverType] && easymodes[receiverType][senderType]) {
-            createEasymodes();
-        } else {
-            var translationFile = 'easymodes/localization/' + language + '/' + receiverType + '.json';
-            var easymodeFile = 'easymodes/' + receiverType + '/' + senderType + '.json';
-
-            $.getJSON(translationFile, function (data) {
-                console.log('easymode translation', translationFile, data);
-                easymodes.lang[language][receiverType] = data;
-                $.getJSON(easymodeFile, function (data) {
-                    console.log('easymode', easymodeFile, data);
-                    if (!easymodes[receiverType]) easymodes[receiverType] = {};
-                    easymodes[receiverType][senderType] = data;
-                    console.log('easymodes', easymodes);
-                    createEasymodes();
-                }).fail(function () {
-                    console.log('TODO! Easymode fail');
-                    createEasymodes();
-                });
-            }).fail(function () {
-                console.log('TODO! Easymode translation fail');
+            socket.emit('rpc', daemon, 'getParamset', [sender, 'MASTER'], function (err, res) {
+                var inputType = senderType !== 'VIRTUAL_KEY' ? (res && res.INPUT_TYPE) : '1';
+                senderType = senderType + '_' + inputType;
+                loadEasyModes();
             });
 
+        } else {
+            loadEasyModes();
         }
+
+
+        function loadEasyModes() {
+            linkSenderType = senderType;
+            linkReceiverType = receiverType;
+
+            //console.log('dialogLinkparamset ' + sender + ' (' + senderType + ') ' + receiver + ' (' + receiverType + ')');
+
+            if (easymodes[receiverType] && easymodes[receiverType][senderType]) {
+                createEasymodes();
+            } else {
+                var translationFile = 'easymodes/localization/' + language + '/' + receiverType + '.json';
+                var easymodeFile = 'easymodes/' + receiverType + '/' + senderType + '.json';
+
+                $.getJSON(translationFile, function (data) {
+                    //console.log('easymode loaded ', translationFile);
+                    easymodes.lang[language][receiverType] = data;
+                    $.getJSON(easymodeFile, function (data) {
+                        //console.log('easymode loaded', easymodeFile);
+                        if (!easymodes[receiverType]) easymodes[receiverType] = {};
+                        easymodes[receiverType][senderType] = data;
+                        createEasymodes();
+                    }).fail(function () {
+                        console.log('TODO! Easymode fail', easymodeFile);
+                        createEasymodes();
+                    });
+                }).fail(function () {
+                    console.log('TODO! Easymode translation fail', translationFile);
+                    easymodes.lang[language][receiverType] = {};
+                    $.getJSON(easymodeFile, function (data) {
+                        //console.log('easymode loaded', easymodeFile);
+                        if (!easymodes[receiverType]) easymodes[receiverType] = {};
+                        easymodes[receiverType][senderType] = data;
+                        createEasymodes();
+                    }).fail(function () {
+                        console.log('TODO! Easymode fail', easymodeFile);
+                        createEasymodes();
+                    });
+                });
+
+            }
+        }
+
 
         function createEasymodes() {
             var profiles = easymodes[receiverType] && easymodes[receiverType][senderType];
@@ -2197,6 +2451,7 @@ $(document).ready(function () {
                     easymodes.lang[language].GENERIC && easymodes.lang[language].GENERIC[profiles[id].name])
                     ||
                     profiles[id].name;
+
 
                 if (data2.UI_HINT == id) {
                     selected = ' selected';
@@ -2229,8 +2484,8 @@ $(document).ready(function () {
             $('#edit-linkparamset-receiver').val(receiver);
             $('#link-sender-params').attr('data-address', sender);
             $('#link-receiver-params').attr('data-address', receiver);
-            $('#link-sender').html(names[sender] + ' (' + sender + ')');
-            $('#link-receiver').html(names[receiver] + ' (' + receiver + ')');
+            $('#link-sender').html((names[sender] || '') + ' (' + sender + ')');
+            $('#link-receiver').html((names[receiver] || '') + ' (' + receiver + ')');
 
             // Buttons
             $('button.paramset-setValue:not(.ui-button)').button();
@@ -2424,7 +2679,6 @@ $(document).ready(function () {
 
     }
     function formEasyMode(data, desc, direction, sType, rType, prn) {
-        $('#linkparamset-input-receiver-sender-UI_HINT').val(prn);
 
         var receiverType;
         var senderType;
@@ -2450,7 +2704,8 @@ $(document).ready(function () {
             $('[id^="linkparamset-input-receiver-sender-"]').each(function () {
                 $(this).val($(this).attr('data-val-prev') || "");
             });
-
+            //console.log("$('#linkparamset-input-receiver-sender-UI_HINT').val(" + prn + ");")
+            $('#linkparamset-input-receiver-sender-UI_HINT').val(prn);
             $('#table-linkparamset2').show();
         } else {
             $tableEasymode.html('');
@@ -2486,6 +2741,8 @@ $(document).ready(function () {
                  elementEasyMode(options[param],  data[options[param].combo[0]]) + '</td></tr>');
 
             }
+            //console.log("$('#linkparamset-input-receiver-sender-UI_HINT').val(" + prn + ");")
+            $('#linkparamset-input-receiver-sender-UI_HINT').val(prn);
 
             $('#table-linkparamset2').hide();
             $('.easymode').show();
@@ -2529,6 +2786,8 @@ $(document).ready(function () {
                 var disabled = desc[param].OPERATIONS & 2;
                 var hidden = param === 'UI_HINT';
 
+               //console.log(param, data[param], desc[param]);
+
                 switch (desc[param].TYPE) {
                     case 'BOOL':
                         input = '<input class="linkparamset-input" id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '" type="checkbox" value="true" data-val-prev="' + data[param] + '" data-type="BOOL" ' + (data[param] ? ' checked="checked"' : '') + (disabled ? '' : ' disabled="disabled"') + '/>';
@@ -2560,7 +2819,7 @@ $(document).ready(function () {
                     case 'FLOAT':
                         data[param] = parseFloat(parseFloat(data[param]).toFixed(6));
                     default:
-                        input = '<input class="linkparamset-input" data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '" type="text" value="' + data[param] + '" data-val-prev="' + data[param] + '" data-type="FLOAT"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                        input = '<input class="linkparamset-input" data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '" type="text" value="' + data[param] + '" data-val-prev="' + data[param] + '" data-type="STRING"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                 }
                 var helpIcon = help ? '<img src="images/help.png" width="16" height="16" title="' + help + '">' : '';
 
@@ -2651,120 +2910,122 @@ $(document).ready(function () {
         }
     }
     function initGridRssi() {
-        if (!$gridRssi.hasClass('ui-jqgrid-btable')) {
-            var colNamesRssi = ['Name', 'ADDRESS', 'TYPE', 'INTERFACE', 'RF_ADDRESS', 'ROAMING'];
-            var colModelRssi = [
-                // TODO Name und Type fixed:false - Überschrifts und Inhaltsspalten stimmen nicht mehr... :-(
-                {name: 'Name', index: 'Name', width: 250, fixed: true},
-                {name: 'ADDRESS', index: 'ADDRESS', width: 84, fixed: true},
-                {name: 'TYPE', index: 'TYPE', width: 140, fixed: true},
-                {name: 'INTERFACE', index: 'INTERFACE', width: 84, fixed: true},
-                {name: 'RF_ADDRESS', index: 'RF_ADDRESS', width: 75, fixed: true},
-                {name: 'roaming', index: 'ROAMING', width: 57, fixed: true, search: false, align: 'center'}
-            ];
+        if ($gridRssi.hasClass('ui-jqgrid-btable') && $gridRssi.jqGrid) {
+            $gridRssi.jqGrid('GridUnload');
+        }
+        var colNamesRssi = ['Name', 'ADDRESS', 'TYPE', 'INTERFACE', 'RF_ADDRESS', 'ROAMING'];
+        var colModelRssi = [
+            // TODO Name und Type fixed:false - Überschrifts und Inhaltsspalten stimmen nicht mehr... :-(
+            {name: 'Name', index: 'Name', width: 250, fixed: true},
+            {name: 'ADDRESS', index: 'ADDRESS', width: 84, fixed: true},
+            {name: 'TYPE', index: 'TYPE', width: 140, fixed: true},
+            {name: 'INTERFACE', index: 'INTERFACE', width: 84, fixed: true},
+            {name: 'RF_ADDRESS', index: 'RF_ADDRESS', width: 75, fixed: true},
+            {name: 'roaming', index: 'ROAMING', width: 57, fixed: true, search: false, align: 'center'}
+        ];
 
-            var groupHeaders = [];
+        var groupHeaders = [];
 
-            for (var i = 0; i < listInterfaces.length; i++) {
-                colNamesRssi.push('<- dBm');
-                colNamesRssi.push('-> dBm');
-                colNamesRssi.push(' ');
-                colModelRssi.push({
-                    name: listInterfaces[i].ADDRESS + '_0',
-                    index: listInterfaces[i].ADDRESS + '_0',
-                    width: 47,
-                    fixed: true,
-                    search: false,
-                    align: 'right',
-                    formatter: rssiColor
-                });
-                colModelRssi.push({
-                    name: listInterfaces[i].ADDRESS + '_1',
-                    index: listInterfaces[i].ADDRESS + '_1',
-                    width: 47,
-                    fixed: true,
-                    search: false,
-                    align: 'right',
-                    formatter: rssiColor
-                });
-                colModelRssi.push({
-                    name: listInterfaces[i].ADDRESS + '_set',
-                    index: listInterfaces[i].ADDRESS + '_set',
-                    width: 28,
-                    fixed: true,
-                    search: false,
-                    align: 'center'
-                });
-                groupHeaders.push({
-                    startColumnName: listInterfaces[i].ADDRESS + '_0',
-                    numberOfColumns: 3,
-                    titleText: listInterfaces[i].ADDRESS + '<br/><span style="font-size: 9px;">(' + listInterfaces[i].DESCRIPTION + ')</span>'
-                });
+        for (var i = 0; i < listInterfaces.length; i++) {
+            colNamesRssi.push('<- dBm');
+            colNamesRssi.push('-> dBm');
+            colNamesRssi.push(' ');
+            colModelRssi.push({
+                name: listInterfaces[i].ADDRESS + '_0',
+                index: listInterfaces[i].ADDRESS + '_0',
+                width: 47,
+                fixed: true,
+                search: false,
+                align: 'right',
+                formatter: rssiColor
+            });
+            colModelRssi.push({
+                name: listInterfaces[i].ADDRESS + '_1',
+                index: listInterfaces[i].ADDRESS + '_1',
+                width: 47,
+                fixed: true,
+                search: false,
+                align: 'right',
+                formatter: rssiColor
+            });
+            colModelRssi.push({
+                name: listInterfaces[i].ADDRESS + '_set',
+                index: listInterfaces[i].ADDRESS + '_set',
+                width: 28,
+                fixed: true,
+                search: false,
+                align: 'center'
+            });
+            groupHeaders.push({
+                startColumnName: listInterfaces[i].ADDRESS + '_0',
+                numberOfColumns: 3,
+                titleText: listInterfaces[i].ADDRESS + '<br/><span style="font-size: 9px;">(' + listInterfaces[i].DESCRIPTION + ')</span>'
+            });
+        }
+
+
+        $gridRssi.jqGrid({
+            colNames: colNamesRssi,
+            colModel: colModelRssi,
+            datatype: 'local',
+            rowNum: 100,
+            autowidth: false,
+            width: '1000',
+            height: 600,
+            rowList: [25, 50, 100, 500],
+            pager: $('#pager-rssi'),
+            sortname: 'timestamp',
+            viewrecords: true,
+            sortorder: 'desc',
+            caption: 'RSSI',
+            subGrid: true,
+            ignoreCase: true,
+            subGridOptions: {
+                expandOnLoad: false
+            },
+            subGridRowExpanded: function (grid_id, row_id) {
+                subGridRssi(grid_id, row_id);
+            },
+            onSelectRow: function (rowid, iRow, iCol, e) {
+
+            },
+            gridComplete: function () {
+
+            },
+            ondblClickRow: function (rowid, iRow, iCol, e) {
+                removeSelectionAfterDblClick();
+                $gridRssi.jqGrid('toggleSubGridRow', rowid);
             }
 
+        }).navGrid('#pager-rssi', {
+            search: false,
+            edit: false,
+            add: false,
+            del: false,
+            refresh: false
+        }).jqGrid('filterToolbar', {
+            defaultSearch: 'cn',
+            autosearch: true,
+            searchOnEnter: false,
+            enableClear: false
+        }).jqGrid('setGroupHeaders', {
+            useColSpanStyle: true,
+            groupHeaders: groupHeaders
+        }).jqGrid('navButtonAdd', '#pager-rssi', {
+            caption: '',
+            buttonicon: 'ui-icon-refresh',
+            onClickButton: function () {
+                getRfdData();
+            },
+            position: 'first',
+            id: 'refresh-rssi',
+            title: _('Refresh'),
+            cursor: 'pointer'
+        });
+        $('#gbox_grid-rssi .ui-jqgrid-titlebar-close').hide();
 
-            $gridRssi.jqGrid({
-                colNames: colNamesRssi,
-                colModel: colModelRssi,
-                datatype: 'local',
-                rowNum: 100,
-                autowidth: false,
-                width: '1000',
-                height: 600,
-                rowList: [25, 50, 100, 500],
-                pager: $('#pager-rssi'),
-                sortname: 'timestamp',
-                viewrecords: true,
-                sortorder: 'desc',
-                caption: 'RSSI',
-                subGrid: true,
-                ignoreCase: true,
-                subGridOptions: {
-                    expandOnLoad: false
-                },
-                subGridRowExpanded: function (grid_id, row_id) {
-                    subGridRssi(grid_id, row_id);
-                },
-                onSelectRow: function (rowid, iRow, iCol, e) {
+        resizeGrids();
 
-                },
-                gridComplete: function () {
-
-                },
-                ondblClickRow: function (rowid, iRow, iCol, e) {
-                    removeSelectionAfterDblClick();
-                    $gridRssi.jqGrid('toggleSubGridRow', rowid);
-                }
-
-            }).navGrid('#pager-rssi', {
-                search: false,
-                edit: false,
-                add: false,
-                del: false,
-                refresh: false
-            }).jqGrid('filterToolbar', {
-                defaultSearch: 'cn',
-                autosearch: true,
-                searchOnEnter: false,
-                enableClear: false
-            }).jqGrid('setGroupHeaders', {
-                useColSpanStyle: true,
-                groupHeaders: groupHeaders
-            }).jqGrid('navButtonAdd', '#pager-rssi', {
-                caption: '',
-                buttonicon: 'ui-icon-refresh',
-                onClickButton: function () {
-                    getRfdData();
-                },
-                position: 'first',
-                id: 'refresh-rssi',
-                title: _('Refresh'),
-                cursor: 'pointer'
-            });
-            $('#gbox_grid-rssi .ui-jqgrid-titlebar-close').hide();
-
-            resizeGrids();
-        }
 
         function subGridRssi(grid_id, row_id) {
             var subgrid_table_id = 'rssi' + row_id + '_t';
@@ -2856,9 +3117,11 @@ $(document).ready(function () {
 
         indexDevices = {};
 
+
         var j = 0;
         for (var i = 0, len = listInterfaces.length; i < len; i++) {
             indexDevices[listInterfaces[i].ADDRESS] = listInterfaces[i];
+
             // TODO - performance improvement, add all rows at once!
             $gridRssi.jqGrid('addRowData', j++, {
                 Name: '',
@@ -3329,22 +3592,64 @@ $(document).ready(function () {
         });
     }
 
-    // RPC execution Wrappers
+    var rpcDialogQueue = [];
+
     function rpcDialog(daemon, cmd, params, callback) {
-        $('#rpc-command').html(cmd + ' ' + params[0]);
+
+        //rpcDialogShow(daemon, cmd, params, callback);
+        rpcDialogQueue.push({dialog:'rpcDialog', daemon: daemon, cmd: cmd, params: params, callback: callback});
+        if (!rpcDialogPending) rpcDialogShift();
+    }
+
+    var rpcDialogPending = false;
+
+        // RPC execution Wrappers
+    function rpcDialogShift() {
+
+        if (!rpcDialogQueue.length) {
+            return;
+        }
+        rpcDialogPending = true;
+
+        var tmp = rpcDialogQueue.shift();
+
+        var dialog = tmp.dialog;
+        var daemon = tmp.daemon;
+        var cmd = tmp.cmd;
+        var params = tmp.params;
+        var callback = tmp.callback;
+
+        $('#rpc-command').html(cmd + ' ' + params.join(' '));
         $('#rpc-message').html('');
         $dialogRpc.dialog('open');
-        $('#rpc-progress').show()
+        $('#rpc-progress').show();
+        //console.log('>', daemon, cmd, params);
         socket.emit('rpc', daemon, cmd, params, function (err, res) {
             $('#rpc-progress').hide();
             if (err) {
+                $dialogRpc.parent().children().children('.ui-dialog-titlebar-close').show();
                 $('#rpc-message').html('<span style="color: red; font-weight: bold;">' + (err.faultString ? err.faultString : JSON.stringify(err)) + '</span>');
+                setTimeout(function () {
+                    rpcDialogPending = false;
+                    rpcDialogShift();
+                }, 1000);
             } else if (res && res.faultCode) {
+                $dialogRpc.parent().children().children('.ui-dialog-titlebar-close').show();
                 $('#rpc-message').html('<span style="color: orange; font-weight: bold;">' + res.faultString + ' (' + res.faultCode + ')</span>');
+                setTimeout(function () {
+                    rpcDialogPending = false;
+                    rpcDialogShift();
+                }, 1000);
             } else {
+                $dialogRpc.parent().children().children('.ui-dialog-titlebar-close').hide();
                 $('#rpc-message').html('<span style="color: green;">success</span><br>' + res);
                 setTimeout(function () {
-                    $dialogRpc.dialog('close');
+                    rpcDialogPending = false;
+                    if (!rpcDialogQueue.length) {
+                        $dialogRpc.dialog('close');
+                    } else {
+                        rpcDialogShift();
+                    }
                 }, 1000);
             }
             if (typeof callback === 'function') callback(err, res);
@@ -3403,14 +3708,15 @@ $(document).ready(function () {
         if (y < 600) y = 600;
 
         $('#grid-devices, #grid-links, #grid-messages').setGridHeight(y - 148).setGridWidth(x - 18);
+
         $('#grid-events').css('height', (y - 84) + 'px').css('width', (x - 18) + 'px');
         $('#grid-events-inner').css('height', (y - 104) + 'px');
         $('#grid-interfaces')/*.setGridHeight(y - 99)*/.setGridWidth(x - 18);
-        $('#grid-rssi').setGridHeight(y - (177 + $('#gbox_grid-interfaces').height())).setGridWidth(x - 18);
+        $('#grid-rssi').setGridHeight(y - (180 + $('#gbox_grid-interfaces').height())).setGridWidth(x - 18);
 
         /*
          // funktioniert nicht mit gruppierten Headers :-(
-         // .updateColumns depreacted :-((
+         // .updateColumns deprecated :-((
 
          var table = $("#grid-rssi")[0];
          var r = table.rows[0], selftable = table;

@@ -40,7 +40,7 @@ var translation = {
     "Falls Gerät nicht erreichbar:": {"de": "Falls Gerät nicht erreichbar:", "en": "If device is unreachable:"},
     "bei nächster Gelegenheit löschen": {"de": "bei nächster Gelegenheit löschen", "en": "Delete later if possible"},
     "Nur aus Schnittstellenprozess löschen": {"de": "Nur aus Schnittstellenprozess löschen", "en": "Delete from interface process only"},
-    "Disconnected": {"de": "Verbindung unterbrpchen"},
+    "Disconnected": {"de": "Verbindung unterbrochen"},
     "Which device do you want to replace?": {"de": "Welches Gerät wollen sie ersetzen?"},
     "Gerät löschen": {"de": "Gerät löschen", "en": "Delete device"},
     "Acknowledge service messages":         {"de": "Servicemeldung bestätigen"},

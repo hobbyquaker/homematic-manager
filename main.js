@@ -7,29 +7,155 @@
  *
  */
 
-"use strict";
+const electron = require('electron');
+const app = electron.app;
+const Menu = electron.Menu;
+const ipc = electron.ipcMain;
+const BrowserWindow = electron.BrowserWindow;
+const dialog = electron.dialog;
 
-var fs =        require('fs');
-var http =      require('http');
+const Rpc = require('electron-ipc-rpc');
+let ipcRpc;
 
-var async =     require('async');
+const storage = require('electron-json-storage');
+const windowStateKeeper = require('electron-window-state');
+const isDev = require('electron-is-dev');
 
-var express =   require('express');
-var socketio =  require('socket.io');
+const net = require('net');
+const path = require('path');
+const url = require('url');
+const fs = require('fs');
+const http = require('http');
+const request = require('request');
 
-var xmlrpc =    require('homematic-xmlrpc');
-var binrpc =    require('binrpc');
+const pjson = require('persist-json')('hm-manager');
+const nextPort = require('nextport');
 
-var config =    require('./lib/config.js');
+const async = require('async');
 
-var app;
-var server;
+const xmlrpc = require('homematic-xmlrpc');
+const binrpc = require('binrpc');
+
+const config = {
+    "rpcListenIp": "0.0.0.0",
+    "rpcInitIp": "172.17.23.6",
+    "ccuAddress": "172.16.23.130",
+    "language": "de"
+};
+
+let mainWindow;
+
+function createWindow() {
+
+    let mainWindowState = windowStateKeeper({
+        defaultWidth: 1280,
+        defaultHeight: 620
+    });
+
+    let devWindowState = {
+        width: 1280,
+        height: 620
+    };
+
+    let windowState = isDev ? devWindowState : mainWindowState;
+
+    mainWindow = new BrowserWindow(windowState);
+
+    mainWindow.loadURL(url.format({
+        pathname: path.join(__dirname, 'www', 'index.html'),
+        protocol: 'file:',
+        slashes: true
+    }));
+
+    if (isDev) mainWindow.webContents.openDevTools();
+
+    ipcRpc = new Rpc(electron.ipcMain, mainWindow.webContents);
+    initIpc();
+
+    nextPort(2000, port => {
+        config.rpcListenPort = port;
+        nextPort(port + 1, portBin => {
+            config.rpcListenPortBin = portBin;
+            findInterfaces();
+        });
+    });
+}
+
+function checkservice(host, port, callback) {
+    const c = net.connect({
+        port,
+        host,
+        timeout: this.timeout
+    }, () => {
+        callback(null, true);
+        c.end();
+    });
+    c.on('error', () => {
+        callback(null, false);
+    });
+}
+
+let regaPresent = false;
+
+function findInterfaces() {
+    const ports = {
+        "BidCos-Wired": 2000,
+        "BidCos-RF": 2001,
+        "HmIP": 2010,
+        "CUxD": 8701,
+        "rega": 8181,
+    };
+    const queue = {};
+    Object.keys(ports).forEach(iface => {
+        queue[iface] = callback => {
+            checkservice(config.ccuAddress, ports[iface], callback);
+        }
+    });
+
+    async.parallel(queue, (err, res) => {
+        regaPresent = res.rega;
+        config.daemons = {};
+        Object.keys(res).forEach(iface => {
+            if (res[iface] && iface !== 'rega') {
+                config.daemons[iface] = {
+                    type: iface,
+                    ip: config.ccuAddress,
+                    port: ports[iface],
+                    protocol: iface === 'HmIP' ? 'xmlrpc' : 'binrpc',
+                    reinitTimeout: iface === 'HmIP' ? 240000 : 45000,
+                }
+            }
+        });
+        initRpcClients();
+        if (regaPresent) {
+            getRegaNames();
+        }
+    });
+}
+
+app.on('ready', () => {
+    createWindow();
+
+});
+
+app.on('window-all-closed', () => {
+    app.quit();
+});
+
+app.on('activate', () => {
+    console.log('...activate!');
+    if (mainWindow === null) {
+    //    createWindow();
+    }
+});
+
+
 var io;
 var rpc;
 
-var localNames = {};
-var localDevices = {};
-var localParamsetDescriptions = {};
+var localNames = pjson.load('names') || {};
+var localDevices = pjson.load('devices') || {};
+var localParamsetDescriptions = pjson.load('paramset-descriptions') || {};
 var rpcClients = {};
 
 var rpcServer;
@@ -40,43 +166,24 @@ var daemonIndex = {};
 var lastEvent = {};
 
 var log = {
-    debug: function (msg) {
-        if (config.debug) {
-            console.log(msg);
-        }
-    },
-    info: function (msg) {
-        console.log(msg);
-    },
-    error: function (msg) {
-        console.error(msg)
-    }
+    debug: console.log,
+    warning: console.log,
+    info: console.log,
+    error: console.log
 };
 
-
-loadJson(config.devicesFile, function (err, data) {
-    if (!err && data) localDevices = data;
-    loadJson(config.paramsetDescriptionsFile, function (err, data) {
-        if (!err && data) localParamsetDescriptions = data;
-        loadJson(config.namesFile, function (err, data) {
-            if (!err && data) localNames = data;
-            initWebServer();
-            initRpcClients();
-        });
-    });
-});
-
-
 function initRpcClients() {
+    log.info('initRpcClients');
 
     function init(_daemon) {
         var protocol = (config.daemons[_daemon].protocol === 'binrpc' ? 'xmlrpc_bin://' : 'http://');
         var port = (config.daemons[_daemon].protocol === 'binrpc' ? config.rpcListenPortBin : config.rpcListenPort);
-        var initUrl = protocol + config.rpcListenIp + ':' + port;
+        var initUrl = protocol + config.rpcInitIp + ':' + port;
         var ident = config.daemons[_daemon].ident;
 
         log.debug('RPC -> ' + config.daemons[_daemon].ip + ':' + config.daemons[_daemon].port + ' init ' + initUrl + ' ' + ident);
         rpcClients[_daemon].methodCall('init', [initUrl, ident], function (err, data) {
+            lastEvent[_daemon] = (new Date()).getTime();
             log.debug('    <- init response ' + JSON.stringify(err) + ' ' + JSON.stringify(data));
         });
     }
@@ -85,10 +192,11 @@ function initRpcClients() {
         var now = (new Date()).getTime();
         for (var daemon in config.daemons) {
             var elapsed = now - lastEvent[daemon];
-            if (elapsed > 45000) {
+            console.log(lastEvent, daemon, now, elapsed);
+            if (elapsed > (config.daemons[daemon].reinitTimeout || 45000)) {
                 log.debug('RPC -> re-init ' + daemon + ' ' + elapsed);
                 init(daemon);
-            } else if (elapsed > 29000) {
+            } else if (elapsed > (((config.daemons[daemon].reinitTimeout || 45000) / 1.5) - 1000)) {
                 log.debug('RPC -> ping ' + daemon + ' ' + elapsed);
                 rpcClients[daemon].methodCall('ping', ['hmm'], function (err, res) {
                     if (err) {
@@ -111,6 +219,7 @@ function initRpcClients() {
             port: config.daemons[daemon].port,
             path: '/'
         });
+
 
         initRpcServer(config.daemons[daemon].protocol);
 
@@ -136,13 +245,13 @@ function initRpcClients() {
 function initRpcServer(protocol) {
     var server;
     if (protocol === 'binrpc' && !rpcServerBinStarted) {
-        rpcServerBinStarted =  true;
-        rpcServerBin =      binrpc.createServer({host: config.rpcListenIp, port: config.rpcListenPortBin});
+        rpcServerBinStarted = true;
+        rpcServerBin = binrpc.createServer({host: config.rpcListenIp, port: config.rpcListenPortBin});
         server = rpcServerBin;
         log.debug('binrpc server listening on ' + config.rpcListenIp + ':' + (config.rpcListenPortBin));
     } else if (!rpcServerStarted) {
-        rpcServerStarted =  true;
-        rpcServer =         xmlrpc.createServer({host: config.rpcListenIp, port: config.rpcListenPort});
+        rpcServerStarted = true;
+        rpcServer = xmlrpc.createServer({host: config.rpcListenIp, port: config.rpcListenPort});
         server = rpcServer;
         log.debug('xmlrpc server listening on ' + config.rpcListenIp + ':' + (config.rpcListenPort));
     } else {
@@ -151,7 +260,7 @@ function initRpcServer(protocol) {
     }
 
     server.on('NotFound', function (method, params) {
-        log.debug('RPC <- undefined method ' + method + ' ' + JSON.stringify(params).slice(0,80));
+        log.debug('RPC <- undefined method ' + method + ' ' + JSON.stringify(params).slice(0, 80));
         io.sockets.emit('rpc', method, params);
     });
 
@@ -161,7 +270,7 @@ function initRpcServer(protocol) {
             if (rpcMethods[params[0][i].methodName]) {
                 response.push(rpcMethods[params[0][i].methodName](null, params[0][i].params));
             } else {
-                log.debug('RPC <- undefined method ' + method + ' ' + JSON.stringify(params).slice(0,80));
+                log.debug('RPC <- undefined method ' + method + ' ' + JSON.stringify(params).slice(0, 80));
                 response.push('');
             }
         }
@@ -169,22 +278,21 @@ function initRpcServer(protocol) {
     });
 
     server.on('event', function (err, params, callback) {
-        lastEvent[daemonIndex[params[0]]] = (new Date()).getTime();
         callback(null, rpcMethods.event(err, params));
     });
     server.on('newDevices', function (err, params, callback) {
         callback(null, rpcMethods.newDevices(err, params));
     });
-    server.on('deleteDevices', function(err, params, callback) {
+    server.on('deleteDevices', function (err, params, callback) {
         callback(null, rpcMethods.deleteDevices(err, params));
     });
-    server.on('replaceDevice', function(err, params, callback) {
+    server.on('replaceDevice', function (err, params, callback) {
         callback(null, rpcMethods.replaceDevice(err, params));
     });
-    server.on('listDevices', function(err, params, callback) {
+    server.on('listDevices', function (err, params, callback) {
         callback(null, rpcMethods.listDevices(err, params));
     });
-    server.on('system.listMethods', function(err, params, callback) {
+    server.on('system.listMethods', function (err, params, callback) {
         callback(null, rpcMethods['system.listMethods'](err, params));
     });
 
@@ -193,52 +301,56 @@ function initRpcServer(protocol) {
 var rpcMethods = {
     event: function (err, params) {
         log.debug('RPC <- event ' + JSON.stringify(params));
-        io.sockets.emit('rpc', 'event', params);
+        lastEvent[daemonIndex[params[0]]] = (new Date()).getTime();
+        ipcRpc.send('rpc', ['event', params]);
+        //io.sockets.emit('rpc', 'event', params);
         return '';
     },
     newDevices: function (err, params) {
         log.debug('RPC <- newDevices ' + JSON.stringify(params).slice(0, 80));
-        io.sockets.emit('rpc', 'newDevices', params);
+        ipcRpc.send('rpc', ['newDevices', params]);
+        //io.sockets.emit('rpc', 'newDevices', params);
+        mainWindow.webContents.send('rpc', ['newDevices', params]);
         var daemon = daemonIndex[params[0]];
-        lastEvent[daemon] = (new Date()).getTime();
         if (!localDevices[daemon]) localDevices[daemon] = {};
         for (var i = 0; i < params[1].length; i++) {
             var dev = params[1][i];
             localDevices[daemon][dev.ADDRESS] = dev;
         }
-        saveJson(config.devicesFile, localDevices);
+        pjson.save('devices', localDevices);
         return '';
     },
     deleteDevices: function (err, params) {
         log.debug('RPC <- deleteDevices ' + JSON.stringify(params));
-        io.sockets.emit('rpc', 'deleteDevices', params);
+        ipcRpc.send('rpc', ['deleteDevices', params]);
+        //io.sockets.emit('rpc', 'deleteDevices', params);
         var daemon = daemonIndex[params[0]];
-        lastEvent[daemon] = (new Date()).getTime();
         if (!localDevices[daemon] || !params[1]) return;
 
         for (var i = 0; i < params[1].length; i++) {
             var address = params[1][i];
             delete localDevices[daemon][address];
         }
-        saveJson(config.devicesFile, localDevices);
+        pjson.save('devices', localDevices);
         return '';
     },
     replaceDevice: function (err, params) {
         log.debug('RPC <- replaceDevice ' + JSON.stringify(params));
-        io.sockets.emit('rpc', 'replaceDevice', params);
+        ipcRpc.send('rpc', ['replaceDevice', params]);
+        //io.sockets.emit('rpc', 'replaceDevice', params);
         var daemon = daemonIndex[params[0]];
-        lastEvent[daemon] = (new Date()).getTime();
         if (!localDevices[daemon] || !params[1]) return;
         localNames[params[2]] = localNames[params[1]];
         delete localNames[params[1]];
-        saveJson(config.namesFile, localNames);
+        pjson.save('names', localNames);
         delete localDevices[daemon][params[1]];
-        saveJson(config.devicesFile, localDevices);
+        pjson.save('devices', localDevices);
         return '';
     },
     listDevices: function (err, params) {
         log.debug('RPC <- listDevices ' + JSON.stringify(params));
-        io.sockets.emit('rpc', 'listDevices', params);
+        ipcRpc.send('rpc', ['listDevices', params]);
+        //io.sockets.emit('rpc', 'listDevices', params);
         var daemon = daemonIndex[params[0]];
         var res = [];
         for (var address in localDevices[daemon]) {
@@ -252,41 +364,45 @@ var rpcMethods = {
     }
 };
 
-function initSocket() {
+function initIpc() {
 
-    io.sockets.on('connection', function (socket) {
+    ipcRpc.on('getConfig', function (params, callback) {
+        console.log('getConfig!');
+        callback(null, config);
+    });
 
-        socket.on('getConfig', function (callback) {
-            callback(config);
-        });
+    ipcRpc.on('getNames', function (params, callback) {
+        callback(null, localNames);
+    });
 
-        socket.on('getNames', function (callback) {
-            callback(localNames);
-        });
+    ipcRpc.on('setName', function (address, name, callback) {
+        localNames[address] = name;
+        log.debug('local rename ' + address + ' "' + name + '"');
+        if (!address.match(/:/)) {
+            localNames[address + ':0'] = name + ':0';
+        }
 
-        socket.on('setName', function (address, name, callback) {
-                localNames[address] = name;
-                log.debug('local rename ' + address + ' "' + name + '"');
-                if (!address.match(/:/)) {
-                    localNames[address + ':0'] = name + ':0';
-                }
-                saveJson(config.namesFile, localNames, function () {
-                    if (callback) callback();
-                });
-        });
-
-        socket.on('rpc', function (daemon, method, paramArray, callback) {
-            if (!rpcClients[daemon]) {
-                log.debug('RPC unknown daemon ' + daemon);
-                if (callback) {
-                    callback(new Error('unknown daemon'), null);
-                }
-                return;
-            }
-            if (method) rpcProxy(daemon, method, paramArray, callback);
-        });
+         pjson.save('names', localNames, function () {
+            if (callback) callback();
+         });
 
     });
+
+    ipcRpc.on('rpc', function (params, callback) {
+        console.log('ipcRpc <', params);
+        const daemon = params[0];
+        const method = params[1];
+        const paramArray = params[2];
+        if (!rpcClients[daemon]) {
+            log.debug('RPC unknown daemon ' + daemon);
+            if (callback) {
+                callback(new Error('unknown daemon'), null);
+            }
+            return;
+        }
+        if (method) rpcProxy(daemon, method, paramArray, callback);
+    });
+
 }
 
 function rpcProxy(daemon, method, params, callback) {
@@ -302,7 +418,6 @@ function rpcProxy(daemon, method, params, callback) {
 
         case 'getParamsetDescription':
             var dev = localDevices[daemon][params[0]];
-            console.log('...', params[0], dev);
             var ident = dev.TYPE + '/' + dev.VERSION + '/' + params[1];
             if (dev.PARENT_TYPE) ident = dev.PARENT_TYPE + '/' + ident;
 
@@ -312,7 +427,7 @@ function rpcProxy(daemon, method, params, callback) {
             } else {
                 rpcClients[daemon].methodCall(method, params, function (error, result) {
                     if (!error && result) localParamsetDescriptions[ident] = result;
-                    saveJson(config.paramsetDescriptionsFile, localParamsetDescriptions);
+                    pjson.save('paramset-descriptions', localParamsetDescriptions);
                     if (callback) callback(error, result);
                 });
             }
@@ -326,58 +441,61 @@ function rpcProxy(daemon, method, params, callback) {
     }
 }
 
-function initWebServer() {
-    app = express();
-    app.use('/', express.static(__dirname + '/www'));
-    server = require('http').createServer(app);
-    server.listen(config.webServerPort);
 
-    io = socketio.listen(server);
 
-    // FIXME redirect socket.io log
-    /*
-    io.set('logger', {
-        debug: function(obj) {
-            log.debug('socket.io debug: ' + obj);
-        },
-        info: function(obj) {
-            log.info('socket.io info: ' + obj);
-        },
-        error: function(obj) {
-            log.error('socket.io error: ' + obj);
-        },
-        warn: function(obj) {
-            log.error('socket.io warn: ' + obj);
+function rega(script, callback) {
+    const url = 'http://' + config.ccuAddress + ':8181/rega.exe';
+    log.debug('sending script to', url);
+    request({
+        method: 'POST',
+        url,
+        body: script,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': script.length
         }
-    });
-    */
-    initSocket();
-
-    log.info('webserver/socket.io listening on port ' + config.webServerPort);
-}
-
-
-
-
-function saveJson(file, obj, callback) {
-    log.debug('saveJson ' + file);
-    fs.writeFile(file, JSON.stringify(obj, null, '    '), function (err) {
-        if (callback) {
+    }, (err, res, body) => {
+        if (!err && body) {
+            const end = body.indexOf('<xml>');
+            const data = body.substr(0, end);
+            callback(null, data);
+        } else {
             callback(err);
         }
     });
 }
 
-function loadJson(file, callback) {
-    log.debug('loadJson ' + file);
-    fs.readFile(file, function (err, data) {
+function regaJson(file, callback) {
+    const filepath = path.join(__dirname, 'regascripts', file);
+    const script = fs.readFileSync(filepath).toString();
+    rega(script, (err, res) => {
         if (err) {
-            callback(err, null);
+            log.error(err);
         } else {
-            callback(null, JSON.parse(data.toString()));
+            try {
+                callback(null, JSON.parse(unescape(res)));
+            } catch (err) {
+                callback(err);
+            }
         }
     });
 }
+
+function getRegaNames() {
+    console.log('getRegaNames');
+    regaJson('devices.fn', (err, res) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(res);
+            Object.keys(res).forEach(address => {
+                localNames[address] = res[address].name;
+            });
+            pjson.save('names', localNames);
+        }
+    })
+}
+
 
 
 
@@ -412,6 +530,10 @@ function stop() {
     });
     setTimeout(stop, 2000);
 }
+
+
+
+
 
 process.on('SIGINT', stop);
 process.on('SIGTERM', stop);

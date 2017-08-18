@@ -1,31 +1,40 @@
 {
   "name": "homematic-manager",
-  "version": "1.0.14",
-  "preferGlobal": true,
+  "version": "2.0.0-alpha.0",
+  "private": true,
   "dependencies": {
     "async": "^1.0.0",
     "binrpc": "^0.1.3",
     "daemonize2": "~0.4.2",
+    "electron-ipc-rpc": "^1.1.0",
+    "electron-is-dev": "^0.1.2",
+    "electron-json-storage": "^3.0.5",
+    "electron-window-state": "^4.1.1",
     "encoding": "~0.1.8",
     "express": "^4.12.3",
+    "free-jqgrid": "^4.14.1",
     "homematic-xmlrpc": ">=1.0.0",
+    "jquery": "^2.2.4",
+    "jquery-ui": "^1.12.1",
+    "jquery-ui-dist": "^1.12.1",
     "mkdirp": "^0.5.1",
+    "nextport": "^1.0.0",
+    "persist-json": "^1.1.0",
+    "request": "^2.81.0",
     "socket.io": "^1.3.5",
+    "ui-contextmenu": "^1.17.0",
     "yargs": "^3.9.0"
   },
   "devDependencies": {
-    "grunt": "^0.4.5",
-    "grunt-contrib-jshint": "^0.11.2",
-    "grunt-contrib-uglify": "^0.9.1",
+    "electron": "^1.6.11",
+    "electron-builder": "^19.8.0",
     "html-entities": "^1.1.2"
   },
   "description": "Webinterface for HomeMatic interface processes (rfd, hs485d, Homegear)",
   "main": "main.js",
-  "bin": {
-    "hm-manager": "./daemon.js"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "electron": "electron ."
   },
   "repository": {
     "type": "git",
@@ -47,7 +56,7 @@
   "contributors": [
     "André 'Anli' Litfin"
   ],
-  "license": "CC BY-NC-SA 4.0",
+  "license": "CC-BY-NC-SA-4.0",
   "bugs": {
     "url": "https://github.com/hobbyquaker/homematic-manager/issues"
   },

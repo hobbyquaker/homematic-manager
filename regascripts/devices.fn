@@ -1,0 +1,43 @@
+!# devices.fn hm2mqtt
+!#
+!# Dieses Homematic-Script gibt eine Liste aller Geraete/Kanaele im JSON Format aus
+!#
+!# 3'2013-8'2017 hobbyquaker https://github.com/hobbyquaker
+!#
+
+string sDevId;
+string sChnId;
+
+Write('{');
+
+boolean dFirst = true;
+
+foreach (sDevId, root.Devices().EnumUsedIDs()) {
+
+    object oDevice   = dom.GetObject(sDevId);
+    boolean bDevReady = oDevice.ReadyConfig();
+
+    if (bDevReady) {
+
+        if (dFirst) {
+          dFirst = false;
+        } else {
+          WriteLine(',');
+        }
+
+        Write('"' # oDevice.Address() # '":{"name": "');
+        WriteURL(oDevice.Name());
+        Write('", "id": ' # sDevId # '}');
+
+        foreach(sChnId, oDevice.Channels()) {
+        	object oChannel = dom.GetObject(sChnId);
+            WriteLine(',');
+          	Write('"' # oChannel.Address() # '":{"name":"');
+        	WriteURL(oChannel.Name());
+        	Write('", "id": ' # sChnId # '}');
+        }
+
+    }
+}
+
+Write('}');

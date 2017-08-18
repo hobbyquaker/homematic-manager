@@ -7,14 +7,23 @@
  *
  */
 
-"use strict";
 
-;(function ($) {
-$(document).ready(function () {
+const ipc =         require('electron').ipcRenderer;
+const Rpc = require('electron-ipc-rpc');
+const ipcRpc = new Rpc(ipc);
+
+window.$ = window.jQuery = require('jquery');
+require('../../node_modules/jquery-ui-dist/jquery-ui.min');
+require('../../node_modules/ui-contextmenu/jquery.ui-contextmenu');
+require('../../node_modules/free-jqgrid/dist/jquery.jqgrid.min')(window, $);
+
+$(document).ready(startRenderer);
+
+function startRenderer() {
+    console.log('start renderer!');
 
     var language = 'de';
 
-    var socket = io.connect();
     var daemon;
     var daemonType;
     var daemonDevices = {};
@@ -87,64 +96,67 @@ $(document).ready(function () {
     var $dialogReplace =                $('#dialog-replace');
 
     // Entrypoint
-    socket.on('connect', getConfig);
+    getConfig();
 
-    socket.on('disconnect', function () {
+    ipcRpc.on('disconnect', function () {
         $dialogDisconnect.dialog('open');
     });
 
     // Incoming Events
-    socket.on('rpc', function (method, params) {
+    ipcRpc.on('rpc', function (data, callback) {
+        console.log('< rpc', data[0], data[1].length)
+        var method = data[0];
+        var params = data[1];
         if (!config || !daemon) return;
         var daemonIdent = params[0];
         if (daemonIdent != config.daemons[daemon].ident) return;
-         switch (method) {
-             case 'newDevices':
-                 var devArr = params[1];
-                 $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html(_('New devices'));
-                 var count = 0;
-                 var output = '';
-                 for (var i = 0; i < devArr.length; i++) {
-                     if (devArr[i].ADDRESS.match(/:/)) continue;
-                     count += 1;
-                     output += '<br/>' + devArr[i].ADDRESS + ' (' + devArr[i].TYPE + ')';
-                 }
-                 $('#alert').html('<h3>' + count + ' ' + _('new') + ' ' + _('device') + (count == 1 ? '' : (language == 'de' ? 'e' : 's')) + ' ' + _('introduced') + ':</h3>' + output);
-                 $("#dialog-alert").dialog('open');
-                 getDevices(function () {
-                     getLinks(function () {
-                         getRfdData();
-                     });
-                 });
-                 break;
-             case 'deleteDevices':
-                 var devArr = params[1];
-                 $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html(_('Devices deleted'));
+        switch (method) {
+            case 'newDevices':
+                var devArr = params[1];
+                $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html(_('New devices'));
                 var count = 0;
-                 var output = '';
-                 for (var i = 0; i < devArr.length; i++) {
-                     if (devArr[i].match(/:/)) continue;
-                     count += 1;
-                     output += '<br/>' + devArr[i];
-                 }
-                 $('#alert').html('<h3>' + count + ' ' + _('device') + (count == 1 ? '' : (language == 'de' ? 'e' : 's')) + ' ' + _('deleted') + ':</h3>' + output);
-                 $("#dialog-alert").dialog('open');
-                 getDevices(function () {
-                     getLinks(function () {
-                         getRfdData();
-                     });
-                 });
-                 break;
-             case 'replaceDevice':
-                 getNames(function () {
-                     getDevices(function () {
-                         getLinks(function () {
-                             getRfdData();
-                         });
-                     });
-                 });
-                 break;
-             case 'event':
+                var output = '';
+                for (var i = 0; i < devArr.length; i++) {
+                    if (devArr[i].ADDRESS.match(/:/)) continue;
+                    count += 1;
+                    output += '<br/>' + devArr[i].ADDRESS + ' (' + devArr[i].TYPE + ')';
+                }
+                $('#alert').html('<h3>' + count + ' ' + _('new') + ' ' + _('device') + (count == 1 ? '' : (language == 'de' ? 'e' : 's')) + ' ' + _('introduced') + ':</h3>' + output);
+                $("#dialog-alert").dialog('open');
+                getDevices(function () {
+                    getLinks(function () {
+                        getRfdData();
+                    });
+                });
+                break;
+            case 'deleteDevices':
+                var devArr = params[1];
+                $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html(_('Devices deleted'));
+                var count = 0;
+                var output = '';
+                for (var i = 0; i < devArr.length; i++) {
+                    if (devArr[i].match(/:/)) continue;
+                    count += 1;
+                    output += '<br/>' + devArr[i];
+                }
+                $('#alert').html('<h3>' + count + ' ' + _('device') + (count == 1 ? '' : (language == 'de' ? 'e' : 's')) + ' ' + _('deleted') + ':</h3>' + output);
+                $("#dialog-alert").dialog('open');
+                getDevices(function () {
+                    getLinks(function () {
+                        getRfdData();
+                    });
+                });
+                break;
+            case 'replaceDevice':
+                getNames(function () {
+                    getDevices(function () {
+                        getLinks(function () {
+                            getRfdData();
+                        });
+                    });
+                });
+                break;
+            case 'event':
                 var address = params[1];
                 var param = params[2];
                 var value = params[3];
@@ -234,6 +246,7 @@ $(document).ready(function () {
 
     // i18n
     function _(word) {
+
         if (translation[word]) {
             if (translation[word][language]) {
                 return translation[word][language];
@@ -271,20 +284,22 @@ $(document).ready(function () {
     }
     function getConfig() {
         firstLoad = true;
-        //console.log('getConfig');
-        socket.emit('getConfig', function (data) {
+        console.log('getConfig');
+        ipcRpc.send('getConfig', [], function (err, data) {
+            console.log('getConfigReply');
+            console.log(data);
             config = data;
             $('.version').html(config.version);
             language = config.language || 'de';
 
             $.getJSON('easymodes/localization/' + language + '/GENERIC.json', function (data) {
-                //console.log('easymode generic', data);
+                console.log('easymode generic', data);
                 if (!easymodes.lang[language]) easymodes.lang[language] = {};
                 easymodes.lang[language].GENERIC = data;
                 $.getJSON('easymodes/localization/' + language + '/PNAME.json', function (data) {
                     //console.log('easymode loaded pname', data);
                     easymodes.lang[language].PNAME = data;
-                    //console.log('easymodes', easymodes);
+                    console.log('easymodes', easymodes);
                 });
             });
 
@@ -300,29 +315,35 @@ $(document).ready(function () {
             initGridLinks();
             initConsole();
 
+            $('#loader').hide();
+
             var tmp = window.location.hash.slice(1).split('/');
             hash = tmp[1];
 
             var count = 0;
-            $selectBidcosDaemon.html('');
-            for (var daemon in config.daemons) {
-                count += 1;
-                $selectBidcosDaemon.append('<option value="' + daemon + '"' + (hash == daemon ? ' selected' : '') + '>' + daemon + /*' (' + 'http://' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')*/ '</option>');
-            }
-            if (count == 1) {
-                $selectBidcosDaemon.hide();
-            } else {
-                $selectBidcosDaemon.multiselect({
-                    classes: 'select-daemon',
-                    multiple: false,
-                    header: false,
-                    selectedList: 1,
-                    minWidth: 100
-                });
-            }
+            if ($selectBidcosDaemon) {
 
-            $('#select-bidcos-daemon option').removeAttr('selected');
-            $('#select-bidcos-daemon option[value="' + tmp[1] + '"]').attr('selected', true);
+
+                $selectBidcosDaemon.html('');
+                for (var daemon in config.daemons) {
+                    count += 1;
+                    $selectBidcosDaemon.append('<option value="' + daemon + '"' + (hash == daemon ? ' selected' : '') + '>' + daemon + /*' (' + 'http://' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')*/ '</option>');
+                }
+                if (count == 1) {
+                    $selectBidcosDaemon.hide();
+                } else {
+                    $selectBidcosDaemon.multiselect({
+                        classes: 'select-daemon',
+                        multiple: false,
+                        header: false,
+                        selectedList: 1,
+                        minWidth: 100
+                    });
+                }
+
+                $('#select-bidcos-daemon option').removeAttr('selected');
+                $('#select-bidcos-daemon option[value="' + tmp[1] + '"]').attr('selected', true);
+            }
             if (tmp[2]) {
                 var index = $('#tabs-main a[href="#' + tmp[2] + '"]').parent().index();
                 $tabsMain.tabs("option", "active", index - 2);
@@ -332,13 +353,16 @@ $(document).ready(function () {
                 initDaemon();
                 // at this point everything should be initialized
                 $dialogDisconnect.dialog('close');
-                $('#loader').hide('fade');
+
             });
 
         });
+        ipcRpc.send('getConfig');
+
     }
     function getNames(callback) {
-        socket.emit('getNames', function (data) {
+        ipcRpc.send('getNames', [], function (err, data) {
+            console.log('getNamesReply');
             names = data;
             if (typeof callback === 'function') callback();
         });
@@ -355,11 +379,15 @@ $(document).ready(function () {
                 $('#tabs-main ul.ui-tabs-nav').prepend('<li><select id="select-bidcos-daemon"></select></li>');
                 $selectBidcosDaemon = $('#select-bidcos-daemon');
 
-                $('#tabs-main ul.ui-tabs-nav').prepend('<li class="header">HomeMatic Manager</li>');
+                $selectBidcosDaemon.change(function () {
+                    initDaemon();
+                });
+
+                $('#tabs-main ul.ui-tabs-nav').prepend('<li class=""></li>');
 
                 $(".ui-tabs-nav").
-                    append("<button title='Help' class='menu-button translateT' id='button-help'></button>").
-                    append("<button title='Settings' value='Theme wählen' class='menu-button translateT' id='button-config'></button>");
+                append("<button title='Help' class='menu-button translateT' id='button-help'></button>").
+                append("<button title='Settings' value='Theme wählen' class='menu-button translateT' id='button-config'></button>");
                 // append("<span style='visibility: hidden; width:15px; height:15px; padding-top:5px; margin-right:10px; float:right;'><span title='Kommunikation' id='ajaxIndicator' style='width:15px; height: 15px;' class='ui-icon ui-icon-transfer-e-w'></span></span>");
 
                 $('#button-help').button({
@@ -383,9 +411,7 @@ $(document).ready(function () {
             }
         });
 
-        $selectBidcosDaemon.change(function () {
-            initDaemon();
-        });
+
 
     }
     function initDialogsMisc() {
@@ -437,6 +463,7 @@ $(document).ready(function () {
         });
     }
     function initDaemon() {
+        console.log('initDaemon');
         indexSourceRoles = {};
         indexTargetRoles = {};
         daemon = $('#select-bidcos-daemon option:selected').val();
@@ -505,6 +532,8 @@ $(document).ready(function () {
                 resizeGrids();
             }
 
+            $('#event-table').html('');
+
             getDevices(function (err) {
                 if (err) {
                     dialogAlert(err.syscall + ' ' + daemon + ' (' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')<br><br><span style="color: red;">' + err.code + '</span>', _('Error'));
@@ -524,7 +553,8 @@ $(document).ready(function () {
     // Devices
     function getDevices(callback) {
         $('#load_grid-devices').show();
-        socket.emit('rpc', daemon, 'listDevices', [], function (err, data) {
+        ipcRpc.send('rpc', [daemon, 'listDevices'], function (err, data) {
+            console.log('listDevices Reply', data);
             indexChannels = {};
             indexSourceRoles = {};
             indexTargetRoles = {};
@@ -872,7 +902,7 @@ $(document).ready(function () {
                         var renameName = $('#rename-name').val();
                         var rowid = $('#rename-rowid').val();
                         var gridid = $('#rename-gridid').val();
-                        socket.emit('setName', renameAddress, renameName, function () {
+                        ipcRpc.send('setName', [renameAddress, renameName], function () {
                             if (renameAddress.match(/:/)) {
                                 // Rename Channel
                                 var $gridCh = $('#' + gridid);
@@ -909,7 +939,7 @@ $(document).ready(function () {
                                     children.forEach(function (child) {
                                         names[child] = renameName + ':' + children.indexOf(child);
                                         //console.log('setName', child, names[child]);
-                                        socket.emit('setName', child, names[child]);
+                                        ipcRpc.send('setName', [child, names[child]]);
                                     });
                                 }
 
@@ -918,7 +948,7 @@ $(document).ready(function () {
                                 $gridDevices.jqGrid('toggleSubGridRow', rowid);
                                 $gridDevices.closest(".ui-jqgrid-bdiv").scrollTop(scrollPosition);
 
-                                if (config.daemons[daemon].type !== 'BidCos-Wired') {
+                                if (config.daemons[daemon].type === 'BidCos-RF') {
                                     refreshGridRssi();
                                 }
                             }
@@ -1003,40 +1033,40 @@ $(document).ready(function () {
                 ignoreCase: true,
                 //multiselect: true,
                 /*beforeSelectRow: function (rowid, e) {
-                    if (e.toElement.className === 'cbox' && !e.shiftKey) return true;
-                    if (!e.ctrlKey && !e.shiftKey && !e.metaKey) {
-                        $subgrid.jqGrid('resetSelection');
-                        return true;
-                    } else if (e.shiftKey) {
-                        var initialRowSelect = $subgrid.jqGrid('getGridParam', 'selrow');
-                        $subgrid.jqGrid('resetSelection');
-    
-                        var CurrentSelectIndex = $subgrid.jqGrid('getInd', rowid);
-                        var InitialSelectIndex = $subgrid.jqGrid('getInd', initialRowSelect);
-                        var startID = "";
-                        var endID = "";
-                        if (CurrentSelectIndex > InitialSelectIndex) {
-                            startID = initialRowSelect;
-                            endID = rowid;
-                        } else {
-                            startID = rowid;
-                            endID = initialRowSelect;
-                        }
+                 if (e.toElement.className === 'cbox' && !e.shiftKey) return true;
+                 if (!e.ctrlKey && !e.shiftKey && !e.metaKey) {
+                 $subgrid.jqGrid('resetSelection');
+                 return true;
+                 } else if (e.shiftKey) {
+                 var initialRowSelect = $subgrid.jqGrid('getGridParam', 'selrow');
+                 $subgrid.jqGrid('resetSelection');
 
-                        for (var i = startID; i <= endID; i++) {
-                            console.log(i);
-                            $subgrid.jqGrid('setSelection', i, i !== startID);
-                        }
+                 var CurrentSelectIndex = $subgrid.jqGrid('getInd', rowid);
+                 var InitialSelectIndex = $subgrid.jqGrid('getInd', initialRowSelect);
+                 var startID = "";
+                 var endID = "";
+                 if (CurrentSelectIndex > InitialSelectIndex) {
+                 startID = initialRowSelect;
+                 endID = rowid;
+                 } else {
+                 startID = rowid;
+                 endID = initialRowSelect;
+                 }
 
-                        unselect();
-                        return false;
+                 for (var i = startID; i <= endID; i++) {
+                 console.log(i);
+                 $subgrid.jqGrid('setSelection', i, i !== startID);
+                 }
 
-                    } else if (e.ctrlKey || e.metaKey) {
-                        console.log('meta', rowid)
-                        //$subgrid.jqGrid('setSelection', rowid, false);
-                        return true;
-                    }
-                },*/
+                 unselect();
+                 return false;
+
+                 } else if (e.ctrlKey || e.metaKey) {
+                 console.log('meta', rowid)
+                 //$subgrid.jqGrid('setSelection', rowid, false);
+                 return true;
+                 }
+                 },*/
                 onSelectRow: function (rowid, e) {
 
                     // unselect other subgrids but not myself
@@ -1083,7 +1113,9 @@ $(document).ready(function () {
 
                     var paramsets = '';
                     for (var j = 0; j < listDevices[i].PARAMSETS.length; j++) {
-                        if (listDevices[i].PARAMSETS[j] == 'LINK') continue;
+                        if (listDevices[i].PARAMSETS[j] === 'LINK' || listDevices[i].PARAMSETS[j] === 'SERVICE') {
+                            continue;
+                        }
                         var idButton = 'paramset_' + listDevices[i].ADDRESS + '_' + listDevices[i].PARAMSETS[j];
                         paramsets += '<button class="paramset device-table" data-address="' + listDevices[i].ADDRESS + '" data-paramset="' + listDevices[i].PARAMSETS[j] +'" id="' + idButton + '">' + listDevices[i].PARAMSETS[j] + '</button>';
                     }
@@ -1209,7 +1241,7 @@ $(document).ready(function () {
     }
     function replaceDevice() {
         var address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam','selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
-        socket.emit('rpc', daemon, 'listReplaceableDevices', [address], function (err, data) {
+        ipcRpc.send('rpc', [daemon, 'listReplaceableDevices', [address]], function (err, data) {
             if (err) {
                 alert(_('RPC error') + '\n\n' + JSON.stringify(err));
                 return;
@@ -1290,7 +1322,7 @@ $(document).ready(function () {
             return;
         }
 
-        socket.emit('rpc', daemon, 'getParamsetDescription', [address, 'VALUES'], function (err, data) {
+        ipcRpc.send('rpc', [daemon, 'getParamsetDescription', [address, 'VALUES']], function (err, data) {
             var queue = [];
             for (var param in data) {
                 queue.push(param);
@@ -1300,9 +1332,11 @@ $(document).ready(function () {
                 if (queue.length > 0) {
                     var param = queue.pop();
                     //console.log('reportValueUsage', address, param, value);
-                    socket.emit('rpc', daemon, 'reportValueUsage', [address, param, value], function (err, data) {
+
+                    ipcRpc.send('rpc', [daemon, 'reportValueUsage', [address, param, value]], function (err, data) {
                         popQueue();
                     });
+
                 }
             }
 
@@ -1318,7 +1352,11 @@ $(document).ready(function () {
         $dialogDelDevice.dialog('open');
     }
     function dialogParamset(data, desc, address, paramset) {
-        //console.log('dialogParamset', data, desc, address, paramset);
+        console.log('dialogParamset', data, desc, address, paramset);
+        if (!data) {
+            $('#load_grid-devices').hide();
+            return;
+        }
 
         // Tabelle befüllen
         $tableParamset.show().html('<tr><th class="paramset-1">Param</th><th class="paramset-2">&nbsp;</th><th class="paramset-3">Value</th><th class="paramset-4">Default</th><th></th></tr>');
@@ -1331,7 +1369,7 @@ $(document).ready(function () {
                 if (desc[param].UNIT == '�C') desc[param].UNIT = '°C';
 
                 var defaultVal = desc[param].DEFAULT;
-
+console.log('defaultVal', defaultVal)
                 // Calculate percent values
                 if (desc[param].UNIT == '100%') {
                     unit = '%';
@@ -1339,7 +1377,8 @@ $(document).ready(function () {
                     defaultVal *= 100;
 
                 } else {
-                    unit = desc[param].UNIT;
+                    unit = desc[param].UNIT || '';
+                    if (unit === '""') unit = '';
                 }
 
                 // Create Input-Field
@@ -1364,6 +1403,10 @@ $(document).ready(function () {
                         break;
                     case 'ENUM':
                         input = '<select data-address="' + address + '" data-paramset="' + paramset + '" data-param="' + param + '" data-val-prev="' + data[param] + '" data-type="INTEGER" id="paramset-input-' + param + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
+                        if (typeof desc[param].MIN === 'string') {
+                            desc[param].MIN = desc[param].VALUE_LIST.indexOf(desc[param].MIN);
+                            desc[param].MAX = desc[param].VALUE_LIST.indexOf(desc[param].MAX);
+                        }
                         for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
                             input += '<option value="' + i + '"' + (data[param] == i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
                             if (helpentry) {
@@ -1386,13 +1429,15 @@ $(document).ready(function () {
 
                         }
                         input += '</select>';
-                        defaultVal = desc[param].VALUE_LIST[defaultVal];
+                        if (typeof defaultVal !== 'string') {
+                            defaultVal = desc[param].VALUE_LIST[defaultVal];
+                        }
                         break;
                     case 'FLOAT':
                         input = '<input data-address="' + address + '" data-paramset="' + paramset + '" data-param="' + param + '" data-val-prev="' + data[param] + '" data-type="FLOAT" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                         break;
                     default:
-                        //console.log('unknown type', desc[param].TYPE);
+                        console.log('unknown type', desc[param].TYPE);
                         // Todo this should not happen
                         input = '<input data-address="' + address + '" data-paramset="' + paramset + '" data-param="' + param + '" data-val-prev="' + data[param] + '" data-type="STRING" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                 }
@@ -1671,40 +1716,40 @@ $(document).ready(function () {
             caption:    _('Links'),
             ignoreCase: true,
             /* multiselect: true,
-            beforeSelectRow: function (rowid, e) {
-                if (!e.ctrlKey && !e.shiftKey && !e.metaKey) {
-                    $gridLinks.jqGrid('resetSelection');
-                    return true;
-                } else if (e.shiftKey) {
-                    var initialRowSelect = $gridLinks.jqGrid('getGridParam', 'selrow');
-                    $gridLinks.jqGrid('resetSelection');
+             beforeSelectRow: function (rowid, e) {
+             if (!e.ctrlKey && !e.shiftKey && !e.metaKey) {
+             $gridLinks.jqGrid('resetSelection');
+             return true;
+             } else if (e.shiftKey) {
+             var initialRowSelect = $gridLinks.jqGrid('getGridParam', 'selrow');
+             $gridLinks.jqGrid('resetSelection');
 
-                    var CurrentSelectIndex = $gridLinks.jqGrid('getInd', rowid);
-                    var InitialSelectIndex = $gridLinks.jqGrid('getInd', initialRowSelect);
-                    var startID = "";
-                    var endID = "";
-                    if (CurrentSelectIndex > InitialSelectIndex) {
-                        startID = initialRowSelect;
-                        endID = rowid;
-                    } else {
-                        startID = rowid;
-                        endID = initialRowSelect;
-                    }
+             var CurrentSelectIndex = $gridLinks.jqGrid('getInd', rowid);
+             var InitialSelectIndex = $gridLinks.jqGrid('getInd', initialRowSelect);
+             var startID = "";
+             var endID = "";
+             if (CurrentSelectIndex > InitialSelectIndex) {
+             startID = initialRowSelect;
+             endID = rowid;
+             } else {
+             startID = rowid;
+             endID = initialRowSelect;
+             }
 
-                    for (var i = startID; i <= endID; i++) {
-                        console.log(i);
-                        $gridLinks.jqGrid('setSelection', i, i !== startID);
-                    }
+             for (var i = startID; i <= endID; i++) {
+             console.log(i);
+             $gridLinks.jqGrid('setSelection', i, i !== startID);
+             }
 
-                    unselect();
-                    return false;
+             unselect();
+             return false;
 
-                } else if (e.ctrlKey || e.metaKey) {
-                    console.log('meta', rowid)
-                    //$subgrid.jqGrid('setSelection', rowid, false);
-                    return true;
-                }
-            },*/
+             } else if (e.ctrlKey || e.metaKey) {
+             console.log('meta', rowid)
+             //$subgrid.jqGrid('setSelection', rowid, false);
+             return true;
+             }
+             },*/
             onSelectRow: function (rowid, iRow, iCol, e) {
                 $('#del-link').removeClass('ui-state-disabled');
                 $('#rename-link').removeClass('ui-state-disabled');
@@ -1881,7 +1926,7 @@ $(document).ready(function () {
             gridComplete: function () {
 
             },
-            hiddengrid: true
+            hiddengrid: false
         });
 
         $('#gbox_grid-interfaces .ui-jqgrid-titlebar-close').click(function () {
@@ -2006,20 +2051,21 @@ $(document).ready(function () {
     function refreshGridLinks() {
         $gridLinks.jqGrid('clearGridData');
         var rowData = [];
-        for (var i = 0, len = listLinks.length; i < len; i++) {
-            if (names[listLinks[i].SENDER]) listLinks[i].Sendername = names[listLinks[i].SENDER];
-            if (names[listLinks[i].RECEIVER]) listLinks[i].Receivername = names[listLinks[i].RECEIVER];
+        if (listLinks) {
+            for (var i = 0, len = listLinks.length; i < len; i++) {
+                if (names[listLinks[i].SENDER]) listLinks[i].Sendername = names[listLinks[i].SENDER];
+                if (names[listLinks[i].RECEIVER]) listLinks[i].Receivername = names[listLinks[i].RECEIVER];
 
-            listLinks[i].SENDER_TYPE = indexChannels[listLinks[i].SENDER] && indexChannels[listLinks[i].SENDER].TYPE;
-            listLinks[i].RECEIVER_TYPE = indexChannels[listLinks[i].RECEIVER] && indexChannels[listLinks[i].RECEIVER].TYPE;
+                listLinks[i].SENDER_TYPE = indexChannels[listLinks[i].SENDER] && indexChannels[listLinks[i].SENDER].TYPE;
+                listLinks[i].RECEIVER_TYPE = indexChannels[listLinks[i].RECEIVER] && indexChannels[listLinks[i].RECEIVER].TYPE;
 
 
+                listLinks[i]._id = i;
+                rowData.push(listLinks[i]);
 
-            listLinks[i]._id = i;
-            rowData.push(listLinks[i]);
-
+            }
+            $gridLinks.jqGrid('addRowData', '_id', rowData);
         }
-        $gridLinks.jqGrid('addRowData', '_id', rowData);
         $gridLinks.trigger('reloadGrid');
     }
     function initDialogLinkParamset() {
@@ -2296,11 +2342,11 @@ $(document).ready(function () {
 
                 // Überspringe Param falls keine Änderung stattgefunden hat und kein Multiedit stattfindet
                 if (!isMulti && (
-                    (val === true && dataValPrev === 'true') ||
-                    (val === false && dataValPrev === 'false') ||
-                    (val == dataValPrev) ||
-                    (!isNaN(dataValPrev) && parseFloat(dataValPrev) == parseFloat(val))
-                )) return;
+                        (val === true && dataValPrev === 'true') ||
+                        (val === false && dataValPrev === 'false') ||
+                        (val == dataValPrev) ||
+                        (!isNaN(dataValPrev) && parseFloat(dataValPrev) == parseFloat(val))
+                    )) return;
 
                 //console.log(param, val, elem, type, $input.attr('id'));
 
@@ -2369,7 +2415,7 @@ $(document).ready(function () {
             if (indexChannels[link.SENDER].TYPE !== senderType) return;
             var name = (link.NAME ? link.NAME + ' - ' : '') +
                 (names[link.SENDER] ? names[link.SENDER] + ' (' + link.SENDER + ')' : link.SENDER) +
-                    ' -> ' +
+                ' -> ' +
                 (names[link.RECEIVER] ? names[link.RECEIVER] + ' (' + link.RECEIVER + ')' : link.RECEIVER);
             //console.log(name);
             $selectLinkParamsetMultiselect.append('<option value="' + link.SENDER + ';' + link.RECEIVER + '">' + name + '</option>')
@@ -2380,7 +2426,7 @@ $(document).ready(function () {
         if (daemonType === 'BidCos-Wired') {
             receiverType = 'HMW_' + receiverType;
 
-            socket.emit('rpc', daemon, 'getParamset', [sender, 'MASTER'], function (err, res) {
+            ipcRpc.send('rpc', [daemon, 'getParamset', [sender, 'MASTER']], function (err, res) {
                 var inputType = senderType !== 'VIRTUAL_KEY' ? (res && res.INPUT_TYPE) : '1';
                 senderType = senderType + '_' + inputType;
                 loadEasyModes();
@@ -2735,10 +2781,10 @@ $(document).ready(function () {
                         easymodes.lang[language][receiverType].GENERIC &&
                         easymodes.lang[language][receiverType].GENERIC[options[param].desc]
                     )
-                    ;
+                ;
 
                 $tableEasymode.append('<tr><td>' + tmp + '</td><td style="font-size: 8px"></td><td>' +
-                 elementEasyMode(options[param],  data[options[param].combo[0]]) + '</td></tr>');
+                    elementEasyMode(options[param],  data[options[param].combo[0]]) + '</td></tr>');
 
             }
             //console.log("$('#linkparamset-input-receiver-sender-UI_HINT').val(" + prn + ");")
@@ -2786,7 +2832,7 @@ $(document).ready(function () {
                 var disabled = desc[param].OPERATIONS & 2;
                 var hidden = param === 'UI_HINT';
 
-               //console.log(param, data[param], desc[param]);
+                //console.log(param, data[param], desc[param]);
 
                 switch (desc[param].TYPE) {
                     case 'BOOL':
@@ -2894,17 +2940,25 @@ $(document).ready(function () {
 
     // RF
     function getRfdData() {
-        if (config.daemons[daemon].type == 'BidCos-RF') {
+        if (config.daemons[daemon].type === 'BidCos-RF' || config.daemons[daemon].type === 'HmIP') {
             $('#load_grid-interfaces').show();
             rpcAlert(daemon, 'listBidcosInterfaces', [], function (err, data) {
+                console.log('listBidcosInterfaces', data);
                 listInterfaces = data;
-                initGridRssi();
-                $('#load_grid-rssi').show();
-                rpcAlert(daemon, 'rssiInfo', [], function (err, data) {
-                    listRssi = data;
-                    refreshGridRssi();
+                if (config.daemons[daemon].type === 'BidCos-RF') {
+                    $('#load_grid-rssi').show();
+                    rpcAlert(daemon, 'rssiInfo', [], function (err, data) {
+                        listRssi = data;
+                        $('#gbox_grid-rssi').show();
+                        initGridRssi();
+                        refreshGridRssi();
+                        getServiceMessages();
+                    });
+                } else {
+                    $('#gbox_grid-rssi').hide();
                     getServiceMessages();
-                });
+                }
+
                 refreshGridInterfaces();
             });
         }
@@ -3175,6 +3229,7 @@ $(document).ready(function () {
     }
     function refreshGridInterfaces() {
         $gridInterfaces.jqGrid('clearGridData');
+        console.log(listInterfaces);
         for (var i = 0, len = listInterfaces.length; i < len; i++) {
             $gridInterfaces.jqGrid('addRowData', i, listInterfaces[i]);
         }
@@ -3359,7 +3414,7 @@ $(document).ready(function () {
             }
 
             $consoleRpcResponse.html('...');
-            socket.emit('rpc', daemon, method, params, function (err, data) {
+            ipcRpc.send('rpc', [daemon, method, params], function (err, data) {
                 if (err) {
                     $('#console-rpc-error').html('Error: ' + err.faultString);
                 } else {
@@ -3383,13 +3438,51 @@ $(document).ready(function () {
             return;
         }
 
+        $consoleRpcMethod.html('');
+
+        // Würgaround https://github.com/eq-3/occu/issues/53
+        var hmipExclude = [
+            'activateLinkParamset',
+            'addDevice',
+            'changeKey',
+            'clearConfigCache',
+            'determineParameter',
+            'getKeyMismatchDevice',
+            'getLinkPeers',
+            'listTeams',
+            'logLevel',
+            'restoreConfigToDevice',
+            'rssiInfo',
+            'searchDevices',
+            'setTeam',
+            'setTempKey',
+            'updateFirmware',
+            'setBidcosInterface',
+            'getMetadata',
+            'setMetadata',
+            'getAllMetadata',
+            'abortDeleteDevice',
+            'hasVolatileMetadata',
+            'setVolatileMetadata',
+            'getVolatileMetadata',
+            'deleteVolatileMetadata',
+            'setInterfaceClock',
+            'replaceDevice',
+            'listReplaceableDevices'
+        ];
+
         rpcAlert(daemon, 'system.listMethods', [], function (err, data) {
             if (err) {
                 return;
             }
+            data.sort();
+            console.log('system.listMethods', daemon, data);
+
             for (var i = 0; i < data.length; i++) {
                 var method = data[i];
-                $consoleRpcMethod.append('<option value="' + method + '">' + method + '</option>');
+                if ((config.daemons[daemon].type !== 'HmIP') || (hmipExclude.indexOf(method) === -1)) {
+                    $consoleRpcMethod.append('<option value="' + method + '">' + method + '</option>');
+                }
             }
             $consoleRpcMethod.multiselect('refresh');
         });
@@ -3399,10 +3492,12 @@ $(document).ready(function () {
         $('#console-rpc-error').html('');
         setValueDesc = null;
         var method = $consoleRpcMethod.val();
-        if (rpcMethods[method].help[language]) {
-            $('#console-rpc-method-help').html(rpcMethods[method].help[language]);
-        } else {
-            $('#console-rpc-method-help').html(rpcMethods[method].help.de);
+        if (rpcMethods[method] && rpcMethods[method].help) {
+            if (rpcMethods[method].help[language]) {
+                $('#console-rpc-method-help').html(rpcMethods[method].help[language]);
+            } else {
+                $('#console-rpc-method-help').html(rpcMethods[method].help.de);
+            }
         }
         var params = rpcMethods[method].params;
         var heading = '<span style="color:#777">' + rpcMethods[method].returns + '</span> ' + method + '(';
@@ -3603,7 +3698,7 @@ $(document).ready(function () {
 
     var rpcDialogPending = false;
 
-        // RPC execution Wrappers
+    // RPC execution Wrappers
     function rpcDialogShift() {
 
         if (!rpcDialogQueue.length) {
@@ -3624,7 +3719,7 @@ $(document).ready(function () {
         $dialogRpc.dialog('open');
         $('#rpc-progress').show();
         //console.log('>', daemon, cmd, params);
-        socket.emit('rpc', daemon, cmd, params, function (err, res) {
+        ipcRpc.send('rpc', [daemon, cmd, params], function (err, res) {
             $('#rpc-progress').hide();
             if (err) {
                 $dialogRpc.parent().children().children('.ui-dialog-titlebar-close').show();
@@ -3656,10 +3751,10 @@ $(document).ready(function () {
         });
     }
     function rpcAlert(daemon, cmd, params, callback) {
-        socket.emit('rpc', daemon, cmd, params, function (err, res) {
+        ipcRpc.send('rpc', [daemon, cmd, params], function (err, res) {
             if (err) {
                 alert(daemon + ' ' + cmd + '\n' + JSON.stringify(err));
-            } else if (res.faultCode) {
+            } else if (res && res.faultCode) {
                 alert(daemon + ' ' + cmd + '\n' + JSON.stringify(res));
             }
             if (typeof callback === 'function') callback(err, res);
@@ -3755,5 +3850,4 @@ $(document).ready(function () {
 
     };
 
-});
-})(jQuery);
+}

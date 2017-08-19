@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "async": "^1.0.0",
-    "binrpc": "^0.1.3",
+    "binrpc": "^3.1.0",
     "daemonize2": "~0.4.2",
     "electron-ipc-rpc": "^1.1.0",
     "electron-is-dev": "^0.1.2",
@@ -23,6 +23,7 @@
     "request": "^2.81.0",
     "socket.io": "^1.3.5",
     "ui-contextmenu": "^1.17.0",
+    "yalm": "^4.0.2",
     "yargs": "^3.9.0"
   },
   "devDependencies": {

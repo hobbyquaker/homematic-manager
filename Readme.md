@@ -1,78 +1,30 @@
 # Homematic Manager
 
-[English language Readme](Readme.en.md)
+[![Dependency Status](https://david-dm.org/hobbyquaker/homematic-manager/status.svg)](https://david-dm.org/hobbyquaker/homematic-manager)
+[![macOS and Linux Build Status](https://travis-ci.org/hobbyquaker/homematic-manager.svg?branch=master)](https://travis-ci.org/hobbyquaker/homematic-manager)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/hobbyquaker/homematic-manager?branch=master&svg=true)](https://ci.appveyor.com/project/hobbyquaker/homematic-manager)
+[![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
+[![License][mit-badge]][mit-url]
+
+> Version 2: alpha - work in progress, unfertig und voller Bugs. Umbau als Electron-App.
+
 
 ## Dokumentation
 
-Der Homematic Manager ist ein Web-Interface für [HomeMatic](http://www.homematic.com)-Schnittstellenprozesse
-(rfd, hs485d, [Homegear](http://www.homegear.eu)).
+Der Homematic Manager ist ein Konfigurationswerkzeug für [HomeMatic](http://www.homematic.com)-Schnittstellenprozesse
+(rfd, hs485d, hmipserver/crRFD und [Homegear](http://www.homegear.eu)).
 
-Mit dem Homematic Manager ist es möglich Geräte an- und abzumelden, Geräte-Konfigurationen und Direktverknüpfungen zu
-Verwalten und vieles mehr.
+Mit dem Homematic Manager ist es möglich Geräte an- und abzulernen, Geräte-Konfigurationen und Direktverknüpfungen zu
+verwalten und vieles mehr.
+
 
 ### Installation
 
-* Homematic Manager setzt eine [Node.js](http://nodejs.org/download/) Installation inkl. npm voraus.
-* Installation: ````sudo npm install -g homematic-manager````
+Unter [latest releases](https://github.com/hobbyquaker/homematic-manager/releases/latest) sind Downloads für macOS, 
+Linux und Windows zu finden.
 
-### Konfiguration
-
-Konfigurationsdatei `~/.hm-manager/hm-manager.json` (bzw. vor dem ersten Start `/usr/local/lib/node_modules/homematic-manager/settings-default.json`) bearbeiten:
-
-IP Adressen auf der die Schnttstellenprozesse rfd/hs485d erreichbar sind (CCU- bzw. BidCoS®-Service IP-Adresse) anpassen. 
-
-Ausserdem muss die IP-Adresse auf der der HomeMatic-Manager selbst erreichbar ist unter ````rpcListenIp```` eingetragen werden.
-
-Es können beliebig viele Schnittstellenprozesse konfiguriert werden.
-
-Nach einer Änderung der Konfigurationsdatei muss der Homematic Manager neu gestartet werden.
-
-#### Beispielkonfiguration
-
-* HomeMatic CCU mit Funk und Wired, IP-Adresse 192.168.1.100
-* RaspberryPi auf dem (u.A.) der Homematic Manager läuft: 192.168.1.50
-* zweite HomeMatic CCU nur mit Funk im Büro (per VPN an Heimnetz angebunden), IP-Adresse 10.23.42.200
-
-```javascript
-{
-  "language": "de",
-  "webServerPort": 8081,
-  "rpcListenIp": "192.168.1.50",
-  "rpcListenPort": "2015",
-  "rpcListenPortBin": "2016",
-  "daemons": {
-    "rf_home": {
-      "type": "BidCos-RF",
-      "ip": "192.168.100",
-      "port": 2001,
-      "protocol": "binrpc"
-    },
-    "wired_home": {
-      "type": "BidCos-Wired",
-      "ip": "192.168.100",
-      "port": 2000,
-      "protocol": "binrpc"
-    },
-    "rf_office": {
-      "type": "BidCos-RF",
-      "ip": "10.23.42.200",
-      "port": 2001,
-      "protocol": "binrpc"
-    }
-  }
-}
-```
-
-### Homematic Manager starten
-
-* ```hm-manager start```
 
 ## FAQ
-
-#### Warum haben die Geräte alle keinen Namen?
-
-Weil die Schnittstellenprozesse nur mit den Adressen arbeiten. Du kannst allerdings im Homematic Manager den Geräten
-problemlos einen Namen zuweisen oder alle Namen von einer CCU importieren: ```node /usr/local/lib/node_modules/homematic-manager/tools/import_rega_names.js <CCU IP>```
 
 #### Wie kann ich den Status eines Aktors sehen oder einen Aktor schalten?
 
@@ -86,6 +38,9 @@ und klicke auf putParamset.
 
 ## Changelog
 
+### 2.0.0
+* (hobbyquaker) Umbau in Electron App, HmIP Anpassungen, diverse Fixes
+
 ### 1.0.13
 * (hobbyquaker) Mehrere (Link-)Paramsets auf einmal bearbeiten
 * (hobbyquaker) Geräte Thumbnails
@@ -94,7 +49,6 @@ und klicke auf putParamset.
 * (hobbyquaker) Sonderbehandlung Anlernen von Wired Geräten (RPC searchDevices statt addDevice)
 * (hobbyquaker) Easymodes ergänzt, Sonderbehandlung Wired Verknüpfungen (PUSH_BUTTON vs SWITCH)
 * (hobbyquaker) Diverse Fixes und Korrekturen
-
 
 ### 1.0.12
 * (hobbyquaker) Service-Message Popup für RSSI_* Nachrichten unterbunden Fix https://github.com/hobbyquaker/homematic-manager/issues/34
@@ -128,7 +82,6 @@ und klicke auf putParamset.
 * (hobbyquaker) Installation als Node-Modul
 * (hobbyquaker) diverse Fixes und Verbesserungen
 
-
 ### 0.9.4
 * (Anli) Alle Servicemeldungen auf einmal bestätigen
 * (Anli) Hilfe ergänzt, Hilfs-Popups auch bei MASTER-Paramsets
@@ -156,7 +109,6 @@ und klicke auf putParamset.
 * (Hobbyquaker) einzelne Service-Meldung bestätigen
 * (Hobbyquaker) Geräte löschen, Geräte anlernen
 * (Hobbyquaker) Tabellen refreshen
-
 
 ### 0.3.1
 * (Hobbyquaker) Zuordnung von Geräten zu Interfaces, Roaming aktivieren/deaktivieren
@@ -216,7 +168,8 @@ und klicke auf putParamset.
 
 ## Lizenz
 
-Copyright (c) 2014, 2015 Anli, Hobbyquaker
+Copyright (c) 2014-2017 Sebastian Raff
+Copyright (c) 2014, 2015 Anli
 
 [CC BY-NC-SA 4.0](http://creativecommons.org/licenses/by-nc-sa/4.0/)
 

@@ -232,3 +232,10 @@ textarea {
     margin-left: -1px;
     margin-bottom: -3px;
 }
+
+#connection-indicator {
+    font-size: 10px;
+    display: inline-block;
+    padding-top: 4px;
+    margin-left: 12px;
+}

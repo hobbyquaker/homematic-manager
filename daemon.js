@@ -8,9 +8,9 @@
  *
  */
 
-var config = require('./lib/config.js');
+const config = require('./lib/config.js');
 
-var daemon = require('daemonize2').setup({
+const daemon = require('daemonize2').setup({
     main: 'main.js',
     name: 'hm-manager',
     pidfile: config.pidFile
@@ -31,17 +31,18 @@ switch (process.argv[2]) {
         break;
 
     case 'restart':
-        daemon.stop(function(err) {
+        daemon.stop(err => {
             daemon.start();
         });
         break;
 
     case 'status':
         var pid = daemon.status();
-        if (pid)
+        if (pid) {
             console.log('Daemon running. PID: ' + pid);
-        else
+        } else {
             console.log('Daemon is not running.');
+        }
         break;
 
     default:

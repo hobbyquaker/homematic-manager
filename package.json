@@ -1,6 +1,6 @@
 {
   "name": "homematic-manager",
-  "version": "2.0.0-alpha.0",
+  "version": "2.0.0-alpha.1",
   "private": true,
   "dependencies": {
     "async": "^2.5.0",
@@ -11,7 +11,7 @@
     "free-jqgrid": "^4.14.1",
     "hm-discover": "^1.0.0",
     "homematic-xmlrpc": "^1.0.2",
-    "jquery": "^2.2.4",
+    "jquery": "^3.2.1",
     "jquery-ui-dist": "^1.12.1",
     "nextport": "^1.0.0",
     "persist-json": "^1.1.0",

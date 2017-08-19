@@ -66,8 +66,6 @@
     "linux": {
       "target": [
         "deb",
-        "rpm",
-        "pacman",
         "tar.gz"
       ]
     },

@@ -1,11 +1,15 @@
-/* global $, window, location, document, alert */
+/* global $, window, document, alert */
+/* eslint-disable import/no-unassigned-import */
 
 const ipc = require('electron').ipcRenderer;
 const Rpc = require('electron-ipc-rpc');
 
 const ipcRpc = new Rpc(ipc);
 
-window.$ = window.jQuery = require('jquery');
+window.$ = require('jquery');
+
+window.jQuery = window.$;
+
 require('../../node_modules/jquery-ui-dist/jquery-ui.min');
 require('../../node_modules/ui-contextmenu/jquery.ui-contextmenu');
 require('../../node_modules/jquery-ui-multiselect-widget/src/jquery.multiselect');
@@ -14,17 +18,16 @@ require('../../node_modules/free-jqgrid/dist/jquery.jqgrid.min')(window, $);
 require('../../node_modules/free-jqgrid/dist/i18n/grid.locale-de')(window, $);
 
 const deviceImages = require('./deviceImages.json');
-const help_linkParamset = require('./helpLinkParamset.json');
+const helpLinkParamset = require('./helpLinkParamset.json');
 const rpcMethods = require('./rpcMethods.json');
 const translation = require('./language.json');
-const missesTranslation = {};
 
+const missesTranslation = {};
 
 let language = 'de';
 
 let daemon;
 let daemonType;
-const daemonDevices = {};
 let config = {};
 let listDevices;
 let indexDevices;
@@ -48,6 +51,8 @@ let linkReceiverType;
 
 let setValueParamsetDescription;
 let setValueDesc;
+
+let rpcDialogPending = false;
 
 const $body = $('body');
 const $gridDevices = $('#grid-devices');
@@ -115,30 +120,29 @@ ipcRpc.on('connection', connected => {
 });
 
 // Incoming Events
-ipcRpc.on('rpc', (data, callback) => {
-    const method = data[0];
-    const params = data[1];
+ipcRpc.on('rpc', data => {
+    const [method, params] = data;
     if (!config || !daemon) {
         return;
     }
     const daemonIdent = params[0];
-    if (daemonIdent != config.daemons[daemon].ident) {
+    if (daemonIdent !== config.daemons[daemon].ident) {
         return;
     }
     switch (method) {
-        case 'newDevices':
-            var devArr = params[1];
+        case 'newDevices': {
+            const devArr = params[1];
             $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html(_('New devices'));
-            var count = 0;
-            var output = '';
-            for (var i = 0; i < devArr.length; i++) {
+            let count = 0;
+            let output = '';
+            for (let i = 0; i < devArr.length; i++) {
                 if (devArr[i].ADDRESS.match(/:/)) {
                     continue;
                 }
                 count += 1;
                 output += '<br/>' + devArr[i].ADDRESS + ' (' + devArr[i].TYPE + ')';
             }
-            $('#alert').html('<h3>' + count + ' ' + _('New') +  (count > 1 ? '' : (language === 'de' ? 's' : '')) + ' ' + _('Device') + (count === 1 ? '' : (language === 'de' ? 'e' : 's')) + ' ' + _('introduced') + ':</h3>' + output);
+            $('#alert').html('<h3>' + count + ' ' + _('New') + (count > 1 ? '' : (language === 'de' ? 's' : '')) + ' ' + _('Device') + (count === 1 ? '' : (language === 'de' ? 'e' : 's')) + ' ' + _('introduced') + ':</h3>' + output);
             $('#dialog-alert').dialog('open');
             getDevices(() => {
                 getLinks(() => {
@@ -146,19 +150,20 @@ ipcRpc.on('rpc', (data, callback) => {
                 });
             });
             break;
-        case 'deleteDevices':
-            var devArr = params[1];
+        }
+        case 'deleteDevices': {
+            const devArr = params[1];
             $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html(_('Devices deleted'));
-            var count = 0;
-            var output = '';
-            for (var i = 0; i < devArr.length; i++) {
+            let count = 0;
+            let output = '';
+            for (let i = 0; i < devArr.length; i++) {
                 if (devArr[i].match(/:/)) {
                     continue;
                 }
                 count += 1;
                 output += '<br/>' + devArr[i];
             }
-            $('#alert').html('<h3>' + count + ' ' + _('device') + (count == 1 ? '' : (language == 'de' ? 'e' : 's')) + ' ' + _('deleted') + ':</h3>' + output);
+            $('#alert').html('<h3>' + count + ' ' + _('device') + (count === 1 ? '' : (language === 'de' ? 'e' : 's')) + ' ' + _('deleted') + ':</h3>' + output);
             $('#dialog-alert').dialog('open');
             getDevices(() => {
                 getLinks(() => {
@@ -166,7 +171,8 @@ ipcRpc.on('rpc', (data, callback) => {
                 });
             });
             break;
-        case 'replaceDevice':
+        }
+        case 'replaceDevice': {
             getNames(() => {
                 getDevices(() => {
                     getLinks(() => {
@@ -175,20 +181,19 @@ ipcRpc.on('rpc', (data, callback) => {
                 });
             });
             break;
-        case 'event':
-            var address = params[1];
-            var param = params[2];
-            var value = params[3];
+        }
+        case 'event': {
+            const [, address, param, value] = params;
 
-            var timestamp = new Date();
-            var ts = timestamp.getFullYear() + '-' +
+            const timestamp = new Date();
+            const ts = timestamp.getFullYear() + '-' +
                 ('0' + (timestamp.getMonth() + 1).toString(10)).slice(-2) + '-' +
                 ('0' + (timestamp.getDate()).toString(10)).slice(-2) + ' ' +
                 ('0' + (timestamp.getHours()).toString(10)).slice(-2) + ':' +
                 ('0' + (timestamp.getMinutes()).toString(10)).slice(-2) + ':' +
                 ('0' + (timestamp.getSeconds()).toString(10)).slice(-2);
 
-            var name = names && names[address] ? names[address] : '';
+            const name = names && names[address] ? names[address] : '';
 
             $('#event-table').prepend('<tr class="ui-widget-content jqgrow ui-row-ltr "><td class="event-column-1">' + ts + '</td><td class="event-column-2">' + name + '</td><td class="event-column-3">' + address + '</td><td class="event-column-4">' + param + '</td><td class="event-column-5">' + value + '</td></tr>');
 
@@ -196,13 +201,13 @@ ipcRpc.on('rpc', (data, callback) => {
             if (!listMessages) {
                 listMessages = [];
             }
-            if (address.slice(-2) === ':0' && (param !== 'RSSI_PEER' && param !== 'RSSI_DEVICE')) {
+            if (address.endsWith(':0') && (param !== 'RSSI_PEER' && param !== 'RSSI_DEVICE')) {
                 let done;
                 if (value) {
                     // Muss Meldung hinzugefügt werden?
                     done = false;
-                    for (var i = 0; i < listMessages.length; i++) {
-                        if (listMessages[i][0] == address && listMessages[i][1] == param) {
+                    for (let i = 0; i < listMessages.length; i++) {
+                        if (listMessages[i][0] === address && listMessages[i][1] === param) {
                             done = true;
                         }
                     }
@@ -219,8 +224,8 @@ ipcRpc.on('rpc', (data, callback) => {
                 } else {
                     // Muss Meldung gelöscht werden?
                     done = true;
-                    for (var i = 0; i < listMessages.length; i++) {
-                        if (listMessages[i][0] == address && listMessages[i][1] == param) {
+                    for (let i = 0; i < listMessages.length; i++) {
+                        if (listMessages[i][0] === address && listMessages[i][1] === param) {
                             done = false;
                         }
                     }
@@ -236,7 +241,7 @@ ipcRpc.on('rpc', (data, callback) => {
                 const elem = $this[0].nodeName;
                 const type = $this.attr('type');
                 let val = value;
-                if ($this.attr('data-unit') == '100%') {
+                if ($this.attr('data-unit') === '100%') {
                     val = (value || 0) * 100;
                 }
 
@@ -261,8 +266,8 @@ ipcRpc.on('rpc', (data, callback) => {
                         $this.html(val);
                 }
             });
-
             break;
+        }
         default:
     }
 });
@@ -292,18 +297,6 @@ function translate() {
     });
 }
 
-// Common
-function unselect() {
-    if (window.getSelection) {
-        if (window.getSelection().empty) {  // Chrome
-            window.getSelection().empty();
-        } else if (window.getSelection().removeAllRanges) {  // Firefox
-            window.getSelection().removeAllRanges();
-        }
-    } else if (document.selection) {  // IE?
-        document.selection.empty();
-    }
-}
 function getConfig() {
     firstLoad = true;
     ipcRpc.send('getConfig', [], (err, data) => {
@@ -349,11 +342,11 @@ function getConfig() {
         let count = 0;
         if ($selectBidcosDaemon) {
             $selectBidcosDaemon.html('');
-            for (const daemon in config.daemons) {
+            Object.keys(config.daemons).forEach(daemon => {
                 count += 1;
-                $selectBidcosDaemon.append('<option value="' + daemon + '"' + (hash == daemon ? ' selected' : '') + '>' + daemon + /* ' (' + 'http://' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ') */ '</option>');
-            }
-            if (count == 1) {
+                $selectBidcosDaemon.append('<option value="' + daemon + '"' + (hash === daemon ? ' selected' : '') + '>' + daemon + /* ' (' + 'http://' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ') */ '</option>');
+            });
+            if (count === 1) {
                 $selectBidcosDaemon.hide();
             } else {
                 $selectBidcosDaemon.multiselect({
@@ -441,7 +434,7 @@ function initDialogsMisc() {
         modal: true,
         autoOpen: false,
         closeOnEscape: false,
-        open(event, ui) {
+        open() {
             $(this).parent().children().children('.ui-dialog-titlebar-close').hide();
         }
     });
@@ -449,7 +442,7 @@ function initDialogsMisc() {
         modal: true,
         autoOpen: false,
         closeOnEscape: false,
-        open(event, ui) {
+        open() {
             $(this).parent().children().children('.ui-dialog-titlebar-close').hide();
         }
     });
@@ -530,7 +523,8 @@ function initDaemon() {
     firstLoad = false;
 
     if (daemon && config.daemons[daemon]) {
-        const type = daemonType = config.daemons[daemon].type;
+        const type = config.daemons[daemon].type;
+        daemonType = config.daemons[daemon].type;
 
         let tmpHash = '#/' + daemon;
 
@@ -555,7 +549,7 @@ function initDaemon() {
             // $gridDevices.jqGrid('hideCol', 'RF_ADDRESS');
             // $gridDevices.jqGrid('hideCol', 'INTERFACE');
             resizeGrids();
-        } else if (type == 'CUxD') {
+        } else if (type === 'CUxD') {
             $('.dselect.' + type).show();
             $('#play-link').hide();
             $('#play-link-long').hide();
@@ -607,8 +601,8 @@ function getDevices(callback) {
         for (let i = 0; i < listDevices.length; i++) {
             indexChannels[listDevices[i].ADDRESS] = listDevices[i];
             if (listDevices[i].LINK_SOURCE_ROLES) {
-                var roles = listDevices[i].LINK_SOURCE_ROLES.split(' ');
-                for (var j = 0; j < roles.length; j++) {
+                const roles = listDevices[i].LINK_SOURCE_ROLES.split(' ');
+                for (let j = 0; j < roles.length; j++) {
                     if (!indexSourceRoles[roles[j]]) {
                         indexSourceRoles[roles[j]] = [];
                     }
@@ -616,8 +610,8 @@ function getDevices(callback) {
                 }
             }
             if (listDevices[i].LINK_TARGET_ROLES) {
-                var roles = listDevices[i].LINK_TARGET_ROLES.split(' ');
-                for (var j = 0; j < roles.length; j++) {
+                const roles = listDevices[i].LINK_TARGET_ROLES.split(' ');
+                for (let j = 0; j < roles.length; j++) {
                     if (!indexTargetRoles[roles[j]]) {
                         indexTargetRoles[roles[j]] = [];
                     }
@@ -657,15 +651,14 @@ function initGridDevices() {
         caption: _('Devices'),
         subGrid: true,
         ignoreCase: true,
-        // Multiselect: true,
-        subGridRowExpanded(grid_id, row_id) {
-            subGridChannels(grid_id, row_id);
+        subGridRowExpanded(gridId, rowId) {
+            subGridChannels(gridId, rowId);
         },
-        ondblClickRow(rowid, iRow, iCol, e) {
+        ondblClickRow(rowid) {
             removeSelectionAfterDblClick();
             $gridDevices.jqGrid('toggleSubGridRow', rowid);
         },
-        onSelectRow(rowid, iRow, iCol, e) {
+        onSelectRow(rowid) {
             $('#reportValueUsage-0').addClass('ui-state-disabled');
             $('#reportValueUsage-1').addClass('ui-state-disabled');
 
@@ -761,7 +754,7 @@ function initGridDevices() {
         },
         position: 'first',
         id: 'reportValueUsage-0',
-        title: 'reportValueUsage' + ' 0',
+        title: 'reportValueUsage 0',
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
@@ -771,7 +764,7 @@ function initGridDevices() {
         },
         position: 'first',
         id: 'reportValueUsage-1',
-        title: 'reportValueUsage' + ' 1',
+        title: 'reportValueUsage 1',
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
@@ -799,11 +792,7 @@ function initGridDevices() {
         defaultSearch: 'cn',
         autosearch: true,
         searchOnEnter: false,
-        enableClear: false,
-        beforeSearch() {
-            const postdata = $gridDevices.jqGrid('getGridParam', 'postData');
-            // Console.log('beforeSearch', postdata);
-        }
+        enableClear: false
     });
 
     $gridDevices.contextmenu({
@@ -846,7 +835,7 @@ function initGridDevices() {
                     replaceDevice(address);
                     break;
                 default:
-                    alert('todo ' + cmd + ' on ' + address);
+                    alert('todo ' + cmd + ' on ' + address); // eslint-disable-line no-alert
             }
         }
     });
@@ -947,10 +936,11 @@ function initGridDevices() {
                     const rowid = $('#rename-rowid').val();
                     const gridid = $('#rename-gridid').val();
                     ipcRpc.send('setName', [renameAddress, renameName], () => {
+                        let rowData;
                         if (renameAddress.match(/:/)) {
                             // Rename Channel
                             const $gridCh = $('#' + gridid);
-                            var rowData = $gridCh.jqGrid('getRowData', rowid);
+                            rowData = $gridCh.jqGrid('getRowData', rowid);
                             rowData.Name = renameName;
                             $gridCh.jqGrid('setRowData', rowid, rowData);
                             if (!names) {
@@ -960,7 +950,7 @@ function initGridDevices() {
                             refreshGridLinks();
                         } else {
                             // Rename Device
-                            var rowData = $gridDevices.jqGrid('getRowData', rowid);
+                            rowData = $gridDevices.jqGrid('getRowData', rowid);
                             rowData.Name = renameName;
                             $gridDevices.jqGrid('setRowData', rowid, rowData);
 
@@ -1033,7 +1023,7 @@ function initGridDevices() {
             if (!err) {
                 $('#add-countdown').html(time);
                 $dialogAddCountdown.dialog('open');
-                var addInterval = setInterval(() => {
+                let addInterval = setInterval(() => {
                     time -= 1;
                     $('#add-countdown').html(time);
                     if (time < 1) {
@@ -1046,9 +1036,9 @@ function initGridDevices() {
         });
     });
 
-    function subGridChannels(grid_id, row_id) {
-        const subgrid_table_id = 'channels_' + row_id + '_t';
-        $('#' + grid_id).html('<table id="' + subgrid_table_id + '"></table>');
+    function subGridChannels(gridId, rowId) {
+        const subgridTableId = 'channels_' + rowId + '_t';
+        $('#' + gridId).html('<table id="' + subgridTableId + '"></table>');
         const gridConf = {
             datatype: 'local',
             colNames: [
@@ -1058,7 +1048,7 @@ function initGridDevices() {
                 'DIRECTION',
                 'PARAMSETS',
                 'FLAGS',
-                config.daemons[daemon].type !== 'BidCos-RF' ? '' : 'AES_ACTIVE'
+                config.daemons[daemon].type === 'BidCos-RF' ? 'AES_ACTIVE' : ''
                 // 'LINK_SOURCE_ROLES',
                 // 'LINK_TARGET_ROLES',
                 // 'VERSION'
@@ -1088,43 +1078,7 @@ function initGridDevices() {
             sortorder: 'desc',
             viewrecords: true,
             ignoreCase: true,
-            // Multiselect: true,
-            /* beforeSelectRow: function (rowid, e) {
-             if (e.toElement.className === 'cbox' && !e.shiftKey) return true;
-             if (!e.ctrlKey && !e.shiftKey && !e.metaKey) {
-             $subgrid.jqGrid('resetSelection');
-             return true;
-             } else if (e.shiftKey) {
-             var initialRowSelect = $subgrid.jqGrid('getGridParam', 'selrow');
-             $subgrid.jqGrid('resetSelection');
-
-             var CurrentSelectIndex = $subgrid.jqGrid('getInd', rowid);
-             var InitialSelectIndex = $subgrid.jqGrid('getInd', initialRowSelect);
-             var startID = "";
-             var endID = "";
-             if (CurrentSelectIndex > InitialSelectIndex) {
-             startID = initialRowSelect;
-             endID = rowid;
-             } else {
-             startID = rowid;
-             endID = initialRowSelect;
-             }
-
-             for (var i = startID; i <= endID; i++) {
-             console.log(i);
-             $subgrid.jqGrid('setSelection', i, i !== startID);
-             }
-
-             unselect();
-             return false;
-
-             } else if (e.ctrlKey || e.metaKey) {
-             console.log('meta', rowid)
-             //$subgrid.jqGrid('setSelection', rowid, false);
-             return true;
-             }
-             }, */
-            onSelectRow(rowid, e) {
+            onSelectRow(rowId) {
                 // Unselect other subgrids but not myself
                 $('[id^="channels_"][id$="_t"]').not('#' + this.id).jqGrid('resetSelection');
 
@@ -1133,16 +1087,16 @@ function initGridDevices() {
 
                 $('#del-device').addClass('ui-state-disabled');
 
-                const rowData = $('#' + this.id).jqGrid('getRowData', rowid);
+                const rowData = $('#' + this.id).jqGrid('getRowData', rowId);
 
-                if (rowData.Name.slice(-2) != ':0') {
-                    $('#edit-device').removeClass('ui-state-disabled');
-                    $('#reportValueUsage-0').removeClass('ui-state-disabled');
-                    $('#reportValueUsage-1').removeClass('ui-state-disabled');
-                } else {
+                if (rowData.Name.endsWith(':0')) {
                     $('#edit-device').addClass('ui-state-disabled');
                     $('#reportValueUsage-0').addClass('ui-state-disabled');
                     $('#reportValueUsage-1').addClass('ui-state-disabled');
+                } else {
+                    $('#edit-device').removeClass('ui-state-disabled');
+                    $('#reportValueUsage-0').removeClass('ui-state-disabled');
+                    $('#reportValueUsage-1').removeClass('ui-state-disabled');
                 }
 
                 $('#replace-device').addClass('ui-state-disabled');
@@ -1155,12 +1109,12 @@ function initGridDevices() {
                 $('button.paramset:not(.ui-button)').button();
             }
         };
-        const $subgrid = $('#' + subgrid_table_id);
+        const $subgrid = $('#' + subgridTableId);
         $subgrid.jqGrid(gridConf);
 
         const rowData = [];
         for (let i = 0, len = listDevices.length; i < len; i++) {
-            if (listDevices[i].PARENT == listDevices[row_id].ADDRESS) {
+            if (listDevices[i].PARENT === listDevices[rowId].ADDRESS) {
                 if (names[listDevices[i].ADDRESS]) {
                     listDevices[i].Name = names[listDevices[i].ADDRESS];
                 }
@@ -1187,8 +1141,8 @@ function initGridDevices() {
         menu: [
             {title: _('Rename'), cmd: 'rename', uiIcon: 'ui-icon-pencil'},
             // {title: _("addLink"), cmd: "addLink", uiIcon: "ui-icon-arrow-2-e-w"},
-            {title: ('reportValueUsage') + ' 1', cmd: 'reportValueUsage-1', uiIcon: 'ui-icon-pin-s'},
-            {title: ('reportValueUsage') + ' 0', cmd: 'reportValueUsage-0', uiIcon: 'ui-icon-pin-w'},
+            {title: 'reportValueUsage 1', cmd: 'reportValueUsage-1', uiIcon: 'ui-icon-pin-s'},
+            {title: 'reportValueUsage 0', cmd: 'reportValueUsage-0', uiIcon: 'ui-icon-pin-w'},
             {title: _('MASTER Paramset'), cmd: 'paramsetMaster', uiIcon: 'ui-icon-gear'},
             {title: _('VALUES Paramset'), cmd: 'paramsetValues', uiIcon: 'ui-icon-gear'}
 
@@ -1196,7 +1150,7 @@ function initGridDevices() {
         beforeOpen(event, ui) {
             const address = ui.target.parent().find('[aria-describedby$="_ADDRESS"]').text();
 
-            if (address.match(/:0$/)) {
+            if (address.endsWith(':0')) {
                 $body.contextmenu('enableEntry', 'rename', false);
                 $body.contextmenu('enableEntry', 'reportValueUsage-0', false);
                 $body.contextmenu('enableEntry', 'reportValueUsage-1', false);
@@ -1226,7 +1180,7 @@ function initGridDevices() {
                     reportValueUsage(0);
                     break;
                 default:
-                    alert('todo ' + cmd + ' on ' + address);
+                    alert('todo ' + cmd + ' on ' + address); // eslint-disable-line no-alert
             }
         }
     });
@@ -1243,28 +1197,23 @@ function refreshGridDevices() {
             listDevices[i].RF_ADDRESS = parseInt(listDevices[i].RF_ADDRESS, 10).toString(16);
         }
 
-        let rx_mode = '';
+        const rxMode = [];
         if (listDevices[i].RX_MODE & 1) {
-            rx_mode += 'ALWAYS ';
+            rxMode.push('ALWAYS');
         }
         if (listDevices[i].RX_MODE & 2) {
-            rx_mode += 'BURST ';
+            rxMode.push('BURST');
         }
         if (listDevices[i].RX_MODE & 4) {
-            rx_mode += 'CONFIG ';
+            rxMode.push('CONFIG');
         }
         if (listDevices[i].RX_MODE & 8) {
-            rx_mode += 'WAKEUP ';
+            rxMode.push('WAKEUP');
         }
         if (listDevices[i].RX_MODE & 16) {
-            rx_mode += 'LAZY_CONFIG ';
+            rxMode.push('LAZY_CONFIG');
         }
-        listDevices[i].rx_mode = rx_mode;
-
-        let roaming = '';
-        if (listDevices[i].ROAMING != '0') {
-            roaming = '<span style="display:inline-block; vertical-align:bottom" class="ui-icon ui-icon-check"></span>';
-        }
+        listDevices[i].rx_mode = rxMode.join(' '); // eslint-disable-line camelcase
 
         let flags = '';
         if (listDevices[i].FLAGS & 1) {
@@ -1289,7 +1238,7 @@ function refreshGridDevices() {
                 listDevices[i].direction = 'NONE';
         }
 
-        listDevices[i].aes_active = listDevices[i].AES_ACTIVE ? listDevices[i].AES_ACTIVE = '<span style="display:inline-block; vertical-align:bottom" class="ui-icon ui-icon-key"></span>' : '';
+        listDevices[i].aes_active = listDevices[i].AES_ACTIVE ? listDevices[i].AES_ACTIVE = '<span style="display:inline-block; vertical-align:bottom" class="ui-icon ui-icon-key"></span>' : ''; // eslint-disable-line camelcase
 
         if (names[listDevices[i].ADDRESS]) {
             listDevices[i].Name = names[listDevices[i].ADDRESS];
@@ -1314,11 +1263,11 @@ function replaceDevice() {
     const address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam', 'selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
     ipcRpc.send('rpc', [daemon, 'listReplaceableDevices', [address]], (err, data) => {
         if (err) {
-            alert(_('RPC error') + '\n\n' + JSON.stringify(err));
+            alert(_('RPC error') + '\n\n' + JSON.stringify(err)); // eslint-disable-line no-alert
             return;
         }
-        if (data.length == 0) {
-            alert(_('Replace Device') + ':\n' + _('No suitable device available'));
+        if (data.length === 0) {
+            alert(_('Replace Device') + ':\n' + _('No suitable device available')); // eslint-disable-line no-alert
         } else {
             $selectReplace.html('');
             data.forEach(dev => {
@@ -1348,28 +1297,31 @@ function dialogRenameDevice() {
     const devSelected = $gridDevices.jqGrid('getGridParam', 'selrow');
     let chSelected = null;
     let chGrid = null;
-    if (!devSelected) {
+    let address;
+    let name;
+    let rowid;
+    if (devSelected) {
+        address = $('#grid-devices tr#' + devSelected + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
+        name = $('#grid-devices tr#' + devSelected + ' td[aria-describedby="grid-devices_Name"]').html();
+        rowid = devSelected;
+        $('#rename-device-only').show();
+    } else {
         $('[id^="channels_"][id$="_t"]').each(function () {
             if ($(this).jqGrid('getGridParam', 'selrow') > 0) {
                 chSelected = $(this).jqGrid('getGridParam', 'selrow');
                 chGrid = $(this).attr('id');
             }
         });
-        var address = $('#' + chGrid + ' tr#' + chSelected + ' td[aria-describedby$="_ADDRESS"]').html();
-        var name = $('#' + chGrid + ' tr#' + chSelected + ' td[aria-describedby$="_Name"]').html();
-        var rowid = chSelected;
+        address = $('#' + chGrid + ' tr#' + chSelected + ' td[aria-describedby$="_ADDRESS"]').html();
+        name = $('#' + chGrid + ' tr#' + chSelected + ' td[aria-describedby$="_Name"]').html();
+        rowid = chSelected;
         $('#rename-device-only').hide();
-    } else {
-        var address = $('#grid-devices tr#' + devSelected + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
-        var name = $('#grid-devices tr#' + devSelected + ' td[aria-describedby="grid-devices_Name"]').html();
-        var rowid = devSelected;
-        $('#rename-device-only').show();
     }
     $('#rename-rowid').val(rowid);
     $('#rename-gridid').val(chGrid);
     $('#rename-address').val(address);
     $('#rename-children').removeAttr('checked');
-    $('#rename-name').val(name == '&nbsp;' ? '' : name);
+    $('#rename-name').val(name === '&nbsp;' ? '' : name);
     $dialogRename.dialog('open');
 }
 function reportValueUsage(value) {
@@ -1377,31 +1329,30 @@ function reportValueUsage(value) {
     let chSelected = null;
     let chGrid = null;
     value = value || 0;
-    if (!devSelected) {
-        $('[id^="channels_"][id$="_t"]').each(function () {
-            if ($(this).jqGrid('getGridParam', 'selrow') > 0) {
-                chSelected = $(this).jqGrid('getGridParam', 'selrow');
-                chGrid = $(this).attr('id');
-            }
-        });
-        var address = $('#' + chGrid + ' tr#' + chSelected + ' td[aria-describedby$="_ADDRESS"]').html();
-    } else {
-        alert('error: reportValueUsage on Device');
+    if (devSelected) {
+        alert('error: reportValueUsage on Device'); // eslint-disable-line no-alert
         return;
     }
+    $('[id^="channels_"][id$="_t"]').each(function () {
+        if ($(this).jqGrid('getGridParam', 'selrow') > 0) {
+            chSelected = $(this).jqGrid('getGridParam', 'selrow');
+            chGrid = $(this).attr('id');
+        }
+    });
+    const address = $('#' + chGrid + ' tr#' + chSelected + ' td[aria-describedby$="_ADDRESS"]').html();
 
     ipcRpc.send('rpc', [daemon, 'getParamsetDescription', [address, 'VALUES']], (err, data) => {
         const queue = [];
-        for (const param in data) {
+        Object.keys(data).forEach(param => {
             queue.push(param);
-        }
+        });
 
         function popQueue() {
             if (queue.length > 0) {
                 const param = queue.pop();
                 // Console.log('reportValueUsage', address, param, value);
 
-                ipcRpc.send('rpc', [daemon, 'reportValueUsage', [address, param, value]], (err, data) => {
+                ipcRpc.send('rpc', [daemon, 'reportValueUsage', [address, param, value]], () => {
                     popQueue();
                 });
             }
@@ -1426,18 +1377,19 @@ function dialogParamset(data, desc, address, paramset) {
     // Tabelle befüllen
     $tableParamset.show().html('<tr><th class="paramset-1">Param</th><th class="paramset-2">&nbsp;</th><th class="paramset-3">Value</th><th class="paramset-4">Default</th><th></th></tr>');
     let count = 0;
-    for (const param in desc) {
+    let helpIcon;
+    Object.keys(desc).forEach(param => {
         let unit = '';
         count += 1;
         if (desc[param]) {
             // Dirty workaround for encoding problem
-            if (desc[param].UNIT == '�C') {
+            if (desc[param].UNIT === '�C') {
                 desc[param].UNIT = '°C';
             }
 
             let defaultVal = desc[param].DEFAULT;
             // Calculate percent values
-            if (desc[param].UNIT == '100%') {
+            if (desc[param].UNIT === '100%') {
                 unit = '%';
                 data[param] = (data[param] || 0) * 100;
                 defaultVal = (defaultVal || 0) * 100;
@@ -1449,9 +1401,9 @@ function dialogParamset(data, desc, address, paramset) {
             }
 
             // Create Input-Field
-            var input;
-            const helpentry = help_linkParamset[language] && help_linkParamset[language][param.replace('SHORT_', '').replace('LONG_', '')];
-            var help;
+            let input;
+            const helpentry = helpLinkParamset[language] && helpLinkParamset[language][param.replace('SHORT_', '').replace('LONG_', '')];
+            let help;
             if (helpentry && helpentry.helpText) {
                 help = helpentry.helpText;
             } else {
@@ -1475,9 +1427,9 @@ function dialogParamset(data, desc, address, paramset) {
                         desc[param].MAX = desc[param].VALUE_LIST.indexOf(desc[param].MAX);
                     }
                     for (let i = desc[param].MIN; i <= desc[param].MAX; i++) {
-                        input += '<option value="' + i + '"' + (data[param] == i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
+                        input += '<option value="' + i + '"' + (data[param] === i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
                         if (helpentry) {
-                            if (i == desc[param].MIN) {
+                            if (i === desc[param].MIN) {
                                 help += '<br/><ul>';
                             }
                             if (helpentry.params[desc[param].VALUE_LIST[i]]) {
@@ -1485,14 +1437,14 @@ function dialogParamset(data, desc, address, paramset) {
                             } else {
                                 help += '<li><strong>' + desc[param].VALUE_LIST[i] + '</strong>';
                             }
-                            if (i == desc[param].MAX) {
+                            if (i === desc[param].MAX) {
                                 help += '</ul>';
                             }
                         }
                     }
-                    if (param == 'DISPLAY_INFORMATION') {
-                        input += '<option value="2"' + (data[param] == 2 ? ' selected="selected"' : '') + '>VENT_POSITION</option>';
-                        input += '<option value="3"' + (data[param] == 3 ? ' selected="selected"' : '') + '>ACTUAL_TEMPERATURE</option>';
+                    if (param === 'DISPLAY_INFORMATION') {
+                        input += '<option value="2"' + (data[param] === 2 ? ' selected="selected"' : '') + '>VENT_POSITION</option>';
+                        input += '<option value="3"' + (data[param] === 3 ? ' selected="selected"' : '') + '>ACTUAL_TEMPERATURE</option>';
                     }
                     input += '</select>';
                     if (typeof defaultVal !== 'string') {
@@ -1508,10 +1460,10 @@ function dialogParamset(data, desc, address, paramset) {
                     input = '<input data-address="' + address + '" data-paramset="' + paramset + '" data-param="' + param + '" data-val-prev="' + data[param] + '" data-type="STRING" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
             }
 
-            var helpIcon = help ? '<img src="images/help.png" width="16" height="16" title="' + help + '">' : '';
+            helpIcon = help ? '<img src="images/help.png" width="16" height="16" title="' + help + '">' : '';
 
             // Paramset VALUES?
-            if (paramset == 'VALUES' && (desc[param].OPERATIONS & 2)) {
+            if (paramset === 'VALUES' && (desc[param].OPERATIONS & 2)) {
                 $tableParamset.append('<tr><td>' + param + '</td><td>' + helpIcon + '</td><td>' + input + '</td><td>' + desc[param].DEFAULT + '</td><td><button class="paramset-setValue" id="paramset-setValue-' + param + '">setValue</button></td></tr>');
             } else {
                 $tableParamset.append('<tr><td>' + param + '</td><td>' + helpIcon + '</td><td>' + input + '</td><td colspan="2">' + defaultVal + unit + '</td></tr>');
@@ -1519,9 +1471,9 @@ function dialogParamset(data, desc, address, paramset) {
         } else {
             $tableParamset.append('<tr><td>' + param + '</td><td>' + helpIcon + '</td><td colspan = "3">' + data[param] + '</td></tr>');
         }
-    }
+    });
 
-    if (count == 0) {
+    if (count === 0) {
         $tableParamset.hide();
     }
 
@@ -1623,18 +1575,18 @@ function initDialogParamset() {
 
         // Get value
         let val;
-        if (elem == 'INPUT') {
-            if (type == 'checkbox') {
+        if (elem === 'INPUT') {
+            if (type === 'checkbox') {
                 val = $input.is(':checked');
             } else {
                 val = $input.val();
             }
-        } else if (elem == 'SELECT') {
+        } else if (elem === 'SELECT') {
             val = $input.find('option:selected').val();
         }
 
         // Calculate value if unit is "100%"
-        if ($input.attr('data-unit') == '100%') {
+        if ($input.attr('data-unit') === '100%') {
             val /= 100;
         }
 
@@ -1690,25 +1642,25 @@ function putParamset() {
 
             // Get value
             let val;
-            if (elem == 'INPUT') {
-                if (type == 'checkbox') {
+            if (elem === 'INPUT') {
+                if (type === 'checkbox') {
                     val = $input.is(':checked');
                 } else {
                     val = $input.val();
                 }
-            } else if (elem == 'SELECT') {
+            } else if (elem === 'SELECT') {
                 val = $input.find('option:selected').val();
             }
 
             // Changes only if not multiselect
-            if (!isMulti && (val == dataValPrev || (val === true && dataValPrev === 'true') || (val === false && dataValPrev === 'false'))) {
+            if (!isMulti && (val === dataValPrev || (val === true && dataValPrev === 'true') || (val === false && dataValPrev === 'false'))) {
                 return;
             }
 
             // Todo update ui if channel aes_active is changed
 
             // calculate value if unit is "100%"
-            if ($input.attr('data-unit') == '100%') {
+            if ($input.attr('data-unit') === '100%') {
                 val /= 100;
             }
             switch (dataType) {
@@ -1746,7 +1698,7 @@ function putParamset() {
 
 // Links
 function getLinks(callback) {
-    if (config.daemons[daemon].type == 'CUxD') {
+    if (config.daemons[daemon].type === 'CUxD') {
         if (callback) {
             callback();
         }
@@ -1786,49 +1738,14 @@ function initGridLinks() {
         sortorder: 'desc',
         caption: _('Links'),
         ignoreCase: true,
-        /* Multiselect: true,
-         beforeSelectRow: function (rowid, e) {
-         if (!e.ctrlKey && !e.shiftKey && !e.metaKey) {
-         $gridLinks.jqGrid('resetSelection');
-         return true;
-         } else if (e.shiftKey) {
-         var initialRowSelect = $gridLinks.jqGrid('getGridParam', 'selrow');
-         $gridLinks.jqGrid('resetSelection');
-
-         var CurrentSelectIndex = $gridLinks.jqGrid('getInd', rowid);
-         var InitialSelectIndex = $gridLinks.jqGrid('getInd', initialRowSelect);
-         var startID = "";
-         var endID = "";
-         if (CurrentSelectIndex > InitialSelectIndex) {
-         startID = initialRowSelect;
-         endID = rowid;
-         } else {
-         startID = rowid;
-         endID = initialRowSelect;
-         }
-
-         for (var i = startID; i <= endID; i++) {
-         console.log(i);
-         $gridLinks.jqGrid('setSelection', i, i !== startID);
-         }
-
-         unselect();
-         return false;
-
-         } else if (e.ctrlKey || e.metaKey) {
-         console.log('meta', rowid)
-         //$subgrid.jqGrid('setSelection', rowid, false);
-         return true;
-         }
-         }, */
-        onSelectRow(rowid, iRow, iCol, e) {
+        onSelectRow() {
             $('#del-link').removeClass('ui-state-disabled');
             $('#rename-link').removeClass('ui-state-disabled');
             $('#edit-link').removeClass('ui-state-disabled');
             $('#play-link').removeClass('ui-state-disabled');
             $('#play-link-long').removeClass('ui-state-disabled');
         },
-        ondblClickRow(rowid, iRow, iCol, e) {
+        ondblClickRow() {
             removeSelectionAfterDblClick();
             const row = $gridLinks.jqGrid('getGridParam', 'selrow');
             const sender = $('#grid-links tr#' + row + ' td[aria-describedby="grid-links_SENDER"]').html();
@@ -1921,7 +1838,7 @@ function initGridLinks() {
                 if (!listDevices[j].PARENT) {
                     continue;
                 }
-                if (listDevices[j].ADDRESS.match(/:0$/)) {
+                if (listDevices[j].ADDRESS.endsWith(':0')) {
                     continue;
                 }
                 if (!listDevices[j].LINK_SOURCE_ROLES) {
@@ -1969,7 +1886,7 @@ function initGridLinks() {
                     dialogRemoveLink(sender, receiver);
                     break;
                 default:
-                    alert('todo ' + ui.cmd + ' on ' + sender + ' - ' + receiver);
+                    alert('todo ' + ui.cmd + ' on ' + sender + ' - ' + receiver); // eslint-disable-line no-alert
             }
         }
     });
@@ -1995,12 +1912,6 @@ function initGridLinks() {
         viewrecords: true,
         sortorder: 'desc',
         caption: _('Interfaces'),
-        onSelectRow(rowid, iRow, iCol, e) {
-
-        },
-        gridComplete() {
-
-        },
         hiddengrid: false
     });
 
@@ -2030,7 +1941,7 @@ function initGridLinks() {
                 text: _('Delete'),
                 click() {
                     $(this).dialog('close');
-                    rpcDialog(daemon, 'removeLink', [$('#delete-link-sender').val(), $('#delete-link-receiver').val()], (err, res) => {
+                    rpcDialog(daemon, 'removeLink', [$('#delete-link-sender').val(), $('#delete-link-receiver').val()], () => {
                         rpcAlert(daemon, 'getLinks', [], (err, data) => {
                             if (!err) {
                                 listLinks = data;
@@ -2061,7 +1972,7 @@ function initGridLinks() {
                     const sender = $selectLinkSender.val();
                     const targets = $selectLinkReceiver.val();
                     const receiver = targets[0];
-                    rpcDialog(daemon, 'addLink', [$selectLinkSender.val(), receiver, '', ''], (err, res) => {
+                    rpcDialog(daemon, 'addLink', [$selectLinkSender.val(), receiver, '', ''], () => {
                         $('#load_grid-links').show();
                         rpcAlert(daemon, 'getParamset', [sender, receiver], (err, data1) => {
                             rpcAlert(daemon, 'getParamsetDescription', [sender, receiver], (err2, desc1) => {
@@ -2096,9 +2007,7 @@ function initGridLinks() {
                     $(this).dialog('close');
                     for (let i = 0; i < targets.length; i++) {
                         const receiver = targets[i];
-                        if (i !== (targets.length - 1)) {
-                            rpcDialog(daemon, 'addLink', [sender, receiver, '', '']);
-                        } else {
+                        if (i === (targets.length - 1)) {
                             rpcDialog(daemon, 'addLink', [sender, receiver, '', ''], () => {
                                 rpcAlert(daemon, 'getLinks', [], (err, data) => {
                                     if (!err) {
@@ -2107,6 +2016,8 @@ function initGridLinks() {
                                     }
                                 });
                             });
+                        } else {
+                            rpcDialog(daemon, 'addLink', [sender, receiver, '', '']);
                         }
                     }
                 }
@@ -2202,18 +2113,19 @@ function initDialogLinkParamset() {
     });
     $selectLinkSender.change(function () {
         const sender = $(this).val();
-        if (sender && sender.length) {
+        let selectOptions;
+        if (sender && sender.length > 0) {
             const roles = indexChannels[sender[0]].LINK_SOURCE_ROLES.split(' ');
             const targets = [];
             $linkSourceRoles.html(indexChannels[sender[0]].LINK_SOURCE_ROLES);
 
             if (sender.length === 1) {
-                var selectOptions = '';
-                for (var j = 0, len = listDevices.length; j < len; j++) {
+                selectOptions = '';
+                for (let j = 0, len = listDevices.length; j < len; j++) {
                     if (!listDevices[j].PARENT) {
                         continue;
                     }
-                    if (listDevices[j].ADDRESS.match(/:0$/)) {
+                    if (listDevices[j].ADDRESS.endsWith(':0')) {
                         continue;
                     }
                     if (!listDevices[j].LINK_SOURCE_ROLES) {
@@ -2229,18 +2141,18 @@ function initDialogLinkParamset() {
                 $selectLinkSender.html(selectOptions).multiselect('refresh');
             }
 
-            for (var i = 0; i < roles.length; i++) {
-                for (const role in indexTargetRoles[roles[i]]) {
+            for (let i = 0; i < roles.length; i++) {
+                Object.keys(indexTargetRoles[roles[i]]).forEach(role => {
                     const address = indexTargetRoles[roles[i]][role];
-                    if (targets.indexOf(address) == -1) {
+                    if (targets.indexOf(address) === -1) {
                         targets.push(address);
                     }
-                }
+                });
             }
 
-            var selectOptions = '';
-            for (var i = 0; i < targets.length; i++) {
-                var name;
+            selectOptions = '';
+            for (let i = 0; i < targets.length; i++) {
+                let name;
                 if (names[targets[i]]) {
                     name = names[targets[i]] || '';
                 } else {
@@ -2255,12 +2167,12 @@ function initDialogLinkParamset() {
             $selectLinkReceiver.multiselect('refresh');
             $selectLinkReceiver.multiselect('enable');
         } else {
-            var selectOptions = '';
-            for (var j = 0, len = listDevices.length; j < len; j++) {
+            selectOptions = '';
+            for (let j = 0, len = listDevices.length; j < len; j++) {
                 if (!listDevices[j].PARENT) {
                     continue;
                 }
-                if (listDevices[j].ADDRESS.match(/:0$/)) {
+                if (listDevices[j].ADDRESS.endsWith(':0')) {
                     continue;
                 }
                 if (!listDevices[j].LINK_SOURCE_ROLES) {
@@ -2328,7 +2240,7 @@ function initDialogLinkParamset() {
     $tableEasymode.on('change', '.easymode-select-input', function () {
         const val = $(this).find('option:selected').val();
         const $input = $(this).parent().find('input');
-        if (val == 99999999 || val == 99999998) {
+        if (val === 99999999 || val === 99999998) {
             $input.show();
         } else {
             $input.hide();
@@ -2354,7 +2266,7 @@ function initDialogLinkParamset() {
 
         const row = $('#edit-linkparamset-row').val();
 
-        rpcDialog(daemon, 'setLinkInfo', [sender, receiver, name, desc], (err, res) => {
+        rpcDialog(daemon, 'setLinkInfo', [sender, receiver, name, desc], err => {
             if (!err) {
                 const rowData = $gridLinks.jqGrid('getRowData', row);
                 rowData.DESCRIPTION = desc;
@@ -2414,13 +2326,13 @@ function putLinkParamset(direction, channel1, channel2, callback) {
 
             // Get value
             let val;
-            if (elem == 'INPUT') {
-                if (type == 'checkbox') {
+            if (elem === 'INPUT') {
+                if (type === 'checkbox') {
                     val = $input.is(':checked');
                 } else {
                     val = $input.val();
                 }
-            } else if (elem == 'SELECT') {
+            } else if (elem === 'SELECT') {
                 val = $input.find('option:selected').val();
             }
 
@@ -2428,8 +2340,8 @@ function putLinkParamset(direction, channel1, channel2, callback) {
             if (!isMulti && (
                     (val === true && dataValPrev === 'true') ||
                     (val === false && dataValPrev === 'false') ||
-                    (val == dataValPrev) ||
-                    (!isNaN(dataValPrev) && parseFloat(dataValPrev) == parseFloat(val))
+                    (val === dataValPrev) ||
+                    (!isNaN(dataValPrev) && parseFloat(dataValPrev) === parseFloat(val))
                 )) {
                 return;
             }
@@ -2440,16 +2352,16 @@ function putLinkParamset(direction, channel1, channel2, callback) {
             $input.attr('data-val-prev', val);
 
             // Calculate value if unit is "100%"
-            if ($input.attr('data-unit') == '100%') {
+            if ($input.attr('data-unit') === '100%') {
                 val /= 100;
             }
 
             // Datentypen für rpc konvertieren
             switch (dataType) {
                 case 'BOOL':
-                    if (val == 'true') {
+                    if (val === 'true') {
                         val = true;
-                    } else if (val == 'false') {
+                    } else if (val === 'false') {
                         val = false;
                     } else if (typeof val !== 'boolean') {
                         val = Boolean(val);
@@ -2519,7 +2431,7 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
         receiverType = 'HMW_' + receiverType;
 
         ipcRpc.send('rpc', [daemon, 'getParamset', [sender, 'MASTER']], (err, res) => {
-            const inputType = senderType !== 'VIRTUAL_KEY' ? (res && res.INPUT_TYPE) : '1';
+            const inputType = senderType === 'VIRTUAL_KEY' ? '1' : (res && res.INPUT_TYPE);
             senderType = senderType + '_' + inputType;
             loadEasyModes();
         });
@@ -2579,9 +2491,9 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
 
         // Profil-Select befüllen
         $selectLinkparamsetProfile.html('');
-        for (const id in profiles) {
-            var selected;
-            var name = (easymodes.lang[language] &&
+        Object.keys(profiles).forEach(id => {
+            let selected;
+            const name = (easymodes.lang[language] &&
                 easymodes.lang[language][receiverType] &&
                 easymodes.lang[language][receiverType].GENERIC &&
                 easymodes.lang[language][receiverType].GENERIC[profiles[id].name]) ||
@@ -2590,13 +2502,13 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
                 easymodes.lang[language].GENERIC && easymodes.lang[language].GENERIC[profiles[id].name]) ||
                 profiles[id].name;
 
-            if (data2.UI_HINT == id) {
+            if (data2.UI_HINT === id) {
                 selected = ' selected';
             } else {
                 selected = '';
             }
             $selectLinkparamsetProfile.append('<option value="' + id + '"' + selected + '>' + name + '</option>');
-        }
+        });
 
         $selectLinkparamsetProfile.multiselect('refresh');
 
@@ -2605,7 +2517,7 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
         formLinkParamset($('#table-linkparamset2'), data2, desc2, 'receiver-sender', senderType, receiverType, profiles);
 
         // Dialog-Überschrift setzen
-        var name = (names && names[sender] ? names[sender] : '');
+        let name = (names && names[sender] ? names[sender] : '');
 
         if (names[receiver]) {
             name = name + ' -> ' + names[receiver];
@@ -2646,9 +2558,10 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
 function elementEasyMode(options, val) {
     // Console.log('elementEasyMode', options, val)
     let form = '';
+    let selectOptions;
     switch (options.option) {
-        case 'RAMPTIME':
-            var selectOptions = [
+        case 'RAMPTIME': {
+            selectOptions = [
                 {value: 0, text: easymodes.lang[language].GENERIC.none},
                 {value: 0.2, text: '0.2s'},
                 {value: 0.5, text: '0.5s'},
@@ -2664,7 +2577,7 @@ function elementEasyMode(options, val) {
             form += '<select class="easymode-select-input" id="">';
             selectOptions.forEach(option => {
                 form += '<option value="' + option.value + '"';
-                if (option.value == parseFloat(val).toFixed(6)) {
+                if (option.value === parseFloat(val)) {
                     form += ' selected="selected">' + option.text + '</option>';
                 } else {
                     form += '>' + option.text + '</option>';
@@ -2673,8 +2586,9 @@ function elementEasyMode(options, val) {
             form += '</select><input value="' + val + '" style="display:none;" id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
 
             break;
-        case 'LENGTH_OF_STAY':
-            var selectOptions = [
+        }
+        case 'LENGTH_OF_STAY': {
+            selectOptions = [
                 {value: 1, text: '1s'},
                 {value: 2, text: '2s'},
                 {value: 5, text: '5s'},
@@ -2699,7 +2613,7 @@ function elementEasyMode(options, val) {
             form += '<select class="easymode-select-input" id="">';
             selectOptions.forEach(option => {
                 form += '<option value="' + option.value + '"';
-                if (option.value == parseFloat(val).toFixed(6)) {
+                if (option.value === parseFloat(val)) {
                     form += ' selected="selected">' + option.text + '</option>';
                 } else {
                     form += '>' + option.text + '</option>';
@@ -2708,9 +2622,9 @@ function elementEasyMode(options, val) {
             form += '</select><input value="' + val + '" style="display:none;" id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
 
             break;
-
-        case 'DIM_ONLEVEL':
-            var selectOptions = [
+        }
+        case 'DIM_ONLEVEL': {
+            selectOptions = [
                 {value: 10, text: '10%'},
                 {value: 20, text: '20%'},
                 {value: 30, text: '30%'},
@@ -2727,7 +2641,7 @@ function elementEasyMode(options, val) {
             form += '<select class="easymode-select-input" id="">';
             selectOptions.forEach(option => {
                 form += '<option value="' + option.value + '"';
-                if (option.value == parseFloat(val).toFixed(6)) {
+                if (option.value === parseFloat(val)) {
                     form += ' selected="selected">' + option.text + '</option>';
                 } else {
                     form += '>' + option.text + '</option>';
@@ -2736,8 +2650,9 @@ function elementEasyMode(options, val) {
             form += '</select><input value="' + val + '" style="display:none;" id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
 
             break;
-        case 'DIM_OFFLEVEL':
-            var selectOptions = [
+        }
+        case 'DIM_OFFLEVEL': {
+            selectOptions = [
                 {value: 0, text: '0%'},
                 {value: 10, text: '10%'},
                 {value: 20, text: '20%'},
@@ -2754,7 +2669,7 @@ function elementEasyMode(options, val) {
             form += '<select class="easymode-select-input" id="">';
             selectOptions.forEach(option => {
                 form += '<option value="' + option.value + '"';
-                if (option.value == parseFloat(val).toFixed(6)) {
+                if (option.value === parseFloat(val)) {
                     form += ' selected="selected">' + option.text + '</option>';
                 } else {
                     form += '>' + option.text + '</option>';
@@ -2763,9 +2678,9 @@ function elementEasyMode(options, val) {
             form += '</select><input value="' + val + '" style="display:none;" id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
 
             break;
-
-        case 'DELAY':
-            var selectOptions = [
+        }
+        case 'DELAY': {
+            selectOptions = [
                 {value: 0, text: easymodes.lang[language].GENERIC.none},
                 {value: 5, text: '5s'},
                 {value: 10, text: '10s'},
@@ -2782,57 +2697,37 @@ function elementEasyMode(options, val) {
             form += '<select class="easymode-select-input" id="">';
             selectOptions.forEach(option => {
                 form += '<option value="' + option.value + '"';
-                if (option.value != val) {
-                    form += '>' + option.text + '</option>';
-                } else {
+                if (option.value === val) {
                     form += ' selected="selected">' + option.text + '</option>';
+                } else {
+                    form += '>' + option.text + '</option>';
                 }
             });
             form += '</select><input value="' + val + '" style="display:none;" id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
 
             break;
-
-        default:
+        }
+        default: {
             // Console.log('elementEasyMode', options.option);
-            var param = options.combo[0];
-            var $tpl = $('#linkparamset-input-receiver-sender-' + param);
-            var $copy = $tpl.clone();
+            const param = options.combo[0];
+            const $tpl = $('#linkparamset-input-receiver-sender-' + param);
+            const $copy = $tpl.clone();
             $copy.removeAttr('id').addClass('easymode-param').attr('data-binds', options.combo);
             return $copy && $copy[0] && $copy[0].outerHTML;
-            break;
+        }
     }
     return form;
 }
 function formEasyMode(data, desc, direction, sType, rType, prn) {
-    let receiverType;
-    let senderType;
-
-    // If (config.daemons[daemon].type.toLowerCase() === 'bidcos-wired' || config.daemons[daemon].type === 'hs485d') {
-    //    receiverType = 'HMW_' + rType;
-    //    senderType = 'HMW_' + sType;
-    // } else {
-    receiverType = rType;
-    senderType = sType;
-    // }
+    const receiverType = rType;
+    const senderType = sType;
 
     let profiles = easymodes[receiverType] && easymodes[receiverType][senderType];
     if (!profiles) {
         profiles = {0: {params: {}, name: 'expert'}};
     }
 
-    if (!prn) {
-        $tableEasymode.html('');
-        $('h4.easymode').html('');
-
-        $('.easymode').hide();
-
-        $('[id^="linkparamset-input-receiver-sender-"]').each(function () {
-            $(this).val($(this).attr('data-val-prev') || '');
-        });
-        // Console.log("$('#linkparamset-input-receiver-sender-UI_HINT').val(" + prn + ");")
-        $('#linkparamset-input-receiver-sender-UI_HINT').val(prn);
-        $('#table-linkparamset2').show();
-    } else {
+    if (prn) {
         $tableEasymode.html('');
         const options = profiles && profiles[prn] && profiles[prn].options;
         const params = profiles && profiles[prn] && profiles[prn].params;
@@ -2876,25 +2771,38 @@ function formEasyMode(data, desc, direction, sType, rType, prn) {
 
         $('#table-linkparamset2').hide();
         $('.easymode').show();
+    } else {
+        $tableEasymode.html('');
+        $('h4.easymode').html('');
+
+        $('.easymode').hide();
+
+        $('[id^="linkparamset-input-receiver-sender-"]').each(function () {
+            $(this).val($(this).attr('data-val-prev') || '');
+        });
+        // Console.log("$('#linkparamset-input-receiver-sender-UI_HINT').val(" + prn + ");")
+        $('#linkparamset-input-receiver-sender-UI_HINT').val(prn);
+        $('#table-linkparamset2').show();
     }
 }
-function formLinkParamset(elem, data, desc, direction, senderType, receiverType, profiles) {
+function formLinkParamset(elem, data, desc, direction, senderType, receiverType) {
     elem.show().html('<tr><th class="paramset-1">Param</th><th class="paramset-2">&nbsp;</th><th class="paramset-3">Value</th><th class="paramset-4">Default</th><th></th></tr>');
     let count = 0;
     const resultArr = [];
-    for (const param in desc) {
+    Object.keys(desc).forEach(param => {
         let unit = '';
+        let hidden;
         count += 1;
         if (desc[param]) {
             // Dirty workaround for encoding problem
-            if (desc[param].UNIT == '�C') {
+            if (desc[param].UNIT === '�C') {
                 desc[param].UNIT = '°C';
             }
 
             let defaultVal = desc[param].DEFAULT;
 
             // Calculate percent values
-            if (desc[param].UNIT == '100%') {
+            if (desc[param].UNIT === '100%') {
                 unit = '%';
                 data[param] = (data[param] || 0) * 100;
                 defaultVal = (defaultVal || 0) * 100;
@@ -2903,9 +2811,9 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType,
             }
 
             // Create Input-Field
-            var input;
-            const helpentry = help_linkParamset[language] && help_linkParamset[language][param.replace('SHORT_', '').replace('LONG_', '')];
-            var help;
+            let input;
+            const helpentry = helpLinkParamset[language] && helpLinkParamset[language][param.replace('SHORT_', '').replace('LONG_', '')];
+            let help;
             if (helpentry && helpentry.helpText) {
                 help = helpentry.helpText;
             } else {
@@ -2913,7 +2821,7 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType,
             }
 
             const disabled = desc[param].OPERATIONS & 2;
-            var hidden = param === 'UI_HINT';
+            hidden = param === 'UI_HINT';
 
             // Console.log(param, data[param], desc[param]);
 
@@ -2926,10 +2834,10 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType,
                     break;
                 case 'ENUM':
                     input = '<select class="linkparamset-input" id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '" data-val-prev="' + data[param] + '" data-type="INTEGER"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
-                    for (var i = desc[param].MIN; i <= desc[param].MAX; i++) {
-                        input += '<option value="' + i + '"' + (data[param] == i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
+                    for (let i = desc[param].MIN; i <= desc[param].MAX; i++) {
+                        input += '<option value="' + i + '"' + (data[param] === i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
                         if (helpentry) {
-                            if (i == desc[param].MIN) {
+                            if (i === desc[param].MIN) {
                                 help += '<br/><ul>';
                             }
                             if (helpentry.params[desc[param].VALUE_LIST[i]]) {
@@ -2937,7 +2845,7 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType,
                             } else {
                                 help += '<li><strong>' + desc[param].VALUE_LIST[i] + '</strong>';
                             }
-                            if (i == desc[param].MAX) {
+                            if (i === desc[param].MAX) {
                                 help += '</ul>';
                             }
                         }
@@ -2947,6 +2855,8 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType,
                     break;
                 case 'FLOAT':
                     data[param] = parseFloat(parseFloat(data[param]).toFixed(6));
+                    input = '<input class="linkparamset-input" data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '" type="text" value="' + data[param] + '" data-val-prev="' + data[param] + '" data-type="STRING"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                    break;
                 default:
                     input = '<input class="linkparamset-input" data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '" type="text" value="' + data[param] + '" data-val-prev="' + data[param] + '" data-type="STRING"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
             }
@@ -2962,9 +2872,9 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType,
                 fragment: '<tr style="' + (hidden ? 'display:none;' : '') + '"><td>' + param + '</td><td colspan = "4">' + data[param] + '</td></tr>'
             });
         }
-    }
+    });
 
-    if (count == 0) {
+    if (count === 0) {
         elem.hide();
         if (direction === 'sender-receiver') {
             $('#toggle-link-sender').hide();
@@ -2976,7 +2886,7 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType,
         resultArr.sort((a, b) => {
             return a.order - b.order;
         });
-        for (var i = 0; i < resultArr.length; i++) {
+        for (let i = 0; i < resultArr.length; i++) {
             elem.append(resultArr[i].fragment);
         }
     }
@@ -3124,18 +3034,12 @@ function initGridRssi() {
         subGridOptions: {
             expandOnLoad: false
         },
-        subGridRowExpanded(grid_id, row_id) {
-            subGridRssi(grid_id, row_id);
+        subGridRowExpanded(gridId, rowId) {
+            subGridRssi(gridId, rowId);
         },
-        onSelectRow(rowid, iRow, iCol, e) {
-
-        },
-        gridComplete() {
-
-        },
-        ondblClickRow(rowid, iRow, iCol, e) {
+        ondblClickRow(rowId) {
             removeSelectionAfterDblClick();
-            $gridRssi.jqGrid('toggleSubGridRow', rowid);
+            $gridRssi.jqGrid('toggleSubGridRow', rowId);
         }
 
     }).navGrid('#pager-rssi', {
@@ -3167,9 +3071,9 @@ function initGridRssi() {
 
     resizeGrids();
 
-    function subGridRssi(grid_id, row_id) {
-        const subgrid_table_id = 'rssi' + row_id + '_t';
-        $('#' + grid_id).html('<table id="' + subgrid_table_id + '"></table>');
+    function subGridRssi(gridId, rowId) {
+        const subgridTableId = 'rssi' + rowId + '_t';
+        $('#' + gridId).html('<table id="' + subgridTableId + '"></table>');
         const gridConf = {
             datatype: 'local',
             colNames: [
@@ -3192,23 +3096,17 @@ function initGridRssi() {
             width: 1000,
             sortorder: 'desc',
             viewrecords: true,
-            ignoreCase: true,
-            onSelectRow(rowid, e) {
-
-            },
-            gridComplete() {
-
-            }
+            ignoreCase: true
         };
-        const $subgrid = $('#' + subgrid_table_id);
+        const $subgrid = $('#' + subgridTableId);
         $subgrid.jqGrid(gridConf);
 
-        const address = $('#grid-rssi tr#' + row_id + ' td[aria-describedby="grid-rssi_ADDRESS"]').html();
+        const address = $('#grid-rssi tr#' + rowId + ' td[aria-describedby="grid-rssi_ADDRESS"]').html();
         const partners = listRssi[address];
         let i = 0;
         const rowData = [];
-        for (const partner in partners) {
-            var obj = {
+        Object.keys(partners).forEach(partner => {
+            const obj = {
                 ADDRESS: partner,
                 Name: (names && names[partner] ? names[partner] : ''),
                 TYPE: (indexDevices[partner] ? indexDevices[partner].TYPE : ''),
@@ -3218,11 +3116,11 @@ function initGridRssi() {
             obj._id = i;
             rowData.push(obj);
             i += 1;
-        }
-        $subgrid.jqGrid('addRowData', '_id', obj);
+        });
+        $subgrid.jqGrid('addRowData', '_id', rowData);
     }
 
-    $body.on('click', '.interface-set', function () {
+    $body.on('click', '.interface-set', () => {
         const i = $(this).attr('data-device-index');
         const ifaceIndex = $(this).attr('data-iface-index');
         const rowId = $(this).parent().parent().attr('id');
@@ -3230,7 +3128,7 @@ function initGridRssi() {
         rowData.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox">';
         rowData.INTERFACE = listInterfaces[$(this).attr('data-iface-index')].ADDRESS;
         for (let k = 0; k < listInterfaces.length; k++) {
-            rowData[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '"' + (k == ifaceIndex ? ' checked="checked"' : '') + '>';
+            rowData[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '"' + (k === ifaceIndex ? ' checked="checked"' : '') + '>';
         }
         $gridRssi.jqGrid('setRowData', rowId, rowData);
         rpcAlert(daemon, 'setBidcosInterface', [$(this).attr('data-device'), listInterfaces[$(this).attr('data-iface-index')].ADDRESS, false]);
@@ -3245,7 +3143,7 @@ function initGridRssi() {
         rowData.INTERFACE = listInterfaces[0].ADDRESS;
         if (checked) {
             for (let k = 0; k < listInterfaces.length; k++) {
-                rowData[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '"' + (k == 0 ? ' checked="checked"' : '') + '>';
+                rowData[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '"' + (k === 0 ? ' checked="checked"' : '') + '>';
             }
         }
         $gridRssi.jqGrid('setRowData', rowId, rowData);
@@ -3258,7 +3156,7 @@ function refreshGridRssi() {
     indexDevices = {};
 
     let j = 0;
-    for (var i = 0, len = listInterfaces.length; i < len; i++) {
+    for (let i = 0, len = listInterfaces.length; i < len; i++) {
         indexDevices[listInterfaces[i].ADDRESS] = listInterfaces[i];
 
         // TODO - performance improvement, add all rows at once!
@@ -3271,27 +3169,25 @@ function refreshGridRssi() {
 
     const rowData = [];
 
-    for (var i = 0, len = listDevices.length; i < len; i++) {
+    for (let i = 0, len = listDevices.length; i < len; i++) {
         if (listDevices[i].PARENT) {
             continue;
         }
-        if (listDevices[i].TYPE == 'HM-RCV-50') {
+        if (listDevices[i].TYPE === 'HM-RCV-50') {
             continue;
         }
-        if (listDevices[i].ADDRESS.slice(0, 1) == '*') {
+        if (listDevices[i].ADDRESS.startsWith('*')) {
             continue;
         }
         indexDevices[listDevices[i].ADDRESS] = listDevices[i];
-        var line = {};
+        let line = {};
         for (let k = 0, ifaceLen = listInterfaces.length; k < ifaceLen; k++) {
             if (listRssi[listDevices[i].ADDRESS] && listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS]) {
-                line[listInterfaces[k].ADDRESS + '_0'] = (listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][0] != 65536 ?
-                    listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][0] :
-                    '');
-                line[listInterfaces[k].ADDRESS + '_1'] = (listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1] != 65536 ?
-                    listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1] :
-                    '');
-                if (listDevices[i].INTERFACE == listInterfaces[k].ADDRESS) {
+                line[listInterfaces[k].ADDRESS + '_0'] = (listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][0] === 65536 ?
+                    '' : listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][0]);
+                line[listInterfaces[k].ADDRESS + '_1'] = (listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1] === 65536 ?
+                    '' : listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1]);
+                if (listDevices[i].INTERFACE === listInterfaces[k].ADDRESS) {
                     line[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '" checked="checked">';
                 } else {
                     line[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '">';
@@ -3302,12 +3198,12 @@ function refreshGridRssi() {
                 line[listInterfaces[k].ADDRESS + '_set'] = '';
             }
         }
-        if (listDevices[i].ROAMING == 0) {
+        if (listDevices[i].ROAMING === 0) {
             line.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox">';
         } else {
             line.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox" checked="checked">';
         }
-        var line = $.extend(true, line, listDevices[i]);
+        line = $.extend(true, line, listDevices[i]);
         line._id = j++;
         rowData.push(line);
     }
@@ -3343,7 +3239,7 @@ function initGridMessages() {
         viewrecords: true,
         sortorder: 'desc',
         caption: _('Service messages'),
-        onSelectRow(rowid, iRow, iCol, e) {
+        onSelectRow(rowid) {
             if ($('#grid-messages tr#' + rowid + ' td[aria-describedby="grid-messages_Message"]').html().match(/STICKY/)) {
                 $('#accept-message').removeClass('ui-state-disabled');
             } else {
@@ -3477,7 +3373,7 @@ function initConsole() {
     });
     $consoleRpcMethod.change(() => {
         const method = $consoleRpcMethod.val();
-        if (method == 'null') {
+        if (method === 'null') {
             $consoleRpcSend.attr('disabled', true);
         } else {
             $consoleRpcSend.removeAttr('disabled').button('refresh');
@@ -3494,11 +3390,11 @@ function initConsole() {
     });
     $consoleRpcSend.attr('disabled', true).button().click(() => {
         const method = $consoleRpcMethod.find('option:selected').val();
-
+        let params;
         try {
-            var params = JSON.parse('[' + $('#console-rpc-params').val() + ']');
-        } catch (e) {
-            alert('Parsing params: ' + e);
+            params = JSON.parse('[' + $('#console-rpc-params').val() + ']');
+        } catch (err) {
+            alert('Parsing params: ' + err); // eslint-disable-line no-alert
             return;
         }
 
@@ -3521,7 +3417,7 @@ function elementConsoleMethod() {
     $('#console-rpc-help').html('');
     $consoleRpcMethod.html('<option value="null" selected="selected">' + _('Please select method') + '</option>');
     $consoleRpcResponse.html('');
-    if (daemon == 'null') {
+    if (daemon === 'null') {
         $consoleRpcSend.attr('disabled', true).button('refresh');
         return;
     }
@@ -3596,14 +3492,14 @@ function formConsoleParams() {
             case 'integer':
                 if (params[i].bitmask) {
                     form += '<tr><td colspan="3">' + params[i].name + '</td></tr>';
-                    for (var val in params[i].bitmask) {
+                    Object.keys(params[i].bitmask).forEach(val => {
                         form += '<tr><td style="padding-left: 6px;"><label for="bitmask_param_' + val + '_' + i + '">' + params[i].bitmask[val] + '</label></td><td></td><td><input class="console-param-checkbox" type="checkbox" value="' + val + '" name="bitmask_param_' + val + '_' + i + '" id="bitmask_param_' + val + '_' + i + '"/></td></tr>';
-                    }
+                    });
                 } else if (params[i].values) {
                     selectOptions = '<option value="">Bitte auswählen</option>';
-                    for (var val in params[i].values) {
+                    Object.keys(params[i].values).forEach(val => {
                         selectOptions += '<option value="' + val + '">' + params[i].values[val] + ' (' + val + ')</option>';
-                    }
+                    });
                     form += '<tr><td><label for="param_' + i + '">' + params[i].name + '</label></td><td></td><td><select class="param-simple" name="param_' + i + '" id="param_' + i + '" class="">' + selectOptions + '</select></td></tr>';
                 } else {
                     form += '<tr><td><label for="param_' + i + '">' + params[i].name + '</label></td><td></td><td><input class="console-param-input ui-widget ui-state-default ui-corner-all" type="number" name="param_' + i + '" id="param_' + i + '" class=""/></td></tr>';
@@ -3614,14 +3510,14 @@ function formConsoleParams() {
                 break;
             case 'device_address':
                 selectOptions = '<option value="">Bitte auswählen</option>';
-                for (var j = 0, len = listDevices.length; j < len; j++) {
+                for (let j = 0, len = listDevices.length; j < len; j++) {
                     if (listDevices[j].PARENT) {
                         continue;
                     }
                     if (listDevices[j].ADDRESS.match(/BidCoS/)) {
                         continue;
                     }
-                    var name = names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '';
+                    const name = names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '';
 
                     selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + name + '</option>';
                 }
@@ -3629,14 +3525,14 @@ function formConsoleParams() {
                 break;
             case 'channel_address':
                 selectOptions = '<option value="">Bitte auswählen</option>';
-                for (var j = 0, len = listDevices.length; j < len; j++) {
+                for (let j = 0, len = listDevices.length; j < len; j++) {
                     if (!listDevices[j].PARENT) {
                         continue;
                     }
-                    if (listDevices[j].ADDRESS.match(/:0$/)) {
+                    if (listDevices[j].ADDRESS.endsWith(':0')) {
                         continue;
                     }
-                    var name = names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '';
+                    const name = names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '';
 
                     selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + name + '</option>';
                 }
@@ -3644,8 +3540,8 @@ function formConsoleParams() {
                 break;
             case 'address':
                 selectOptions = '<option value="">' + _('Please select') + '</option>';
-                for (var j = 0, len = listDevices.length; j < len; j++) {
-                    var name = names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '';
+                for (let j = 0, len = listDevices.length; j < len; j++) {
+                    const name = names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '';
 
                     selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + name + '</option>';
                 }
@@ -3653,7 +3549,7 @@ function formConsoleParams() {
                 break;
             case 'interface_address':
                 selectOptions = '<option value="">' + _('Please select') + '</option>';
-                for (var j = 0, len = listInterfaces.length; j < len; j++) {
+                for (let j = 0, len = listInterfaces.length; j < len; j++) {
                     selectOptions += '<option value="' + listInterfaces[j].ADDRESS + '">' + listInterfaces[j].ADDRESS + ' ' + listInterfaces[j].TYPE + '</option>';
                 }
                 form += '<tr><td><label for="param_' + i + '">' + params[i].name + '</label></td><td></td><td><select class="param-simple" name="param_' + i + '" id="param_' + i + '" class="">' + selectOptions + '</select></td></tr>';
@@ -3669,7 +3565,7 @@ function formConsoleParams() {
                 form += '<tr><td><label for="param_' + i + '">' + params[i].name + '</label></td><td></td><td><input class="console-param-input ui-widget ui-state-default ui-corner-all" type="text" name="param_' + i + '" id="param_' + i + '"/></td></tr>';
                 break;
         }
-        paramArr.push('<span style="color:#777">' + (params[i].type.match(/address$/) || params[i].type.match(/^value_key$/) ? 'string' : params[i].type) + '</span> ' + params[i].name);
+        paramArr.push('<span style="color:#777">' + (params[i].type.endsWith('address$') || params[i].type === 'value_key' ? 'string' : params[i].type) + '</span> ' + params[i].name);
     }
     heading += paramArr.join(', ');
     heading += ')';
@@ -3692,7 +3588,7 @@ function setConsoleParams(elem) {
     const method = $consoleRpcMethod.val();
 
     const param0 = $('#param_0').val();
-    if (method == 'setValue' && $(elem).attr('id') == 'param_0' && param0) {
+    if (method === 'setValue' && $(elem).attr('id') === 'param_0' && param0) {
         $('#param_1').val('...').attr('disabled', true);
         rpcAlert(daemon, 'getParamsetDescription', [param0, 'VALUES'], (err, data) => {
             let selectOptions = '<option value="">Bitte auswählen</option>';
@@ -3711,7 +3607,7 @@ function setConsoleParams(elem) {
                 selectedList: 1
             });
         });
-    } else if (method == 'setValue' && $(elem).attr('id') == 'param_1' && param0) {
+    } else if (method === 'setValue' && $(elem).attr('id') === 'param_1' && param0) {
         const desc = setValueParamsetDescription[$(elem).val()];
         setValueDesc = desc;
         switch (desc.TYPE) {
@@ -3721,6 +3617,7 @@ function setConsoleParams(elem) {
                 break;
             case 'INTEGER':
                 $('#param_2').replaceWith('<input class="console-param-input ui-widget ui-state-default ui-corner-all" type="number" name="param_2" id="param_2"/>');
+                break;
             default:
                 $('#param_2').replaceWith('<input class="console-param-input ui-widget ui-state-default ui-corner-all" type="text" name="param_2" id="param_2"/>');
         }
@@ -3743,30 +3640,31 @@ function setConsoleParams(elem) {
     $('[id^="param_"]').each(function () {
         const paramIndex = parseInt($(this).attr('id').slice(6), 10);
         const paramDesc = rpcMethods[method].params[paramIndex];
-        if (paramDesc.type == 'integer') {
-            var val = parseInt($(this).val(), 10);
+        let val;
+        if (paramDesc.type === 'integer') {
+            const val = parseInt($(this).val(), 10);
             if (isNaN(val) && !paramDesc.optional) {
                 paramArr[paramIndex] = 0;
             } else if (!isNaN(val)) {
                 paramArr[paramIndex] = val;
             }
-        } else if (paramDesc.type == 'boolean') {
+        } else if (paramDesc.type === 'boolean') {
             paramArr[paramIndex] = $(this).is(':checked');
-        } else if (setValueDesc && paramDesc.type == 'mixed') {
+        } else if (setValueDesc && paramDesc.type === 'mixed') {
             switch (setValueDesc.TYPE) {
                 case 'BOOL':
                 case 'ACTION':
                     paramArr[paramIndex] = $(this).is(':checked');
                     break;
                 case 'FLOAT':
-                    var val = parseFloat($(this).val());
+                    val = parseFloat($(this).val());
                     if (isNaN(val)) {
                         val = 0;
                     }
                     paramArr[paramIndex] = val;
                     break;
                 case 'INTEGER':
-                    var val = parseInt($(this).val(), 10);
+                    val = parseInt($(this).val(), 10);
                     if (isNaN(val)) {
                         val = 0;
                     }
@@ -3776,8 +3674,8 @@ function setConsoleParams(elem) {
                     paramArr[paramIndex] = $(this).val();
             }
         } else {
-            var val = $(this).val();
-            if (val != '' || !paramDesc.optional) {
+            val = $(this).val();
+            if (val || !paramDesc.optional) {
                 paramArr[paramIndex] = val;
             }
         }
@@ -3795,18 +3693,15 @@ function rpcDialog(daemon, cmd, params, callback) {
     }
 }
 
-var rpcDialogPending = false;
-
 // RPC execution Wrappers
 function rpcDialogShift() {
-    if (!rpcDialogQueue.length) {
+    if (rpcDialogQueue.length < 1) {
         return;
     }
     rpcDialogPending = true;
 
     const tmp = rpcDialogQueue.shift();
 
-    const dialog = tmp.dialog;
     const daemon = tmp.daemon;
     const cmd = tmp.cmd;
     const params = tmp.params;
@@ -3838,10 +3733,10 @@ function rpcDialogShift() {
             $('#rpc-message').html('<span style="color: green;">success</span><br>' + res);
             setTimeout(() => {
                 rpcDialogPending = false;
-                if (!rpcDialogQueue.length) {
-                    $dialogRpc.dialog('close');
-                } else {
+                if (rpcDialogQueue.length > 0) {
                     rpcDialogShift();
+                } else {
+                    $dialogRpc.dialog('close');
                 }
             }, 1000);
         }
@@ -3853,9 +3748,9 @@ function rpcDialogShift() {
 function rpcAlert(daemon, cmd, params, callback) {
     ipcRpc.send('rpc', [daemon, cmd, params], (err, res) => {
         if (err) {
-            alert(daemon + ' ' + cmd + '\n' + JSON.stringify(err));
+            alert(daemon + ' ' + cmd + '\n' + JSON.stringify(err)); // eslint-disable-line no-alert
         } else if (res && res.faultCode) {
-            alert(daemon + ' ' + cmd + '\n' + JSON.stringify(res));
+            alert(daemon + ' ' + cmd + '\n' + JSON.stringify(res)); // eslint-disable-line no-alert
         }
         if (typeof callback === 'function') {
             callback(err, res);
@@ -3871,7 +3766,7 @@ function dialogAlert(text, title) {
     $dialogAlert.dialog('open');
 }
 function rssiColor(rssi) {
-    if (typeof rssi === 'undefined' || rssi === '' || rssi == 65536) {
+    if (typeof rssi === 'undefined' || rssi === '' || rssi === 65536) {
         return '';
     }
 

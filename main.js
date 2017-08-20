@@ -1,23 +1,13 @@
-/**
- *      Homematic-manager
- *
- *  Copyright (c) 2014-2017 Sebastian Raff
- *  Copyright (c) 2014, 2015 Anli
- *
- *  CC BY-NC-SA 4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
- *
- */
-
-const pkg = require('./package.json');
-
 const electron = require('electron');
+const fs = require('fs');
+const os = require('os');
+const net = require('net');
+const path = require('path');
+const url = require('url');
 
 const app = electron.app;
-const Menu = electron.Menu;
-const ipc = electron.ipcMain;
+// Const Menu = electron.Menu;
 const BrowserWindow = electron.BrowserWindow;
-const dialog = electron.dialog;
-
 const Rpc = require('electron-ipc-rpc');
 
 let ipcRpc;
@@ -25,11 +15,6 @@ let ipcRpc;
 const windowStateKeeper = require('electron-window-state');
 const isDev = require('electron-is-dev');
 
-const net = require('net');
-const path = require('path');
-const url = require('url');
-const fs = require('fs');
-const http = require('http');
 const request = require('request');
 
 const pjson = require('persist-json')('hm-manager');
@@ -43,13 +28,13 @@ const binrpc = require('binrpc');
 
 const log = require('yalm');
 
+const pkg = require('./package.json');
+
 log.setLevel(isDev ? 'debug' : 'error');
 
 let config = pjson.load('config') || {};
 
 config.version = pkg.version;
-
-const os = require('os');
 
 config.rpcInitIpSelect = [];
 const interfaces = os.networkInterfaces();
@@ -189,11 +174,8 @@ app.on('activate', () => {
 
 app.on('quit', stop);
 
-let io;
-let rpc;
-
 const localNames = pjson.load('names_' + config.ccuAddress) || {};
-const localNamesIds = {};
+// Const localNamesIds = {};
 const localDevices = pjson.load('devices_' + config.ccuAddress) || {};
 const localParamsetDescriptions = pjson.load('paramset-descriptions_' + config.ccuAddress) || {};
 const rpcClients = {};
@@ -228,7 +210,7 @@ function initRpcClients() {
 
     function pingPong() {
         const now = (new Date()).getTime();
-        for (const daemon in config.daemons) {
+        Object.keys(config.daemons).forEach(daemon => {
             const elapsed = now - lastEvent[daemon];
             if (elapsed > (config.daemons[daemon].reinitTimeout || 45000)) {
                 connected[daemon] = false;
@@ -236,18 +218,18 @@ function initRpcClients() {
                 init(daemon);
             } else if (elapsed > (((config.daemons[daemon].reinitTimeout || 45000) / 1.5) - 1000)) {
                 log.debug('RPC -> ping ' + daemon + ' ' + elapsed);
-                rpcClients[daemon].methodCall('ping', ['hmm'], (err, res) => {
+                rpcClients[daemon].methodCall('ping', ['hmm'], err => {
                     if (err) {
                         log.error('RPC -> ping', err);
                     }
                 });
             }
-        }
+        });
         ipcRpc.send('connection', [connected]);
     }
 
     let count = 0; // Math.floor(Math.random() * 65536);
-    for (const daemon in config.daemons) {
+    Object.keys(config.daemons).forEach(daemon => {
         config.daemons[daemon].ident = 'hmm_' + count;
 
         daemonIndex[config.daemons[daemon].ident] = daemon;
@@ -262,34 +244,8 @@ function initRpcClients() {
         init(daemon);
 
         count += 1;
-    }
+    });
     setInterval(pingPong, 15000);
-}
-
-function initRpcServer(protocol) {
-    let server;
-    if (protocol === 'binrpc' && !rpcServerBinStarted) {
-        rpcServerBinStarted = true;
-        rpcServerBin = binrpc.createServer({host: config.rpcListenIp, port: config.rpcListenPortBin});
-        server = rpcServerBin;
-        log.debug('binrpc server listening on ' + config.rpcListenIp + ':' + (config.rpcListenPortBin));
-    } else if (!rpcServerStarted) {
-        rpcServerStarted = true;
-        rpcServer = xmlrpc.createServer({host: config.rpcListenIp, port: config.rpcListenPort});
-        server = rpcServer;
-        log.debug('xmlrpc server listening on ' + config.rpcListenIp + ':' + (config.rpcListenPort));
-    } else {
-        log.debug(protocol + ' server already started');
-        return;
-    }
-
-    server.on('NotFound', (method, params) => {
-        log.debug('RPC <- undefined method ' + method + ' ' + JSON.stringify(params).slice(0, 80));
-    });
-
-    Object.keys(rpcMethods).forEach(m => {
-        server.on(m, rpcMethods[m]);
-    });
 }
 
 const rpcMethods = {
@@ -366,9 +322,9 @@ const rpcMethods = {
         ipcRpc.send('rpc', ['listDevices', params]);
         const daemon = daemonIndex[params[0]];
         const res = [];
-        for (const address in localDevices[daemon]) {
+        Object.keys(localDevices[daemon]).forEach(address => {
             res.push({ADDRESS: address, VERSION: localDevices[daemon][address].VERSION});
-        }
+        });
         log.debug('RPC -> listDevices response length ' + res.length);
         callback(null, res);
     },
@@ -377,8 +333,34 @@ const rpcMethods = {
     }
 };
 
+function initRpcServer(protocol) {
+    let server;
+    if (protocol === 'binrpc' && !rpcServerBinStarted) {
+        rpcServerBinStarted = true;
+        rpcServerBin = binrpc.createServer({host: config.rpcListenIp, port: config.rpcListenPortBin});
+        server = rpcServerBin;
+        log.debug('binrpc server listening on ' + config.rpcListenIp + ':' + (config.rpcListenPortBin));
+    } else if (rpcServerStarted) {
+        log.debug(protocol + ' server already started');
+        return;
+    } else {
+        rpcServerStarted = true;
+        rpcServer = xmlrpc.createServer({host: config.rpcListenIp, port: config.rpcListenPort});
+        server = rpcServer;
+        log.debug('xmlrpc server listening on ' + config.rpcListenIp + ':' + (config.rpcListenPort));
+    }
+
+    server.on('NotFound', (method, params) => {
+        log.debug('RPC <- undefined method ' + method + ' ' + JSON.stringify(params).slice(0, 80));
+    });
+
+    Object.keys(rpcMethods).forEach(m => {
+        server.on(m, rpcMethods[m]);
+    });
+}
+
 function initIpc() {
-    ipcRpc.on('config', (params, callback) => {
+    ipcRpc.on('config', params => {
         config = params[0];
         console.log(config);
         pjson.save('config', config);
@@ -431,18 +413,18 @@ function initIpc() {
 
 function rpcProxy(daemon, method, params, callback) {
     switch (method) {
-        case 'listDevices':
-            var res = [];
-            for (const address in localDevices[daemon]) {
+        case 'listDevices': {
+            const res = [];
+            Object.keys(localDevices[daemon]).forEach(address => {
                 res.push(localDevices[daemon][address]);
-            }
+            });
             log.debug('RPC -> respond to listDevices from cache (' + res.length + ')');
             callback(null, res);
             break;
-
-        case 'getParamsetDescription':
-            var dev = localDevices[daemon][params[0]];
-            var ident = dev.TYPE + '/' + dev.VERSION + '/' + params[1];
+        }
+        case 'getParamsetDescription': {
+            const dev = localDevices[daemon][params[0]];
+            let ident = dev.TYPE + '/' + dev.VERSION + '/' + params[1];
             if (dev.PARENT_TYPE) {
                 ident = dev.PARENT_TYPE + '/' + ident;
             }
@@ -462,7 +444,7 @@ function rpcProxy(daemon, method, params, callback) {
                 });
             }
             break;
-
+        }
         default:
             log.debug('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method + '(' + JSON.stringify(params).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
             rpcClients[daemon].methodCall(method, params, (error, result) => {
@@ -530,28 +512,25 @@ let stopping;
 function stop() {
     if (stopping) {
         log.debug('force terminate');
-        process.exit(1);
+        process.exit(1); // eslint-disable-line unicorn/no-process-exit
         return;
     }
 
     const tasks = [];
-    for (const daemon in config.daemons) {
+    Object.keys(config.daemons).forEach(daemon => {
         const protocol = (config.daemons[daemon].protocol === 'binrpc' ? 'xmlrpc_bin://' : 'http://');
         const initUrl = protocol + config.rpcInitIp + ':' + (config.daemons[daemon].protocol === 'binrpc' ? config.rpcListenPortBin : config.rpcListenPort);
-
-        (function (_daemon, _initUrl) {
-            tasks.push(cb => {
-                log.debug('RPC -> ' + config.daemons[_daemon].ip + ':' + config.daemons[_daemon].port + ' init ' + _initUrl + ' ""');
-                rpcClients[_daemon].methodCall('init', [_initUrl, ''], (err, data) => {
-                    log.debug('    <- ' + JSON.stringify(err) + ' ' + JSON.stringify(data));
-                    cb(null, data);
-                });
+        tasks.push(cb => {
+            log.debug('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' init ' + initUrl + ' ""');
+            rpcClients[daemon].methodCall('init', [initUrl, ''], (err, data) => {
+                log.debug('    <- ' + JSON.stringify(err) + ' ' + JSON.stringify(data));
+                cb(null, data);
             });
-        })(daemon, initUrl);
-    }
+        });
+    });
     async.parallel(tasks, () => {
         log.debug('terminate');
-        process.exit(0);
+        process.exit(0); // eslint-disable-line unicorn/no-process-exit
     });
     setTimeout(stop, 2000);
 }

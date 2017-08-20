@@ -8,21 +8,21 @@
  */
 
 const occuPath = '/Users/basti/PhpstormProjects/homematic-manager/occu/occu/';
-var langs = ['de', 'en', 'tr'];
+const langs = ['de', 'en', 'tr'];
 // Var langs = ['de'];
-var receivers = ['SWITCH', 'DIMMER', 'BLIND', 'ACTOR_SECURITY', 'ACTOR_WINDOW', 'ALARMACTUATOR',
+const receivers = ['SWITCH', 'DIMMER', 'BLIND', 'ACTOR_SECURITY', 'ACTOR_WINDOW', 'ALARMACTUATOR',
     'CLIMATECONTROL_RECEIVER', 'CLIMATECONTROL_RT_RECEIVER', 'CLIMATECONTROL_VENT_DRIVE',
     'DDC', 'HMW_BLIND', 'HMW_DIMMER', 'HMW_INPUT_OUTPUT', 'HMW_SWITCH', 'KEYMATIC',
     'REMOTECONTROL_RECEIVER', 'SIGNAL_CHIME', 'SIGNAL_LED', 'STATUS_INDICATOR', 'SWITCH',
     'VIRTUAL_DIMMER', 'WEATHER', 'WEATHER_RECEIVER', 'WINDOW_SWITCH_RECEIVER', /* 'WINMATIC' */, 'WS_TH'
 ];
+/*
+const receivers = ['RGBW_AUTOMATIC', 'RGBW_COLOR', 'SWITCH_VIRTUAL_RECEIVER'];
 
-var receivers = ['RGBW_AUTOMATIC', 'RGBW_COLOR', 'SWITCH_VIRTUAL_RECEIVER'];
+const receivers = ['HMW_BLIND', 'HMW_DIMMER', 'HMW_INPUT_OUTPUT', 'HMW_SWITCH'];
 
-var receivers = ['HMW_BLIND', 'HMW_DIMMER', 'HMW_INPUT_OUTPUT', 'HMW_SWITCH'];
-
-var receivers = ['SIGNAL_CHIMEM', 'SIGNAL_LEDM'];
-
+const receivers = ['SIGNAL_CHIMEM', 'SIGNAL_LEDM'];
+*/
 const files = ['GENERIC', 'PNAME'];
 
 const fs = require('fs');
@@ -202,7 +202,7 @@ function readFile(receiver, sender) {
                 obj[receiver][sender][prn].options[pref] = {};
             }
             obj[receiver][sender][prn].options[pref].desc = match[1];
-        } else if (match = line.match(/get_ComboBox options ([A-Z_\|]+)/)) {
+        } else if (match = line.match(/get_ComboBox options ([A-Z_|]+)/)) {
             const combo = match[1].split('|');
             combo.forEach(p => {
                 if (obj[receiver][sender][prn].params[p]) {

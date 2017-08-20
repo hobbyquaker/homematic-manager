@@ -31,8 +31,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "electron": "electron .",
     "dist": "build",
-    "lint": "xo --space 4",
-    "lintfix": "xo --space 4 --fix"
+    "lint": "xo",
+    "lintfix": "xo --fix"
   },
   "repository": {
     "type": "git",
@@ -78,5 +78,12 @@
         "portable"
       ]
     }
+  },
+  "xo": {
+    "space": 4,
+    "ignore": [
+      "tools/convert_easymodes.js",
+      "tools/convert_imgpaths.js"
+    ]
   }
 }

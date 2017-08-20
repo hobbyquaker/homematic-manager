@@ -1,4 +1,16 @@
 {
+  "Homematic Manager Address": {
+      "de": "Homematic Manager Adresse"
+  },
+  "CCU Address": {
+    "de": "CCU Adresse"
+  },
+  "Select": {
+    "de": "Auswählen"
+  },
+  "Save & Restart": {
+    "de": "Speichern und Neustarten"
+  },
   "Error": {
     "de": "Fehler"
   },

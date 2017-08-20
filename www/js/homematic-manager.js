@@ -107,7 +107,6 @@ ipcRpc.on('disconnect', () => {
 
 ipcRpc.on('connection', connected => {
     connected = connected[0];
-    console.log('connection', connected);
     let connections = '';
     Object.keys(connected).forEach(d => {
         if (connected[d]) {
@@ -306,7 +305,6 @@ function getConfig() {
         language = config.language || 'de';
 
         $.getJSON('easymodes/localization/' + language + '/GENERIC.json', data => {
-            console.log('easymode generic', data);
             if (!easymodes.lang[language]) {
                 easymodes.lang[language] = {};
             }
@@ -314,7 +312,6 @@ function getConfig() {
             $.getJSON('easymodes/localization/' + language + '/PNAME.json', data => {
                 // Console.log('easymode loaded pname', data);
                 easymodes.lang[language].PNAME = data;
-                console.log('easymodes', easymodes);
             });
         });
 
@@ -376,7 +373,6 @@ function getConfig() {
 }
 function getNames(callback) {
     ipcRpc.send('getNames', [], (err, data) => {
-        console.log('getNamesReply');
         names = data;
         if (typeof callback === 'function') {
             callback();
@@ -495,7 +491,6 @@ function initDialogsMisc() {
     });
 }
 function initDaemon() {
-    console.log('initDaemon');
     indexSourceRoles = {};
     indexTargetRoles = {};
     daemon = $('#select-bidcos-daemon option:selected').val();
@@ -585,7 +580,6 @@ function initDaemon() {
 function getDevices(callback) {
     $('#load_grid-devices').show();
     ipcRpc.send('rpc', [daemon, 'listDevices'], (err, data) => {
-        console.log('listDevices Reply', data);
         indexChannels = {};
         indexSourceRoles = {};
         indexTargetRoles = {};
@@ -1368,7 +1362,6 @@ function dialogDeleteDevice() {
     $dialogDelDevice.dialog('open');
 }
 function dialogParamset(data, desc, address, paramset) {
-    console.log('dialogParamset', data, desc, address, paramset);
     if (!data) {
         $('#load_grid-devices').hide();
         return;

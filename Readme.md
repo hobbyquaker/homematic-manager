@@ -168,8 +168,7 @@ und klicke auf putParamset.
 
 ## Lizenz
 
-Copyright (c) 2014-2017 Sebastian Raff
-Copyright (c) 2014, 2015 Anli
+Copyright (c) 2014-2017 Sebastian 'hobbyquaker' Raff, Anli
 
 [CC BY-NC-SA 4.0](http://creativecommons.org/licenses/by-nc-sa/4.0/)
 

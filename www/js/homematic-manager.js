@@ -8,6 +8,8 @@ const ipcRpc = new Rpc(ipc);
 window.$ = window.jQuery = require('jquery');
 require('../../node_modules/jquery-ui-dist/jquery-ui.min');
 require('../../node_modules/ui-contextmenu/jquery.ui-contextmenu');
+require('../../node_modules/jquery-ui-multiselect-widget/src/jquery.multiselect');;;;;;;;;;
+require('../../node_modules/jquery-ui-multiselect-widget/src/jquery.multiselect.filter');;;;;;;;;;
 require('../../node_modules/free-jqgrid/dist/jquery.jqgrid.min')(window, $);
 
 $(document).ready(startRenderer);

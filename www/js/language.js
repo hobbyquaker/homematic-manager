@@ -2,6 +2,7 @@ const translation = {
     Error: {de: 'Fehler'},
     Devices: {de: 'Geräte'},
     Device: {de: 'Gerät'},
+    introduced: {de: 'gefunden'},
     New: {de: 'Neue'},
     Events: {de: 'Ereignisse'},
     Cancel: {de: 'Abbrechen'},

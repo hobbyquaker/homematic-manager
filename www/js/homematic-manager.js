@@ -131,7 +131,7 @@ ipcRpc.on('rpc', (data, callback) => {
                 count += 1;
                 output += '<br/>' + devArr[i].ADDRESS + ' (' + devArr[i].TYPE + ')';
             }
-            $('#alert').html('<h3>' + count + ' ' + _('New') +  (count === 1 ? '' : (language === 'de' ? 's' : '')) + ' ' + _('Device') + (count === 1 ? '' : (language === 'de' ? 'e' : 's')) + ' ' + _('introduced') + ':</h3>' + output);
+            $('#alert').html('<h3>' + count + ' ' + _('New') +  (count > 1 ? '' : (language === 'de' ? 's' : '')) + ' ' + _('Device') + (count === 1 ? '' : (language === 'de' ? 'e' : 's')) + ' ' + _('introduced') + ':</h3>' + output);
             $('#dialog-alert').dialog('open');
             getDevices(() => {
                 getLinks(() => {
@@ -1051,7 +1051,7 @@ function initGridDevices() {
                 'DIRECTION',
                 'PARAMSETS',
                 'FLAGS',
-                'AES_ACTIVE'
+                config.daemons[daemon].type !== 'BidCos-RF' ? '' : 'AES_ACTIVE'
                 // 'LINK_SOURCE_ROLES',
                 // 'LINK_TARGET_ROLES',
                 // 'VERSION'
@@ -1068,7 +1068,6 @@ function initGridDevices() {
                     index: 'aes_active',
                     width: 148,
                     fixed: true,
-                    hidden: (config.daemons[daemon].type !== 'BidCos-RF'),
                     classes: 'channel-cell'
                 }
                 // {name: 'LINK_SOURCE_ROLES', index: 'LINK_SOURCE_ROLES', width: 100, hidden: true},

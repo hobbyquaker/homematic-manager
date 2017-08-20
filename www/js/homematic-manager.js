@@ -1398,6 +1398,10 @@ function dialogParamset(data, desc, address, paramset) {
                 }
             }
 
+            if (typeof data[param] === 'undefined') {
+                data[param] = desc[param].DEFAULT;
+            }
+
             // Create Input-Field
             let input;
             const helpentry = helpLinkParamset[language] && helpLinkParamset[language][param.replace('SHORT_', '').replace('LONG_', '')];

@@ -1374,6 +1374,7 @@ function dialogParamset(data, desc, address, paramset) {
     // Tabelle befüllen
     $tableParamset.show().html('<tr><th class="paramset-1">Param</th><th class="paramset-2">&nbsp;</th><th class="paramset-3">Value</th><th class="paramset-4">Default</th><th></th></tr>');
     let count = 0;
+    let writeable = false;
     let helpIcon;
     Object.keys(desc).forEach(param => {
         let unit = '';
@@ -1405,6 +1406,10 @@ function dialogParamset(data, desc, address, paramset) {
                 help = helpentry.helpText;
             } else {
                 help = helpentry || '';
+            }
+
+            if (desc[param].OPERATIONS & 2) {
+                writeable = true;
             }
 
             switch (desc[param].TYPE) {
@@ -1451,6 +1456,9 @@ function dialogParamset(data, desc, address, paramset) {
                 case 'FLOAT':
                     input = '<input data-address="' + address + '" data-paramset="' + paramset + '" data-param="' + param + '" data-val-prev="' + data[param] + '" data-type="FLOAT" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                     break;
+                case 'STRING':
+                    input = '<input data-address="' + address + '" data-paramset="' + paramset + '" data-param="' + param + '" data-val-prev="' + data[param] + '" data-type="STRING" data-unit="' + desc[param].UNIT + '" id="paramset-input-' + param + '" type="text" value="' + data[param] + '"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                    break;
                 default:
                     console.log('unknown type', desc[param].TYPE);
                     // Todo this should not happen
@@ -1490,32 +1498,50 @@ function dialogParamset(data, desc, address, paramset) {
 
     $selectParamsetMultiselect.html('');
     let tmpName;
-    for (const a in indexChannels) {
+    let mcount = 0;
+    Object.keys(indexChannels).forEach(a => {
+
         if (a === address) {
-            continue;
+            return;
         }
         if (indexChannels[address].TYPE !== indexChannels[a].TYPE) {
-            continue;
+            return;
         }
         if ((indexChannels[address].PARENT === '') && (indexChannels[a].PARENT !== '')) {
-            continue;
+            return;
         }
         if ((indexChannels[address].PARENT !== '') && (indexChannels[a].PARENT === '')) {
-            continue;
+            return;
         }
         if (names[a]) {
             tmpName = names[a] + ' (' + a + ')';
         } else {
             tmpName = a;
         }
+        mcount += 1;
         $selectParamsetMultiselect.append('<option value="' + a + '">' + tmpName + '</option>');
-    }
+    });
+
     $selectParamsetMultiselect.multiselect('refresh');
+
+    if (mcount > 0 && writeable) {
+        $('#select-paramset-multiselect_ms').show();
+    } else {
+        $('#select-paramset-multiselect_ms').hide();
+    }
+    if (writeable) {
+        $('#dialog-paramset-button').show();
+    } else {
+        $('#dialog-paramset-button').hide();
+    }
+
+    console.log('writeable', writeable);
 
     $dialogParamset.dialog('open');
     $dialogParamset.tooltip({
         open(event, ui) {
             ui.tooltip.css('max-width', '500px');
+
         },
         content() {
             return $(this).prop('title');
@@ -1533,7 +1559,8 @@ function initDialogParamset() {
                 text: _('putParamset'),
                 click() {
                     putParamset();
-                }
+                },
+                id: 'dialog-paramset-button'
             }
         ]
     });
@@ -3635,9 +3662,12 @@ function setConsoleParams(elem) {
     });
 
     $('[id^="param_"]').each(function () {
+        if ($(this).attr('id').endsWith('_ms')) {
+            return;
+        }
         const paramIndex = parseInt($(this).attr('id').slice(6), 10);
         const paramDesc = rpcMethods[method].params[paramIndex];
-        let val;
+        let val = $(this).val();
         if (paramDesc.type === 'integer') {
             const val = parseInt($(this).val(), 10);
             if (isNaN(val) && !paramDesc.optional) {
@@ -3671,7 +3701,6 @@ function setConsoleParams(elem) {
                     paramArr[paramIndex] = $(this).val();
             }
         } else {
-            val = $(this).val();
             if (val || !paramDesc.optional) {
                 paramArr[paramIndex] = val;
             }

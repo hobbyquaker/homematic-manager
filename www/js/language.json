@@ -232,13 +232,13 @@
     "de": "RPC wird ausgeführt",
     "en": "RPC execution"
   },
-  "about HomeMatic Manager": {
-    "de": "Über HomeMatic Manager",
-    "en": "about HomeMatic Manager"
+  "about Homematic Manager": {
+    "de": "Über Homematic Manager",
+    "en": "about Homematic Manager"
   },
-  "Loading HomeMatic Manager...": {
-    "de": "Lade HomeMatic Manager...",
-    "en": "Loading HomeMatic Manager..."
+  "Loading Homematic Manager...": {
+    "de": "Lade Homematic Manager...",
+    "en": "Loading Homematic Manager..."
   },
   "Check all": {
     "de": "Alle auswählen",

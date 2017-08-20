@@ -623,17 +623,17 @@ function initGridDevices() {
     $gridDevices.jqGrid({
         colNames: ['', 'Name', 'ADDRESS', 'TYPE', 'FIRMWARE', 'PARAMSETS', 'FLAGS', /* 'INTERFACE', 'RF_ADDRESS', */ /* 'ROAMING', */ 'RX_MODE'/* , 'VERSION' */],
         colModel: [
-            {name: 'img', index: 'img', width: 22, fixed: true, classes: 'device-cell', align: 'center'},
+            {name: 'img', index: 'img', width: 22, fixed: true, classes: 'device-cell', align: 'center', search: false},
             {name: 'Name', index: 'Name', width: 160, fixed: false, classes: 'device-cell'},
             {name: 'ADDRESS', index: 'ADDRESS', width: 140, fixed: true, classes: 'device-cell'},
             {name: 'TYPE', index: 'TYPE', width: 140, fixed: false, classes: 'device-cell'},
             {name: 'FIRMWARE', index: 'FIRMWARE', width: 80, fixed: true, classes: 'device-cell'},
-            {name: 'params', index: 'params', width: 120, fixed: true, classes: 'device-cell'},
-            {name: 'flags', index: 'FLAGS', width: 150, fixed: true, classes: 'device-cell'},
+            {name: 'params', index: 'params', width: 120, fixed: true, classes: 'device-cell', search: false},
+            {name: 'flags', index: 'flags', width: 150, fixed: true, classes: 'device-cell'},
             // {name:'INTERFACE',index:'INTERFACE', width:70},
             // {name:'RF_ADDRESS',index:'RF_ADDRESS', width:70},
             // {name:'roaming',index:'roaming', width:30, hidden: true},
-            {name: 'rx_mode', index: 'RX_MODE', width: 150, fixed: true, classes: 'device-cell'}
+            {name: 'rx_mode', index: 'rx_mode', width: 150, fixed: true, classes: 'device-cell'}
             // {name:'VERSION',index:'VERSION', width:60, fixed: true, align:'right'}
         ],
         datatype: 'local',

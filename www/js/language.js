@@ -1,6 +1,8 @@
 const translation = {
     Error: {de: 'Fehler'},
     Devices: {de: 'Geräte'},
+    Device: {de: 'Gerät'},
+    New: {de: 'Neue'},
     Events: {de: 'Ereignisse'},
     Cancel: {de: 'Abbrechen'},
     OK: {de: 'OK'},

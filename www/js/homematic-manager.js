@@ -13,7 +13,6 @@ require('../../node_modules/jquery-ui-multiselect-widget/src/jquery.multiselect.
 require('../../node_modules/free-jqgrid/dist/jquery.jqgrid.min')(window, $);
 require('../../node_modules/free-jqgrid/dist/i18n/grid.locale-de')(window, $);
 
-
 let language = 'de';
 
 let daemon;
@@ -132,7 +131,7 @@ ipcRpc.on('rpc', (data, callback) => {
                 count += 1;
                 output += '<br/>' + devArr[i].ADDRESS + ' (' + devArr[i].TYPE + ')';
             }
-            $('#alert').html('<h3>' + count + ' ' + _('new') + ' ' + _('device') + (count == 1 ? '' : (language == 'de' ? 'e' : 's')) + ' ' + _('introduced') + ':</h3>' + output);
+            $('#alert').html('<h3>' + count + ' ' + _('New') +  (count === 1 ? '' : (language === 'de' ? 's' : '')) + ' ' + _('Device') + (count === 1 ? '' : (language === 'de' ? 'e' : 's')) + ' ' + _('introduced') + ':</h3>' + output);
             $('#dialog-alert').dialog('open');
             getDevices(() => {
                 getLinks(() => {

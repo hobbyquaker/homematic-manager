@@ -538,8 +538,15 @@ function initDaemon() {
         window.location.hash = tmpHash;
 
         $('.dselect').hide();
+        $('.show-rf').hide();
+        $('.show-wired').hide();
+        $('.show-hmip').hide();
+        $('.show-cuxd').hide();
+        $('#replace-device, #update-device, #clear-device, #add-device, #restore-device').show();
 
         if (type === 'BidCos-Wired') {
+            $('.show-wired').show();
+
             $('.dselect.' + type).show();
             $('#play-link').hide();
             $('#play-link-long').hide();
@@ -549,10 +556,21 @@ function initDaemon() {
             // $gridDevices.jqGrid('hideCol', 'INTERFACE');
             resizeGrids();
         } else if (type === 'CUxD') {
+            $('.show-cuxd').show();
             $('.dselect.' + type).show();
             $('#play-link').hide();
             $('#play-link-long').hide();
+        } else if (type === 'HmIP') {
+            $('.show-hmip').show();
+            $('#play-link').hide();
+            $('#play-link-long').hide();
+            $('#replace-device, #update-device, #clear-device, #add-device, #restore-device').hide();
+            $('.dselect').show();
+            $gridDevices.jqGrid('showCol', 'rx_mode');
+            resizeGrids();
+
         } else {
+            $('.show-rf').show();
             $('.dselect').show();
             $('#play-link').show();
             $('#play-link-long').show();
@@ -798,12 +816,13 @@ function initGridDevices() {
         menu: [
             {title: _('Rename'), cmd: 'rename', uiIcon: 'ui-icon-pencil'},
             {title: _('MASTER Paramset'), cmd: 'paramsetMaster', uiIcon: 'ui-icon-gear'},
+            {title: _('SERVICE Paramset'), cmd: 'paramsetService', uiIcon: 'ui-icon-gear', addClass: 'show-hmip'},
             {title: '----'},
-            {title: _('restoreConfigToDevice'), cmd: 'restoreConfigToDevice', uiIcon: 'ui-icon-comment'},
-            {title: _('clearConfigCache'), cmd: 'clearConfigCache', uiIcon: 'ui-icon-arrowrefresh-1-w'},
+            {title: _('restoreConfigToDevice'), cmd: 'restoreConfigToDevice', uiIcon: 'ui-icon-comment', addClass: 'show-rf'},
+            {title: _('clearConfigCache'), cmd: 'clearConfigCache', uiIcon: 'ui-icon-arrowrefresh-1-w', addClass: 'show-rf'},
             {title: '----'},
-            {title: _('updateFirmware'), cmd: 'updateFirmware', uiIcon: 'ui-icon-script'},
-            {title: _('Replace'), cmd: 'replace', uiIcon: 'ui-icon-transfer-e-w'},
+            {title: _('updateFirmware'), cmd: 'updateFirmware', uiIcon: 'ui-icon-script', addClass: 'show-rf'},
+            {title: _('Replace'), cmd: 'replace', uiIcon: 'ui-icon-transfer-e-w', addClass: 'show-rf'},
             {title: _('Delete'), cmd: 'delete', uiIcon: 'ui-icon-trash'}
 
         ],
@@ -813,6 +832,9 @@ function initGridDevices() {
             switch (cmd) {
                 case 'paramsetMaster':
                     getParamset(address, 'MASTER');
+                    break;
+                case 'paramsetService':
+                    getParamset(address, 'SERVICE');
                     break;
                 case 'clearConfigCache':
                     clearConfigCache();
@@ -1891,8 +1913,8 @@ function initGridLinks() {
         delegate: 'td.link-cell',
         menu: [
             {title: _('Edit link'), cmd: 'edit', uiIcon: 'ui-icon-gear'},
-            {title: _('Activate short'), cmd: 'activate', uiIcon: 'ui-icon-seek-end'},
-            {title: _('Activate long'), cmd: 'activate_long', uiIcon: 'ui-icon-seek-next'},
+            {title: _('Activate short'), cmd: 'activate', uiIcon: 'ui-icon-seek-end', addClass: 'show-rf'},
+            {title: _('Activate long'), cmd: 'activate_long', uiIcon: 'ui-icon-seek-next', addClass: 'show-rf'},
             {title: _('Delete link'), cmd: 'delete', uiIcon: 'ui-icon-trash'}
         ],
         select(event, ui) {

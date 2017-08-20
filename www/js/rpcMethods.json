@@ -131,7 +131,7 @@
     ],
     "returns": "DeviceDescription",
     "help": {
-      "de": "Diese Methode löscht ein Gerät aus dem Schnittstellenprozess.<br>Der Parameter address ist die Addresse des zu löschenden Gerätes.<br>Flags ist ein bitweises oder folgender Werte:<ul><li>DELETE_FLAG_RESET Das Gerät wird vor dem Löschen in den Werkszustand zurückgesetzt </li><li>DELETE_FLAG_FORCE Das Gerät wird auch gelöscht, wenn es nicht erreichbar ist </li><li>DELETE_FLAG_DEFER Wenn das Gerät nicht erreichbar ist, wird es bei nächster Gelegenheit gelöscht</li></ul>"
+      "de": "Diese Methode löscht ein Gerät aus dem Schnittstellenprozess.<br>Der Parameter address ist die Addresse des zu löschenden Gerätes.<br>Flags ist ein bitweises oder folgender Werte:<ul><li>DELETE_FLAG_RESET Das Gerät wird vor dem Löschen in den Werkszustand zurückgesetzt </li><li>DELETE_FLAG_FORCE Das Gerät wird auch gelöscht, wenn es nicht erreichbar ist </li><li>DELETE_FLAG_DEFER Wenn das Gerät nicht erreichbar ist, wird es bei nächster Gelegenheit gelöscht</li></ul>Bei Homematic IP sind die Flags 0x01 und 0x04 nicht mehr vorhanden und das Löschen von Geräten ist per Default so, als wenn diese Flags gesetzt worden wären."
     }
   },
   "determineParameter": {
@@ -293,7 +293,7 @@
     ],
     "returns": "",
     "help": {
-      "de": "Mit dieser Methode wird ein komplettes Parameter-Set für ein logisches Gerät gelesen. Der Parameter address ist die Addresses eines logischen Gerätes. Der Parameter paramset_key ist „MASTER“, „VALUES“ oder die Adresse eines Kommunikationspartners für das entsprechende Link-Parameter-Set (siehe getLinkPeers).<br>Dem optionalen Parameter mode können folgende Werte übergeben werden (nur rfd):<ul><li>0 default: Keien Auswirkung, die Funktion verhält sicht wie der Aufruf ohne mode</li><li>1 UndefinedValues: Jeder Eintrag innerhalb des zurückgelieferten Paramset ins eine Struktur mit folgendem Aufbau:<br>„UNDEFINED“(Boolean) Flag ob der angeforderte Wert initial gesetzt wurde und somit wahrscheinlich nicht der Realität entspricht oder ob der Wert von einem Gerät empfangen wurde, true = Wert wurde initial gesetzt und noch nicht verändert, false = der Wert wurde neu gesetzt <br>„VALUE“(ValueType) Wert des angeforderten Parameter.<br>UndefindeValues kann nur für Parameter aus dem Parameterset „VALUES“ abgefragt werden."
+      "de": "Mit dieser Methode wird ein komplettes Parameter-Set für ein logisches Gerät gelesen. Der Parameter address ist die Addresses eines logischen Gerätes. Der Parameter paramset_key ist „MASTER“, „VALUES“ oder die Adresse eines Kommunikationspartners für das entsprechende Link-Parameter-Set (siehe getLinkPeers).<br>Dem optionalen Parameter mode können folgende Werte übergeben werden (nur rfd):<ul><li>0 default: Keien Auswirkung, die Funktion verhält sicht wie der Aufruf ohne mode</li><li>1 UndefinedValues: Jeder Eintrag innerhalb des zurückgelieferten Paramset ins eine Struktur mit folgendem Aufbau:<br>„UNDEFINED“(Boolean) Flag ob der angeforderte Wert initial gesetzt wurde und somit wahrscheinlich nicht der Realität entspricht oder ob der Wert von einem Gerät empfangen wurde, true = Wert wurde initial gesetzt und noch nicht verändert, false = der Wert wurde neu gesetzt <br>„VALUE“(ValueType) Wert des angeforderten Parameter.<br>UndefindeValues kann nur für Parameter aus dem Parameterset „VALUES“ abgefragt werden. Bei HomeMatic IP gibt es für bestimmte Geräte zusätzlich den paramset_type„SERVICE“, welche Geräte dies sind, ist der jeweiligen DeviceDescription zu entnehmen.Ebenso ist dieses Parameter Set kanalübergreifend, so dass es über die XML-RPCSchnittstellefür alle Kanäle abgefragt werden kann, aber immer dieselben Parameterzurückliefert.<br>Hinweis: Diese Parameter werden bei jeder Anfrage direkt vom Gerät abgefragt, deshalbsollten sie wegen der DutyCycle Belastung nicht sehr häufig abgefragt werden."
     }
   },
   "getParamsetDescription": {
@@ -309,7 +309,7 @@
     ],
     "returns": "",
     "help": {
-      "de": "Mit dieser Methode wird die Beschreibung eines Parameter-Sets ermittelt. Der Parameter address ist die Adresse eines logischen Gerätes (z.B. von listDevices zurückgegeben). Der Parameter paramset_type ist „MASTER“, „VALUES“ oder „LINK“."
+      "de": "Mit dieser Methode wird die Beschreibung eines Parameter-Sets ermittelt. Der Parameter address ist die Adresse eines logischen Gerätes (z.B. von listDevices zurückgegeben). Der Parameter paramset_type ist „MASTER“, „VALUES“ oder „LINK“.Bei HomeMatic IP gibt es für bestimmte Geräte zusätzlich den paramset_typeSERVICE, welche Geräte dies sind, ist der jeweiligen DeviceDescription zu entnehmen.Ebenso ist dieses Parameter Set kanalübergreifend, so dass es über die XML-RPCSchnittstellefür alle Kanäle abgefragt werden kann, aber immer dieselben Parameter zurückliefert. "
     }
   },
   "getParamsetId": {
@@ -451,7 +451,7 @@
     ],
     "returns": "",
     "help": {
-      "de": "Mit dieser Methode wird ein komplettes Parameter-Set für ein logisches Gerät geschrieben. Der Parameter address ist die Addresses eines logischen Gerätes. Der Parameter paramset_key ist „MASTER“, „VALUES“ oder die Adresse eines Kommunikationspartners für das entsprechende Link-Parameter-Set (siehe getLinkPeers). Der Parameter set ist das zu schreibende Parameter-Set. In set nicht vorhandene Member werden einfach nicht geschrieben und behalten ihren alten Wert"
+      "de": "Mit dieser Methode wird ein komplettes Parameter-Set für ein logisches Gerät geschrieben. Der Parameter address ist die Addresses eines logischen Gerätes. Der Parameter paramset_key ist „MASTER“, „VALUES“ oder die Adresse eines Kommunikationspartners für das entsprechende Link-Parameter-Set (siehe getLinkPeers). Der Parameter set ist das zu schreibende Parameter-Set. In set nicht vorhandene Member werden einfach nicht geschrieben und behalten ihren alten Wert.<br>Bei HomeMatic IP kann address auch die spezielle Adresse ALL_SMOKE_DETECTORS sein, welche für die Übertragung über Funk nicht eine Geräteadresse sondern die Multicast Adresse (0xF00005) für alle Rauchmelder verwendet und somit auch alle in Funkreichweite befindlichen Rauchmelder des Funknetzwerkes diesen ausführen sollten."
     }
   },
   "removeLink": {
@@ -704,7 +704,7 @@
     ],
     "returns": "",
     "help": {
-      "de": "Mit dieser Methode wird ein einzelner Wert aus dem Parameter-Set „VALUES“ geschrieben. Der Parameter address ist die Addresse eines logischen Gerätes. Der Parameter value_key ist der Name des zu schreibenden Wertes. Die möglichen Werte für value_key ergeben sich aus der ParamsetDescription des entsprechenden Parameter-Sets „VALUES“. Der Parameter value ist der zu schreibende Wert."
+      "de": "Mit dieser Methode wird ein einzelner Wert aus dem Parameter-Set „VALUES“ geschrieben. Der Parameter address ist die Addresse eines logischen Gerätes. Der Parameter value_key ist der Name des zu schreibenden Wertes. Die möglichen Werte für value_key ergeben sich aus der ParamsetDescription des entsprechenden Parameter-Sets „VALUES“. Der Parameter value ist der zu schreibende Wert.<br>Bei HomeMatic IP kann address auch die spezielle Adresse ALL_SMOKE_DETECTORS sein, welche für die Übertragung über Funk nicht eine Geräteadresse sondern die Multicast Adresse (0xF00005) für alle Rauchmelder verwendet und somit auch alle in Funkreichweite befindlichen Rauchmelder des Funknetzwerkes diesen ausführen sollten."
     }
   },
   "system.listMethods": {
@@ -728,6 +728,38 @@
     "returns": "",
     "help": {
       "de": "Diese Methode führt ein Firmware-Update für das in device angegebene Gerät durch. Das Gerät wird durch seine Seriennummer spezifiziert. Der Rückgabewert gibt an, ob das Firmware-Update erfolgreich war."
+    }
+  },
+  "installFirmware": {
+    "params": [
+      {
+        "name": "device",
+        "type": "device_address"
+      }
+    ],
+    "returns": "boolean",
+    "help": {
+      "de": "Mit dieser Methode teilt die Logikschicht dem Schnittstellenprozess mit, dass ein Gerät die über Background OTAU aufgespielte Firmware aktiveren soll."
+    }
+  },
+  "setInstallModeWithWhitelist": {
+    "params": [
+      {
+        "name": "on",
+        "type": "boolean"
+      },
+      {
+        "name": "time",
+        "type": "integer"
+      },
+      {
+        "name": "whitelistValues",
+        "type": "RpcStruct[]"
+      }
+    ],
+    "returns": "void",
+    "help": {
+      "de": "Mit dieser Methode teilt die Logikschicht dem Schnittstellenprozess mit, dass ein oder mehrere Geräte über die Whitelist für die Inkludierung freigeschaltet werden sollen für den angegebenen Zeitraum. <ul><li>on, gibt an ob die Install Mode aktiviert oder deaktiviert werden soll. Wenn der Wert „false“ ist haben die weiteren Parameter keine Auswirkung auf die Aktion. </li><li> time, gibt die Zeit in Sekunden an, nach der der Install Mode deaktiviert werden soll. Der Defaultwert ist 30 Sekunden. </li><li>whiteListValues, gibt die Geräte an, die inkludiert werden sollen, dies ist ein Array aus RPC Structs, welche folgende Daten haben: <ul><li> ADDRESS, gibt die SGTIN bzw. ID des Gerätes an, das inkludiert werden soll. </li><li> KEY_MODE, gibt den Typen des Keys an, der für die Inklusion verwendet werden soll. Dieser Wert ist ein String mit folgenden unterstützten Werten: <ul><li>LOCAL </li><li>MASTER und DEFAULT werden zur Zeit vom crRFD noch nicht unterstützt</li></ul> </li><li> KEY, gibt den zu verwendenden Geräteschlüssel an, der bei der Inklusion verwendet werden soll. Dieser Wert ist der Hexstring des 16 Byte langen Schlüssels </li></ul></li></ul> Wenn der KEY_MODE oder KEY nicht angegeben ist wird der Master Key vom Key-Server für die Inklusion versucht zu nutzten. Die Whitelist wird beim Ablauf des Install Mode zurückgesetzt."
     }
   }
 }

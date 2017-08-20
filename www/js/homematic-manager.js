@@ -1744,11 +1744,13 @@ function getLinks(callback) {
 function initGridLinks() {
     $gridLinks.jqGrid({
         datatype: 'local',
-        colNames: ['SENDER Name', 'SENDER', 'TYPE', 'RECEIVER Name', 'RECEIVER', 'TYPE', 'NAME', 'DESCRIPTION'/* , 'Aktionen' */],
+        colNames: ['', 'SENDER Name', 'SENDER', 'TYPE', '', 'RECEIVER Name', 'RECEIVER', 'TYPE', 'NAME', 'DESCRIPTION'/* , 'Aktionen' */],
         colModel: [
+            {name: 'img_sender', index: 'img_sender', width: 22, fixed: true, classes: 'device-cell', align: 'center', search: false},
             {name: 'Sendername', index: 'Sendername', width: 100, classes: 'link-cell'},
             {name: 'SENDER', index: 'SENDER', width: 50, classes: 'link-cell'},
             {name: 'SENDER_TYPE', index: 'SENDER_TYPE', width: 50, classes: 'link-cell'},
+            {name: 'img_receiver', index: 'img_receiver', width: 22, fixed: true, classes: 'device-cell', align: 'center', search: false},
             {name: 'Receivername', index: 'Receivername', width: 100, classes: 'link-cell'},
             {name: 'RECEIVER', index: 'RECEIVER', width: 50, classes: 'link-cell'},
             {name: 'RECEIVER_TYPE', index: 'RECEIVER_TYPE', width: 50, classes: 'link-cell'},
@@ -2075,6 +2077,13 @@ function refreshGridLinks() {
             listLinks[i].RECEIVER_TYPE = indexChannels[listLinks[i].RECEIVER] && indexChannels[listLinks[i].RECEIVER].TYPE;
 
             listLinks[i]._id = i;
+
+            const devSender = indexChannels[indexChannels[listLinks[i].SENDER].PARENT].TYPE;
+            const devReceiver = indexChannels[indexChannels[listLinks[i].RECEIVER].PARENT].TYPE;
+
+            listLinks[i].img_sender = '<img class="device-image" src="' + (deviceImages[devSender] || deviceImages.DEVICE) + '">';
+            listLinks[i].img_receiver = '<img class="device-image" src="' + (deviceImages[devReceiver] || deviceImages.DEVICE) + '">';
+
             rowData.push(listLinks[i]);
         }
         $gridLinks.jqGrid('addRowData', '_id', rowData);

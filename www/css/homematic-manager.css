@@ -88,16 +88,17 @@ li.header {
 }
 
 button.paramset {
-
+    padding: 0;
 }
 
 button.paramset.link span.ui-button-text, #save-link-info span.ui-button-text {
     font-size: 11px;
     width: 100px;
+
 }
 
 button.paramset.device-table span.ui-button-text {
-    padding: 1px 3px 1px 3px;
+
 }
 
 .console-container {
@@ -238,4 +239,19 @@ textarea {
     display: inline-block;
     padding-top: 4px;
     margin-left: 12px;
+}
+
+.ui-tabs .ui-tabs-nav {
+
+    height: 29px;
+
+
+}
+.ui-tabs .ui-tabs-nav li.ui-tabs-active {
+    background-color: white;
+    border-color: lightgrey;
+}
+
+.ui-tabs .ui-tabs-nav li.ui-tabs-active .ui-tabs-anchor {
+    color: black;
 }

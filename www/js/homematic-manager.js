@@ -3912,12 +3912,12 @@ function resizeGrids() {
         y = 600;
     }
 
-    $('#grid-devices, #grid-links, #grid-messages').setGridHeight(y - 148).setGridWidth(x - 18);
+    $('#grid-devices, #grid-links, #grid-messages').setGridHeight(y - 144).setGridWidth(x - 18);
 
-    $('#grid-events').css('height', (y - 84) + 'px').css('width', (x - 18) + 'px');
-    $('#grid-events-inner').css('height', (y - 104) + 'px');
+    $('#grid-events').css('height', (y - 80) + 'px').css('width', (x - 18) + 'px');
+    $('#grid-events-inner').css('height', (y - 100) + 'px');
     $('#grid-interfaces')/* .setGridHeight(y - 99) */.setGridWidth(x - 18);
-    $('#grid-rssi').setGridHeight(y - (180 + $('#gbox_grid-interfaces').height())).setGridWidth(x - 18);
+    $('#grid-rssi').setGridHeight(y - (173 + $('#gbox_grid-interfaces').height())).setGridWidth(x - 18);
 
     /*
      // funktioniert nicht mit gruppierten Headers :-(

@@ -515,7 +515,7 @@ function stop() {
     if (stopping) {
         log.debug('force terminate');
         app.quit();
-        process.exit(1);
+        process.exit(1); // eslint-disable-line unicorn/no-process-exit
         return;
     }
 

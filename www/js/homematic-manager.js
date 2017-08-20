@@ -489,7 +489,7 @@ function initDialogsMisc() {
             }
         ]
     });
-    $('#ccu-address-select').change(function () {
+    $('#ccu-address-select').change(() => {
         $('#ccu-address').val($('#ccu-address-select').val());
         $('#ccu-address-select').val('Select');
     });
@@ -568,7 +568,6 @@ function initDaemon() {
             $('.dselect').show();
             $gridDevices.jqGrid('showCol', 'rx_mode');
             resizeGrids();
-
         } else {
             $('.show-rf').show();
             $('.dselect').show();
@@ -1526,7 +1525,6 @@ function dialogParamset(data, desc, address, paramset) {
     let tmpName;
     let mcount = 0;
     Object.keys(indexChannels).forEach(a => {
-
         if (a === address) {
             return;
         }
@@ -1565,7 +1563,6 @@ function dialogParamset(data, desc, address, paramset) {
     $dialogParamset.tooltip({
         open(event, ui) {
             ui.tooltip.css('max-width', '500px');
-
         },
         content() {
             return $(this).prop('title');
@@ -1797,7 +1794,6 @@ function initGridLinks() {
         },
         ondblClickRow(row) {
             removeSelectionAfterDblClick();
-            //const row = $gridLinks.jqGrid('getGridParam', 'selrow');
             const sender = $('#grid-links tr#' + row + ' td[aria-describedby="grid-links_SENDER"]').html();
             const receiver = $('#grid-links tr#' + row + ' td[aria-describedby="grid-links_RECEIVER"]').html();
             getLink(sender, receiver, row);
@@ -2101,8 +2097,8 @@ function refreshGridLinks() {
             const devSender = indexChannels[indexChannels[listLinks[i].SENDER].PARENT].TYPE;
             const devReceiver = indexChannels[indexChannels[listLinks[i].RECEIVER].PARENT].TYPE;
 
-            listLinks[i].img_sender = '<img class="device-image" src="' + (deviceImages[devSender] || deviceImages.DEVICE) + '">';
-            listLinks[i].img_receiver = '<img class="device-image" src="' + (deviceImages[devReceiver] || deviceImages.DEVICE) + '">';
+            listLinks[i].img_sender = '<img class="device-image" src="' + (deviceImages[devSender] || deviceImages.DEVICE) + '">'; // eslint-disable-line camelcase
+            listLinks[i].img_receiver = '<img class="device-image" src="' + (deviceImages[devReceiver] || deviceImages.DEVICE) + '">'; // eslint-disable-line camelcase
 
             rowData.push(listLinks[i]);
         }
@@ -2484,7 +2480,7 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
     });
 
     $selectLinkParamsetMultiselect.multiselect('refresh');
-    if (mcount > 0 && writeable) {
+    if (mcount > 0) {
         $('#select-linkparamset-multiselect_ms').show();
     } else {
         $('#select-linkparamset-multiselect_ms').hide();
@@ -2857,7 +2853,7 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
     let count = 0;
     const resultArr = [];
     if (!desc) {
-        throw(new Error('formLinkParamset paramsetDescription missing'));
+        throw new Error('formLinkParamset paramsetDescription missing');
     }
     Object.keys(desc).forEach(param => {
         let unit = '';
@@ -3002,7 +2998,7 @@ function dialogRemoveLink() {
 }
 function getLink(sender, receiver, row) {
     if (!sender || !receiver) {
-        throw(new Error('getLink Error ' + sender + ' ' + receiver));
+        throw new Error('getLink Error ' + sender + ' ' + receiver);
     }
     $('#edit-linkparamset-row').val(row);
     $('#load_grid-links').show();
@@ -3764,10 +3760,8 @@ function setConsoleParams(elem) {
                 default:
                     paramArr[paramIndex] = $(this).val();
             }
-        } else {
-            if (val || !paramDesc.optional) {
-                paramArr[paramIndex] = val;
-            }
+        } else if (val || !paramDesc.optional) {
+            paramArr[paramIndex] = val;
         }
         $('#console-rpc-params').val(JSON.stringify(paramArr).slice(1).slice(0, -1).replace(/,/g, ', '));
     });

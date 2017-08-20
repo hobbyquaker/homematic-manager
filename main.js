@@ -366,7 +366,7 @@ function initIpc() {
         pjson.save('config', config);
         app.relaunch();
         mainWindow.destroy();
-        app.quit();
+        stop();
     });
 
     ipcRpc.on('getConfig', (params, callback) => {
@@ -512,7 +512,8 @@ let stopping;
 function stop() {
     if (stopping) {
         log.debug('force terminate');
-        process.exit(1); // eslint-disable-line unicorn/no-process-exit
+        app.quit();
+        process.exit(1);
         return;
     }
 
@@ -530,6 +531,7 @@ function stop() {
     });
     async.parallel(tasks, () => {
         log.debug('terminate');
+        app.quit();
         process.exit(0); // eslint-disable-line unicorn/no-process-exit
     });
     setTimeout(stop, 2000);

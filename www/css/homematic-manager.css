@@ -43,7 +43,7 @@ a.ui-tabs-anchor:focus, .ui-button:focus, #dialog-help a:focus {
 
 tr.ui-row-ltr {
     font-family: consolas "lucida console" courier;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 
@@ -254,4 +254,8 @@ textarea {
 
 .ui-tabs .ui-tabs-nav li.ui-tabs-active .ui-tabs-anchor {
     color: black;
+}
+
+.ui-widget-overlay {
+    opacity: 0.5;
 }

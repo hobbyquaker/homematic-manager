@@ -2444,6 +2444,7 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
     let receiverType = indexChannels[receiver] && indexChannels[receiver].TYPE;
 
     $selectLinkParamsetMultiselect.html('');
+    let mcount = 0;
     listLinks.forEach(link => {
         if (link.RECEIVER === receiver && link.SENDER === sender) {
             return;
@@ -2458,12 +2459,17 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
             (names[link.SENDER] ? names[link.SENDER] + ' (' + link.SENDER + ')' : link.SENDER) +
             ' -> ' +
             (names[link.RECEIVER] ? names[link.RECEIVER] + ' (' + link.RECEIVER + ')' : link.RECEIVER);
-        // Console.log(name);
+
+        mcount += 1;
         $selectLinkParamsetMultiselect.append('<option value="' + link.SENDER + ';' + link.RECEIVER + '">' + name + '</option>');
     });
 
     $selectLinkParamsetMultiselect.multiselect('refresh');
-
+    if (mcount > 0 && writeable) {
+        $('#select-linkparamset-multiselect_ms').show();
+    } else {
+        $('#select-linkparamset-multiselect_ms').hide();
+    }
     if (daemonType === 'BidCos-Wired') {
         receiverType = 'HMW_' + receiverType;
 

@@ -1,0 +1,239 @@
+{
+  "Error": {
+    "de": "Fehler"
+  },
+  "Devices": {
+    "de": "Geräte"
+  },
+  "Device": {
+    "de": "Gerät"
+  },
+  "introduced": {
+    "de": "gefunden"
+  },
+  "New": {
+    "de": "Neue"
+  },
+  "Events": {
+    "de": "Ereignisse"
+  },
+  "Cancel": {
+    "de": "Abbrechen"
+  },
+  "OK": {
+    "de": "OK"
+  },
+  "Delete": {
+    "de": "Löschen"
+  },
+  "Save": {
+    "de": "Speichern"
+  },
+  "Create and edit": {
+    "de": "Anlegen und Bearbeiten"
+  },
+  "Create": {
+    "de": "Anlegen"
+  },
+  "Please choose one or more channels": {
+    "de": "Bitte einen oder mehrere Kanäle auswählen"
+  },
+  "Refresh": {
+    "de": "Aktualisieren"
+  },
+  "Delete device": {
+    "de": "Gerät löschen"
+  },
+  "Rename device": {
+    "de": "Gerät umbenennen"
+  },
+  "Pair devices": {
+    "de": "Geräte anlernen"
+  },
+  "Links": {
+    "de": "Verknüpfungen"
+  },
+  "Delete link": {
+    "de": "Verknüpfung löschen"
+  },
+  "Edit link": {
+    "de": "Verknüpfung bearbeiten"
+  },
+  "Test link": {
+    "de": "Verknüpfung testen"
+  },
+  "Create link": {
+    "de": "Verknüpfung anlegen"
+  },
+  "RSSI": {
+    "de": "Funk"
+  },
+  "RPC Console": {
+    "de": "RPC Konsole"
+  },
+  "Service messages": {
+    "de": "Servicemeldungen"
+  },
+  "Send request": {
+    "de": "Befehl senden"
+  },
+  "Parameters": {
+    "de": "Parameter"
+  },
+  "Response": {
+    "de": "Antwort"
+  },
+  "Help": {
+    "de": "Hilfe"
+  },
+  "Settings": {
+    "de": "Einstellungen"
+  },
+  "Please choose one or more links": {
+    "de": "mehrere Verknüpfungen bearbeiten"
+  },
+  "Kanäle überschreiben": {
+    "de": "Kanäle überschreiben",
+    "en": "Overwrite channels"
+  },
+  "Normaler Anlernmodus": {
+    "de": "Normaler Anlernmodus",
+    "en": "Normal pairing mode"
+  },
+  "Default-Parameter in Paramset MASTER schreiben, bestehende Verknüpfungen löschen": {
+    "en": "Write defaults to MASTER paramset, delete existing links",
+    "de": "Default-Parameter in Paramset MASTER schreiben, bestehende Verknüpfungen löschen"
+  },
+  "Sender": {
+    "de": "Sender",
+    "en": "Sender"
+  },
+  "Receiver": {
+    "de": "Empfänger",
+    "en": "Receiver"
+  },
+  "Ablernen und Gerät auf Werkseinstellungen zurücksetzen": {
+    "de": "Ablernen und Gerät auf Werkseinstellungen zurücksetzen",
+    "en": "Unpair and factory reset device"
+  },
+  "Nur ablernen (Direktverknüpfungen bleiben erhalten)": {
+    "de": "Nur ablernen (Direktverknüpfungen bleiben erhalten)",
+    "en": "Unpair only and keep existing links"
+  },
+  "Falls Gerät nicht erreichbar:": {
+    "de": "Falls Gerät nicht erreichbar:",
+    "en": "If device is unreachable:"
+  },
+  "bei nächster Gelegenheit löschen": {
+    "de": "bei nächster Gelegenheit löschen",
+    "en": "Delete later if possible"
+  },
+  "Nur aus Schnittstellenprozess löschen": {
+    "de": "Nur aus Schnittstellenprozess löschen",
+    "en": "Delete from interface process only"
+  },
+  "Disconnected": {
+    "de": "Verbindung unterbrochen"
+  },
+  "Which device do you want to replace?": {
+    "de": "Welches Gerät wollen sie ersetzen?"
+  },
+  "Gerät löschen": {
+    "de": "Gerät löschen",
+    "en": "Delete device"
+  },
+  "Acknowledge service messages": {
+    "de": "Servicemeldung bestätigen"
+  },
+  "Acknowledge all service messages": {
+    "de": "Alle Servicemeldungen bestätigen"
+  },
+  "Interfaces": {
+    "de": "Interfaces"
+  },
+  "Edit device": {
+    "de": "Gerät bearbeiten"
+  },
+  "undefined": {
+    "de": "undefined"
+  },
+  "Please select method": {
+    "de": "Bitte eine Methode auswählen"
+  },
+  "saveAsNewTemplate": {
+    "de": "als neue Profilvorlage speichern",
+    "en": "saveAsNewTemplate"
+  },
+  "Replace device": {
+    "de": "Gerät tauschen",
+    "en": "Replace device"
+  },
+  "Update firmware": {
+    "de": "Firmware aktualisieren",
+    "en": "Update firmware"
+  },
+  "clearConfigCache": {
+    "de": "clearConfigCache",
+    "en": "clearConfigCache"
+  },
+  "restoreConfigToDevice": {
+    "de": "restoreConfigToDevice",
+    "en": "restoreConfigToDevice"
+  },
+  "Rename": {
+    "de": "Umbenennen",
+    "en": "Rename"
+  },
+  "MASTER Paramset": {
+    "de": "MASTER Paramset",
+    "en": "MASTER Paramset"
+  },
+  "updateFirmware": {
+    "de": "Firmware aktualisieren",
+    "en": "updateFirmware"
+  },
+  "Replace": {
+    "de": "Gerät tauschen",
+    "en": "Replace"
+  },
+  "VALUES Paramset": {
+    "de": "VALUES Paramset",
+    "en": "VALUES Paramset"
+  },
+  "Activate long": {
+    "de": "Empfägnerprofil testen (langer Tastendruck)",
+    "en": "Activate long"
+  },
+  "Activate short": {
+    "de": "Empfängerprofil testen (kurzer Tastendruck)",
+    "en": "Activate short"
+  },
+  "putParamset": {
+    "de": "Parameter in Gerät übernehmen",
+    "en": "putParamset"
+  },
+  "New service message": {
+    "de": "Neue Servicemeldung",
+    "en": "New service message"
+  },
+  "RPC execution": {
+    "de": "RPC wird ausgeführt",
+    "en": "RPC execution"
+  },
+  "about HomeMatic Manager": {
+    "de": "Über HomeMatic Manager",
+    "en": "about HomeMatic Manager"
+  },
+  "Loading HomeMatic Manager...": {
+    "de": "Lade HomeMatic Manager...",
+    "en": "Loading HomeMatic Manager..."
+  },
+  "Check all": {
+    "de": "Alle auswählen",
+    "en": "Check all"
+  },
+  "Uncheck all": {
+    "de": "Auswahl entfernen",
+    "en": "Uncheck all"
+  }
+}

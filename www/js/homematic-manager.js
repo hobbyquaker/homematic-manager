@@ -13,6 +13,13 @@ require('../../node_modules/jquery-ui-multiselect-widget/src/jquery.multiselect.
 require('../../node_modules/free-jqgrid/dist/jquery.jqgrid.min')(window, $);
 require('../../node_modules/free-jqgrid/dist/i18n/grid.locale-de')(window, $);
 
+const deviceImages = require('./deviceImages.json');
+const help_linkParamset = require('./helpLinkParamset.json');
+const rpcMethods = require('./rpcMethods.json');
+const translation = require('./language.json');
+const missesTranslation = {};
+
+
 let language = 'de';
 
 let daemon;

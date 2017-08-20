@@ -2521,6 +2521,12 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
     }
 
     function createEasymodes() {
+        // Todo HmIP Easymodes https://github.com/hobbyquaker/homematic-manager/issues/50
+        if (daemon === 'HmIP') {
+            console.log('createEasymods HmIP');
+            receiverType = 'HmIP_' + receiverType;
+            senderType = 'HmIP_' + senderType;
+        }
         let profiles = easymodes[receiverType] && easymodes[receiverType][senderType];
         if (!profiles) {
             profiles = {0: {params: {}, name: 'expert'}};
@@ -2847,7 +2853,14 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
                 data[param] = (data[param] || 0) * 100;
                 defaultVal = (defaultVal || 0) * 100;
             } else {
-                unit = desc[param].UNIT;
+                unit = desc[param].UNIT || '';
+            }
+            if (unit === '""') {
+                unit = '';
+            }
+
+            if (typeof data[param] === 'undefined') {
+                data[param] = desc[param].DEFAULT;
             }
 
             // Create Input-Field
@@ -2874,6 +2887,10 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
                     break;
                 case 'ENUM':
                     input = '<select class="linkparamset-input" id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '" data-val-prev="' + data[param] + '" data-type="INTEGER"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '>';
+                    if (typeof desc[param].MIN === 'string') {
+                        desc[param].MIN = desc[param].VALUE_LIST.indexOf(desc[param].MIN);
+                        desc[param].MAX = desc[param].VALUE_LIST.indexOf(desc[param].MAX);
+                    }
                     for (let i = desc[param].MIN; i <= desc[param].MAX; i++) {
                         input += '<option value="' + i + '"' + (data[param] === i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
                         if (helpentry) {
@@ -2891,7 +2908,9 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
                         }
                     }
                     input += '</select>';
-                    defaultVal = desc[param].VALUE_LIST[defaultVal];
+                    if (typeof defaultVal !== 'string') {
+                        defaultVal = desc[param].VALUE_LIST[defaultVal];
+                    }
                     break;
                 case 'FLOAT':
                     data[param] = parseFloat(parseFloat(data[param]).toFixed(6));
@@ -3502,7 +3521,9 @@ function elementConsoleMethod() {
         if (err) {
             return;
         }
-        data.sort();
+        if (data && data.length > 0) {
+            data.sort();
+        }
 
         for (let i = 0; i < data.length; i++) {
             const method = data[i];

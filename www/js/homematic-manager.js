@@ -489,6 +489,10 @@ function initDialogsMisc() {
             }
         ]
     });
+    $('#ccu-address-select').change(function () {
+        $('#ccu-address').val($('#ccu-address-select').val());
+        $('#ccu-address-select').val('Select');
+    });
 }
 function initDaemon() {
     indexSourceRoles = {};
@@ -3854,6 +3858,7 @@ window.onhashchange = function () {
 };
 
 function dialogConfigOpen() {
+    $('#init-ip-select').html('');
     config.rpcInitIpSelect.forEach(ip => {
         if (ip === config.rpcInitIp) {
             $('#init-ip-select').append('<option selected>' + ip + '</option>');
@@ -3864,6 +3869,7 @@ function dialogConfigOpen() {
 
     $('#ccu-address').val(config.ccuAddress);
 
+    $('#ccu-address-select').html('<option>' + _('Select') + '</option>');
     config.ccuAddressSelect.forEach(ccu => {
         if (ccu.type === 'eQ3-HM-CCU2-App') {
             if (ccu.address === config.ccuAddress) {

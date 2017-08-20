@@ -589,7 +589,7 @@ function getDevices(callback) {
         indexTargetRoles = {};
         $('#load_grid-devices').hide();
         listDevices = data;
-        if (callback) {
+        if (typeof callback === 'function') {
             callback(err);
         }
         if (err) {
@@ -1775,9 +1775,9 @@ function initGridLinks() {
             $('#play-link').removeClass('ui-state-disabled');
             $('#play-link-long').removeClass('ui-state-disabled');
         },
-        ondblClickRow() {
+        ondblClickRow(row) {
             removeSelectionAfterDblClick();
-            const row = $gridLinks.jqGrid('getGridParam', 'selrow');
+            //const row = $gridLinks.jqGrid('getGridParam', 'selrow');
             const sender = $('#grid-links tr#' + row + ' td[aria-describedby="grid-links_SENDER"]').html();
             const receiver = $('#grid-links tr#' + row + ' td[aria-describedby="grid-links_RECEIVER"]').html();
             getLink(sender, receiver, row);
@@ -2432,7 +2432,7 @@ function putLinkParamset(direction, channel1, channel2, callback) {
     }
 }
 function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver) {
-    // Console.log('dialogLinkparamset', sender, receiver);
+    console.log('dialogLinkparamset', sender, receiver, desc1, desc2);
     $('#save-link-info').button('disable');
     $('#edit-link-input-name').val(data0.NAME);
     $('#edit-link-input-description').val(data0.DESCRIPTION);
@@ -2499,11 +2499,11 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
                     easymodes[receiverType][senderType] = data;
                     createEasymodes();
                 }).fail(() => {
-                    console.log('TODO! Easymode fail', easymodeFile);
+                    console.error('TODO! Easymode fail', easymodeFile);
                     createEasymodes();
                 });
             }).fail(() => {
-                console.log('TODO! Easymode translation fail', translationFile);
+                console.error('TODO! Easymode translation fail', translationFile);
                 easymodes.lang[language][receiverType] = {};
                 $.getJSON(easymodeFile, data => {
                     // Console.log('easymode loaded', easymodeFile);
@@ -2513,7 +2513,7 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
                     easymodes[receiverType][senderType] = data;
                     createEasymodes();
                 }).fail(() => {
-                    console.log('TODO! Easymode fail', easymodeFile);
+                    console.error('TODO! Easymode fail', easymodeFile);
                     createEasymodes();
                 });
             });
@@ -2826,6 +2826,9 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
     elem.show().html('<tr><th class="paramset-1">Param</th><th class="paramset-2">&nbsp;</th><th class="paramset-3">Value</th><th class="paramset-4">Default</th><th></th></tr>');
     let count = 0;
     const resultArr = [];
+    if (!desc) {
+        throw(new Error('formLinkParamset paramsetDescription missing'));
+    }
     Object.keys(desc).forEach(param => {
         let unit = '';
         let hidden;
@@ -2955,13 +2958,16 @@ function dialogRemoveLink() {
     $dialogRemoveLink.dialog('open');
 }
 function getLink(sender, receiver, row) {
+    if (!sender || !receiver) {
+        throw(new Error('getLink Error ' + sender + ' ' + receiver));
+    }
     $('#edit-linkparamset-row').val(row);
     $('#load_grid-links').show();
     rpcAlert(daemon, 'getLinkInfo', [sender, receiver], (err0, data0) => {
         rpcAlert(daemon, 'getParamset', [sender, receiver], (err1, data1) => {
-            rpcAlert(daemon, 'getParamsetDescription', [sender, receiver], (err2, data2) => {
+            rpcAlert(daemon, 'getParamsetDescription', [sender, 'LINK'], (err2, data2) => {
                 rpcAlert(daemon, 'getParamset', [receiver, sender], (err3, data3) => {
-                    rpcAlert(daemon, 'getParamsetDescription', [receiver, sender], (err4, data4) => {
+                    rpcAlert(daemon, 'getParamsetDescription', [receiver, 'LINK'], (err4, data4) => {
                         dialogLinkparamset(data0, data1, data2, data3, data4, sender, receiver);
                         $('#load_grid-links').hide();
                     });

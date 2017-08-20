@@ -424,16 +424,18 @@ function rpcProxy(daemon, method, params, callback) {
         }
         case 'getParamsetDescription': {
             const dev = localDevices[daemon][params[0]];
+
             let ident = dev.TYPE + '/' + dev.VERSION + '/' + params[1];
             if (dev.PARENT_TYPE) {
                 ident = dev.PARENT_TYPE + '/' + ident;
             }
-
             if (localParamsetDescriptions[ident]) {
                 log.debug('paramset cache hit ' + ident);
                 callback(null, localParamsetDescriptions[ident]);
             } else {
+                log.debug('paramset not in cache ' + ident);
                 rpcClients[daemon].methodCall(method, params, (error, result) => {
+                    console.log('rpc response', error, result);
                     if (!error && result) {
                         localParamsetDescriptions[ident] = result;
                     }

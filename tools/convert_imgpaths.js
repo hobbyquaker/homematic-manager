@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const tcl = fs.readFileSync('../occu/occu/WebUI/www/config/devdescr/DEVDB.tcl').toString();
+const tcl = fs.readFileSync('../occu/WebUI/www/config/devdescr/DEVDB.tcl').toString();
 
 const tclArr = tcl.match(/array set DEV_PATHS\s([^\n]+)/)[1].trim();
 
@@ -17,8 +17,8 @@ arr.forEach(str => {
     }
 });
 
-const out = 'var deviceImages = ' + JSON.stringify(res, null, '  ') + ';';
+const out = 'const deviceImages = ' + JSON.stringify(res, null, '  ') + ';';
 
 fs.writeFileSync('../www/js/deviceImages.js', out);
 
-console.log('cp -Rv ../occu/occu/WebUI/www/config/img/devices ../www/images/');
+console.log('cp -Rv ../occu/WebUI/www/config/img/devices ../www/images/');

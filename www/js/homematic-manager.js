@@ -1539,8 +1539,6 @@ function dialogParamset(data, desc, address, paramset) {
         $('#dialog-paramset-button').hide();
     }
 
-    console.log('writeable', writeable);
-
     $dialogParamset.dialog('open');
     $dialogParamset.tooltip({
         open(event, ui) {
@@ -2432,7 +2430,6 @@ function putLinkParamset(direction, channel1, channel2, callback) {
     }
 }
 function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver) {
-    console.log('dialogLinkparamset', sender, receiver, desc1, desc2);
     $('#save-link-info').button('disable');
     $('#edit-link-input-name').val(data0.NAME);
     $('#edit-link-input-description').val(data0.DESCRIPTION);
@@ -2529,7 +2526,6 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
     function createEasymodes() {
         // Todo HmIP Easymodes https://github.com/hobbyquaker/homematic-manager/issues/50
         if (daemon === 'HmIP') {
-            console.log('createEasymods HmIP');
             receiverType = 'HmIP_' + receiverType;
             senderType = 'HmIP_' + senderType;
         }

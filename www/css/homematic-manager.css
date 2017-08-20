@@ -268,3 +268,7 @@ textarea {
 #console-rpc-method_ms {
     height: 28px;
 }
+
+.ui-multiselect-menu {
+    z-index: 10000;
+}

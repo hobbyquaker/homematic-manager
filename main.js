@@ -175,6 +175,7 @@ app.on('activate', () => {
 app.on('quit', stop);
 
 const localNames = pjson.load('names_' + config.ccuAddress) || {};
+const localRegaId = {};
 // Const localNamesIds = {};
 const localDevices = pjson.load('devices_' + config.ccuAddress) || {};
 const localParamsetDescriptions = pjson.load('paramset-descriptions_' + config.ccuAddress) || {};
@@ -379,19 +380,65 @@ function initIpc() {
         callback(null, localNames);
     });
 
-    ipcRpc.on('setName', (address, name, callback) => {
+    ipcRpc.on('setName', (params, callback) => {
+        const [address, name] = params;
         localNames[address] = name;
+        const queue = [];
         log.debug('local rename ' + address + ' "' + name + '"');
+        queue.push({address, name});
         if (!address.match(/:/)) {
             localNames[address + ':0'] = name + ':0';
+            queue.push({address: address + ':0', name: name + ':0'});
         }
-
         pjson.save('names_' + config.ccuAddress, localNames, () => {
-            if (callback) {
+            if (!regapresent && callback) {
                 callback();
             }
         });
+        if (regaPresent) {
+            regaRename(queue, callback);
+        }
     });
+
+    ipcRpc.on('setNames', (params, callback) => {
+        const [tuples] = params;
+        const queue = [];
+        tuples.forEach(tuple => {
+            const {address, name} = tuple;
+            localNames[address] = name;
+            queue.push({address, name});
+            log.debug('local rename ' + address + ' "' + name + '"');
+            if (!address.match(/:/)) {
+                localNames[address + ':0'] = name + ':0';
+                queue.push({address: address + ':0', name: name + ':0'});
+            }
+        });
+        pjson.save('names_' + config.ccuAddress, localNames, () => {
+            if (!regaPresent && callback) {
+                callback();
+            }
+        });
+        if (regaPresent) {
+            regaRename(queue, callback);
+        }
+    });
+
+    function regaRename(names, callback) {
+        let script = 'var o;\n';
+        names.forEach(tuple => {
+            const {address, name} = tuple;
+            if (localRegaId[address]) {
+                script += `o = dom.GetObject(${localRegaId[address]});\n`;
+                script += `o.Name("${name}");\n`;
+            }
+        });
+        rega(script, err => {
+           if (err) {
+               log.error(err);
+           }
+           callback(err);
+        });
+    }
 
     ipcRpc.on('rpc', (params, callback) => {
         log.debug('ipcRpc <', params);
@@ -503,6 +550,7 @@ function getRegaNames() {
             log.debug('got', Object.keys(res).length, 'rega names');
             Object.keys(res).forEach(address => {
                 localNames[address] = res[address].name;
+                localRegaId[address] = res[address].id;
             });
             pjson.save('names_' + config.ccuAddress, localNames);
         }

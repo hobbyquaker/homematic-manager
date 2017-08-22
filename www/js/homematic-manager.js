@@ -954,63 +954,70 @@ function initGridDevices() {
                     const renameName = $('#rename-name').val();
                     const rowid = $('#rename-rowid').val();
                     const gridid = $('#rename-gridid').val();
-                    ipcRpc.send('setName', [renameAddress, renameName], () => {
-                        let rowData;
-                        if (renameAddress.match(/:/)) {
-                            // Rename Channel
-                            const $gridCh = $('#' + gridid);
-                            rowData = $gridCh.jqGrid('getRowData', rowid);
-                            rowData.Name = renameName;
-                            $gridCh.jqGrid('setRowData', rowid, rowData);
-                            if (!names) {
-                                names = {};
+
+                    const queue = [];
+                    queue.push({address: renameAddress, name: renameName});
+
+                    let rowData;
+                    if (renameAddress.match(/:/)) {
+                        // Rename Channel
+                        const $gridCh = $('#' + gridid);
+                        rowData = $gridCh.jqGrid('getRowData', rowid);
+                        rowData.Name = renameName;
+                        $gridCh.jqGrid('setRowData', rowid, rowData);
+                        if (!names) {
+                            names = {};
+                        }
+                        names[renameAddress] = renameName;
+                        refreshGridLinks();
+                    } else {
+                        // Rename Device
+                        rowData = $gridDevices.jqGrid('getRowData', rowid);
+                        rowData.Name = renameName;
+                        $gridDevices.jqGrid('setRowData', rowid, rowData);
+
+                        if (!names) {
+                            names = {};
+                        }
+                        names[renameAddress] = renameName;
+                        names[renameAddress + ':0'] = renameName + ':0';
+                        queue.push({address: renameAddress + ':0', name: renameName + ':0'});
+
+
+                        const renameChildren = $('#rename-children').is(':checked');
+                        const children = indexChannels[renameAddress].CHILDREN;
+
+                        for (let i = 0; i < listDevices.length; i++) {
+                            if (listDevices[i].ADDRESS === renameAddress) {
+                                listDevices[i].Name = renameName;
                             }
-                            names[renameAddress] = renameName;
-                            refreshGridLinks();
-                        } else {
-                            // Rename Device
-                            rowData = $gridDevices.jqGrid('getRowData', rowid);
-                            rowData.Name = renameName;
-                            $gridDevices.jqGrid('setRowData', rowid, rowData);
-
-                            if (!names) {
-                                names = {};
-                            }
-                            names[renameAddress] = renameName;
-                            names[renameAddress + ':0'] = renameName + ':0';
-
-                            const renameChildren = $('#rename-children').is(':checked');
-                            const children = indexChannels[renameAddress].CHILDREN;
-
-                            for (let i = 0; i < listDevices.length; i++) {
-                                if (listDevices[i].ADDRESS === renameAddress) {
-                                    listDevices[i].Name = renameName;
-                                }
-                                if (renameChildren && (children.indexOf(listDevices[i].ADDRESS) !== -1)) {
-                                    listDevices[i].Name = renameName + ':' + children.indexOf(listDevices[i].ADDRESS);
-                                }
-                            }
-
-                            if (renameChildren) {
-                                children.forEach(child => {
-                                    names[child] = renameName + ':' + children.indexOf(child);
-                                    // Console.log('setName', child, names[child]);
-                                    ipcRpc.send('setName', [child, names[child]]);
-                                });
-                            }
-
-                            const scrollPosition = $gridDevices.closest('.ui-jqgrid-bdiv').scrollTop();
-                            $gridDevices.jqGrid('toggleSubGridRow', rowid);
-                            $gridDevices.jqGrid('toggleSubGridRow', rowid);
-                            $gridDevices.closest('.ui-jqgrid-bdiv').scrollTop(scrollPosition);
-
-                            if (config.daemons[daemon].type === 'BidCos-RF') {
-                                refreshGridRssi();
+                            if (renameChildren && (children.indexOf(listDevices[i].ADDRESS) !== -1)) {
+                                listDevices[i].Name = renameName + ':' + children.indexOf(listDevices[i].ADDRESS);
                             }
                         }
 
+                        if (renameChildren) {
+                            children.forEach(child => {
+                                names[child] = renameName + ':' + children.indexOf(child);
+                                // Console.log('setName', child, names[child]);
+                                //ipcRpc.send('setName', [child, names[child]]);
+                                queue.push({address: child, name: names[child]});
+                            });
+                        }
+
+                        const scrollPosition = $gridDevices.closest('.ui-jqgrid-bdiv').scrollTop();
+                        $gridDevices.jqGrid('toggleSubGridRow', rowid);
+                        $gridDevices.jqGrid('toggleSubGridRow', rowid);
+                        $gridDevices.closest('.ui-jqgrid-bdiv').scrollTop(scrollPosition);
+
+                        if (config.daemons[daemon].type === 'BidCos-RF') {
+                            refreshGridRssi();
+                        }
+
+                        ipcRpc.send('setNames', [queue], () => {});
+
                         $that.dialog('close');
-                    });
+                    }
                 }
             },
             {

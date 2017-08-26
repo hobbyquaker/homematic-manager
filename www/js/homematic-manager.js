@@ -3545,18 +3545,18 @@ function elementConsoleMethod() {
     ];
 
     rpcAlert(daemon, 'system.listMethods', [], (err, data) => {
-        if (err) {
-            return;
-        }
-        if (data && data.length > 0) {
-            data.sort();
-        }
+        $consoleRpcMethod.html('');
 
-        for (let i = 0; i < data.length; i++) {
-            const method = data[i];
-            if ((config.daemons[daemon].type !== 'HmIP') || (hmipExclude.indexOf(method) === -1)) {
-                $consoleRpcMethod.append('<option value="' + method + '">' + method + '</option>');
+        if (!err && data && data.length > 0) {
+            data.sort();
+            for (let i = 0; i < data.length; i++) {
+                const method = data[i];
+                if ((config.daemons[daemon].type !== 'HmIP') || (hmipExclude.indexOf(method) === -1)) {
+                    $consoleRpcMethod.append('<option value="' + method + '">' + method + '</option>');
+                }
             }
+        } else if (err) {
+            alert(err);
         }
         $consoleRpcMethod.multiselect('refresh');
     });

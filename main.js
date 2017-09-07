@@ -323,9 +323,11 @@ const rpcMethods = {
         ipcRpc.send('rpc', ['listDevices', params]);
         const daemon = daemonIndex[params[0]];
         const res = [];
-        Object.keys(localDevices[daemon]).forEach(address => {
-            res.push({ADDRESS: address, VERSION: localDevices[daemon][address].VERSION});
-        });
+        if (localDevices[daemon]) {
+            Object.keys(localDevices[daemon]).forEach(address => {
+                res.push({ADDRESS: address, VERSION: localDevices[daemon][address].VERSION});
+            });
+        }
         log.debug('RPC -> listDevices response length ' + res.length);
         callback(null, res);
     },
@@ -462,9 +464,11 @@ function rpcProxy(daemon, method, params, callback) {
     switch (method) {
         case 'listDevices': {
             const res = [];
-            Object.keys(localDevices[daemon]).forEach(address => {
-                res.push(localDevices[daemon][address]);
-            });
+            if (localDevices[daemon]) {
+                Object.keys(localDevices[daemon]).forEach(address => {
+                    res.push(localDevices[daemon][address]);
+                });
+            }
             log.debug('RPC -> respond to listDevices from cache (' + res.length + ')');
             callback(null, res);
             break;

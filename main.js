@@ -393,7 +393,7 @@ function initIpc() {
             queue.push({address: address + ':0', name: name + ':0'});
         }
         pjson.save('names_' + config.ccuAddress, localNames, () => {
-            if (!regapresent && callback) {
+            if (!regaPresent && callback) {
                 callback();
             }
         });
@@ -435,10 +435,10 @@ function initIpc() {
             }
         });
         rega(script, err => {
-           if (err) {
-               log.error(err);
-           }
-           callback(err);
+            if (err) {
+                log.error(err);
+            }
+            callback(err);
         });
     }
 

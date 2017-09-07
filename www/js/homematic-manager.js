@@ -983,7 +983,6 @@ function initGridDevices() {
                         names[renameAddress + ':0'] = renameName + ':0';
                         queue.push({address: renameAddress + ':0', name: renameName + ':0'});
 
-
                         const renameChildren = $('#rename-children').is(':checked');
                         const children = indexChannels[renameAddress].CHILDREN;
 
@@ -1000,7 +999,7 @@ function initGridDevices() {
                             children.forEach(child => {
                                 names[child] = renameName + ':' + children.indexOf(child);
                                 // Console.log('setName', child, names[child]);
-                                //ipcRpc.send('setName', [child, names[child]]);
+                                // ipcRpc.send('setName', [child, names[child]]);
                                 queue.push({address: child, name: names[child]});
                             });
                         }
@@ -3556,7 +3555,7 @@ function elementConsoleMethod() {
                 }
             }
         } else if (err) {
-            alert(err);
+            alert(err); // eslint-disable-line no-alert
         }
         $consoleRpcMethod.multiselect('refresh');
     });

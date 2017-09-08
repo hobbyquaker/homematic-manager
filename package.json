@@ -11,6 +11,7 @@
     "free-jqgrid": "^4.14.1",
     "hm-discover": "^1.0.0",
     "homematic-xmlrpc": "^1.0.2",
+    "iconv-lite": "^0.4.18",
     "jquery": "^3.2.1",
     "jquery-ui-dist": "^1.12.1",
     "jquery-ui-multiselect-widget": "^2.0.1",
@@ -29,7 +30,7 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "electron": "electron .",
+    "start": "electron .",
     "dist": "build",
     "lint": "xo",
     "lintfix": "xo --fix"

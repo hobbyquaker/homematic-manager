@@ -1013,10 +1013,11 @@ function initGridDevices() {
                             refreshGridRssi();
                         }
 
-                        ipcRpc.send('setNames', [queue], () => {});
 
-                        $that.dialog('close');
                     }
+                    ipcRpc.send('setNames', [queue], () => {});
+
+                    $that.dialog('close');
                 }
             },
             {

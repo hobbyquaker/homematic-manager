@@ -4,6 +4,7 @@ const os = require('os');
 const net = require('net');
 const path = require('path');
 const url = require('url');
+const iconv = require('iconv-lite');
 
 const app = electron.app;
 // Const Menu = electron.Menu;
@@ -428,7 +429,7 @@ function initIpc() {
     function regaRename(names, callback) {
         let script = 'var o;\n';
         names.forEach(tuple => {
-            const {address, name} = tuple;
+            let {address, name} = tuple;
             if (localRegaId[address]) {
                 script += `o = dom.GetObject(${localRegaId[address]});\n`;
                 script += `o.Name("${name}");\n`;
@@ -509,6 +510,7 @@ function rpcProxy(daemon, method, params, callback) {
 }
 
 function rega(script, callback) {
+    script = iconv.encode(script, 'iso-8859-1');
     const url = 'http://' + config.ccuAddress + ':8181/rega.exe';
     log.debug('sending script to', url);
     request({

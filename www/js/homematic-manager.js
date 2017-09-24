@@ -2039,7 +2039,16 @@ function initGridLinks() {
                                             NAME: '',
                                             DESCRIPTION: ''
                                         }, data1, desc1, data2, desc2, s1, t1);
-                                        // TODO select sender and targets
+
+                                        sender.forEach(s => {
+                                            targets.forEach(t => {
+                                                if (s === s1 && t === t1) {
+                                                    return;
+                                                }
+                                                $selectLinkParamsetMultiselect.find('option[value="' + s + ';' + t + '"]').attr('selected', true);
+                                            });
+                                        });
+                                        $selectLinkParamsetMultiselect.multiselect('refresh');
                                         $('#load_grid-links').hide();
                                     });
                                 });
@@ -2048,34 +2057,6 @@ function initGridLinks() {
                     });
 
                     $(this).dialog('close');
-
-                    /*
-                    rpcDialog(daemon, 'addLink', [$selectLinkSender.val(), receiver, '', ''], () => {
-                        $('#load_grid-links').show();
-                        rpcAlert(daemon, 'getParamset', [sender, receiver], (err, data1) => {
-                            rpcAlert(daemon, 'getParamsetDescription', [sender, receiver], (err2, desc1) => {
-                                rpcAlert(daemon, 'getParamset', [receiver, sender], (err3, data2) => {
-                                    rpcAlert(daemon, 'getParamsetDescription', [receiver, sender], (err4, desc2) => {
-                                        dialogLinkparamset({
-                                            NAME: '',
-                                            DESCRIPTION: ''
-                                        }, data1, desc1, data2, desc2, sender, receiver);
-                                        $('#load_grid-links').hide();
-                                    });
-                                });
-                            });
-                        });
-                    });
-
-                    rpcAlert(daemon, 'getLinks', [], (err, data) => {
-                        if (!err) {
-                            listLinks = data;
-                            refreshGridLinks();
-                        }
-                    });
-
-
-                    */
                 }
             }, {
                 text: _('Create'),
@@ -2087,24 +2068,6 @@ function initGridLinks() {
                     createLinks(sender, targets);
 
                     $(this).dialog('close');
-                    /*
-
-                    for (let i = 0; i < targets.length; i++) {
-                        const receiver = targets[i];
-                        if (i === (targets.length - 1)) {
-                            rpcDialog(daemon, 'addLink', [sender, receiver, '', ''], () => {
-                                rpcAlert(daemon, 'getLinks', [], (err, data) => {
-                                    if (!err) {
-                                        listLinks = data;
-                                        refreshGridLinks();
-                                    }
-                                });
-                            });
-                        } else {
-                            rpcDialog(daemon, 'addLink', [sender, receiver, '', '']);
-                        }
-                    }
-                    */
                 }
             },
             {

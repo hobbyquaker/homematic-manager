@@ -2026,9 +2026,25 @@ function initGridLinks() {
                 click() {
                     const sender = $selectLinkSender.val();
                     const targets = $selectLinkReceiver.val();
+                    const s1 = sender[0];
+                    const t1 = targets[0];
 
                     createLinks(sender, targets, () => {
-
+                        $('#load_grid-links').show();
+                        rpcAlert(daemon, 'getParamset', [s1, t1], (err, data1) => {
+                            rpcAlert(daemon, 'getParamsetDescription', [s1, t1], (err2, desc1) => {
+                                rpcAlert(daemon, 'getParamset', [t1, s1], (err3, data2) => {
+                                    rpcAlert(daemon, 'getParamsetDescription', [t1, s1], (err4, desc2) => {
+                                        dialogLinkparamset({
+                                            NAME: '',
+                                            DESCRIPTION: ''
+                                        }, data1, desc1, data2, desc2, s1, t1);
+                                        // TODO select sender and targets
+                                        $('#load_grid-links').hide();
+                                    });
+                                });
+                            });
+                        });
                     });
 
                     $(this).dialog('close');
@@ -2110,9 +2126,10 @@ function createLinks(sender, targets, callback) {
         });
     });
 
-    console.log(links);
+    async.mapSeries(links, (link, cb) => {
+        rpcDialog(daemon, 'addLink', cb);
+    }, callback);
 }
-
 
 function refreshGridLinks() {
     $gridLinks.jqGrid('clearGridData');
@@ -2316,14 +2333,64 @@ function initDialogLinkParamset() {
         placeholder: ''
     });
 
-    $selectLinkReceiver.change(() => {
-        const c = $selectLinkReceiver.val() ? $selectLinkReceiver.val().length : 0;
-        if (c === 0) {
-            $('.add-link-create').button('disable');
-            $('.add-link-create-edit').button('disable');
-        } else {
+    $selectLinkReceiver.change(function () {
+        const receiver = $(this).val();
+
+        if (receiver && receiver.length > 0) {
             $('.add-link-create').button('enable');
             $('.add-link-create-edit').button('enable');
+
+            if (receiver.length === 1) {
+                const roles = indexChannels[receiver[0]].LINK_TARGET_ROLES.split(' ');
+                let targetRole;
+                roles.forEach(role => {
+                    if ($linkSourceRoles.html().split(' ').indexOf(role) !== -1) {
+                        targetRole = role;
+                    }
+                });
+                let selectOptions = '';
+                listDevices.forEach(dev => {
+                    if (!dev.PARENT || dev.ADDRESS.endsWith(':0')) {
+                        return;
+                    }
+                    if (dev.LINK_TARGET_ROLES && dev.LINK_TARGET_ROLES.split(' ').indexOf(targetRole) !== -1) {
+                        selectOptions += '<option value="' + dev.ADDRESS + '"' +
+                            (receiver[0] === dev.ADDRESS ? ' selected' : '') +
+                            '>' + dev.ADDRESS + ' ' + (names && names[dev.ADDRESS] ? names[dev.ADDRESS] : '') + '</option>';
+                    }
+                });
+                $selectLinkReceiver.html(selectOptions).multiselect('refresh');
+            }
+        } else {
+            $('.add-link-create').button('disable');
+            $('.add-link-create-edit').button('disable');
+
+            let selectOptions = '';
+
+            const roles = $linkSourceRoles.html().split(' ');
+            const targets = [];
+
+            for (let i = 0; i < roles.length; i++) {
+                if (indexTargetRoles[roles[i]]) {
+                    Object.keys(indexTargetRoles[roles[i]]).forEach(role => {
+                        const address = indexTargetRoles[roles[i]][role];
+                        if (targets.indexOf(address) === -1) {
+                            targets.push(address);
+                        }
+                    });
+                }
+            }
+
+            for (let i = 0; i < targets.length; i++) {
+                let name;
+                if (names[targets[i]]) {
+                    name = names[targets[i]] || '';
+                } else {
+                    name = '';
+                }
+                selectOptions += '<option value="' + targets[i] + '">' + targets[i] + ' ' + name + '</option>';
+            }
+            $selectLinkReceiver.html(selectOptions).multiselect('refresh');
         }
     });
 

@@ -2206,12 +2206,14 @@ function initDialogLinkParamset() {
             }
 
             for (let i = 0; i < roles.length; i++) {
-                Object.keys(indexTargetRoles[roles[i]]).forEach(role => {
-                    const address = indexTargetRoles[roles[i]][role];
-                    if (targets.indexOf(address) === -1) {
-                        targets.push(address);
-                    }
-                });
+                if (indexTargetRoles[roles[i]]) {
+                    Object.keys(indexTargetRoles[roles[i]]).forEach(role => {
+                        const address = indexTargetRoles[roles[i]][role];
+                        if (targets.indexOf(address) === -1) {
+                            targets.push(address);
+                        }
+                    });
+                }
             }
 
             selectOptions = '';

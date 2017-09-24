@@ -2263,11 +2263,13 @@ function initDialogLinkParamset() {
         minWidth: 480,
         noneSelectedText: _('Please choose one or more channels'), // "Bitte einen oder mehrere Kanäle auswählen",
         checkAllText: _('Check all'),
-        uncheckAllText: _('Uncheck all')
+        uncheckAllText: _('Uncheck all'),
+        appendTo: '#dialog-add-link'
     }).multiselectfilter({
         autoReset: true,
         placeholder: ''
     });
+
     $selectLinkReceiver.multiselect({
         classes: 'link-receiver',
         multiple: true,
@@ -2277,7 +2279,8 @@ function initDialogLinkParamset() {
         minWidth: 480,
         noneSelectedText: _('Please choose one or more channels'), // "Bitte einen oder mehrere Kanäle auswählen",
         checkAllText: _('Check all'),
-        uncheckAllText: _('Uncheck all')
+        uncheckAllText: _('Uncheck all'),
+        appendTo: '#dialog-add-link'
     }).multiselectfilter({
         autoReset: true,
         placeholder: ''

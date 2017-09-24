@@ -2101,11 +2101,15 @@ function refreshGridLinks() {
 
             listLinks[i]._id = i;
 
-            const devSender = indexChannels[indexChannels[listLinks[i].SENDER].PARENT].TYPE;
-            const devReceiver = indexChannels[indexChannels[listLinks[i].RECEIVER].PARENT].TYPE;
+            if (indexChannels[listLinks[i].SENDER] && indexChannels[indexChannels[listLinks[i].SENDER].PARENT]) {
+                const devSender = indexChannels[indexChannels[listLinks[i].SENDER].PARENT].TYPE;
+                listLinks[i].img_sender = '<img class="device-image" src="' + (deviceImages[devSender] || deviceImages.DEVICE) + '">'; // eslint-disable-line camelcase
+            }
 
-            listLinks[i].img_sender = '<img class="device-image" src="' + (deviceImages[devSender] || deviceImages.DEVICE) + '">'; // eslint-disable-line camelcase
-            listLinks[i].img_receiver = '<img class="device-image" src="' + (deviceImages[devReceiver] || deviceImages.DEVICE) + '">'; // eslint-disable-line camelcase
+            if (indexChannels[listLinks[i].RECEIVER] && indexChannels[indexChannels[listLinks[i].RECEIVER].PARENT]) {
+                const devReceiver = indexChannels[indexChannels[listLinks[i].RECEIVER].PARENT].TYPE;
+                listLinks[i].img_receiver = '<img class="device-image" src="' + (deviceImages[devReceiver] || deviceImages.DEVICE) + '">'; // eslint-disable-line camelcase
+            }
 
             rowData.push(listLinks[i]);
         }

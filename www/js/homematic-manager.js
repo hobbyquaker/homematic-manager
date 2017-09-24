@@ -2045,6 +2045,8 @@ function initGridLinks() {
                                                 if (s === s1 && t === t1) {
                                                     return;
                                                 }
+                                                console.log('option[value="' + s + ';' + t + '"]');
+                                                console.log($selectLinkParamsetMultiselect.find('option[value="' + s + ';' + t + '"]'));
                                                 $selectLinkParamsetMultiselect.find('option[value="' + s + ';' + t + '"]').attr('selected', true);
                                             });
                                         });
@@ -2090,8 +2092,15 @@ function createLinks(sender, targets, callback) {
     });
 
     async.mapSeries(links, (link, cb) => {
-        rpcDialog(daemon, 'addLink', cb);
-    }, callback);
+        rpcDialog(daemon, 'addLink', link, cb);
+    }, () => {
+        getLinks(() => {
+            if (typeof callback === 'function') {
+                callback();
+            }
+        });
+
+    });
 }
 
 function refreshGridLinks() {
@@ -2543,7 +2552,7 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
         if (indexChannels[link.SENDER].TYPE !== senderType) {
             return;
         }
-        const name = (link.NAME ? link.NAME + ' - ' : '') +
+        const name = /* (link.NAME ? link.NAME + ' - ' : '') + */
             (names[link.SENDER] ? names[link.SENDER] + ' (' + link.SENDER + ')' : link.SENDER) +
             ' -> ' +
             (names[link.RECEIVER] ? names[link.RECEIVER] + ' (' + link.RECEIVER + ')' : link.RECEIVER);

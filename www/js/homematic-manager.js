@@ -10,12 +10,14 @@ window.$ = require('jquery');
 
 window.jQuery = window.$;
 
-require('../../node_modules/jquery-ui-dist/jquery-ui.min');
-require('../../node_modules/ui-contextmenu/jquery.ui-contextmenu');
-require('../../node_modules/jquery-ui-multiselect-widget/src/jquery.multiselect');
-require('../../node_modules/jquery-ui-multiselect-widget/src/jquery.multiselect.filter');
-require('../../node_modules/free-jqgrid/dist/jquery.jqgrid.min')(window, $);
-require('../../node_modules/free-jqgrid/dist/i18n/grid.locale-de')(window, $);
+require('jquery-ui-dist/jquery-ui.min');
+require('ui-contextmenu/jquery.ui-contextmenu');
+require('jquery-ui-multiselect-widget/src/jquery.multiselect');
+require('jquery-ui-multiselect-widget/src/jquery.multiselect.filter');
+require('free-jqgrid/dist/jquery.jqgrid.min')(window, $);
+require('free-jqgrid/dist/i18n/grid.locale-de')(window, $);
+
+const async = require('async');
 
 const deviceImages = require('./deviceImages.json');
 const helpLinkParamset = require('./helpLinkParamset.json');
@@ -2024,7 +2026,14 @@ function initGridLinks() {
                 click() {
                     const sender = $selectLinkSender.val();
                     const targets = $selectLinkReceiver.val();
-                    const receiver = targets[0];
+
+                    createLinks(sender, targets, () => {
+
+                    });
+
+                    $(this).dialog('close');
+
+                    /*
                     rpcDialog(daemon, 'addLink', [$selectLinkSender.val(), receiver, '', ''], () => {
                         $('#load_grid-links').show();
                         rpcAlert(daemon, 'getParamset', [sender, receiver], (err, data1) => {
@@ -2049,7 +2058,8 @@ function initGridLinks() {
                         }
                     });
 
-                    $(this).dialog('close');
+
+                    */
                 }
             }, {
                 text: _('Create'),
@@ -2057,7 +2067,12 @@ function initGridLinks() {
                 click() {
                     const sender = $selectLinkSender.val();
                     const targets = $selectLinkReceiver.val();
+
+                    createLinks(sender, targets);
+
                     $(this).dialog('close');
+                    /*
+
                     for (let i = 0; i < targets.length; i++) {
                         const receiver = targets[i];
                         if (i === (targets.length - 1)) {
@@ -2073,6 +2088,7 @@ function initGridLinks() {
                             rpcDialog(daemon, 'addLink', [sender, receiver, '', '']);
                         }
                     }
+                    */
                 }
             },
             {
@@ -2084,6 +2100,20 @@ function initGridLinks() {
         ]
     });
 }
+
+function createLinks(sender, targets, callback) {
+    const links = [];
+
+    sender.forEach(s => {
+        targets.forEach(t => {
+            links.push([s, t, '', '']);
+        });
+    });
+
+    console.log(links);
+}
+
+
 function refreshGridLinks() {
     $gridLinks.jqGrid('clearGridData');
     const rowData = [];
@@ -2291,12 +2321,9 @@ function initDialogLinkParamset() {
         if (c === 0) {
             $('.add-link-create').button('disable');
             $('.add-link-create-edit').button('disable');
-        } else if (c === 1) {
-            $('.add-link-create').button('enable');
-            $('.add-link-create-edit').button('enable');
         } else {
             $('.add-link-create').button('enable');
-            $('.add-link-create-edit').button('disable');
+            $('.add-link-create-edit').button('enable');
         }
     });
 

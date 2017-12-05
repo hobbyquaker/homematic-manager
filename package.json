@@ -1,6 +1,6 @@
 {
   "name": "homematic-manager",
-  "version": "2.0.0-beta.0",
+  "version": "2.0.0-beta.1",
   "private": true,
   "dependencies": {
     "async": "^2.5.0",
@@ -22,8 +22,8 @@
     "yalm": "^4.0.2"
   },
   "devDependencies": {
-    "electron": "latest",
-    "electron-builder": "latest",
+    "electron": "1.7.5",
+    "electron-builder": "19.27.3",
     "xo": "latest"
   },
   "description": "Webinterface for HomeMatic interface processes (rfd, hs485d, Homegear)",

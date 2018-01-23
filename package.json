@@ -1,10 +1,10 @@
 {
   "name": "homematic-manager",
-  "version": "2.0.0-beta.1",
+  "version": "2.0.0-beta.2",
   "private": true,
   "dependencies": {
     "async": "^2.5.0",
-    "binrpc": "^3.1.0",
+    "binrpc": "^3.1.1",
     "electron-ipc-rpc": "^1.1.0",
     "electron-is-dev": "^0.3.0",
     "electron-window-state": "^4.1.1",

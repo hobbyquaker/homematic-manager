@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "async": "^2.5.0",
-    "binrpc": "^3.1.1",
+    "binrpc": "^3.1.2",
     "electron-ipc-rpc": "^1.1.0",
     "electron-is-dev": "^0.3.0",
     "electron-window-state": "^4.1.1",
@@ -51,7 +51,7 @@
     "Internet of Things",
     "IoT"
   ],
-  "author": "Sebastian 'hobbyquaker' Raff <hq@ccu.io>",
+  "author": "Sebastian 'hobbyquaker' Raff <hobbyquaker@gmail.com>",
   "contributors": [
     "André 'Anli' Litfin"
   ],

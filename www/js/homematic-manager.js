@@ -17,6 +17,8 @@ require('jquery-ui-multiselect-widget/src/jquery.multiselect.filter');
 require('free-jqgrid/dist/jquery.jqgrid.min')(window, $);
 require('free-jqgrid/dist/i18n/grid.locale-de')(window, $);
 
+$.extend($.jgrid.defaults, { autoencode: false });
+
 const async = require('async');
 
 const deviceImages = require('./deviceImages.json');

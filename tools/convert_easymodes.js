@@ -7,7 +7,7 @@
  *      Please configure occuPath, languages and receivers!
  */
 
-const occuPath = '/Users/basti/PhpstormProjects/homematic-manager/occu/occu/';
+const occuPath = __dirname + '../../occu/';
 const langs = ['de', 'en', 'tr'];
 // Var langs = ['de'];
 const receivers = ['SWITCH', 'DIMMER', 'BLIND', 'ACTOR_SECURITY', 'ACTOR_WINDOW', 'ALARMACTUATOR',

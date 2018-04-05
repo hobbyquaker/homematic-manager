@@ -7,7 +7,7 @@ const url = require('url');
 const iconv = require('iconv-lite');
 
 const app = electron.app;
-// Const Menu = electron.Menu;
+const Menu = electron.Menu;
 const BrowserWindow = electron.BrowserWindow;
 const Rpc = require('electron-ipc-rpc');
 
@@ -93,6 +93,23 @@ function createWindow() {
     if (isDev) {
         mainWindow.webContents.openDevTools();
     }
+
+    const template = [{
+        label: "Application",
+        submenu: [
+            { label: "About Homematic Manager", selector: "orderFrontStandardAboutPanel:" },
+            { type: "separator" },
+            { label: "Quit", accelerator: "Command+Q", click: app.quit}
+        ]}, {
+        label: "Edit",
+        submenu: [
+            { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
+            { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
+            { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" }
+        ]}
+    ];
+
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 
     ipcRpc = new Rpc(electron.ipcMain, mainWindow.webContents);
     initIpc();

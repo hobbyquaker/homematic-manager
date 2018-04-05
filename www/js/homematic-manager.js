@@ -17,7 +17,7 @@ require('jquery-ui-multiselect-widget/src/jquery.multiselect.filter');
 require('free-jqgrid/dist/jquery.jqgrid.min')(window, $);
 require('free-jqgrid/dist/i18n/grid.locale-de')(window, $);
 
-$.extend($.jgrid.defaults, { autoencode: false });
+$.extend($.jgrid.defaults, {autoencode: false});
 
 const async = require('async');
 
@@ -1018,8 +1018,6 @@ function initGridDevices() {
                         if (config.daemons[daemon].type === 'BidCos-RF') {
                             refreshGridRssi();
                         }
-
-
                     }
                     ipcRpc.send('setNames', [queue], () => {});
 
@@ -2103,7 +2101,6 @@ function createLinks(sender, targets, callback) {
                 callback();
             }
         });
-
     });
 }
 
@@ -3878,7 +3875,6 @@ function rpcDialogShift() {
     const callback = tmp.callback;
 
     const paramText = JSON.stringify(JSON.parse(JSON.stringify(params).replace(/{"explicitDouble":([0-9.]+)}/g, '$1')), null, '  ');
-
 
     $('#rpc-command').html(cmd + ' ' + paramText);
     $('#rpc-message').html('');

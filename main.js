@@ -73,7 +73,7 @@ function createWindow() {
 
     const devWindowState = {
         width: 1860,
-        height: 1024,
+        height: 1024
     };
 
     const windowState = isDev ? devWindowState : mainWindowState;
@@ -95,18 +95,18 @@ function createWindow() {
     }
 
     const template = [{
-        label: "Application",
+        label: 'Application',
         submenu: [
-            { label: "About Homematic Manager", selector: "orderFrontStandardAboutPanel:" },
-            { type: "separator" },
-            { label: "Quit", accelerator: "Command+Q", click: app.quit}
+            {label: 'About Homematic Manager', selector: 'orderFrontStandardAboutPanel:'},
+            {type: 'separator'},
+            {label: 'Quit', accelerator: 'Command+Q', click: app.quit}
         ]}, {
-        label: "Edit",
-        submenu: [
-            { label: "Cut", accelerator: "CmdOrCtrl+X", selector: "cut:" },
-            { label: "Copy", accelerator: "CmdOrCtrl+C", selector: "copy:" },
-            { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" }
-        ]}
+            label: 'Edit',
+            submenu: [
+            {label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:'},
+            {label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:'},
+            {label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:'}
+            ]}
     ];
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
@@ -446,7 +446,7 @@ function initIpc() {
     function regaRename(names, callback) {
         let script = 'var o;\n';
         names.forEach(tuple => {
-            let {address, name} = tuple;
+            const {address, name} = tuple;
             if (localRegaId[address]) {
                 script += `o = dom.GetObject(${localRegaId[address]});\n`;
                 script += `o.Name("${name}");\n`;

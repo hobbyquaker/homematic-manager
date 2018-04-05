@@ -66,23 +66,23 @@ let mainWindow;
 function createWindow() {
     const mainWindowState = windowStateKeeper({
         defaultWidth: 1280,
-        defaultHeight: 620,
-
+        defaultHeight: 960,
         minHeight: 620,
         minWidth: 1200
-
     });
 
     const devWindowState = {
-        width: 1280,
-        height: 620,
-        minHeight: 620,
-        minWidth: 1200
+        width: 1860,
+        height: 1024,
     };
 
     const windowState = isDev ? devWindowState : mainWindowState;
 
     mainWindow = new BrowserWindow(windowState);
+
+    if (!isDev) {
+        mainWindowState.manage(mainWindow);
+    }
 
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, 'www', 'index.html'),

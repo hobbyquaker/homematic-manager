@@ -21,6 +21,9 @@ $.extend($.jgrid.defaults, {autoencode: false});
 
 const async = require('async');
 
+const unhandled = require('electron-unhandled');
+unhandled();
+
 const deviceImages = require('./deviceImages.json');
 const helpLinkParamset = require('./helpLinkParamset.json');
 const rpcMethods = require('./rpcMethods.json');

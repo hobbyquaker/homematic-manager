@@ -16,6 +16,9 @@ let ipcRpc;
 const windowStateKeeper = require('electron-window-state');
 const isDev = require('electron-is-dev');
 
+const unhandled = require('electron-unhandled');
+unhandled();
+
 const request = require('request');
 
 const pjson = require('persist-json')('hm-manager');

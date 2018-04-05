@@ -2550,10 +2550,10 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
         if (link.RECEIVER === receiver && link.SENDER === sender) {
             return;
         }
-        if (indexChannels[link.RECEIVER].TYPE !== receiverType) {
+        if (!indexChannels[link.RECEIVER] || indexChannels[link.RECEIVER].TYPE !== receiverType) {
             return;
         }
-        if (indexChannels[link.SENDER].TYPE !== senderType) {
+        if (!indexChannels[link.SENDER] || indexChannels[link.SENDER].TYPE !== senderType) {
             return;
         }
         const name = /* (link.NAME ? link.NAME + ' - ' : '') + */

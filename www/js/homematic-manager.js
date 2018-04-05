@@ -1288,7 +1288,7 @@ function refreshGridDevices() {
         }
     }
     $gridDevices.jqGrid('addRowData', '_id', rowData);
-    $gridDevices.trigger('reloadGrid');
+    $gridDevices.trigger('reloadGrid').sortGrid('Name', false, 'asc');
     $('button.paramset:not(.ui-button)').button();
 }
 function replaceDevice() {

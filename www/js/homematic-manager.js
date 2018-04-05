@@ -442,6 +442,8 @@ function initDialogsMisc() {
         modal: true,
         autoOpen: false,
         closeOnEscape: false,
+        width: 400,
+        height: 400,
         open() {
             $(this).parent().children().children('.ui-dialog-titlebar-close').hide();
         }
@@ -3875,7 +3877,10 @@ function rpcDialogShift() {
     const params = tmp.params;
     const callback = tmp.callback;
 
-    $('#rpc-command').html(cmd + ' ' + params.join(' '));
+    const paramText = JSON.stringify(JSON.parse(JSON.stringify(params).replace(/{"explicitDouble":([0-9.]+)}/g, '$1')), null, '  ');
+
+
+    $('#rpc-command').html(cmd + ' ' + paramText);
     $('#rpc-message').html('');
     $dialogRpc.dialog('open');
     $('#rpc-progress').show();
@@ -3888,17 +3893,18 @@ function rpcDialogShift() {
             setTimeout(() => {
                 rpcDialogPending = false;
                 rpcDialogShift();
-            }, 1000);
+            }, 1500);
         } else if (res && res.faultCode) {
             $dialogRpc.parent().children().children('.ui-dialog-titlebar-close').show();
             $('#rpc-message').html('<span style="color: orange; font-weight: bold;">' + res.faultString + ' (' + res.faultCode + ')</span>');
             setTimeout(() => {
                 rpcDialogPending = false;
                 rpcDialogShift();
-            }, 1000);
+            }, 1500);
         } else {
             $dialogRpc.parent().children().children('.ui-dialog-titlebar-close').hide();
-            $('#rpc-message').html('<span style="color: green;">success</span><br>' + (typeof res === 'string' ? res : JSON.stringify(res, null, '  ')));
+            const resText = res ? ('<br>' + (typeof res === 'string' ? res : JSON.stringify(res, null, '  '))) : '';
+            $('#rpc-message').html('<span style="color: green;">success</span><br>' + resText);
             setTimeout(() => {
                 rpcDialogPending = false;
                 if (rpcDialogQueue.length > 0) {
@@ -3906,7 +3912,7 @@ function rpcDialogShift() {
                 } else {
                     $dialogRpc.dialog('close');
                 }
-            }, 1000);
+            }, 1500);
         }
         if (typeof callback === 'function') {
             callback(err, res);

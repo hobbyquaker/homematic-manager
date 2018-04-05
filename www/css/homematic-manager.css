@@ -272,3 +272,8 @@ textarea {
 .ui-multiselect-menu {
     z-index: 10000;
 }
+
+#rpc-command {
+    font-family: monospace;
+    white-space: pre;
+}

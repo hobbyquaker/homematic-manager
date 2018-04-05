@@ -3898,7 +3898,7 @@ function rpcDialogShift() {
             }, 1000);
         } else {
             $dialogRpc.parent().children().children('.ui-dialog-titlebar-close').hide();
-            $('#rpc-message').html('<span style="color: green;">success</span><br>' + res);
+            $('#rpc-message').html('<span style="color: green;">success</span><br>' + (typeof res === 'string' ? res : JSON.stringify(res, null, '  ')));
             setTimeout(() => {
                 rpcDialogPending = false;
                 if (rpcDialogQueue.length > 0) {

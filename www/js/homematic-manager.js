@@ -41,10 +41,10 @@ let indexDevices;
 let indexChannels = {};
 let indexSourceRoles = {};
 let indexTargetRoles = {};
-let listLinks;
-let listRssi;
-let listInterfaces;
-let listMessages;
+let listLinks = [];
+let listRssi = [];
+let listInterfaces = [];
+let listMessages = [];
 let names = {};
 let hash;
 let firstLoad = true;
@@ -3110,6 +3110,10 @@ function getRfdData() {
     if (config.daemons[daemon].type === 'BidCos-RF' || config.daemons[daemon].type === 'HmIP') {
         $('#load_grid-interfaces').show();
         rpcAlert(daemon, 'listBidcosInterfaces', [], (err, data) => {
+            if (err || !data || typeof data.length === 'undefined') {
+                alert('listBidocsInterfaces\n' + err);
+                return;
+            }
             listInterfaces = data;
             if (config.daemons[daemon].type === 'BidCos-RF') {
                 $('#load_grid-rssi').show();
@@ -3523,6 +3527,8 @@ function getServiceMessages() {
         if (!err) {
             listMessages = data || [];
             refreshGridMessages();
+        } else {
+            alert('getServiceMessages\n' + err);
         }
     });
 }

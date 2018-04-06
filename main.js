@@ -30,6 +30,10 @@ const async = require('async');
 const xmlrpc = require('homematic-xmlrpc');
 const binrpc = require('binrpc');
 
+const Rega = require('homematic-rega');
+let rega;
+let regaPresent = false;
+
 const log = require('yalm');
 
 const pkg = require('./package.json');
@@ -140,7 +144,7 @@ function checkservice(host, port, callback) {
     });
 }
 
-let regaPresent = false;
+
 
 function findInterfaces() {
     const ports = {
@@ -173,6 +177,9 @@ function findInterfaces() {
         });
         initRpcClients();
         if (regaPresent) {
+            rega = new Rega({
+                host: config.ccuAddress
+            });
             getRegaNames();
         }
     });
@@ -447,12 +454,12 @@ function initIpc() {
     });
 
     function regaRename(names, callback) {
-        let script = 'var o;\n';
+        let script = 'var hmm_o;\n';
         names.forEach(tuple => {
             const {address, name} = tuple;
             if (localRegaId[address]) {
-                script += `o = dom.GetObject(${localRegaId[address]});\n`;
-                script += `o.Name("${name}");\n`;
+                script += `hmm_o = dom.GetObject(${localRegaId[address]});\n`;
+                script += `hmm_o.Name("${name}");\n`;
             }
         });
         rega(script, err => {
@@ -529,46 +536,24 @@ function rpcProxy(daemon, method, params, callback) {
     }
 }
 
-function rega(script, callback) {
-    script = iconv.encode(script, 'iso-8859-1');
-    const url = 'http://' + config.ccuAddress + ':8181/rega.exe';
-    log.debug('sending script to', url);
-    request({
-        method: 'POST',
-        url,
-        body: script,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Content-Length': script.length
-        }
-    }, (err, res, body) => {
-        if (!err && body) {
-            const end = body.indexOf('<xml>');
-            const data = body.substr(0, end);
-            callback(null, data);
-        } else {
-            callback(err);
-        }
-    });
-}
-
-function regaJson(file, callback) {
-    const filepath = path.join(__dirname, 'regascripts', file);
-    const script = fs.readFileSync(filepath).toString();
-    rega(script, (err, res) => {
-        if (err) {
-            log.error(err);
-        } else {
-            try {
-                callback(null, JSON.parse(unescape(res)));
-            } catch (err) {
-                callback(err);
-            }
-        }
-    });
-}
-
 function getRegaNames() {
+    rega.getChannels((err, res) => {
+        if (err) {
+            throw err;
+        } else if (res && res.length) {
+            log.debug('got', Object.keys(res).length, 'rega names');
+            res.forEach(ch => {
+                localNames[ch.address] = ch.name;
+                localRegaId[ch.address] = ch.id;
+
+            });
+        } else {
+            throw new Error('rega.getChannels empty result');
+        }
+        console.log(err, res);
+    });
+    //app.quit();
+    /*
     regaJson('devices.fn', (err, res) => {
         if (err) {
             log.error(err);
@@ -581,6 +566,7 @@ function getRegaNames() {
             pjson.save('names_' + config.ccuAddress, localNames);
         }
     });
+    */
 }
 
 let stopping;

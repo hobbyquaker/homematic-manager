@@ -545,28 +545,13 @@ function getRegaNames() {
             res.forEach(ch => {
                 localNames[ch.address] = ch.name;
                 localRegaId[ch.address] = ch.id;
-
             });
+            pjson.save('names_' + config.ccuAddress, localNames);
         } else {
             throw new Error('rega.getChannels empty result');
         }
         console.log(err, res);
     });
-    //app.quit();
-    /*
-    regaJson('devices.fn', (err, res) => {
-        if (err) {
-            log.error(err);
-        } else {
-            log.debug('got', Object.keys(res).length, 'rega names');
-            Object.keys(res).forEach(address => {
-                localNames[address] = res[address].name;
-                localRegaId[address] = res[address].id;
-            });
-            pjson.save('names_' + config.ccuAddress, localNames);
-        }
-    });
-    */
 }
 
 let stopping;

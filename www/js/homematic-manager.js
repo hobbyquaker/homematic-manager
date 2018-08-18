@@ -2531,7 +2531,8 @@ function putLinkParamset(direction, channel1, channel2, callback) {
                 rpcDialog(daemon, 'putParamset', [tmp[0], tmp[1], values]);
             });
         }
-    } else if (typeof (callback) === 'function') {
+    }
+    if (typeof (callback) === 'function') {
         callback(null, null);
     }
 }

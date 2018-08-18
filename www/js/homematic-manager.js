@@ -33,6 +33,8 @@ const missesTranslation = {};
 
 let language = 'de';
 
+const serviceMsgParams = ['CONFIG_PENDING', 'DUTY_CYCLE', 'LOWBAT', 'LOW_BAT', 'SABOTAGE', 'UNREACH', 'UPDATE_PENDING'];
+
 let daemon;
 let daemonType;
 let config = {};
@@ -207,7 +209,7 @@ ipcRpc.on('rpc', data => {
             if (!listMessages) {
                 listMessages = [];
             }
-            if (address.endsWith(':0') && (param !== 'RSSI_PEER' && param !== 'RSSI_DEVICE')) {
+            if (address.endsWith(':0') && (serviceMsgParams.indexOf(param) !== -1)) {
                 let done;
                 if (value) {
                     // Muss Meldung hinzugefügt werden?
@@ -618,10 +620,10 @@ function getDevices(callback) {
         if (typeof callback === 'function') {
             callback(err);
         }
-        if (err) {
+        refreshGridDevices();
+        if (err || !listDevices) {
             return;
         }
-        refreshGridDevices();
         for (let i = 0; i < listDevices.length; i++) {
             indexChannels[listDevices[i].ADDRESS] = listDevices[i];
             if (listDevices[i].LINK_SOURCE_ROLES) {

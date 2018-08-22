@@ -2654,7 +2654,7 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
                 easymodes.lang[language].GENERIC && easymodes.lang[language].GENERIC[profiles[id].name]) ||
                 profiles[id].name;
 
-            if (data2.UI_HINT === id) {
+            if (data2 && data2.UI_HINT === id) {
                 selected = ' selected';
             } else {
                 selected = '';
@@ -2968,6 +2968,10 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
                 unit = '';
             }
 
+            if (!data) {
+                throw new Error('RPC getParamset: Invalid Response Received\n\n');
+            }
+
             if (typeof data[param] === 'undefined') {
                 data[param] = desc[param].DEFAULT;
             }
@@ -3092,10 +3096,15 @@ function getLink(sender, receiver, row) {
     $('#edit-linkparamset-row').val(row);
     $('#load_grid-links').show();
     rpcAlert(daemon, 'getLinkInfo', [sender, receiver], (err0, data0) => {
+        console.log('data0', err0, data0);
         rpcAlert(daemon, 'getParamset', [sender, receiver], (err1, data1) => {
+            console.log('data1', err1, data1);
             rpcAlert(daemon, 'getParamsetDescription', [sender, 'LINK'], (err2, data2) => {
+                console.log('data2', err2, data2);
                 rpcAlert(daemon, 'getParamset', [receiver, sender], (err3, data3) => {
+                    console.log('data3', err3, data3);
                     rpcAlert(daemon, 'getParamsetDescription', [receiver, 'LINK'], (err4, data4) => {
+                        console.log('data4', err4, data4);
                         dialogLinkparamset(data0, data1, data2, data3, data4, sender, receiver);
                         $('#load_grid-links').hide();
                     });
@@ -3928,13 +3937,15 @@ function rpcDialogShift() {
     });
 }
 function rpcAlert(daemon, cmd, params, callback) {
+    callback = callback || function () {};
     ipcRpc.send('rpc', [daemon, cmd, params], (err, res) => {
         if (err) {
             alert(daemon + ' ' + cmd + '\n' + JSON.stringify(err)); // eslint-disable-line no-alert
-        } else if (res && res.faultCode) {
+            callback(err, res);
+        } else if (res && res.faultString) {
             alert(daemon + ' ' + cmd + '\n' + JSON.stringify(res)); // eslint-disable-line no-alert
-        }
-        if (typeof callback === 'function') {
+            callback(new Error(res.faultString), res);
+        } else {
             callback(err, res);
         }
     });

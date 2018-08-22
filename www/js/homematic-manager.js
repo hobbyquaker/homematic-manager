@@ -1766,12 +1766,15 @@ function getLinks(callback) {
         return;
     }
     $('#load_grid-links').show();
+    const currentDaemon = daemon;
     rpcAlert(daemon, 'getLinks', [], (err, data) => {
         listLinks = data;
         if (callback) {
             callback();
         }
-        refreshGridLinks();
+        if (currentDaemon === daemon) {
+            refreshGridLinks();
+        }
     });
 }
 function initGridLinks() {
@@ -2110,6 +2113,7 @@ function createLinks(sender, targets, callback) {
 }
 
 function refreshGridLinks() {
+    console.log('refreshGridLinks', listLinks && listLinks.length);
     $gridLinks.jqGrid('clearGridData');
     const rowData = [];
     if (listLinks) {

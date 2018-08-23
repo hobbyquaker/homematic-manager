@@ -3656,21 +3656,25 @@ function elementConsoleMethod() {
         'listReplaceableDevices'
     ];
 
+    const currentDaemon = daemon;
     rpcAlert(daemon, 'system.listMethods', [], (err, data) => {
-        $consoleRpcMethod.html('');
+        if (daemon === currentDaemon) {
+            $consoleRpcMethod.html('');
 
-        if (!err && data && data.length > 0) {
-            data.sort();
-            for (let i = 0; i < data.length; i++) {
-                const method = data[i];
-                if ((config.daemons[daemon].type !== 'HmIP') || (hmipExclude.indexOf(method) === -1)) {
-                    $consoleRpcMethod.append('<option value="' + method + '">' + method + '</option>');
+            if (!err && data && data.length > 0) {
+
+                data.sort();
+                for (let i = 0; i < data.length; i++) {
+                    const method = data[i];
+                    if ((config.daemons[daemon].type !== 'HmIP') || (hmipExclude.indexOf(method) === -1)) {
+                        $consoleRpcMethod.append('<option value="' + method + '">' + method + '</option>');
+                    }
                 }
+            } else if (err) {
+                alert(err); // eslint-disable-line no-alert
             }
-        } else if (err) {
-            alert(err); // eslint-disable-line no-alert
+            $consoleRpcMethod.multiselect('refresh');
         }
-        $consoleRpcMethod.multiselect('refresh');
     });
 }
 function formConsoleParams() {

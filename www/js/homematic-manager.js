@@ -611,11 +611,16 @@ function initDaemon() {
 // Devices
 function getDevices(callback) {
     $('#load_grid-devices').show();
+    const currentDaemon = daemon;
     ipcRpc.send('rpc', [daemon, 'listDevices'], (err, data) => {
+        $('#load_grid-devices').hide();
+        if (daemon !== currentDaemon) {
+            return;
+        }
         indexChannels = {};
         indexSourceRoles = {};
         indexTargetRoles = {};
-        $('#load_grid-devices').hide();
+
         listDevices = data;
         if (typeof callback === 'function') {
             callback(err);
@@ -1768,12 +1773,12 @@ function getLinks(callback) {
     $('#load_grid-links').show();
     const currentDaemon = daemon;
     rpcAlert(daemon, 'getLinks', [], (err, data) => {
-        listLinks = data;
-        if (callback) {
-            callback();
-        }
         if (currentDaemon === daemon) {
             refreshGridLinks();
+            listLinks = data;
+            if (callback) {
+                callback();
+            }
         }
     });
 }
@@ -3125,27 +3130,30 @@ function activateLinkParamset(receiver, sender, long) {
 function getRfdData() {
     if (config.daemons[daemon].type === 'BidCos-RF' || config.daemons[daemon].type === 'HmIP') {
         $('#load_grid-interfaces').show();
+        const currentDaemon = daemon;
         rpcAlert(daemon, 'listBidcosInterfaces', [], (err, data) => {
             if (err || !data || typeof data.length === 'undefined') {
                 alert('listBidocsInterfaces\n' + err);
                 return;
             }
-            listInterfaces = data;
-            if (config.daemons[daemon].type === 'BidCos-RF') {
-                $('#load_grid-rssi').show();
-                rpcAlert(daemon, 'rssiInfo', [], (err, data) => {
-                    listRssi = data;
-                    $('#gbox_grid-rssi').show();
-                    initGridRssi();
-                    refreshGridRssi();
+            if (daemon === currentDaemon) {
+                listInterfaces = data;
+                if (config.daemons[daemon].type === 'BidCos-RF') {
+                    $('#load_grid-rssi').show();
+                    rpcAlert(daemon, 'rssiInfo', [], (err, data) => {
+                        listRssi = data;
+                        $('#gbox_grid-rssi').show();
+                        initGridRssi();
+                        refreshGridRssi();
+                        getServiceMessages();
+                    });
+                } else {
+                    $('#gbox_grid-rssi').hide();
                     getServiceMessages();
-                });
-            } else {
-                $('#gbox_grid-rssi').hide();
-                getServiceMessages();
-            }
+                }
 
-            refreshGridInterfaces();
+                refreshGridInterfaces();
+            }
         });
     }
 }
@@ -3539,10 +3547,13 @@ function refreshGridMessages() {
 }
 function getServiceMessages() {
     $('#load_grid-messages').show();
+    const currentDaemon = daemon;
     rpcAlert(daemon, 'getServiceMessages', [], (err, data) => {
         if (!err) {
-            listMessages = data || [];
-            refreshGridMessages();
+            if (daemon === currentDaemon) {
+                listMessages = data || [];
+                refreshGridMessages();
+            }
         } else {
             alert('getServiceMessages\n' + err);
         }

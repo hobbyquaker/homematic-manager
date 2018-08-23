@@ -532,6 +532,8 @@ function initDaemon() {
     }
     firstLoad = false;
 
+    console.log('initDaemon', daemon);
+
     if (daemon && config.daemons[daemon]) {
         const type = config.daemons[daemon].type;
         daemonType = config.daemons[daemon].type;
@@ -598,10 +600,13 @@ function initDaemon() {
                 dialogAlert(err.syscall + ' ' + daemon + ' (' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ')<br><br><span style="color: red;">' + err.code + '</span>', _('Error'));
                 return;
             }
-            getLinks(() => {
-                getRfdData();
+            elementConsoleMethod(() => {
+                getLinks(() => {
+                    getRfdData();
+                });
             });
-            elementConsoleMethod();
+
+
         });
     } else {
         window.location.hash = '';
@@ -610,6 +615,7 @@ function initDaemon() {
 
 // Devices
 function getDevices(callback) {
+    console.log('getDevices', daemon);
     $('#load_grid-devices').show();
     const currentDaemon = daemon;
     ipcRpc.send('rpc', [daemon, 'listDevices'], (err, data) => {
@@ -1771,12 +1777,13 @@ function getLinks(callback) {
         }
         return;
     }
+    console.log('getLinks', daemon);
     $('#load_grid-links').show();
     const currentDaemon = daemon;
     rpcAlert(daemon, 'getLinks', [], (err, data) => {
         if (currentDaemon === daemon) {
-            refreshGridLinks();
             listLinks = data;
+            refreshGridLinks();
             if (callback) {
                 callback();
             }
@@ -2675,8 +2682,12 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
         $selectLinkparamsetProfile.multiselect('refresh');
 
         // Tabelle befüllen
-        formLinkParamset($('#table-linkparamset1'), data1, desc1, 'sender-receiver', senderType, receiverType);
-        formLinkParamset($('#table-linkparamset2'), data2, desc2, 'receiver-sender', senderType, receiverType, profiles);
+        try {
+            formLinkParamset($('#table-linkparamset1'), data1, desc1, 'sender-receiver', senderType, receiverType);
+            formLinkParamset($('#table-linkparamset2'), data2, desc2, 'receiver-sender', senderType, receiverType, profiles);
+        } catch (err) {
+            return;
+        }
 
         // Dialog-Überschrift setzen
         let name = (names && names[sender] ? names[sender] : '');
@@ -2952,7 +2963,14 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
     let count = 0;
     const resultArr = [];
     if (!desc) {
-        throw new Error('formLinkParamset paramsetDescription missing');
+        $dialogLinkparamset.dialog('close');
+        dialogAlert('formLinkParamset paramsetDescription missing\nPlease try again.', 'ERROR');
+        throw(new Error());
+    }
+    if (!data) {
+        $dialogLinkparamset.dialog('close');
+        dialogAlert('formLinkParamset paramset missing\nPlease try again.', 'ERROR');
+        throw(new Error());
     }
     Object.keys(desc).forEach(param => {
         let unit = '';
@@ -2979,7 +2997,8 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
             }
 
             if (!data) {
-                throw new Error('RPC getParamset: Invalid Response Received\n\n');
+                dialogAlert('getParamset: Invalid Response Received', 'RPC Error');
+                return;
             }
 
             if (typeof data[param] === 'undefined') {
@@ -3106,15 +3125,15 @@ function getLink(sender, receiver, row) {
     $('#edit-linkparamset-row').val(row);
     $('#load_grid-links').show();
     rpcAlert(daemon, 'getLinkInfo', [sender, receiver], (err0, data0) => {
-        console.log('data0', err0, data0);
+        console.log('getLinkInfo', err0, data0);
         rpcAlert(daemon, 'getParamset', [sender, receiver], (err1, data1) => {
-            console.log('data1', err1, data1);
+            console.log('getParamset', sender, receiver, err1, data1);
             rpcAlert(daemon, 'getParamsetDescription', [sender, 'LINK'], (err2, data2) => {
-                console.log('data2', err2, data2);
+                console.log('getParamsetDescription', sender, 'LINK', err2, data2);
                 rpcAlert(daemon, 'getParamset', [receiver, sender], (err3, data3) => {
-                    console.log('data3', err3, data3);
+                    console.log('getParamset', receiver, sender, err3, data3);
                     rpcAlert(daemon, 'getParamsetDescription', [receiver, 'LINK'], (err4, data4) => {
-                        console.log('data4', err4, data4);
+                        console.log('getParamsetDescription', receiver, 'LINK', err4, data4);
                         dialogLinkparamset(data0, data1, data2, data3, data4, sender, receiver);
                         $('#load_grid-links').hide();
                     });
@@ -3615,16 +3634,11 @@ function initConsole() {
         setConsoleParams(this);
     });
 }
-function elementConsoleMethod() {
-    $('#console-rpc-help').html('');
-    $consoleRpcMethod.html('<option value="null" selected="selected">' + _('Please select method') + '</option>');
-    $consoleRpcResponse.html('');
+function elementConsoleMethod(callback) {
     if (daemon === 'null') {
         $consoleRpcSend.attr('disabled', true).button('refresh');
         return;
     }
-
-    $consoleRpcMethod.html('');
 
     // Würgaround https://github.com/eq-3/occu/issues/53
     const hmipExclude = [
@@ -3658,11 +3672,16 @@ function elementConsoleMethod() {
     ];
 
     const currentDaemon = daemon;
+    console.log('elementConsoleMethod', daemon);
     rpcAlert(daemon, 'system.listMethods', [], (err, data) => {
-        $consoleRpcMethod.html('');
+        console.log('system.listMethods', currentDaemon, err, data);
+        if (daemon === currentDaemon) {
+            $consoleRpcMethod.html('');
+            $('#console-rpc-help').html('');
+            $consoleRpcMethod.html('<option value="null" selected="selected">' + _('Please select method') + '</option>');
+            $consoleRpcResponse.html('');
 
-        if (!err && data && data.length > 0) {
-            if (daemon === currentDaemon) {
+            if (!err && data && data.length > 0) {
                 data.sort();
                 for (let i = 0; i < data.length; i++) {
                     const method = data[i];
@@ -3671,8 +3690,12 @@ function elementConsoleMethod() {
                     }
                 }
             }
-        } else if (err) {
-            alert(err); // eslint-disable-line no-alert
+            if (typeof callback === 'function') {
+                callback();
+            }
+        }
+        if (err) {
+            dialogAlert('system.listMethod ' + daemon + ' ' + err, 'RPC Error');
         }
 
         $consoleRpcMethod.multiselect('refresh');
@@ -3974,7 +3997,7 @@ function rpcAlert(daemon, cmd, params, callback) {
 // Helper functions
 function dialogAlert(text, title) {
     title = title || '&nbsp';
-    $('#alert').html(text);
+    $('#alert').html(text.replace('\n', '<br>'));
     $dialogAlert.dialog('option', 'title', title);
     $dialogAlert.dialog('open');
 }

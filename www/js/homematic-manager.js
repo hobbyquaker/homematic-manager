@@ -613,10 +613,11 @@ function getDevices(callback) {
     $('#load_grid-devices').show();
     const currentDaemon = daemon;
     ipcRpc.send('rpc', [daemon, 'listDevices'], (err, data) => {
-        $('#load_grid-devices').hide();
         if (daemon !== currentDaemon) {
             return;
         }
+        $('#load_grid-devices').hide();
+
         indexChannels = {};
         indexSourceRoles = {};
         indexTargetRoles = {};
@@ -3658,11 +3659,10 @@ function elementConsoleMethod() {
 
     const currentDaemon = daemon;
     rpcAlert(daemon, 'system.listMethods', [], (err, data) => {
-        if (daemon === currentDaemon) {
-            $consoleRpcMethod.html('');
+        $consoleRpcMethod.html('');
 
-            if (!err && data && data.length > 0) {
-
+        if (!err && data && data.length > 0) {
+            if (daemon === currentDaemon) {
                 data.sort();
                 for (let i = 0; i < data.length; i++) {
                     const method = data[i];
@@ -3670,11 +3670,12 @@ function elementConsoleMethod() {
                         $consoleRpcMethod.append('<option value="' + method + '">' + method + '</option>');
                     }
                 }
-            } else if (err) {
-                alert(err); // eslint-disable-line no-alert
             }
-            $consoleRpcMethod.multiselect('refresh');
+        } else if (err) {
+            alert(err); // eslint-disable-line no-alert
         }
+
+        $consoleRpcMethod.multiselect('refresh');
     });
 }
 function formConsoleParams() {

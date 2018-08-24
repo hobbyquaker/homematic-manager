@@ -6,8 +6,6 @@
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-blue.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
-> Version 2: alpha - work in progress, unfertig und voller Bugs. Umbau als Electron-App.
-
 
 ## Dokumentation
 

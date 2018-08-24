@@ -13,7 +13,7 @@
     "hm-discover": "1.1.0",
     "homematic-rega": "^1.2.6",
     "homematic-xmlrpc": "1.0.2",
-    "iconv-lite": "0.4.23",
+    "iconv-lite": "0.4.24",
     "jquery": "3.3.1",
     "jquery-ui-dist": "^1.12.1",
     "jquery-ui-multiselect-widget": "2.0.2",
@@ -24,8 +24,8 @@
     "yalm": "4.1.0"
   },
   "devDependencies": {
-    "electron": "^2.0.7",
-    "electron-builder": "^20.28.1",
+    "electron": "^2.0.8",
+    "electron-builder": "^20.28.2",
     "xo": "latest"
   },
   "description": "Webinterface for HomeMatic interface processes (rfd, hs485d, Homegear)",

@@ -2054,10 +2054,11 @@ function initGridLinks() {
 
                     createLinks(sender, targets, () => {
                         $('#load_grid-links').show();
+
                         rpcAlert(daemon, 'getParamset', [s1, t1], (err, data1) => {
-                            rpcAlert(daemon, 'getParamsetDescription', [s1, t1], (err2, desc1) => {
+                            rpcAlert(daemon, 'getParamsetDescription', [s1, 'LINK'], (err2, desc1) => {
                                 rpcAlert(daemon, 'getParamset', [t1, s1], (err3, data2) => {
-                                    rpcAlert(daemon, 'getParamsetDescription', [t1, s1], (err4, desc2) => {
+                                    rpcAlert(daemon, 'getParamsetDescription', [t1, 'LINK'], (err4, desc2) => {
                                         dialogLinkparamset({
                                             NAME: '',
                                             DESCRIPTION: ''
@@ -2079,6 +2080,7 @@ function initGridLinks() {
                                 });
                             });
                         });
+
                     });
 
                     $(this).dialog('close');
@@ -2089,10 +2091,7 @@ function initGridLinks() {
                 click() {
                     const sender = $selectLinkSender.val();
                     const targets = $selectLinkReceiver.val();
-
-                    createLinks(sender, targets);
-
-                    $(this).dialog('close');
+                    createLinks(sender, targets, () => {});
                 }
             },
             {
@@ -2110,10 +2109,11 @@ function createLinks(sender, targets, callback) {
 
     sender.forEach(s => {
         targets.forEach(t => {
-            links.push([s, t, '', '']);
+            links.push([s, t]);
         });
     });
 
+    $dialogAddLink.dialog('close');
     async.mapSeries(links, (link, cb) => {
         rpcDialog(daemon, 'addLink', link, cb);
     }, () => {
@@ -3125,15 +3125,10 @@ function getLink(sender, receiver, row) {
     $('#edit-linkparamset-row').val(row);
     $('#load_grid-links').show();
     rpcAlert(daemon, 'getLinkInfo', [sender, receiver], (err0, data0) => {
-        console.log('getLinkInfo', err0, data0);
         rpcAlert(daemon, 'getParamset', [sender, receiver], (err1, data1) => {
-            console.log('getParamset', sender, receiver, err1, data1);
             rpcAlert(daemon, 'getParamsetDescription', [sender, 'LINK'], (err2, data2) => {
-                console.log('getParamsetDescription', sender, 'LINK', err2, data2);
                 rpcAlert(daemon, 'getParamset', [receiver, sender], (err3, data3) => {
-                    console.log('getParamset', receiver, sender, err3, data3);
                     rpcAlert(daemon, 'getParamsetDescription', [receiver, 'LINK'], (err4, data4) => {
-                        console.log('getParamsetDescription', receiver, 'LINK', err4, data4);
                         dialogLinkparamset(data0, data1, data2, data3, data4, sender, receiver);
                         $('#load_grid-links').hide();
                     });
@@ -3152,12 +3147,8 @@ function getRfdData() {
         $('#load_grid-interfaces').show();
         const currentDaemon = daemon;
         rpcAlert(daemon, 'listBidcosInterfaces', [], (err, data) => {
-            if (err || !data || typeof data.length === 'undefined') {
-                alert('listBidocsInterfaces\n' + err);
-                return;
-            }
             if (daemon === currentDaemon) {
-                listInterfaces = data;
+                listInterfaces = data || [];
                 if (config.daemons[daemon].type === 'BidCos-RF') {
                     $('#load_grid-rssi').show();
                     rpcAlert(daemon, 'rssiInfo', [], (err, data) => {

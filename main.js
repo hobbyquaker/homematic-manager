@@ -206,7 +206,7 @@ const localNames = pjson.load('names_' + config.ccuAddress) || {};
 const localRegaId = {};
 // Const localNamesIds = {};
 const localDevices = pjson.load('devices_' + config.ccuAddress) || {};
-const localParamsetDescriptions = pjson.load('paramset-descriptions_' + config.ccuAddress) || {};
+const localParamsetDescriptions = pjson.load('paramset-descriptions-v2_' + config.ccuAddress) || {};
 const rpcClients = {};
 
 let rpcServer;
@@ -488,6 +488,22 @@ function initIpc() {
     });
 }
 
+function paramsetName(daemon, device, paramset) {
+    let cType = '';
+    let d;
+    if (device) {
+        if (device.PARENT) {
+            // channel
+            cType = device.TYPE;
+            d = localDevices[daemon][device.PARENT];
+        } else {
+            // device
+            d = device;
+        }
+        return [daemon, d.TYPE, d.FIRMWARE, d.VERSION, cType, paramset].join('/');
+    }
+}
+
 function rpcProxy(daemon, method, params, callback) {
     switch (method) {
         case 'listDevices': {
@@ -504,10 +520,8 @@ function rpcProxy(daemon, method, params, callback) {
         case 'getParamsetDescription': {
             const dev = localDevices[daemon][params[0]];
 
-            let ident = dev.TYPE + '/' + dev.VERSION + '/' + params[1];
-            if (dev.PARENT_TYPE) {
-                ident = dev.PARENT_TYPE + '/' + ident;
-            }
+            const ident = paramsetName(daemon, dev, params[1]);
+
             if (localParamsetDescriptions[ident]) {
                 log.debug('paramset cache hit ' + ident);
                 callback(null, localParamsetDescriptions[ident]);
@@ -517,9 +531,9 @@ function rpcProxy(daemon, method, params, callback) {
                 rpcClients[daemon].methodCall(method, params, (error, result) => {
                     console.log('rpc response ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method, error, result);
                     if (!error && result) {
-                        localParamsetDescriptions[ident] = result;
+                         localParamsetDescriptions[ident] = result;
                     }
-                    pjson.save('paramset-descriptions_' + config.ccuAddress, localParamsetDescriptions);
+                    pjson.save('paramset-descriptions-v2_' + config.ccuAddress, localParamsetDescriptions);
                     if (callback) {
                         callback(error, result);
                     }

@@ -353,7 +353,41 @@ const rpcMethods = {
         const res = [];
         if (localDevices[daemon]) {
             Object.keys(localDevices[daemon]).forEach(address => {
-                res.push({ADDRESS: address, VERSION: localDevices[daemon][address].VERSION});
+                if (daemon === 'HmIP') {
+                    const d = localDevices[daemon][address];
+                    const dev = {
+                        ADDRESS: d.ADDRESS,
+                        VERSION: d.VERSION,
+                        AES_ACTIVE: d.AES_ACTIVE,
+                        CHILDREN: d.CHILDREN,
+                        DIRECTION: d.DIRECTION,
+                        FIRMWARE: d.FIRMWARE,
+                        FLAGS: d.FLAGS,
+                        GROUP: d.GROUP,
+                        INDEX: d.INDEX,
+                        INTERFACE: d.INTERFACE,
+                        LINK_SOURCE_ROLES: d.LINK_SOURCE_ROLES,
+                        LINK_TARGET_ROLES: d.LINK_TARGET_ROLES,
+                        PARAMSETS: d.PARAMSETS,
+                        PARENT: d.PARENT,
+                        PARENT_TYPE: d.PARENT_TYPE,
+                        RF_ADDRESS: d.RF_ADDRESS,
+                        ROAMING: d.ROAMING,
+                        RX_MODE: d.RX_MODE,
+                        TEAM: d.TEAM,
+                        TEAM_CHANNELS: d.TEAM_CHANNELS,
+                        TEAM_TAG: d.TEAM_TAG,
+                        TYPE: d.TYPE
+                    };
+                    Object.keys(dev).forEach(k => {
+                        if (!dev[k]) {
+                            delete dev[k];
+                        }
+                    });
+                    res.push(dev);
+                } else {
+                    res.push({ADDRESS: address, VERSION: localDevices[daemon][address].VERSION});
+                }
             });
         }
         log.debug('RPC -> listDevices response length ' + res.length);

@@ -3538,7 +3538,7 @@ function refreshGridMessages() {
     let acceptableMessages = false;
     const rowData = [];
     for (let i = 0, len = listMessages.length; i < len; i++) {
-        const deviceAddress = listMessages[i][0].slice(0, listMessages[i][0].length - 2);
+        const deviceAddress = String(listMessages[i][0]).slice(0, listMessages[i][0].length - 2);
         let name = '';
         if (names[deviceAddress]) {
             name = names[deviceAddress];

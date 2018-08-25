@@ -3312,18 +3312,20 @@ function initGridRssi() {
         const partners = listRssi[address];
         let i = 0;
         const rowData = [];
-        Object.keys(partners).forEach(partner => {
-            const obj = {
-                ADDRESS: partner,
-                Name: (names && names[partner] ? names[partner] : ''),
-                TYPE: (indexDevices[partner] ? indexDevices[partner].TYPE : ''),
-                'RSSI-Receive': rssiColor(partners[partner][0]),
-                'RSSI-Send': rssiColor(partners[partner][1])
-            };
-            obj._id = i;
-            rowData.push(obj);
-            i += 1;
-        });
+        if (partners) {
+            Object.keys(partners).forEach(partner => {
+                const obj = {
+                    ADDRESS: partner,
+                    Name: (names && names[partner] ? names[partner] : ''),
+                    TYPE: (indexDevices[partner] ? indexDevices[partner].TYPE : ''),
+                    'RSSI-Receive': rssiColor(partners[partner][0]),
+                    'RSSI-Send': rssiColor(partners[partner][1])
+                };
+                obj._id = i;
+                rowData.push(obj);
+                i += 1;
+            });
+        }
         $subgrid.jqGrid('addRowData', '_id', rowData);
     }
 

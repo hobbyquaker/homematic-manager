@@ -57,7 +57,7 @@
   "contributors": [
     "André 'Anli' Litfin"
   ],
-  "license": "CC-BY-NC-SA-4.0",
+  "license": "GPLv3",
   "bugs": {
     "url": "https://github.com/hobbyquaker/homematic-manager/issues"
   },

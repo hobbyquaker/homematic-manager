@@ -22,9 +22,9 @@ Linux und Windows zu finden.
 
 ## Lizenz
 
-Copyright (c) 2014-2017 Sebastian 'hobbyquaker' Raff, Anli
+Copyright (c) 2014-2018 Sebastian "Hobbyquaker" Raff, André "Anli" Litfin
 
-[CC BY-NC-SA 4.0](http://creativecommons.org/licenses/by-nc-sa/4.0/)
+[GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
 
 
 Der obige Urheberrechtsvermerk ist in allen Kopien oder Teilkopien der Software beizulegen.

@@ -525,6 +525,10 @@ function initDaemon() {
     $('#play-link-long').addClass('ui-state-disabled');
     $('#del-link').addClass('ui-state-disabled');
 
+    $consoleFormParams.html('');
+    $consoleRpcResponse.html('');
+    $('#console-rpc-params').val('');
+
     const tmp = window.location.hash.slice(1).split('/');
 
     if (tmp[1] && firstLoad) {

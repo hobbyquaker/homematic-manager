@@ -1614,6 +1614,14 @@ function initDialogParamset() {
                     putParamset();
                 },
                 id: 'dialog-paramset-button'
+            },
+            {
+                text: _('putParamsetClose'),
+                click() {
+                    $dialogParamset.dialog('close');
+                    putParamset();
+                },
+                id: 'dialog-paramset-close-button'
             }
         ]
     });
@@ -2188,6 +2196,14 @@ function initDialogLinkParamset() {
                 class: 'linkparamset-save',
                 text: _('putParamset'),
                 click() {
+                    putLinkParamsets($(this));
+                }
+            },
+            {
+                class: 'linkparamset-save',
+                text: _('putParamsetClose'),
+                click() {
+                    $dialogLinkparamset.dialog('close');
                     putLinkParamsets($(this));
                 }
             }

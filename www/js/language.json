@@ -221,7 +221,11 @@
     "en": "Activate short"
   },
   "putParamset": {
-    "de": "Parameter in Gerät übernehmen",
+    "de": "Parameter übernehmen",
+    "en": "putParamset"
+  },
+  "putParamsetClose": {
+    "de": "Parameter übernehmen und schließen",
     "en": "putParamset"
   },
   "New service message": {

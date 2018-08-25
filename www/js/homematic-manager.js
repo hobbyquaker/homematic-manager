@@ -1586,9 +1586,9 @@ function dialogParamset(data, desc, address, paramset) {
         $('#select-paramset-multiselect_ms').hide();
     }
     if (writeable) {
-        $('#dialog-paramset-button').show();
+        $('.dialog-paramset-button').show();
     } else {
-        $('#dialog-paramset-button').hide();
+        $('.dialog-paramset-button').hide();
     }
 
     $dialogParamset.dialog('open');
@@ -1613,7 +1613,17 @@ function initDialogParamset() {
                 click() {
                     putParamset();
                 },
-                id: 'dialog-paramset-button'
+                id: 'dialog-paramset-button',
+                class: 'dialog-paramset-button'
+            },
+            {
+                text: _('putParamsetClose'),
+                click() {
+                    $dialogParamset.dialog('close');
+                    putParamset();
+                },
+                id: 'dialog-paramset-close-button',
+                class: 'dialog-paramset-button'
             }
         ]
     });
@@ -2188,6 +2198,14 @@ function initDialogLinkParamset() {
                 class: 'linkparamset-save',
                 text: _('putParamset'),
                 click() {
+                    putLinkParamsets($(this));
+                }
+            },
+            {
+                class: 'linkparamset-save',
+                text: _('putParamsetClose'),
+                click() {
+                    $dialogLinkparamset.dialog('close');
                     putLinkParamsets($(this));
                 }
             }

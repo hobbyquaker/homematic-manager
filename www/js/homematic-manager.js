@@ -554,6 +554,7 @@ function initDaemon() {
 
         window.location.hash = tmpHash;
 
+        $gridDevices.jqGrid('hideCol', 'SUBTYPE');
         $('.dselect').hide();
         $('.show-rf').hide();
         $('.show-wired').hide();
@@ -563,7 +564,6 @@ function initDaemon() {
 
         if (type === 'BidCos-Wired') {
             $('.show-wired').show();
-
             $('.dselect.' + type).show();
             $('#play-link').hide();
             $('#play-link-long').hide();
@@ -578,6 +578,7 @@ function initDaemon() {
             $('#play-link').hide();
             $('#play-link-long').hide();
         } else if (type === 'HmIP') {
+            $gridDevices.jqGrid('showCol', 'SUBTYPE');
             $('.show-hmip').show();
             $('#play-link').hide();
             $('#play-link-long').hide();
@@ -665,12 +666,13 @@ function getDevices(callback) {
 }
 function initGridDevices() {
     $gridDevices.jqGrid({
-        colNames: ['', 'Name', 'ADDRESS', 'TYPE', 'FIRMWARE', 'PARAMSETS', 'FLAGS', /* 'INTERFACE', 'RF_ADDRESS', */ /* 'ROAMING', */ 'RX_MODE'/* , 'VERSION' */],
+        colNames: ['', 'Name', 'ADDRESS', 'TYPE', 'SUBTYPE', 'FIRMWARE', 'PARAMSETS', 'FLAGS', /* 'INTERFACE', 'RF_ADDRESS', */ /* 'ROAMING', */ 'RX_MODE'/* , 'VERSION' */],
         colModel: [
             {name: 'img', index: 'img', width: 22, fixed: true, classes: 'device-cell', align: 'center', search: false},
             {name: 'Name', index: 'Name', width: 160, fixed: false, classes: 'device-cell'},
             {name: 'ADDRESS', index: 'ADDRESS', width: 140, fixed: true, classes: 'device-cell'},
             {name: 'TYPE', index: 'TYPE', width: 140, fixed: false, classes: 'device-cell'},
+            {name: 'SUBTYPE', index: 'SUBTYPE', width: 80, fixed: false, classes: 'device-cell'},
             {name: 'FIRMWARE', index: 'FIRMWARE', width: 80, fixed: true, classes: 'device-cell'},
             {name: 'params', index: 'params', width: 120, fixed: true, classes: 'device-cell', search: false},
             {name: 'flags', index: 'flags', width: 150, fixed: true, classes: 'device-cell'},
@@ -1107,7 +1109,7 @@ function initGridDevices() {
             colModel: [
                 {name: 'Name', index: 'Name', width: 172, fixed: false, classes: 'channel-cell'},
                 {name: 'ADDRESS', index: 'ADDRESS', width: 140, fixed: true, classes: 'channel-cell'},
-                {name: 'TYPE', index: 'TYPE', width: 140, fixed: false, classes: 'channel-cell'},
+                {name: 'TYPE', index: 'TYPE', width: daemon === 'HmIP' ? 217 : 140, fixed: false, classes: 'channel-cell'},
                 {name: 'direction', index: 'direction', width: 80, fixed: true, classes: 'channel-cell'},
                 {name: 'params', index: 'params', width: 120, fixed: true, classes: 'channel-cell'},
                 {name: 'flags', index: 'flags', width: 150, fixed: true, classes: 'channel-cell'},

@@ -34,6 +34,8 @@ const Rega = require('homematic-rega');
 let rega;
 let regaPresent = false;
 
+let invalidateDeviceCache = {};
+
 const log = require('yalm');
 
 const pkg = require('./package.json');
@@ -444,6 +446,11 @@ function initIpc() {
         callback(null, localNames);
     });
 
+    ipcRpc.on('invalidateDeviceCache', (params, callback) => {
+        invalidateDeviceCache[params[0]] = true;
+        callback(null);
+    });
+
     ipcRpc.on('setName', (params, callback) => {
         const [address, name] = params;
         localNames[address] = name;
@@ -541,14 +548,29 @@ function paramsetName(daemon, device, paramset) {
 function rpcProxy(daemon, method, params, callback) {
     switch (method) {
         case 'listDevices': {
-            const res = [];
-            if (localDevices[daemon]) {
-                Object.keys(localDevices[daemon]).forEach(address => {
-                    res.push(localDevices[daemon][address]);
+            if (invalidateDeviceCache[daemon]) {
+                rpcClients[daemon].methodCall('listDevices', params, (err, res) => {
+                    if (!err && res) {
+                        delete invalidateDeviceCache[daemon];
+                        localDevices[daemon] = {};
+                        res.forEach(dev => {
+                             localDevices[daemon][dev.ADDRESS] = dev;
+                        });
+                    }
+                    res = res || [];
+                    log.debug('RPC -> respond to listDevices from interface (' + res + ')');
+                    callback(err, res);
                 });
+            } else {
+                const res = [];
+                if (localDevices[daemon]) {
+                    Object.keys(localDevices[daemon]).forEach(address => {
+                        res.push(localDevices[daemon][address]);
+                    });
+                }
+                log.debug('RPC -> respond to listDevices from cache (' + res.length + ')');
+                callback(null, res);
             }
-            log.debug('RPC -> respond to listDevices from cache (' + res.length + ')');
-            callback(null, res);
             break;
         }
         case 'getParamsetDescription': {

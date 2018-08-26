@@ -618,6 +618,12 @@ function initDaemon() {
     }
 }
 
+function invalidateDeviceCache() {
+    ipcRpc.send('invalidateDeviceCache', [daemon], () => {
+        getDevices();
+    });
+}
+
 // Devices
 function getDevices(callback) {
     console.log('getDevices', daemon);
@@ -671,9 +677,9 @@ function initGridDevices() {
             {name: 'img', index: 'img', width: 22, fixed: true, classes: 'device-cell', align: 'center', search: false},
             {name: 'Name', index: 'Name', width: 160, fixed: false, classes: 'device-cell'},
             {name: 'ADDRESS', index: 'ADDRESS', width: 140, fixed: true, classes: 'device-cell'},
-            {name: 'TYPE', index: 'TYPE', width: 140, fixed: false, classes: 'device-cell'},
-            {name: 'SUBTYPE', index: 'SUBTYPE', width: 80, fixed: false, classes: 'device-cell'},
-            {name: 'FIRMWARE', index: 'FIRMWARE', width: 80, fixed: true, classes: 'device-cell'},
+            {name: 'TYPE', index: 'TYPE', width: 120, fixed: false, classes: 'device-cell'},
+            {name: 'SUBTYPE', index: 'SUBTYPE', width: 60, fixed: false, classes: 'device-cell'},
+            {name: 'FIRMWARE', index: 'FIRMWARE', width: 130, fixed: true, classes: 'device-cell'},
             {name: 'params', index: 'params', width: 120, fixed: true, classes: 'device-cell', search: false},
             {name: 'flags', index: 'flags', width: 150, fixed: true, classes: 'device-cell'},
             // {name:'INTERFACE',index:'INTERFACE', width:70},
@@ -742,7 +748,7 @@ function initGridDevices() {
     }).jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
         buttonicon: 'ui-icon-refresh',
-        onClickButton: getDevices,
+        onClickButton: invalidateDeviceCache,
         position: 'first',
         id: 'refresh-devices',
         title: _('Refresh'),
@@ -1109,8 +1115,8 @@ function initGridDevices() {
             colModel: [
                 {name: 'Name', index: 'Name', width: 172, fixed: false, classes: 'channel-cell'},
                 {name: 'ADDRESS', index: 'ADDRESS', width: 140, fixed: true, classes: 'channel-cell'},
-                {name: 'TYPE', index: 'TYPE', width: daemon === 'HmIP' ? 217 : 140, fixed: false, classes: 'channel-cell'},
-                {name: 'direction', index: 'direction', width: 80, fixed: true, classes: 'channel-cell'},
+                {name: 'TYPE', index: 'TYPE', width: daemon === 'HmIP' ? 177 : 100, fixed: false, classes: 'channel-cell'},
+                {name: 'direction', index: 'direction', width: 130, fixed: true, classes: 'channel-cell'},
                 {name: 'params', index: 'params', width: 120, fixed: true, classes: 'channel-cell'},
                 {name: 'flags', index: 'flags', width: 150, fixed: true, classes: 'channel-cell'},
                 {
@@ -1250,6 +1256,20 @@ function refreshGridDevices() {
             listDevices[i].RF_ADDRESS = parseInt(listDevices[i].RF_ADDRESS, 10).toString(16);
         }
 
+        listDevices[i].FIRMWARE = '<span style="width: 40px; display: inline-block;">' + listDevices[i].FIRMWARE + '</span>';
+        switch (listDevices[i].FIRMWARE_UPDATE_STATE) {
+            case 'UP_TO_DATE':
+            case 'NEW_FIRMWARE_AVAILABLE':
+            case 'DELIVER_FIRMWARE_IMAGE':
+            case 'PERFORMING_UPDATE':
+                listDevices[i].FIRMWARE += ' <span class="firmware-status">' + listDevices[i].FIRMWARE_UPDATE_STATE.toLowerCase().replace(/_/g, ' ') + '</span>';
+                break;
+            case 'READY_FOR_UPDATE':
+                listDevices[i].FIRMWARE += ' ' + '<button class="install-firmware device-table" data-address="' + listDevices[i].ADDRESS + '" id="install-firmware_' + listDevices[i].ADDRESS + '">install Firmware</button>';
+                break;
+            default:
+        }
+
         const rxMode = [];
         if (listDevices[i].RX_MODE & 1) {
             rxMode.push('ALWAYS');
@@ -1311,6 +1331,7 @@ function refreshGridDevices() {
     $gridDevices.jqGrid('addRowData', '_id', rowData);
     $gridDevices.trigger('reloadGrid').sortGrid('Name', false, 'asc');
     $('button.paramset:not(.ui-button)').button();
+    $('button.install-firmware:not(.ui-button)').button();
 }
 function replaceDevice() {
     const address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam', 'selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
@@ -1642,6 +1663,14 @@ function initDialogParamset() {
     }).multiselectfilter({
         autoReset: true,
         placeholder: ''
+    });
+
+    $body.on('click', 'button.install-firmware', function () {
+        const address = $(this).attr('data-address');
+        ipcRpc.send('invalidateDeviceCache', [daemon], () => {
+            rpcDialog(daemon, 'installFirmware', [address]);
+        });
+        $(this).button('disable');
     });
 
     $body.on('click', 'button.paramset', function () {
@@ -3389,64 +3418,71 @@ function refreshGridRssi() {
     indexDevices = {};
 
     let j = 0;
-    for (let i = 0, len = listInterfaces.length; i < len; i++) {
-        indexDevices[listInterfaces[i].ADDRESS] = listInterfaces[i];
+    if (listInterfaces) {
+        for (let i = 0, len = listInterfaces.length; i < len; i++) {
+            indexDevices[listInterfaces[i].ADDRESS] = listInterfaces[i];
 
-        // TODO - performance improvement, add all rows at once!
-        $gridRssi.jqGrid('addRowData', j++, {
-            Name: '',
-            ADDRESS: listInterfaces[i].ADDRESS,
-            TYPE: listInterfaces[i].TYPE
-        });
+            // TODO - performance improvement, add all rows at once!
+            $gridRssi.jqGrid('addRowData', j++, {
+                Name: '',
+                ADDRESS: listInterfaces[i].ADDRESS,
+                TYPE: listInterfaces[i].TYPE
+            });
+        }
     }
 
     const rowData = [];
 
-    for (let i = 0, len = listDevices.length; i < len; i++) {
-        if (listDevices[i].PARENT) {
-            continue;
-        }
-        if (listDevices[i].TYPE === 'HM-RCV-50') {
-            continue;
-        }
-        if (listDevices[i].ADDRESS.startsWith('*')) {
-            continue;
-        }
-        indexDevices[listDevices[i].ADDRESS] = listDevices[i];
-        let line = {};
-        for (let k = 0, ifaceLen = listInterfaces.length; k < ifaceLen; k++) {
-            if (listRssi[listDevices[i].ADDRESS] && listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS]) {
-                line[listInterfaces[k].ADDRESS + '_0'] = (listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][0] === 65536 ?
-                    '' : listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][0]);
-                line[listInterfaces[k].ADDRESS + '_1'] = (listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1] === 65536 ?
-                    '' : listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1]);
-                if (listDevices[i].INTERFACE === listInterfaces[k].ADDRESS) {
-                    line[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '" checked="checked">';
-                } else {
-                    line[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '">';
-                }
-            } else {
-                line[listInterfaces[k].ADDRESS + '_0'] = '';
-                line[listInterfaces[k].ADDRESS + '_1'] = '';
-                line[listInterfaces[k].ADDRESS + '_set'] = '';
+    if (listDevices) {
+        for (let i = 0, len = listDevices.length; i < len; i++) {
+            if (listDevices[i].PARENT) {
+                continue;
             }
+            if (listDevices[i].TYPE === 'HM-RCV-50') {
+                continue;
+            }
+            if (listDevices[i].ADDRESS.startsWith('*')) {
+                continue;
+            }
+            indexDevices[listDevices[i].ADDRESS] = listDevices[i];
+            let line = {};
+            for (let k = 0, ifaceLen = listInterfaces.length; k < ifaceLen; k++) {
+                if (listRssi[listDevices[i].ADDRESS] && listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS]) {
+                    line[listInterfaces[k].ADDRESS + '_0'] = (listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][0] === 65536 ?
+                        '' : listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][0]);
+                    line[listInterfaces[k].ADDRESS + '_1'] = (listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1] === 65536 ?
+                        '' : listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1]);
+                    if (listDevices[i].INTERFACE === listInterfaces[k].ADDRESS) {
+                        line[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '" checked="checked">';
+                    } else {
+                        line[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '">';
+                    }
+                } else {
+                    line[listInterfaces[k].ADDRESS + '_0'] = '';
+                    line[listInterfaces[k].ADDRESS + '_1'] = '';
+                    line[listInterfaces[k].ADDRESS + '_set'] = '';
+                }
+            }
+            if (listDevices[i].ROAMING === 0) {
+                line.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox">';
+            } else {
+                line.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox" checked="checked">';
+            }
+            line = $.extend(true, line, listDevices[i]);
+            line._id = j++;
+            rowData.push(line);
         }
-        if (listDevices[i].ROAMING === 0) {
-            line.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox">';
-        } else {
-            line.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox" checked="checked">';
-        }
-        line = $.extend(true, line, listDevices[i]);
-        line._id = j++;
-        rowData.push(line);
+        $gridRssi.jqGrid('addRowData', '_id', rowData);
+
     }
-    $gridRssi.jqGrid('addRowData', '_id', rowData);
     $gridRssi.trigger('reloadGrid');
 }
 function refreshGridInterfaces() {
     $gridInterfaces.jqGrid('clearGridData');
-    for (let i = 0, len = listInterfaces.length; i < len; i++) {
-        $gridInterfaces.jqGrid('addRowData', i, listInterfaces[i]);
+    if (listInterfaces) {
+        for (let i = 0, len = listInterfaces.length; i < len; i++) {
+            $gridInterfaces.jqGrid('addRowData', i, listInterfaces[i]);
+        }
     }
     $gridInterfaces.trigger('reloadGrid');
 }

@@ -58,7 +58,7 @@ li.header {
     margin-top: -1px !important;
 }
 
-.paramset, .editlink, .deletelink {
+.paramset, .editlink, .deletelink, .install-firmware {
     font-size: 11px !important;
 }
 
@@ -87,7 +87,7 @@ li.header {
     margin-right: 2px;
 }
 
-button.paramset {
+button.paramset, button.install-firmware {
     padding: 0;
 }
 
@@ -276,4 +276,10 @@ textarea {
 #rpc-command {
     font-family: monospace;
     white-space: pre;
+}
+
+.firmware-status {
+    font-size: 0.9em;
+    padding-left: 2px;
+    text-overflow: ellipsis;
 }

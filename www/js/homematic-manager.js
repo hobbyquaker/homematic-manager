@@ -22,6 +22,7 @@ $.extend($.jgrid.defaults, {autoencode: false});
 const async = require('async');
 
 const unhandled = require('electron-unhandled');
+
 unhandled();
 
 const deviceImages = require('./deviceImages.json');
@@ -87,7 +88,7 @@ const $selectReplace = $('#select-replace');
 const $selectParamsetMultiselect = $('#select-paramset-multiselect');
 const $selectLinkParamsetMultiselect = $('#select-linkparamset-multiselect');
 
-let $selectBidcosDaemon;    // Assigned after ui initialization, see initTabs()
+let $selectBidcosDaemon; // Assigned after ui initialization, see initTabs()
 
 const $tabsMain = $('#tabs-main');
 
@@ -610,8 +611,6 @@ function initDaemon() {
                     getRfdData();
                 });
             });
-
-
         });
     } else {
         window.location.hash = '';
@@ -1345,7 +1344,7 @@ function replaceDevice() {
         } else {
             $selectReplace.html('');
             data.forEach(dev => {
-                if (!dev.ADDRESS.match(/:[0-9]+$/)) {
+                if (!dev.ADDRESS.match(/:\d+$/)) {
                     $selectReplace.append('<option value="' + dev.ADDRESS + '">' + names[dev.ADDRESS] + ' (' + dev.ADDRESS + ')</option>');
                 }
             });
@@ -1782,7 +1781,6 @@ function putParamset() {
                 val /= 100;
             }
             switch (dataType) {
-
                 case 'BOOL':
                     if (val === 'true') {
                         val = true;
@@ -2125,12 +2123,12 @@ function initGridLinks() {
                                 });
                             });
                         });
-
                     });
 
                     $(this).dialog('close');
                 }
-            }, {
+            },
+            {
                 text: _('Create'),
                 class: 'add-link-create',
                 click() {
@@ -2549,11 +2547,11 @@ function putLinkParamset(direction, channel1, channel2, callback) {
 
             // Überspringe Param falls keine Änderung stattgefunden hat und kein Multiedit stattfindet
             if (!isMulti && (
-                    (val === true && dataValPrev === 'true') ||
+                (val === true && dataValPrev === 'true') ||
                     (val === false && dataValPrev === 'false') ||
                     (val === dataValPrev) ||
                     (!isNaN(dataValPrev) && parseFloat(dataValPrev) === parseFloat(val))
-                )) {
+            )) {
                 return;
             }
 
@@ -2986,9 +2984,7 @@ function formEasyMode(data, desc, direction, sType, rType, prn) {
                     easymodes.lang[language][receiverType] &&
                     easymodes.lang[language][receiverType].GENERIC &&
                     easymodes.lang[language][receiverType].GENERIC[options[param].desc]
-                )
-            ;
-
+                );
             $tableEasymode.append('<tr><td>' + tmp + '</td><td style="font-size: 8px"></td><td>' +
                 elementEasyMode(options[param], data[options[param].combo[0]]) + '</td></tr>');
         }
@@ -3018,12 +3014,12 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
     if (!desc) {
         $dialogLinkparamset.dialog('close');
         dialogAlert('formLinkParamset paramsetDescription missing\nPlease try again.', 'ERROR');
-        throw(new Error());
+        throw (new Error());
     }
     if (!data) {
         $dialogLinkparamset.dialog('close');
         dialogAlert('formLinkParamset paramset missing\nPlease try again.', 'ERROR');
-        throw(new Error());
+        throw (new Error());
     }
     Object.keys(desc).forEach(param => {
         let unit = '';
@@ -3473,7 +3469,6 @@ function refreshGridRssi() {
             rowData.push(line);
         }
         $gridRssi.jqGrid('addRowData', '_id', rowData);
-
     }
     $gridRssi.trigger('reloadGrid');
 }
@@ -3979,7 +3974,7 @@ function rpcDialog(daemon, cmd, params, callback) {
 
 // RPC execution Wrappers
 function rpcDialogShift() {
-    if (rpcDialogQueue.length < 1) {
+    if (rpcDialogQueue.length === 0) {
         return;
     }
     rpcDialogPending = true;
@@ -4126,7 +4121,7 @@ function resizeGrids() {
 $(window).resize(resizeGrids);
 
 // Navigation
-window.onhashchange = function () {
+window.addEventListener('hashchange', () => {
     const tmp = window.location.hash.slice(1).split('/');
     hash = tmp[1];
     if (config.daemons[hash]) {
@@ -4147,7 +4142,7 @@ window.onhashchange = function () {
         const index = $('#tabs-main a[href="#' + tmp[2] + '"]').parent().index();
         $tabsMain.tabs('option', 'active', index - 2);
     }
-};
+});
 
 function dialogConfigOpen() {
     $('#init-ip-select').html('');

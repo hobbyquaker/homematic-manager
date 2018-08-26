@@ -17,6 +17,7 @@ const windowStateKeeper = require('electron-window-state');
 const isDev = require('electron-is-dev');
 
 const unhandled = require('electron-unhandled');
+
 unhandled();
 
 const request = require('request');
@@ -31,10 +32,11 @@ const xmlrpc = require('homematic-xmlrpc');
 const binrpc = require('binrpc');
 
 const Rega = require('homematic-rega');
+
 let rega;
 let regaPresent = false;
 
-let invalidateDeviceCache = {};
+const invalidateDeviceCache = {};
 
 const log = require('yalm');
 
@@ -110,13 +112,12 @@ function createWindow() {
             {type: 'separator'},
             {label: 'Quit', accelerator: 'Command+Q', click: app.quit}
         ]}, {
-            label: 'Edit',
-            submenu: [
+        label: 'Edit',
+        submenu: [
             {label: 'Cut', accelerator: 'CmdOrCtrl+X', selector: 'cut:'},
             {label: 'Copy', accelerator: 'CmdOrCtrl+C', selector: 'copy:'},
             {label: 'Paste', accelerator: 'CmdOrCtrl+V', selector: 'paste:'}
-            ]}
-    ];
+        ]}];
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 
@@ -145,8 +146,6 @@ function checkservice(host, port, callback) {
         callback(null, false);
     });
 }
-
-
 
 function findInterfaces() {
     const ports = {
@@ -534,11 +533,11 @@ function paramsetName(daemon, device, paramset) {
     let d;
     if (device) {
         if (device.PARENT) {
-            // channel
+            // Channel
             cType = device.TYPE;
             d = localDevices[daemon][device.PARENT];
         } else {
-            // device
+            // Device
             d = device;
         }
         return [daemon, d.TYPE, d.FIRMWARE, d.VERSION, cType, paramset].join('/');
@@ -554,7 +553,7 @@ function rpcProxy(daemon, method, params, callback) {
                         delete invalidateDeviceCache[daemon];
                         localDevices[daemon] = {};
                         res.forEach(dev => {
-                             localDevices[daemon][dev.ADDRESS] = dev;
+                            localDevices[daemon][dev.ADDRESS] = dev;
                         });
                     }
                     res = res || [];
@@ -587,7 +586,7 @@ function rpcProxy(daemon, method, params, callback) {
                 rpcClients[daemon].methodCall(method, params, (error, result) => {
                     console.log('rpc response ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method, error, result);
                     if (!error && result) {
-                         localParamsetDescriptions[ident] = result;
+                        localParamsetDescriptions[ident] = result;
                     }
                     pjson.save('paramset-descriptions-v2_' + config.ccuAddress, localParamsetDescriptions);
                     if (callback) {
@@ -633,7 +632,6 @@ function stop() {
         log.debug('force terminate');
         app.quit();
         process.exit(1); // eslint-disable-line unicorn/no-process-exit
-        return;
     }
 
     const tasks = [];

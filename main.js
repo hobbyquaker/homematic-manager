@@ -431,7 +431,7 @@ function initRpcServer(protocol) {
 function initIpc() {
     ipcRpc.on('config', params => {
         config = params[0];
-        console.log(config);
+        //console.log(config);
         pjson.save('config', config);
         app.relaunch();
         mainWindow.destroy();
@@ -587,7 +587,7 @@ function rpcProxy(daemon, method, params, callback) {
                 log.debug('paramset not in cache ' + ident);
                 log.debug('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method + '(' + JSON.stringify(params).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
                 rpcClients[daemon].methodCall(method, params, (error, result) => {
-                    console.log('rpc response ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method, error, result);
+                    //console.log('rpc response ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method, error, result);
                     if (!error && result) {
                         localParamsetDescriptions[ident] = result;
                     }
@@ -603,7 +603,7 @@ function rpcProxy(daemon, method, params, callback) {
             log.debug('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method + '(' + JSON.stringify(params).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
             rpcClients[daemon].methodCall(method, params, (error, result) => {
                 if (callback) {
-                    console.log('rpc response ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method, error, result);
+                    //console.log('rpc response ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method, error, result);
                     callback(error, result);
                 }
             });
@@ -624,7 +624,7 @@ function getRegaNames() {
         } else {
             throw new Error('rega.getChannels empty result');
         }
-        console.log(err, res);
+        //console.log(err, res);
     });
 }
 

@@ -183,6 +183,38 @@
 
 
     </div>
+    <div id="dialog-add-device-ip" title="Gerät anlernen">
+        <select id="add-device-ip-mode">
+            <option value="keyserver" selected="selected" class="translate">via Key Server</option>
+            <option value="local" class="translate">Lokal</option>
+        </select>
+
+        <table>
+            <tr class="add-device-keyserver">
+                <td colspan="3">
+                    <h3>Anlernen über Key Server</h3>
+                </td>
+            </tr>
+            <tr class="add-device-local">
+                <td colspan="3">
+                    <h3>Lokales Anlernen</h3>
+                </td>
+            </tr>
+            <tr class="add-device-local">
+                <td>SGTIN:</td>
+                <td colspan="2"><input size="44" type="text" id="add-device-ip-address" value=""/></td>
+            </tr>
+            <tr class="add-device-local">
+                <td>Key:</td>
+                <td colspan="2"><input size="44" type="text" id="add-device-ip-key" value=""/></td>
+            </tr>
+            <tr>
+                <td>Dauer:</td>
+                <td><input type="number" id="add-device-ip-time" value="60"/>s</td>
+                <td><input type="button" id="add-device-ip-start" value="Anlernmodus aktivieren"/></td>
+            </tr>
+        </table>
+    </div>
     <div id="dialog-add-countdown" title="Anlernmodus aktiv">
         <br/><br/>
         <h3 style="width: 100%; text-align: center;">Zeit verbleibend: <span id="add-countdown"></span>s</h3>

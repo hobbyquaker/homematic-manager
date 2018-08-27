@@ -95,6 +95,7 @@ const $tabsMain = $('#tabs-main');
 const $dialogLinkparamset = $('#dialog-linkparamset');
 const $dialogDisconnect = $('#dialog-disconnect');
 const $dialogAddDevice = $('#dialog-add-device');
+const $dialogAddDeviceIp = $('#dialog-add-device-ip');
 const $dialogAddCountdown = $('#dialog-add-countdown');
 const $dialogDelDevice = $('#dialog-del-device');
 const $dialogRename = $('#dialog-rename');
@@ -583,7 +584,7 @@ function initDaemon() {
             $('.show-hmip').show();
             $('#play-link').hide();
             $('#play-link-long').hide();
-            $('#replace-device, #update-device, #clear-device, #add-device, #restore-device').hide();
+            $('#replace-device, #update-device, #clear-device, #restore-device').hide();
             $('.dselect').show();
             $gridDevices.jqGrid('showCol', 'rx_mode');
             resizeGrids();
@@ -829,6 +830,8 @@ function initGridDevices() {
         onClickButton() {
             if (daemonType === 'BidCos-Wired') {
                 rpcDialog(daemon, 'searchDevices', ['']);
+            } else if (daemon === 'HmIP') {
+                $dialogAddDeviceIp.dialog('open');
             } else {
                 $dialogAddDevice.dialog('open');
             }
@@ -932,6 +935,20 @@ function initGridDevices() {
         placeholder: ''
     });
     $dialogAddDevice.dialog({
+        autoOpen: false,
+        modal: true,
+        width: 540,
+        height: 320,
+        buttons: [
+            {
+                text: _('Cancel'),
+                click() {
+                    $(this).dialog('close');
+                }
+            }
+        ]
+    });
+    $dialogAddDeviceIp.dialog({
         autoOpen: false,
         modal: true,
         width: 540,
@@ -1092,6 +1109,71 @@ function initGridDevices() {
                 }, 1000);
             }
         });
+    });
+
+    $('.add-device-local').hide();
+    $('#add-device-ip-mode').selectmenu({
+        select() {
+            switch ($('#add-device-ip-mode').val()) {
+                case 'local':
+                    $('.add-device-keyserver').hide();
+                    $('.add-device-local').show();
+                    break;
+                default:
+                    $('.add-device-local').hide();
+                    $('.add-device-keyserver').show();
+            }
+        }
+    });
+
+    $('#add-device-ip-start').button().click(() => {
+        let time = parseInt($.trim($('#add-device-ip-time').val()), 10);
+        time = time || 60;
+        if (time > 300) {
+            time = 300;
+        }
+        switch ($('#add-device-ip-mode').val()) {
+            case 'local':
+                const sgtin = $.trim($('#add-device-ip-address').val());
+                const key = $.trim($('#add-device-ip-key').val());
+                if (sgtin && key) {
+                    $('#dialog-add-device-ip').dialog('close');
+                    rpcDialog(daemon, 'setInstallModeWithWhitelist', [true, time, [{ADDRESS: sgtin, KEY_MODE: 'LOCAL', KEY: key}]], err => {
+                        if (!err) {
+                            $('#add-countdown').html(time);
+                            $dialogAddCountdown.dialog('open');
+                            let addInterval = setInterval(() => {
+                                time -= 1;
+                                $('#add-countdown').html(time);
+                                if (time < 1) {
+                                    clearInterval(addInterval);
+                                    $dialogAddCountdown.dialog('close');
+                                    addInterval = null;
+                                }
+                            }, 1000);
+                        }
+                    });
+                }
+                break;
+
+            default:
+                $('#dialog-add-device-ip').dialog('close');
+                rpcAlert(daemon, 'setInstallMode', [true, time], err => {
+                    if (!err) {
+                        $('#add-countdown').html(time);
+                        $dialogAddCountdown.dialog('open');
+                        let addInterval = setInterval(() => {
+                            time -= 1;
+                            $('#add-countdown').html(time);
+                            if (time < 1) {
+                                clearInterval(addInterval);
+                                $dialogAddCountdown.dialog('close');
+                                addInterval = null;
+                            }
+                        }, 1000);
+                    }
+                });
+        }
     });
 
     function subGridChannels(gridId, rowId) {

@@ -58,7 +58,7 @@ li.header {
     margin-top: -1px !important;
 }
 
-.paramset, .editlink, .deletelink, .install-firmware {
+.paramset, .editlink, .deletelink, .install-firmware, .update-firmware {
     font-size: 11px !important;
 }
 
@@ -87,8 +87,20 @@ li.header {
     margin-right: 2px;
 }
 
-button.paramset, button.install-firmware {
+button.paramset {
     padding: 0;
+}
+
+button.install-firmware, button.update-firmware {
+    padding: 0 1px 0 1px;
+}
+
+.firmware-status {
+    padding-right: 2px;
+}
+
+.update-firmware, .install-firmware, .firmware-status {
+    float: right;
 }
 
 button.paramset.link span.ui-button-text, #save-link-info span.ui-button-text {

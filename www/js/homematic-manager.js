@@ -562,7 +562,7 @@ function initDaemon() {
         $('.show-wired').hide();
         $('.show-hmip').hide();
         $('.show-cuxd').hide();
-        $('#replace-device, #update-device, #clear-device, #add-device, #restore-device').show();
+        $('#replace-device, #clear-device, #add-device, #restore-device').show();
 
         if (type === 'BidCos-Wired') {
             $('.show-wired').show();
@@ -584,7 +584,7 @@ function initDaemon() {
             $('.show-hmip').show();
             $('#play-link').hide();
             $('#play-link-long').hide();
-            $('#replace-device, #update-device, #clear-device, #restore-device').hide();
+            $('#replace-device, #clear-device, #restore-device').hide();
             $('.dselect').show();
             $gridDevices.jqGrid('showCol', 'rx_mode');
             resizeGrids();
@@ -679,7 +679,7 @@ function initGridDevices() {
             {name: 'ADDRESS', index: 'ADDRESS', width: 140, fixed: true, classes: 'device-cell'},
             {name: 'TYPE', index: 'TYPE', width: 120, fixed: false, classes: 'device-cell'},
             {name: 'SUBTYPE', index: 'SUBTYPE', width: 60, fixed: false, classes: 'device-cell'},
-            {name: 'FIRMWARE', index: 'FIRMWARE', width: 130, fixed: true, classes: 'device-cell'},
+            {name: 'FIRMWARE', index: 'FIRMWARE', width: 110, fixed: true, classes: 'device-cell'},
             {name: 'params', index: 'params', width: 120, fixed: true, classes: 'device-cell', search: false},
             {name: 'flags', index: 'flags', width: 150, fixed: true, classes: 'device-cell'},
             // {name:'INTERFACE',index:'INTERFACE', width:70},
@@ -721,7 +721,6 @@ function initGridDevices() {
                 $('#replace-device').removeClass('ui-state-disabled');
                 $('#edit-device').removeClass('ui-state-disabled');
                 $('#restore-device').removeClass('ui-state-disabled');
-                $('#update-device').removeClass('ui-state-disabled');
                 $('#clear-device').removeClass('ui-state-disabled');
             }
 
@@ -732,7 +731,6 @@ function initGridDevices() {
             $('button.paramset:not(.ui-button)').button();
             $('#del-device').addClass('ui-state-disabled');
             $('#replace-device').addClass('ui-state-disabled');
-            $('#update-device').addClass('ui-state-disabled');
             $('#restore-device').addClass('ui-state-disabled');
             $('#clear-device').addClass('ui-state-disabled');
             $('#edit-device').addClass('ui-state-disabled');
@@ -771,14 +769,6 @@ function initGridDevices() {
         position: 'first',
         id: 'replace-device',
         title: _('Replace device'),
-        cursor: 'pointer'
-    }).jqGrid('navButtonAdd', '#pager-devices', {
-        caption: '',
-        buttonicon: 'ui-icon-script',
-        onClickButton: updateFirmware,
-        position: 'first',
-        id: 'update-device',
-        title: _('Update firmware'),
         cursor: 'pointer'
     }).jqGrid('navButtonAdd', '#pager-devices', {
         caption: '',
@@ -857,7 +847,7 @@ function initGridDevices() {
             {title: _('restoreConfigToDevice'), cmd: 'restoreConfigToDevice', uiIcon: 'ui-icon-comment', addClass: 'show-rf'},
             {title: _('clearConfigCache'), cmd: 'clearConfigCache', uiIcon: 'ui-icon-arrowrefresh-1-w', addClass: 'show-rf'},
             {title: '----'},
-            {title: _('updateFirmware'), cmd: 'updateFirmware', uiIcon: 'ui-icon-script', addClass: 'show-rf'},
+            //{title: _('updateFirmware'), cmd: 'updateFirmware', uiIcon: 'ui-icon-script', addClass: 'show-rf'},
             {title: _('Replace'), cmd: 'replace', uiIcon: 'ui-icon-transfer-e-w', addClass: 'show-rf'},
             {title: _('Delete'), cmd: 'delete', uiIcon: 'ui-icon-trash'}
 
@@ -874,9 +864,6 @@ function initGridDevices() {
                     break;
                 case 'clearConfigCache':
                     clearConfigCache();
-                    break;
-                case 'updateFirmware':
-                    updateFirmware();
                     break;
                 case 'restoreConfigToDevice':
                     restoreConfigToDevice();
@@ -1197,7 +1184,7 @@ function initGridDevices() {
                 {name: 'Name', index: 'Name', width: 172, fixed: false, classes: 'channel-cell'},
                 {name: 'ADDRESS', index: 'ADDRESS', width: 140, fixed: true, classes: 'channel-cell'},
                 {name: 'TYPE', index: 'TYPE', width: daemon === 'HmIP' ? 177 : 100, fixed: false, classes: 'channel-cell'},
-                {name: 'direction', index: 'direction', width: 130, fixed: true, classes: 'channel-cell'},
+                {name: 'direction', index: 'direction', width: 110, fixed: true, classes: 'channel-cell'},
                 {name: 'params', index: 'params', width: 120, fixed: true, classes: 'channel-cell'},
                 {name: 'flags', index: 'flags', width: 150, fixed: true, classes: 'channel-cell'},
                 {
@@ -1241,7 +1228,6 @@ function initGridDevices() {
 
                 $('#replace-device').addClass('ui-state-disabled');
                 $('#restore-device').addClass('ui-state-disabled');
-                $('#update-device').addClass('ui-state-disabled');
                 $('#clear-device').addClass('ui-state-disabled');
             },
             gridComplete() {
@@ -1337,18 +1323,27 @@ function refreshGridDevices() {
             listDevices[i].RF_ADDRESS = parseInt(listDevices[i].RF_ADDRESS, 10).toString(16);
         }
 
-        listDevices[i].FIRMWARE = '<span style="width: 40px; display: inline-block;">' + listDevices[i].FIRMWARE + '</span>';
-        switch (listDevices[i].FIRMWARE_UPDATE_STATE) {
-            case 'UP_TO_DATE':
-            case 'NEW_FIRMWARE_AVAILABLE':
-            case 'DELIVER_FIRMWARE_IMAGE':
-            case 'PERFORMING_UPDATE':
-                listDevices[i].FIRMWARE += ' <span class="firmware-status">' + listDevices[i].FIRMWARE_UPDATE_STATE.toLowerCase().replace(/_/g, ' ') + '</span>';
-                break;
-            case 'READY_FOR_UPDATE':
-                listDevices[i].FIRMWARE += ' ' + '<button class="install-firmware device-table" data-address="' + listDevices[i].ADDRESS + '" id="install-firmware_' + listDevices[i].ADDRESS + '">install Firmware</button>';
-                break;
-            default:
+        //listDevices[i].FIRMWARE = '<span style="">' + listDevices[i].FIRMWARE + '</span>';
+
+        if (daemon === 'HmIP') {
+            switch (listDevices[i].FIRMWARE_UPDATE_STATE) {
+                case 'UP_TO_DATE':
+                case 'NEW_FIRMWARE_AVAILABLE':
+                case 'DELIVER_FIRMWARE_IMAGE':
+                case 'PERFORMING_UPDATE':
+                    listDevices[i].FIRMWARE += ' <span class="firmware-status">' + listDevices[i].FIRMWARE_UPDATE_STATE.toLowerCase().replace(/_/g, ' ') + '</span>';
+                    break;
+                case 'READY_FOR_UPDATE':
+                    listDevices[i].FIRMWARE += ' <button class="install-firmware device-table" data-address="' + listDevices[i].ADDRESS + '" id="install-firmware_' + listDevices[i].ADDRESS + '">install ' + listDevices[i].AVAILABLE_FIRMWARE + '</button>';
+                    break;
+                default:
+            }
+        } else {
+            if (listDevices[i].AVAILABLE_FIRMWARE && listDevices[i].AVAILABLE_FIRMWARE !== listDevices[i].FIRMWARE) {
+                listDevices[i].FIRMWARE += ' <button class="update-firmware device-table" data-address="' + listDevices[i].ADDRESS + '" id="update-firmware_' + listDevices[i].ADDRESS + '">install ' + listDevices[i].AVAILABLE_FIRMWARE + '</button>';
+            } else if (listDevices[i].UPDATABLE) {
+                //listDevices[i].FIRMWARE += ' <span class="firmware-status">up to date</span>';
+            }
         }
 
         const rxMode = [];
@@ -1413,6 +1408,7 @@ function refreshGridDevices() {
     $gridDevices.trigger('reloadGrid').sortGrid('Name', false, 'asc');
     $('button.paramset:not(.ui-button)').button();
     $('button.install-firmware:not(.ui-button)').button();
+    $('button.update-firmware:not(.ui-button)').button();
 }
 function replaceDevice() {
     const address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam', 'selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
@@ -1436,10 +1432,7 @@ function replaceDevice() {
         }
     });
 }
-function updateFirmware() {
-    const address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam', 'selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
-    rpcDialog(daemon, 'updateFirmware', [address]);
-}
+
 function restoreConfigToDevice() {
     const address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam', 'selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
     rpcDialog(daemon, 'restoreConfigToDevice', [address]);
@@ -1750,6 +1743,14 @@ function initDialogParamset() {
         const address = $(this).attr('data-address');
         ipcRpc.send('invalidateDeviceCache', [daemon], () => {
             rpcDialog(daemon, 'installFirmware', [address]);
+        });
+        $(this).button('disable');
+    });
+
+    $body.on('click', 'button.update-firmware', function () {
+        const address = $(this).attr('data-address');
+        ipcRpc.send('invalidateDeviceCache', [daemon], () => {
+            rpcDialog(daemon, 'updateFirmware', [address]);
         });
         $(this).button('disable');
     });

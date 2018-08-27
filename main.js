@@ -12,6 +12,7 @@ const BrowserWindow = electron.BrowserWindow;
 const Rpc = require('electron-ipc-rpc');
 
 let ipcRpc;
+let stopping;
 
 const windowStateKeeper = require('electron-window-state');
 const isDev = require('electron-is-dev');
@@ -300,7 +301,9 @@ const rpcMethods = {
     event(err, params, callback) {
         log.debug('RPC <- event ' + JSON.stringify(params));
         lastEvent[daemonIndex[params[0]]] = (new Date()).getTime();
-        ipcRpc.send('rpc', ['event', params]);
+        if (!stopping) {
+            ipcRpc.send('rpc', ['event', params]);
+        }
         callback(null, '');
     },
     newDevices(err, params, callback) {
@@ -625,14 +628,13 @@ function getRegaNames() {
     });
 }
 
-let stopping;
-
 function stop() {
     if (stopping) {
         log.debug('force terminate');
         app.quit();
         process.exit(1); // eslint-disable-line unicorn/no-process-exit
     }
+    stopping = true;
 
     const tasks = [];
     Object.keys(config.daemons).forEach(daemon => {

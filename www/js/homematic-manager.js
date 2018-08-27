@@ -672,11 +672,12 @@ function getDevices(callback) {
 }
 function initGridDevices() {
     $gridDevices.jqGrid({
-        colNames: ['', 'Name', 'ADDRESS', 'TYPE', 'SUBTYPE', 'FIRMWARE', 'PARAMSETS', 'FLAGS', /* 'INTERFACE', 'RF_ADDRESS', */ /* 'ROAMING', */ 'RX_MODE'/* , 'VERSION' */],
+        colNames: ['', 'Name', 'ADDRESS', 'Msgs', 'TYPE', 'SUBTYPE', 'FIRMWARE', 'PARAMSETS', 'FLAGS', /* 'INTERFACE', 'RF_ADDRESS', */ /* 'ROAMING', */ 'RX_MODE'/* , 'VERSION' */],
         colModel: [
             {name: 'img', index: 'img', width: 22, fixed: true, classes: 'device-cell', align: 'center', search: false},
             {name: 'Name', index: 'Name', width: 160, fixed: false, classes: 'device-cell'},
             {name: 'ADDRESS', index: 'ADDRESS', width: 140, fixed: true, classes: 'device-cell'},
+            {name: 'msgs', index: 'msgs', width: 44, fixed: true, classes: 'device-cell', align: 'center', search: false},
             {name: 'TYPE', index: 'TYPE', width: 120, fixed: false, classes: 'device-cell'},
             {name: 'SUBTYPE', index: 'SUBTYPE', width: 60, fixed: false, classes: 'device-cell'},
             {name: 'FIRMWARE', index: 'FIRMWARE', width: 110, fixed: true, classes: 'device-cell'},
@@ -1182,7 +1183,7 @@ function initGridDevices() {
             ],
             colModel: [
                 {name: 'Name', index: 'Name', width: 172, fixed: false, classes: 'channel-cell'},
-                {name: 'ADDRESS', index: 'ADDRESS', width: 140, fixed: true, classes: 'channel-cell'},
+                {name: 'ADDRESS', index: 'ADDRESS', width: 181, fixed: true, classes: 'channel-cell'},
                 {name: 'TYPE', index: 'TYPE', width: daemon === 'HmIP' ? 177 : 100, fixed: false, classes: 'channel-cell'},
                 {name: 'direction', index: 'direction', width: 110, fixed: true, classes: 'channel-cell'},
                 {name: 'params', index: 'params', width: 120, fixed: true, classes: 'channel-cell'},
@@ -1323,6 +1324,28 @@ function refreshGridDevices() {
             listDevices[i].RF_ADDRESS = parseInt(listDevices[i].RF_ADDRESS, 10).toString(16);
         }
 
+        let msgs = [];
+        for (let j = 0, lenm = listMessages.length; j < lenm; j++) {
+            const deviceAddress = String(listMessages[j][0]).slice(0, listMessages[j][0].length - 2);
+            if (deviceAddress === listDevices[i].ADDRESS) {
+                switch (listMessages[j][1]) {
+                    case 'LOWBAT':
+                    case 'LOW_BAT':
+                        msgs.unshift('<img title="LOWBAT" style="height: 12px" src="images/servicemsgs/lowbat.png">');
+                        break;
+                    case 'UNREACH':
+                        msgs.unshift('<img title="UNREACH" style="height: 12px" src="images/servicemsgs/unreach.png">');
+                        break;
+                    case 'ERROR':
+                        msgs.push('<img title="ERROR" style="height: 12px" src="images/servicemsgs/error.png">');
+                        break;
+                    case 'CONFIG_PENDING':
+                        msgs.push('<img title="CONFIG_PENDING" style="height: 12px" src="images/servicemsgs/config_pending.png">');
+                        break;
+                }
+            }
+        }
+        listDevices[i].msgs = msgs.slice(0, 2).join('&nbsp;');
         //listDevices[i].FIRMWARE = '<span style="">' + listDevices[i].FIRMWARE + '</span>';
 
         if (daemon === 'HmIP') {
@@ -3275,6 +3298,7 @@ function activateLinkParamset(receiver, sender, long) {
 
 // RF
 function getRfdData() {
+    console.log('getRfdData');
     if (config.daemons[daemon].type === 'BidCos-RF' || config.daemons[daemon].type === 'HmIP') {
         $('#load_grid-interfaces').show();
         const currentDaemon = daemon;
@@ -3696,13 +3720,57 @@ function refreshGridMessages() {
     $('#message-count').html(listMessages.length);
     $gridMessages.trigger('reloadGrid');
 }
+
+let getServiceMessagesPending;
 function getServiceMessages() {
+    if (getServiceMessagesPending) {
+        return;
+    }
+    getServiceMessagesPending = true;
     $('#load_grid-messages').show();
     const currentDaemon = daemon;
+    console.log('getServiceMessages');
     rpcAlert(daemon, 'getServiceMessages', [], (err, data) => {
+        getServiceMessagesPending = false;
         if (!err) {
             if (daemon === currentDaemon) {
                 listMessages = data || [];
+                var rowIds = $gridDevices.jqGrid('getDataIDs');
+                listMessages.forEach(msg => {
+                    const [channel, message, value] = msg;
+                    const [device, channelNumber] = channel.split(':');
+
+                    rowIds.forEach(rowId => {
+                        let rowData = $gridDevices.jqGrid('getRowData', rowId);
+                        if (rowData && rowData['ADDRESS'] === device ) {
+                            let msg = [];
+                            switch (message) {
+                                case 'LOWBAT':
+                                case 'LOW_BAT':
+                                    msg = ('<img title="LOWBAT" style="height: 12px" src="images/servicemsgs/lowbat.png">');
+                                    break;
+                                case 'UNREACH':
+                                    msg = ('<img title="UNREACH" style="height: 12px" src="images/servicemsgs/unreach.png">');
+                                    break;
+                                case 'ERROR':
+                                    msg = ('<img title="ERROR" style="height: 12px" src="images/servicemsgs/error.png">');
+                                    break;
+                                case 'CONFIG_PENDING':
+                                    msg = ('<img title="CONFIG_PENDING" style="height: 12px" src="images/servicemsgs/config_pending.png">');
+                                    break;
+                            }
+                            if (!rowData.msgs) {
+                                rowData.msgs = msg;
+                            } else if (!rowData.msgs.match(new RegExp(message))) {
+                                if ((rowData.msgs.match(/img/g) || []).length < 2) {
+                                    rowData.msgs += '&nbsp;' + msg;
+                                }
+                            }
+                            $gridDevices.jqGrid('setRowData', rowId, rowData);
+                        }
+                    });
+
+                });
                 refreshGridMessages();
             }
         } else {

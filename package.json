@@ -1,6 +1,6 @@
 {
   "name": "homematic-manager",
-  "version": "2.0.0-rc.3",
+  "version": "2.0.0-rc.4",
   "private": true,
   "dependencies": {
     "async": "2.6.1",
@@ -28,7 +28,7 @@
     "electron-builder": "^20.28.2",
     "xo": "latest"
   },
-  "description": "Webinterface for HomeMatic interface processes (rfd, hs485d, Homegear)",
+  "description": "Homematic Device Configuration and Administration",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -65,8 +65,11 @@
   "build": {
     "productName": "Homematic Manager",
     "mac": {
+      "category": "public.app-category.utilities",
       "target": [
-        "dmg"
+        "dmg",
+        "mas",
+        "mas-dev"
       ]
     },
     "linux": {

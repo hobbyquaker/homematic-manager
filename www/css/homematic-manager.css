@@ -295,3 +295,14 @@ textarea {
     padding-left: 2px;
     text-overflow: ellipsis;
 }
+
+.externalLink {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+
+.externalLink:hover {
+    text-decoration: none;
+    cursor: pointer;
+}

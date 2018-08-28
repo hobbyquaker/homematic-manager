@@ -2,6 +2,7 @@
 /* eslint-disable import/no-unassigned-import */
 
 const ipc = require('electron').ipcRenderer;
+const shell = require('electron').shell;
 const Rpc = require('electron-ipc-rpc');
 
 const ipcRpc = new Rpc(ipc);
@@ -4356,6 +4357,10 @@ window.addEventListener('hashchange', () => {
         const index = $('#tabs-main a[href="#' + tmp[2] + '"]').parent().index();
         $tabsMain.tabs('option', 'active', index - 2);
     }
+});
+
+$('.externalLink').click(function () {
+    shell.openExternal($(this).data('href'));
 });
 
 function dialogConfigOpen() {

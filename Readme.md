@@ -1,5 +1,6 @@
 # Homematic Manager
 
+[![Current Release](https://img.shields.io/github/release/hobbyquaker/homematic-manager.svg?colorB=4cc61e)](https://github.com/hobbyquaker/homematic-manager/releases/latest)
 [![Dependency Status](https://david-dm.org/hobbyquaker/homematic-manager/status.svg)](https://david-dm.org/hobbyquaker/homematic-manager)
 [![macOS and Linux Build Status](https://travis-ci.org/hobbyquaker/homematic-manager.svg?branch=master)](https://travis-ci.org/hobbyquaker/homematic-manager)
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/hobbyquaker/homematic-manager?branch=master&svg=true)](https://ci.appveyor.com/project/hobbyquaker/homematic-manager)

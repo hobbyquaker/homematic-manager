@@ -1,4 +1,4 @@
-<img width="128px" src="build/icon.png" align="left"/>
+<img width="168px" src="build/icon.png" align="left"/>
 
 # Homematic Manager
 
@@ -9,9 +9,7 @@
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
 [![License: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 
-<br>
-
-Der Homematic Manager ist ein Konfigurationswerkzeug für [HomeMatic](http://www.homematic.com) und HomematicIP Geräte.
+> Konfigurations und Administration von [HomeMatic](http://www.homematic.com) und HomematicIP Geräten.
 
 Mit dem Homematic Manager ist es möglich Geräte an- und abzulernen, Geräte-Konfigurationen und Direktverknüpfungen zu
 verwalten und vieles mehr.

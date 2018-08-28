@@ -751,6 +751,8 @@ function initGridDevices() {
         gridComplete() {
             $gridDevices.jqGrid('hideCol', 'cb');
             $('button.paramset:not(.ui-button)').button();
+            $('button.install-firmware:not(.ui-button)').button();
+            $('button.update-firmware:not(.ui-button)').button();
             $('#del-device').addClass('ui-state-disabled');
             $('#replace-device').addClass('ui-state-disabled');
             $('#restore-device').addClass('ui-state-disabled');
@@ -1468,6 +1470,7 @@ function refreshGridDevices() {
     $('button.install-firmware:not(.ui-button)').button();
     $('button.update-firmware:not(.ui-button)').button();
 }
+
 function replaceDevice() {
     const address = $('#grid-devices tr#' + $gridDevices.jqGrid('getGridParam', 'selrow') + ' td[aria-describedby="grid-devices_ADDRESS"]').html();
     ipcRpc.send('rpc', [daemon, 'listReplaceableDevices', [address]], (err, data) => {

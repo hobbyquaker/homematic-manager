@@ -1337,39 +1337,42 @@ function refreshGridDevices() {
             listDevices[i].RF_ADDRESS = parseInt(listDevices[i].RF_ADDRESS, 10).toString(16);
         }
 
-        let msgs = [];
-        for (let j = 0, lenm = listMessages.length; j < lenm; j++) {
-            const deviceAddress = String(listMessages[j][0]).slice(0, listMessages[j][0].length - 2);
-            if (deviceAddress === listDevices[i].ADDRESS) {
-                switch (listMessages[j][1]) {
-                    case 'LOWBAT':
-                    case 'LOW_BAT':
-                        msgs.unshift('<img title="LOWBAT" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/lowbat.png">');
-                        break;
-                    case 'UNREACH':
-                        msgs.unshift('<img title="UNREACH" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/unreach.png">');
-                        break;
-                    case 'ERROR':
-                        if (paramsetDescriptions[listMessages[j][0]] && paramsetDescriptions[listMessages[j][0]].VALUES) {
-                            const errEnum = paramsetDescriptions[listMessages[j][0]].VALUES.ERROR.VALUE_LIST[listMessages[j][2]];
-                            msgs.push('<img title="' + errEnum + '" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
-                        } else {
-                            rpcAlert(daemon, 'getParamsetDescription', [listMessages[j][0], 'VALUES'], function (err, res) {
-                                if (!paramsetDescriptions[listMessages[j][0]]) {
-                                    paramsetDescriptions[listMessages[j][0]] = {};
-                                }
-                                paramsetDescriptions[listMessages[j][0]].VALUES = res;
-                            });
-                            msgs.push('<img title="ERROR" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
-                        }
-                        break;
-                    case 'CONFIG_PENDING':
-                        msgs.push('<img title="CONFIG_PENDING" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/config_pending.png">');
-                        break;
+        if (daemon === 'BidCos-RF' || daemon === 'HmIP') {
+            let msgs = [];
+            for (let j = 0, lenm = listMessages.length; j < lenm; j++) {
+                const deviceAddress = String(listMessages[j][0]).slice(0, listMessages[j][0].length - 2);
+                if (deviceAddress === listDevices[i].ADDRESS) {
+                    switch (listMessages[j][1]) {
+                        case 'LOWBAT':
+                        case 'LOW_BAT':
+                            msgs.unshift('<img title="LOWBAT" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/lowbat.png">');
+                            break;
+                        case 'UNREACH':
+                            msgs.unshift('<img title="UNREACH" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/unreach.png">');
+                            break;
+                        case 'ERROR':
+                            if (paramsetDescriptions[listMessages[j][0]] && paramsetDescriptions[listMessages[j][0]].VALUES) {
+                                const errEnum = paramsetDescriptions[listMessages[j][0]].VALUES.ERROR.VALUE_LIST[listMessages[j][2]];
+                                msgs.push('<img title="' + errEnum + '" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
+                            } else {
+                                rpcAlert(daemon, 'getParamsetDescription', [listMessages[j][0], 'VALUES'], function (err, res) {
+                                    if (!paramsetDescriptions[listMessages[j][0]]) {
+                                        paramsetDescriptions[listMessages[j][0]] = {};
+                                    }
+                                    paramsetDescriptions[listMessages[j][0]].VALUES = res;
+                                });
+                                msgs.push('<img title="ERROR" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
+                            }
+                            break;
+                        case 'CONFIG_PENDING':
+                            msgs.push('<img title="CONFIG_PENDING" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/config_pending.png">');
+                            break;
+                    }
                 }
             }
+            listDevices[i].msgs = msgs.slice(0, 2).join('&nbsp;');
         }
-        listDevices[i].msgs = msgs.slice(0, 2).join('&nbsp;');
+
         //listDevices[i].FIRMWARE = '<span style="">' + listDevices[i].FIRMWARE + '</span>';
 
         if (daemon === 'HmIP') {

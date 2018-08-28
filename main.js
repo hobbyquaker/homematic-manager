@@ -74,6 +74,7 @@ hmDiscover(f => {
 });
 
 let mainWindow;
+let windowClosed;
 
 function createWindow() {
     const mainWindowState = windowStateKeeper({
@@ -91,6 +92,10 @@ function createWindow() {
     const windowState = isDev ? devWindowState : mainWindowState;
 
     mainWindow = new BrowserWindow(windowState);
+
+    mainWindow.on('close', () => {
+        windowClosed = true;
+    });
 
     if (!isDev) {
         mainWindowState.manage(mainWindow);
@@ -301,7 +306,7 @@ const rpcMethods = {
     event(err, params, callback) {
         log.debug('RPC <- event ' + JSON.stringify(params));
         lastEvent[daemonIndex[params[0]]] = (new Date()).getTime();
-        if (!stopping) {
+        if (!stopping && !windowClosed) {
             ipcRpc.send('rpc', ['event', params]);
         }
         callback(null, '');

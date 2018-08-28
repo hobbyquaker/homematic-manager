@@ -34,7 +34,19 @@ const missesTranslation = {};
 
 let language = 'de';
 
-const serviceMsgParams = ['CONFIG_PENDING', 'DUTY_CYCLE', 'LOWBAT', 'LOW_BAT', 'SABOTAGE', 'UNREACH', 'UPDATE_PENDING'];
+const serviceMsgParams = [
+    'CONFIG_PENDING',
+    'DUTY_CYCLE',
+    'ERROR',
+    'ERROR_REDUCED',
+    'ERROR_OVERLOAD',
+    'ERROR_OVERHEAT',
+    'LOWBAT',
+    'LOW_BAT',
+    'SABOTAGE',
+    'UNREACH',
+    'UPDATE_PENDING'
+];
 
 let daemon;
 let daemonType;
@@ -50,6 +62,7 @@ let listInterfaces = [];
 let listMessages = [];
 let names = {};
 let hash;
+let paramsetDescriptions = {};
 let firstLoad = true;
 
 const easymodes = {lang: {}};
@@ -1337,7 +1350,18 @@ function refreshGridDevices() {
                         msgs.unshift('<img title="UNREACH" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/unreach.png">');
                         break;
                     case 'ERROR':
-                        msgs.push('<img title="ERROR" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
+                        if (paramsetDescriptions[listMessages[j][0]] && paramsetDescriptions[listMessages[j][0]].VALUES) {
+                            const errEnum = paramsetDescriptions[listMessages[j][0]].VALUES.ERROR.VALUE_LIST[listMessages[j][2]];
+                            msgs.push('<img title="' + errEnum + '" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
+                        } else {
+                            rpcAlert(daemon, 'getParamsetDescription', [listMessages[j][0], 'VALUES'], function (err, res) {
+                                if (!paramsetDescriptions[listMessages[j][0]]) {
+                                    paramsetDescriptions[listMessages[j][0]] = {};
+                                }
+                                paramsetDescriptions[listMessages[j][0]].VALUES = res;
+                            });
+                            msgs.push('<img title="ERROR" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
+                        }
                         break;
                     case 'CONFIG_PENDING':
                         msgs.push('<img title="CONFIG_PENDING" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/config_pending.png">');
@@ -3704,12 +3728,18 @@ function refreshGridMessages() {
         if (listMessages[i][1].match(/STICKY/)) {
             acceptableMessages = true;
         }
+        let msg = listMessages[i][1];
+        if (listMessages[i][1] === 'ERROR') {
+            if (paramsetDescriptions[listMessages[i][0]] && paramsetDescriptions[listMessages[i][0]].VALUES && paramsetDescriptions[listMessages[i][0]].VALUES.ERROR) {
+                msg = paramsetDescriptions[listMessages[i][0]].VALUES.ERROR.VALUE_LIST[listMessages[i][2]];
+            }
+        }
         const obj = {
             _id: i,
             Name: name,
             ADDRESS: listMessages[i][0],
             DeviceAddress: deviceAddress,
-            Message: listMessages[i][1]
+            Message: msg
         };
         rowData.push(obj);
     }
@@ -3736,7 +3766,12 @@ function getServiceMessages() {
             if (daemon === currentDaemon) {
                 listMessages = data || [];
                 var rowIds = $gridDevices.jqGrid('getDataIDs');
-                listMessages.forEach(msg => {
+                rowIds.forEach(rowId => {
+                    let rowData = $gridDevices.jqGrid('getRowData', rowId);
+                    rowData.msgs = '';
+                    $gridDevices.jqGrid('setRowData', rowId, rowData);
+                });
+                listMessages.forEach((msg, msgIndex) => {
                     const [channel, message, value] = msg;
                     const [device, channelNumber] = channel.split(':');
 
@@ -3753,7 +3788,20 @@ function getServiceMessages() {
                                     msg = ('<img title="UNREACH" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/unreach.png">');
                                     break;
                                 case 'ERROR':
-                                    msg = ('<img title="ERROR" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
+                                    if (paramsetDescriptions[channel] && paramsetDescriptions[channel].VALUES) {
+                                        const errEnum = paramsetDescriptions[channel].VALUES.ERROR.VALUE_LIST[value];
+                                        msg = ('<img title="' + errEnum + '" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
+                                    } else {
+                                        rpcAlert(daemon, 'getParamsetDescription', [channel, 'VALUES'], function (err, res) {
+                                            if (!paramsetDescriptions[channel]) {
+                                                paramsetDescriptions[channel] = {};
+                                            }
+                                            paramsetDescriptions[channel].VALUES = res;
+                                        });
+                                        msg = ('<img title="ERROR" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
+                                    }
+
+
                                     break;
                                 case 'CONFIG_PENDING':
                                     msg = ('<img title="CONFIG_PENDING" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/config_pending.png">');

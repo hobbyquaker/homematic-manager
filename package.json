@@ -1,6 +1,6 @@
 {
   "name": "homematic-manager",
-  "version": "2.0.0-rc.2",
+  "version": "2.0.0-rc.3",
   "private": true,
   "dependencies": {
     "async": "2.6.1",

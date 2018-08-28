@@ -214,6 +214,7 @@ const localRegaId = {};
 // Const localNamesIds = {};
 const localDevices = pjson.load('devices_' + config.ccuAddress) || {};
 const localParamsetDescriptions = pjson.load('paramset-descriptions-v2_' + config.ccuAddress) || {};
+const localRssiInfo = {};
 const rpcClients = {};
 
 let rpcServer;
@@ -458,6 +459,11 @@ function initIpc() {
         callback(null);
     });
 
+    ipcRpc.on('invalidateRssiInfo', (params, callback) => {
+        delete localRssiInfo[params[0]];
+        callback(null);
+    });
+
     ipcRpc.on('setName', (params, callback) => {
         const [address, name] = params;
         localNames[address] = name;
@@ -577,6 +583,19 @@ function rpcProxy(daemon, method, params, callback) {
                 }
                 log.debug('RPC -> respond to listDevices from cache (' + res.length + ')');
                 callback(null, res);
+            }
+            break;
+        }
+        case 'rssiInfo': {
+            if (localRssiInfo[daemon]) {
+                callback(null, localRssiInfo[daemon]);
+            } else {
+                log.debug('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method + '(' + JSON.stringify(params).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
+                rpcClients[daemon].methodCall(method, params, (error, result) => {
+                    if (callback) {
+                        callback(error, result);
+                    }
+                });
             }
             break;
         }

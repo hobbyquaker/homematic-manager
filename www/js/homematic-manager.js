@@ -540,6 +540,13 @@ function initDaemon() {
     $('#play-link-long').addClass('ui-state-disabled');
     $('#del-link').addClass('ui-state-disabled');
 
+    $('#load_grid-devices').show();
+    $('#load_grid-links').show();
+    $('#load_grid-interfaces').show();
+    $('#load_grid-rssi').show();
+    $('#load_grid-messages').show();
+
+
     $consoleFormParams.html('');
     $consoleRpcResponse.html('');
     $('#console-rpc-params').val('');
@@ -3328,12 +3335,15 @@ function getRfdData() {
     console.log('getRfdData');
     if (config.daemons[daemon].type === 'BidCos-RF' || config.daemons[daemon].type === 'HmIP') {
         $('#load_grid-interfaces').show();
+        if (config.daemons[daemon].type === 'BidCos-RF') {
+            $('#load_grid-interfaces').show();
+            $('#load_grid-rssi').show();
+        }
         const currentDaemon = daemon;
         rpcAlert(daemon, 'listBidcosInterfaces', [], (err, data) => {
             if (daemon === currentDaemon) {
                 listInterfaces = data || [];
                 if (config.daemons[daemon].type === 'BidCos-RF') {
-                    $('#load_grid-rssi').show();
                     rpcAlert(daemon, 'rssiInfo', [], (err, data) => {
                         listRssi = data;
                         $('#gbox_grid-rssi').show();
@@ -3450,7 +3460,9 @@ function initGridRssi() {
         caption: '',
         buttonicon: 'ui-icon-refresh',
         onClickButton() {
-            getRfdData();
+            ipcRpc.send('invalidateRssiInfo', [daemon], () => {
+                getRfdData();
+            });
         },
         position: 'first',
         id: 'refresh-rssi',

@@ -1,4 +1,5 @@
 <img width="152px" src="build/icon.png" align="left"/> 
+
 # Homematic Manager
 
 [![Current Release](https://img.shields.io/github/release/hobbyquaker/homematic-manager.svg?colorB=4cc61e)](https://github.com/hobbyquaker/homematic-manager/releases/latest)

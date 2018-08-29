@@ -1711,6 +1711,7 @@ function dialogParamset(data, desc, address, paramset) {
     // Buttons
     $('button.paramset-setValue:not(.ui-button)').button();
 
+    let selectOptions = [];
     $selectParamsetMultiselect.html('');
     let tmpName;
     let mcount = 0;
@@ -1733,7 +1734,22 @@ function dialogParamset(data, desc, address, paramset) {
             tmpName = a;
         }
         mcount += 1;
-        $selectParamsetMultiselect.append('<option value="' + a + '">' + tmpName + '</option>');
+        //$selectParamsetMultiselect.append('<option value="' + a + '">' + tmpName + '</option>');
+        selectOptions.push({
+            value: a,
+            name: names[a],
+            text: a + ' ' + names[a]
+        });
+    });
+
+    selectOptions.sort(function (a, b) {
+        const aName = a.name || a.value;
+        const bName = b.name || b.value;
+        return aName.toLowerCase().localeCompare(bName.toLowerCase());
+    });
+    $selectParamsetMultiselect.html('');
+    selectOptions.forEach(function (opt) {
+        $selectParamsetMultiselect.append('<option value="' + opt.value + '">' + opt.text + '</option>');
     });
 
     $selectParamsetMultiselect.multiselect('refresh');
@@ -2098,7 +2114,8 @@ function initGridLinks() {
         caption: '',
         buttonicon: 'ui-icon-plus',
         onClickButton() {
-            let selectOptions = '';
+            let selectOptions = [];
+
             for (let j = 0, len = listDevices.length; j < len; j++) {
                 if (!listDevices[j].PARENT) {
                     continue;
@@ -2109,9 +2126,23 @@ function initGridLinks() {
                 if (!listDevices[j].LINK_SOURCE_ROLES) {
                     continue;
                 }
-                selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '') + '</option>';
+                selectOptions.push({
+                    value: listDevices[j].ADDRESS,
+                    name: (names && names[listDevices[j].ADDRESS]),
+                    text: listDevices[j].ADDRESS + ' ' + (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '')
+                });
+                //selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '') + '</option>';
             }
-            $selectLinkSender.html(selectOptions).multiselect('refresh');
+            selectOptions.sort(function (a, b) {
+                const aName = a.name || a.value;
+                const bName = b.name || b.value;
+                return aName.toLowerCase().localeCompare(bName.toLowerCase());
+            });
+            $selectLinkSender.html('');
+            selectOptions.forEach(function (opt) {
+                $selectLinkSender.append('<option value="' + opt.value + '">' + opt.text + '</option>');
+            });
+            $selectLinkSender.multiselect('refresh');
             $selectLinkReceiver.html('').multiselect('refresh').multiselect('disable');
             $linkSourceRoles.html('');
             $('#link-target-roles').html('');
@@ -2453,7 +2484,7 @@ function initDialogLinkParamset() {
                 }
             }
 
-            selectOptions = '';
+            selectOptions = [];
             for (let i = 0; i < targets.length; i++) {
                 let name;
                 if (names[targets[i]]) {
@@ -2461,16 +2492,25 @@ function initDialogLinkParamset() {
                 } else {
                     name = '';
                 }
-                selectOptions += '<option value="' + targets[i] + '">' + targets[i] + ' ' + name + '</option>';
+                selectOptions.push({value: targets[i], name: name, text: targets[i] + ' ' + name})
+                //selectOptions += '<option value="' + targets[i] + '">' + targets[i] + ' ' + name + '</option>';
             }
-            $selectLinkReceiver.html(selectOptions);
+            selectOptions.sort(function (a, b) {
+                const aName = a.name || a.value;
+                const bName = b.name || b.value;
+                return aName.toLowerCase().localeCompare(bName.toLowerCase());
+            });
+            $selectLinkReceiver.html('');
+            selectOptions.forEach(function (opt) {
+                $selectLinkReceiver.append('<option value="' + opt.value + '">' + opt.text + '</option>');
+            });
             $('.add-link-create').button('disable');
             $('.add-link-create-edit').button('disable');
 
             $selectLinkReceiver.multiselect('refresh');
             $selectLinkReceiver.multiselect('enable');
         } else {
-            selectOptions = '';
+            selectOptions = [];
             for (let j = 0, len = listDevices.length; j < len; j++) {
                 if (!listDevices[j].PARENT) {
                     continue;
@@ -2481,12 +2521,28 @@ function initDialogLinkParamset() {
                 if (!listDevices[j].LINK_SOURCE_ROLES) {
                     continue;
                 }
+                /*
                 selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' +
                     listDevices[j].ADDRESS + ' ' +
                     (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '') +
                     '</option>';
+                    */
+                selectOptions.push({
+                    value: listDevices[j].ADDRESS,
+                    name: (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : ''),
+                    text: listDevices[j].ADDRESS + ' ' + (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '')
+                });
             }
-            $selectLinkSender.html(selectOptions).multiselect('refresh');
+            selectOptions.sort(function (a, b) {
+                const aName = a.name || a.value;
+                const bName = b.name || b.value;
+                return aName.toLowerCase().localeCompare(bName.toLowerCase());
+            });
+            $selectLinkSender.html('');
+            selectOptions.forEach(function (opt) {
+                $selectLinkSender.append('<option value="' + opt.value + '">' + opt.text + '</option>');
+            });
+            $selectLinkSender.multiselect('refresh');
             $selectLinkReceiver.multiselect('disable');
             $linkSourceRoles.html('');
         }
@@ -2538,24 +2594,42 @@ function initDialogLinkParamset() {
                         targetRole = role;
                     }
                 });
-                let selectOptions = '';
+                let selectOptions = [];
                 listDevices.forEach(dev => {
                     if (!dev.PARENT || dev.ADDRESS.endsWith(':0')) {
                         return;
                     }
                     if (dev.LINK_TARGET_ROLES && dev.LINK_TARGET_ROLES.split(' ').indexOf(targetRole) !== -1) {
+
+                        /*
                         selectOptions += '<option value="' + dev.ADDRESS + '"' +
                             (receiver[0] === dev.ADDRESS ? ' selected' : '') +
                             '>' + dev.ADDRESS + ' ' + (names && names[dev.ADDRESS] ? names[dev.ADDRESS] : '') + '</option>';
+                        */
+                        selectOptions.push({
+                            selected: receiver[0] === dev.ADDRESS,
+                            value: dev.ADDRESS,
+                            name: (names && names[dev.ADDRESS] ? names[dev.ADDRESS] : ''),
+                            text: dev.ADDRESS + ' ' + (names && names[dev.ADDRESS] ? names[dev.ADDRESS] : '')
+                        });
                     }
                 });
-                $selectLinkReceiver.html(selectOptions).multiselect('refresh');
+                selectOptions.sort(function (a, b) {
+                    const aName = a.name || a.value;
+                    const bName = b.name || b.value;
+                    return aName.toLowerCase().localeCompare(bName.toLowerCase());
+                });
+                $selectLinkReceiver.html('');
+                selectOptions.forEach(function (opt) {
+                    $selectLinkReceiver.append('<option value="' + opt.value + '"' + (opt.selected ? ' selected' : '') + '>' + opt.text + '</option>');
+                });
+                $selectLinkReceiver.multiselect('refresh');
             }
         } else {
             $('.add-link-create').button('disable');
             $('.add-link-create-edit').button('disable');
 
-            let selectOptions = '';
+            let selectOptions = [];
 
             const roles = $linkSourceRoles.html().split(' ');
             const targets = [];
@@ -2578,9 +2652,23 @@ function initDialogLinkParamset() {
                 } else {
                     name = '';
                 }
-                selectOptions += '<option value="' + targets[i] + '">' + targets[i] + ' ' + name + '</option>';
+                //selectOptions += '<option value="' + targets[i] + '">' + targets[i] + ' ' + name + '</option>';
+                selectOptions.push({
+                    value: targets[i],
+                    name: name,
+                    text: targets[i] + ' ' + name
+                });
             }
-            $selectLinkReceiver.html(selectOptions).multiselect('refresh');
+            selectOptions.sort(function (a, b) {
+                const aName = a.name || a.value;
+                const bName = b.name || b.value;
+                return aName.toLowerCase().localeCompare(bName.toLowerCase());
+            });
+            $selectLinkReceiver.html('');
+            selectOptions.forEach(function (opt) {
+                $selectLinkReceiver.append('<option value="' + opt.value + '">' + opt.text + '</option>');
+            });
+            $selectLinkReceiver.multiselect('refresh');
         }
     });
 

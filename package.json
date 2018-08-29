@@ -13,13 +13,11 @@
     "hm-discover": "1.1.0",
     "homematic-rega": "^1.2.6",
     "homematic-xmlrpc": "1.0.2",
-    "iconv-lite": "0.4.24",
     "jquery": "3.3.1",
     "jquery-ui-dist": "^1.12.1",
     "jquery-ui-multiselect-widget": "2.0.2",
     "nextport": "1.0.0",
     "persist-json": "1.2.0",
-    "request": "2.88.0",
     "ui-contextmenu": "1.18.1",
     "yalm": "4.1.0"
   },

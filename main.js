@@ -1,14 +1,10 @@
 const electron = require('electron');
-const fs = require('fs');
 const os = require('os');
 const net = require('net');
 const path = require('path');
 const url = require('url');
-const iconv = require('iconv-lite');
 
-const app = electron.app;
-const Menu = electron.Menu;
-const BrowserWindow = electron.BrowserWindow;
+const {app, Menu, BrowserWindow} = electron;
 const Rpc = require('electron-ipc-rpc');
 
 let ipcRpc;
@@ -20,8 +16,6 @@ const isDev = require('electron-is-dev');
 const unhandled = require('electron-unhandled');
 
 unhandled();
-
-const request = require('request');
 
 const pjson = require('persist-json')('hm-manager');
 const nextPort = require('nextport');
@@ -232,7 +226,7 @@ function initRpcClients() {
         const protocol = (config.daemons[_daemon].protocol === 'binrpc' ? 'xmlrpc_bin://' : 'http://');
         const port = (config.daemons[_daemon].protocol === 'binrpc' ? config.rpcListenPortBin : config.rpcListenPort);
         const initUrl = protocol + config.rpcInitIp + ':' + port;
-        const ident = config.daemons[_daemon].ident;
+        const {ident} = config.daemons[_daemon];
 
         log.debug('RPC -> ' + config.daemons[_daemon].ip + ':' + config.daemons[_daemon].port + ' init ' + initUrl + ' ' + ident);
         rpcClients[_daemon].methodCall('init', [initUrl, ident], (err, data) => {
@@ -437,7 +431,7 @@ function initRpcServer(protocol) {
 function initIpc() {
     ipcRpc.on('config', params => {
         config = params[0];
-        //console.log(config);
+        // Console.log(config);
         pjson.save('config', config);
         app.relaunch();
         mainWindow.destroy();
@@ -561,7 +555,8 @@ function paramsetName(daemon, device, paramset) {
 function rpcProxy(daemon, method, params, callback) {
     switch (method) {
         case 'listDevices': {
-            if (invalidateDeviceCache[daemon]) {
+            if (!localDevices[daemon] || invalidateDeviceCache[daemon]) {
+                log.debug('RPC -> listDevices', params);
                 rpcClients[daemon].methodCall('listDevices', params, (err, res) => {
                     if (!err && res) {
                         delete invalidateDeviceCache[daemon];
@@ -571,7 +566,7 @@ function rpcProxy(daemon, method, params, callback) {
                         });
                     }
                     res = res || [];
-                    log.debug('RPC -> respond to listDevices from interface (' + res + ')');
+                    log.debug('respond to listDevices from interface (' + res.length + ')');
                     callback(err, res);
                 });
             } else {
@@ -581,19 +576,23 @@ function rpcProxy(daemon, method, params, callback) {
                         res.push(localDevices[daemon][address]);
                     });
                 }
-                log.debug('RPC -> respond to listDevices from cache (' + res.length + ')');
+                log.debug('respond to listDevices from cache (' + res.length + ')');
                 callback(null, res);
             }
             break;
         }
         case 'rssiInfo': {
             if (localRssiInfo[daemon]) {
+                log.debug('respond to rssiInfo from cache');
                 callback(null, localRssiInfo[daemon]);
             } else {
                 log.debug('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method + '(' + JSON.stringify(params).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
-                rpcClients[daemon].methodCall(method, params, (error, result) => {
-                    if (callback) {
-                        callback(error, result);
+                rpcClients[daemon].methodCall(method, params, (err, res) => {
+                    if (!err && res) {
+                        localRssiInfo[daemon] = res;
+                    }
+                    if (typeof callback === 'function') {
+                        callback(err, res);
                     }
                 });
             }
@@ -605,19 +604,17 @@ function rpcProxy(daemon, method, params, callback) {
             const ident = paramsetName(daemon, dev, params[1]);
 
             if (localParamsetDescriptions[ident]) {
-                log.debug('paramset cache hit ' + ident);
+                log.debug('respond to getParamsetDescription from cache ' + ident);
                 callback(null, localParamsetDescriptions[ident]);
             } else {
-                log.debug('paramset not in cache ' + ident);
                 log.debug('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method + '(' + JSON.stringify(params).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
-                rpcClients[daemon].methodCall(method, params, (error, result) => {
-                    //console.log('rpc response ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method, error, result);
-                    if (!error && result) {
-                        localParamsetDescriptions[ident] = result;
+                rpcClients[daemon].methodCall(method, params, (err, res) => {
+                    if (!err && res) {
+                        localParamsetDescriptions[ident] = res;
                     }
                     pjson.save('paramset-descriptions-v2_' + config.ccuAddress, localParamsetDescriptions);
                     if (callback) {
-                        callback(error, result);
+                        callback(err, res);
                     }
                 });
             }
@@ -625,10 +622,9 @@ function rpcProxy(daemon, method, params, callback) {
         }
         default:
             log.debug('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method + '(' + JSON.stringify(params).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
-            rpcClients[daemon].methodCall(method, params, (error, result) => {
+            rpcClients[daemon].methodCall(method, params, (err, res) => {
                 if (callback) {
-                    //console.log('rpc response ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method, error, result);
-                    callback(error, result);
+                    callback(err, res);
                 }
             });
     }
@@ -638,7 +634,7 @@ function getRegaNames() {
     rega.getChannels((err, res) => {
         if (err) {
             throw err;
-        } else if (res && res.length) {
+        } else if (res && res.length > 0) {
             log.debug('got', Object.keys(res).length, 'rega names');
             res.forEach(ch => {
                 localNames[ch.address] = ch.name;
@@ -648,7 +644,7 @@ function getRegaNames() {
         } else {
             throw new Error('rega.getChannels empty result');
         }
-        //console.log(err, res);
+        // Console.log(err, res);
     });
 }
 

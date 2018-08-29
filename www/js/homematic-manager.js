@@ -2,7 +2,7 @@
 /* eslint-disable import/no-unassigned-import */
 
 const ipc = require('electron').ipcRenderer;
-const shell = require('electron').shell;
+const {shell} = require('electron');
 const Rpc = require('electron-ipc-rpc');
 
 const ipcRpc = new Rpc(ipc);
@@ -63,7 +63,7 @@ let listInterfaces = [];
 let listMessages = [];
 let names = {};
 let hash;
-let paramsetDescriptions = {};
+const paramsetDescriptions = {};
 let firstLoad = true;
 
 const easymodes = {lang: {}};
@@ -159,13 +159,14 @@ ipcRpc.on('rpc', data => {
             $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html(_('New devices'));
             let count = 0;
             let output = '';
-            for (let i = 0; i < devArr.length; i++) {
-                if (devArr[i].ADDRESS.match(/:/)) {
-                    continue;
+            devArr.forEach(dev => {
+                if (dev.ADDRESS.match(/:/)) {
+                    return;
                 }
                 count += 1;
-                output += '<br/>' + devArr[i].ADDRESS + ' (' + devArr[i].TYPE + ')';
-            }
+                output += '<br/>' + dev.ADDRESS + ' (' + dev.TYPE + ')';
+            });
+
             $('#alert').html('<h3>' + count + ' ' + _('New') + (count > 1 ? '' : (language === 'de' ? 's' : '')) + ' ' + _('Device') + (count === 1 ? '' : (language === 'de' ? 'e' : 's')) + ' ' + _('introduced') + ':</h3>' + output);
             $('#dialog-alert').dialog('open');
             getDevices(() => {
@@ -180,13 +181,13 @@ ipcRpc.on('rpc', data => {
             $('div.ui-dialog[aria-describedby="dialog-alert"] .ui-dialog-title').html(_('Devices deleted'));
             let count = 0;
             let output = '';
-            for (let i = 0; i < devArr.length; i++) {
-                if (devArr[i].match(/:/)) {
-                    continue;
+            devArr.forEach(dev => {
+                if (dev.match(/:/)) {
+                    return;
                 }
                 count += 1;
-                output += '<br/>' + devArr[i];
-            }
+                output += '<br/>' + dev;
+            });
             $('#alert').html('<h3>' + count + ' ' + _('device') + (count === 1 ? '' : (language === 'de' ? 'e' : 's')) + ' ' + _('deleted') + ':</h3>' + output);
             $('#dialog-alert').dialog('open');
             getDevices(() => {
@@ -230,10 +231,12 @@ ipcRpc.on('rpc', data => {
                 if (value) {
                     // Muss Meldung hinzugefügt werden?
                     done = false;
-                    for (let i = 0; i < listMessages.length; i++) {
-                        if (listMessages[i][0] === address && listMessages[i][1] === param) {
-                            done = true;
-                        }
+                    if (listMessages) {
+                        listMessages.forEach(msg => {
+                            if (msg[0] === address && msg[1] === param) {
+                                done = true;
+                            }
+                        });
                     }
 
                     // Dialog für neue Servicemeldung anzeigen
@@ -248,10 +251,12 @@ ipcRpc.on('rpc', data => {
                 } else {
                     // Muss Meldung gelöscht werden?
                     done = true;
-                    for (let i = 0; i < listMessages.length; i++) {
-                        if (listMessages[i][0] === address && listMessages[i][1] === param) {
-                            done = false;
-                        }
+                    if (listMessages) {
+                        listMessages.forEach(msg => {
+                            if (msg[0] === address && msg[1] === param) {
+                                done = false;
+                            }
+                        });
                     }
                 }
                 if (!done) {
@@ -335,7 +340,6 @@ function getConfig() {
             }
             easymodes.lang[language].GENERIC = data;
             $.getJSON('easymodes/localization/' + language + '/PNAME.json', data => {
-                // Console.log('easymode loaded pname', data);
                 easymodes.lang[language].PNAME = data;
             });
         });
@@ -547,7 +551,6 @@ function initDaemon() {
     $('#load_grid-rssi').show();
     $('#load_grid-messages').show();
 
-
     $consoleFormParams.html('');
     $consoleRpcResponse.html('');
     $('#console-rpc-params').val('');
@@ -562,8 +565,8 @@ function initDaemon() {
     console.log('initDaemon', daemon);
 
     if (daemon && config.daemons[daemon]) {
-        const type = config.daemons[daemon].type;
-        daemonType = config.daemons[daemon].type;
+        const {type} = config.daemons[daemon];
+        daemonType = type;
 
         let tmpHash = '#/' + daemon;
 
@@ -871,13 +874,13 @@ function initGridDevices() {
             {title: _('restoreConfigToDevice'), cmd: 'restoreConfigToDevice', uiIcon: 'ui-icon-comment', addClass: 'show-rf'},
             {title: _('clearConfigCache'), cmd: 'clearConfigCache', uiIcon: 'ui-icon-arrowrefresh-1-w', addClass: 'show-rf'},
             {title: '----'},
-            //{title: _('updateFirmware'), cmd: 'updateFirmware', uiIcon: 'ui-icon-script', addClass: 'show-rf'},
+            // {title: _('updateFirmware'), cmd: 'updateFirmware', uiIcon: 'ui-icon-script', addClass: 'show-rf'},
             {title: _('Replace'), cmd: 'replace', uiIcon: 'ui-icon-transfer-e-w', addClass: 'show-rf'},
             {title: _('Delete'), cmd: 'delete', uiIcon: 'ui-icon-trash'}
 
         ],
         select(event, ui) {
-            const cmd = ui.cmd;
+            const {cmd} = ui;
             const address = ui.target.parent().find('[aria-describedby$="_ADDRESS"]').text();
             switch (cmd) {
                 case 'paramsetMaster':
@@ -1060,8 +1063,6 @@ function initGridDevices() {
                         if (renameChildren) {
                             children.forEach(child => {
                                 names[child] = renameName + ':' + children.indexOf(child);
-                                // Console.log('setName', child, names[child]);
-                                // ipcRpc.send('setName', [child, names[child]]);
                                 queue.push({address: child, name: names[child]});
                             });
                         }
@@ -1144,12 +1145,16 @@ function initGridDevices() {
             time = 300;
         }
         switch ($('#add-device-ip-mode').val()) {
-            case 'local':
+            case 'local': {
                 const sgtin = $.trim($('#add-device-ip-address').val());
                 const key = $.trim($('#add-device-ip-key').val());
                 if (sgtin && key) {
                     $('#dialog-add-device-ip').dialog('close');
-                    rpcDialog(daemon, 'setInstallModeWithWhitelist', [true, time, [{ADDRESS: sgtin, KEY_MODE: 'LOCAL', KEY: key}]], err => {
+                    rpcDialog(daemon, 'setInstallModeWithWhitelist', [true, time, [{
+                        ADDRESS: sgtin,
+                        KEY_MODE: 'LOCAL',
+                        KEY: key
+                    }]], err => {
                         if (!err) {
                             $('#add-countdown').html(time);
                             $dialogAddCountdown.dialog('open');
@@ -1166,8 +1171,8 @@ function initGridDevices() {
                     });
                 }
                 break;
-
-            default:
+            }
+            default: {
                 $('#dialog-add-device-ip').dialog('close');
                 rpcAlert(daemon, 'setInstallMode', [true, time], err => {
                     if (!err) {
@@ -1184,6 +1189,7 @@ function initGridDevices() {
                         }, 1000);
                     }
                 });
+            }
         }
     });
 
@@ -1311,7 +1317,7 @@ function initGridDevices() {
             }
         },
         select(event, ui) {
-            const cmd = ui.cmd;
+            const {cmd} = ui;
             const address = ui.target.parent().find('[aria-describedby$="_ADDRESS"]').text();
             switch (cmd) {
                 case 'paramsetMaster':
@@ -1348,7 +1354,7 @@ function refreshGridDevices() {
         }
 
         if (daemon === 'BidCos-RF' || daemon === 'HmIP') {
-            let msgs = [];
+            const msgs = [];
             for (let j = 0, lenm = listMessages.length; j < lenm; j++) {
                 const deviceAddress = String(listMessages[j][0]).slice(0, listMessages[j][0].length - 2);
                 if (deviceAddress === listDevices[i].ADDRESS) {
@@ -1365,7 +1371,7 @@ function refreshGridDevices() {
                                 const errEnum = paramsetDescriptions[listMessages[j][0]].VALUES.ERROR.VALUE_LIST[listMessages[j][2]];
                                 msgs.push('<img title="' + errEnum + '" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
                             } else {
-                                rpcAlert(daemon, 'getParamsetDescription', [listMessages[j][0], 'VALUES'], function (err, res) {
+                                rpcAlert(daemon, 'getParamsetDescription', [listMessages[j][0], 'VALUES'], (err, res) => {
                                     if (!paramsetDescriptions[listMessages[j][0]]) {
                                         paramsetDescriptions[listMessages[j][0]] = {};
                                     }
@@ -1377,13 +1383,14 @@ function refreshGridDevices() {
                         case 'CONFIG_PENDING':
                             msgs.push('<img title="CONFIG_PENDING" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/config_pending.png">');
                             break;
+                        default:
                     }
                 }
             }
             listDevices[i].msgs = msgs.slice(0, 2).join('&nbsp;');
         }
 
-        //listDevices[i].FIRMWARE = '<span style="">' + listDevices[i].FIRMWARE + '</span>';
+        // ListDevices[i].FIRMWARE = '<span style="">' + listDevices[i].FIRMWARE + '</span>';
 
         if (daemon === 'HmIP') {
             switch (listDevices[i].FIRMWARE_UPDATE_STATE) {
@@ -1398,12 +1405,10 @@ function refreshGridDevices() {
                     break;
                 default:
             }
-        } else {
-            if (listDevices[i].AVAILABLE_FIRMWARE && listDevices[i].AVAILABLE_FIRMWARE !== listDevices[i].FIRMWARE) {
-                listDevices[i].FIRMWARE += ' <button class="update-firmware device-table" data-address="' + listDevices[i].ADDRESS + '" id="update-firmware_' + listDevices[i].ADDRESS + '">install ' + listDevices[i].AVAILABLE_FIRMWARE + '</button>';
-            } else if (listDevices[i].UPDATABLE) {
-                //listDevices[i].FIRMWARE += ' <span class="firmware-status">up to date</span>';
-            }
+        } else if (listDevices[i].AVAILABLE_FIRMWARE && listDevices[i].AVAILABLE_FIRMWARE !== listDevices[i].FIRMWARE) {
+            listDevices[i].FIRMWARE += ' <button class="update-firmware device-table" data-address="' + listDevices[i].ADDRESS + '" id="update-firmware_' + listDevices[i].ADDRESS + '">install ' + listDevices[i].AVAILABLE_FIRMWARE + '</button>';
+        } else if (listDevices[i].UPDATABLE) {
+            // ListDevices[i].FIRMWARE += ' <span class="firmware-status">up to date</span>';
         }
 
         const rxMode = [];
@@ -1559,9 +1564,7 @@ function reportValueUsage(value) {
         function popQueue() {
             if (queue.length > 0) {
                 const param = queue.pop();
-                // Console.log('reportValueUsage', address, param, value);
-
-                ipcRpc.send('rpc', [daemon, 'reportValueUsage', [address, param, value]], () => {
+                rpcDialog(daemon, 'reportValueUsage', [address, param, value], () => {
                     popQueue();
                 });
             }
@@ -1711,9 +1714,8 @@ function dialogParamset(data, desc, address, paramset) {
     // Buttons
     $('button.paramset-setValue:not(.ui-button)').button();
 
-    let selectOptions = [];
+    const selectOptions = [];
     $selectParamsetMultiselect.html('');
-    let tmpName;
     let mcount = 0;
     Object.keys(indexChannels).forEach(a => {
         if (a === address) {
@@ -1728,13 +1730,8 @@ function dialogParamset(data, desc, address, paramset) {
         if ((indexChannels[address].PARENT !== '') && (indexChannels[a].PARENT === '')) {
             return;
         }
-        if (names[a]) {
-            tmpName = names[a] + ' (' + a + ')';
-        } else {
-            tmpName = a;
-        }
         mcount += 1;
-        //$selectParamsetMultiselect.append('<option value="' + a + '">' + tmpName + '</option>');
+
         selectOptions.push({
             value: a,
             name: names[a],
@@ -1742,13 +1739,13 @@ function dialogParamset(data, desc, address, paramset) {
         });
     });
 
-    selectOptions.sort(function (a, b) {
+    selectOptions.sort((a, b) => {
         const aName = a.name || a.value;
         const bName = b.name || b.value;
         return aName.toLowerCase().localeCompare(bName.toLowerCase());
     });
     $selectParamsetMultiselect.html('');
-    selectOptions.forEach(function (opt) {
+    selectOptions.forEach(opt => {
         $selectParamsetMultiselect.append('<option value="' + opt.value + '">' + opt.text + '</option>');
     });
 
@@ -2114,7 +2111,7 @@ function initGridLinks() {
         caption: '',
         buttonicon: 'ui-icon-plus',
         onClickButton() {
-            let selectOptions = [];
+            const selectOptions = [];
 
             for (let j = 0, len = listDevices.length; j < len; j++) {
                 if (!listDevices[j].PARENT) {
@@ -2131,15 +2128,15 @@ function initGridLinks() {
                     name: (names && names[listDevices[j].ADDRESS]),
                     text: listDevices[j].ADDRESS + ' ' + (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '')
                 });
-                //selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '') + '</option>';
+                // SelectOptions += '<option value="' + listDevices[j].ADDRESS + '">' + listDevices[j].ADDRESS + ' ' + (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '') + '</option>';
             }
-            selectOptions.sort(function (a, b) {
+            selectOptions.sort((a, b) => {
                 const aName = a.name || a.value;
                 const bName = b.name || b.value;
                 return aName.toLowerCase().localeCompare(bName.toLowerCase());
             });
             $selectLinkSender.html('');
-            selectOptions.forEach(function (opt) {
+            selectOptions.forEach(opt => {
                 $selectLinkSender.append('<option value="' + opt.value + '">' + opt.text + '</option>');
             });
             $selectLinkSender.multiselect('refresh');
@@ -2164,7 +2161,7 @@ function initGridLinks() {
             {title: _('Delete link'), cmd: 'delete', uiIcon: 'ui-icon-trash'}
         ],
         select(event, ui) {
-            const cmd = ui.cmd;
+            const {cmd} = ui;
             const row = ui.target.parent().attr('id');
             const sender = ui.target.parent().find('[aria-describedby$="_SENDER"]').text();
             const receiver = ui.target.parent().find('[aria-describedby$="_RECEIVER"]').text();
@@ -2348,31 +2345,32 @@ function refreshGridLinks() {
     $gridLinks.jqGrid('clearGridData');
     const rowData = [];
     if (listLinks) {
-        for (let i = 0, len = listLinks.length; i < len; i++) {
-            if (names[listLinks[i].SENDER]) {
-                listLinks[i].Sendername = names[listLinks[i].SENDER];
+        listLinks.forEach((link, i) => {
+            if (names[link.SENDER]) {
+                link.Sendername = names[link.SENDER];
             }
-            if (names[listLinks[i].RECEIVER]) {
-                listLinks[i].Receivername = names[listLinks[i].RECEIVER];
-            }
-
-            listLinks[i].SENDER_TYPE = indexChannels[listLinks[i].SENDER] && indexChannels[listLinks[i].SENDER].TYPE;
-            listLinks[i].RECEIVER_TYPE = indexChannels[listLinks[i].RECEIVER] && indexChannels[listLinks[i].RECEIVER].TYPE;
-
-            listLinks[i]._id = i;
-
-            if (indexChannels[listLinks[i].SENDER] && indexChannels[indexChannels[listLinks[i].SENDER].PARENT]) {
-                const devSender = indexChannels[indexChannels[listLinks[i].SENDER].PARENT].TYPE;
-                listLinks[i].img_sender = '<img class="device-image" src="' + (deviceImages[devSender] || deviceImages.DEVICE) + '">'; // eslint-disable-line camelcase
+            if (names[link.RECEIVER]) {
+                link.Receivername = names[link.RECEIVER];
             }
 
-            if (indexChannels[listLinks[i].RECEIVER] && indexChannels[indexChannels[listLinks[i].RECEIVER].PARENT]) {
-                const devReceiver = indexChannels[indexChannels[listLinks[i].RECEIVER].PARENT].TYPE;
-                listLinks[i].img_receiver = '<img class="device-image" src="' + (deviceImages[devReceiver] || deviceImages.DEVICE) + '">'; // eslint-disable-line camelcase
+            link.SENDER_TYPE = indexChannels[link.SENDER] && indexChannels[link.SENDER].TYPE;
+            link.RECEIVER_TYPE = indexChannels[link.RECEIVER] && indexChannels[link.RECEIVER].TYPE;
+
+            link._id = i;
+
+            if (indexChannels[link.SENDER] && indexChannels[indexChannels[link.SENDER].PARENT]) {
+                const devSender = indexChannels[indexChannels[link.SENDER].PARENT].TYPE;
+                link.img_sender = '<img class="device-image" src="' + (deviceImages[devSender] || deviceImages.DEVICE) + '">'; // eslint-disable-line camelcase
             }
 
-            rowData.push(listLinks[i]);
-        }
+            if (indexChannels[link.RECEIVER] && indexChannels[indexChannels[link.RECEIVER].PARENT]) {
+                const devReceiver = indexChannels[indexChannels[link.RECEIVER].PARENT].TYPE;
+                link.img_receiver = '<img class="device-image" src="' + (deviceImages[devReceiver] || deviceImages.DEVICE) + '">'; // eslint-disable-line camelcase
+            }
+
+            rowData.push(link);
+        });
+
         $gridLinks.jqGrid('addRowData', '_id', rowData);
     }
     $gridLinks.trigger('reloadGrid');
@@ -2433,7 +2431,6 @@ function initDialogLinkParamset() {
 
     $selectLinkparamsetProfile.change(function () {
         const prn = parseInt($(this).val(), 10) || 0;
-        // Console.log("$('#linkparamset-input-receiver-sender-UI_HINT').val(" + prn + ");")
         $('#linkparamset-input-receiver-sender-UI_HINT').val(prn);
         formEasyMode(linkReceiverData, linkReceiverDesc, 'receiver-sender', linkSenderType, linkReceiverType, prn);
     });
@@ -2445,43 +2442,56 @@ function initDialogLinkParamset() {
     });
     $selectLinkSender.change(function () {
         const sender = $(this).val();
-        let selectOptions;
+        let selectOptions = [];
         if (sender && sender.length > 0) {
             const roles = indexChannels[sender[0]].LINK_SOURCE_ROLES.split(' ');
             const targets = [];
             $linkSourceRoles.html(indexChannels[sender[0]].LINK_SOURCE_ROLES);
 
             if (sender.length === 1) {
-                selectOptions = '';
-                for (let j = 0, len = listDevices.length; j < len; j++) {
-                    if (!listDevices[j].PARENT) {
-                        continue;
+                listDevices.forEach(dev => {
+                    if (!dev.PARENT) {
+                        return;
                     }
-                    if (listDevices[j].ADDRESS.endsWith(':0')) {
-                        continue;
+                    if (dev.ADDRESS.endsWith(':0')) {
+                        return;
                     }
-                    if (!listDevices[j].LINK_SOURCE_ROLES) {
-                        continue;
+                    if (!dev.LINK_SOURCE_ROLES) {
+                        return;
                     }
-                    if (listDevices[j].TYPE !== indexChannels[sender[0]].TYPE) {
-                        continue;
+                    if (dev.TYPE !== indexChannels[sender[0]].TYPE) {
+                        return;
                     }
-                    selectOptions += '<option value="' + listDevices[j].ADDRESS + '"' +
-                        (sender[0] === listDevices[j].ADDRESS ? ' selected' : '') +
-                        '>' + listDevices[j].ADDRESS + ' ' + (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '') + '</option>';
-                }
-                $selectLinkSender.html(selectOptions).multiselect('refresh');
+                    selectOptions.push({
+                        value: dev.ADDRESS,
+                        name: (names && names[dev.ADDRESS] ? names[dev.ADDRESS] : ''),
+                        text: dev.ADDRESS + ' ' + (names && names[dev.ADDRESS] ? names[dev.ADDRESS] : '')
+                    });
+                });
+
+                selectOptions.sort((a, b) => {
+                    const aName = a.name || a.value;
+                    const bName = b.name || b.value;
+                    return aName.toLowerCase().localeCompare(bName.toLowerCase());
+                });
+                $selectLinkSender.html('');
+                selectOptions.forEach(opt => {
+                    $selectLinkSender.append('<option value="' + opt.value + '">' + opt.text + '</option>');
+                });
+                $selectLinkSender.multiselect('refresh');
             }
 
-            for (let i = 0; i < roles.length; i++) {
-                if (indexTargetRoles[roles[i]]) {
-                    Object.keys(indexTargetRoles[roles[i]]).forEach(role => {
-                        const address = indexTargetRoles[roles[i]][role];
-                        if (targets.indexOf(address) === -1) {
-                            targets.push(address);
-                        }
-                    });
-                }
+            if (roles) {
+                roles.forEach(role => {
+                    if (indexTargetRoles[role]) {
+                        Object.keys(indexTargetRoles[role]).forEach(role => {
+                            const address = indexTargetRoles[role][role];
+                            if (targets.indexOf(address) === -1) {
+                                targets.push(address);
+                            }
+                        });
+                    }
+                });
             }
 
             selectOptions = [];
@@ -2492,16 +2502,16 @@ function initDialogLinkParamset() {
                 } else {
                     name = '';
                 }
-                selectOptions.push({value: targets[i], name: name, text: targets[i] + ' ' + name})
-                //selectOptions += '<option value="' + targets[i] + '">' + targets[i] + ' ' + name + '</option>';
+                selectOptions.push({value: targets[i], name, text: targets[i] + ' ' + name});
+                // SelectOptions += '<option value="' + targets[i] + '">' + targets[i] + ' ' + name + '</option>';
             }
-            selectOptions.sort(function (a, b) {
+            selectOptions.sort((a, b) => {
                 const aName = a.name || a.value;
                 const bName = b.name || b.value;
                 return aName.toLowerCase().localeCompare(bName.toLowerCase());
             });
             $selectLinkReceiver.html('');
-            selectOptions.forEach(function (opt) {
+            selectOptions.forEach(opt => {
                 $selectLinkReceiver.append('<option value="' + opt.value + '">' + opt.text + '</option>');
             });
             $('.add-link-create').button('disable');
@@ -2511,35 +2521,32 @@ function initDialogLinkParamset() {
             $selectLinkReceiver.multiselect('enable');
         } else {
             selectOptions = [];
-            for (let j = 0, len = listDevices.length; j < len; j++) {
-                if (!listDevices[j].PARENT) {
-                    continue;
-                }
-                if (listDevices[j].ADDRESS.endsWith(':0')) {
-                    continue;
-                }
-                if (!listDevices[j].LINK_SOURCE_ROLES) {
-                    continue;
-                }
-                /*
-                selectOptions += '<option value="' + listDevices[j].ADDRESS + '">' +
-                    listDevices[j].ADDRESS + ' ' +
-                    (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '') +
-                    '</option>';
-                    */
-                selectOptions.push({
-                    value: listDevices[j].ADDRESS,
-                    name: (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : ''),
-                    text: listDevices[j].ADDRESS + ' ' + (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '')
+            if (listDevices) {
+                listDevices.forEach(dev => {
+                    if (!dev.PARENT) {
+                        return;
+                    }
+                    if (dev.ADDRESS.endsWith(':0')) {
+                        return;
+                    }
+                    if (!dev.LINK_SOURCE_ROLES) {
+                        return;
+                    }
+                    selectOptions.push({
+                        value: dev.ADDRESS,
+                        name: (names && names[dev.ADDRESS] ? names[dev.ADDRESS] : ''),
+                        text: dev.ADDRESS + ' ' + (names && names[dev.ADDRESS] ? names[dev.ADDRESS] : '')
+                    });
                 });
             }
-            selectOptions.sort(function (a, b) {
+
+            selectOptions.sort((a, b) => {
                 const aName = a.name || a.value;
                 const bName = b.name || b.value;
                 return aName.toLowerCase().localeCompare(bName.toLowerCase());
             });
             $selectLinkSender.html('');
-            selectOptions.forEach(function (opt) {
+            selectOptions.forEach(opt => {
                 $selectLinkSender.append('<option value="' + opt.value + '">' + opt.text + '</option>');
             });
             $selectLinkSender.multiselect('refresh');
@@ -2594,15 +2601,14 @@ function initDialogLinkParamset() {
                         targetRole = role;
                     }
                 });
-                let selectOptions = [];
+                const selectOptions = [];
                 listDevices.forEach(dev => {
                     if (!dev.PARENT || dev.ADDRESS.endsWith(':0')) {
                         return;
                     }
                     if (dev.LINK_TARGET_ROLES && dev.LINK_TARGET_ROLES.split(' ').indexOf(targetRole) !== -1) {
-
                         /*
-                        selectOptions += '<option value="' + dev.ADDRESS + '"' +
+                        SelectOptions += '<option value="' + dev.ADDRESS + '"' +
                             (receiver[0] === dev.ADDRESS ? ' selected' : '') +
                             '>' + dev.ADDRESS + ' ' + (names && names[dev.ADDRESS] ? names[dev.ADDRESS] : '') + '</option>';
                         */
@@ -2614,13 +2620,13 @@ function initDialogLinkParamset() {
                         });
                     }
                 });
-                selectOptions.sort(function (a, b) {
+                selectOptions.sort((a, b) => {
                     const aName = a.name || a.value;
                     const bName = b.name || b.value;
                     return aName.toLowerCase().localeCompare(bName.toLowerCase());
                 });
                 $selectLinkReceiver.html('');
-                selectOptions.forEach(function (opt) {
+                selectOptions.forEach(opt => {
                     $selectLinkReceiver.append('<option value="' + opt.value + '"' + (opt.selected ? ' selected' : '') + '>' + opt.text + '</option>');
                 });
                 $selectLinkReceiver.multiselect('refresh');
@@ -2629,7 +2635,7 @@ function initDialogLinkParamset() {
             $('.add-link-create').button('disable');
             $('.add-link-create-edit').button('disable');
 
-            let selectOptions = [];
+            const selectOptions = [];
 
             const roles = $linkSourceRoles.html().split(' ');
             const targets = [];
@@ -2645,27 +2651,30 @@ function initDialogLinkParamset() {
                 }
             }
 
-            for (let i = 0; i < targets.length; i++) {
-                let name;
-                if (names[targets[i]]) {
-                    name = names[targets[i]] || '';
-                } else {
-                    name = '';
-                }
-                //selectOptions += '<option value="' + targets[i] + '">' + targets[i] + ' ' + name + '</option>';
-                selectOptions.push({
-                    value: targets[i],
-                    name: name,
-                    text: targets[i] + ' ' + name
+            if (targets) {
+                targets.forEach(target => {
+                    let name;
+                    if (names[target]) {
+                        name = names[target] || '';
+                    } else {
+                        name = '';
+                    }
+                    // SelectOptions += '<option value="' + target + '">' + target + ' ' + name + '</option>';
+                    selectOptions.push({
+                        value: target,
+                        name,
+                        text: target + ' ' + name
+                    });
                 });
             }
-            selectOptions.sort(function (a, b) {
+
+            selectOptions.sort((a, b) => {
                 const aName = a.name || a.value;
                 const bName = b.name || b.value;
                 return aName.toLowerCase().localeCompare(bName.toLowerCase());
             });
             $selectLinkReceiver.html('');
-            selectOptions.forEach(function (opt) {
+            selectOptions.forEach(opt => {
                 $selectLinkReceiver.append('<option value="' + opt.value + '">' + opt.text + '</option>');
             });
             $selectLinkReceiver.multiselect('refresh');
@@ -2692,7 +2701,6 @@ function initDialogLinkParamset() {
     $tableEasymode.on('change', '.easymode-param', function () {
         const val = $(this).val();
         const binds = $(this).attr('data-binds').split(',');
-        // Console.log('...', val, binds);
         binds.forEach(param => {
             $('#linkparamset-input-receiver-sender-' + param).val(val);
         });
@@ -2787,9 +2795,7 @@ function putLinkParamset(direction, channel1, channel2, callback) {
                 return;
             }
 
-            // Console.log(param, val, elem, type, $input.attr('id'));
-
-            // aktualisiere data-val-prev - falls auf prn 0 (expert) zurückgeschaltet wird werden diese werte verwendet
+            // Aktualisiere data-val-prev - falls auf prn 0 (expert) zurückgeschaltet wird werden diese werte verwendet
             $input.attr('data-val-prev', val);
 
             // Calculate value if unit is "100%"
@@ -2890,8 +2896,6 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
         linkSenderType = senderType;
         linkReceiverType = receiverType;
 
-        // Console.log('dialogLinkparamset ' + sender + ' (' + senderType + ') ' + receiver + ' (' + receiverType + ')');
-
         if (easymodes[receiverType] && easymodes[receiverType][senderType]) {
             createEasymodes();
         } else {
@@ -2899,10 +2903,8 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
             const easymodeFile = 'easymodes/' + receiverType + '/' + senderType + '.json';
 
             $.getJSON(translationFile, data => {
-                // Console.log('easymode loaded ', translationFile);
                 easymodes.lang[language][receiverType] = data;
                 $.getJSON(easymodeFile, data => {
-                    // Console.log('easymode loaded', easymodeFile);
                     if (!easymodes[receiverType]) {
                         easymodes[receiverType] = {};
                     }
@@ -2916,7 +2918,6 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
                 console.error('TODO! Easymode translation fail', translationFile);
                 easymodes.lang[language][receiverType] = {};
                 $.getJSON(easymodeFile, data => {
-                    // Console.log('easymode loaded', easymodeFile);
                     if (!easymodes[receiverType]) {
                         easymodes[receiverType] = {};
                     }
@@ -3012,7 +3013,6 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
     }
 }
 function elementEasyMode(options, val) {
-    // Console.log('elementEasyMode', options, val)
     let form = '';
     let selectOptions;
     switch (options.option) {
@@ -3164,7 +3164,6 @@ function elementEasyMode(options, val) {
             break;
         }
         default: {
-            // Console.log('elementEasyMode', options.option);
             const param = options.combo[0];
             const $tpl = $('#linkparamset-input-receiver-sender-' + param);
             const $copy = $tpl.clone();
@@ -3220,7 +3219,6 @@ function formEasyMode(data, desc, direction, sType, rType, prn) {
             $tableEasymode.append('<tr><td>' + tmp + '</td><td style="font-size: 8px"></td><td>' +
                 elementEasyMode(options[param], data[options[param].combo[0]]) + '</td></tr>');
         }
-        // Console.log("$('#linkparamset-input-receiver-sender-UI_HINT').val(" + prn + ");")
         $('#linkparamset-input-receiver-sender-UI_HINT').val(prn);
 
         $('#table-linkparamset2').hide();
@@ -3234,7 +3232,6 @@ function formEasyMode(data, desc, direction, sType, rType, prn) {
         $('[id^="linkparamset-input-receiver-sender-"]').each(function () {
             $(this).val($(this).attr('data-val-prev') || '');
         });
-        // Console.log("$('#linkparamset-input-receiver-sender-UI_HINT').val(" + prn + ");")
         $('#linkparamset-input-receiver-sender-UI_HINT').val(prn);
         $('#table-linkparamset2').show();
     }
@@ -3246,12 +3243,12 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
     if (!desc) {
         $dialogLinkparamset.dialog('close');
         dialogAlert('formLinkParamset paramsetDescription missing\nPlease try again.', 'ERROR');
-        throw (new Error());
+        throw (new Error('paramsetDescription missing'));
     }
     if (!data) {
         $dialogLinkparamset.dialog('close');
         dialogAlert('formLinkParamset paramset missing\nPlease try again.', 'ERROR');
-        throw (new Error());
+        throw (new Error('paramsetDescription missing'));
     }
     Object.keys(desc).forEach(param => {
         let unit = '';
@@ -3298,8 +3295,6 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
 
             const disabled = desc[param].OPERATIONS & 2;
             hidden = param === 'UI_HINT';
-
-            // Console.log(param, data[param], desc[param]);
 
             switch (desc[param].TYPE) {
                 case 'BOOL':
@@ -3713,9 +3708,9 @@ function refreshGridRssi() {
 function refreshGridInterfaces() {
     $gridInterfaces.jqGrid('clearGridData');
     if (listInterfaces) {
-        for (let i = 0, len = listInterfaces.length; i < len; i++) {
-            $gridInterfaces.jqGrid('addRowData', i, listInterfaces[i]);
-        }
+        listInterfaces.forEach((iface, i) => {
+            $gridInterfaces.jqGrid('addRowData', i, iface);
+        });
     }
     $gridInterfaces.trigger('reloadGrid');
 }
@@ -3783,12 +3778,15 @@ function initGridMessages() {
         buttonicon: 'ui-icon-circle-check',
         onClickButton() {
             const acceptQueue = [];
-            for (let i = 0, len = listMessages.length; i < len; i++) {
-                const address = listMessages[i][0];
-                if (listMessages[i][1].match(/STICKY/)) {
-                    acceptQueue.push([address, listMessages[i][1], false]);
-                }
+            if (listMessages) {
+                listMessages.forEach(msg => {
+                    const address = msg[0];
+                    if (msg[1].match(/STICKY/)) {
+                        acceptQueue.push([address, msg[1], false]);
+                    }
+                });
             }
+
             function popQueue() {
                 const params = acceptQueue.pop();
                 rpcAlert(daemon, 'setValue', params, () => {
@@ -3826,30 +3824,33 @@ function refreshGridMessages() {
     $('#accept-messages').addClass('ui-state-disabled');
     let acceptableMessages = false;
     const rowData = [];
-    for (let i = 0, len = listMessages.length; i < len; i++) {
-        const deviceAddress = String(listMessages[i][0]).slice(0, listMessages[i][0].length - 2);
-        let name = '';
-        if (names[deviceAddress]) {
-            name = names[deviceAddress];
-        }
-        if (listMessages[i][1].match(/STICKY/)) {
-            acceptableMessages = true;
-        }
-        let msg = listMessages[i][1];
-        if (listMessages[i][1] === 'ERROR') {
-            if (paramsetDescriptions[listMessages[i][0]] && paramsetDescriptions[listMessages[i][0]].VALUES && paramsetDescriptions[listMessages[i][0]].VALUES.ERROR) {
-                msg = paramsetDescriptions[listMessages[i][0]].VALUES.ERROR.VALUE_LIST[listMessages[i][2]];
+    if (listMessages) {
+        listMessages.forEach((smsg, i) => {
+            const deviceAddress = String(smsg[0]).slice(0, smsg[0].length - 2);
+            let name = '';
+            if (names[deviceAddress]) {
+                name = names[deviceAddress];
             }
-        }
-        const obj = {
-            _id: i,
-            Name: name,
-            ADDRESS: listMessages[i][0],
-            DeviceAddress: deviceAddress,
-            Message: msg
-        };
-        rowData.push(obj);
+            if (smsg[1].match(/STICKY/)) {
+                acceptableMessages = true;
+            }
+            let msg = smsg[1];
+            if (msg === 'ERROR') {
+                if (paramsetDescriptions[smsg[0]] && paramsetDescriptions[smsg[0]].VALUES && paramsetDescriptions[smsg[0]].VALUES.ERROR) {
+                    msg = paramsetDescriptions[smsg[0]].VALUES.ERROR.VALUE_LIST[smsg[2]];
+                }
+            }
+            const obj = {
+                _id: i,
+                Name: name,
+                ADDRESS: smsg[0],
+                DeviceAddress: deviceAddress,
+                Message: msg
+            };
+            rowData.push(obj);
+        });
     }
+
     $gridMessages.jqGrid('addRowData', '_id', rowData);
     if (acceptableMessages) {
         $('#accept-messages').removeClass('ui-state-disabled');
@@ -3869,67 +3870,64 @@ function getServiceMessages() {
     console.log('getServiceMessages');
     rpcAlert(daemon, 'getServiceMessages', [], (err, data) => {
         getServiceMessagesPending = false;
-        if (!err) {
-            if (daemon === currentDaemon) {
-                listMessages = data || [];
-                var rowIds = $gridDevices.jqGrid('getDataIDs');
+        if (err) {
+            dialogAlert(err.message, 'getServiceMessages Error');
+        } else if (daemon === currentDaemon) {
+            listMessages = data || [];
+            const rowIds = $gridDevices.jqGrid('getDataIDs');
+            rowIds.forEach(rowId => {
+                const rowData = $gridDevices.jqGrid('getRowData', rowId);
+                rowData.msgs = '';
+                $gridDevices.jqGrid('setRowData', rowId, rowData);
+            });
+            listMessages.forEach(msg => {
+                const [channel, message, value] = msg;
+                const [device] = channel.split(':');
+
                 rowIds.forEach(rowId => {
-                    let rowData = $gridDevices.jqGrid('getRowData', rowId);
-                    rowData.msgs = '';
-                    $gridDevices.jqGrid('setRowData', rowId, rowData);
-                });
-                listMessages.forEach((msg, msgIndex) => {
-                    const [channel, message, value] = msg;
-                    const [device, channelNumber] = channel.split(':');
-
-                    rowIds.forEach(rowId => {
-                        let rowData = $gridDevices.jqGrid('getRowData', rowId);
-                        if (rowData && rowData['ADDRESS'] === device ) {
-                            let msg = [];
-                            switch (message) {
-                                case 'LOWBAT':
-                                case 'LOW_BAT':
-                                    msg = ('<img title="LOWBAT" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/lowbat.png">');
-                                    break;
-                                case 'UNREACH':
-                                    msg = ('<img title="UNREACH" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/unreach.png">');
-                                    break;
-                                case 'ERROR':
-                                    if (paramsetDescriptions[channel] && paramsetDescriptions[channel].VALUES) {
-                                        const errEnum = paramsetDescriptions[channel].VALUES.ERROR.VALUE_LIST[value];
-                                        msg = ('<img title="' + errEnum + '" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
-                                    } else {
-                                        rpcAlert(daemon, 'getParamsetDescription', [channel, 'VALUES'], function (err, res) {
-                                            if (!paramsetDescriptions[channel]) {
-                                                paramsetDescriptions[channel] = {};
-                                            }
-                                            paramsetDescriptions[channel].VALUES = res;
-                                        });
-                                        msg = ('<img title="ERROR" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
-                                    }
-
-
-                                    break;
-                                case 'CONFIG_PENDING':
-                                    msg = ('<img title="CONFIG_PENDING" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/config_pending.png">');
-                                    break;
-                            }
-                            if (!rowData.msgs) {
-                                rowData.msgs = msg;
-                            } else if (!rowData.msgs.match(new RegExp(message))) {
-                                if ((rowData.msgs.match(/img/g) || []).length < 2) {
-                                    rowData.msgs += '&nbsp;' + msg;
+                    const rowData = $gridDevices.jqGrid('getRowData', rowId);
+                    if (rowData && rowData.ADDRESS === device) {
+                        let msg = [];
+                        switch (message) {
+                            case 'LOWBAT':
+                            case 'LOW_BAT':
+                                msg = ('<img title="LOWBAT" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/lowbat.png">');
+                                break;
+                            case 'UNREACH':
+                                msg = ('<img title="UNREACH" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/unreach.png">');
+                                break;
+                            case 'ERROR':
+                                if (paramsetDescriptions[channel] && paramsetDescriptions[channel].VALUES) {
+                                    const errEnum = paramsetDescriptions[channel].VALUES.ERROR.VALUE_LIST[value];
+                                    msg = ('<img title="' + errEnum + '" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
+                                } else {
+                                    rpcAlert(daemon, 'getParamsetDescription', [channel, 'VALUES'], (err, res) => {
+                                        if (!paramsetDescriptions[channel]) {
+                                            paramsetDescriptions[channel] = {};
+                                        }
+                                        paramsetDescriptions[channel].VALUES = res;
+                                    });
+                                    msg = ('<img title="ERROR" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/error.png">');
                                 }
-                            }
-                            $gridDevices.jqGrid('setRowData', rowId, rowData);
-                        }
-                    });
 
+                                break;
+                            case 'CONFIG_PENDING':
+                                msg = ('<img title="CONFIG_PENDING" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/config_pending.png">');
+                                break;
+                            default:
+                        }
+                        if (!rowData.msgs) {
+                            rowData.msgs = msg;
+                        } else if (!rowData.msgs.match(new RegExp(message))) {
+                            if ((rowData.msgs.match(/img/g) || []).length < 2) {
+                                rowData.msgs += '&nbsp;' + msg;
+                            }
+                        }
+                        $gridDevices.jqGrid('setRowData', rowId, rowData);
+                    }
                 });
-                refreshGridMessages();
-            }
-        } else {
-            alert('getServiceMessages\n' + err);
+            });
+            refreshGridMessages();
         }
     });
 }
@@ -4037,12 +4035,11 @@ function elementConsoleMethod(callback) {
 
             if (!err && data && data.length > 0) {
                 data.sort();
-                for (let i = 0; i < data.length; i++) {
-                    const method = data[i];
+                data.forEach(method => {
                     if ((config.daemons[daemon].type !== 'HmIP') || (hmipExclude.indexOf(method) === -1)) {
                         $consoleRpcMethod.append('<option value="' + method + '">' + method + '</option>');
                     }
-                }
+                });
             }
             if (typeof callback === 'function') {
                 callback();
@@ -4067,7 +4064,7 @@ function formConsoleParams() {
             $('#console-rpc-method-help').html(rpcMethods[method].help.de);
         }
     }
-    const params = rpcMethods[method].params;
+    const {params} = rpcMethods[method];
     let heading = '<span style="color:#777">' + rpcMethods[method].returns + '</span> ' + method + '(';
     const paramArr = [];
     let form = '';
@@ -4285,12 +4282,7 @@ function rpcDialogShift() {
     }
     rpcDialogPending = true;
 
-    const tmp = rpcDialogQueue.shift();
-
-    const daemon = tmp.daemon;
-    const cmd = tmp.cmd;
-    const params = tmp.params;
-    const callback = tmp.callback;
+    const {daemon, cmd, params, callback} = rpcDialogQueue.shift();
 
     const paramText = JSON.stringify(JSON.parse(JSON.stringify(params).replace(/{"explicitDouble":([0-9.]+)}/g, '$1')), null, '  ');
 
@@ -4298,7 +4290,7 @@ function rpcDialogShift() {
     $('#rpc-message').html('');
     $dialogRpc.dialog('open');
     $('#rpc-progress').show();
-    // Console.log('>', daemon, cmd, params);
+
     ipcRpc.send('rpc', [daemon, cmd, params], (err, res) => {
         $('#rpc-progress').hide();
         if (err) {

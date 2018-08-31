@@ -3422,7 +3422,7 @@ function getRfdData() {
     console.log('getRfdData');
     if (config.daemons[daemon].type === 'BidCos-RF' || config.daemons[daemon].type === 'HmIP') {
         $('#load_grid-interfaces').show();
-        if (config.daemons[daemon].type === 'BidCos-RF') {
+        if (['BidCos-RF', 'HmIP'].includes(config.daemons[daemon].type)) {
             $('#load_grid-interfaces').show();
             $('#load_grid-rssi').show();
         }
@@ -3430,8 +3430,9 @@ function getRfdData() {
         rpcAlert(daemon, 'listBidcosInterfaces', [], (err, data) => {
             if (daemon === currentDaemon) {
                 listInterfaces = data || [];
-                if (config.daemons[daemon].type === 'BidCos-RF') {
+                if (['BidCos-RF', 'HmIP'].includes(config.daemons[daemon].type)) {
                     rpcAlert(daemon, 'rssiInfo', [], (err, data) => {
+                        console.log('rssiInfo', daemon, JSON.stringify(data));
                         listRssi = data;
                         $('#gbox_grid-rssi').show();
                         initGridRssi();
@@ -3456,7 +3457,7 @@ function initGridRssi() {
     const colModelRssi = [
         // TODO Name und Type fixed:false - Überschrifts und Inhaltsspalten stimmen nicht mehr... :-(
         {name: 'Name', index: 'Name', width: 250, fixed: true, title: false},
-        {name: 'ADDRESS', index: 'ADDRESS', width: 84, fixed: true, title: false},
+        {name: 'ADDRESS', index: 'ADDRESS', width: daemon === 'HmIP' ? 160 : 84, fixed: true, title: false},
         {name: 'TYPE', index: 'TYPE', width: 140, fixed: true, title: false},
         {name: 'INTERFACE', index: 'INTERFACE', width: 84, fixed: true, title: false},
         {name: 'RF_ADDRESS', index: 'RF_ADDRESS', width: 75, fixed: true, title: false},
@@ -3468,7 +3469,6 @@ function initGridRssi() {
     for (let i = 0; i < listInterfaces.length; i++) {
         colNamesRssi.push('<- dBm');
         colNamesRssi.push('-> dBm');
-        colNamesRssi.push(' ');
         colModelRssi.push({
             name: listInterfaces[i].ADDRESS + '_0',
             index: listInterfaces[i].ADDRESS + '_0',
@@ -3481,23 +3481,27 @@ function initGridRssi() {
         colModelRssi.push({
             name: listInterfaces[i].ADDRESS + '_1',
             index: listInterfaces[i].ADDRESS + '_1',
-            width: 47,
+            width: daemon === 'HmIP' ? 50 : 47,
             fixed: true,
             search: false,
             align: 'right',
             formatter: rssiColor
         });
-        colModelRssi.push({
-            name: listInterfaces[i].ADDRESS + '_set',
-            index: listInterfaces[i].ADDRESS + '_set',
-            width: 28,
-            fixed: true,
-            search: false,
-            align: 'center'
-        });
+        if (daemon !== 'HmIP') {
+            colNamesRssi.push(' ');
+            colModelRssi.push({
+                name: listInterfaces[i].ADDRESS + '_set',
+                index: listInterfaces[i].ADDRESS + '_set',
+                width: 28,
+                fixed: true,
+                search: false,
+                align: 'center'
+            });
+
+        }
         groupHeaders.push({
             startColumnName: listInterfaces[i].ADDRESS + '_0',
-            numberOfColumns: 3,
+            numberOfColumns: daemon === 'HmIP' ? 2 : 3,
             titleText: listInterfaces[i].ADDRESS + '<br/><span style="font-size: 9px;">(' + listInterfaces[i].DESCRIPTION + ')</span>'
         });
     }
@@ -3574,7 +3578,7 @@ function initGridRssi() {
             ],
             colModel: [
                 {name: 'Name', index: 'Name', width: 248, fixed: true, title: false},
-                {name: 'ADDRESS', index: 'ADDRESS', width: 84, fixed: true, title: false},
+                {name: 'ADDRESS', index: 'ADDRESS', width: daemon === 'HmIP' ? 160 : 84, fixed: true, title: false},
                 {name: 'TYPE', index: 'TYPE', width: 140, fixed: true, title: false},
                 {name: 'RSSI-Receive', index: 'RSSI-Receive', width: 47, fixed: true, align: 'right', title: false},
                 {name: 'RSSI-Send', index: 'RSSI-Send', width: 47, fixed: true, align: 'right', title: false}
@@ -3642,6 +3646,7 @@ function initGridRssi() {
     });
 }
 function refreshGridRssi() {
+    console.log('refreshGridRssi');
     $gridRssi.jqGrid('clearGridData');
 
     indexDevices = {};
@@ -3704,6 +3709,15 @@ function refreshGridRssi() {
         $gridRssi.jqGrid('addRowData', '_id', rowData);
     }
     $gridRssi.trigger('reloadGrid');
+    if (daemon === 'HmIP') {
+        $gridRssi.jqGrid('hideCol', 'roaming');
+        $gridRssi.jqGrid('hideCol', 'INTERFACE');
+        $gridRssi.jqGrid('hideCol', 'RF_ADDRESS');
+    } else {
+        $gridRssi.jqGrid('showCol', 'roaming');
+        $gridRssi.jqGrid('showCol', 'INTERFACE');
+        $gridRssi.jqGrid('showCol', 'RF_ADDRESS');
+    }
 }
 function refreshGridInterfaces() {
     $gridInterfaces.jqGrid('clearGridData');

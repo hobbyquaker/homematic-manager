@@ -208,7 +208,8 @@ const localRegaId = {};
 // Const localNamesIds = {};
 const localDevices = pjson.load('devices_' + config.ccuAddress) || {};
 const localParamsetDescriptions = pjson.load('paramset-descriptions-v2_' + config.ccuAddress) || {};
-const localRssiInfo = {};
+const localRssiInfo = {HmIP: {}};
+let hmipAddress;
 const rpcClients = {};
 
 let rpcServer;
@@ -274,6 +275,13 @@ function initRpcClients() {
         initRpcServer(config.daemons[daemon].protocol);
         init(daemon);
 
+        if (daemon === 'HmIP') {
+            rpcClients[daemon].methodCall('listBidcosInterfaces', [], (err,res) => {
+                hmipAddress = res[0].ADDRESS;
+                localRssiInfo.HmIP[hmipAddress] = {};
+            });
+        }
+
         count += 1;
     });
     setInterval(pingPong, 15000);
@@ -301,6 +309,30 @@ const rpcMethods = {
     event(err, params, callback) {
         log.debug('RPC <- event ' + JSON.stringify(params));
         lastEvent[daemonIndex[params[0]]] = (new Date()).getTime();
+        if (daemonIndex[params[0]] === 'HmIP') {
+            const device = params[1].split(':')[0];
+            if (params[2].startsWith('RSSI_')) {
+                if (!localRssiInfo.HmIP[hmipAddress]) {
+                    localRssiInfo.HmIP[hmipAddress] = {};
+                }
+                if (!localRssiInfo.HmIP[hmipAddress][device]) {
+                    localRssiInfo.HmIP[hmipAddress][device] = [];
+                }
+                if (!localRssiInfo.HmIP[device]) {
+                    localRssiInfo.HmIP[device] = {};
+                }
+                if (!localRssiInfo.HmIP[device][hmipAddress]) {
+                    localRssiInfo.HmIP[device][hmipAddress] = [];
+                }
+            }
+            if (params[2] === 'RSSI_DEVICE') {
+                localRssiInfo.HmIP[hmipAddress][device][0] = params[3];
+                localRssiInfo.HmIP[device][hmipAddress][1] = params[3];
+            } else if (params[2] === 'RSSI_PEER') {
+                localRssiInfo.HmIP[device][hmipAddress][0] = params[3];
+                localRssiInfo.HmIP[hmipAddress][device][1] = params[3];
+            }
+        }
         if (!stopping && !windowClosed) {
             ipcRpc.send('rpc', ['event', params]);
         }
@@ -454,7 +486,9 @@ function initIpc() {
     });
 
     ipcRpc.on('invalidateRssiInfo', (params, callback) => {
-        delete localRssiInfo[params[0]];
+        if (params[0] !== 'HmIP') {
+            delete localRssiInfo[params[0]];
+        }
         callback(null);
     });
 

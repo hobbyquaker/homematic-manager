@@ -220,6 +220,32 @@ const daemonIndex = {};
 const lastEvent = {};
 const connected = {};
 
+const hmipGetRssiQueue = [];
+let hmipGetRssiTimeout;
+
+function hmipGetRssi() {
+    clearTimeout(hmipGetRssiTimeout);
+    hmipGetRssiTimeout = setTimeout(() => {
+        Object.keys(localDevices.HmIP).forEach(address => {
+            if (address.endsWith(':0')) {
+                if (!hmipGetRssiQueue.includes(address)) {
+                    hmipGetRssiQueue.push(address);
+                }
+            }
+        });
+        hmipGetRssiShift();
+    }, 1000);
+}
+
+function hmipGetRssiShift() {
+    if (hmipGetRssiQueue.length > 0) {
+        const address = hmipGetRssiQueue.shift();
+        rpcProxy('HmIP', 'getParamset', [address, 'VALUES'], (err, res) => {
+            hmipGetRssiShift();
+        });
+    }
+}
+
 function initRpcClients() {
     log.info('initRpcClients');
 
@@ -279,6 +305,7 @@ function initRpcClients() {
             rpcClients[daemon].methodCall('listBidcosInterfaces', [], (err,res) => {
                 hmipAddress = res[0].ADDRESS;
                 localRssiInfo.HmIP[hmipAddress] = {};
+                hmipGetRssi();
             });
         }
 
@@ -351,6 +378,9 @@ const rpcMethods = {
             localDevices[daemon][dev.ADDRESS] = dev;
         }
         pjson.save('devices_' + config.ccuAddress, localDevices);
+        if (daemon === 'HmIP') {
+            hmipGetRssi();
+        }
         callback(null, '');
     },
     deleteDevices(err, params, callback) {
@@ -366,6 +396,9 @@ const rpcMethods = {
             delete localDevices[daemon][address];
         }
         pjson.save('devices_' + config.ccuAddress, localDevices);
+        if (daemon === 'HmIP') {
+            hmipGetRssi();
+        }
         callback(null, '');
     },
     replaceDevice(err, params, callback) {
@@ -380,6 +413,9 @@ const rpcMethods = {
         pjson.save('names_' + config.ccuAddress, localNames);
         delete localDevices[daemon][params[1]];
         pjson.save('devices_' + config.ccuAddress, localDevices);
+        if (daemon === 'HmIP') {
+            hmipGetRssi();
+        }
         callback(null, '');
     },
     listDevices(err, params, callback) {
@@ -428,6 +464,9 @@ const rpcMethods = {
         }
         log.debug('RPC -> listDevices response length ' + res.length);
         callback(null, res);
+        if (daemon === 'HmIP') {
+            hmipGetRssi();
+        }
     },
     'system.listMethods'(err, params, callback) {
         callback(null, Object.keys(rpcMethods));
@@ -652,6 +691,38 @@ function rpcProxy(daemon, method, params, callback) {
                     }
                 });
             }
+            break;
+        }
+        case 'getParamset': {
+            log.debug('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method + '(' + JSON.stringify(params).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
+            rpcClients[daemon].methodCall(method, params, (err, res) => {
+                if (!err && res && daemon === 'HmIP' && params[0].endsWith(':0')) {
+                    const device = params[0].split(':')[0];
+                    if (!localRssiInfo.HmIP[hmipAddress]) {
+                        localRssiInfo.HmIP[hmipAddress] = {};
+                    }
+                    if (!localRssiInfo.HmIP[hmipAddress][device]) {
+                        localRssiInfo.HmIP[hmipAddress][device] = [];
+                    }
+                    if (!localRssiInfo.HmIP[device]) {
+                        localRssiInfo.HmIP[device] = {};
+                    }
+                    if (!localRssiInfo.HmIP[device][hmipAddress]) {
+                        localRssiInfo.HmIP[device][hmipAddress] = [];
+                    }
+                    if (res.RSSI_DEVICE) {
+                        localRssiInfo.HmIP[hmipAddress][device][0] = res.RSSI_DEVICE;
+                        localRssiInfo.HmIP[device][hmipAddress][1] = res.RSSI_DEVICE;
+                    }
+                    if (res.RSSI_PEER) {
+                        localRssiInfo.HmIP[device][hmipAddress][0] = res.RSSI_PEER;
+                        localRssiInfo.HmIP[hmipAddress][device][1] = res.RSSI_PEER;
+                    }
+                }
+                if (callback) {
+                    callback(err, res);
+                }
+            });
             break;
         }
         default:

@@ -12,7 +12,7 @@
 Konfiguration und Administration von [HomeMatic](http://www.homematic.com) und HomematicIP Geräten.
 
 >  Mit dem Homematic Manager ist es möglich Geräte an- und abzulernen, Geräte-Konfigurationen und Direktverknüpfungen zu
-verwalten und vieles mehr.
+verwalten und vieles mehr. Eine Ausführlichere Beschreibung ist im [Homematic Forum](https://homematic-forum.de/forum/viewtopic.php?f=18&t=45134) zu finden.
 
 Unter [latest releases](https://github.com/hobbyquaker/homematic-manager/releases/latest) sind Downloads für macOS, 
 Linux und Windows zu finden.

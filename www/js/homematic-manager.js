@@ -123,6 +123,9 @@ const $dialogHelp = $('#dialog-help');
 const $dialogConfig = $('#dialog-config');
 const $dialogReplace = $('#dialog-replace');
 
+let alertOpen = false;
+let messagePending = false;
+
 // Entrypoint
 getConfig();
 
@@ -168,6 +171,7 @@ ipcRpc.on('rpc', data => {
             });
 
             $('#alert').html('<h3>' + count + ' ' + _('New') + (count > 1 ? '' : (language === 'de' ? 's' : '')) + ' ' + _('Device') + (count === 1 ? '' : (language === 'de' ? 'e' : 's')) + ' ' + _('introduced') + ':</h3>' + output);
+
             $('#dialog-alert').dialog('open');
             getDevices(() => {
                 getLinks(() => {
@@ -189,6 +193,10 @@ ipcRpc.on('rpc', data => {
                 output += '<br/>' + dev;
             });
             $('#alert').html('<h3>' + count + ' ' + _('device') + (count === 1 ? '' : (language === 'de' ? 'e' : 's')) + ' ' + _('deleted') + ':</h3>' + output);
+            alertOpen = true;
+            $dialogRpc.dialog('close');
+            $dialogAlert.dialog('close');
+            $dialogServicemessage.dialog('close');
             $('#dialog-alert').dialog('open');
             getDevices(() => {
                 getLinks(() => {
@@ -246,7 +254,13 @@ ipcRpc.on('rpc', data => {
                         $('#service-device').html(devName + ' (' + devAddress + ')');
                         $('#service-param').html(param);
                         $dialogRpc.dialog('close');
-                        $dialogServicemessage.dialog('open');
+                        $dialogAddCountdown.dialog('close');
+                        if (alertOpen) {
+                            messagePending = true;
+                        } else {
+                            $dialogServicemessage.dialog('open');
+                        }
+
                     }
                 } else {
                     // Muss Meldung gelöscht werden?
@@ -487,6 +501,11 @@ function initDialogsMisc() {
                 text: _('OK'),
                 click() {
                     $(this).dialog('close');
+                    alertOpen = false;
+                    if (messagePending) {
+                        $dialogServicemessage.dialog('open');
+                        messagePending = false;
+                    }
                 }
             }
         ]
@@ -4361,6 +4380,10 @@ function dialogAlert(text, title) {
     title = title || '&nbsp';
     $('#alert').html(text.replace('\n', '<br>'));
     $dialogAlert.dialog('option', 'title', title);
+    alertOpen = true;
+    $dialogRpc.dialog('close');
+    $dialogAlert.dialog('close');
+    $dialogServicemessage.dialog('close');
     $dialogAlert.dialog('open');
 }
 function rssiColor(rssi) {

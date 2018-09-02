@@ -2449,25 +2449,27 @@ function initDialogLinkParamset() {
             $linkSourceRoles.html(indexChannels[sender[0]].LINK_SOURCE_ROLES);
 
             if (sender.length === 1) {
-                listDevices.forEach(dev => {
-                    if (!dev.PARENT) {
-                        return;
+                selectOptions = [];
+                for (let j = 0, len = listDevices.length; j < len; j++) {
+                    if (!listDevices[j].PARENT) {
+                        continue;
                     }
-                    if (dev.ADDRESS.endsWith(':0')) {
-                        return;
+                    if (listDevices[j].ADDRESS.endsWith(':0')) {
+                        continue;
                     }
-                    if (!dev.LINK_SOURCE_ROLES) {
-                        return;
+                    if (!listDevices[j].LINK_SOURCE_ROLES) {
+                        continue;
                     }
-                    if (dev.TYPE !== indexChannels[sender[0]].TYPE) {
-                        return;
+                    if (listDevices[j].TYPE !== indexChannels[sender[0]].TYPE) {
+                        continue;
                     }
                     selectOptions.push({
-                        value: dev.ADDRESS,
-                        name: (names && names[dev.ADDRESS] ? names[dev.ADDRESS] : ''),
-                        text: dev.ADDRESS + ' ' + (names && names[dev.ADDRESS] ? names[dev.ADDRESS] : '')
+                        selected: sender[0] === listDevices[j].ADDRESS ? ' selected': '',
+                        value: listDevices[j].ADDRESS,
+                        name: (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : ''),
+                        text: listDevices[j].ADDRESS + ' ' + (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '')
                     });
-                });
+                }
 
                 selectOptions.sort((a, b) => {
                     const aName = a.name || a.value;
@@ -2476,22 +2478,20 @@ function initDialogLinkParamset() {
                 });
                 $selectLinkSender.html('');
                 selectOptions.forEach(opt => {
-                    $selectLinkSender.append('<option value="' + opt.value + '">' + opt.text + '</option>');
+                    $selectLinkSender.append('<option value="' + opt.value + '"' + opt.selected + '>' + opt.text + '</option>');
                 });
                 $selectLinkSender.multiselect('refresh');
             }
 
-            if (roles) {
-                roles.forEach(role => {
-                    if (indexTargetRoles[role]) {
-                        Object.keys(indexTargetRoles[role]).forEach(role => {
-                            const address = indexTargetRoles[role][role];
-                            if (targets.indexOf(address) === -1) {
-                                targets.push(address);
-                            }
-                        });
-                    }
-                });
+            for (let i = 0; i < roles.length; i++) {
+                if (indexTargetRoles[roles[i]]) {
+                    Object.keys(indexTargetRoles[roles[i]]).forEach(role => {
+                        const address = indexTargetRoles[roles[i]][role];
+                        if (targets.indexOf(address) === -1) {
+                            targets.push(address);
+                        }
+                    });
+                }
             }
 
             selectOptions = [];

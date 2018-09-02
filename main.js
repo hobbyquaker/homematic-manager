@@ -303,7 +303,7 @@ function initRpcClients() {
         init(daemon);
 
         if (daemon === 'HmIP') {
-            rpcClients[daemon].methodCall('listBidcosInterfaces', [], (err,res) => {
+            rpcClients[daemon].methodCall('listBidcosInterfaces', [], (err, res) => {
                 hmipAddress = res[0].ADDRESS;
                 localRssiInfo.HmIP[hmipAddress] = {};
                 hmipGetRssi();

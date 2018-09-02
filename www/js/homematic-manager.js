@@ -1165,14 +1165,14 @@ function initGridDevices() {
         }
         switch ($('#add-device-ip-mode').val()) {
             case 'local': {
-                const sgtin = $.trim($('#add-device-ip-address').val());
-                const key = $.trim($('#add-device-ip-key').val());
+                const sgtin = $.trim($('#add-device-ip-address').val()).toUpperCase().replace(/-/g, '');
+                const key = $.trim($('#add-device-ip-key').val()).toUpperCase().replace(/-/g, '');
                 if (sgtin && key) {
                     $('#dialog-add-device-ip').dialog('close');
                     rpcDialog(daemon, 'setInstallModeWithWhitelist', [true, time, [{
                         ADDRESS: sgtin,
                         KEY_MODE: 'LOCAL',
-                        KEY: key
+                        KEY: convertHmIPKeyBase32ToBase16(key)
                     }]], err => {
                         if (!err) {
                             $('#add-countdown').html(time);
@@ -4511,3 +4511,45 @@ function dialogConfigOpen() {
     $dialogConfig.dialog('open');
 }
 
+function convertHmIPKeyBase32ToBase16(valueString) {
+
+    var HMIP_KEY_CHARS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A',
+        'B', 'C', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'W', 'X', 'Y', 'Z' ];
+
+    var buffer = new ArrayBuffer(16),
+        keyValue = new Uint8Array(buffer),
+        value = 0,
+        counter = valueString.length - 1 ,
+        bits = 0,
+        byteCounter = keyValue.length - 1,
+        keyString = "";
+
+    while (counter >= 0) {
+        for(var i= 0; i < HMIP_KEY_CHARS.length; i++) {
+            if(HMIP_KEY_CHARS[i] == valueString.charAt(counter)) {
+                value |= i << bits;
+                //console.log(value +" - break");
+                break;
+            }
+        }
+
+        bits += 5;
+        counter--;
+        while (bits > 8 && byteCounter >= 0) {
+            keyValue[byteCounter] = value & 0xff;
+            value >>= 8;
+            bits -= 8;
+            byteCounter--;
+        }
+    }
+
+    for(var i = 0; i < keyValue.length; i++)
+    {
+        if (keyValue[i] < 16) {
+            keyString += "0";
+        }
+        keyString += keyValue[i].toString(16);
+    }
+
+    return keyString.toUpperCase();
+};

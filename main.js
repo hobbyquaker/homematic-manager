@@ -207,6 +207,7 @@ const localNames = pjson.load('names_' + config.ccuAddress) || {};
 const localRegaId = {};
 // Const localNamesIds = {};
 const localDevices = pjson.load('devices_' + config.ccuAddress) || {};
+localDevices.HmIP = localDevices.HmIP || {};
 const localParamsetDescriptions = pjson.load('paramset-descriptions-v2_' + config.ccuAddress) || {};
 const localRssiInfo = {HmIP: {}};
 let hmipAddress;

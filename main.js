@@ -584,7 +584,7 @@ function initIpc() {
                 script += `hmm_o.Name("${name}");\n`;
             }
         });
-        rega.script(script, err => {
+        rega.exec(script, err => {
             if (err) {
                 log.error(err);
             }

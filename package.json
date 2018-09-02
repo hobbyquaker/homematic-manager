@@ -1,6 +1,6 @@
 {
   "name": "homematic-manager",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "private": true,
   "dependencies": {
     "async": "2.6.1",
@@ -13,6 +13,7 @@
     "hm-discover": "1.1.0",
     "homematic-rega": "^1.2.6",
     "homematic-xmlrpc": "1.0.2",
+    "instascan": "^1.0.0",
     "jquery": "3.3.1",
     "jquery-ui-dist": "^1.12.1",
     "jquery-ui-multiselect-widget": "2.0.2",

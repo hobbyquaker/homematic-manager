@@ -306,3 +306,8 @@ textarea {
     text-decoration: none;
     cursor: pointer;
 }
+
+#qr {
+    width: 280px;
+    height: 210px;
+}

@@ -20,6 +20,8 @@ require('free-jqgrid/dist/i18n/grid.locale-de')(window, $);
 
 $.extend($.jgrid.defaults, {autoencode: false});
 
+const Instascan = require('instascan');
+
 const async = require('async');
 
 const unhandled = require('electron-unhandled');
@@ -124,7 +126,24 @@ const $dialogConfig = $('#dialog-config');
 const $dialogReplace = $('#dialog-replace');
 
 let alertOpen = false;
-let messagePending = false;
+const messagePending = false;
+
+let cameras = [];
+const scanner = new Instascan.Scanner({video: document.getElementById('qr')});
+
+scanner.addListener('scan', content => {
+    const match = content.match(/^EQ01SG([0-9A-F]{24})DLK([0-9A-F]{32})$/);
+    if (match) {
+        const [, sgtin, key] = match;
+        $('#add-device-ip-address').val(sgtin);
+        $('#add-device-ip-key').val(key);
+    }
+});
+Instascan.Camera.getCameras().then(c => {
+    cameras = c;
+}).catch(e => {
+    console.error(e);
+});
 
 // Entrypoint
 getConfig();
@@ -264,7 +283,6 @@ ipcRpc.on('rpc', data => {
                             $dialogServicemessage.dialog('open');
                         }
                         */
-
                     }
                 } else {
                     // Muss Meldung gelöscht werden?
@@ -507,7 +525,7 @@ function initDialogsMisc() {
                     $(this).dialog('close');
                     alertOpen = false;
                     /*
-                    if (messagePending) {
+                    If (messagePending) {
                         $dialogServicemessage.dialog('open');
                         messagePending = false;
                     }
@@ -990,8 +1008,8 @@ function initGridDevices() {
     $dialogAddDeviceIp.dialog({
         autoOpen: false,
         modal: true,
-        width: 540,
-        height: 320,
+        width: 640,
+        height: 480,
         buttons: [
             {
                 text: _('Cancel'),
@@ -1155,10 +1173,16 @@ function initGridDevices() {
                 case 'local':
                     $('.add-device-keyserver').hide();
                     $('.add-device-local').show();
+                    if (cameras.length > 0) {
+                        scanner.start(cameras[0]);
+                    }
                     break;
                 default:
                     $('.add-device-local').hide();
                     $('.add-device-keyserver').show();
+                    if (cameras.length > 0) {
+                        scanner.stop();
+                    }
             }
         }
     });
@@ -1174,11 +1198,14 @@ function initGridDevices() {
                 const sgtin = $.trim($('#add-device-ip-address').val()).toUpperCase().replace(/-/g, '');
                 const key = $.trim($('#add-device-ip-key').val()).toUpperCase().replace(/-/g, '');
                 if (sgtin && key) {
+                    if (cameras.length > 0) {
+                        scanner.stop();
+                    }
                     $('#dialog-add-device-ip').dialog('close');
                     rpcDialog(daemon, 'setInstallModeWithWhitelist', [true, time, [{
                         ADDRESS: sgtin,
                         KEY_MODE: 'LOCAL',
-                        KEY: convertHmIPKeyBase32ToBase16(key)
+                        KEY: key.length !== 32 ? convertHmIPKeyBase32ToBase16(key) : key
                     }]], err => {
                         if (!err) {
                             $('#add-countdown').html(time);
@@ -1198,6 +1225,9 @@ function initGridDevices() {
                 break;
             }
             default: {
+                if (cameras.length > 0) {
+                    scanner.stop();
+                }
                 $('#dialog-add-device-ip').dialog('close');
                 rpcAlert(daemon, 'setInstallMode', [true, time], err => {
                     if (!err) {
@@ -2489,7 +2519,7 @@ function initDialogLinkParamset() {
                         continue;
                     }
                     selectOptions.push({
-                        selected: sender[0] === listDevices[j].ADDRESS ? ' selected': '',
+                        selected: sender[0] === listDevices[j].ADDRESS ? ' selected' : '',
                         value: listDevices[j].ADDRESS,
                         name: (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : ''),
                         text: listDevices[j].ADDRESS + ' ' + (names && names[listDevices[j].ADDRESS] ? names[listDevices[j].ADDRESS] : '')
@@ -3522,7 +3552,6 @@ function initGridRssi() {
                 search: false,
                 align: 'center'
             });
-
         }
         groupHeaders.push({
             startColumnName: listInterfaces[i].ADDRESS + '_0',
@@ -3646,7 +3675,7 @@ function initGridRssi() {
         const rowId = $(this).parent().parent().attr('id');
         const rowData = $gridRssi.jqGrid('getRowData', rowId);
         rowData.INTERFACE = listInterfaces[$(this).attr('data-iface-index')].ADDRESS;
-        rpcDialog(daemon, 'setBidcosInterface', [$(this).attr('data-device'), listInterfaces[$(this).attr('data-iface-index')].ADDRESS, false], function () {
+        rpcDialog(daemon, 'setBidcosInterface', [$(this).attr('data-device'), listInterfaces[$(this).attr('data-iface-index')].ADDRESS, false], () => {
             rowData.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox">';
             for (let k = 0; k < listInterfaces.length; k++) {
                 rowData[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '"' + (k === ifaceIndex ? ' checked="checked"' : '') + '>';
@@ -3660,7 +3689,7 @@ function initGridRssi() {
         const i = $(this).attr('data-device-index');
         const rowId = $(this).parent().parent().attr('id');
         const rowData = $gridRssi.jqGrid('getRowData', rowId);
-        rpcDialog(daemon, 'setBidcosInterface', [$(this).attr('data-device'), listInterfaces[0].ADDRESS, $(this).is(':checked')], function () {
+        rpcDialog(daemon, 'setBidcosInterface', [$(this).attr('data-device'), listInterfaces[0].ADDRESS, $(this).is(':checked')], () => {
             rowData.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox"' + (checked ? ' checked="checked"' : '') + '>';
             rowData.INTERFACE = listInterfaces[0].ADDRESS;
             if (checked) {
@@ -4518,23 +4547,58 @@ function dialogConfigOpen() {
 }
 
 function convertHmIPKeyBase32ToBase16(valueString) {
+    const HMIP_KEY_CHARS = ['0',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        'A',
+        'B',
+        'C',
+        'E',
+        'F',
+        'G',
+        'H',
+        'J',
+        'K',
+        'L',
+        'M',
+        'N',
+        'P',
+        'Q',
+        'R',
+        'S',
+        'T',
+        'U',
+        'W',
+        'X',
+        'Y',
+        'Z'];
 
-    var HMIP_KEY_CHARS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A',
-        'B', 'C', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'W', 'X', 'Y', 'Z' ];
+    const buffer = new ArrayBuffer(16);
 
-    var buffer = new ArrayBuffer(16),
-        keyValue = new Uint8Array(buffer),
-        value = 0,
-        counter = valueString.length - 1 ,
-        bits = 0,
-        byteCounter = keyValue.length - 1,
-        keyString = "";
+    const keyValue = new Uint8Array(buffer);
+
+    let value = 0;
+
+    let counter = valueString.length - 1;
+
+    let bits = 0;
+
+    let byteCounter = keyValue.length - 1;
+
+    let keyString = '';
 
     while (counter >= 0) {
-        for(var i= 0; i < HMIP_KEY_CHARS.length; i++) {
-            if(HMIP_KEY_CHARS[i] == valueString.charAt(counter)) {
+        for (var i = 0; i < HMIP_KEY_CHARS.length; i++) {
+            if (HMIP_KEY_CHARS[i] == valueString.charAt(counter)) {
                 value |= i << bits;
-                //console.log(value +" - break");
+                // Console.log(value +" - break");
                 break;
             }
         }
@@ -4542,20 +4606,19 @@ function convertHmIPKeyBase32ToBase16(valueString) {
         bits += 5;
         counter--;
         while (bits > 8 && byteCounter >= 0) {
-            keyValue[byteCounter] = value & 0xff;
+            keyValue[byteCounter] = value & 0xFF;
             value >>= 8;
             bits -= 8;
             byteCounter--;
         }
     }
 
-    for(var i = 0; i < keyValue.length; i++)
-    {
+    for (var i = 0; i < keyValue.length; i++) {
         if (keyValue[i] < 16) {
-            keyString += "0";
+            keyString += '0';
         }
         keyString += keyValue[i].toString(16);
     }
 
     return keyString.toUpperCase();
-};
+}

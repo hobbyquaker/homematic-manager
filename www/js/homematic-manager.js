@@ -253,6 +253,9 @@ ipcRpc.on('rpc', data => {
                         const devName = names && names[devAddress] ? names[devAddress] : '';
                         $('#service-device').html(devName + ' (' + devAddress + ')');
                         $('#service-param').html(param);
+
+                        // TODO Tab Reiter Markierung
+                        /*
                         $dialogRpc.dialog('close');
                         $dialogAddCountdown.dialog('close');
                         if (alertOpen) {
@@ -260,6 +263,7 @@ ipcRpc.on('rpc', data => {
                         } else {
                             $dialogServicemessage.dialog('open');
                         }
+                        */
 
                     }
                 } else {
@@ -502,10 +506,12 @@ function initDialogsMisc() {
                 click() {
                     $(this).dialog('close');
                     alertOpen = false;
+                    /*
                     if (messagePending) {
                         $dialogServicemessage.dialog('open');
                         messagePending = false;
                     }
+                    */
                 }
             }
         ]

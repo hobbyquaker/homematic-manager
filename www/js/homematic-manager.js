@@ -1927,6 +1927,7 @@ function initDialogParamset() {
             case 'FLOAT':
                 val = {explicitDouble: parseFloat(val)};
                 break;
+            case 'ENUM':
             case 'INTEGER':
                 val = parseInt(val, 10);
                 break;
@@ -2003,6 +2004,7 @@ function putParamset() {
                         val = Boolean(val);
                     }
                     break;
+                case 'ENUM':
                 case 'INTEGER':
                     val = parseInt(val, 10);
                     break;
@@ -2870,6 +2872,7 @@ function putLinkParamset(direction, channel1, channel2, callback) {
                         val = Boolean(val);
                     }
                     break;
+                case 'ENUM':
                 case 'INTEGER':
                     val = parseInt(val, 10) || 0;
                     break;

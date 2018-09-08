@@ -1,6 +1,7 @@
 const electron = require('electron');
 const os = require('os');
 const net = require('net');
+const fs = require('fs');
 const path = require('path');
 const url = require('url');
 
@@ -66,6 +67,14 @@ config.ccuAddressSelect = [];
 hmDiscover(f => {
     config.ccuAddressSelect = f;
 });
+
+let rpcLog;
+
+if (config.rpcLogFolder) {
+    if (fs.existsSync(config.rpcLogFolder)) {
+        rpcLog = config.rpcLogFolder;
+    }
+}
 
 let mainWindow;
 let windowClosed;
@@ -727,6 +736,11 @@ function rpcProxy(daemon, method, params, callback) {
             break;
         }
         default:
+            if (rpcLog && method === 'putParamset') {
+                const logfile = path.join(rpcLog, (new Date()).getTime() + '_' + daemon + '_' + method + '.json');
+                fs.writeFile(logfile, JSON.stringify(params, null, '  '));
+            }
+
             log.debug('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method + '(' + JSON.stringify(params).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
             rpcClients[daemon].methodCall(method, params, (err, res) => {
                 if (callback) {

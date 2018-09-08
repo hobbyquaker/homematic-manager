@@ -552,6 +552,7 @@ function initDialogsMisc() {
                     $(this).dialog('close');
                     config.rpcInitIp = $.trim($('#init-ip-select').val());
                     config.ccuAddress = $.trim($('#ccu-address').val());
+                    config.rpcLogFolder = $.trim($('#rpc-log-folder').val());
                     ipcRpc.send('config', [config]);
                 }
             },
@@ -4534,6 +4535,7 @@ function dialogConfigOpen() {
     });
 
     $('#ccu-address').val(config.ccuAddress);
+    $('#rpc-log-folder').val(config.rpcLogFolder);
 
     $('#ccu-address-select').html('<option>' + _('Select') + '</option>');
     config.ccuAddressSelect.forEach(ccu => {

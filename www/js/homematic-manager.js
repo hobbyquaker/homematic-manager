@@ -3391,7 +3391,7 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
                     break;
                 case 'FLOAT':
                     data[param] = parseFloat(parseFloat(data[param]).toFixed(6));
-                    input = '<input class="linkparamset-input" data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '" type="text" value="' + data[param] + '" data-val-prev="' + data[param] + '" data-type="STRING"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
+                    input = '<input class="linkparamset-input" data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '" type="text" value="' + data[param] + '" data-val-prev="' + data[param] + '" data-type="FLOAT"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;
                     break;
                 default:
                     input = '<input class="linkparamset-input" data-unit="' + desc[param].UNIT + '" id="linkparamset-input-' + (direction ? direction + '-' : '') + param + '" type="text" value="' + data[param] + '" data-val-prev="' + data[param] + '" data-type="STRING"' + (desc[param].OPERATIONS & 2 ? '' : ' disabled="disabled"') + '/>' + unit;

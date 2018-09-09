@@ -181,7 +181,7 @@ function findInterfaces() {
                     ip: config.ccuAddress,
                     port: ports[iface],
                     protocol: iface === 'HmIP' ? 'xmlrpc' : 'binrpc',
-                    reinitTimeout: iface === 'HmIP' ? 240000 : 45000
+                    reinitTimeout: iface === 'HmIP' ? 600000 : 60000
                 };
             }
         });

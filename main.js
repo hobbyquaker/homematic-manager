@@ -298,8 +298,7 @@ function initRpcClients() {
 
     let count = 0; // Math.floor(Math.random() * 65536);
     Object.keys(config.daemons).forEach(daemon => {
-        config.daemons[daemon].ident = 'hmm_' + count;
-
+        config.daemons[daemon].ident = daemon === 'CUxD' ? 'CUxD' : 'hmm_' + count;
         daemonIndex[config.daemons[daemon].ident] = daemon;
 
         rpcClients[daemon] = (config.daemons[daemon].protocol === 'binrpc' ? binrpc : xmlrpc).createClient({
@@ -345,8 +344,9 @@ const rpcMethods = {
     },
     event(err, params, callback) {
         log.debug('RPC <- event ' + JSON.stringify(params));
-        lastEvent[daemonIndex[params[0]]] = (new Date()).getTime();
-        if (daemonIndex[params[0]] === 'HmIP') {
+        const evDaemon = params[0] === 'CUxD' ? 'CUxD' : daemonIndex[params[0]];
+        lastEvent[evDaemon] = (new Date()).getTime();
+        if (evDaemon === 'HmIP') {
             const device = params[1].split(':')[0];
             if (params[2].startsWith('RSSI_')) {
                 if (!localRssiInfo.HmIP[hmipAddress]) {

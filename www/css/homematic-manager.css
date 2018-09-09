@@ -311,3 +311,8 @@ textarea {
     width: 280px;
     height: 210px;
 }
+
+#dialog-config label {
+    width: 210px;
+    display: inline-block;
+}

@@ -553,6 +553,7 @@ function initDialogsMisc() {
                     config.rpcInitIp = $.trim($('#init-ip-select').val());
                     config.ccuAddress = $.trim($('#ccu-address').val());
                     config.rpcLogFolder = $.trim($('#rpc-log-folder').val());
+                    config.clearCache = $.trim($('#clear-cache').is(':checked'));
                     ipcRpc.send('config', [config]);
                 }
             },

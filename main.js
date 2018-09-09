@@ -212,6 +212,8 @@ app.on('activate', () => {
 
 app.on('quit', stop);
 
+
+
 const localNames = pjson.load('names_' + config.ccuAddress) || {};
 const localRegaId = {};
 // Const localNamesIds = {};
@@ -513,6 +515,13 @@ function initIpc() {
     ipcRpc.on('config', params => {
         config = params[0];
         // Console.log(config);
+        if (config.clearCache) {
+            log.info('clear cache');
+            delete config.clearCache;
+            pjson.save('names_' + config.ccuAddress, {});
+            pjson.save('devices_' + config.ccuAddress, {});
+            pjson.save('paramset-descriptions-v2_' + config.ccuAddress, {});
+        }
         pjson.save('config', config);
         app.relaunch();
         mainWindow.destroy();

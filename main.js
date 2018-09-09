@@ -656,6 +656,7 @@ function rpcProxy(daemon, method, params, callback) {
                         res.forEach(dev => {
                             localDevices[daemon][dev.ADDRESS] = dev;
                         });
+                        pjson.save('devices_' + config.ccuAddress, localDevices);
                     }
                     res = res || [];
                     log.debug('respond to listDevices from interface (' + res.length + ')');

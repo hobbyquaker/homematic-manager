@@ -3610,8 +3610,10 @@ function initGridRssi() {
         caption: '',
         buttonicon: 'ui-icon-refresh',
         onClickButton() {
-            ipcRpc.send('invalidateRssiInfo', [daemon], () => {
-                getRfdData();
+            ipcRpc.send('invalidateDeviceCache', [daemon], () => {
+                ipcRpc.send('invalidateRssiInfo', [daemon], () => {
+                    getDevices(getRfdData);
+                });
             });
         },
         position: 'first',
@@ -3681,14 +3683,19 @@ $body.on('click', '.interface-set', function () {
     const rowId = parseInt($(this).parent().parent().attr('id'), 10);
     const rowData = $gridRssi.jqGrid('getRowData', rowId);
     rowData.INTERFACE = listInterfaces[ifaceIndex].ADDRESS;
+
     rpcDialog(daemon, 'setBidcosInterface', [$(this).attr('data-device'), listInterfaces[ifaceIndex].ADDRESS], () => {
-        rowData.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox">';
-        console.log(i, ifaceIndex, rowData.INTERFACE);
-        for (let k = 0; k < listInterfaces.length; k++) {
-            console.log(k);
-            rowData[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '"' + (k === ifaceIndex ? ' checked="checked"' : '') + '>';
-        }
-        $gridRssi.jqGrid('setRowData', rowId, rowData);
+        ipcRpc.send('invalidateDeviceCache', [daemon], () => {
+            getDevices(() => {
+                rowData.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox">';
+                console.log(i, ifaceIndex, rowData.INTERFACE);
+                for (let k = 0; k < listInterfaces.length; k++) {
+                    console.log(k);
+                    rowData[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '"' + (k === ifaceIndex ? ' checked="checked"' : '') + '>';
+                }
+                $gridRssi.jqGrid('setRowData', rowId, rowData);
+            });
+        });
     });
 });
 
@@ -3697,16 +3704,22 @@ $body.on('change', '.checkbox-roaming', function () {
     const i = parseInt($(this).attr('data-device-index'), 10);
     const rowId = parseInt($(this).parent().parent().attr('id'), 10);
     const rowData = $gridRssi.jqGrid('getRowData', rowId);
+
     rpcDialog(daemon, 'setBidcosInterface', [$(this).attr('data-device'), listInterfaces[0].ADDRESS, checked], () => {
-        rowData.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox"' + (checked ? ' checked="checked"' : '') + '>';
-        rowData.INTERFACE = listInterfaces[0].ADDRESS;
-        if (checked) {
-            for (let k = 0; k < listInterfaces.length; k++) {
-                rowData[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '"' + (k === 0 ? ' checked="checked"' : '') + '>';
-            }
-        }
-        $gridRssi.jqGrid('setRowData', rowId, rowData);
+        ipcRpc.send('invalidateDeviceCache', [daemon], () => {
+            getDevices(() => {
+                rowData.roaming = '<input class="checkbox-roaming" data-device-index="' + i + '" data-device="' + listDevices[i].ADDRESS + '" type="checkbox"' + (checked ? ' checked="checked"' : '') + '>';
+                rowData.INTERFACE = listInterfaces[0].ADDRESS;
+                if (checked) {
+                    for (let k = 0; k < listInterfaces.length; k++) {
+                        rowData[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '"' + (k === 0 ? ' checked="checked"' : '') + '>';
+                    }
+                }
+                $gridRssi.jqGrid('setRowData', rowId, rowData);
+            });
+        });
     });
+
 });
 
 function refreshGridRssi() {
@@ -3750,6 +3763,7 @@ function refreshGridRssi() {
                         '' : listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][0]);
                     line[listInterfaces[k].ADDRESS + '_1'] = (listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1] === 65536 ?
                         '' : listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1]);
+                    console.log(listDevices[i].ADDRESS, 'dev iface, iface addr', listDevices[i].INTERFACE, listInterfaces[k].ADDRESS)
                     if (listDevices[i].INTERFACE === listInterfaces[k].ADDRESS) {
                         line[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '" checked="checked">';
                     } else {

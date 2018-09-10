@@ -2747,9 +2747,10 @@ function initDialogLinkParamset() {
         $('#save-link-info').button('enable');
     });
     $tableEasymode.on('change', '.easymode-select-input', function () {
-        const val = $(this).find('option:selected').val();
+        const val = parseInt($(this).find('option:selected').val(), 10);
         const $input = $(this).parent().find('input');
         if (val === 99999999 || val === 99999998) {
+
             $input.show();
         } else {
             $input.hide();

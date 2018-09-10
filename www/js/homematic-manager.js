@@ -2202,8 +2202,8 @@ function initGridLinks() {
             $selectLinkReceiver.html('').multiselect('refresh').multiselect('disable');
             $linkSourceRoles.html('');
             $('#link-target-roles').html('');
-            $('.add-link-create').button('disable');
-            $('.add-link-create-edit').button('disable');
+            //$('.add-link-create').button('disable');
+            //$('.add-link-create-edit').button('disable');
             $dialogAddLink.dialog('open');
         },
         position: 'first',
@@ -2573,8 +2573,8 @@ function initDialogLinkParamset() {
             selectOptions.forEach(opt => {
                 $selectLinkReceiver.append('<option value="' + opt.value + '">' + opt.text + '</option>');
             });
-            $('.add-link-create').button('disable');
-            $('.add-link-create-edit').button('disable');
+            //$('.add-link-create').button('disable');
+            //$('.add-link-create-edit').button('disable');
 
             $selectLinkReceiver.multiselect('refresh');
             $selectLinkReceiver.multiselect('enable');
@@ -2691,8 +2691,8 @@ function initDialogLinkParamset() {
                 $selectLinkReceiver.multiselect('refresh');
             }
         } else {
-            $('.add-link-create').button('disable');
-            $('.add-link-create-edit').button('disable');
+            //$('.add-link-create').button('disable');
+            //$('.add-link-create-edit').button('disable');
 
             const selectOptions = [];
 
@@ -2766,7 +2766,7 @@ function initDialogLinkParamset() {
         });
     });
     $('#save-link-info').click(function () {
-        $(this).button('disable');
+        //$(this).button('disable');
 
         const sender = $('#edit-linkparamset-sender').val();
         const receiver = $('#edit-linkparamset-receiver').val();
@@ -2904,7 +2904,7 @@ function putLinkParamset(direction, channel1, channel2, callback) {
     }
 }
 function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver) {
-    $('#save-link-info').button('disable');
+    //$('#save-link-info').button('disable');
     $('#edit-link-input-name').val(data0.NAME);
     $('#edit-link-input-description').val(data0.DESCRIPTION);
 
@@ -3056,7 +3056,7 @@ function dialogLinkparamset(data0, data1, desc1, data2, desc2, sender, receiver)
         // Buttons
         $('button.paramset-setValue:not(.ui-button)').button();
 
-        $('button.linkparamset-save').button('disable');
+        //$('button.linkparamset-save').button('disable');
 
         $('.linkparamset-input, .easymode-param, #linkparamset-profile').change(() => {
             $('button.linkparamset-save').button('enable');

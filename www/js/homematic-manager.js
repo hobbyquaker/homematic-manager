@@ -3092,15 +3092,19 @@ function elementEasyMode(options, val) {
             ];
 
             form += '<select class="easymode-select-input" id="">';
+            let enterValue = true;
             selectOptions.forEach(option => {
                 form += '<option value="' + option.value + '"';
-                if (option.value === parseFloat(val)) {
+                if (option.value === parseFloat(val) || enterValue && option.value === 99999999) {
                     form += ' selected="selected">' + option.text + '</option>';
+                    if (option.value !== 99999999) {
+                        enterValue = false;
+                    }
                 } else {
                     form += '>' + option.text + '</option>';
                 }
             });
-            form += '</select><input value="' + val + '" style="display:none;" id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
+            form += '</select><input value="' + val + '" ' + (enterValue ? '' : 'style="display:none;" ') + 'id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
 
             break;
         }
@@ -3128,16 +3132,19 @@ function elementEasyMode(options, val) {
             ];
 
             form += '<select class="easymode-select-input" id="">';
+            let enterValue = true;
             selectOptions.forEach(option => {
                 form += '<option value="' + option.value + '"';
-                if (option.value === parseFloat(val)) {
+                if (option.value === parseFloat(val) || enterValue && option.value === 99999999) {
                     form += ' selected="selected">' + option.text + '</option>';
+                    if (option.value !== 99999999) {
+                        enterValue = false;
+                    }
                 } else {
                     form += '>' + option.text + '</option>';
                 }
             });
-            form += '</select><input value="' + val + '" style="display:none;" id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
-
+            form += '</select><input value="' + val + '" ' + (enterValue ? '' : 'style="display:none;" ') + 'id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
             break;
         }
         case 'DIM_ONLEVEL': {
@@ -3156,15 +3163,19 @@ function elementEasyMode(options, val) {
                 {value: 99999998, text: easymodes.lang[language].GENERIC.enterValue}
             ];
             form += '<select class="easymode-select-input" id="">';
+            let enterValue = true;
             selectOptions.forEach(option => {
                 form += '<option value="' + option.value + '"';
-                if (option.value === parseFloat(val)) {
+                if (option.value === parseFloat(val) || enterValue && option.value === 99999998) {
                     form += ' selected="selected">' + option.text + '</option>';
+                    if (option.value !== 99999998) {
+                        enterValue = false;
+                    }
                 } else {
                     form += '>' + option.text + '</option>';
                 }
             });
-            form += '</select><input value="' + val + '" style="display:none;" id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
+            form += '</select><input value="' + val + '" ' + (enterValue ? '' : 'style="display:none;" ') + 'id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
 
             break;
         }
@@ -3184,15 +3195,19 @@ function elementEasyMode(options, val) {
                 {value: 99999998, text: easymodes.lang[language].GENERIC.enterValue}
             ];
             form += '<select class="easymode-select-input" id="">';
+            let enterValue = true;
             selectOptions.forEach(option => {
                 form += '<option value="' + option.value + '"';
-                if (option.value === parseFloat(val)) {
+                if (option.value === parseFloat(val) || enterValue && option.value === 99999998) {
                     form += ' selected="selected">' + option.text + '</option>';
+                    if (option.value !== 99999998) {
+                        enterValue = false;
+                    }
                 } else {
                     form += '>' + option.text + '</option>';
                 }
             });
-            form += '</select><input value="' + val + '" style="display:none;" id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
+            form += '</select><input value="' + val + '" ' + (enterValue ? '' : 'style="display:none;" ') + 'id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
 
             break;
         }
@@ -3212,15 +3227,19 @@ function elementEasyMode(options, val) {
             ];
 
             form += '<select class="easymode-select-input" id="">';
+            let enterValue = true;
             selectOptions.forEach(option => {
                 form += '<option value="' + option.value + '"';
-                if (option.value === val) {
+                if (option.value === val || enterValue && option.value === 99999999) {
                     form += ' selected="selected">' + option.text + '</option>';
+                    if (option.value !== 99999999) {
+                        enterValue = false;
+                    }
                 } else {
                     form += '>' + option.text + '</option>';
                 }
             });
-            form += '</select><input value="' + val + '" style="display:none;" id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
+            form += '</select><input value="' + val + '" ' + (enterValue ? '' : 'style="display:none;" ') + 'id="" class="easymode-param" data-binds="' + options.combo.join(',') + '">';
 
             break;
         }

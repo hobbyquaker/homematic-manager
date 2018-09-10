@@ -748,7 +748,7 @@ function rpcProxy(daemon, method, params, callback) {
         default:
             if (rpcLog && method === 'putParamset') {
                 const logfile = path.join(rpcLog, (new Date()).getTime() + '_' + daemon + '_' + method + '.json');
-                fs.writeFile(logfile, JSON.stringify(params, null, '  '));
+                fs.writeFile(logfile, JSON.stringify(params, null, '  '), () => {});
             }
 
             log.debug('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method + '(' + JSON.stringify(params).slice(1).slice(0, -1).replace(/,/, ', ') + ')');

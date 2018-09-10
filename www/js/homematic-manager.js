@@ -2895,7 +2895,12 @@ function putLinkParamset(direction, channel1, channel2, callback) {
         if (isMulti) {
             multi.forEach(link => {
                 const tmp = link.split(';');
-                rpcDialog(daemon, 'putParamset', [tmp[0], tmp[1], values]);
+                if (direction === 'sender-receiver') {
+                    rpcDialog(daemon, 'putParamset', [tmp[0], tmp[1], values]);
+                } else {
+                    rpcDialog(daemon, 'putParamset', [tmp[1], tmp[0], values]);
+                }
+
             });
         }
     }

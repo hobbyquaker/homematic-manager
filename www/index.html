@@ -302,7 +302,10 @@
                 <option class="translate">Select</option>
             </select>
         </p>
-
+        <p>
+            <label for="rpc-delay" class="translate">RPC Delay (ms)</label>
+            <input id="rpc-delay" type="number">
+        </p>
         <p>
             <label for="rpc-log-folder" class="translate">RPC Log Folder</label>
             <input id="rpc-log-folder" size="50">
@@ -314,8 +317,8 @@
 
     </div>
     <div id="dialog-rpc" class="translateT" title="RPC execution">
-        <span id="rpc-message" style="height: 32px; display: block"></span>
-        <div style="height: 24px; padding: 6px; display: block" ><img id="rpc-progress" src="images/ajax-loader.gif"></div>
+        <span id="rpc-message" style="height: 18px; padding-top: 4px; display: block"></span>
+        <div style="height: 18px; padding: 0 6px 0 6px; display: block" ><img id="rpc-progress" src="images/ajax-loader.gif"></div>
         <span id="rpc-command"></span>
     </div>
     <div id="dialog-disconnect" class="translateT" class="translateT" title="Disconnected">

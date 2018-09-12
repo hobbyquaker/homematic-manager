@@ -42,6 +42,8 @@ log.setLevel(isDev ? 'debug' : 'error');
 
 let config = pjson.load('config') || {};
 
+config.rpcDelay = config.rpcDelay || 3000;
+
 config.version = pkg.version;
 
 config.rpcInitIpSelect = [];

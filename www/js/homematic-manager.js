@@ -504,7 +504,7 @@ function initDialogsMisc() {
         autoOpen: false,
         closeOnEscape: false,
         width: 400,
-        height: 400,
+        height: 600,
         open() {
             $(this).parent().children().children('.ui-dialog-titlebar-close').hide();
         }
@@ -553,6 +553,7 @@ function initDialogsMisc() {
                     config.rpcInitIp = $.trim($('#init-ip-select').val());
                     config.ccuAddress = $.trim($('#ccu-address').val());
                     config.rpcLogFolder = $.trim($('#rpc-log-folder').val());
+                    config.rpcDelay = parseInt($.trim($('#rpc-delay').val()), 10) || 100;
                     config.clearCache = $.trim($('#clear-cache').is(':checked'));
                     ipcRpc.send('config', [config]);
                 }
@@ -1834,7 +1835,7 @@ function initDialogParamset() {
         autoOpen: false,
         modal: true,
         width: 800,
-        height: 480,
+        height: 550,
         buttons: [
             {
                 text: _('putParamset'),
@@ -1960,7 +1961,7 @@ function putParamset() {
     const values = {};
     let count = 0;
     const multi = $selectParamsetMultiselect.val();
-    const isMulti = Boolean(multi);
+    const isMulti = Boolean(multi.length);
 
     $('[id^="paramset-input"]').each(function () {
         const $input = $(this);
@@ -2441,7 +2442,7 @@ function initDialogLinkParamset() {
         autoOpen: false,
         modal: true,
         width: 960,
-        height: 480,
+        height: 550,
         buttons: [
             {
                 text: _('Cancel'),
@@ -2811,18 +2812,39 @@ function initDialogLinkParamset() {
         }
     });
 }
+
 function putLinkParamsets() {
     const sender = $('#edit-linkparamset-sender').val();
     const receiver = $('#edit-linkparamset-receiver').val();
-    putLinkParamset('sender-receiver', sender, receiver, () => {
-        putLinkParamset('receiver-sender', receiver, sender);
+
+    const multi = $selectLinkParamsetMultiselect.val();
+    const isMulti = Boolean(multi.length);
+
+    const queue = [];
+
+    queue.push({direction: 'sender-receiver', channel1: sender, channel2: receiver, isMulti});
+    queue.push({direction: 'receiver-sender', channel1: receiver, channel2: sender, isMulti});
+
+    if (isMulti) {
+        multi.forEach(link => {
+            const [mSender, mReceiver] = link.split(';');
+            queue.push({direction: 'sender-receiver', channel1: mSender, channel2: mReceiver, isMulti});
+            queue.push({direction: 'receiver-sender', channel1: mReceiver, channel2: mSender, isMulti});
+        });
+    }
+
+    async.mapSeries(queue, (item, callback) => {
+        console.log(item);
+        const {direction, channel1, channel2, isMulti} = item;
+        putLinkParamset(direction, channel1, channel2, isMulti, callback);
+    }, () => {
+        console.log('putLinkParamsets done!');
     });
 }
-function putLinkParamset(direction, channel1, channel2, callback) {
+
+function putLinkParamset(direction, channel1, channel2, isMulti, callback) {
     const values = {};
     let count = 0;
-    const multi = $selectLinkParamsetMultiselect.val();
-    const isMulti = Boolean(multi);
     $('[id^="linkparamset-input-' + direction + '"]').each(function () {
         const $input = $(this);
         if (!$input.is(':disabled')) {
@@ -2890,21 +2912,9 @@ function putLinkParamset(direction, channel1, channel2, callback) {
         }
     });
 
-    if (count > 0 || isMulti) {
-        rpcDialog(daemon, 'putParamset', [channel1, channel2, values]);
-        if (isMulti) {
-            multi.forEach(link => {
-                const tmp = link.split(';');
-                if (direction === 'sender-receiver') {
-                    rpcDialog(daemon, 'putParamset', [tmp[0], tmp[1], values]);
-                } else {
-                    rpcDialog(daemon, 'putParamset', [tmp[1], tmp[0], values]);
-                }
-
-            });
-        }
-    }
-    if (typeof (callback) === 'function') {
+    if (count > 0) {
+        rpcDialog(daemon, 'putParamset', [channel1, channel2, values], callback);
+    } else if (typeof callback === 'function') {
         callback(null, null);
     }
 }
@@ -3335,7 +3345,7 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
         dialogAlert('formLinkParamset paramset missing\nPlease try again.', 'ERROR');
         throw (new Error('paramsetDescription missing'));
     }
-    Object.keys(desc).forEach(param => {
+    Object.keys(desc).sort().forEach(param => {
         let unit = '';
         let hidden;
         count += 1;
@@ -3445,9 +3455,11 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
         if (direction === 'sender-receiver') {
             $('#toggle-link-sender').show();
         }
+        /*
         resultArr.sort((a, b) => {
             return a.order - b.order;
         });
+        */
         for (let i = 0; i < resultArr.length; i++) {
             elem.append(resultArr[i].fragment);
         }
@@ -4395,6 +4407,7 @@ function rpcDialog(daemon, cmd, params, callback) {
 // RPC execution Wrappers
 function rpcDialogShift() {
     if (rpcDialogQueue.length === 0) {
+        $dialogRpc.dialog('close');
         return;
     }
     rpcDialogPending = true;
@@ -4413,35 +4426,24 @@ function rpcDialogShift() {
         if (err) {
             $dialogRpc.parent().children().children('.ui-dialog-titlebar-close').show();
             $('#rpc-message').html('<span style="color: red; font-weight: bold;">' + (err.faultString ? err.faultString : JSON.stringify(err)) + '</span>');
-            setTimeout(() => {
-                rpcDialogPending = false;
-                rpcDialogShift();
-            }, 1500);
         } else if (res && res.faultCode) {
             $dialogRpc.parent().children().children('.ui-dialog-titlebar-close').show();
             $('#rpc-message').html('<span style="color: orange; font-weight: bold;">' + res.faultString + ' (' + res.faultCode + ')</span>');
-            setTimeout(() => {
-                rpcDialogPending = false;
-                rpcDialogShift();
-            }, 1500);
         } else {
             $dialogRpc.parent().children().children('.ui-dialog-titlebar-close').hide();
             const resText = res ? ('<br>' + (typeof res === 'string' ? res : JSON.stringify(res, null, '  '))) : '';
             $('#rpc-message').html('<span style="color: green;">success</span><br>' + resText);
-            setTimeout(() => {
-                rpcDialogPending = false;
-                if (rpcDialogQueue.length > 0) {
-                    rpcDialogShift();
-                } else {
-                    $dialogRpc.dialog('close');
-                }
-            }, 1500);
         }
-        if (typeof callback === 'function') {
-            callback(err, res);
-        }
+        setTimeout(() => {
+            rpcDialogPending = false;
+            rpcDialogShift();
+            if (typeof callback === 'function') {
+                callback(err, res);
+            }
+        }, config.rpcDelay);
     });
 }
+
 function rpcAlert(daemon, cmd, params, callback) {
     callback = callback || function () {};
     ipcRpc.send('rpc', [daemon, cmd, params], (err, res) => {
@@ -4579,6 +4581,7 @@ function dialogConfigOpen() {
 
     $('#ccu-address').val(config.ccuAddress);
     $('#rpc-log-folder').val(config.rpcLogFolder);
+    $('#rpc-delay').val(config.rpcDelay);
 
     $('#ccu-address-select').html('<option>' + _('Select') + '</option>');
     config.ccuAddressSelect.forEach(ccu => {

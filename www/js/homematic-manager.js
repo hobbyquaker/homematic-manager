@@ -3535,7 +3535,6 @@ function getRfdData() {
                 listInterfaces = data || [];
                 if (['BidCos-RF', 'HmIP'].includes(config.daemons[daemon].type)) {
                     rpcAlert(daemon, 'rssiInfo', [], (err, data) => {
-                        console.log('rssiInfo', daemon, JSON.stringify(data));
                         listRssi = data;
                         $('#gbox_grid-rssi').show();
                         initGridRssi();
@@ -3552,8 +3551,23 @@ function getRfdData() {
         });
     }
 }
+
+let sortnameGridRssi;
+let sortorderGridRssi;
+let filterGridRssi;
+
 function initGridRssi() {
+    console.log('initGridRssi');
     if ($gridRssi.hasClass('ui-jqgrid-btable') && $gridRssi.jqGrid) {
+
+        sortnameGridRssi = $gridRssi.jqGrid('getGridParam', 'sortname');
+        sortorderGridRssi = $gridRssi.jqGrid('getGridParam', 'sortorder');
+        filterGridRssi = {
+            Name: $('#gs_grid-rssi_Name').val(),
+            ADDRESS: $('#gs_grid-rssi_ADDRESS').val(),
+            TYPE: $('#gs_grid-rssi_TYPE').val(),
+            INTERFACE: $('#gs_grid-rssi_INTERFACE').val()
+        };
         $gridRssi.jqGrid('GridUnload');
     }
     const colNamesRssi = ['Name', 'ADDRESS', 'TYPE', 'INTERFACE', 'RF_ADDRESS', 'ROAMING'];
@@ -3806,7 +3820,6 @@ function refreshGridRssi() {
                         '' : listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][0]);
                     line[listInterfaces[k].ADDRESS + '_1'] = (listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1] === 65536 ?
                         '' : listRssi[listDevices[i].ADDRESS][listInterfaces[k].ADDRESS][1]);
-                    console.log(listDevices[i].ADDRESS, 'dev iface, iface addr', listDevices[i].INTERFACE, listInterfaces[k].ADDRESS)
                     if (listDevices[i].INTERFACE === listInterfaces[k].ADDRESS) {
                         line[listInterfaces[k].ADDRESS + '_set'] = '<input type="radio" class="interface-set" name="iface_' + i + '" data-device-index="' + i + '" data-iface-index="' + k + '" data-device="' + listDevices[i].ADDRESS + '" value="' + listInterfaces[k].ADDRESS + '" checked="checked">';
                     } else {
@@ -3829,7 +3842,20 @@ function refreshGridRssi() {
         }
         $gridRssi.jqGrid('addRowData', '_id', rowData);
     }
+
+    $gridRssi.jqGrid('setGridParam', {
+        sortname: sortnameGridRssi || 'Name',
+        sortorder: sortorderGridRssi || 'asc'
+    });
     $gridRssi.trigger('reloadGrid');
+    /* Todo Trigger filtering
+    if (filterGridRssi) {
+        $('#gs_grid-rssi_Name').val(filterGridRssi.Name).trigger('change');
+        $('#gs_grid-rssi_ADDRESS').val(filterGridRssi.ADDRESS).trigger('change');
+        $('#gs_grid-rssi_TYPE').val(filterGridRssi.TYPE).trigger('change');
+        $('#gs_grid-rssi_INTERFACE').val(filterGridRssi.INTERFACE).trigger('change');
+    }
+    */
     if (daemon === 'HmIP') {
         $gridRssi.jqGrid('hideCol', 'roaming');
         $gridRssi.jqGrid('hideCol', 'INTERFACE');

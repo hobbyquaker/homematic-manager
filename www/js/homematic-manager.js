@@ -1410,6 +1410,7 @@ function refreshGridDevices() {
         if (listDevices[i].RF_ADDRESS) {
             listDevices[i].RF_ADDRESS = parseInt(listDevices[i].RF_ADDRESS, 10).toString(16);
         }
+        let updatePending = false;
 
         if (daemon === 'BidCos-RF' || daemon === 'HmIP') {
             const msgs = [];
@@ -1441,6 +1442,9 @@ function refreshGridDevices() {
                         case 'CONFIG_PENDING':
                             msgs.push('<img title="CONFIG_PENDING" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/config_pending.png">');
                             break;
+                        case 'UPDATE_PENDING':
+                            updatePending = true;
+                            break;
                         default:
                     }
                 }
@@ -1463,6 +1467,8 @@ function refreshGridDevices() {
                     break;
                 default:
             }
+        } else if (updatePending) {
+            listDevices[i].FIRMWARE += ' <span class="firmware-status">update pending</span>';
         } else if (listDevices[i].AVAILABLE_FIRMWARE && listDevices[i].AVAILABLE_FIRMWARE !== listDevices[i].FIRMWARE) {
             listDevices[i].FIRMWARE += ' <button class="update-firmware device-table" data-address="' + listDevices[i].ADDRESS + '" id="update-firmware_' + listDevices[i].ADDRESS + '">install ' + listDevices[i].AVAILABLE_FIRMWARE + '</button>';
         } else if (listDevices[i].UPDATABLE) {
@@ -4042,6 +4048,9 @@ function getServiceMessages() {
                                 break;
                             case 'CONFIG_PENDING':
                                 msg = ('<img title="CONFIG_PENDING" style="height: 12px; padding-top: 3px;" src="images/servicemsgs/config_pending.png">');
+                                break;
+                            case 'UPDATE_PENDING':
+                                rowData.FIRMWARE = rowData.FIRMWARE.split(' ')[0] + '<span class="firmware-status">update pending</span>';
                                 break;
                             default:
                         }

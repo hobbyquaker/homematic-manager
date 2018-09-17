@@ -223,6 +223,8 @@ const localDevices = pjson.load('devices_' + config.ccuAddress) || {};
 localDevices.HmIP = localDevices.HmIP || {};
 const localParamsetDescriptions = pjson.load('paramset-descriptions-v2_' + config.ccuAddress) || {};
 const localRssiInfo = {HmIP: {}};
+const localServiceMessages = {HmIP: {}};
+const serviceMessages = ['CONFIG_PENDING', 'DUTY_CYCLE', 'ERROR_CODE', 'LOW_BAT', 'SABOTAGE', 'UNREACH'];
 let hmipAddress;
 const rpcClients = {};
 
@@ -302,7 +304,7 @@ function initRpcClients() {
 
     let count = 0; // Math.floor(Math.random() * 65536);
     Object.keys(config.daemons).forEach(daemon => {
-        config.daemons[daemon].ident = daemon === 'CUxD' ? 'CUxD' : 'hmm_' + count;
+        config.daemons[daemon].ident = daemon === 'CUxD' ? 'CUxD' : 'hmm_' + daemon;
         daemonIndex[config.daemons[daemon].ident] = daemon;
 
         rpcClients[daemon] = (config.daemons[daemon].protocol === 'binrpc' ? binrpc : xmlrpc).createClient({
@@ -325,6 +327,26 @@ function initRpcClients() {
         count += 1;
     });
     setInterval(pingPong, 15000);
+}
+
+function setServiceMessage(daemon, channel, datapoint, value) {
+    console.log('setServiceMessage', daemon, channel, datapoint, value);
+    if (value) {
+        if (!localServiceMessages[daemon]) {
+            localServiceMessages[daemon] = {};
+        }
+        if (!localServiceMessages[daemon][channel]) {
+            localServiceMessages[daemon][channel] = {};
+        }
+        localServiceMessages[daemon][channel][datapoint] = value;
+    } else {
+        if (localServiceMessages[daemon] && localServiceMessages[daemon][channel] && localServiceMessages[daemon][channel][datapoint]) {
+            delete localServiceMessages[daemon][channel][datapoint];
+            if ((Object.keys(localServiceMessages[daemon][channel])).length === 0) {
+                delete localServiceMessages[daemon][channel];
+            }
+        }
+    }
 }
 
 const rpcMethods = {
@@ -351,7 +373,10 @@ const rpcMethods = {
         const evDaemon = params[0] === 'CUxD' ? 'CUxD' : daemonIndex[params[0]];
         lastEvent[evDaemon] = (new Date()).getTime();
         if (evDaemon === 'HmIP') {
-            const device = params[1].split(':')[0];
+            const [device, channelNumber] = params[1].split(':');
+            if (serviceMessages.includes(params[2])) {
+                setServiceMessage(evDaemon, params[1], params[2], params[3]);
+            }
             if (params[2].startsWith('RSSI_')) {
                 if (!localRssiInfo.HmIP[hmipAddress]) {
                     localRssiInfo.HmIP[hmipAddress] = {};
@@ -676,6 +701,24 @@ function rpcProxy(daemon, method, params, callback) {
             }
             break;
         }
+        case 'getServiceMessages': {
+            if (daemon === 'HmIP') {
+                const arr = [];
+                Object.keys(localServiceMessages[daemon]).forEach(channel => {
+                    Object.keys(localServiceMessages[daemon][channel]).forEach(dp => {
+                        arr.push([channel, dp, localServiceMessages[daemon][channel][dp]]);
+                    });
+                });
+                callback(null, arr);
+            } else {
+                rpcClients[daemon].methodCall(method, params, (err, res) => {
+                    if (typeof callback === 'function') {
+                        callback(err, res);
+                    }
+                });
+            }
+            break;
+        }
         case 'rssiInfo': {
             if (localRssiInfo[daemon]) {
                 log.debug('respond to rssiInfo from cache');
@@ -740,6 +783,11 @@ function rpcProxy(daemon, method, params, callback) {
                         localRssiInfo.HmIP[device][hmipAddress][0] = res.RSSI_PEER;
                         localRssiInfo.HmIP[hmipAddress][device][1] = res.RSSI_PEER;
                     }
+                    serviceMessages.forEach(dp => {
+                        if (typeof res[dp] !== 'undefined') {
+                            setServiceMessage(daemon, params[0], dp, res[dp]);
+                        }
+                    })
                 }
                 if (callback) {
                     callback(err, res);

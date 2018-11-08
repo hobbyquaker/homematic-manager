@@ -148,7 +148,7 @@ function checkservice(host, port, callback) {
     const c = net.connect({
         port,
         host,
-        timeout: this.timeout
+        timeout: 5000
     }, () => {
         callback(null, true);
         c.end();
@@ -182,7 +182,7 @@ function findInterfaces() {
                     type: iface,
                     ip: config.ccuAddress,
                     port: ports[iface],
-                    protocol: iface === 'HmIP' ? 'xmlrpc' : 'binrpc',
+                    protocol: 'xmlrpc', // iface === 'HmIP' ? 'xmlrpc' : 'binrpc',
                     reinitTimeout: iface === 'HmIP' ? 600000 : 60000
                 };
             }

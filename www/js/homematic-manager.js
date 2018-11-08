@@ -132,7 +132,7 @@ let cameras = [];
 const scanner = new Instascan.Scanner({video: document.getElementById('qr')});
 
 scanner.addListener('scan', content => {
-    const match = content.match(/^EQ01SG([0-9A-F]{24})DLK([0-9A-F]{32})$/);
+    const match = content.match(/^[A-Z0-9]{4}SG([0-9A-F]{24})DLK([0-9A-F]{32})$/);
     if (match) {
         const [, sgtin, key] = match;
         $('#add-device-ip-address').val(sgtin);

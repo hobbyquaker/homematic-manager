@@ -1,17 +1,17 @@
 {
   "name": "homematic-manager",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "private": true,
   "dependencies": {
     "async": "2.6.1",
-    "binrpc": "3.2.1",
+    "binrpc": "3.2.2",
     "electron-ipc-rpc": "1.1.0",
-    "electron-is-dev": "0.3.0",
+    "electron-is-dev": "1.0.1",
     "electron-unhandled": "^1.1.0",
-    "electron-window-state": "4.1.1",
+    "electron-window-state": "5.0.2",
     "free-jqgrid": "4.15.5",
     "hm-discover": "1.1.0",
-    "homematic-rega": "^1.2.6",
+    "homematic-rega": "^1.3.2",
     "homematic-xmlrpc": "1.0.2",
     "instascan": "^1.0.0",
     "jquery": "3.3.1",
@@ -23,7 +23,7 @@
     "yalm": "4.1.0"
   },
   "devDependencies": {
-    "electron": "^2.0.8",
+    "electron": "^3.0.8",
     "electron-builder": "^20.28.2",
     "xo": "latest"
   },

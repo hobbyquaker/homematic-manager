@@ -163,6 +163,7 @@ function findInterfaces() {
         'BidCos-Wired': 2000,
         'BidCos-RF': 2001,
         HmIP: 2010,
+        'VirtualDevices': 9292,
         CUxD: 8701,
         rega: 8181
     };
@@ -183,7 +184,8 @@ function findInterfaces() {
                     ip: config.ccuAddress,
                     port: ports[iface],
                     protocol: 'xmlrpc', // iface === 'HmIP' ? 'xmlrpc' : 'binrpc',
-                    reinitTimeout: iface === 'HmIP' ? 600000 : 60000
+                    reinitTimeout: iface === 'HmIP' ? 600000 : 60000,
+                    path: iface === 'VirtualDevices' ? '/groups' : '/'
                 };
             }
         });
@@ -310,7 +312,7 @@ function initRpcClients() {
         rpcClients[daemon] = (config.daemons[daemon].protocol === 'binrpc' ? binrpc : xmlrpc).createClient({
             host: config.daemons[daemon].ip,
             port: config.daemons[daemon].port,
-            path: '/'
+            path: config.daemons[daemon].path,
         });
 
         initRpcServer(config.daemons[daemon].protocol);

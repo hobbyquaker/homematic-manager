@@ -4,18 +4,18 @@
   "private": true,
   "dependencies": {
     "async": "2.6.1",
-    "binrpc": "3.2.2",
+    "binrpc": "3.3.1",
     "electron-ipc-rpc": "1.1.0",
     "electron-is-dev": "1.0.1",
-    "electron-unhandled": "^1.1.0",
-    "electron-window-state": "5.0.2",
+    "electron-unhandled": "^2.1.0",
+    "electron-window-state": "5.0.3",
     "free-jqgrid": "4.15.5",
     "hm-discover": "1.1.0",
-    "homematic-rega": "^1.3.2",
+    "homematic-rega": "1.3.4",
     "homematic-xmlrpc": "1.0.2",
-    "instascan": "^1.0.0",
+    "instascan": "1.0.0",
     "jquery": "3.3.1",
-    "jquery-ui-dist": "^1.12.1",
+    "jquery-ui-dist": "1.12.1",
     "jquery-ui-multiselect-widget": "2.0.2",
     "nextport": "1.0.0",
     "persist-json": "1.2.0",
@@ -23,9 +23,9 @@
     "yalm": "4.1.0"
   },
   "devDependencies": {
-    "electron": "^3.0.8",
-    "electron-builder": "^20.28.2",
-    "xo": "latest"
+    "electron": "4.0.1",
+    "electron-builder": "20.38.4",
+    "xo": "0.23.0"
   },
   "description": "Homematic Device Configuration and Administration",
   "main": "main.js",

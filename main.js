@@ -228,7 +228,7 @@ localDevices.HmIP = localDevices.HmIP || {};
 const localParamsetDescriptions = pjson.load('paramset-descriptions-v2_' + config.ccuAddress) || {};
 const localRssiInfo = {HmIP: {}};
 const localServiceMessages = {HmIP: {}};
-const serviceMessages = ['CONFIG_PENDING', 'DUTY_CYCLE', 'ERROR_CODE', 'LOW_BAT', 'SABOTAGE', 'UNREACH'];
+const serviceMessages = ['CONFIG_PENDING', 'DUTY_CYCLE', 'ERROR_CODE', 'LOW_BAT', 'LOWBAT', 'SABOTAGE', 'UNREACH'];
 let hmipAddress;
 const rpcClients = {};
 
@@ -378,10 +378,12 @@ const rpcMethods = {
         lastEvent[evDaemon] = (new Date()).getTime();
         if (evDaemon === 'HmIP') {
             const [device, channelNumber] = params[1].split(':');
-            if (serviceMessages.includes(params[2])) {
+
+            if (params[2] === 'DUTY_CYCLE' && (typeof params[3] !== 'boolean')) {
+                // Not a Service Message!
+            } else if (serviceMessages.includes(params[2])) {
                 setServiceMessage(evDaemon, params[1], params[2], params[3]);
-            }
-            if (params[2].startsWith('RSSI_')) {
+            } else if (params[2].startsWith('RSSI_')) {
                 if (!localRssiInfo.HmIP[hmipAddress]) {
                     localRssiInfo.HmIP[hmipAddress] = {};
                 }
@@ -394,14 +396,15 @@ const rpcMethods = {
                 if (!localRssiInfo.HmIP[device][hmipAddress]) {
                     localRssiInfo.HmIP[device][hmipAddress] = [];
                 }
+                if (params[2] === 'RSSI_DEVICE') {
+                    localRssiInfo.HmIP[hmipAddress][device][0] = params[3];
+                    localRssiInfo.HmIP[device][hmipAddress][1] = params[3];
+                } else if (params[2] === 'RSSI_PEER') {
+                    localRssiInfo.HmIP[device][hmipAddress][0] = params[3];
+                    localRssiInfo.HmIP[hmipAddress][device][1] = params[3];
+                }
             }
-            if (params[2] === 'RSSI_DEVICE') {
-                localRssiInfo.HmIP[hmipAddress][device][0] = params[3];
-                localRssiInfo.HmIP[device][hmipAddress][1] = params[3];
-            } else if (params[2] === 'RSSI_PEER') {
-                localRssiInfo.HmIP[device][hmipAddress][0] = params[3];
-                localRssiInfo.HmIP[hmipAddress][device][1] = params[3];
-            }
+            
         }
         if (!stopping && !windowClosed) {
             ipcRpc.send('rpc', ['event', params]);

@@ -245,7 +245,7 @@ ipcRpc.on('rpc', data => {
 
             const name = names && names[address] ? names[address] : '';
 
-            $('#event-table').prepend('<tr class="ui-widget-content jqgrow ui-row-ltr "><td class="event-column-1">' + ts + '</td><td class="event-column-2">' + name + '</td><td class="event-column-3">' + address + '</td><td class="event-column-4">' + param + '</td><td class="event-column-5">' + value + '</td></tr>');
+            $('#event-table').prepend('<tr class="ui-widget-content jqgrow ui-row-ltr "><td class="event-column-1 monospace">' + ts + '</td><td class="event-column-2">' + name + '</td><td class="event-column-3 monospace">' + address + '</td><td class="event-column-4 monospace">' + param + '</td><td class="event-column-5 monospace">' + value + '</td></tr>');
 
             // Service-Meldung?
             if (!listMessages) {

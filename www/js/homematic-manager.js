@@ -4621,6 +4621,12 @@ function dialogConfigOpen() {
     $('#ccu-address').val(config.ccuAddress);
     $('#rpc-log-folder').val(config.rpcLogFolder);
     $('#rpc-delay').val(config.rpcDelay);
+    if (config.showUnhandled) {
+        $('#show-unhandled').prop('checked', true);
+    }
+    if (config.hideNameCols) {
+        $('#hide-name-cols').prop('checked', true);
+    }
 
     $('#ccu-address-select').html('<option>' + _('Select') + '</option>');
     config.ccuAddressSelect.forEach(ccu => {

@@ -23,7 +23,7 @@ Linux und Windows zu finden.
 
 ## Lizenz
 
-Copyright (c) 2014-2018 Sebastian "Hobbyquaker" Raff, André "Anli" Litfin
+Copyright (c) 2014-2019 Sebastian "Hobbyquaker" Raff, André "Anli" Litfin
 
 [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
 

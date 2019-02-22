@@ -20,4 +20,3 @@ arr.forEach(str => {
 
 fs.writeFileSync(path.join(__dirname, '../www/js/deviceImages.json'), JSON.stringify(res, null, '  '));
 
-console.log('cp -Rv ' + path.join(__dirname, '../../occu/WebUI/www/config/img/devices') + ' ' + path.join(__dirname, '../www/images/'));

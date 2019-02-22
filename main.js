@@ -499,7 +499,9 @@ const rpcMethods = {
                             delete dev[k];
                         }
                     });
-                    res.push(dev);
+                    if (d.TYPE !== 'HmIP-RCV-50' && d.PARENT_TYPE !== 'HmIP-RCV-50') {
+                        res.push(dev);
+                    }
                 } else {
                     res.push({ADDRESS: address, VERSION: localDevices[daemon][address].VERSION});
                 }

@@ -558,6 +558,7 @@ function initDialogsMisc() {
                     config.rpcDelay = parseInt($.trim($('#rpc-delay').val()), 10) || 100;
                     config.clearCache = $('#clear-cache').is(':checked');
                     config.showUnhandled = $('#show-unhandled').is(':checked');
+                    config.hideNameCols = $('#hide-name-cols').is(':checked');
                     ipcRpc.send('config', [config]);
                 }
             },
@@ -748,8 +749,8 @@ function initGridDevices() {
         colNames: ['', 'Name', 'ADDRESS', 'Msgs', 'TYPE', 'SUBTYPE', 'FIRMWARE', 'PARAMSETS', 'FLAGS', /* 'INTERFACE', 'RF_ADDRESS', */ /* 'ROAMING', */ 'RX_MODE'/* , 'VERSION' */],
         colModel: [
             {name: 'img', index: 'img', width: 22, fixed: true, classes: 'device-cell', align: 'center', search: false, title: false},
-            {name: 'Name', index: 'Name', width: 160, fixed: false, classes: 'device-cell', title: false},
-            {name: 'ADDRESS', index: 'ADDRESS', width: 140, fixed: true, classes: 'device-cell', title: false},
+            {name: 'Name', index: 'Name', width: 120, fixed: false, classes: 'device-cell', title: false, hidden: config.hideNameCols},
+            {name: 'ADDRESS', index: 'ADDRESS', width: 180, fixed: true, classes: 'device-cell monospace', title: false},
             {name: 'msgs', index: 'msgs', width: 44, fixed: true, classes: 'device-cell', align: 'center', search: false, title: false},
             {name: 'TYPE', index: 'TYPE', width: 120, fixed: false, classes: 'device-cell', title: false},
             {name: 'SUBTYPE', index: 'SUBTYPE', width: 60, fixed: false, classes: 'device-cell', title: false},
@@ -1272,8 +1273,8 @@ function initGridDevices() {
                 // 'VERSION'
             ],
             colModel: [
-                {name: 'Name', index: 'Name', width: 172, fixed: false, classes: 'channel-cell', title: false},
-                {name: 'ADDRESS', index: 'ADDRESS', width: 181, fixed: true, classes: 'channel-cell', title: false},
+                {name: 'Name', index: 'Name', width: 152, fixed: false, classes: 'channel-cell', title: false, hidden: config.hideNameCols},
+                {name: 'ADDRESS', index: 'ADDRESS', width: 201, fixed: true, classes: 'channel-cell monospace', title: false},
                 {name: 'TYPE', index: 'TYPE', width: daemon === 'HmIP' ? 177 : 100, fixed: false, classes: 'channel-cell', title: false},
                 {name: 'direction', index: 'direction', width: 110, fixed: true, classes: 'channel-cell', title: false},
                 {name: 'params', index: 'params', width: 120, fixed: true, classes: 'channel-cell', title: false},
@@ -1843,7 +1844,7 @@ function initDialogParamset() {
     $dialogParamset.dialog({
         autoOpen: false,
         modal: true,
-        width: 800,
+        width: 960,
         height: 550,
         buttons: [
             {
@@ -2065,15 +2066,15 @@ function initGridLinks() {
         colNames: ['', 'SENDER Name', 'SENDER', 'TYPE', '', 'RECEIVER Name', 'RECEIVER', 'TYPE', 'NAME', 'DESCRIPTION'/* , 'Aktionen' */],
         colModel: [
             {name: 'img_sender', index: 'img_sender', width: 22, fixed: true, classes: 'device-cell', align: 'center', search: false, title: false},
-            {name: 'Sendername', index: 'Sendername', width: 100, classes: 'link-cell', title: false},
-            {name: 'SENDER', index: 'SENDER', width: 50, classes: 'link-cell', title: false},
-            {name: 'SENDER_TYPE', index: 'SENDER_TYPE', width: 50, classes: 'link-cell', title: false},
+            {name: 'Sendername', index: 'Sendername', width: 80, classes: 'link-cell', title: false, hidden: config.hideNameCols},
+            {name: 'SENDER', index: 'SENDER', width: 80, classes: 'link-cell monospace', title: false},
+            {name: 'SENDER_TYPE', index: 'SENDER_TYPE', width: 80, classes: 'link-cell', title: false},
             {name: 'img_receiver', index: 'img_receiver', width: 22, fixed: true, classes: 'device-cell', align: 'center', search: false, title: false},
-            {name: 'Receivername', index: 'Receivername', width: 100, classes: 'link-cell', title: false},
-            {name: 'RECEIVER', index: 'RECEIVER', width: 50, classes: 'link-cell', title: false},
-            {name: 'RECEIVER_TYPE', index: 'RECEIVER_TYPE', width: 50, classes: 'link-cell', title: false},
-            {name: 'NAME', index: 'NAME', width: 100, classes: 'link-cell', title: false},
-            {name: 'DESCRIPTION', index: 'DESCRIPTION', width: 100, classes: 'link-cell', title: false}
+            {name: 'Receivername', index: 'Receivername', width: 80, classes: 'link-cell', title: false, hidden: config.hideNameCols},
+            {name: 'RECEIVER', index: 'RECEIVER', width: 80, classes: 'link-cell monospace', title: false},
+            {name: 'RECEIVER_TYPE', index: 'RECEIVER_TYPE', width: 80, classes: 'link-cell', title: false},
+            {name: 'NAME', index: 'NAME', width: 80, classes: 'link-cell', title: false},
+            {name: 'DESCRIPTION', index: 'DESCRIPTION', width: 80, classes: 'link-cell', title: false}
             // {name:'ACTIONS', index:'ACTIONS', width:80}
         ],
         rowNum: 100,
@@ -2256,9 +2257,9 @@ function initGridLinks() {
     $gridInterfaces.jqGrid({
         colNames: ['ADDRESS', 'DESCRIPTION', 'TYPE', 'FIRMWARE_VERSION', 'CONNECTED', 'DEFAULT', 'DUTY_CYCLE'],
         colModel: [
-            {name: 'ADDRESS', index: 'ADDRESS', width: 110, fixed: true, title: false},
+            {name: 'ADDRESS', index: 'ADDRESS', width: 180, fixed: true, title: false, classes: 'monospace'},
             {name: 'DESCRIPTION', index: 'DESCRIPTION', width: 150, fixed: false, title: false},
-            {name: 'TYPE', index: 'TYPE', width: 70, fixed: false, title: false},
+            {name: 'TYPE', index: 'TYPE', width: 50, fixed: false, title: false},
             {name: 'FIRMWARE_VERSION', index: 'FIRMWARE_VERSION', width: 130, fixed: true, title: false},
             {name: 'CONNECTED', index: 'CONNECTED', width: 110, fixed: true, title: false},
             {name: 'DEFAULT', index: 'DEFAULT', width: 110, fixed: true, title: false},
@@ -3576,8 +3577,8 @@ function initGridRssi() {
     const colNamesRssi = ['Name', 'ADDRESS', 'TYPE', 'INTERFACE', 'RF_ADDRESS', 'ROAMING'];
     const colModelRssi = [
         // TODO Name und Type fixed:false - Überschrifts und Inhaltsspalten stimmen nicht mehr... :-(
-        {name: 'Name', index: 'Name', width: 250, fixed: true, title: false},
-        {name: 'ADDRESS', index: 'ADDRESS', width: daemon === 'HmIP' ? 160 : 84, fixed: true, title: false},
+        {name: 'Name', index: 'Name', width: 250, fixed: true, title: false, hidden: config.hideNameCols},
+        {name: 'ADDRESS', index: 'ADDRESS', width: daemon === 'HmIP' ? 186 : 84, fixed: true, title: false, classes: 'monospace'},
         {name: 'TYPE', index: 'TYPE', width: 140, fixed: true, title: false},
         {name: 'INTERFACE', index: 'INTERFACE', width: 84, fixed: true, title: false},
         {name: 'RF_ADDRESS', index: 'RF_ADDRESS', width: 75, fixed: true, title: false},
@@ -3698,8 +3699,8 @@ function initGridRssi() {
                 '-> dBm'
             ],
             colModel: [
-                {name: 'Name', index: 'Name', width: 248, fixed: true, title: false},
-                {name: 'ADDRESS', index: 'ADDRESS', width: daemon === 'HmIP' ? 160 : 84, fixed: true, title: false},
+                {name: 'Name', index: 'Name', width: 248, fixed: true, title: false, hidden: config.hideNameCols},
+                {name: 'ADDRESS', index: 'ADDRESS', width: daemon === 'HmIP' ? 186 : 84, fixed: true, title: false, classes: 'monospace'},
                 {name: 'TYPE', index: 'TYPE', width: 140, fixed: true, title: false},
                 {name: 'RSSI-Receive', index: 'RSSI-Receive', width: 47, fixed: true, align: 'right', title: false},
                 {name: 'RSSI-Send', index: 'RSSI-Send', width: 47, fixed: true, align: 'right', title: false}
@@ -3884,7 +3885,7 @@ function initGridMessages() {
     $gridMessages.jqGrid({
         colNames: ['Name', 'ADDRESS', 'DeviceAddress', 'Message'],
         colModel: [
-            {name: 'Name', index: 'Name', width: 420, fixed: true, title: false},
+            {name: 'Name', index: 'Name', width: 420, fixed: true, title: false, hidden: config.hideNameCols},
             {name: 'ADDRESS', index: 'ADDRESS', width: 110, fixed: true, title: false},
             {name: 'DeviceAddress', index: 'DeviceAddress', width: 110, fixed: true, title: false},
             {name: 'Message', index: 'Message', width: 150, fixed: false, title: false}

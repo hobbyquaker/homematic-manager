@@ -316,3 +316,7 @@ textarea {
     width: 210px;
     display: inline-block;
 }
+
+.monospace {
+    font-family: "Lucida Console", Monaco, monospace;
+}

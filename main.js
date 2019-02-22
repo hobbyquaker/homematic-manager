@@ -812,6 +812,7 @@ function rpcProxy(daemon, method, params, callback) {
 
             log.debug('RPC -> ' + config.daemons[daemon].ip + ':' + config.daemons[daemon].port + ' ' + method + '(' + JSON.stringify(params).slice(1).slice(0, -1).replace(/,/, ', ') + ')');
             rpcClients[daemon].methodCall(method, params, (err, res) => {
+                log.debug('    <- err: ' + err + ' res: ' + res);
                 if (callback) {
                     callback(err, res);
                 }

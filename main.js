@@ -16,8 +16,6 @@ const isDev = require('electron-is-dev');
 
 const unhandled = require('electron-unhandled');
 
-unhandled();
-
 const pjson = require('persist-json')('hm-manager');
 const nextPort = require('nextport');
 const hmDiscover = require('hm-discover');
@@ -41,6 +39,10 @@ const pkg = require('./package.json');
 log.setLevel(isDev ? 'debug' : 'error');
 
 let config = pjson.load('config') || {};
+
+if (config.showUnhandled) {
+    unhandled();
+}
 
 config.rpcDelay = config.rpcDelay || 3000;
 

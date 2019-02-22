@@ -26,8 +26,6 @@ const async = require('async');
 
 const unhandled = require('electron-unhandled');
 
-unhandled();
-
 const deviceImages = require('./deviceImages.json');
 const helpLinkParamset = require('./helpLinkParamset.json');
 const rpcMethods = require('./rpcMethods.json');
@@ -367,6 +365,10 @@ function getConfig() {
     ipcRpc.send('getConfig', [], (err, data) => {
         config = data;
 
+        if (config.showUnhandled) {
+            unhandled();
+        }
+
         $('.version').html(config.version);
         language = config.language || 'de';
 
@@ -554,7 +556,8 @@ function initDialogsMisc() {
                     config.ccuAddress = $.trim($('#ccu-address').val());
                     config.rpcLogFolder = $.trim($('#rpc-log-folder').val());
                     config.rpcDelay = parseInt($.trim($('#rpc-delay').val()), 10) || 100;
-                    config.clearCache = $.trim($('#clear-cache').is(':checked'));
+                    config.clearCache = $('#clear-cache').is(':checked');
+                    config.showUnhandled = $('#show-unhandled').is(':checked');
                     ipcRpc.send('config', [config]);
                 }
             },

@@ -2001,7 +2001,7 @@ function putParamset() {
 
             // Changes only if not multiselect
             if (!isMulti && (val === dataValPrev || (val === true && dataValPrev === 'true') || (val === false && dataValPrev === 'false'))) {
-                return;
+                //return;
             }
 
             // Todo update ui if channel aes_active is changed
@@ -2890,7 +2890,7 @@ function putLinkParamset(direction, channel1, channel2, isMulti, callback) {
                     (val === dataValPrev) ||
                     (!isNaN(dataValPrev) && parseFloat(dataValPrev) === parseFloat(val))
             )) {
-                return;
+                //return;
             }
 
             // Aktualisiere data-val-prev - falls auf prn 0 (expert) zurückgeschaltet wird werden diese werte verwendet

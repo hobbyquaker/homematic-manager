@@ -185,7 +185,7 @@ function findInterfaces() {
                     type: iface,
                     ip: config.ccuAddress,
                     port: ports[iface],
-                    protocol: 'xmlrpc', // iface === 'HmIP' ? 'xmlrpc' : 'binrpc',
+                    protocol: iface === 'CUxD' ? 'binrpc' : 'xmlrpc',
                     reinitTimeout: iface === 'HmIP' ? 600000 : 60000,
                     path: iface === 'VirtualDevices' ? '/groups' : '/'
                 };

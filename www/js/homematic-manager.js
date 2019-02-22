@@ -1715,7 +1715,9 @@ function dialogParamset(data, desc, address, paramset) {
                         desc[param].MAX = desc[param].VALUE_LIST.indexOf(desc[param].MAX);
                     }
                     for (let i = desc[param].MIN; i <= desc[param].MAX; i++) {
-                        input += '<option value="' + i + '"' + (data[param] === i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
+                        let optVal = daemon === 'HmIP' ? desc[param].VALUE_LIST[i] : i;
+                        console.log(param, i, optVal);
+                        input += '<option value="' + optVal + '"' + (data[param] === i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
                         if (helpentry) {
                             if (i === desc[param].MIN) {
                                 help += '<br/><ul>';
@@ -1941,7 +1943,9 @@ function initDialogParamset() {
                 break;
             case 'ENUM':
             case 'INTEGER':
-                val = parseInt(val, 10);
+                if (!isNaN(val)) {
+                    val = parseInt(val, 10);
+                }
                 break;
             default:
                 val = String(val);
@@ -2018,7 +2022,9 @@ function putParamset() {
                     break;
                 case 'ENUM':
                 case 'INTEGER':
-                    val = parseInt(val, 10);
+                    if (!isNaN(val)) {
+                        val = parseInt(val, 10);
+                    }
                     break;
                 case 'FLOAT':
                     val = {explicitDouble: parseFloat(val)};
@@ -2908,7 +2914,9 @@ function putLinkParamset(direction, channel1, channel2, isMulti, callback) {
                     break;
                 case 'ENUM':
                 case 'INTEGER':
-                    val = parseInt(val, 10) || 0;
+                    if (!isNaN(val)) {
+                        val = parseInt(val, 10);
+                    }
                     break;
                 case 'FLOAT':
                     val = {explicitDouble: parseFloat(val)};
@@ -4417,9 +4425,8 @@ function setConsoleParams(elem) {
                     paramArr[paramIndex] = val;
                     break;
                 case 'INTEGER':
-                    val = parseInt($(this).val(), 10);
-                    if (isNaN(val)) {
-                        val = 0;
+                    if (!isNaN(val)) {
+                        val = parseInt($(this).val(), 10);
                     }
                     paramArr[paramIndex] = val;
                     break;
@@ -4674,7 +4681,8 @@ function convertHmIPKeyBase32ToBase16(valueString) {
         'W',
         'X',
         'Y',
-        'Z'];
+        'Z'
+    ];
 
     const buffer = new ArrayBuffer(16);
 

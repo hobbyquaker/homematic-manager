@@ -63,7 +63,7 @@ langs.forEach(lang => {
 
 fs.writeFileSync(path.join(__dirname, '..', 'www', 'js', 'stringtable.json'), JSON.stringify(strings, null, '  '));
 
-
+/*
 
 channels.forEach(ch => {
     const {file, channelType, langFile} = ch;
@@ -116,5 +116,4 @@ channels.forEach(ch => {
 });
 
 fs.writeFileSync(path.join(__dirname, '..', 'www', 'js', 'helpMasterParamset.json'), JSON.stringify(obj, null, '  '));
-
-//console.log(obj);
+*/

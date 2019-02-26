@@ -839,10 +839,12 @@ function getRegaNames() {
 }
 
 function stop() {
+    log.debug('stop', stopping);
     if (stopping) {
         log.debug('force terminate');
-        app.quit();
+        //app.quit();
         process.exit(1); // eslint-disable-line unicorn/no-process-exit
+        return;
     }
     stopping = true;
 
@@ -860,11 +862,15 @@ function stop() {
     });
     async.parallel(tasks, () => {
         log.debug('terminate');
-        app.quit();
+        //app.quit();
         process.exit(0); // eslint-disable-line unicorn/no-process-exit
     });
-    setTimeout(stop, 2000);
+    setTimeout(stop, 5000);
 }
 
-process.on('SIGINT', stop);
-process.on('SIGTERM', stop);
+app.on('quit', event => {
+    if (!stopping) {
+        stop();
+    }
+    event.preventDefault();
+});

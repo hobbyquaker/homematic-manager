@@ -35,6 +35,7 @@ const easymodePath = occuPath + '/WebUI/www/config/easymodes/';
 
 const obj = {lang: {}};
 
+
 files.forEach(file => {
     langs.forEach(lang => {
         if (typeof obj.lang[lang] === 'undefined') {

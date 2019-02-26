@@ -28,6 +28,8 @@ const unhandled = require('electron-unhandled');
 
 const deviceImages = require('./deviceImages.json');
 const helpLinkParamset = require('./helpLinkParamset.json');
+const helpMasterParamset = require('./helpMasterParamset.json');
+const stringtable = require('./stringtable.json');
 const rpcMethods = require('./rpcMethods.json');
 const translation = require('./language.json');
 
@@ -1686,7 +1688,14 @@ function dialogParamset(data, desc, address, paramset) {
 
             // Create Input-Field
             let input;
-            const helpentry = helpLinkParamset[language] && helpLinkParamset[language][param.replace('SHORT_', '').replace('LONG_', '')];
+            let helpentry;
+            if (paramset === 'MASTER') {
+                console.log(address, 'MASTER');
+                helpentry = helpMasterParamset[language] && helpMasterParamset[language][indexChannels[address].TYPE] && helpMasterParamset[language][indexChannels[address].TYPE][param];
+                if (!helpentry) {
+                    helpentry = stringtable[language][indexChannels[address].TYPE + '|' + param] || stringtable[language][param];
+                }
+            }
             let help;
             if (helpentry && helpentry.helpText) {
                 help = helpentry.helpText;
@@ -1722,7 +1731,7 @@ function dialogParamset(data, desc, address, paramset) {
                             if (i === desc[param].MIN) {
                                 help += '<br/><ul>';
                             }
-                            if (helpentry.params[desc[param].VALUE_LIST[i]]) {
+                            if (helpentry.params && helpentry.params[desc[param].VALUE_LIST[i]]) {
                                 help += '<li><strong>' + desc[param].VALUE_LIST[i] + '</strong>: ' + helpentry.params[desc[param].VALUE_LIST[i]] + (i < desc[param].MAX ? '<br/>' : '');
                             } else {
                                 help += '<li><strong>' + desc[param].VALUE_LIST[i] + '</strong>';
@@ -1769,6 +1778,10 @@ function dialogParamset(data, desc, address, paramset) {
     if (count === 0) {
         $tableParamset.hide();
     }
+
+    let help_txt = helpentry = helpMasterParamset[language] && helpMasterParamset[language][indexChannels[address].TYPE] && helpMasterParamset[language][indexChannels[address].TYPE].help_txt || '';
+    $('#paramset-help-txt').html(help_txt);
+
 
     // Dialog-Überschrift setzen
     let name = names && names[address] ? names[address] : '';

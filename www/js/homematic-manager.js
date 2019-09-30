@@ -1726,7 +1726,7 @@ function dialogParamset(data, desc, address, paramset) {
                     for (let i = desc[param].MIN; i <= desc[param].MAX; i++) {
                         let optVal = daemon === 'HmIP' ? desc[param].VALUE_LIST[i] : i;
                         console.log(param, i, optVal);
-                        input += '<option value="' + optVal + '"' + (data[param] === i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
+                        input += '<option value="' + optVal + '"' + ((data[param] === i || data[param] === desc[param].VALUE_LIST[i]) ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
                         if (helpentry) {
                             if (i === desc[param].MIN) {
                                 help += '<br/><ul>';

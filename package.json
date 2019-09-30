@@ -67,9 +67,7 @@
     "mac": {
       "category": "public.app-category.utilities",
       "target": [
-        "dmg",
-        "mas",
-        "mas-dev"
+        "dmg"
       ]
     },
     "linux": {

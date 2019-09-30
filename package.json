@@ -33,7 +33,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "dist": "build",
+    "dist": "electron-builder",
     "lint": "xo",
     "lintfix": "xo --fix"
   },

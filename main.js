@@ -865,7 +865,7 @@ function stop() {
         //app.quit();
         process.exit(0); // eslint-disable-line unicorn/no-process-exit
     });
-    setTimeout(stop, 5000);
+    setTimeout(stop, 15000);
 }
 
 app.on('quit', event => {

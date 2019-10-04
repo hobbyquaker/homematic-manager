@@ -548,7 +548,7 @@ function initDialogsMisc() {
         autoOpen: false,
         modal: true,
         width: 640,
-        height: 400,
+        height: 480,
         buttons: [
             {
                 text: _('Save & Restart'),
@@ -556,10 +556,14 @@ function initDialogsMisc() {
                     $(this).dialog('close');
                     config.rpcInitIp = $.trim($('#init-ip-select').val());
                     config.ccuAddress = $.trim($('#ccu-address').val());
+                    config.user = $.trim($('#auth-user').val());
+                    config.pass = $.trim($('#auth-pass').val());
                     config.rpcLogFolder = $.trim($('#rpc-log-folder').val());
                     config.rpcDelay = parseInt($.trim($('#rpc-delay').val()), 10) || 100;
                     config.clearCache = $('#clear-cache').is(':checked');
                     config.showUnhandled = $('#show-unhandled').is(':checked');
+                    config.useAuth = $('#use-auth').is(':checked');
+                    config.useTLS = $('#use-tls').is(':checked');
                     config.hideNameCols = $('#hide-name-cols').is(':checked');
                     ipcRpc.send('config', [config]);
                 }
@@ -4628,6 +4632,16 @@ $('.externalLink').click(function () {
     shell.openExternal($(this).data('href'));
 });
 
+$('#use-auth').change(function () {
+    if ($(this).is(':checked')) {
+        $('#auth-user').removeAttr('disabled');
+        $('#auth-pass').removeAttr('disabled');
+    } else {
+        $('#auth-user').attr('disabled', true);
+        $('#auth-pass').attr('disabled', true);
+    }
+});
+
 function dialogConfigOpen() {
     $('#init-ip-select').html('');
     config.rpcInitIpSelect.forEach(ip => {
@@ -4639,8 +4653,16 @@ function dialogConfigOpen() {
     });
 
     $('#ccu-address').val(config.ccuAddress);
+    $('#auth-user').val(config.user);
+    $('#auth-pass').val(config.pass);
     $('#rpc-log-folder').val(config.rpcLogFolder);
     $('#rpc-delay').val(config.rpcDelay);
+    if (config.useTLS) {
+        $('#use-tls').prop('checked', true);
+    }
+    if (config.useAuth) {
+        $('#use-auth').prop('checked', true).trigger('change');
+    }
     if (config.showUnhandled) {
         $('#show-unhandled').prop('checked', true);
     }

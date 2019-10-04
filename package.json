@@ -1,6 +1,6 @@
 {
   "name": "homematic-manager",
-  "version": "2.5.1",
+  "version": "2.6.0",
   "private": true,
   "dependencies": {
     "async": "2.6.2",
@@ -11,7 +11,7 @@
     "electron-window-state": "5.0.3",
     "free-jqgrid": "4.15.5",
     "hm-discover": "1.1.0",
-    "homematic-rega": "1.3.5",
+    "homematic-rega": "^1.4.0",
     "homematic-xmlrpc": "1.0.2",
     "instascan": "1.0.0",
     "jquery": "3.3.1",

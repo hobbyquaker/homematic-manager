@@ -184,6 +184,10 @@ function findInterfaces() {
                 config.daemons[iface] = {
                     type: iface,
                     ip: config.ccuAddress,
+                    isSecure: config.useTLS,
+                    useAuth: config.useAuth,
+                    user: config.user,
+                    pass: config.pass,
                     port: ports[iface],
                     protocol: iface === 'CUxD' ? 'binrpc' : 'xmlrpc',
                     reinitTimeout: iface === 'HmIP' ? 600000 : 60000,
@@ -194,7 +198,11 @@ function findInterfaces() {
         initRpcClients();
         if (regaPresent) {
             rega = new Rega({
-                host: config.ccuAddress
+                host: config.ccuAddress,
+                tls: config.useTls,
+                auth: config.useAuth,
+                user: config.user,
+                pass: config.pass
             });
             getRegaNames();
         }
@@ -311,11 +319,25 @@ function initRpcClients() {
         config.daemons[daemon].ident = daemon === 'CUxD' ? 'CUxD' : 'hmm_' + daemon;
         daemonIndex[config.daemons[daemon].ident] = daemon;
 
-        rpcClients[daemon] = (config.daemons[daemon].protocol === 'binrpc' ? binrpc : xmlrpc).createClient({
+        const clientOptions = {
             host: config.daemons[daemon].ip,
             port: config.daemons[daemon].port,
             path: config.daemons[daemon].path,
-        });
+            isSecure: config.daemons[daemon].isSecure,
+        };
+
+        if (config.daemons[daemon].isSecure && config.daemons[daemon].ident !== 'CUxD') {
+            config.daemons[daemon].port = 40000 + config.daemons[daemon].port;
+        }
+
+        if (config.daemons[daemon].useAuth) {
+            clientOptions.basic_auth = {
+                user: config.daemons[daemon].user,
+                pass: config.daemons[daemon].pass
+            }
+        }
+
+        rpcClients[daemon] = (config.daemons[daemon].protocol === 'binrpc' ? binrpc : xmlrpc).createClient(clientOptions);
 
         initRpcServer(config.daemons[daemon].protocol);
         init(daemon);

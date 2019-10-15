@@ -3440,7 +3440,8 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
                         desc[param].MAX = desc[param].VALUE_LIST.indexOf(desc[param].MAX);
                     }
                     for (let i = desc[param].MIN; i <= desc[param].MAX; i++) {
-                        input += '<option value="' + i + '"' + (data[param] === i ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
+                        let optVal = daemon === 'HmIP' ? desc[param].VALUE_LIST[i] : i;
+                        input += '<option value="' + optVal + '"' + ((data[param] === i || data[param] === desc[param].VALUE_LIST[i]) ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
                         if (helpentry) {
                             if (i === desc[param].MIN) {
                                 help += '<br/><ul>';

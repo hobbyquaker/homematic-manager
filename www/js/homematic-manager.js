@@ -3441,7 +3441,7 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
                     }
                     for (let i = desc[param].MIN; i <= desc[param].MAX; i++) {
                         let optVal = daemon === 'HmIP' ? desc[param].VALUE_LIST[i] : i;
-                        input += '<option value="' + optVal + '"' + ((data[param] === i || data[param] === desc[param].VALUE_LIST[i]) ? ' selected="selected"' : '') + '>' + desc[param].VALUE_LIST[i] + '</option>';
+                        input += '<option value="' + optVal + '">' + desc[param].VALUE_LIST[i] + '</option>';
                         if (helpentry) {
                             if (i === desc[param].MIN) {
                                 help += '<br/><ul>';
@@ -3499,10 +3499,14 @@ function formLinkParamset(elem, data, desc, direction, senderType, receiverType)
         for (let i = 0; i < resultArr.length; i++) {
             elem.append(resultArr[i].fragment);
         }
+
     }
     if (direction === 'receiver-sender') {
         formEasyMode(data, desc, direction, senderType, receiverType, data.UI_HINT);
     }
+    elem.find('select').each(function () {
+        $(this).children('option:eq(' + $(this).data('val-prev') + ')').attr('selected', 'selected');
+    });
 }
 function dialogRemoveLink() {
     const rowId = $gridLinks.jqGrid('getGridParam', 'selrow');

@@ -376,7 +376,7 @@ function setServiceMessage(daemon, channel, datapoint, value) {
 }
 
 const rpcMethods = {
-    'system.multicall'(err, params, callback) {
+    'system.multicall'(_, params, callback) {
         const queue = [];
         params[0].forEach(c => {
             const m = c.methodName;

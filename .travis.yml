@@ -25,8 +25,7 @@ before_install:
 before_script:
 - git-lfs pull
 install:
-- nvm install 8
-- npm install electron-builder@next
+- nvm install 12
 - npm install
 - npm prune
 script:

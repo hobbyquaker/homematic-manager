@@ -3893,7 +3893,7 @@ function refreshGridRssi() {
     if (daemon === 'HmIP') {
         $gridRssi.jqGrid('hideCol', 'roaming');
         $gridRssi.jqGrid('hideCol', 'INTERFACE');
-        $gridRssi.jqGrid('hideCol', 'RF_ADDRESS');
+        //$gridRssi.jqGrid('hideCol', 'RF_ADDRESS');
     } else {
         $gridRssi.jqGrid('showCol', 'roaming');
         $gridRssi.jqGrid('showCol', 'INTERFACE');

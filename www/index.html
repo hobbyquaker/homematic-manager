@@ -215,6 +215,18 @@
                 <td><input type="button" id="add-device-ip-start" value="Anlernmodus aktivieren"/></td>
             </tr>
             <tr class="add-device-local">
+                <td>QR Scanner</td>
+                <td>
+                    <select id="qr-enable">
+                        <option>disable</option>
+                        <option>enable</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" id="qr-error" style="color: red;"></td>
+            </tr>
+            <tr class="add-device-local">
                 <td colspan="3">
                     <video id="qr"></video>
                 </td>

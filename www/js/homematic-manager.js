@@ -139,11 +139,35 @@ scanner.addListener('scan', content => {
         $('#add-device-ip-key').val(key);
     }
 });
-Instascan.Camera.getCameras().then(c => {
-    cameras = c;
-}).catch(e => {
-    console.error(e);
+
+function startScanner() {
+    Instascan.Camera.getCameras().then(c => {
+        if (c.length > 0) {
+            scanner.start(c[0]).catch(e => {
+                $('#qr-error').html(`Error: ${e.message}`);
+            });
+        } else {
+            $('#qr-error').html(`Error: no camera found`);
+        }
+    }).catch(e => {
+        $('#qr-error').html(`Error: ${e.message}`);
+    });
+}
+
+function stopScanner() {
+    scanner.stop();
+    $('#qr-error').html('');
+    $('#qr-enable').val('disable');
+}
+
+$('#qr-enable').change(() => {
+    if ($('#qr-enable').val() === 'enable') {
+        startScanner();
+    } else {
+        stopScanner();
+    }
 });
+
 
 // Entrypoint
 getConfig();
@@ -1022,7 +1046,7 @@ function initGridDevices() {
         autoOpen: false,
         modal: true,
         width: 640,
-        height: 480,
+        height: 506,
         buttons: [
             {
                 text: _('Cancel'),
@@ -1030,7 +1054,10 @@ function initGridDevices() {
                     $(this).dialog('close');
                 }
             }
-        ]
+        ],
+        beforeClose() {
+            stopScanner();
+        }
     });
     $dialogAddCountdown.dialog({
         autoOpen: false,
@@ -1186,16 +1213,13 @@ function initGridDevices() {
                 case 'local':
                     $('.add-device-keyserver').hide();
                     $('.add-device-local').show();
-                    if (cameras.length > 0) {
-                        scanner.start(cameras[0]);
-                    }
+
                     break;
                 default:
                     $('.add-device-local').hide();
                     $('.add-device-keyserver').show();
-                    if (cameras.length > 0) {
-                        scanner.stop();
-                    }
+                    $('#qr-enable').val('disable');
+                    stopScanner();
             }
         }
     });
@@ -1211,9 +1235,6 @@ function initGridDevices() {
                 const sgtin = $.trim($('#add-device-ip-address').val()).toUpperCase().replace(/-/g, '');
                 const key = $.trim($('#add-device-ip-key').val()).toUpperCase().replace(/-/g, '');
                 if (sgtin && key) {
-                    if (cameras.length > 0) {
-                        scanner.stop();
-                    }
                     $('#dialog-add-device-ip').dialog('close');
                     rpcDialog(daemon, 'setInstallModeWithWhitelist', [true, time, [{
                         ADDRESS: sgtin,
@@ -1238,9 +1259,6 @@ function initGridDevices() {
                 break;
             }
             default: {
-                if (cameras.length > 0) {
-                    scanner.stop();
-                }
                 $('#dialog-add-device-ip').dialog('close');
                 rpcAlert(daemon, 'setInstallMode', [true, time], err => {
                     if (!err) {

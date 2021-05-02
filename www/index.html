@@ -147,7 +147,7 @@
         <input type="hidden" id="edit-link-sender" value=""/>
         <input type="hidden" id="edit-link-receiver" value=""/>
     </div>
-    <div id="dialog-rename" title="Umbenennen">
+    <div id="dialog-rename" class="translateT" title="Rename">
         <br/>
         <input type="text" id="rename-name" value="" size="56"/>
         <div id="rename-device-only"><label for="rename-children"><input type="checkbox" id="rename-children"/><span class="translate">Kanäle überschreiben</span></label></div>
@@ -155,7 +155,7 @@
         <input type="hidden" id="rename-rowid" value=""/>
         <input type="hidden" id="rename-gridid" value=""/>
     </div>
-    <div id="dialog-add-device" title="Gerät anlernen">
+    <div id="dialog-add-device" class="translateT" title="Gerät anlernen">
         <select id="add-device-mode">
             <option value="1" selected="selected" class="translate">Normaler Anlernmodus</option>
             <option value="2" class="translate">Default-Parameter in Paramset MASTER schreiben, bestehende Verknüpfungen löschen</option>
@@ -164,23 +164,23 @@
         <table>
             <tr>
                 <td colspan="3">
-                    <h3>Anlernmodus</h3>
+                    <h3 class="translate">Anlernmodus</h3>
                 </td>
             </tr>
             <tr>
-                <td>Dauer:</td>
+                <td class="translate">Dauer:</td>
                 <td><input type="number" id="add-device-time" value="60"/>s</td>
-                <td><input type="button" id="add-device-time-start" value="Anlernmodus aktivieren"/></td>
+                <td><button class="" id="add-device-time-start"><span class="translate">Anlernmodus aktivieren</span></button></td>
             </tr>
             <tr>
                 <td colspan="3">
-                    <h3>Anlernen über Seriennummer <span style="font-weight: normal; font-size: 11px;">(nicht bei allen Geräten möglich)</span></h3>
+                    <h3><span class="translate">Anlernen über Seriennummer</span> <span style="font-weight: normal; font-size: 11px;" class="translate">(nicht bei allen Geräten möglich)</span></h3>
                 </td>
             </tr>
             <tr>
-                <td>Seriennummer:</td>
+                <td class="translate">Seriennummer:</td>
                 <td><input type="text" id="add-device-address" value=""/></td>
-                <td><input type="button" id="add-device-address-start" value="Anlernen"/></td>
+                <td><button class="" id="add-device-address-start"><span class="translate">Anlernen</span></button></td>
             </tr>
 
         </table>
@@ -244,7 +244,7 @@
         <br/><br/>
         <h3 style="width: 100%; text-align: center;"><span id="alert"></span></h3>
     </div>
-    <div id="dialog-add-link" title="Direktverknüpfung anlegen">
+    <div id="dialog-add-link" class="translateT" title="Direktverknüpfung anlegen">
         <table>
             <tr>
                 <td class="translate">Sender</td>
@@ -305,6 +305,14 @@
         </div>
     </div>
     <div id="dialog-config" class="translateT" title="Settings">
+
+        <p>
+            <label for="ui-language" class="translate">UI Language</label>
+            <select id="ui-language-select">
+                <option class="translate" value="de">German (de-DE)</option>
+                <option class="translate" value="en">English (en-US)</option>
+            </select>
+        </p>
 
         <p>
             <label for="init-ip-select" class="translate">Homematic Manager Address</label>

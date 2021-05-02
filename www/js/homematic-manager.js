@@ -16,6 +16,7 @@ require('ui-contextmenu/jquery.ui-contextmenu');
 require('jquery-ui-multiselect-widget/src/jquery.multiselect');
 require('jquery-ui-multiselect-widget/src/jquery.multiselect.filter');
 require('free-jqgrid/dist/jquery.jqgrid.min')(window, $);
+require('free-jqgrid/dist/i18n/grid.locale-en')(window, $);
 require('free-jqgrid/dist/i18n/grid.locale-de')(window, $);
 
 $.extend($.jgrid.defaults, {autoencode: false});
@@ -391,6 +392,7 @@ function _(word) {
     return word;
 }
 function translate() {
+    $.extend($.jgrid.defaults, {locale: language});
     $('.translate').each(function () {
         const $this = $(this);
         $this.html(_($this.html()));
@@ -613,6 +615,7 @@ function initDialogsMisc() {
                 text: _('Save & Restart'),
                 click() {
                     $(this).dialog('close');
+                    config.language = $.trim($('#ui-language-select').val());
                     config.rpcInitIp = $.trim($('#init-ip-select').val());
                     config.ccuAddress = $.trim($('#ccu-address').val());
                     config.user = $.trim($('#auth-user').val());
@@ -1748,8 +1751,8 @@ function dialogParamset(data, desc, address, paramset) {
             // Create Input-Field
             let input;
             let helpentry;
-            if (paramset === 'MASTER') {
-                console.log(address, 'MASTER');
+            if (paramset === 'MASTER' || paramset === 'VALUES') {
+                console.log(address, paramset);
                 helpentry = helpMasterParamset[language] && helpMasterParamset[language][indexChannels[address].TYPE] && helpMasterParamset[language][indexChannels[address].TYPE][param];
                 if (!helpentry) {
                     helpentry = stringtable[language][indexChannels[address].TYPE + '|' + param] || stringtable[language][param];
@@ -3991,7 +3994,7 @@ function initGridEvents() {
         viewrecords: true,
         sortorder: 'desc',
         caption: _('Events'),
-
+        
     }).navGrid('#pager-events', {
         search: false,
         edit: false,
@@ -4762,7 +4765,7 @@ function dialogConfigOpen() {
             $('#init-ip-select').append('<option>' + ip + '</option>');
         }
     });
-
+    $('#ui-language-select').val(config.language);
     $('#ccu-address').val(config.ccuAddress);
     $('#auth-user').val(config.user);
     $('#auth-pass').val(config.pass);

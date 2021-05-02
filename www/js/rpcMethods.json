@@ -503,7 +503,8 @@
     ],
     "returns": "",
     "help": {
-      "de": "Diese Methode teilt dem Interfaceprozess in ref_counter mit, wie oft der Wert value_id des Kanals address innerhalb der Logikschicht (z.B. in Programmen) verwendet wird. Dadurch kann der Interfaceprozess die Verbindung mit der entsprechenden Komponente herstellen bzw. löschen. Diese Funktion sollte bei jeder Änderung aufgerufen werden.<br>Der Rückgabewert ist true, wenn die Aktion sofort durchgeführt wurde. Er ist false, wenn die entsprechende Komponente nicht erreicht werden konnte und vom Benutzer zunächst in den Config-Mode gebracht werden muss. Der Interfaceprozess hat dann aber die neue Einstellung übernommen und wird sie bei nächster Gelegenheit automatisch an die Komponente übertragen. In diesem Fall ist dann auch der Wert CONFIG_PENDING im Kanal MAINTENANCE der Komponente gesetzt."
+      "de": "Diese Methode teilt dem Interfaceprozess in ref_counter mit, wie oft der Wert value_id des Kanals address innerhalb der Logikschicht (z.B. in Programmen) verwendet wird. Dadurch kann der Interfaceprozess die Verbindung mit der entsprechenden Komponente herstellen bzw. löschen. Diese Funktion sollte bei jeder Änderung aufgerufen werden.<br>Der Rückgabewert ist true, wenn die Aktion sofort durchgeführt wurde. Er ist false, wenn die entsprechende Komponente nicht erreicht werden konnte und vom Benutzer zunächst in den Config-Mode gebracht werden muss. Der Interfaceprozess hat dann aber die neue Einstellung übernommen und wird sie bei nächster Gelegenheit automatisch an die Komponente übertragen. In diesem Fall ist dann auch der Wert CONFIG_PENDING im Kanal MAINTENANCE der Komponente gesetzt.",
+      "en": "This method tells the interface process in ref_counter how often the value_id of the channel address is used within the logic layer (e.g. in programs). This enables the interface process to establish or delete the connection with the corresponding component. This function should be called whenever a change is made. <br> The return value is true if the action was carried out immediately. It is false if the corresponding component could not be reached and must first be switched to Config mode by the user. The interface process has then adopted the new setting and will automatically transfer it to the component at the next opportunity. In this case, the value CONFIG_PENDING is also set in the MAINTENANCE channel of the component."
     }
   },
   "restoreConfigToDevice": {
@@ -515,7 +516,8 @@
     ],
     "returns": "",
     "help": {
-      "de": "Diese Methode überträgt alle zu einem Gerät in der CCU gespeicherten Konfigurationsdaten erneut an das Gerät."
+      "de": "Diese Methode überträgt alle zu einem Gerät in der CCU gespeicherten Konfigurationsdaten erneut an das Gerät.",
+      "en": "This method retransmits all configuration data stored for a device in the CCU to the device."
     }
   },
   "rssiInfo": {

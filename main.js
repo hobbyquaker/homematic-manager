@@ -195,7 +195,12 @@ function findInterfaces() {
                 };
             }
         });
+
+        log.debug('config ready');
+        ipcRpc.send('config-ready');
+
         initRpcClients();
+
         if (regaPresent) {
             rega = new Rega({
                 host: config.ccuAddress,
@@ -356,7 +361,7 @@ function initRpcClients() {
 }
 
 function setServiceMessage(daemon, channel, datapoint, value) {
-    console.log('setServiceMessage', daemon, channel, datapoint, value);
+    log.debug('setServiceMessage', daemon, channel, datapoint, value);
     if (value) {
         if (!localServiceMessages[daemon]) {
             localServiceMessages[daemon] = {};

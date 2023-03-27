@@ -171,8 +171,10 @@ $('#qr-enable').change(() => {
 });
 
 
-// Entrypoint
-getConfig();
+ipcRpc.on('config-ready', () => {
+    // Entrypoint
+    getConfig();
+});
 
 ipcRpc.on('disconnect', () => {
     $dialogDisconnect.dialog('open');

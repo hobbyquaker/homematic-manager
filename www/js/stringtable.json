@@ -1632,7 +1632,7 @@
     "WINMATIC": "Window tilt actuator",
     "MOTOR_TILT_ERROR": "Error tilt actuator",
     "MOTOR_TURN_ERROR": "Error rotary actuator",
-    "WINMATIC|LEVEL": "Tilt position",
+    "WINMATIC|LEVEL": "Tilt position (-.5 to close)",
     "WINMATIC|MOUNT_SIDE": "Mounting side",
     "WINMATIC|PULL_FORCE": "Power tilt actuator for closing",
     "WINMATIC|PUSH_FORCE": "Power tilt actuator for opening",

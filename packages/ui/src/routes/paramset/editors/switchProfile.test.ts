@@ -12,6 +12,7 @@ import {
     switchParam,
     switchTime,
     toggleWeekdayBit,
+    WEEKDAY_BIT_LABELS,
     type SwitchProfileSpec,
 } from '../../../lib/util/editors/index.js';
 import {MockTransport} from '../../../lib/transport/MockTransport.js';
@@ -115,6 +116,32 @@ describe('the weekday bit mask and the fixed time', () => {
         expect(toggleWeekdayBit(0b0000010, 2, true)).toBe(0b0000110);
         expect(toggleWeekdayBit(0b0000110, 1, false)).toBe(0b0000100);
         expect(toggleWeekdayBit(undefined, 0, true)).toBe(1);
+    });
+
+    /**
+     * A-17, measured 2026-09-05 (OQ-16): the CCU's own weekly-programme dialog
+     * (`/www/config/easymodes/js/HmIPWeeklyProgram.js`, identical on CCU3 firmware 3.89.8 and
+     * OpenCCU 3.89.8) gives each weekday checkbox the bit value as its `value` and sums the ticked
+     * ones into `NN_WP_WEEKDAY`. This pins that table, so a later reordering of the labels - which
+     * would silently mislabel every slot a user has configured in the WebUI - fails here.
+     */
+    it('labels the bits the way the CCU s own weekly-programme dialog numbers them (A-17)', () => {
+        expect(WEEKDAY_BIT_LABELS).toEqual([
+            'Sunday',
+            'Monday',
+            'Tuesday',
+            'Wednesday',
+            'Thursday',
+            'Friday',
+            'Saturday',
+        ]);
+        const valueOfDay = {Sunday: 1, Monday: 2, Tuesday: 4, Wednesday: 8, Thursday: 16, Friday: 32, Saturday: 64};
+        for (const [bit, label] of WEEKDAY_BIT_LABELS.entries()) {
+            expect(toggleWeekdayBit(0, bit, true)).toBe(valueOfDay[label as keyof typeof valueOfDay]);
+            expect(hasWeekdayBit(valueOfDay[label as keyof typeof valueOfDay], bit)).toBe(true);
+        }
+        // every day ticked, as the dialog writes it
+        expect(WEEKDAY_BIT_LABELS.reduce((mask, _label, bit) => toggleWeekdayBit(mask, bit, true), 0)).toBe(127);
     });
 
     it('reads the two time parameters as a clock time and back', () => {

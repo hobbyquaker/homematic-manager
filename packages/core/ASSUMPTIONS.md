@@ -31,6 +31,7 @@ is `tools/lab/config-pending-study.mjs`. Each entry below now starts with what c
 | A-13 | a `100%` unit means a fraction                               | untested - no such parameter on the lab devices                       |
 | A-14 | `writeAll` may fall back to `DEFAULT`                        | **verified as a real case** - the repair reports it                   |
 | A-15 | the HmIP-WRC6 stands in for the WRC2                         | **fixed** - the WRC2's own descriptions were dumped                   |
+| A-17 | `NN_WP_WEEKDAY` bit 0 is Sunday                              | **verified 2026-09-05** in the lab (task 17, OQ-16)                    |
 
 Two things the study found that were not on this list at all, and that matter more than most of
 it: hmipserver **stores what it rejects**, so a parameter a channel does not have is kept for ever
@@ -224,3 +225,40 @@ so the WRC6 is used instead. Both expose `KEY_TRANSCEIVER`, which is what the te
 what the tests exercise - but its `MAINTENANCE` `MASTER` has 9 parameters where the PDT has 21 and
 the DRS8 23, which is exactly the difference that makes a multi-apply across device types dangerous.
 The anonymised `listDevices` dumps are in hm-simulator's `data/fixtures/lab-devices.json`.
+
+## A-17 `NN_WP_WEEKDAY` bit 0 is Sunday - **VERIFIED 2026-09-05 (OQ-16)**
+
+`WEEKDAY_BIT_LABELS` in `packages/ui/src/lib/util/editors/switchProfile.ts` labels the seven bits of
+the HmIP switching programme's weekday mask Sunday first. Nothing in the paramset description and
+nothing in `data/dist` says which bit is which day; task 10 inferred it from the HmIP weekday enums
+the descriptions do document (`DECALCIFICATION_WEEKDAY` and `DST_START_DAY_OF_WEEK` on HmIP start at
+Sunday, while the *BidCos* `DECALCIFICATION_WEEKDAY` starts at Saturday), and printed the raw mask
+beside the checkboxes because of the doubt.
+
+**Measured 2026-09-05 on the lab boxes, and the inference was right.** The mask is produced by the
+CCU's own dialog, `/www/config/easymodes/js/HmIPWeeklyProgram.js`, which is byte-identical
+(md5 `929085c9751a95b15d7ff1cc43d15414`) on CCU3 firmware 3.89.8 and on OpenCCU 3.89.8. Its
+`_getWeekDay()` emits one checkbox per day carrying the bit value as the checkbox `value`, and
+`setWPWeekday()` adds or subtracts that value from the hidden `NN_WP_WEEKDAY` field the WebUI
+submits. Loading that file and the WebUI's jQuery from a lab box into a browser, rebuilding the row
+it emits and ticking one day at a time gives:
+
+| bit | value | day       |
+| --- | ----- | --------- |
+| 0   | 1     | Sunday    |
+| 1   | 2     | Monday    |
+| 2   | 4     | Tuesday   |
+| 3   | 8     | Wednesday |
+| 4   | 16    | Thursday  |
+| 5   | 32    | Friday    |
+| 6   | 64    | Saturday  |
+
+All seven ticked is 127. The same file says it a second way where it fills the checkboxes back in
+from a stored value: it renders the mask as a seven-character binary string, most significant bit
+first, and reads Saturday from index 0 and Sunday from index 6.
+
+No device was written to for this. The measurement runs the CCU's own function over its own markup
+and never submits the form - which is also why it can be repeated on any box without a week
+programme configured, as the lab's HmIP-PDT (`DIMMER_WEEK_PROFILE`, 75 slots, every `NN_WP_WEEKDAY`
+still 0) is. The raw mask stays next to the checkboxes in the editor: it costs nothing, and it is
+what would have made a wrong answer visible.

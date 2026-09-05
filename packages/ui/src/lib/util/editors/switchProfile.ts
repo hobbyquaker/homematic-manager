@@ -22,15 +22,24 @@ import type {DeviceEditorBase, EditorTarget, EditorValues} from './types.js';
  * multiply. This editor draws one line per slot with the columns the description really has, and
  * the durations through the same `DurationPair` the duration picker uses.
  *
- * ## The weekday bit mask (assumption, not measured)
+ * ## The weekday bit mask - measured, A-17
  *
- * Nothing in the description or in `data/dist` says which bit is which day. Bit 0 is taken to be
- * **Sunday** here, because every weekday enum HmIP does document starts there - `DECALCIFICATION_WEEKDAY`
- * on an HmIP-eTRV-2 is `SUNDAY|MONDAY|..|SATURDAY` and so are `DST_START_DAY_OF_WEEK` and
- * `DST_END_DAY_OF_WEEK`, while the *BidCos* `DECALCIFICATION_WEEKDAY` starts at Saturday. That is
- * an inference from neighbouring parameters, so the raw mask is always printed next to the
- * checkboxes and the raw row is one "show the raw parameters" click away. It wants a lab check
- * against the WebUI before anybody trusts the labels.
+ * Nothing in the description or in `data/dist` says which bit is which day. Bit 0 was *taken* to be
+ * **Sunday** by task 10, because every weekday enum HmIP does document starts there -
+ * `DECALCIFICATION_WEEKDAY` on an HmIP-eTRV-2 is `SUNDAY|MONDAY|..|SATURDAY` and so are
+ * `DST_START_DAY_OF_WEEK` and `DST_END_DAY_OF_WEEK`, while the *BidCos* `DECALCIFICATION_WEEKDAY`
+ * starts at Saturday.
+ *
+ * **Confirmed in the lab on 2026-09-05 (OQ-16, task 17).** The mask is produced by the CCU's own
+ * dialog, `/www/config/easymodes/js/HmIPWeeklyProgram.js`, identical on CCU3 firmware 3.89.8 and
+ * OpenCCU 3.89.8: its `_getWeekDay()` gives each day's checkbox the bit value as its `value`
+ * (Sun 1, Mon 2, Tue 4, Wed 8, Thu 16, Fri 32, Sat 64) and `setWPWeekday()` sums them into the
+ * hidden `NN_WP_WEEKDAY` field, so bit 0 is Sunday and all seven days are 127. Running that
+ * function over its own markup in a browser reproduces the table one day at a time; the details
+ * are in `packages/core/ASSUMPTIONS.md` A-17.
+ *
+ * The raw mask stays printed next to the checkboxes anyway. It costs nothing, and it is what would
+ * have made a wrong answer visible.
  */
 
 /** `01_WP_WEEKDAY`. */
@@ -79,8 +88,8 @@ export interface SwitchProfileSpec extends DeviceEditorBase {
 }
 
 /**
- * The seven bits of `NN_WP_WEEKDAY`, Sunday first - see the note at the top: an inference from the
- * HmIP weekday enums, not something the description says.
+ * The seven bits of `NN_WP_WEEKDAY`, Sunday first - see the note at the top: measured against the
+ * CCU's own weekly-programme dialog on both firmwares (A-17), not something the description says.
  */
 export const WEEKDAY_BIT_LABELS: readonly string[] = [
     'Sunday',

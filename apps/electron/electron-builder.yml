@@ -19,7 +19,7 @@ productName: Homematic Manager
 # Without this the binary would be called `@homematic-manager/electron` after the workspace name,
 # which is not a file name on any of the three platforms.
 executableName: homematic-manager
-copyright: Copyright © 2016-2026 Sebastian Raff and contributors, GPL-3.0-or-later
+copyright: Copyright © 2016-2026 Sebastian Raff and contributors, AGPL-3.0-or-later
 
 directories:
   output: dist-electron

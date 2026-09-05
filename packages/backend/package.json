@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "description": "Homematic Manager backend: XML-RPC/BIN-RPC clients and callback servers, caches, optional ReGa",
-  "license": "GPL-3.0-or-later",
+  "license": "AGPL-3.0-or-later",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

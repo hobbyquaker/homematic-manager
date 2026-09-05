@@ -20,7 +20,7 @@
             >github.com/hobbyquaker/homematic-manager</a
         >
     </p>
-    <p>Copyright (c) 2014-2026 Sebastian "Hobbyquaker" Raff, André "Anli" Litfin — GPLv3</p>
+    <p>Copyright (c) 2014-2026 Sebastian "Hobbyquaker" Raff, André "Anli" Litfin — AGPLv3</p>
     <p class="hmm-about-note">HomeMatic und BidCoS sind eingetragene Warenzeichen der eQ-3 AG.</p>
     {#snippet buttons()}
         <button type="button" class="hmm-button" onclick={() => (open = false)}>{t('Close')}</button>

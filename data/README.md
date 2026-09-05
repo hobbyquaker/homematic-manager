@@ -133,7 +133,7 @@ committed.
 
 ## Licensing
 
-The code in this repository is GPLv3; the data here is not. See [NOTICE.md](NOTICE.md).
+The code in this repository is AGPLv3; the data here is not. See [NOTICE.md](NOTICE.md).
 
 - Everything derived from openccu-data's `easymode_extract`, `profiles/`, `translation_extract` and
   `device_icons` - that is `dist/profiles/`, `dist/master-metadata.json`, `dist/option-presets.json`,

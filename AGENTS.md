@@ -28,7 +28,7 @@ the plan is built on is [docs/analysis-2026-09.md](docs/analysis-2026-09.md).
   the fast e2e target, and the process that runs on the CCU.
 - `apps/ccu-addon`: the addon package (bundled musl Node, `rc.d`, monit, tclsh CGIs with the WebUI
   session check, lighttpd proxy).
-- `data/`: pinned openccu-data artifacts and the converter. Not GPLv3 - see `data/NOTICE.md`.
+- `data/`: pinned openccu-data artifacts and the converter. Not AGPLv3 - see `data/NOTICE.md`.
 - `legacy/`: the 2.7.1 code, reference only, never built or linted, deleted when 3.0 ships.
 - `scripts/version-dev.mjs`: the version bump (see below). CI: `.github/workflows/ci.yml`.
 

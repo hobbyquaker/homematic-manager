@@ -9,7 +9,7 @@
 [![Current Release](https://img.shields.io/github/release/hobbyquaker/homematic-manager.svg?colorB=4cc61e)](https://github.com/hobbyquaker/homematic-manager/releases/latest)
 [![Dependency Status](https://david-dm.org/hobbyquaker/homematic-manager/status.svg)](https://david-dm.org/hobbyquaker/homematic-manager)
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
-[![License: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
+[![License: AGPLv3](https://img.shields.io/badge/license-AGPLv3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
 
 Konfiguration und Administration von [HomeMatic](http://www.homematic.com) und HomematicIP Geräten.
 
@@ -25,9 +25,9 @@ Linux und Windows zu finden.
 
 ## Lizenz
 
-Copyright (c) 2014-2019 Sebastian "Hobbyquaker" Raff, André "Anli" Litfin
+Copyright (c) 2014-2026 Sebastian "Hobbyquaker" Raff, André "Anli" Litfin
 
-[GPLv3](https://www.gnu.org/licenses/gpl-3.0.html)
+[AGPLv3](https://www.gnu.org/licenses/agpl-3.0.html) (ab 3.0; die 2.x-Quellen unter `legacy/` bleiben GPLv3)
 
 
 Der obige Urheberrechtsvermerk ist in allen Kopien oder Teilkopien der Software beizulegen.

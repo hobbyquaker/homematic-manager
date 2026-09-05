@@ -3,19 +3,27 @@ import {readFileSync} from 'node:fs';
 import {describe, expect, it} from 'vitest';
 
 import type {ParameterDescription, ParamsetDescription} from './description.js';
+import type {DurationPair} from './time.js';
 import {
+    decodeDuration,
     decodeTime,
+    durationUnitIndex,
+    encodeDuration,
     encodeTime,
+    findDurationPairs,
     findTimePairs,
     isNotUsed,
+    maxDurationSeconds,
     MAX_BASE_FACTOR_SECONDS,
     MAX_TIME_FACTOR,
     notUsedValue,
+    readDurationPair,
     readTimePair,
     TIME_BASE_NAMES,
     TIME_BASES,
     timeBaseIndex,
     timeBaseSeconds,
+    writeDurationPair,
     writeTimePair,
 } from './time.js';
 
@@ -231,5 +239,175 @@ describe('the "not used" value (issue #96)', () => {
     it('ignores a SPECIAL entry that is not NOT_USED', () => {
         const description = {TYPE: 'FLOAT', OPERATIONS: 3, SPECIAL: [{ID: 'INFINITE', VALUE: 1}]};
         expect(notUsedValue(description)).toBeUndefined();
+    });
+});
+
+describe('duration pairs beyond *_TIME_BASE (task 10)', () => {
+    const hmipMaster = fixtures['HmIP-RF/HmIPW-DRS8/1.2.4/1/SWITCH_VIRTUAL_RECEIVER/MASTER'] ?? {};
+
+    /** The pair by its prefix, so the tests can stay free of non-null assertions. */
+    function durationPair(description: ParamsetDescription, name: string): DurationPair {
+        const found = findDurationPairs(description).find((pair) => pair.name === name);
+        if (!found) {
+            throw new Error(`description has no duration pair ${name}`);
+        }
+        return found;
+    }
+
+    it('finds the base/factor pairs of a real HmIP LINK description, with the same names', () => {
+        const pairs = findDurationPairs(hmipLink);
+        expect(pairs.every((pair) => pair.kind === 'base-factor')).toBe(true);
+        expect(pairs.map((pair) => pair.name).sort()).toEqual(
+            findTimePairs(hmipLink)
+                .map((pair) => pair.name)
+                .sort(),
+        );
+        const shortOn = durationPair(hmipLink, 'SHORT_ON');
+        expect(shortOn.unitParam).toBe('SHORT_ON_TIME_BASE');
+        expect(shortOn.countParam).toBe('SHORT_ON_TIME_FACTOR');
+        expect(shortOn.maxCount).toBe(MAX_TIME_FACTOR);
+        expect(shortOn.units.map((unit) => unit.name)).toEqual(TIME_BASE_NAMES);
+        expect(shortOn.units.map((unit) => unit.seconds)).toEqual([...TIME_BASES]);
+    });
+
+    it('finds a base/factor pair that is not called *_TIME_BASE', () => {
+        // SWITCHING_INTERVAL_BASE/_FACTOR on BidCos-RF and 01_WP_DURATION_BASE/_FACTOR inside an
+        // HmIP week profile are the same eight steps under another prefix; findTimePairs, which
+        // matches the `_TIME_BASE` suffix, sees neither.
+        const description: ParamsetDescription = {
+            SWITCHING_INTERVAL_BASE: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 7},
+            SWITCHING_INTERVAL_FACTOR: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 31},
+        };
+        expect(findTimePairs(description)).toEqual([]);
+        const pair = durationPair(description, 'SWITCHING_INTERVAL');
+        expect(pair.kind).toBe('base-factor');
+        // No VALUE_LIST: the BidCos shape, the eight fixed steps addressed by index.
+        expect(pair.units.map((unit) => unit.seconds)).toEqual([...TIME_BASES]);
+        expect(decodeDuration(4, 15, pair)?.seconds).toBe(900);
+    });
+
+    it('ignores a *_BASE whose VALUE_LIST is not the time base table', () => {
+        const description: ParamsetDescription = {
+            COLOR_BASE: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['RED', 'GREEN']},
+            COLOR_FACTOR: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 31},
+        };
+        expect(findDurationPairs(description)).toEqual([]);
+    });
+
+    it('ignores a *_BASE without a factor next to it', () => {
+        expect(findDurationPairs({ON_TIME_BASE: {TYPE: 'INTEGER', OPERATIONS: 3}})).toEqual([]);
+    });
+
+    it('falls back to 0..31 for a factor whose description carries no MAX', () => {
+        const pair = durationPair(
+            {
+                ON_TIME_BASE: {TYPE: 'INTEGER', OPERATIONS: 3},
+                ON_TIME_FACTOR: {TYPE: 'INTEGER', OPERATIONS: 3},
+            },
+            'ON',
+        );
+        expect(pair.maxCount).toBe(MAX_TIME_FACTOR);
+    });
+
+    it('finds the HmIP unit/value pairs of a real MASTER description', () => {
+        expect(
+            findDurationPairs(hmipMaster)
+                .map((pair) => pair.name)
+                .sort(),
+        ).toEqual(['POWERUP_OFFDELAY', 'POWERUP_OFFTIME', 'POWERUP_ONDELAY', 'POWERUP_ONTIME']);
+        const onDelay = durationPair(hmipMaster, 'POWERUP_ONDELAY');
+        expect(onDelay.kind).toBe('unit-value');
+        expect(onDelay.unitParam).toBe('POWERUP_ONDELAY_UNIT');
+        expect(onDelay.countParam).toBe('POWERUP_ONDELAY_VALUE');
+        expect(onDelay.maxCount).toBe(31);
+        expect(onDelay.units).toEqual([
+            {name: '100MS', seconds: 0.1},
+            {name: '1S', seconds: 1},
+            {name: '5S', seconds: 5},
+            {name: '10S', seconds: 10},
+            {name: '1M', seconds: 60},
+            {name: '5M', seconds: 300},
+            {name: '10M', seconds: 600},
+            {name: 'H', seconds: 3600},
+        ]);
+    });
+
+    it('leaves an enum that is not a duration alone - CELSIUS|FAHRENHEIT is a unit too', () => {
+        const description: ParamsetDescription = {
+            DISPLAY_TEMPERATUR_UNIT: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['CELSIUS', 'FAHRENHEIT']},
+            DISPLAY_TEMPERATUR_VALUE: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 100},
+        };
+        expect(findDurationPairs(description)).toEqual([]);
+    });
+
+    it('needs both halves, a VALUE_LIST and a numeric MAX on the count', () => {
+        const unit: ParameterDescription = {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['S', 'M']};
+        expect(findDurationPairs({A_UNIT: unit})).toEqual([]);
+        expect(
+            findDurationPairs({A_UNIT: {TYPE: 'ENUM', OPERATIONS: 3}, A_VALUE: {TYPE: 'INTEGER', OPERATIONS: 3}}),
+        ).toEqual([]);
+        expect(findDurationPairs({A_UNIT: unit, A_VALUE: {TYPE: 'INTEGER', OPERATIONS: 3}})).toEqual([]);
+        expect(
+            findDurationPairs({
+                A_UNIT: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: []},
+                A_VALUE: {TYPE: 'INTEGER', OPERATIONS: 3, MAX: 10},
+            }),
+        ).toEqual([]);
+    });
+
+    it('reads a unit/value pair by enum name and by index', () => {
+        const pair = durationPair(hmipMaster, 'POWERUP_ONTIME');
+        // HmIP answers getParamset with the index, the description carries the name; both work.
+        expect(readDurationPair({POWERUP_ONTIME_UNIT: '1M', POWERUP_ONTIME_VALUE: 5}, pair)?.seconds).toBe(300);
+        expect(readDurationPair({POWERUP_ONTIME_UNIT: 4, POWERUP_ONTIME_VALUE: 5}, pair)?.seconds).toBe(300);
+        expect(durationUnitIndex('10M', pair)).toBe(6);
+        expect(durationUnitIndex('NOPE', pair)).toBeUndefined();
+        expect(durationUnitIndex(9, pair)).toBeUndefined();
+        expect(durationUnitIndex(true, pair)).toBeUndefined();
+    });
+
+    it('reports a malformed half instead of inventing a duration', () => {
+        const pair = durationPair(hmipMaster, 'POWERUP_ONTIME');
+        expect(readDurationPair({POWERUP_ONTIME_UNIT: '1M'}, pair)).toBeUndefined();
+        expect(readDurationPair({POWERUP_ONTIME_UNIT: '1M', POWERUP_ONTIME_VALUE: 32}, pair)).toBeUndefined();
+        expect(readDurationPair({POWERUP_ONTIME_UNIT: '1M', POWERUP_ONTIME_VALUE: -1}, pair)).toBeUndefined();
+        expect(readDurationPair({POWERUP_ONTIME_UNIT: '1M', POWERUP_ONTIME_VALUE: 1.5}, pair)).toBeUndefined();
+        expect(readDurationPair({POWERUP_ONTIME_VALUE: 5}, pair)).toBeUndefined();
+    });
+
+    it('marks the pair maximum, which is what "for ever" means on the wire', () => {
+        const pair = durationPair(hmipMaster, 'POWERUP_ONTIME');
+        expect(readDurationPair({POWERUP_ONTIME_UNIT: 'H', POWERUP_ONTIME_VALUE: 31}, pair)?.maximal).toBe(true);
+        expect(maxDurationSeconds(pair)).toBe(MAX_BASE_FACTOR_SECONDS);
+        expect(maxDurationSeconds({...pair, units: []})).toBe(0);
+    });
+
+    it('encodes seconds into the finest unit whose count still fits', () => {
+        const pair = durationPair(hmipMaster, 'POWERUP_ONTIME');
+        expect(encodeDuration(300, pair)).toMatchObject({unitIndex: 3, count: 30, seconds: 300, exact: true});
+        expect(writeDurationPair(300, pair)).toEqual({POWERUP_ONTIME_UNIT: 3, POWERUP_ONTIME_VALUE: 30});
+    });
+
+    it('says so when the pair cannot express the value exactly, and picks the closest', () => {
+        const pair = durationPair(hmipMaster, 'POWERUP_ONTIME');
+        const encoded = encodeDuration(7.05, pair);
+        expect(encoded?.exact).toBe(false);
+        expect(encoded?.seconds).toBe(7);
+        // Above what the pair can hold it clamps to the maximum rather than refusing.
+        expect(encodeDuration(999_999, pair)?.seconds).toBe(MAX_BASE_FACTOR_SECONDS);
+    });
+
+    it('refuses a nonsensical duration', () => {
+        const pair = durationPair(hmipMaster, 'POWERUP_ONTIME');
+        expect(encodeDuration(-1, pair)).toBeUndefined();
+        expect(encodeDuration(Number.NaN, pair)).toBeUndefined();
+        expect(writeDurationPair(-1, pair)).toBeUndefined();
+        expect(encodeDuration(5, {...pair, units: []})).toBeUndefined();
+    });
+
+    it('reads a base/factor pair the same way, so one picker serves both encodings', () => {
+        const pair = durationPair(hmipLink, 'SHORT_ON');
+        expect(readDurationPair({SHORT_ON_TIME_BASE: 'BASE_1_M', SHORT_ON_TIME_FACTOR: 5}, pair)?.seconds).toBe(300);
+        expect(writeDurationPair(300, pair)).toEqual({SHORT_ON_TIME_BASE: 3, SHORT_ON_TIME_FACTOR: 30});
     });
 });

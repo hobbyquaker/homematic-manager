@@ -123,7 +123,7 @@ describe('RegaService.refreshNames', () => {
 
 describe('RegaService.rename', () => {
     it('sends the script for the addresses ReGa knows', async () => {
-        const exec = vi.fn((_script: string) => Promise.resolve({output: '', objects: {}}));
+        const exec = vi.fn((script: string) => Promise.resolve({output: script, objects: {}}));
         const names = new NameStore();
         const {rega} = service(
             {getChannels: () => Promise.resolve([{id: 4711, address: 'A:1', name: 'x'}]), exec},
@@ -140,7 +140,7 @@ describe('RegaService.rename', () => {
     });
 
     it('does nothing without entries or without a known object', async () => {
-        const exec = vi.fn((_script: string) => Promise.resolve({output: '', objects: {}}));
+        const exec = vi.fn((script: string) => Promise.resolve({output: script, objects: {}}));
         const {rega} = service({exec});
         await rega.rename([]);
         await rega.rename([{address: 'A:1', name: 'x'}]);

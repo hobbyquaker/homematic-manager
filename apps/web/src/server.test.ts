@@ -563,6 +563,218 @@ describe('the keepalive that a reverse proxy needs (task 13)', () => {
     });
 });
 
+describe('the ReGa login (D-32)', () => {
+    /** A CCU with one user; the real one asks ReGa and the udp daemon, this one asks nobody. */
+    const fakeCcu = {
+        calls: [] as Array<{user: string; password: string}>,
+        fail: false,
+        authenticate(user: string, password: string): Promise<{name: string; level: number} | undefined> {
+            fakeCcu.calls.push({user, password});
+            if (fakeCcu.fail) {
+                return Promise.reject(new Error('rega is not answering'));
+            }
+            return Promise.resolve(user === 'Admin' && password === 'secret' ? {name: 'Admin', level: 8} : undefined);
+        },
+    };
+
+    beforeEach(() => {
+        fakeCcu.calls.length = 0;
+        fakeCcu.fail = false;
+    });
+
+    /** A host in `rega` mode. `local` is required, so every one of these sets it. */
+    function login(options: WebHostOptions = {}): Promise<WebHost> {
+        return start({authMode: 'rega', local: true, authenticator: fakeCcu, ...options});
+    }
+
+    /** Posts the form the login page carries. */
+    function post(host: WebHost, body: string, headers: Record<string, string> = {}): Promise<Response> {
+        return fetch(`${host.url}login`, {
+            method: 'POST',
+            redirect: 'manual',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded', ...headers},
+            body,
+        });
+    }
+
+    /** The `hmm_session` cookie out of a `Set-Cookie` header. */
+    function sessionCookieOf(answer: Response): string {
+        const header = answer.headers.get('set-cookie') ?? '';
+        const value = /hmm_session=([^;]+)/.exec(header)?.[1];
+        expect(value, `no session cookie in ${header}`).toBeTruthy();
+        return `hmm_session=${value ?? ''}`;
+    }
+
+    it('is off by default: the UI is served without any login', async () => {
+        const host = await start();
+        expect(host.authMode).toBe('token');
+        expect(host.sessions).toBeUndefined();
+        expect((await fetch(host.url)).status).toBe(200);
+        expect(await (await fetch(host.url)).text()).toContain('<div id="app">');
+    });
+
+    it('serves the login page instead of the UI, and a 401 for everything else', async () => {
+        const host = await login();
+        const page = await fetch(host.url);
+        expect(page.status).toBe(200);
+        const body = await page.text();
+        expect(body).toContain('Benutzername');
+        expect(body).toContain(`action="${host.base}login"`);
+        expect(body).not.toContain('<div id="app">');
+        expect(page.headers.get('cache-control')).toBe('no-store');
+        // the assets and the metadata are not the page: a login form in place of a stylesheet
+        // only confuses a browser
+        expect((await fetch(`${host.url}assets/app-C9tqDdX1.js`)).status).toBe(401);
+        expect((await fetch(`${host.url}data/manifest.json`)).status).toBe(401);
+    });
+
+    it('refuses to start off the CCU, and says why', async () => {
+        await expect(start({authMode: 'rega'})).rejects.toThrow('--auth-mode rega needs --local');
+        await expect(start({authMode: 'rega', local: false})).rejects.toThrow('loopback');
+        // and it guards nothing without a token, so that combination is refused too
+        await expect(start({authMode: 'rega', local: true, auth: false})).rejects.toThrow('--no-auth');
+    });
+
+    it('hands out a session cookie for the right credentials and lets the browser in', async () => {
+        const host = await login();
+        const answer = await post(host, 'user=Admin&password=secret');
+        expect(answer.status).toBe(302);
+        expect(answer.headers.get('location')).toBe(host.base);
+        const cookie = sessionCookieOf(answer);
+        const header = answer.headers.get('set-cookie') ?? '';
+        expect(header).toContain('Path=/');
+        expect(header).toContain('HttpOnly');
+        expect(header).toContain('SameSite=Strict');
+        expect(header).toContain('Max-Age=86400');
+        // no Secure over plain http - the CCU is usually reached over http, and the browser would
+        // simply never send the cookie back
+        expect(header).not.toContain('Secure');
+
+        const ui = await fetch(host.url, {headers: {Cookie: cookie}});
+        expect(await ui.text()).toContain('<div id="app">');
+        expect((await fetch(`${host.url}data/manifest.json`, {headers: {Cookie: cookie}})).status).toBe(200);
+    });
+
+    it('answers a wrong password and an unknown user identically', async () => {
+        const host = await login();
+        const wrong = await post(host, 'user=Admin&password=nope');
+        const unknown = await post(host, 'user=Nobody&password=secret');
+        expect(wrong.status).toBe(401);
+        expect(unknown.status).toBe(401);
+        const wrongBody = await wrong.text();
+        const unknownBody = await unknown.text();
+        expect(wrongBody).toContain('data-error="credentials"');
+        // the two pages differ only in the user name that is put back into the form
+        expect(wrongBody.replace('Admin', 'X')).toBe(unknownBody.replace('Nobody', 'X'));
+        expect(wrong.headers.get('set-cookie')).toBeNull();
+    });
+
+    it('stops after five failures from one source and refuses the sixth without asking the CCU', async () => {
+        const host = await login();
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+            expect((await post(host, 'user=Admin&password=nope')).status).toBe(401);
+        }
+        expect(fakeCcu.calls).toHaveLength(5);
+        const blocked = await post(host, 'user=Admin&password=secret');
+        expect(blocked.status).toBe(429);
+        expect(await blocked.text()).toContain('data-error="rate-limited"');
+        // the right password was never even tried: the CCU was not asked a sixth time
+        expect(fakeCcu.calls).toHaveLength(5);
+    });
+
+    it('says so when the CCU cannot be asked at all', async () => {
+        const host = await login();
+        fakeCcu.fail = true;
+        const answer = await post(host, 'user=Admin&password=secret');
+        expect(answer.status).toBe(401);
+        expect(await answer.text()).toContain('data-error="unavailable"');
+    });
+
+    it('opens the api socket with the session cookie, exactly like the token cookie', async () => {
+        const host = await login();
+        const cookie = sessionCookieOf(await post(host, 'user=Admin&password=secret'));
+        await expect(handshake(host, {cookie})).resolves.toBe(101);
+        await expect(handshake(host, {cookie: 'hmm_session=forged'})).resolves.toBe(401);
+        await expect(handshake(host)).resolves.toBe(401);
+        await expect(handshake(host, {cookie: `hmm_token=${host.token ?? ''}`})).resolves.toBe(101);
+    });
+
+    it('answers session.info on that socket with the user and the level', async () => {
+        const host = await login();
+        const cookie = sessionCookieOf(await post(host, 'user=Admin&password=secret'));
+        const socket = new WebSocket(`ws://127.0.0.1:${host.port}${host.base}api`, {
+            headers: {Cookie: cookie},
+        } as unknown as string[]);
+        await new Promise<void>((resolve, reject) => {
+            socket.onopen = (): void => resolve();
+            socket.onerror = (): void => reject(new Error('the socket did not open'));
+        });
+        const answer = await new Promise<ApiFrame>((resolve) => {
+            socket.onmessage = (event): void => resolve(JSON.parse(String(event.data)) as ApiFrame);
+            socket.send(JSON.stringify({t: 'req', id: 1, m: 'session.info', p: []}));
+        });
+        expect(answer).toEqual({t: 'res', id: 1, r: {user: 'Admin', level: 8}});
+        socket.close();
+    });
+
+    it('slides the expiry and re-sends the cookie on every page load', async () => {
+        const host = await login({sessionTtlMs: 60_000});
+        const cookie = sessionCookieOf(await post(host, 'user=Admin&password=secret'));
+        const page = await fetch(host.url, {headers: {Cookie: cookie}});
+        expect(page.headers.get('set-cookie')).toContain('Max-Age=60');
+        expect(host.sessions?.size).toBe(1);
+    });
+
+    it('logs out: the session is gone here and the cookie is gone there', async () => {
+        const host = await login();
+        const cookie = sessionCookieOf(await post(host, 'user=Admin&password=secret'));
+        expect(host.sessions?.size).toBe(1);
+        const answer = await fetch(`${host.url}logout`, {headers: {Cookie: cookie}, redirect: 'manual'});
+        expect(answer.status).toBe(302);
+        expect(answer.headers.get('location')).toBe(`${host.base}login`);
+        expect(answer.headers.get('set-cookie')).toContain('Max-Age=0');
+        expect(host.sessions?.size).toBe(0);
+        // and the cookie the browser still has opens nothing
+        expect(await (await fetch(host.url, {headers: {Cookie: cookie}})).text()).toContain('Benutzername');
+        await expect(handshake(host, {cookie})).resolves.toBe(401);
+    });
+
+    it('lets the settings.cgi hand-over past the login page, untouched', async () => {
+        // task 13: the WebUI session was checked by `settings.cgi`, which set the token cookie and
+        // redirected here. That browser must never see the login form.
+        const host = await login({base: '/addons/hmm/'});
+        const cookie = `hmm_token=${host.token ?? ''}`;
+        const page = await fetch(host.url, {headers: {Cookie: cookie}});
+        expect(await page.text()).toContain('<div id="app">');
+        expect((await fetch(`${host.url}data/manifest.json`, {headers: {Cookie: cookie}})).status).toBe(200);
+        await expect(handshake(host, {cookie})).resolves.toBe(101);
+        expect(fakeCcu.calls).toHaveLength(0);
+    });
+
+    it('serves the login page in English when the browser asks for it, and on request', async () => {
+        const host = await login();
+        const english = await fetch(host.url, {headers: {'Accept-Language': 'en-GB,en;q=0.9'}});
+        expect(await english.text()).toContain('User name');
+        const chosen = await fetch(`${host.url}login?lang=en`);
+        expect(await chosen.text()).toContain('User name');
+        const german = await fetch(`${host.url}login?lang=de`, {headers: {'Accept-Language': 'en-GB'}});
+        expect(await german.text()).toContain('Benutzername');
+    });
+
+    it('marks the cookie Secure when the request came in over https', async () => {
+        const host = await login();
+        const answer = await post(host, 'user=Admin&password=secret', {'X-Forwarded-Proto': 'https'});
+        expect(answer.headers.get('set-cookie')).toContain('Secure');
+    });
+
+    it('answers a login body that is far too large as a failed attempt, not with a buffer', async () => {
+        const host = await login();
+        const answer = await post(host, `user=Admin&password=${'x'.repeat(9000)}`);
+        expect(answer.status).toBe(401);
+        expect(fakeCcu.calls).toHaveLength(0);
+    });
+});
+
 describe('shutdown', () => {
     it('closes the port, the socket and the backend, and may be called twice', async () => {
         const host = await start();

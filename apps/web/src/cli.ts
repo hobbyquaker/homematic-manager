@@ -121,6 +121,15 @@ export async function runCli(options: RunCliOptions = {}): Promise<CliRun> {
         log.debug(`token ${host.token}`);
     }
     log.debug(`a client without a cookie can use ${host.url}?token=${host.token}`);
+    if (parsed.authMode === 'rega') {
+        // D-32: the token still works and `settings.cgi` still hands it out - the login is a second
+        // door, not a replacement, and saying so keeps the addon's two paths straight in the log
+        log.info(
+            `login: CCU credentials required (ReGa), sessions last ${String(
+                Math.round(parsed.sessionTtlMs / 3_600_000),
+            )} h of inactivity; the token cookie of settings.cgi is still accepted`,
+        );
+    }
     if (parsed.uiDevServer !== undefined) {
         log.info(`development mode: everything but the api is proxied to ${parsed.uiDevServer}`);
     }
@@ -173,6 +182,8 @@ function startHost(values: WebOptions, log: Logger, version: string): Promise<We
         ...(values.uiDevServer === undefined ? {} : {uiDevServer: values.uiDevServer}),
         ...(values.token === undefined ? {} : {token: values.token}),
         ...(values.issueCookie === undefined ? {} : {issueCookie: values.issueCookie}),
+        authMode: values.authMode,
+        sessionTtlMs: values.sessionTtlMs,
         ...(values.ccu === undefined ? {} : {ccu: values.ccu}),
         ...(values.local === undefined ? {} : {local: values.local}),
         ...(values.callbackIp === undefined ? {} : {callbackIp: values.callbackIp}),

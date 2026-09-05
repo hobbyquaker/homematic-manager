@@ -97,6 +97,23 @@ describe('runCli', () => {
         expect(lines.some((line) => line.startsWith('debug') && line.includes('S3CRET'))).toBe(true);
     });
 
+    it('says in the log that the login is on, and that the token still is too (D-32)', async () => {
+        const lines: string[] = [];
+        const io = capture();
+        await runCli({
+            argv: ['--auth-mode', 'rega', '--local', '--session-ttl', '12h'],
+            env: {},
+            ...io,
+            logWrite: (level, line) => lines.push(`${level} ${line}`),
+            start: () => Promise.resolve(fakeHost('S3CRET')),
+            onSignal: () => undefined,
+        });
+        const login = lines.find((line) => line.includes('login:'));
+        expect(login).toContain('CCU credentials required');
+        expect(login).toContain('12 h');
+        expect(login).toContain('settings.cgi');
+    });
+
     it('reports a host that will not start and exits 1', async () => {
         const io = capture();
         const run = await runCli({

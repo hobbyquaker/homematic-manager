@@ -30,6 +30,16 @@ import {randomBytes} from 'node:crypto';
 /** The cookie the page load sets and the upgrade request replays. */
 export const TOKEN_COOKIE = 'hmm_token';
 
+/**
+ * D-32: the cookie the `rega` login issues instead.
+ *
+ * It is a *second* door to the same socket, not a replacement: the addon's `settings.cgi` keeps
+ * handing out the token cookie after its WebUI session check, and a browser that has one is let in
+ * without ever seeing the login page. Both are translated into the `?token=` the backend
+ * understands on the upgrade request, so `packages/ui` still knows nothing about any of it.
+ */
+export const SESSION_COOKIE = 'hmm_session';
+
 /** A fresh token: 32 hex characters, from the CSPRNG. */
 export function createToken(): string {
     return randomBytes(16).toString('hex');
@@ -55,6 +65,36 @@ export function readCookie(header: string | undefined, name: string): string | u
 /** The `Set-Cookie` value for a token, scoped to the base path the UI is served under. */
 export function tokenCookie(token: string, base: string, secure = false): string {
     const parts = [`${TOKEN_COOKIE}=${encodeURIComponent(token)}`, `Path=${base}`, 'HttpOnly', 'SameSite=Strict'];
+    if (secure) {
+        parts.push('Secure');
+    }
+    return parts.join('; ');
+}
+
+/**
+ * The `Set-Cookie` value for a session (D-32).
+ *
+ * `Max-Age` mirrors the server-side expiry and is re-sent on every page load, which is what makes
+ * the sliding expiry visible to the browser as well: a tab that is being used keeps its cookie
+ * alive, one that is not loses it at the same moment the host forgets the session.
+ */
+export function sessionCookie(id: string, base: string, maxAgeSeconds: number, secure = false): string {
+    const parts = [
+        `${SESSION_COOKIE}=${encodeURIComponent(id)}`,
+        `Path=${base}`,
+        `Max-Age=${String(Math.max(0, Math.floor(maxAgeSeconds)))}`,
+        'HttpOnly',
+        'SameSite=Strict',
+    ];
+    if (secure) {
+        parts.push('Secure');
+    }
+    return parts.join('; ');
+}
+
+/** The `Set-Cookie` that ends a session in the browser as well; what logout answers with. */
+export function clearedSessionCookie(base: string, secure = false): string {
+    const parts = [`${SESSION_COOKIE}=`, `Path=${base}`, 'Max-Age=0', 'HttpOnly', 'SameSite=Strict'];
     if (secure) {
         parts.push('Secure');
     }
@@ -94,6 +134,28 @@ export function applyCookieToken(
         return;
     }
     if (readCookie(request.headers.cookie, TOKEN_COOKIE) === token) {
+        request.url = withTokenQuery(request.url, token);
+    }
+}
+
+/**
+ * The same for the session cookie of D-32: a valid session opens the API socket exactly like the
+ * token cookie does.
+ *
+ * `isValid` is the host's session store. The token itself never reaches the browser in this mode -
+ * the session id is what the browser holds, and the host translates it here for the backend, which
+ * only ever knew about tokens.
+ */
+export function applySessionToken(
+    request: {url?: string | undefined; headers: {cookie?: string | undefined}},
+    token: string | undefined,
+    isValid: (id: string) => boolean,
+): void {
+    if (token === undefined || token === '' || hasTokenQuery(request.url)) {
+        return;
+    }
+    const id = readCookie(request.headers.cookie, SESSION_COOKIE);
+    if (id !== undefined && id !== '' && isValid(id)) {
         request.url = withTokenQuery(request.url, token);
     }
 }

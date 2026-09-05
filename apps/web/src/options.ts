@@ -10,7 +10,7 @@
 
 import {LOG_LEVELS, isLogLevel, type LogLevel} from './log.js';
 import {defaultDataDir} from './paths.js';
-import {DEFAULT_HOST, DEFAULT_PORT} from './server.js';
+import {DEFAULT_HOST, DEFAULT_PORT, type AuthMode} from './server.js';
 
 /** Prefix of every environment variable: `--data-dir` is `HMM_DATA_DIR`. */
 export const ENV_PREFIX = 'HMM';
@@ -22,6 +22,16 @@ export const ENV_PREFIX = 'HMM';
  * `0` disables it; Electron never gets here (its transport reports no sessions).
  */
 export const DEFAULT_IDLE_UNSUBSCRIBE = '5m';
+
+/**
+ * D-32: how a browser is let in. `token` is what every install type but the CCU addon uses, and
+ * stays the default there too - the addon's `settings.cgi` hand-over is the primary path and the
+ * login is switched on by hand in `etc/hmm.env` or from the addon's settings page.
+ */
+export const AUTH_MODES = ['token', 'rega'] as const;
+
+/** D-32: a login lasts a day of not being used. Sliding, so a tab in use never expires. */
+export const DEFAULT_SESSION_TTL = '24h';
 
 /**
  * A duration as `90` (seconds), `300s`, `5m` or `1h`, in milliseconds. `0` is off.
@@ -38,6 +48,11 @@ export function parseDuration(value: string, option: string): number {
     const amount = Number(match[1]);
     const factor = {ms: 1, s: 1000, m: 60_000, h: 3_600_000}[match[2] ?? 's'] ?? 1000;
     return amount * factor;
+}
+
+/** Is this one of the two modes? `parseRaw` has already refused everything else. */
+export function isAuthMode(value: string | undefined): value is AuthMode {
+    return value === 'token' || value === 'rega';
 }
 
 export type OptionType = 'string' | 'number' | 'boolean';
@@ -105,6 +120,17 @@ export const OPTIONS = {
         type: 'boolean',
         describe: 'hand the token to the browser as a cookie on the page load',
         defaultDescription: 'on for a loopback bind, off otherwise',
+    },
+    'auth-mode': {
+        type: 'string',
+        describe: 'token: the token guards the api. rega: ask for a CCU login first (addon only, needs --local)',
+        choices: AUTH_MODES,
+        default: 'token',
+    },
+    'session-ttl': {
+        type: 'string',
+        describe: 'with --auth-mode rega: how long a login lasts without being used (24h, 90m, ...)',
+        default: DEFAULT_SESSION_TTL,
     },
     ccu: {
         alias: 'a',
@@ -185,6 +211,10 @@ export interface WebOptions {
     readonly token: string | undefined;
     readonly auth: boolean;
     readonly issueCookie: boolean | undefined;
+    /** D-32: `token` or `rega`. */
+    readonly authMode: AuthMode;
+    /** D-32, in milliseconds. */
+    readonly sessionTtlMs: number;
     readonly ccu: string | undefined;
     readonly local: boolean | undefined;
     readonly callbackIp: string | undefined;
@@ -331,6 +361,8 @@ export function parseOptions(argv: readonly string[], env: NodeJS.ProcessEnv = p
         token: string('token'),
         auth: boolean('auth') as boolean,
         issueCookie: boolean('issue-cookie'),
+        authMode: isAuthMode(string('auth-mode')) ? (string('auth-mode') as AuthMode) : 'token',
+        sessionTtlMs: parseDuration(string('session-ttl') as string, '--session-ttl'),
         ccu: string('ccu'),
         local: boolean('local'),
         callbackIp: string('callback-ip'),

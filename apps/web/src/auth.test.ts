@@ -2,10 +2,14 @@ import {describe, expect, it} from 'vitest';
 
 import {
     applyCookieToken,
+    applySessionToken,
+    clearedSessionCookie,
     createToken,
     hasTokenQuery,
     isLoopbackHost,
     readCookie,
+    SESSION_COOKIE,
+    sessionCookie,
     TOKEN_COOKIE,
     tokenCookie,
     withTokenQuery,
@@ -94,6 +98,59 @@ describe('applyCookieToken', () => {
 
         const explicit = {url: '/api?token=given', headers: {cookie: 'hmm_token=secret'}};
         applyCookieToken(explicit, 'secret');
+        expect(explicit.url).toBe('/api?token=given');
+    });
+});
+
+describe('the session cookie (D-32)', () => {
+    it('carries the sliding lifetime as Max-Age and is scoped like the token cookie', () => {
+        expect(sessionCookie('abc', '/addons/hmm/', 86_400)).toBe(
+            'hmm_session=abc; Path=/addons/hmm/; Max-Age=86400; HttpOnly; SameSite=Strict',
+        );
+        expect(sessionCookie('abc', '/', 60, true)).toBe(
+            'hmm_session=abc; Path=/; Max-Age=60; HttpOnly; SameSite=Strict; Secure',
+        );
+        // a fractional or negative lifetime is not a header a browser should have to parse
+        expect(sessionCookie('abc', '/', -5)).toContain('Max-Age=0');
+        expect(sessionCookie('abc', '/', 1.7)).toContain('Max-Age=1');
+    });
+
+    it('is cleared by the same cookie with Max-Age=0 - that is what logout answers with', () => {
+        expect(clearedSessionCookie('/addons/hmm/')).toBe(
+            'hmm_session=; Path=/addons/hmm/; Max-Age=0; HttpOnly; SameSite=Strict',
+        );
+        expect(clearedSessionCookie('/', true)).toContain('; Secure');
+    });
+
+    it('is read back by name like every other cookie', () => {
+        expect(readCookie('a=1; hmm_session=xyz; hmm_token=abc', SESSION_COOKIE)).toBe('xyz');
+    });
+});
+
+describe('applySessionToken', () => {
+    const valid = (id: string): boolean => id === 'live';
+
+    it('opens the api socket for a session the host still knows', () => {
+        const request = {url: '/api', headers: {cookie: 'hmm_session=live'}};
+        applySessionToken(request, 'secret', valid);
+        expect(request.url).toBe('/api?token=secret');
+    });
+
+    it('leaves a forged, an expired and a missing session alone, so the backend answers 401', () => {
+        for (const cookie of ['hmm_session=forged', 'hmm_session=', 'hmm_token=other', '']) {
+            const request = {url: '/api', headers: {cookie}};
+            applySessionToken(request, 'secret', valid);
+            expect(request.url, cookie).toBe('/api');
+        }
+    });
+
+    it('does nothing without a token or when one is already in the url', () => {
+        const noAuth = {url: '/api', headers: {cookie: 'hmm_session=live'}};
+        applySessionToken(noAuth, undefined, valid);
+        expect(noAuth.url).toBe('/api');
+
+        const explicit = {url: '/api?token=given', headers: {cookie: 'hmm_session=live'}};
+        applySessionToken(explicit, 'secret', valid);
         expect(explicit.url).toBe('/api?token=given');
     });
 });

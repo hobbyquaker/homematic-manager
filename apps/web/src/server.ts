@@ -28,14 +28,35 @@ import type {IncomingMessage, ServerResponse} from 'node:http';
 import type {Socket} from 'node:net';
 import path from 'node:path';
 
-import type {AppConfig} from '@homematic-manager/core';
-import {ApiWebSocketServer, Backend, type BackendOptions} from '@homematic-manager/backend';
+import type {AppConfig, SessionInfo} from '@homematic-manager/core';
+import {ApiWebSocketServer, Backend, RegaAuthenticator, type BackendOptions} from '@homematic-manager/backend';
 
-import {applyCookieToken, createToken, isLoopbackHost, tokenCookie} from './auth.js';
+import {
+    applyCookieToken,
+    applySessionToken,
+    clearedSessionCookie,
+    createToken,
+    isLoopbackHost,
+    readCookie,
+    SESSION_COOKIE,
+    sessionCookie,
+    TOKEN_COOKIE,
+    tokenCookie,
+} from './auth.js';
 import {DeviceImageService, readIconMapFile, type ImageUpstream} from './images.js';
+import {
+    clientAddress,
+    parseLoginForm,
+    pickLanguage,
+    readBody,
+    renderLoginPage,
+    type LoginError,
+    type LoginLanguage,
+} from './login.js';
 import {createLogger, silentLogger, type Logger, type LogLevel} from './log.js';
 import {defaultDataDir, defaultMetadataDir, defaultUiDir, packageVersion} from './paths.js';
 import {proxyRequest, proxyUpgrade} from './proxy.js';
+import {RateLimiter, SessionStore, type Session} from './sessions.js';
 import {resolveStaticFile, sendFile} from './static.js';
 
 /** The port the CLI binds by default - 8090, next to nothing else a Homematic user runs. */
@@ -53,6 +74,21 @@ export const SHUTDOWN_TIMEOUT_MS = 5000;
  * CCU addon (task 13) after a minute without traffic.
  */
 export const KEEPALIVE_INTERVAL_MS = 25_000;
+
+/**
+ * D-32: how a browser is let in.
+ *
+ * `token` is what tasks 12 and 13 built and stays the default everywhere: the token comes from the
+ * command line, the environment or the addon's session-checked `settings.cgi`. `rega` puts a login
+ * page in front of the UI and checks the credentials against the CCU itself - which only works
+ * *on* the CCU, because both services it asks are loopback-only.
+ */
+export type AuthMode = 'token' | 'rega';
+
+/** What the login endpoint asks. `RegaAuthenticator` is the real one; a test passes a fake. */
+export interface CredentialChecker {
+    authenticate(user: string, password: string): Promise<{name: string; level: number} | undefined>;
+}
 
 export interface WebHostOptions {
     readonly port?: number;
@@ -78,6 +114,12 @@ export interface WebHostOptions {
     readonly auth?: boolean;
     /** Hand the token to the browser as a cookie on the page load. Default: loopback binds only. */
     readonly issueCookie?: boolean | undefined;
+    /** D-32: `token` (the default) or `rega` - a login page checked against the CCU's own users. */
+    readonly authMode?: AuthMode | undefined;
+    /** D-32: how long a login session lives without being used; sliding. Default 24 h. */
+    readonly sessionTtlMs?: number | undefined;
+    /** D-32: injected by the tests in place of the real ReGa and UDP check. */
+    readonly authenticator?: CredentialChecker | undefined;
     /** Serve the UI in demo mode and start no backend at all. */
     readonly demo?: boolean;
     /** Written to `ConnectionConfig.host` when it differs from what is configured. */
@@ -118,6 +160,10 @@ export interface WebHost {
     readonly base: string;
     /** `undefined` when auth is off. */
     readonly token: string | undefined;
+    /** D-32: how a browser is let in. */
+    readonly authMode: AuthMode;
+    /** D-32: the login sessions; `undefined` in `token` mode, where there are none. */
+    readonly sessions: SessionStore | undefined;
     close(): Promise<void>;
 }
 
@@ -153,6 +199,19 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
     const token = auth ? (options.token ?? createToken()) : undefined;
     const issueCookie = options.issueCookie ?? isLoopbackHost(host);
     const apiPath = `${base}api`;
+    const authMode = options.authMode ?? 'token';
+    requireLocalForRega(authMode, options, auth);
+
+    // D-32: everything the login needs, and nothing at all in `token` mode
+    const sessions = authMode === 'rega' ? new SessionStore(sessionStoreOptions(options)) : undefined;
+    const loginLimit = authMode === 'rega' ? new RateLimiter() : undefined;
+    const credentials =
+        authMode === 'rega'
+            ? (options.authenticator ??
+              new RegaAuthenticator({
+                  onNotice: (level, message) => log[level](`login: ${message}`),
+              }))
+            : undefined;
 
     let connection: AppConfig['connection'] | undefined;
     let backend: Backend | undefined;
@@ -206,11 +265,6 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
 
     async function handle(request: IncomingMessage, response: ServerResponse): Promise<void> {
         const method = request.method ?? 'GET';
-        if (method !== 'GET' && method !== 'HEAD') {
-            response.writeHead(405, {Allow: 'GET, HEAD', 'Content-Type': 'text/plain; charset=utf-8'});
-            response.end('method not allowed\n');
-            return;
-        }
         const url = new URL(request.url ?? '/', 'http://localhost');
         const pathname = url.pathname;
         if (base !== '/' && `${pathname}/` === base) {
@@ -223,6 +277,52 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
             return;
         }
         const rest = pathname.slice(base.length);
+
+        // D-32: the login is the one route that takes a POST, and the one route that is reachable
+        // without a session - it is what hands one out
+        if (sessions && rest === 'login') {
+            if (method === 'POST') {
+                await handleLogin(request, response);
+                return;
+            }
+            if (method === 'GET' || method === 'HEAD') {
+                sendLoginPage(request, response, 200, url.searchParams.get('lang'));
+                return;
+            }
+        }
+
+        if (method !== 'GET' && method !== 'HEAD') {
+            response.writeHead(405, {Allow: 'GET, HEAD', 'Content-Type': 'text/plain; charset=utf-8'});
+            response.end('method not allowed\n');
+            return;
+        }
+
+        let session: Session | undefined;
+        if (sessions) {
+            if (rest === 'logout') {
+                sessions.remove(readCookie(request.headers.cookie, SESSION_COOKIE));
+                response.writeHead(302, {
+                    Location: `${base}login`,
+                    'Set-Cookie': clearedSessionCookie(base, isHttps(request)),
+                    'Cache-Control': 'no-store',
+                });
+                response.end();
+                return;
+            }
+            session = sessions.get(readCookie(request.headers.cookie, SESSION_COOKIE));
+            if (!session && !hasValidToken(request)) {
+                // the page itself becomes the login form; anything else - assets, metadata, images -
+                // is answered with a plain 401, because a login page in place of a stylesheet only
+                // confuses a browser. The `settings.cgi` hand-over of task 13 never lands here: its
+                // token cookie is accepted above, and the WebUI session it checked is why.
+                if (rest === '' || rest === 'index.html') {
+                    sendLoginPage(request, response, 200);
+                } else {
+                    unauthorised(response);
+                }
+                return;
+            }
+        }
 
         if (rest === 'api' || rest.startsWith('api/')) {
             // the API is a WebSocket; a plain GET on it is a mistake worth naming
@@ -253,7 +353,88 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
             return;
         }
 
-        await serveStatic(request, response, uiDir, rest === '' ? 'index.html' : rest, method);
+        await serveStatic(
+            request,
+            response,
+            uiDir,
+            rest === '' ? 'index.html' : rest,
+            method,
+            // D-32: the sliding expiry, told to the browser as well - a tab in use keeps its
+            // cookie alive, one that is not loses it when the host forgets the session
+            session === undefined
+                ? undefined
+                : {'Set-Cookie': sessionCookie(session.id, base, (sessions?.ttlMs ?? 0) / 1000, isHttps(request))},
+        );
+    }
+
+    /** The login form, in the language the visitor asked for or the browser prefers. */
+    function sendLoginPage(
+        request: IncomingMessage,
+        response: ServerResponse,
+        status: number,
+        language?: string | null,
+        error?: LoginError,
+        user?: string,
+    ): void {
+        const chosen: LoginLanguage =
+            language === 'de' || language === 'en'
+                ? language
+                : pickLanguage(language, request.headers['accept-language']);
+        const body = renderLoginPage({base, language: chosen, error, user});
+        response.writeHead(status, {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Content-Length': String(Buffer.byteLength(body)),
+            // never cached: it is a form, and the page it replaces comes back the moment there is
+            // a session
+            'Cache-Control': 'no-store',
+        });
+        response.end(request.method === 'HEAD' ? undefined : body);
+    }
+
+    /**
+     * The form's `POST`: rate limit, credentials, cookie, redirect.
+     *
+     * A wrong password and an unknown user leave by exactly the same door, and the failure is
+     * counted against the *source*, never against the user name - locking out the CCU's admin by
+     * guessing at it would be a denial of service anybody could run.
+     */
+    async function handleLogin(request: IncomingMessage, response: ServerResponse): Promise<void> {
+        const form = parseLoginForm(await readBody(request), request.headers['accept-language']);
+        const source = clientAddress(request);
+        if (loginLimit?.blocked(source)) {
+            log.warn(`login: too many failed attempts from ${source}`);
+            sendLoginPage(request, response, 429, form.language, 'rate-limited', form.user);
+            return;
+        }
+        let user: {name: string; level: number} | undefined;
+        let failure: LoginError = 'credentials';
+        try {
+            user = form.user === '' ? undefined : await credentials?.authenticate(form.user, form.password);
+        } catch (error) {
+            // `RegaAuthenticator` answers "no" rather than throwing, so this is the unexpected case
+            log.error('login failed:', error);
+            failure = 'unavailable';
+        }
+        if (!user) {
+            loginLimit?.fail(source);
+            log.warn(`login: refused an attempt from ${source}`);
+            sendLoginPage(request, response, 401, form.language, failure, form.user);
+            return;
+        }
+        loginLimit?.clear(source);
+        const session = (sessions as SessionStore).create(user.name, user.level);
+        log.info(`login: ${user.name} (level ${String(user.level)}) from ${source}`);
+        response.writeHead(302, {
+            Location: base,
+            'Set-Cookie': sessionCookie(session.id, base, (sessions as SessionStore).ttlMs / 1000, isHttps(request)),
+            'Cache-Control': 'no-store',
+        });
+        response.end();
+    }
+
+    /** The token cookie of task 13 - `settings.cgi`'s hand-over still opens every door. */
+    function hasValidToken(request: IncomingMessage): boolean {
+        return token !== undefined && readCookie(request.headers.cookie, TOKEN_COOKIE) === token;
     }
 
     async function serveImage(response: ServerResponse, deviceType: string, method: string): Promise<void> {
@@ -278,6 +459,7 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
         root: string,
         relative: string,
         method: string,
+        extraHeaders?: Record<string, string> | undefined,
     ): Promise<void> {
         const file = await resolveStaticFile(root, relative);
         if (file === undefined) {
@@ -285,12 +467,14 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
             return;
         }
         const isIndex = path.basename(file) === 'index.html' && root === uiDir;
+        const headers = {
+            ...(isIndex && issueCookie && token !== undefined ? {'Set-Cookie': tokenCookie(token, base)} : {}),
+            ...(isIndex ? extraHeaders : undefined),
+        };
         await sendFile(response, file, {
             method,
             ifNoneMatch: request.headers['if-none-match'],
-            ...(isIndex && issueCookie && token !== undefined
-                ? {headers: {'Set-Cookie': tokenCookie(token, base)}}
-                : {}),
+            ...(Object.keys(headers).length > 0 ? {headers} : {}),
         });
     }
 
@@ -310,6 +494,8 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
               path: apiPath,
               keepAliveMs: options.keepAliveMs ?? KEEPALIVE_INTERVAL_MS,
               ...(token === undefined ? {} : {token}),
+              // D-32: `session.info` is answered per socket, from the cookie this upgrade carried
+              ...(sessions === undefined ? {} : {sessionInfo: (request) => sessionInfoOf(sessions, request)}),
               onError: (error) => log.warn('api socket:', error),
           })
         : undefined;
@@ -326,6 +512,10 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
             // no origin check on purpose: lighttpd forwards the browser's Origin and its own Host
             // unchanged (task 13), and the token - not the origin - is what guards this socket
             applyCookieToken(request, token);
+            // D-32: and a login session opens the same socket, in the same way
+            if (sessions) {
+                applySessionToken(request, token, (id) => sessions.get(id) !== undefined);
+            }
             api.handleUpgrade(request, socket, head);
             return;
         }
@@ -354,6 +544,8 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
             return;
         }
         closed = true;
+        // the sessions live in this process only, so stopping it is a logout for all of them
+        sessions?.clear();
         await api?.stop();
         await new Promise<void>((resolve) => {
             server.close(() => resolve());
@@ -378,6 +570,8 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
         port,
         base,
         token,
+        authMode,
+        sessions,
         close,
     };
 }
@@ -387,9 +581,67 @@ export async function ensureDataDir(dataDir: string): Promise<void> {
     await fs.mkdir(path.join(dataDir, 'images'), {recursive: true});
 }
 
+/**
+ * D-32: `rega` is refused anywhere it could not work, with the reason.
+ *
+ * Both services the login asks - ReGa's script port and the authentication daemon on UDP 1998 -
+ * listen on the CCU's loopback and nowhere else (D-28 is the same story for BIN-RPC). A host that
+ * is not *on* the CCU cannot reach either of them, so an npm or Docker install that asks for this
+ * mode would show a login page that can never say yes. Failing at start-up with a sentence that
+ * says why is the only useful answer.
+ */
+export function requireLocalForRega(authMode: AuthMode, options: WebHostOptions, auth: boolean): void {
+    if (authMode !== 'rega') {
+        return;
+    }
+    if (options.local !== true) {
+        throw new Error(
+            "--auth-mode rega needs --local: the CCU's ReGa (8183) and its authentication daemon (udp 1998) " +
+                "listen on the CCU's own loopback, so the login can only be checked by a process running on the " +
+                'CCU itself - the addon. Every other install type uses --auth-mode token.',
+        );
+    }
+    if (!auth) {
+        throw new Error(
+            '--auth-mode rega cannot be combined with --no-auth: without a token the api socket lets everyone ' +
+                'in anyway, and the login page would guard nothing.',
+        );
+    }
+}
+
+/** The session of an upgrade request, for the transport's `session.info`. */
+export function sessionInfoOf(
+    sessions: SessionStore,
+    request: {headers: {cookie?: string | undefined}},
+): SessionInfo | null {
+    const session = sessions.get(readCookie(request.headers.cookie, SESSION_COOKIE));
+    return session ? {user: session.user, level: session.level} : null;
+}
+
+/** Was this request made over TLS? Only then may a cookie carry `Secure` and still arrive. */
+function isHttps(request: IncomingMessage): boolean {
+    if ((request.socket as {encrypted?: boolean}).encrypted === true) {
+        return true;
+    }
+    // behind a proxy that terminates TLS - the CCU's lighttpd on 443, or a reverse proxy
+    const forwarded = request.headers['x-forwarded-proto'];
+    const value = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+    return (value ?? '').split(',')[0]?.trim().toLowerCase() === 'https';
+}
+
+function sessionStoreOptions(options: WebHostOptions): {ttlMs?: number} {
+    return options.sessionTtlMs === undefined || options.sessionTtlMs <= 0 ? {} : {ttlMs: options.sessionTtlMs};
+}
+
 function notFound(response: ServerResponse): void {
     response.writeHead(404, {'Content-Type': 'text/plain; charset=utf-8'});
     response.end('not found\n');
+}
+
+/** What everything that is not the page itself gets while there is no session. */
+function unauthorised(response: ServerResponse): void {
+    response.writeHead(401, {'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store'});
+    response.end('unauthorized\n');
 }
 
 function upstreamOf(connection: AppConfig['connection'] | undefined): ImageUpstream | undefined {

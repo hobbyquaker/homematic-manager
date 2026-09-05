@@ -159,6 +159,31 @@ describe('configSchema', () => {
     });
 });
 
+describe('--auth-mode and --session-ttl (D-32)', () => {
+    it('is token by default: nothing changes for anybody who does not ask for the login', () => {
+        expect(parseOptions([], noEnv).authMode).toBe('token');
+        expect(parseOptions([], noEnv).sessionTtlMs).toBe(24 * 3_600_000);
+    });
+
+    it('takes the mode from the command line and from the environment', () => {
+        expect(parseOptions(['--auth-mode', 'rega'], noEnv).authMode).toBe('rega');
+        expect(parseOptions([], {...noEnv, HMM_AUTH_MODE: 'rega'}).authMode).toBe('rega');
+        // the addon's etc/hmm.env is the environment, and the rc.d command line wins over it
+        expect(parseOptions(['--auth-mode', 'token'], {...noEnv, HMM_AUTH_MODE: 'rega'}).authMode).toBe('token');
+    });
+
+    it('refuses a mode that does not exist rather than falling back to one', () => {
+        expect(() => parseOptions(['--auth-mode', 'oauth'], noEnv)).toThrow(CliError);
+        expect(() => parseOptions(['--auth-mode', 'oauth'], noEnv)).toThrow(/token, rega/);
+    });
+
+    it('takes the session lifetime as a duration', () => {
+        expect(parseOptions(['--session-ttl', '30m'], noEnv).sessionTtlMs).toBe(1_800_000);
+        expect(parseOptions([], {...noEnv, HMM_SESSION_TTL: '2h'}).sessionTtlMs).toBe(7_200_000);
+        expect(() => parseOptions(['--session-ttl', 'a while'], noEnv)).toThrow(/not a duration/);
+    });
+});
+
 describe('parseDuration and --idle-unsubscribe (D-31)', () => {
     it('reads the four spellings the addon and the compose file use', () => {
         expect(parseDuration('5m', 'x')).toBe(300_000);

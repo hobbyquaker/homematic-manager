@@ -12,7 +12,7 @@
 #   bin/update_addon  tcl helper that maintains the Systemsteuerung entry
 #   lib/              shared libraries of the runtime (armv7l only)
 #   share/icu/        ICU data - node does not start without it (musl build)
-#   app/              the packed @homematic-manager/web with its dependencies installed:
+#   app/              the packed homematic-manager npm package with its dependencies installed:
 #                     dist/ (the host), ui/ (the built UI), data/ (the generated metadata),
 #                     node_modules/ (ws, binrpc, homematic-xmlrpc, homematic-rega and the
 #                     bundled @homematic-manager/{backend,core} of D-29)
@@ -70,7 +70,7 @@ mkdir -p "$TREE/var"
 # 3. the app: exactly the npm tarball of apps/web, installed the way a user would install it. That
 #    tarball already carries the built UI, the generated metadata and the bundled backend and core
 #    (D-29), so this is the same artefact the npm and Docker deliverables run - no second recipe.
-echo "packing @homematic-manager/web..."
+echo "packing the homematic-manager npm package..."
 PACKDIR="$WORK/npm"
 mkdir -p "$PACKDIR"
 WEB_TGZ="$PACKDIR/$(cd "$REPO_ROOT" && npm pack --silent -w apps/web --pack-destination "$PACKDIR" | tail -1)"
@@ -87,7 +87,7 @@ trap 'rm -rf "$STAGE"' EXIT
 printf '{"name":"hmm-addon-app","version":"0.0.0","private":true}\n' > "$STAGE/package.json"
 (cd "$STAGE" && npm install --silent --omit=dev --omit=optional --ignore-scripts --no-audit --no-fund "$WEB_TGZ" >/dev/null)
 
-WEB="$STAGE/node_modules/@homematic-manager/web"
+WEB="$STAGE/node_modules/homematic-manager"
 [ -d "$WEB/dist" ] || {
     echo "error: the installed tarball has no dist/ - did prepack run?" >&2
     exit 1
@@ -103,12 +103,10 @@ fi
 for entry in "$STAGE/node_modules"/*; do
     name="$(basename "$entry")"
     case "$name" in
-        .*) continue ;;
+        # the package itself was copied above; its bundled workspace packages keep their scope
+        .* | homematic-manager) continue ;;
         @homematic-manager)
-            for scoped in "$entry"/*; do
-                [ "$(basename "$scoped")" = web ] && continue
-                cp -a "$scoped" "$TREE/app/node_modules/@homematic-manager/"
-            done
+            cp -a "$entry/." "$TREE/app/node_modules/@homematic-manager/"
             continue
             ;;
     esac

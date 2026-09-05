@@ -8,7 +8,7 @@
  * for that).
  *
  * This module is the npm package's view of it: the tarball bundles the backend (D-29), so a
- * consumer of `@homematic-manager/web` cannot import those symbols from anywhere else.
+ * consumer of `homematic-manager` cannot import those symbols from anywhere else.
  *
  * The disk cache is `<data-dir>/images/`, which is also the `images` root the backend's `data.file`
  * is given, so a picture fetched here is readable through the API as well.

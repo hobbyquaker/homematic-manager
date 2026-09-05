@@ -41,7 +41,7 @@ RUN npm ci --no-audit --no-fund
 RUN npm run build -w @homematic-manager/core \
     -w @homematic-manager/backend \
     -w @homematic-manager/ui \
-    -w @homematic-manager/web
+    -w apps/web
 
 # `prepack.mjs` copies the built UI and `data/dist` into the package and materialises the two
 # bundled workspace packages; `postpack.mjs` undoes it. What comes out is self-contained.
@@ -83,7 +83,7 @@ ENV NODE_ENV=production \
 # `@homematic-manager/{backend,core}`; npm pulls its four registry dependencies (binrpc,
 # homematic-rega, homematic-xmlrpc, ws), all of them pure JavaScript.
 RUN --mount=from=build,source=/pack,target=/pack \
-    npm install -g /pack/homematic-manager-web-*.tgz \
+    npm install -g /pack/homematic-manager-*.tgz \
     && npm cache clean --force
 
 # `config.json`, the per-CCU caches, the device-image cache and the write log.
@@ -100,4 +100,4 @@ WORKDIR /data
 
 # Not `node dist/cli.js`: the global bin is what a user runs outside a container too, and it makes
 # `docker run --rm <image> --version` and `--help` work as they read.
-ENTRYPOINT ["homematic-manager-web"]
+ENTRYPOINT ["homematic-manager"]

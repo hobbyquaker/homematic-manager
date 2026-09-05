@@ -1,8 +1,8 @@
 {
-  "name": "@homematic-manager/web",
+  "name": "homematic-manager",
   "version": "3.0.0-dev.1",
   "type": "module",
-  "description": "Homematic Manager server: the backend as a local HTTP/WebSocket server serving the built web UI",
+  "description": "Configure and administer Homematic and HomematicIP devices - devices and channels, direct links, paramsets, RSSI, service messages, events and an RPC console - from a local HTTP/WebSocket server that also serves the web UI",
   "keywords": [
     "homematic",
     "homematicip",
@@ -24,7 +24,7 @@
   "bugs": {
     "url": "https://github.com/hobbyquaker/homematic-manager/issues"
   },
-  "homepage": "https://github.com/hobbyquaker/homematic-manager",
+  "homepage": "https://github.com/hobbyquaker/homematic-manager#readme",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -34,6 +34,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
+    "homematic-manager": "./dist/cli.js",
     "homematic-manager-web": "./dist/cli.js"
   },
   "files": [
@@ -49,6 +50,9 @@
   ],
   "engines": {
     "node": ">=22.12"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsc -b",

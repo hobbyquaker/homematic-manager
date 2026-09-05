@@ -2,9 +2,9 @@ import {describe, expect, it} from 'vitest';
 
 import * as web from './index.js';
 
-describe('@homematic-manager/web', () => {
+describe('homematic-manager', () => {
     it('exports its package name', () => {
-        expect(web.PACKAGE).toBe('@homematic-manager/web');
+        expect(web.PACKAGE).toBe('homematic-manager');
     });
 
     it('exports what a host, the CLI and the e2e suites need', () => {

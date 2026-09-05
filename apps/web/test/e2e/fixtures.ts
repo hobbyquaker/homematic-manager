@@ -13,7 +13,7 @@
  * for one suite, and `apps/web` is a published package.
  */
 
-import {requireSimulator, startForTest, type TestHost} from '@homematic-manager/web';
+import {requireSimulator, startForTest, type TestHost} from 'homematic-manager';
 import {test as base, expect} from '@playwright/test';
 
 export {expect};

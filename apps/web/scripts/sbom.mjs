@@ -124,14 +124,7 @@ function describe(tree) {
  * runs, so they are read from the installed tree and appended by hand.
  */
 function addBundled(sbom, tree) {
-    const bundledDir = path.join(
-        tree,
-        'node_modules',
-        '@homematic-manager',
-        'web',
-        'node_modules',
-        '@homematic-manager',
-    );
+    const bundledDir = path.join(tree, 'node_modules', 'homematic-manager', 'node_modules', '@homematic-manager');
     if (!fs.existsSync(bundledDir)) {
         return;
     }

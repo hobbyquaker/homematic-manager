@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * `npm run dev -w @homematic-manager/web`: a vite dev server for `packages/ui` and the web host in
+ * `npm run dev -w apps/web`: a vite dev server for `packages/ui` and the web host in
  * front of it, so UI changes hot-reload against a real backend.
  *
  * Both on one origin, because that is what the UI's relative `api` path needs: vite gets a free

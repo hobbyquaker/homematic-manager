@@ -1,5 +1,5 @@
 /**
- * `@homematic-manager/web` - the backend as a local HTTP + WebSocket server serving the built UI.
+ * `homematic-manager` - the backend as a local HTTP + WebSocket server serving the built UI.
  *
  * Three jobs, one process: development with hot reload, the fast e2e target of task 14 (a browser
  * and hm-simulator, no Electron), and the process the CCU addon of task 13 runs behind lighttpd.
@@ -10,7 +10,7 @@
  */
 
 /** Name of this package; the workspace smoke tests use it. */
-export const PACKAGE = '@homematic-manager/web';
+export const PACKAGE = 'homematic-manager';
 
 export * from './server.js';
 export * from './options.js';

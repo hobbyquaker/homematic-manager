@@ -8,7 +8,7 @@
  *
  * What is inside an addon package is two different things, and a CVE search has to find both:
  *
- * - the npm tree of `app/` - which is exactly the published `@homematic-manager/web` tarball with
+ * - the npm tree of `app/` - which is exactly the published `homematic-manager` tarball with
  *   its dependencies installed, so `apps/web/scripts/sbom.mjs` already knows how to describe it
  *   (it installs the tarball and runs `cyclonedx-npm` on the result, which is the only way the
  *   bundled workspace packages of D-29 show up at all). It is run here rather than reimplemented,

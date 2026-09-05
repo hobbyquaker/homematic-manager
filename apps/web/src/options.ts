@@ -441,7 +441,7 @@ export function configSchema(version: string): Record<string, unknown> {
     }
     return {
         $schema: 'https://json-schema.org/draft/2020-12/schema',
-        title: `@homematic-manager/web ${version}`,
+        title: `homematic-manager ${version}`,
         type: 'object',
         additionalProperties: false,
         properties,

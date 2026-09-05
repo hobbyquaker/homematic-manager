@@ -158,6 +158,66 @@ export interface WriteResult {
     durationMs?: number;
 }
 
+/** What `devices.repairConfig` may do beyond writing a valid MASTER paramset back. */
+export interface RepairConfigOptions {
+    /** Work out the repair and return it without writing anything. */
+    dryRun?: boolean;
+    /**
+     * Repair only these channels; by default every channel of the device that has a `MASTER`
+     * paramset, plus the device's own.
+     */
+    channels?: string[];
+    /**
+     * BidCos only. `clearConfigCache` drops the interface process' cached configuration,
+     * `restoreConfigToDevice` re-sends it. Both answer `-1 Generic error` on hmipserver, so they
+     * are never called for an HmIP interface whatever this says (task 6, `docs/config-pending.md`).
+     */
+    bidcosRecovery?: 'none' | 'clearConfigCache' | 'restoreConfigToDevice';
+}
+
+/** One parameter the repair replaces, and why. */
+export interface RepairCorrection {
+    parameter: string;
+    /** What the interface process has stored. */
+    stored: RpcValue;
+    /** What will be written instead. */
+    replacement: RpcWriteValue;
+    reason: string;
+}
+
+/** What the repair found on one channel and what it wrote there. */
+export interface RepairChannelResult {
+    address: string;
+    /**
+     * Parameters the interface process stores although the paramset description does not have
+     * them. They cannot be removed through the RPC API - on hmipserver they make every further
+     * `putParamset` on the channel fault, and only re-pairing the device clears them.
+     */
+    unknown: string[];
+    /** Stored values that are not valid for their parameter, with what replaces them. */
+    corrected: RepairCorrection[];
+    /** The write, exactly as `paramset.put` would report it. */
+    write: WriteResult;
+}
+
+/** The answer of `devices.repairConfig`. */
+export interface RepairConfigResult {
+    interfaceName: string;
+    address: string;
+    /** `CONFIG_PENDING` of `<device>:0` before and after; `undefined` when it could not be read. */
+    configPendingBefore?: boolean;
+    configPendingAfter?: boolean;
+    channels: RepairChannelResult[];
+    /**
+     * Channels the repair cannot fix because the interface process stores a parameter their
+     * description does not have. The UI has to say what that means: the device has to be deleted
+     * and paired again, or a CCU backup from before the bad write restored.
+     */
+    unrepairable: string[];
+    /** The BidCos recovery that was called, if any. */
+    bidcosRecovery?: 'clearConfigCache' | 'restoreConfigToDevice';
+}
+
 export interface WriteLogEntry {
     id: number;
     timestamp: number;
@@ -217,6 +277,17 @@ export interface ApiMethods {
     };
     'devices.restoreConfig': {params: [interfaceName: string, address: string]; result: null};
     'devices.clearConfigCache': {params: [interfaceName: string, address: string]; result: null};
+    /**
+     * "Repair configuration" (task 6, item 7), built from the recovery the lab measured: a valid
+     * full `MASTER` write per channel, made from that channel's own description and its stored
+     * values. It clears a sticky `CONFIG_PENDING` and replaces values the interface process kept
+     * although they are not valid; it cannot remove a parameter the channel does not have, and
+     * reports those channels as `unrepairable` instead of pretending.
+     */
+    'devices.repairConfig': {
+        params: [interfaceName: string, address: string, options?: RepairConfigOptions];
+        result: RepairConfigResult;
+    };
     'devices.updateFirmware': {params: [interfaceName: string, addresses: string[]]; result: boolean[]};
     'devices.installFirmware': {params: [interfaceName: string, address: string]; result: boolean};
     'devices.installMode.set': {

@@ -126,6 +126,106 @@ describe.skipIf(!simulatorAvailable)('writing paramsets against hm-simulator', (
         expect(sim.getConfigPending('hmip')).toEqual([]);
     });
 
+    /*
+     * The four tests below run against the simulator's `hmip` mode, which is what hmipserver 3.89.8
+     * was measured to do on 2026-09-05 (task 6, docs/config-pending.md). They are the regression
+     * tests for the provocations that mattered: a wrong type, an unknown parameter, and the two
+     * recoveries.
+     */
+    it('hmip mode: a wrong type sticks in CONFIG_PENDING, and the write path never sends one', async () => {
+        const {sim, harness} = await connected();
+        // what 2.x would send: a value the parameter cannot hold
+        await harness.backend
+            .request('rpc.call', 'HmIP-RF', 'putParamset', [PDT, 'MASTER', {DIM_STEP: 'not-a-number'}])
+            .catch(() => undefined);
+        expect((sim.getConfigPending('hmip') as {address: string; sticky: boolean}[]).map((e) => e.address)).toEqual([
+            '0001D3C99ABCDE',
+        ]);
+
+        // devices.repairConfig: a valid full MASTER write per channel, built from the description
+        const repair = await harness.backend.request('devices.repairConfig', 'HmIP-RF', PDT);
+        expect(repair.configPendingBefore).toBe(true);
+        expect(repair.configPendingAfter).toBe(false);
+        expect(repair.unrepairable).toEqual([]);
+        const channel = repair.channels.find((entry) => entry.address === PDT);
+        expect(channel?.corrected.map((entry) => entry.parameter)).toContain('DIM_STEP');
+        expect(sim.getConfigPending('hmip')).toEqual([]);
+
+        // and the write path itself would never have produced it: an ENUM value that is in neither
+        // form is exactly what left the lab device stuck, and it is refused before the wire
+        const results = await harness.backend.request('paramset.put', 'HmIP-RF', [PDT], 'MASTER', {MODE: 'NOPE'});
+        expect(results[0]?.ok).toBe(false);
+        expect(results[0]?.problems[0]?.parameter).toBe('MODE');
+        expect(sim.getConfigPending('hmip')).toEqual([]);
+
+        // a string in a FLOAT is the one case the cast rescues instead of refusing: it becomes a
+        // number the parameter can hold, so the device is safe either way
+        const rescued = await harness.backend.request('paramset.put', 'HmIP-RF', [PDT], 'MASTER', {
+            DIM_STEP: 'not-a-number',
+        });
+        expect(rescued[0]?.ok).toBe(true);
+        expect(typeof (await harness.backend.request('paramset.get', 'HmIP-RF', PDT, 'MASTER'))['DIM_STEP']).toBe(
+            'number',
+        );
+        expect(sim.getConfigPending('hmip')).toEqual([]);
+    });
+
+    it('hmip mode: an unknown parameter poisons the channel for good, and we never send one', async () => {
+        const {sim, harness} = await connected();
+        await harness.backend
+            .request('rpc.call', 'HmIP-RF', 'putParamset', [PDT, 'MASTER', {NOT_A_PARAMETER: 1}])
+            .catch(() => undefined);
+        expect(sim.getPoisonedChannels('hmip')).toEqual([PDT]);
+        // no CONFIG_PENDING: nothing the device knows about changed, so nothing is pending - the
+        // channel is silently broken, which is what made issue #98 so hard to see
+        expect(sim.getConfigPending('hmip')).toEqual([]);
+
+        const repair = await harness.backend.request('devices.repairConfig', 'HmIP-RF', PDT);
+        expect(repair.unrepairable).toEqual([PDT]);
+        const channel = repair.channels.find((entry) => entry.address === PDT);
+        expect(channel?.unknown).toEqual(['NOT_A_PARAMETER']);
+        expect(channel?.write.ok).toBe(false);
+        expect(channel?.write.faultCode).toBe(-5);
+        // the repair does not write the unknown parameter back
+        expect(Object.keys(channel?.write.sent ?? {})).not.toContain('NOT_A_PARAMETER');
+
+        // the write path drops it before it reaches the wire, so this can never happen through us
+        const before = (sim.getWriteLog() as unknown[]).length;
+        const results = await harness.backend.request('paramset.put', 'HmIP-RF', ['0002D3C99ABCDE:1'], 'MASTER', {
+            NOT_A_PARAMETER: 1,
+        });
+        expect(results[0]?.ok).toBe(false);
+        expect((sim.getWriteLog() as unknown[]).length).toBe(before);
+        expect(sim.getPoisonedChannels('hmip')).toEqual([PDT]);
+    });
+
+    it('repairConfig offers no BidCos maintenance method on HmIP and does nothing on a dry run', async () => {
+        const {sim, harness} = await connected();
+        const before = (sim.getWriteLog() as unknown[]).length;
+        const dry = await harness.backend.request('devices.repairConfig', 'HmIP-RF', PDT, {dryRun: true});
+        expect((sim.getWriteLog() as unknown[]).length).toBe(before);
+        expect(dry.channels.every((entry) => entry.write.skipped === true)).toBe(true);
+
+        // clearConfigCache and restoreConfigToDevice answer -1 Generic error on hmipserver, so the
+        // repair does not call them whatever it is asked for
+        const asked = await harness.backend.request('devices.repairConfig', 'HmIP-RF', PDT, {
+            bidcosRecovery: 'clearConfigCache',
+        });
+        expect(asked.bidcosRecovery).toBeUndefined();
+    });
+
+    it('repairConfig uses the BidCos recovery on a BidCos device', async () => {
+        const {sim, harness} = await connected();
+        const result = await harness.backend.request('devices.repairConfig', 'BidCos-RF', 'LEQ0000001:1', {
+            bidcosRecovery: 'restoreConfigToDevice',
+        });
+        expect(result.bidcosRecovery).toBe('restoreConfigToDevice');
+        expect(result.unrepairable).toEqual([]);
+        const log = await harness.backend.request('writeLog.list');
+        expect(log.map((entry) => entry.method)).toContain('restoreConfigToDevice');
+        expect(sim.getConfigPending('rfd')).toEqual([]);
+    });
+
     it('CONFIG_PENDING pending: the same bad write sticks, and ours still does not', async () => {
         const {sim, harness} = await connected({configPendingMode: 'pending'});
         await harness.backend
@@ -181,11 +281,19 @@ describe.skipIf(!simulatorAvailable)('writing paramsets against hm-simulator', (
         );
     });
 
-    it('sends an ENUM to HmIP by name (A-1)', async () => {
+    it('sends an ENUM as its index on every interface (A-1, refuted in the lab)', async () => {
         const {sim, harness} = await connected();
+        // A-1 said hmipserver wants the name. It takes both, answers `getParamset` with the index,
+        // and so does rfd - so the index is the only encoding a changed-only diff can compare
+        // against (task 6, docs/config-pending.md).
         await harness.backend.request('paramset.put', 'HmIP-RF', [PDT], 'MASTER', {MODE: 'AUTO'});
         const written = sim.getWriteLog() as {values: Record<string, unknown>}[];
-        expect(written.at(-1)?.values).toEqual({MODE: 'AUTO'});
+        expect(written.at(-1)?.values).toEqual({MODE: 2});
+        expect(await harness.backend.request('paramset.get', 'HmIP-RF', PDT, 'MASTER')).toMatchObject({MODE: 2});
+
+        // and writing the same value again sends nothing at all, which is the point
+        const again = await harness.backend.request('paramset.put', 'HmIP-RF', [PDT], 'MASTER', {MODE: 'AUTO'});
+        expect(again[0]).toMatchObject({ok: true, skipped: true, sent: {}});
     });
 
     it('logs every write and keeps the 2.x rpcLogFolder dump available', async () => {

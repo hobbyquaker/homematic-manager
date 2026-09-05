@@ -49,6 +49,7 @@ a WebSocket, and the CCU addon (task 13) runs the same process on the CCU.
 | `write/queue.ts` | one paced queue per interface, cancellable |
 | `write/log.ts` | the session write log and the 2.x `rpcLogFolder` dumps |
 | `write/paramset.ts` | the changed-only `putParamset`, multi-apply, link writes, `setValue` |
+| `write/repair.ts` | `devices.repairConfig`: the recovery task 6 measured, per channel |
 | `devices/installMode.ts` | install mode in all its variants, incl. the HmIP key conversion |
 | `data/files.ts` | `data.file`: reads from injected roots and nothing else |
 | `util/*` | the typed event emitter, atomic and debounced JSON files, net helpers |
@@ -73,13 +74,21 @@ const server = new ApiWebSocketServer({backend, port: 8181, token: process.env.H
 await server.start();
 ```
 
-Two rules run through the whole class:
+Three rules run through the whole class:
 
 - **reads never queue.** Only writes are paced, so opening a paramset editor is immediate where 2.x
   waited three seconds per call and blocked the UI with a modal dialog.
 - **nothing rejects except as `ApiError`.** A CCU that is off, a ReGa that wants a password, a cache
   file that cannot be written - each is a typed rejection or a `notice` event, never an exception in
   the host process.
+- **nothing invalid reaches an interface process.** Not as a courtesy: the lab study of task 6
+  ([`docs/config-pending.md`](../../docs/config-pending.md)) found that hmipserver **stores what it
+  rejects**, so one `putParamset` with a parameter the channel does not have leaves that channel
+  unwritable for the life of the pairing, and that **neither** interface process checks
+  `MIN`..`MAX` - hmipserver keeps an out-of-range value, rfd clamps it without a word. Every write
+  is cast and validated against the channel's own description first, `ENUM` goes out as the index on
+  every interface, `FLOAT` always as an explicit double (required on BidCos), and multi-apply is
+  restricted to identical descriptions.
 
 ## What is persisted, and where
 
@@ -109,8 +118,14 @@ is not on the list.
 
 `test/simulator/*.test.ts` drives the whole backend over real sockets against an in-process
 [hm-simulator](https://github.com/hobbyquaker/hm-simulator): connect over BIN-RPC and XML-RPC, TLS,
-basic auth, the callbacks, `dropConnection()`, the caches, the ReGa mock, the write path, both
+basic auth, the callbacks, `dropConnection()`, the caches, the ReGa mock, the write path, the
 `CONFIG_PENDING` modes and both transports.
+
+Since task 6 the simulator's `hmip` and `bidcos` modes are what the two interface processes of a
+CCU on firmware 3.89.8 were **measured** to do, and the suites run against those by default: the
+wrong type that sticks in `CONFIG_PENDING`, the unknown parameter that makes a channel unwritable
+for good, and `devices.repairConfig` on both. `configPendingMode: 'strict'` in
+`test/simulator/helpers.ts` still gets the stricter hypothesis where a test wants it.
 
 hm-simulator 1.0 is **not published yet** (roadmap task 5), so it is not a dependency. Until it is:
 
@@ -150,10 +165,18 @@ this package does about it, and what it cannot:
   `homematic-xmlrpc`**.
 - **Requests are sent as UTF-8, always.** `homematic-xmlrpc` writes the body with `request.write(xml,
   'utf8')` and emits `<?xml version="1.0"?>` with no encoding declaration; `binrpc` writes `latin1`.
-  So the same name with an umlaut reaches rfd correctly over BIN-RPC and as UTF-8 bytes over
-  XML-RPC. Whether the interface processes parse that as ISO-8859-1 (and therefore store mojibake)
-  is **unverified** - it needs a lab check: write a link `NAME` with an umlaut over XML-RPC and read
-  it back in the CCU's WebUI.
+  **Measured in the lab on 2026-09-05** (task 6, `docs/config-pending.md`), by writing
+  `Tür Küche äöüß °C` into device metadata and reading the raw bytes back over both transports:
+  rfd stores what XML-RPC sends, so the string lands on the CCU as **UTF-8 bytes in an ISO-8859-1
+  world** and the WebUI shows mojibake. A value stored correctly comes back correctly through our
+  `latin1` response decoding, so the read side is right and the **request side is the bug**;
+  `request.write(xml, 'latin1')` is the fix, in `homematic-xmlrpc`.
+- **BIN-RPC is the mirror image.** Its encoder is right (`Buffer.from(str, 'ascii')` keeps the low
+  byte, so `0xFC` goes out as `0xFC`), its decoder is wrong: `decodeString()` ends in
+  `toString()`, i.e. UTF-8, so `0xFC` comes back as U+FFFD and the character is gone. Verified by
+  running the round trip on the CCU itself, because **BIN-RPC is not reachable from outside a stock
+  CCU at all**: port 2001 is lighttpd and speaks XML-RPC over HTTP only, and rfd's own port 32001 is
+  `local-only` in the CCU firewall. BIN-RPC is in practice an addon transport (task 13).
 
 ## Tests
 

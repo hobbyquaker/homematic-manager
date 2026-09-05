@@ -39,6 +39,7 @@ import {
     type ParamsetDescription,
     type ParamsetValue,
     type RpcMethodInfo,
+    type RepairConfigOptions,
     type WriteOptions,
     type RpcValue,
     type RpcWriteValue,
@@ -61,6 +62,7 @@ import {ApiEventEmitter} from '../util/emitter.js';
 import {WriteLog} from '../write/log.js';
 import {isWriteMethod} from '../write/log.js';
 import {ParamsetWriter} from '../write/paramset.js';
+import {ConfigRepair} from '../write/repair.js';
 import {WriteQueue} from '../write/queue.js';
 
 /** How often the BidCos service messages are polled while the connection is up. */
@@ -98,6 +100,7 @@ export class Backend {
     readonly #queue: WriteQueue;
     readonly #writeLog: WriteLog;
     readonly #writer: ParamsetWriter;
+    readonly #repair: ConfigRepair;
     readonly #files: DataFileServer;
     readonly #now: () => number;
     readonly #methodCache = new Map<string, RpcMethodInfo[]>();
@@ -134,6 +137,15 @@ export class Backend {
             ...(options.cacheWriteDelayMs === undefined ? {} : {writeDelayMs: options.cacheWriteDelayMs}),
         });
         this.#writer = new ParamsetWriter({
+            index: (interfaceName) => this.#caches.devices.index(interfaceName),
+            describe: (interfaceName, address, paramset) => this.#describe(interfaceName, address, paramset),
+            read: (interfaceName, method, params) => this.#read(interfaceName, method, params),
+            write: (interfaceName, method, params) => this.#write(interfaceName, method, params),
+            onProgress: (progress) => {
+                this.events.emit('write.progress', progress);
+            },
+        });
+        this.#repair = new ConfigRepair({
             index: (interfaceName) => this.#caches.devices.index(interfaceName),
             describe: (interfaceName, address, paramset) => this.#describe(interfaceName, address, paramset),
             read: (interfaceName, method, params) => this.#read(interfaceName, method, params),
@@ -241,6 +253,8 @@ export class Backend {
             case 'devices.clearConfigCache':
                 await this.#write(p[0], 'clearConfigCache', [p[1]]);
                 return null;
+            case 'devices.repairConfig':
+                return this.#repair.repair(p[0], p[1], (params[2] as RepairConfigOptions | undefined) ?? {});
             case 'devices.updateFirmware':
                 return asBooleans(await this.#write(p[0], 'updateFirmware', [p[1]]));
             case 'devices.installFirmware':
@@ -1053,6 +1067,7 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'devices.reportValueUsage',
     'devices.restoreConfig',
     'devices.clearConfigCache',
+    'devices.repairConfig',
     'devices.updateFirmware',
     'devices.installFirmware',
     'devices.installMode.set',

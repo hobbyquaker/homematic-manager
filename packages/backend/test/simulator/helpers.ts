@@ -240,7 +240,15 @@ export interface SimulatorOptions {
     readonly tls?: boolean;
     readonly auth?: {username: string; password: string};
     readonly rega?: boolean;
-    readonly configPendingMode?: 'strict' | 'pending';
+    /**
+     * The CONFIG_PENDING behaviour of the `hmip` interface. Defaults to `hmip`, which is what
+     * hmipserver 3.89.8 was measured to do in the lab (task 6, `docs/config-pending.md`);
+     * `strict` and `pending` are the two hypotheses that measurement replaced and are still
+     * worth testing against.
+     */
+    readonly configPendingMode?: 'strict' | 'pending' | 'hmip' | 'bidcos';
+    /** The same for the `rfd` interface; defaults to `bidcos`, as rfd was measured. */
+    readonly rfdConfigPendingMode?: 'strict' | 'pending' | 'hmip' | 'bidcos';
     readonly links?: Record<string, unknown[]>;
     readonly serviceMessages?: Record<string, unknown[]>;
 }
@@ -258,8 +266,8 @@ export async function startSimulator(options: SimulatorOptions = {}): Promise<an
         ...(options.links ? {links: options.links} : {}),
         ...(options.serviceMessages ? {serviceMessages: options.serviceMessages} : {}),
         interfaces: {
-            hmip: {configPendingMode: options.configPendingMode ?? 'strict'},
-            rfd: {configPendingMode: 'strict'},
+            hmip: {configPendingMode: options.configPendingMode ?? 'hmip'},
+            rfd: {configPendingMode: options.rfdConfigPendingMode ?? 'bidcos'},
         },
     });
     await sim.whenReady();

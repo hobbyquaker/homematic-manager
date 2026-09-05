@@ -35,6 +35,7 @@ import {
     type HostCommandName,
     type HostCommands,
     type HostInfo,
+    type MenuAction,
     type ThemeSource,
     type UpdateState,
 } from '../shared/ipc.js';
@@ -219,6 +220,7 @@ export function createHostBridge(ipc: IpcRendererLike): HostBridge {
 
     const updateListeners = new Set<(state: UpdateState) => void>();
     const systemThemeListeners = new Set<(dark: boolean) => void>();
+    const menuListeners = new Set<(action: MenuAction) => void>();
     ipc.on(HOST_EVENT_CHANNEL, (_event, ...args) => {
         const [name, payload] = args;
         if (name === 'update.state') {
@@ -229,6 +231,13 @@ export function createHostBridge(ipc: IpcRendererLike): HostBridge {
             const dark = (payload as {dark?: unknown} | undefined)?.dark === true;
             for (const handler of [...systemThemeListeners]) {
                 handler(dark);
+            }
+        } else if (name === 'menu.action') {
+            const action = (payload as {action?: unknown} | undefined)?.action;
+            if (typeof action === 'string') {
+                for (const handler of [...menuListeners]) {
+                    handler(action as MenuAction);
+                }
             }
         }
     });
@@ -242,6 +251,10 @@ export function createHostBridge(ipc: IpcRendererLike): HostBridge {
         onSystemTheme(handler: (dark: boolean) => void): () => void {
             systemThemeListeners.add(handler);
             return () => systemThemeListeners.delete(handler);
+        },
+        onMenuAction(handler: (action: MenuAction) => void): () => void {
+            menuListeners.add(handler);
+            return () => menuListeners.delete(handler);
         },
         update: {
             state: (): Promise<UpdateState> => invoke('update.state'),

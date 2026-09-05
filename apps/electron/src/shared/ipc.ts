@@ -117,7 +117,12 @@ export interface HostEvents {
     'update.state': UpdateState;
     /** The OS switched between light and dark while `system` is selected (D-22). */
     'theme.system': {dark: boolean};
+    /** A menu item the renderer has to act on - the native menu cannot reach into the page. */
+    'menu.action': {action: MenuAction};
 }
+
+/** What the application menu asks the renderer to do. */
+export type MenuAction = 'settings';
 
 export type HostEventName = keyof HostEvents;
 
@@ -130,6 +135,8 @@ export interface HostBridge {
     setTheme(source: ThemeSource): Promise<void>;
     /** The OS theme, for `system`; fires whenever the OS switches (D-22). */
     onSystemTheme(handler: (dark: boolean) => void): () => void;
+    /** Menu items that only the page can carry out, such as opening the settings dialog. */
+    onMenuAction(handler: (action: MenuAction) => void): () => void;
     update: {
         state(): Promise<UpdateState>;
         check(): Promise<UpdateState>;

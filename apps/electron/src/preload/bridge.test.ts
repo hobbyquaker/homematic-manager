@@ -215,6 +215,18 @@ describe('the host bridge', () => {
         expect(seen).toEqual([{phase: 'available', version: '3.1.0', dismissed: false}]);
     });
 
+    it('passes a menu action on, because the native menu cannot reach into the page', () => {
+        const ipc = new FakeIpc();
+        const host = createHostBridge(ipc);
+        const seen: string[] = [];
+        const off = host.onMenuAction((action) => seen.push(action));
+        ipc.emit(HOST_EVENT_CHANNEL, 'menu.action', {action: 'settings'});
+        ipc.emit(HOST_EVENT_CHANNEL, 'menu.action', {});
+        off();
+        ipc.emit(HOST_EVENT_CHANNEL, 'menu.action', {action: 'settings'});
+        expect(seen).toEqual(['settings']);
+    });
+
     it('pushes the OS theme and ignores an event it does not know', () => {
         const ipc = new FakeIpc();
         const host = createHostBridge(ipc);

@@ -22,7 +22,12 @@ NODE=$ADDON_DIR/bin/node
 APP=$ADDON_DIR/app/dist/cli.js
 ENV_FILE=$ADDON_DIR/etc/hmm.env
 TOKEN_FILE=$STATE_DIR/token
-PIDFILE=/var/run/$ADDON.pid
+# Not /var/run: the CCU3 firmware installs an addon inside a chroot it builds first, and that
+# chroot binds /usr/local, /dev, /proc and /sys - not /var/run. `update_script`'s stop therefore
+# found no pidfile there, reported "not running" and left the old backend on the replaced tree
+# (measured in the lab on 2026-09-05). $ADDON_DIR/var is on /usr/local, so it exists in the chroot
+# and in the running system alike, and it is where the log already lives.
+PIDFILE=$ADDON_DIR/var/$ADDON.pid
 LOG=$ADDON_DIR/var/hmm.log
 LOG_MAX=1048576
 
@@ -33,7 +38,15 @@ LOG_MAX=1048576
 
 Running() {
     [ -f $PIDFILE ] || return 1
-    kill -0 "$(cat $PIDFILE)" 2>/dev/null
+    pid="$(cat $PIDFILE 2>/dev/null)"
+    case "$pid" in
+        '' | *[!0-9]*) return 1 ;;
+    esac
+    kill -0 "$pid" 2>/dev/null || return 1
+    # /var/run was a tmpfs and lost its pidfile at every boot; this one is on /usr/local and
+    # survives one, so a pid the kernel handed to somebody else must not be taken for the addon.
+    [ -r /proc/$pid/cmdline ] || return 0
+    tr '\0' ' ' < /proc/$pid/cmdline 2>/dev/null | grep -q "$ADDON_DIR/app/"
 }
 
 # The token the UI's browser has to present on the API socket. settings.cgi hands it out as a
@@ -59,6 +72,9 @@ Start() {
         echo "$ADDON already running"
         return 0
     fi
+    # a pidfile that outlived its process (a power cut, a kill -9): it would only confuse
+    # start-stop-daemon and monit
+    rm -f $PIDFILE
 
     # The addon writes into $STATE_DIR and its own var/ and nowhere else. Enforced here rather than
     # left to the configuration: HOME on a CCU is /root on a read-only rootfs, and the host's

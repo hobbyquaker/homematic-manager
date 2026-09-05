@@ -105,6 +105,11 @@ check "the token is root-only" "600" "$(dex 'stat -c %a /usr/local/hmm/token')"
 check "the profile directory is root-only" "700" "$(dex 'stat -c %a /usr/local/hmm')"
 check "the image cache is excluded from the backup" "OK" "$(dex 'test -f /usr/local/hmm/images/.nobackup && echo OK')"
 check "the service was started by the live install" "running" "$(dex '/usr/local/etc/config/rc.d/hmm status')"
+# not /var/run: the CCU3 builds a chroot for the install that binds /usr/local but not /var/run,
+# so a pidfile there is invisible to update_script exactly when it matters (lab, 2026-09-05)
+check "the pidfile is inside the addon tree, where the CCU3 install chroot can see it" "OK" \
+    "$(dex 'test -s /usr/local/addons/hmm/var/hmm.pid && echo OK')"
+absent "and nothing was written to /var/run" "hmm.pid" "$(dex 'ls /var/run 2>/dev/null')"
 
 echo
 echo "the CCU's lighttpd in front of it"
@@ -270,6 +275,33 @@ check "and so did the token, so an open browser tab keeps working" "$TOKEN_BEFOR
 check "the service is running again" "running" "$(dex '/usr/local/etc/config/rc.d/hmm status')"
 out="$(dex "curl -so /dev/null -w '%{http_code}' -b '$COOKIE' http://127.0.0.1/addons/hmm/")"
 check "the UI answers again after the update" "200" "$out"
+
+echo
+echo "the CCU3 firmware's path: an install_addon driven by hand on a running box"
+# The CCU3 wraps update_script in a chroot that binds /usr/local, /dev, /proc and /sys - not
+# /var/run, where the pidfile used to be. `rc.d/hmm stop` of the *installed* version therefore found
+# nothing to stop and the old backend kept running on the replaced tree; the lab had to finish the
+# update with a restart by hand. Both halves of that are replayed here: the marker file that makes
+# update_script take the firmware's branch, and a pidfile the installed rc.d cannot see.
+dex 'mkdir -p /etc/init.d && touch /etc/init.d/S00InstallAddon' >/dev/null
+PID_BEFORE="$(dex 'cat /usr/local/addons/hmm/var/hmm.pid')"
+dex 'rm -f /usr/local/addons/hmm/var/hmm.pid' >/dev/null
+check "the installed rc.d can no longer see its own process, as in the chroot" "stopped" \
+    "$(dex '/usr/local/etc/config/rc.d/hmm status')"
+out="$(install_addon)"
+check "update_script exits 0 on that update too" "exit 0" "$out"
+absent "the old backend was stopped, by name, with no pidfile to go by" "hmm/app/dist/cli.js" \
+    "$(dex "tr '\\0' ' ' < /proc/$PID_BEFORE/cmdline 2>/dev/null")"
+check "and a new one is running, so the update needs no restart by hand" "running" \
+    "$(dex '/usr/local/etc/config/rc.d/hmm status')"
+absent "with a pid of its own" "$PID_BEFORE" "$(dex 'cat /usr/local/addons/hmm/var/hmm.pid')"
+for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+    dex "curl -sf -o /dev/null -b '$COOKIE' http://127.0.0.1:8090/addons/hmm/" >/dev/null && break
+    sleep 1
+done
+out="$(dex "curl -so /dev/null -w '%{http_code}' -b '$COOKIE' http://127.0.0.1/addons/hmm/")"
+check "and it serves the UI again" "200" "$out"
+dex 'rm -f /etc/init.d/S00InstallAddon' >/dev/null
 
 echo
 echo "uninstall"

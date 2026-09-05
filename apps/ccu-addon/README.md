@@ -57,7 +57,7 @@ ssh root@ccu /bin/install_addon        # OpenCCU: the exact path the WebUI takes
 
 | Path                                        | What                                                        |
 | ------------------------------------------- | ----------------------------------------------------------- |
-| `/usr/local/addons/hmm/`                    | the addon: `bin/node`, `app/`, `rc.d/hmm`, `etc/`, `www/`, `var/hmm.log` |
+| `/usr/local/addons/hmm/`                    | the addon: `bin/node`, `app/`, `rc.d/hmm`, `etc/`, `www/`, `var/hmm.log`, `var/hmm.pid` |
 | `/usr/local/hmm/`                           | the **profile**: `config.json`, the caches, `images/`, `token` (mode 600) |
 | `/usr/local/etc/config/rc.d/hmm`            | symlink to the service script                                |
 | `/usr/local/etc/config/addons/www/hmm`      | symlink to `www/` — this is what serves the CGIs             |
@@ -222,13 +222,20 @@ leaves the check unmonitored on every monit reload — measured in the lab, see 
 the lighttpd rule and starts the service again — exit code 0, no reboot. The Zusatzsoftware page
 shows the newest release through `update_check.cgi`.
 
-On the **CCU3 firmware** the update runs in a chroot during the reboot the WebUI asks for, and that
-chroot binds `/usr/local`, `/dev`, `/proc` and `/sys` — not `/var/run`, where the pidfile is. So
-`update_script`'s stop finds nothing to stop there, which is harmless in the firmware's own flow
-(the box is going down anyway) but means that **running `/bin/install_addon` by hand on a CCU3 to
-avoid the reboot leaves the old process running on the replaced tree**: finish such an update with
-`/usr/local/etc/config/rc.d/hmm restart`. Measured in the lab on 2026-09-05, see
-[`docs/hardware-checklist.md`](../../docs/hardware-checklist.md). The firmware's
+On the **CCU3 firmware** the install runs inside a chroot the firmware builds first, and that
+chroot binds `/usr/local`, `/dev`, `/proc` and `/sys` — not `/var/run`. That is why the pidfile is
+`/usr/local/addons/hmm/var/hmm.pid` and not `/var/run/hmm.pid`: in `/var/run` it was invisible to
+`update_script` exactly where it mattered, so the stop reported "not running" and the old backend
+kept running on the replaced tree — **an `install_addon` driven by hand on a CCU3 used to need a
+`rc.d/hmm restart` afterwards** (measured in the lab on 2026-09-05, see
+[`docs/hardware-checklist.md`](../../docs/hardware-checklist.md)). It does not any more:
+`update_script` stops the old process by either pidfile and, failing that, by its command line in
+`/proc`, and if it *was* running — which is what tells a hand-driven update on a live box apart from
+the firmware's own install around a reboot — it starts the new one through `/proc/1/root`, the real
+root of the running system, because a backend started from inside the chroot would keep a directory
+that is about to be deleted as its root. The firmware's own flow is unchanged: nothing is started
+there, `S98StartAddons` does it at the boot. Replayed by `container-test.sh`; not re-measured on the
+CCU3 box itself. The firmware's
 `/bin/install_addon` also ends with `sync` rather than propagating the exit code, so a CCU3 always
 reports 0 whether the install was an update or a fresh one; only OpenCCU's wrapper passes the 0/10
 through.

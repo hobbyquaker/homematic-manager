@@ -19,6 +19,10 @@ WWW_DIR=$CONF_DIR/addons/www/$ADDON
 STATE_DIR=/usr/local/hmm
 LIGHTTPD_DIR=$CONF_DIR/lighttpd
 LIGHTTPD_CONF=$LIGHTTPD_DIR/$ADDON.conf
+PIDFILE=$ADDON_DIR/var/$ADDON.pid
+# where installations from before 2026-09-06 keep it, and where this script cannot see it on the
+# CCU3 firmware: that install runs in a chroot which binds /usr/local, /dev, /proc and /sys only
+LEGACY_PIDFILE=/var/run/$ADDON.pid
 
 # 10 tells the WebUI this was a fresh install (it then offers a reboot), 0 an update. The CCU3
 # firmware ignores the code and always reboots; OpenCCU installs live and only reboots on 10.
@@ -42,10 +46,66 @@ fi
 mkdir -p $ADDONS_DIR $CONF_DIR/rc.d $CONF_DIR/addons/www $LIGHTTPD_DIR $STATE_DIR
 chmod 755 $ADDONS_DIR
 
+# Every pid that is this addon's backend. The pid files first - the one inside the addon tree, which
+# is on /usr/local and is therefore visible from the CCU3 install chroot too, and the /var/run one
+# an installation from before that change still writes - and then /proc, which finds the process
+# when neither pid file can be read from here. /proc is bound into the chroot, so this works there.
+AddonPids() {
+    for file in $PIDFILE $LEGACY_PIDFILE; do
+        [ -f "$file" ] || continue
+        pid="$(cat "$file" 2>/dev/null)"
+        case "$pid" in
+            '' | *[!0-9]*) continue ;;
+        esac
+        [ -d /proc/"$pid" ] && echo "$pid"
+    done
+    for dir in /proc/[0-9]*; do
+        pid="${dir#/proc/}"
+        [ "$pid" = "$$" ] && continue
+        cmdline="$(tr '\0' ' ' < "$dir/cmdline" 2>/dev/null)" || continue
+        case "$cmdline" in
+            *"$ADDON_DIR/app/"*) echo "$pid" ;;
+        esac
+    done
+}
+
+# Was the addon running when this update started?
+#
+# It is also the answer to "is this a live system". The firmware's own install runs with the addon
+# stopped - on the CCU3 it happens around a reboot, in a chroot - and only an `install_addon` driven
+# by hand on a running box finds its own process alive. The lab measured what that costs when the
+# stop below silently does nothing: the old backend keeps running on the deleted inodes of the tree
+# this script replaces, and the box needs a restart by hand to finish the update.
+WAS_RUNNING=0
+[ -n "$(AddonPids)" ] && WAS_RUNNING=1
+
 if [ -x $CONF_DIR/rc.d/$ADDON ]; then
     EXITCODE=0
     $CONF_DIR/rc.d/$ADDON stop >/dev/null 2>&1
 fi
+
+# ... and whatever that did not reach, by pid file or by name. On OpenCCU the stop above has already
+# done it and this finds nothing; on the CCU3 it is the one that works, because `rc.d/hmm stop` of
+# the *installed* (old) version still looks for its pidfile in the /var/run the chroot does not have.
+StopOld() {
+    pids="$(AddonPids | sort -u)"
+    [ -n "$pids" ] || return 0
+    logger -t $ADDON -p daemon.info "stopping the running backend before the update: $pids"
+    # shellcheck disable=SC2086
+    kill $pids 2>/dev/null
+    i=0
+    while [ $i -lt 15 ]; do
+        pids="$(AddonPids | sort -u)"
+        [ -n "$pids" ] || return 0
+        sleep 1
+        i=$((i + 1))
+    done
+    logger -t $ADDON -p daemon.warn "killing the running backend: $pids"
+    # shellcheck disable=SC2086
+    kill -9 $pids 2>/dev/null
+    rm -f $PIDFILE $LEGACY_PIDFILE
+}
+StopOld
 
 # The host's configuration survives updates; the addon tree itself is replaced wholesale, so a file
 # removed in a new version cannot survive. The profile directory ($STATE_DIR) is never touched here.
@@ -104,16 +164,32 @@ fi
 
 sync
 
-# On the CCU3 firmware this whole script runs in a chroot during the shutdown of a reboot
-# (/etc/init.d/S00InstallAddon), so nothing may be started here - the boot afterwards does it. On
-# OpenCCU the install is live: lighttpd has to pick the new rule up once, and nothing else would
-# start the service - not on an update (the WebUI does not reboot on exit code 0) and not on a
-# fresh install either, where the reboot the WebUI offers for exit code 10 may be declined.
+# On OpenCCU the install is live: lighttpd has to pick the new rule up once, and nothing else
+# would start the service - not on an update (the WebUI does not reboot on exit code 0) and not on
+# a fresh install either, where the reboot the WebUI offers for exit code 10 may be declined.
 # `cd /` first: the OpenCCU installer deletes this working directory the moment this script returns.
 if [ ! -f /etc/init.d/S00InstallAddon ]; then
     cd /
     [ -x /etc/init.d/S50lighttpd ] && /etc/init.d/S50lighttpd restart >/dev/null 2>&1
     $CONF_DIR/rc.d/$ADDON start >/dev/null 2>&1
+elif [ "$WAS_RUNNING" = 1 ]; then
+    # The CCU3 firmware, driven by hand on a running box. Its installer wraps this script in a
+    # chroot it builds under /usr/local, and that directory is gone when the install returns - a
+    # backend started from in there would keep it as its root and lose /usr/local, and with it the
+    # profile it writes. /proc *is* bound into the chroot, so /proc/1/root is the real root of the
+    # running system and the service can be started where it belongs. Off the chroot (a firmware
+    # that runs this script directly) /proc/1/root is the same root and this is a plain start.
+    #
+    # Nothing is started when the addon was not running: that is the firmware's own install around
+    # a reboot, where the boot (S98StartAddons) starts the addon, and a fresh install there asks
+    # for that reboot anyway (exit code 10).
+    cd /
+    HOST_ROOT=/proc/1/root
+    if command -v chroot >/dev/null 2>&1 && [ -x $HOST_ROOT$CONF_DIR/rc.d/$ADDON ]; then
+        chroot $HOST_ROOT $CONF_DIR/rc.d/$ADDON start >/dev/null 2>&1
+    else
+        $CONF_DIR/rc.d/$ADDON start >/dev/null 2>&1
+    fi
 fi
 
 exit $EXITCODE

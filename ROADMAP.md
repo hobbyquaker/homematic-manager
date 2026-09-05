@@ -592,6 +592,13 @@ console round trip (ping → pong event) works, and five things to change:
 - Toasts: at most five on screen, the oldest disappears when a sixth arrives, informational toasts
   expire after a few seconds, warnings later, errors stay until dismissed; a "n more" counter
   instead of a wall.
+- Nothing changes size with its content or state (maintainer, 2026-09-06): an active tab is not
+  wider than an inactive one, so the tab bar never moves; a dialog keeps its size while open,
+  sized for the expected content with the height bounded by the viewport, scrolls vertically
+  inside its content area on overflow and never overflows horizontally (long values wrap or
+  ellipsise, tables inside dialogs scroll in their own container). Browser-mode tests measure
+  tab widths across activation and every dialog's bounding box before and after its content
+  grows.
 
 Screenshots in `docs/` are retaken at the end; the README's images follow.
 

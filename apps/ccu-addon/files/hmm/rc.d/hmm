@@ -1,0 +1,202 @@
+#!/bin/sh
+#
+# Service script of the Homematic Manager CCU addon. Called by run-parts at boot ("init" from
+# S55InitAddons, "start" from S98StartAddons), at shutdown ("stop"), and by the WebUI ("info",
+# "info.de", "info.en", "restart", "uninstall"). service.cgi calls start/stop/restart/status.
+#
+# POSIX sh on purpose: this runs under busybox ash on both firmwares.
+
+ADDON=hmm
+ADDON_DIR=/usr/local/addons/hmm
+CONF_DIR=/usr/local/etc/config
+WWW_DIR=$CONF_DIR/addons/www/$ADDON
+LIGHTTPD_CONF=$CONF_DIR/lighttpd/$ADDON.conf
+MONIT_CONF=/usr/local/etc/monit-$ADDON.cfg
+
+# The profile: config.json (the CCU address, interfaces, ReGa, pacing - everything the settings
+# dialog of the UI writes), the caches and the device image cache. Deliberately *outside*
+# $ADDON_DIR, which an update replaces wholesale and an uninstall deletes.
+STATE_DIR=/usr/local/hmm
+
+NODE=$ADDON_DIR/bin/node
+APP=$ADDON_DIR/app/dist/cli.js
+ENV_FILE=$ADDON_DIR/etc/hmm.env
+TOKEN_FILE=$STATE_DIR/token
+PIDFILE=/var/run/$ADDON.pid
+LOG=$ADDON_DIR/var/hmm.log
+LOG_MAX=1048576
+
+[ -f $ADDON_DIR/versions ] && . $ADDON_DIR/versions
+
+# ICU keeps its data outside the libraries; without this node does not start (musl build)
+[ -n "$NODE_ICU_DATA" ] && export ICU_DATA="$NODE_ICU_DATA"
+
+Running() {
+    [ -f $PIDFILE ] || return 1
+    kill -0 "$(cat $PIDFILE)" 2>/dev/null
+}
+
+# The token the UI's browser has to present on the API socket. settings.cgi hands it out as a
+# cookie after the WebUI session check; nobody else ever sees it, so it is root-only and lives in
+# the profile directory, where it survives an update (and with it the open browser tab).
+Token() {
+    if [ ! -s $TOKEN_FILE ]; then
+        mkdir -p $STATE_DIR
+        if command -v openssl >/dev/null 2>&1; then
+            openssl rand -hex 32 > $TOKEN_FILE 2>/dev/null
+        fi
+        if [ ! -s $TOKEN_FILE ]; then
+            dd if=/dev/urandom bs=32 count=1 2>/dev/null | od -An -tx1 | tr -d ' \n' > $TOKEN_FILE
+            echo >> $TOKEN_FILE
+        fi
+        chmod 600 $TOKEN_FILE
+    fi
+    cat $TOKEN_FILE
+}
+
+Start() {
+    if Running; then
+        echo "$ADDON already running"
+        return 0
+    fi
+
+    # The addon writes into $STATE_DIR and its own var/ and nowhere else. Enforced here rather than
+    # left to the configuration: HOME on a CCU is /root on a read-only rootfs, and the host's
+    # default profile directory would be $HOME/.config/homematic-manager.
+    export HOME="$ADDON_DIR"
+    export XDG_CACHE_HOME="$ADDON_DIR/var/cache"
+    export XDG_CONFIG_HOME="$STATE_DIR"
+    export TMPDIR="${TMPDIR:-/tmp}"
+
+    # HMM_PORT and HMM_LOG_LEVEL, and anything else a user put there: every option of the host has
+    # an HMM_* environment mirror, and the command line below wins over all of them.
+    HMM_PORT=8090
+    HMM_LOG_LEVEL=info
+    if [ -f $ENV_FILE ]; then
+        set -a
+        . $ENV_FILE
+        set +a
+    fi
+    export HMM_PORT HMM_LOG_LEVEL
+
+    # not on the command line: an argument is world-readable in `ps`, the environment is not
+    HMM_TOKEN="$(Token)"
+    export HMM_TOKEN
+
+    mkdir -p $ADDON_DIR/var $ADDON_DIR/var/cache $STATE_DIR
+    if [ -f $LOG ] && [ "$(wc -c < $LOG)" -gt $LOG_MAX ]; then
+        mv $LOG $LOG.1
+    fi
+
+    echo -n "Starting $ADDON: "
+    logger -t $ADDON -p daemon.info "starting homematic-manager $VERSION_ADDON (node $NODE_VERSION) on 127.0.0.1:$HMM_PORT"
+    # cd / because the OpenCCU installer deletes its temp directory right after update_script
+    # returns, and a process whose cwd is gone cannot spawn children.
+    # sh -c "exec ..." so the recorded pid is node's own, not a wrapper's.
+    cd / || return 1
+    start-stop-daemon -S -b -m -p $PIDFILE -x /bin/sh -- -c "exec $NODE $APP \
+--local --ccu 127.0.0.1 --base /addons/$ADDON --host 127.0.0.1 --no-issue-cookie \
+--data-dir $STATE_DIR >>$LOG 2>&1"
+
+    # under memory pressure the kernel should take this before it takes rfd or ReGaHSS
+    if Running; then
+        echo 800 > /proc/"$(cat $PIDFILE)"/oom_score_adj 2>/dev/null
+    fi
+    echo "OK"
+}
+
+Stop() {
+    if ! Running; then
+        rm -f $PIDFILE
+        echo "$ADDON not running"
+        return 1
+    fi
+    echo -n "Stopping $ADDON: "
+    logger -t $ADDON -p daemon.info "stopping homematic-manager"
+    # SIGTERM makes the host de-register its callbacks from the interface processes; give it time
+    start-stop-daemon -K -q -p $PIDFILE
+    i=0
+    while Running && [ $i -lt 15 ]; do
+        sleep 1
+        i=$((i + 1))
+    done
+    if Running; then
+        logger -t $ADDON -p daemon.warn "killing homematic-manager"
+        kill -9 "$(cat $PIDFILE)" 2>/dev/null
+    fi
+    rm -f $PIDFILE
+    echo "OK"
+}
+
+case "$1" in
+    init)
+        # called before the CCU interfaces are up - nothing to prepare, start happens later
+        exit 0
+        ;;
+
+    start)
+        Start
+        ;;
+
+    stop)
+        Stop
+        ;;
+
+    restart)
+        Stop
+        sleep 2
+        Start
+        ;;
+
+    status)
+        if Running; then
+            echo "$ADDON running, pid $(cat $PIDFILE)"
+        else
+            echo "$ADDON stopped"
+            exit 1
+        fi
+        ;;
+
+    info)
+        echo "Info: <div>Homematic Manager - Geräte, Verknüpfungen, Parameter - <a target=\"_blank\" href=\"https://github.com/hobbyquaker/homematic-manager\">github.com/hobbyquaker/homematic-manager</a></div>"
+        echo "Name: Homematic Manager"
+        echo "Version: $VERSION_ADDON"
+        echo "Update: /addons/$ADDON/update_check.cgi"
+        echo "Config-Url: /addons/$ADDON/settings.cgi"
+        echo "Operations: restart uninstall"
+        ;;
+
+    uninstall)
+        # The WebUI calls this without an argument and then deletes the rc.d script itself. The
+        # profile directory is *kept*: it holds the CCU configuration the user made in the UI.
+        # `uninstall purge` deletes that too.
+        Stop
+        $ADDON_DIR/bin/update_addon $ADDON
+        if [ -L $MONIT_CONF ] || [ -f $MONIT_CONF ]; then
+            rm -f $MONIT_CONF
+            [ -x /usr/bin/monit ] && /usr/bin/monit reload >/dev/null 2>&1
+        fi
+        if [ -f $LIGHTTPD_CONF ]; then
+            rm -f $LIGHTTPD_CONF
+            [ -x /etc/init.d/S50lighttpd ] && /etc/init.d/S50lighttpd restart >/dev/null 2>&1
+        fi
+        rm -f $CONF_DIR/rc.d/$ADDON
+        rm -rf $WWW_DIR
+        rm -rf $ADDON_DIR
+        if [ "$2" = purge ]; then
+            rm -rf $STATE_DIR
+            logger -t $ADDON -p daemon.info "uninstalled homematic-manager, profile purged"
+        else
+            logger -t $ADDON -p daemon.info "uninstalled homematic-manager, profile kept in $STATE_DIR"
+        fi
+        ;;
+
+    *)
+        # cp_software.cgi parses every line of `info.<lang>` output, so an unknown command has to
+        # stay quiet on stdout
+        echo "Usage: $ADDON {init|start|stop|restart|status|info|uninstall [purge]}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

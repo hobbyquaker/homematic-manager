@@ -1,0 +1,63 @@
+#!/bin/tclsh
+#
+# Adds or removes this addon's entry in /usr/local/etc/config/hm_addons.cfg, which is what puts the
+# Einstellungen button into Systemsteuerung.
+#
+#   update_addon <id> <cfgfile>   add or replace the entry
+#   update_addon <id>             remove it
+#
+# The CCU3 firmware ships no update_addon of its own (RedMatic bundles compiled i386/armv7 helpers
+# that do not run in a test container), and OpenCCU's /bin/updateAddonConfig.tcl does not exist
+# there - so here it is as a tcl script. hm_addons.cfg is a flat list of id/value pairs, which an
+# array handles; `dict` would be the obvious tool but arrived in Tcl 8.5 and the CCU3 has 8.2.3.
+#
+# Ported from hm2mqtt.js's addon/files/hm2mqtt/bin/update_addon (same author).
+
+set file /usr/local/etc/config/hm_addons.cfg
+if {[info exists env(HM_ADDONS_CFG)]} {
+    set file $env(HM_ADDONS_CFG)
+}
+
+set id [lindex $argv 0]
+set cfgfile [lindex $argv 1]
+
+if {[string equal $id ""]} {
+    puts stderr "usage: update_addon <id> \[<cfgfile>\]"
+    exit 1
+}
+
+set data ""
+if {[file exists $file]} {
+    set fd [open $file r]
+    set data [string trim [read $fd]]
+    close $fd
+}
+
+# a malformed file would take the whole WebUI page with it - start over instead
+array set entries {}
+if {[catch {array set entries $data}]} {
+    array unset entries
+    array set entries {}
+}
+
+if {![string equal $cfgfile ""]} {
+    set fd [open $cfgfile r]
+    set entry [string trim [read $fd]]
+    close $fd
+    # the .cfg holds the braced value; the list quoting is added back when the file is written
+    if {[string equal [string index $entry 0] "\{"] && [string equal [string index $entry end] "\}"]} {
+        set entry [string range $entry 1 end-1]
+    }
+    set entries($id) $entry
+} else {
+    catch {unset entries($id)}
+}
+
+set out [list]
+foreach key [lsort [array names entries]] {
+    lappend out $key $entries($key)
+}
+
+set fd [open $file w]
+puts -nonewline $fd $out
+close $fd

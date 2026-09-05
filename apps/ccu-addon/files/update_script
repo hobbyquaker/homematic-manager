@@ -1,0 +1,119 @@
+#!/bin/sh
+#
+# Runs on the CCU when the package is installed or updated through
+# Systemsteuerung -> Zusatzsoftware, with the extracted package as the working directory.
+#
+# Everything happens inside /usr/local/addons/hmm, /usr/local/hmm (the profile) plus four links the
+# platform provides for exactly this: rc.d, addons/www, hm_addons.cfg and the lighttpd config
+# directory. No system file is patched, no binary is placed in /usr/local/bin, no profile or PATH is
+# touched - another addon's Node.js (RedMatic ships one too) stays untouched and this one's runtime
+# is invisible to it.
+#
+# POSIX sh: busybox ash runs this, on the CCU3 inside a chroot at shutdown and on OpenCCU live.
+
+ADDON=hmm
+ADDONS_DIR=/usr/local/addons
+CONF_DIR=/usr/local/etc/config
+ADDON_DIR=$ADDONS_DIR/$ADDON
+WWW_DIR=$CONF_DIR/addons/www/$ADDON
+STATE_DIR=/usr/local/hmm
+LIGHTTPD_DIR=$CONF_DIR/lighttpd
+LIGHTTPD_CONF=$LIGHTTPD_DIR/$ADDON.conf
+
+# 10 tells the WebUI this was a fresh install (it then offers a reboot), 0 an update. The CCU3
+# firmware ignores the code and always reboots; OpenCCU installs live and only reboots on 10.
+EXITCODE=10
+
+mount | grep -q ' /usr/local ' || mount /usr/local
+
+# One package per architecture: refuse a wrong one rather than install a runtime that cannot start.
+# 13 is the conventional "unsupported platform" code; the WebUI shows it as Error (13).
+PKG_ARCH=""
+if [ -f $ADDON/versions ]; then
+    PKG_ARCH="$(sed -n 's/^NODE_ARCH="\(.*\)"$/\1/p' $ADDON/versions)"
+fi
+MACHINE="$(uname -m)"
+if [ -n "$PKG_ARCH" ] && [ "$PKG_ARCH" != "$MACHINE" ]; then
+    logger -t $ADDON -p daemon.err "package is for $PKG_ARCH, this CCU is $MACHINE"
+    echo "this package is for $PKG_ARCH, this system is $MACHINE" >&2
+    exit 13
+fi
+
+mkdir -p $ADDONS_DIR $CONF_DIR/rc.d $CONF_DIR/addons/www $LIGHTTPD_DIR $STATE_DIR
+chmod 755 $ADDONS_DIR
+
+if [ -x $CONF_DIR/rc.d/$ADDON ]; then
+    EXITCODE=0
+    $CONF_DIR/rc.d/$ADDON stop >/dev/null 2>&1
+fi
+
+# The host's configuration survives updates; the addon tree itself is replaced wholesale, so a file
+# removed in a new version cannot survive. The profile directory ($STATE_DIR) is never touched here.
+if [ -f $ADDON_DIR/etc/hmm.env ]; then
+    cp $ADDON_DIR/etc/hmm.env /tmp/hmm.env.keep
+fi
+
+rm -rf $ADDON_DIR
+cp -af $ADDON $ADDONS_DIR/
+
+if [ -f /tmp/hmm.env.keep ]; then
+    mv /tmp/hmm.env.keep $ADDON_DIR/etc/hmm.env
+else
+    cp $ADDON_DIR/etc/default.env $ADDON_DIR/etc/hmm.env
+fi
+
+# The token the UI's browser gets from settings.cgi after the WebUI session check, and the only
+# thing that opens the backend's API socket. Root-only, in the profile directory, so it survives an
+# update and an open browser tab keeps working across one.
+if [ ! -s $STATE_DIR/token ]; then
+    if command -v openssl >/dev/null 2>&1; then
+        openssl rand -hex 32 > $STATE_DIR/token 2>/dev/null
+    fi
+    if [ ! -s $STATE_DIR/token ]; then
+        dd if=/dev/urandom bs=32 count=1 2>/dev/null | od -An -tx1 | tr -d ' \n' > $STATE_DIR/token
+        echo >> $STATE_DIR/token
+    fi
+fi
+chmod 600 $STATE_DIR/token
+chmod 700 $STATE_DIR
+
+# The device image cache is re-fetched from the CCU on demand; keep it out of the backup.
+mkdir -p $STATE_DIR/images
+touch $STATE_DIR/images/.nobackup
+
+ln -sfn $ADDON_DIR/rc.d/$ADDON $CONF_DIR/rc.d/$ADDON
+rm -rf $WWW_DIR
+ln -sfn $ADDON_DIR/www $WWW_DIR
+
+# entry in Systemsteuerung
+touch $CONF_DIR/hm_addons.cfg
+$ADDON_DIR/bin/update_addon $ADDON $ADDON.cfg
+
+# The lighttpd rule that puts the UI (and its WebSocket) under /addons/hmm/. The port is the one in
+# etc/hmm.env, so a user who moves the port and re-runs this gets a matching rule.
+HMM_PORT=8090
+# shellcheck disable=SC1090
+. $ADDON_DIR/etc/hmm.env
+sed "s/@PORT@/$HMM_PORT/g" $ADDON_DIR/etc/lighttpd.conf > $LIGHTTPD_CONF
+
+# monit exists on OpenCCU, not on the CCU3 firmware
+if [ -x /usr/bin/monit ]; then
+    ln -sf $ADDON_DIR/etc/monit.cfg /usr/local/etc/monit-$ADDON.cfg
+    /usr/bin/monit reload >/dev/null 2>&1
+fi
+
+sync
+
+# On the CCU3 firmware this whole script runs in a chroot during the shutdown of a reboot
+# (/etc/init.d/S00InstallAddon), so nothing may be started here - the boot afterwards does it. On
+# OpenCCU the install is live: lighttpd has to pick the new rule up once, and nothing else would
+# start the service - not on an update (the WebUI does not reboot on exit code 0) and not on a
+# fresh install either, where the reboot the WebUI offers for exit code 10 may be declined.
+# `cd /` first: the OpenCCU installer deletes this working directory the moment this script returns.
+if [ ! -f /etc/init.d/S00InstallAddon ]; then
+    cd /
+    [ -x /etc/init.d/S50lighttpd ] && /etc/init.d/S50lighttpd restart >/dev/null 2>&1
+    $CONF_DIR/rc.d/$ADDON start >/dev/null 2>&1
+fi
+
+exit $EXITCODE

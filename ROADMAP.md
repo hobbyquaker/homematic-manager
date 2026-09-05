@@ -79,7 +79,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [16. Documentation](#16-documentation) ✅
 - [17. Beta cycle and 3.0 release](#17-beta-cycle-and-30-release) ✅ agent side (release waits on the maintainer)
 - [18. Addon login against ReGa](#18-addon-login-against-rega) ✅ (lab check pending)
-- [19. UI polish after the first look](#19-ui-polish-after-the-first-look)
+- [19. UI polish after the first look](#19-ui-polish-after-the-first-look) ✅
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
 
@@ -574,6 +574,10 @@ settings page. npm and Docker installs keep `token` (UDP 1998 is loopback on the
 that `rega` is refused with a clear message when the CCU is not local.
 
 ## 19. UI polish after the first look
+
+Done 2026-09-06, report in `roadmap-archive/task-19.md`. The setValue defect was a double FLOAT
+cast that wrote zero in `setValue` and `putParamset` alike; the rest is layout and style, judged
+by the maintainer from the retaken screenshots and the next dev build.
 
 D-34. The maintainer's first look at a dev build (2026-09-06): "looks nice, seems to work", the RPC
 console round trip (ping → pong event) works, and five things to change:

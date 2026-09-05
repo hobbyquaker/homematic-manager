@@ -41,7 +41,8 @@ about every half hour while the agent works; the timestamp above is the last ref
   1082 tests, `npm run lint`, `npm run typecheck`.
 - In progress by background subagents (Opus), committing distinct commits on
   `3.0-dev` in the shared working tree (each stages only its own files):
-  - none; the three loose ends of the beta pass are fixed (`30023f9`, `1681a47`, `cc32363`).
+  - none; task 19 (UI polish after the maintainer's first look: setValue double-cast fix,
+    toast cap, stable columns, fixed dialogs, she-style restyle) is archived at `3.0.0-dev.3`.
     Next lab run: a live `install_addon` update on the CCU3 box (the `/proc/1/root` start path
     is container-tested only), and the task 18 login with a lower-level CCU user.
 - If a session ends with those agents mid-flight: uncommitted files in the working tree are

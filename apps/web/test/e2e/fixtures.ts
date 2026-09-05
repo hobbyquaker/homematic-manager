@@ -182,6 +182,9 @@ const PARAMSET_DESCRIPTIONS: Record<string, unknown> = {
     },
     'HmIP-RF/HmIP-PDT/1.4.8/1/SWITCH_VIRTUAL_RECEIVER/VALUES': {
         STATE: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true},
+        // A writable FLOAT datapoint: the one type whose `setValue` was broken until task 19,
+        // because the UI wrapped it in `{explicitDouble}` before the backend cast it again.
+        LEVEL: {TYPE: 'FLOAT', OPERATIONS: 7, FLAGS: 1, DEFAULT: 0, MIN: 0, MAX: 1, UNIT: ''},
     },
     'HmIP-RF/HmIP-PDT/1.6.0/1/SWITCH_VIRTUAL_RECEIVER/VALUES': {
         STATE: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true},

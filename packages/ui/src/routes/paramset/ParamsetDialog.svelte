@@ -1,6 +1,6 @@
 <script lang="ts">
     import type {MasterView, Paramset, ParamsetDescription, ParamsetValue, WriteResult} from '@homematic-manager/core';
-    import {castValue, enumEncodingFor, multiApplyEligibility} from '@homematic-manager/core';
+    import {multiApplyEligibility} from '@homematic-manager/core';
 
     import Dialog from '../../lib/components/Dialog.svelte';
     import MultiSelect from '../../lib/components/MultiSelect.svelte';
@@ -269,13 +269,42 @@
         open = false;
     }
 
-    /** The per-datapoint `setValue` of the VALUES paramset. */
-    async function setOne(field: FormField): Promise<void> {
-        const value = castValue(valueOf(field), field.description, {enumAs: enumEncodingFor(interfaceName)});
-        const ok = await stores.paramsets.setValue(interfaceName, address, field.name, value);
-        if (ok) {
-            stores.notices.push('info', `setValue ${address} ${field.name}`);
+    /** How a written value reads in the toast: an enum by its label, everything else as it is. */
+    function shownValue(field: FormField, value: ParamsetValue): string {
+        if (field.kind === 'enum' && typeof value === 'number') {
+            const entry = field.valueList?.[value];
+            if (entry !== undefined) {
+                return `${stores.meta.valueLabel(field.name, entry, channelType)} (${value})`;
+            }
         }
+        return String(value);
+    }
+
+    /**
+     * The per-datapoint `setValue` of the VALUES paramset.
+     *
+     * The value goes out **uncast**. Casting it here as well used to break every `FLOAT`: the core
+     * wraps a float in `{explicitDouble}` for the XML-RPC encoder, the backend cast the wrapper a
+     * second time, `parseFloat('[object Object]')` is `NaN` and `NaN` becomes `0` - so the dimmer
+     * the maintainer tried went to zero instead of to the level he typed, which looks like nothing
+     * happening at all. The backend owns the cast: it has the authoritative `VALUES` description,
+     * it validates against it, and it is the only place that knows what goes on the wire.
+     */
+    async function setOne(field: FormField): Promise<void> {
+        const raw = valueOf(field);
+        const value: ParamsetValue =
+            typeof raw === 'boolean' || typeof raw === 'number' || typeof raw === 'string' ? raw : false;
+        const ok = await stores.paramsets.setValue(interfaceName, address, field.name, value);
+        if (!ok) {
+            return;
+        }
+        // The device holds it now, so the row is no longer "changed" and the dialog agrees again.
+        edited = Object.fromEntries(Object.entries(edited).filter(([name]) => name !== field.name));
+        original = {...original, [field.name]: value};
+        stores.notices.push(
+            'info',
+            `setValue ${stores.nameOf(address)} (${address}) ${field.name} = ${shownValue(field, value)}`,
+        );
     }
 </script>
 

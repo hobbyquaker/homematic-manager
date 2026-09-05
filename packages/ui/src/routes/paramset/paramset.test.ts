@@ -334,6 +334,34 @@ describe('the paramset dialog', () => {
         await waitFor(() => {
             expect(transport.lastCall('value.set')).toEqual(['BidCos-RF', 'MEQ0123456:1', 'STATE', false]);
         });
+        // Task 19: the toast used to say "setValue MEQ0123456:1 STATE" and nothing about the value,
+        // so a write that did nothing was indistinguishable from one that worked.
+        await waitFor(() => {
+            expect(screen.getByTestId('notices').textContent).toContain('MEQ0123456:1');
+        });
+        expect(screen.getByTestId('notices').textContent).toContain('STATE = false');
+    });
+
+    /**
+     * The task 19 defect, at the unit level: the dialog must hand the raw value to the transport.
+     * Casting it here as well wrapped a `FLOAT` in `{explicitDouble}`, which the backend then cast
+     * a second time into `0`.
+     */
+    it('sends a float datapoint uncast, so the backend is the only place that casts', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        const parent = document.querySelector<HTMLElement>('[data-row-id="GEQ0567890"]')!;
+        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(screen.getByTestId('paramset-GEQ0567890:1-VALUES'));
+
+        // LEVEL has UNIT `100%`, so the input shows percent and the store keeps the fraction.
+        const row = await waitFor(() => screen.getByTestId('param-LEVEL'));
+        await fireEvent.input(within(row).getByRole('spinbutton'), {target: {value: '50'}});
+        await fireEvent.click(screen.getByTestId('set-LEVEL'));
+
+        await waitFor(() => {
+            expect(transport.lastCall('value.set')).toEqual(['BidCos-RF', 'GEQ0567890:1', 'LEVEL', 0.5]);
+        });
+        expect(screen.getByTestId('notices').textContent).toContain('LEVEL = 0.5');
     });
 
     it('shows no multi-apply picker for VALUES - it is a MASTER affair', async () => {

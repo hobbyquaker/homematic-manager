@@ -204,3 +204,30 @@ describe('castValue with an undocumented type', () => {
         expect(castValue(5, {TYPE: 'DOUBLE', OPERATIONS: 3})).toBe('5');
     });
 });
+
+/**
+ * Task 19: the `setValue` bug. The paramset dialog cast a value before sending it, the backend cast
+ * what arrived, and the `{explicitDouble}` wrapper of the first cast turned into `NaN` and then
+ * into `0` in the second - every float was written as zero. The dialog no longer pre-casts, and a
+ * second cast can no longer destroy a value either.
+ */
+describe('castValue is idempotent', () => {
+    it('unwraps an already cast FLOAT instead of stringifying the wrapper', () => {
+        expect(castValue(castValue('1.5', FLOAT), FLOAT)).toEqual({explicitDouble: 1.5});
+        expect(castValue({explicitDouble: 0.5}, FLOAT, {explicitDouble: false})).toBe(0.5);
+    });
+
+    it('leaves the other types where the first cast put them', () => {
+        expect(castValue(castValue('7', INTEGER), INTEGER)).toBe(7);
+        expect(castValue(castValue('true', BOOL), BOOL)).toBe(true);
+        expect(castValue(castValue('AUTO', ENUM), ENUM)).toBe(2);
+        expect(castValue(castValue('abc', STRING), STRING)).toBe('abc');
+    });
+
+    it('takes the wrapper for the other types too, rather than [object Object]', () => {
+        expect(castValue({explicitDouble: 3}, INTEGER)).toBe(3);
+        expect(castValue({explicitDouble: 3}, STRING)).toBe('3');
+        expect(castValue({explicitDouble: 1}, ENUM)).toBe(1);
+        expect(castValue({explicitDouble: 1})).toBe('1');
+    });
+});

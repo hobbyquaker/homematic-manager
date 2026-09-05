@@ -21,7 +21,7 @@
  */
 
 import {enumIndex, enumList, type ParameterDescription} from './description.js';
-import type {RpcWriteValue} from '../rpc/values.js';
+import {isExplicitDouble, type RpcWriteValue} from '../rpc/values.js';
 
 /** How an interface wants `ENUM` values on the wire. */
 export type EnumEncoding = 'index' | 'name';
@@ -67,10 +67,16 @@ export interface CastOptions {
  * the original does for datapoints whose description has not been fetched.
  */
 export function castValue(
-    value: unknown,
+    input: unknown,
     description?: ParameterDescription,
     options: CastOptions = {},
 ): RpcWriteValue {
+    // Casting is idempotent: an already cast `FLOAT` arrives as `{explicitDouble: n}`, and without
+    // this line the second cast would `String()` the wrapper, `parseFloat('[object Object]')` is
+    // `NaN` and `NaN` becomes `0`. That is the task 19 `setValue` bug: the paramset dialog cast the
+    // value before sending it and the backend cast what arrived, so every float was written as
+    // zero. The dialog no longer pre-casts, and a double cast can no longer destroy a value.
+    const value = isExplicitDouble(input) ? input.explicitDouble : input;
     if (!description) {
         return typeof value === 'boolean' || typeof value === 'string' ? value : String(value);
     }

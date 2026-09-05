@@ -73,13 +73,16 @@ test('a link is created, its paramset written and the link removed again', async
     await expect(page.getByTestId('link-results')).toBeVisible();
 
     // The LINK paramset of a link is stored under the peer's address, not under a paramset name.
+    // The value has to arrive as the float it is: until task 19 the dialog cast it into
+    // `{explicitDouble: 12}` and the backend cast that a second time into `0`, so every float in a
+    // paramset write reached the interface process as zero.
     const linkWrites = sim.getWriteLog().filter((entry) => entry.values['SHORT_ON_TIME'] !== undefined);
     expect(linkWrites.length).toBeGreaterThan(0);
+    expect(linkWrites.at(-1)?.values['SHORT_ON_TIME']).toBe(12);
 
-    // The preview is a second modal on top of the editor and does not close itself when the
-    // read-back differs from what was written - which it does here, because the simulator stores a
-    // LINK paramset per peer and answers the whole set. Both have to be closed, innermost first.
-    await page.getByTestId('write-preview').getByRole('button', {name: 'Close'}).first().click();
+    // The preview closes itself once the write succeeded and the read-back agrees with it; only
+    // the editor underneath is left to close.
+    await expect(page.getByTestId('write-preview')).not.toHaveAttribute('open');
     await editor.getByRole('button', {name: 'Close'}).first().click();
     await expect(editor).not.toHaveAttribute('open');
 

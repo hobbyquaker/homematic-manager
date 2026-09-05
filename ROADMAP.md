@@ -39,6 +39,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 | D-18 | Version scheme and commits for the rebuild: work on 3.0 starts at `3.0.0-dev.0` and every dev build bumps the counter (`3.0.0-dev.1`, `3.0.0-dev.2`, ...), then `3.0.0-alpha.n`, `3.0.0-beta.n`, `3.0.0`. Every significant change is its own commit with a message that explains the why; no squashed "WIP" commits. The maintainer tags and releases. |
 | D-19 | No support for the HVL addon (#123): the project is dead. The issue is closed with that note. |
 | D-20 | No Homegear-specific work. Checked 2026-09-05: the Homegear repository still receives build-system commits (last 2026-05) but its last release is 0.7.40 from 2019-07, three issues were opened since 2025, 127 stars; the user base is small and the project barely maintained. Homegear keeps working through the generic XML-RPC path where it behaves like a CCU; the `setName` special case (#41) is dropped and #41, #59, #60, #100, #106 are closed with that note. |
+| D-21 | (2026-09-05) The branch `3.0-dev` may be pushed to GitHub by the agent so that GitHub Actions builds the Windows/macOS/Linux artifacts (task 11) and runs CI; the maintainer downloads dev builds from the workflow artifacts. Tags, releases and pushes to `master` stay with the maintainer. |
 
 ## Contents
 
@@ -359,7 +360,7 @@ analysis when 3.0 ships.
 
 Alpha from M2 to the forum, beta with the addon, bug-fix buffer, hardware checklist on the three
 lab boxes, release 3.0.0 (Electron) and 3.1.0 (addon) through the workflows. The maintainer cuts
-releases; the agent never tags or pushes on its own.
+releases; the agent never tags or pushes to `master` on its own (pushing `3.0-dev` for CI builds is D-21).
 
 ## Open questions
 

@@ -5,9 +5,44 @@ reusable components the tabs are built from, the stores, and the transports that
 backend. It never touches Node, a socket or a file - everything goes through the `Transport` of the
 API contract in `packages/core/src/api/types.ts`.
 
-Task 7 built the foundation; the tab contents (paramset editor, links editing, RPC console, RSSI
-matrix, add device, acknowledge) arrive with task 8. Toolbar buttons that need task 8 are drawn and
-disabled, and say so in their tooltip.
+Task 7 built the foundation, task 8 filled the six tabs: the device grid with its channel sub-grid,
+the generic paramset editor, the link editor with the easy-mode profiles, the RPC console, the RSSI
+matrix, the service messages, the events and the pairing dialog. A toolbar button that is disabled
+always says why in its tooltip.
+
+## What the tabs do
+
+- **Devices**: the 2.7 columns with the channel sub-grid of `subGridChannels`, device images (D-10),
+  flags, RX_MODE, service-message marks, and a firmware column whose button really disappears when
+  the update has arrived (#95, #113). Context menu and toolbar: rename, reportValueUsage over a
+  whole selection (#18), `restoreConfigToDevice`, `clearConfigCache`, repair configuration
+  (task 6.7), replace, delete with the two flag dropdowns, and the paramset buttons.
+- **Paramset editor**: description-driven, with the metadata of task 9 on top (order, conditional
+  visibility, option presets, cross-validation, labels, enum names and help texts). Multi-apply only
+  across an identical paramset description (task 6.3), a preview of the changed-only payload before
+  every write, `writeAll` as the explicit opt-out, `setValue` per datapoint of VALUES, and the
+  read-back afterwards - `ok` means nothing on BidCos (`docs/config-pending.md`).
+- **Links**: the grid with both device images and the defective mark of #79, add through core's role
+  matrix, remove a whole selection (#80), play short and long on BidCos-RF, and the link paramset
+  editor with the profiles of the data set, the sender's full option list and an expert view.
+- **RSSI**: the gateway grid, a receive/send pair per gateway, the peer sub-grid, and
+  `setBidcosInterface` that shows the assignment the interface reports now (#122).
+- **RPC console**: a generated argument form for all 51 catalogue methods including structs
+  (#27, #136), a history and the raw response.
+- **Service messages**: acknowledge one or all, the two meanings of `CONFIG_PENDING`, toasts instead
+  of 2.x's modal (#77) and a quiet mode (#102).
+- **Events**: the two filter boxes over core's event filter, a pause, and the per-device counter of
+  #129.
+- **Add device**: BidCos install mode with mode, serial and temporary key (#20), HmIP with SGTIN and
+  key or key server, a QR scanner (`@zxing/browser`, loaded lazily, #112) and naming right after
+  pairing (#24).
+
+## The host bridge
+
+`window.__HMM_HOST__` (Electron, task 11) is read through `HostStore` and nowhere else. Without it -
+`apps/web`, the CCU addon, demo mode - `available` is false, every method is a no-op that resolves,
+the update notice never appears, the About dialog shows the API's version instead of Electron's, and
+a device image falls back to a labelled placeholder.
 
 ## Demo mode
 
@@ -66,12 +101,20 @@ src/
   index.ts              library entry for the Electron renderer
   app.css               the theme tokens, light and dark (D-22)
   routes/               one component per tab, plus the settings and about dialogs
+  routes/devices/       rename, delete, replace, repair, add device and the QR scanner
+  routes/paramset/      the generic paramset editor, one parameter row, the write preview
+  routes/links/         add link, remove links, the link paramset editor
+  routes/radio/         setBidcosInterface
   lib/components/       DataTable, Dialog, MultiSelect, ContextMenu, Tabs, Toolbar, Loader,
-                        Notices, RpcLogPanel, RpcProgress, ConnectionIndicator, the two switches
+                        Notices, RpcLogPanel, RpcProgress, ConnectionIndicator, DeviceImage,
+                        RssiCell, UpdateNotice, the two switches
+  lib/host/             the typed view of `window.__HMM_HOST__`, and the check that it is one
   lib/stores/           runes stores, all built around an injected Transport
   lib/transport/        MockTransport, WebSocketTransport, createTransport, the demo fixture
   lib/i18n/             the reactive binding to core's translator, plus the UI's own strings
-  lib/util/             value and time formatting for the grids
+  lib/util/             the pure parts of the tabs: the device grid cells, the paramset and link
+                        forms, the RPC argument form, the HmIP key, value and time formatting
+  testHarness.ts        `mountApp()` and the three doubles every tab test starts with
 ```
 
 ## Theme (D-22)

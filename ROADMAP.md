@@ -15,7 +15,7 @@ Status 2026-09-05: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 
 version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); tasks 7 (UI foundation) and 11 (Electron
 host with the build and release workflows) and 12 (web host and npm package; its Docker part runs
 as a follow-up, also done) are done too, and so is task 6 (write-safety lab study, `docs/config-pending.md`):
-milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon) are in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+milestone M1 is complete. Task 8 (UI feature parity) is done as well; task 13 (CCU addon) is in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
@@ -62,7 +62,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - 5. hm-simulator 1.0 ✅ [archived](roadmap-archive/task-5.md) (branch `1.0-dev` in its own repository, release by the maintainer)
 - [6. Paramset write safety and the CONFIG_PENDING study](#6-paramset-write-safety-and-the-config_pending-study) ✅
 - 7. UI foundation ✅ [archived](roadmap-archive/task-7.md)
-- [8. UI feature parity](#8-ui-feature-parity)
+- 8. UI feature parity ✅ [archived](roadmap-archive/task-8.md)
 - 9. Device metadata pipeline ✅ [archived](roadmap-archive/task-9.md)
 - [10. Device-specific editors](#10-device-specific-editors)
 - [11. Electron host, builds, releases](#11-electron-host-builds-releases) ✅
@@ -257,32 +257,12 @@ The fix for #98 and the reason the write path is rebuilt before any UI exists:
 
 ## 8. UI feature parity
 
-Everything in section 2.1 of the analysis, tab by tab, with e2e tests per workflow, each view
-checked in the light and the dark theme (D-22):
-
-- hmipserver deletes and re-sends every HmIP device on each `init` (eq-3/occu#45): an empty device
-  list right after connecting is transient, never "no devices" (found in task 4).
-- Devices: grid, channel sub-grid, images (OQ-4), flags, `AVAILABLE_FIRMWARE`/update buttons with
-  live refresh (#95, #113), context menu (rename, delete with flags, replace, restore, clear
-  config cache, reportValueUsage incl. multi-select #18/PR #138, paramsets).
-- Paramset editor: generic description-driven form with the metadata layer (task 9), help texts,
-  `setValue` per datapoint, multi-apply (task 6), preview and write log.
-- Links: grid, add (role matrix), remove (multi, #80), edit name/description, play short/long,
-  defective links (#79), link paramset editor with profiles and expert view (#96, #105). The
-  easy-mode dialog shows the sender's full option list from `senderMetadata` (task 9 flattened
-  the 2.x per-profile `options`) and greys out what the chosen profile fixes; editors derive from
-  the description (`TYPE`, `UNIT`, `MIN`, `MAX`), not from the dropped 2.x `input` hints.
-- RPC console: method catalogue with generated argument forms including structs for `putParamset`
-  (#27, #136), history, raw response.
-- Radio: interfaces grid, RSSI matrix with colours, `setBidcosInterface`/roaming with correct
-  active-interface display (#122), LAN gateway status.
-- Service messages: list, acknowledge, pop-ups that never break other dialogs (#77), quiet mode
-  (#102).
-- Events: live table, filter, per-device counters (#129).
-- Add device: BidCos install mode incl. temporary key (#20), HmIP key entry and QR scan with
-  `@zxing/browser` (#112), name right after pairing (#24).
-- Configuration: CCU address with discovery, explicit interface list, callback IP/port, TLS, auth,
-  language, pacing, log folder, cache reset; connection indicator per interface.
+Done 2026-09-05, report in [`roadmap-archive/task-8.md`](roadmap-archive/task-8.md): every tab of
+2.7 in `packages/ui`, the generic paramset editor with the metadata layer of task 9, the link
+editor with the easy-mode profiles, and what the lab study of task 6 changed about `CONFIG_PENDING`,
+the repair action and the read-back after a write. Left for others: `packages/ui` is still linted
+with the untyped rule set (task 14); the device-specific editors of task 10 plug into
+`lib/util/paramsetForm.ts`; `src/testHarness.ts` is what the e2e suites of task 14 should reuse.
 
 ## 9. Device metadata pipeline
 

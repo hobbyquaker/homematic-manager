@@ -15,7 +15,7 @@ npm and GitHub on 2026-09-05 at the maintainer's request; branch `1.0-dev`, `mas
 version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); tasks 7 (UI foundation) and 11 (Electron
 host with the build and release workflows) and 12 (web host and npm package; its Docker part runs
 as a follow-up, also done) are done too, and so is task 6 (write-safety lab study, `docs/config-pending.md`):
-milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon, installed and checked on all three lab boxes) are done as well: milestones M2 and M4 are reached in the code. Tasks 10 (device-specific editors, initial set) and 16 (documentation: README with the install matrix, one page per install type, migration notes, BUILD.md, changelog) are done, and so is task 14 (test infrastructure: browser mode default, Playwright e2e, merged coverage, strict UI lint, shellcheck): milestone M3 lacks only task 17, and task 15 (backlog features: #124, #87, #26, #25, #21, #54, #94, #97 BidCos, D-31 idle unsubscribe, the hardware findings) is done, so M5's backlog half is in as well. Task 17 (beta cycle) is next; it waits on the maintainer for GitHub Actions. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon, installed and checked on all three lab boxes) are done as well: milestones M2 and M4 are reached in the code. Tasks 10 (device-specific editors, initial set) and 16 (documentation: README with the install matrix, one page per install type, migration notes, BUILD.md, changelog) are done, and so is task 14 (test infrastructure: browser mode default, Playwright e2e, merged coverage, strict UI lint, shellcheck): milestone M3 lacks only task 17, and task 15 (backlog features: #124, #87, #26, #25, #21, #54, #94, #97 BidCos, D-31 idle unsubscribe, the hardware findings) is done, so M5's backlog half is in as well. Task 17 (beta cycle) is running its agent-side part and waits on the maintainer for GitHub Actions; task 18 (optional login against ReGa) is implemented and tested against stubs, its lab check rides with task 17's hardware run. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
@@ -75,7 +75,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [15. Backlog features from the triage](#15-backlog-features-from-the-triage) ✅
 - [16. Documentation](#16-documentation) ✅
 - [17. Beta cycle and 3.0 release](#17-beta-cycle-and-30-release)
-- [18. Addon login against ReGa](#18-addon-login-against-rega)
+- [18. Addon login against ReGa](#18-addon-login-against-rega) ✅ (lab check pending)
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
 
@@ -523,6 +523,9 @@ The maintainer cuts releases; the agent never tags or pushes to `master` on its 
 `3.0-dev` for CI builds is D-21).
 
 ## 18. Addon login against ReGa
+
+Implemented 2026-09-05, report in `roadmap-archive/task-18.md`; the hardware pass (eight steps in
+`apps/ccu-addon/README.md`) is part of task 17's lab run.
 
 D-32. In `apps/web`: `--auth-mode token|rega` (`HMM_AUTH_MODE`), default `token`, the current
 behaviour. With `rega`, a request without a valid session gets a small login page (German/English,

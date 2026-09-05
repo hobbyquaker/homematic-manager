@@ -6,6 +6,9 @@ coverage-e2e/
 .vite/
 *.tsbuildinfo
 
+# vitest browser mode writes screenshots and attachments of a failed component test here
+.vitest/
+
 # playwright: the traces of a failed e2e run and the HTML report
 test-results/
 playwright-report/

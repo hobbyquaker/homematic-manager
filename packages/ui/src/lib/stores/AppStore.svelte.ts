@@ -68,6 +68,12 @@ export class AppStore {
     connected = $state(false);
     selectedInterface = $state('');
     tab = $state<TabId>(DEFAULT_TAB);
+    /**
+     * Issue #25: what the Links tab should filter on when it is opened from somewhere else. Set by
+     * the Devices tab's "show links", consumed and cleared by the Links tab on the next render, so
+     * it is a hand-over and not a persistent filter the user cannot get rid of.
+     */
+    linksFilter = $state('');
     language = $state<Language>('de');
     theme = $state<ThemeChoice>('system');
     /** Open state of the settings dialog; opened automatically when no host is configured. */

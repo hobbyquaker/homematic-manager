@@ -31,7 +31,9 @@ its tooltip.
 - **Links**: the grid with both device images and the defective mark of #79, add through core's role
   matrix with a name and a description **per pair** (#87), remove a whole selection (#80), play
   short and long on BidCos-RF, and the link paramset editor with the profiles of the data set, the
-  sender's full option list and an expert view.
+  sender's full option list and an expert view. A channel's links are also visible and creatable
+  from the Devices tab (#25): a count in the channel grid, and a context menu that opens the create
+  dialog with that channel already chosen or jumps to the Links tab filtered on it.
 - **RSSI**: the gateway grid, a receive/send pair per gateway, the peer sub-grid,
   `setBidcosInterface` that shows the assignment the interface reports now (#122), and the unreach
   counter of #26 - how often each device has dropped out, kept across restarts, with a reset.

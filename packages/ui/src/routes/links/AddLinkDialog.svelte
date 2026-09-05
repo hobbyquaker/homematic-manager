@@ -11,9 +11,16 @@
         open?: boolean;
         /** Called with the first created link when "Create and edit" was used. */
         onedit?: ((link: {sender: string; receiver: string}) => void) | undefined;
+        /**
+         * Issue #25: the channel the dialog was opened on, already chosen. Opening this from the
+         * Devices tab is only an improvement if the user does not have to find the same channel
+         * again in a list of two hundred.
+         */
+        presetSenders?: readonly string[];
+        presetReceivers?: readonly string[];
     }
 
-    let {open = $bindable(false), onedit = undefined}: Props = $props();
+    let {open = $bindable(false), onedit = undefined, presetSenders = [], presetReceivers = []}: Props = $props();
 
     const stores = getStores();
     const t = stores.i18n.t;
@@ -38,8 +45,8 @@
 
     $effect(() => {
         if (open) {
-            senders = [];
-            receivers = [];
+            senders = [...presetSenders];
+            receivers = [...presetReceivers];
             pairNames = {};
             nameForAll = '';
             descriptionForAll = '';

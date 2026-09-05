@@ -359,10 +359,57 @@ describe('the context menu', () => {
             'reportValueUsage 0',
             'MASTER Paramset',
             'VALUES Paramset',
+            'Verknüpfung als Sender anlegen',
+            'Verknüpfung als Empfänger anlegen',
+            'Verknüpfungen anzeigen (0)',
         ]);
         // The three that act on the channel are off for :0; the paramsets of :0 are readable.
         expect(items.slice(0, 3).every((item) => item.disabled)).toBe(true);
-        expect(items.slice(3).some((item) => item.disabled)).toBe(false);
+        expect(items.slice(3, 5).some((item) => item.disabled)).toBe(false);
+        // MAINTENANCE has no link roles at all, so the three link entries of #25 are off too
+        expect(items.slice(5).every((item) => item.disabled)).toBe(true);
+    });
+
+    it('creates a link from the Devices tab with the channel already chosen (#25)', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await select('MEQ0123456:1');
+        await fireEvent.contextMenu(rowOf('MEQ0123456:1'));
+
+        // MEQ0123456:1 is a SWITCH receiver: it can only be the receiver of a link
+        const items = within(screen.getByTestId('devices-menu')).getAllByRole('menuitem') as HTMLButtonElement[];
+        const asSender = items.find((item) => item.textContent.includes('als Sender'));
+        const asReceiver = items.find((item) => item.textContent.includes('als Empfänger'));
+        expect(asSender?.disabled).toBe(true);
+        expect(asReceiver?.disabled).toBe(false);
+
+        await fireEvent.click(asReceiver as HTMLButtonElement);
+        const dialog = await screen.findByTestId('add-link-dialog');
+        expect(dialog.hasAttribute('open')).toBe(true);
+        // the channel is already in the receiver selection, so nothing has to be found again
+        expect(within(screen.getByTestId('add-link-receivers')).getByRole('button').textContent).toContain('1');
+    });
+
+    it('hands the address over to the Links tab (#25)', async () => {
+        const {stores} = await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await waitFor(() => {
+            expect(stores.links.of('BidCos-RF').length).toBeGreaterThan(0);
+        });
+        const linked = stores.links.of('BidCos-RF')[0]!.RECEIVER;
+        await select(linked);
+        await fireEvent.contextMenu(rowOf(linked));
+
+        const show = (within(screen.getByTestId('devices-menu')).getAllByRole('menuitem') as HTMLButtonElement[]).find(
+            (item) => item.textContent.includes('Verknüpfungen anzeigen'),
+        );
+        expect(show?.disabled).toBe(false);
+        await fireEvent.click(show as HTMLButtonElement);
+
+        expect(stores.app.tab).toBe('links');
+        await waitFor(() => {
+            expect(screen.getByTestId('links-table')).toBeTruthy();
+        });
+        // the filter box of the links grid carries the address, and the store's hand-over is clear
+        expect(stores.app.linksFilter).toBe('');
     });
 
     it('opens the delete dialog from the menu', async () => {

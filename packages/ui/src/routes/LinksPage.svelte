@@ -24,6 +24,7 @@
     let menuY = $state(0);
     let menuLink = $state<{sender: string; receiver: string} | undefined>(undefined);
 
+    let tableFilter = $state('');
     let addOpen = $state(false);
     let removeOpen = $state(false);
     let editOpen = $state(false);
@@ -32,6 +33,15 @@
 
     const interfaceName = $derived(stores.app.selectedInterface);
     const interfaceType = $derived(stores.interfaces.typeOf(interfaceName));
+
+    /** #25: "show the links of this channel" hands the address over through the app store. */
+    $effect(() => {
+        const handover = stores.app.linksFilter;
+        if (handover !== '') {
+            tableFilter = handover;
+            stores.app.linksFilter = '';
+        }
+    });
     const links = $derived(stores.links.of(interfaceName));
     const defective = $derived(stores.links.defective(interfaceName).length);
     /** 2.x offered "play" only on BidCos-RF: only there does `activateLinkParamset` exist. */
@@ -207,6 +217,7 @@
             {columns}
             getId={(link) => `${link.SENDER}->${link.RECEIVER}`}
             bind:selected
+            bind:filter={tableFilter}
             caption={t('Links')}
             filterLabel={t('Filter')}
             emptyText={t('No data')}

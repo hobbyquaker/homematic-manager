@@ -6,6 +6,7 @@
         decodeRxMode,
         isDeviceAddress,
         isMaintenanceAddress,
+        parseRoles,
     } from '@homematic-manager/core';
 
     import ContextMenu from '../lib/components/ContextMenu.svelte';
@@ -18,6 +19,7 @@
     import {getStores} from '../lib/stores/context.js';
     import {firmwareCell, offersRepair, serviceMarks, serviceMessageExplanation} from '../lib/util/deviceGrid.js';
 
+    import AddLinkDialog from './links/AddLinkDialog.svelte';
     import ParamsetDialog from './paramset/ParamsetDialog.svelte';
 
     import AddDeviceDialog from './devices/AddDeviceDialog.svelte';
@@ -46,6 +48,10 @@
     let repairOpen = $state(false);
     let addOpen = $state(false);
     let actionAddress = $state('');
+    /** #25: the create-link dialog, opened from here with the channel already chosen. */
+    let addLinkOpen = $state(false);
+    let linkSenders = $state<string[]>([]);
+    let linkReceivers = $state<string[]>([]);
 
     let paramsetOpen = $state(false);
     let paramsetAddress = $state('');
@@ -56,6 +62,13 @@
     const devices = $derived(stores.devices.devices(interfaceName));
     const index = $derived(stores.devices.index(interfaceName));
     const messages = $derived(stores.serviceMessages.of(interfaceName));
+
+    /** #25: the link count in the channel grid needs the links of this interface to be loaded. */
+    $effect(() => {
+        if (interfaceName !== '') {
+            void stores.links.ensure(interfaceName);
+        }
+    });
 
     /**
      * hmipserver empties its device cache on every `init` and re-sends the whole list (eq-3/occu#45,
@@ -184,12 +197,35 @@
             value: (channel) => decodeDeviceFlags(channel.FLAGS).labels.join(' '),
         },
         {
+            // Issue #25 asks for the direct links to be *shown* in the Devices tab as well as
+            // created there. A count is what fits in a grid; the context menu opens the list.
+            key: 'links',
+            label: t('Links'),
+            width: 70,
+            align: 'right',
+            filterable: false,
+            value: (channel) => {
+                const count = stores.links.forAddress(interfaceName, channel.ADDRESS).length;
+                return count === 0 ? '' : count;
+            },
+        },
+        {
             key: 'AES_ACTIVE',
             label: 'AES_ACTIVE',
             hidden: interfaceType !== 'BidCos-RF',
             value: (channel) => (channel.AES_ACTIVE ? '🔑' : ''),
         },
     ]);
+
+    /** #25: what a channel may be in a link, from its roles - the same rule the Links tab uses. */
+    function linkRolesOf(address: string): {canSend: boolean; canReceive: boolean; links: number} {
+        const channel = index?.get(address);
+        return {
+            canSend: parseRoles(channel?.LINK_SOURCE_ROLES).length > 0,
+            canReceive: parseRoles(channel?.LINK_TARGET_ROLES).length > 0,
+            links: stores.links.forAddress(interfaceName, address).length,
+        };
+    }
 
     function channelsOf(device: DeviceDescription): DeviceDescription[] {
         return stores.devices.channels(interfaceName, device.ADDRESS);
@@ -327,6 +363,23 @@
                   {id: 'sep1', separator: true},
                   {id: 'paramset:MASTER', label: t('MASTER Paramset')},
                   {id: 'paramset:VALUES', label: t('VALUES Paramset')},
+                  {id: 'sep2', separator: true},
+                  // Issue #25: create a link from here, with this channel already chosen
+                  {
+                      id: 'link:sender',
+                      label: t('Create link as sender'),
+                      disabled: !linkRolesOf(menuAddress).canSend,
+                  },
+                  {
+                      id: 'link:receiver',
+                      label: t('Create link as receiver'),
+                      disabled: !linkRolesOf(menuAddress).canReceive,
+                  },
+                  {
+                      id: 'link:show',
+                      label: `${t('Show links')} (${String(linkRolesOf(menuAddress).links)})`,
+                      disabled: linkRolesOf(menuAddress).links === 0,
+                  },
               ],
     );
 
@@ -341,6 +394,20 @@
             return;
         }
         switch (id) {
+            case 'link:sender':
+                linkSenders = [address];
+                linkReceivers = [];
+                addLinkOpen = true;
+                break;
+            case 'link:receiver':
+                linkSenders = [];
+                linkReceivers = [address];
+                addLinkOpen = true;
+                break;
+            case 'link:show':
+                stores.app.linksFilter = address;
+                stores.app.setTab('links');
+                break;
             case 'rename':
                 openRename(address);
                 break;
@@ -552,6 +619,7 @@
 <DeleteDeviceDialog bind:open={deleteOpen} address={actionAddress} />
 <ReplaceDeviceDialog bind:open={replaceOpen} address={actionAddress} />
 <AddDeviceDialog bind:open={addOpen} />
+<AddLinkDialog bind:open={addLinkOpen} presetSenders={linkSenders} presetReceivers={linkReceivers} />
 <RepairConfigDialog bind:open={repairOpen} address={actionAddress} />
 <ParamsetDialog bind:open={paramsetOpen} {interfaceName} address={paramsetAddress} paramset={paramsetName} />
 

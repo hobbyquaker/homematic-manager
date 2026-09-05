@@ -26,6 +26,9 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Not present': {de: 'Nicht vorhanden', en: 'Not present'},
     Subscribing: {de: 'Anmeldung läuft', en: 'Subscribing'},
     'Pending changes': {de: 'Offene Änderungen', en: 'Pending changes'},
+    'Create link as sender': {de: 'Verknüpfung als Sender anlegen', en: 'Create link as sender'},
+    'Create link as receiver': {de: 'Verknüpfung als Empfänger anlegen', en: 'Create link as receiver'},
+    'Show links': {de: 'Verknüpfungen anzeigen', en: 'Show links'},
     Unreach: {de: 'Ausfälle', en: 'Unreach'},
     'Reset the unreach counters': {de: 'Ausfallzähler zurücksetzen', en: 'Reset the unreach counters'},
     'Acknowledge STICKY_UNREACH automatically': {

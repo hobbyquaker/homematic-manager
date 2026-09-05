@@ -59,7 +59,8 @@
     "sbom": "node scripts/sbom.mjs"
   },
   "devDependencies": {
-    "@cyclonedx/cyclonedx-npm": "^4.2.1"
+    "@cyclonedx/cyclonedx-npm": "^4.2.1",
+    "hm-simulator": "^1.0.0"
   },
   "dependencies": {
     "@homematic-manager/backend": "3.0.0-dev.0",

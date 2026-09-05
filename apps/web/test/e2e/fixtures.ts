@@ -306,8 +306,8 @@ export async function simulatorReady(): Promise<boolean> {
     if (!available && !announced) {
         announced = true;
         const reason =
-            'hm-simulator is not installed - run `npm install --no-save ../hm-simulator` from the ' +
-            'repository root, or set SIMULATOR_REQUIRED=1 to make this a failure';
+            'hm-simulator is not installed - it is a devDependency since 1.0.0, so run `npm ci`, ' +
+            'or set SIMULATOR_REQUIRED=1 to make this a failure';
         console.warn(`[e2e] skipping the web end-to-end suite: ${reason}`);
         if (process.env['CI'] !== undefined) {
             // A skipped suite is invisible in a green log; an annotation is not.

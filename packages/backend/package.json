@@ -28,7 +28,7 @@
     "ws": "^8.21.3"
   },
   "devDependencies": {
-    "@types/ws": "^8.18.1"
-  },
-  "//hm-simulator": "TODO: hm-simulator 1.0 is not published yet (roadmap task 5). Until it is, run the integration tests with: npm install --no-save <path>/hm-simulator (from the repository root); without it they skip themselves. Once hm-simulator@1.0.0-dev.0 is on npm, add it here as a devDependency and delete this note."
+    "@types/ws": "^8.18.1",
+    "hm-simulator": "^1.0.0"
+  }
 }

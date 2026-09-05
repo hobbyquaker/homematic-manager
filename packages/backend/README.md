@@ -128,16 +128,15 @@ wrong type that sticks in `CONFIG_PENDING`, the unknown parameter that makes a c
 for good, and `devices.repairConfig` on both. `configPendingMode: 'strict'` in
 `test/simulator/helpers.ts` still gets the stricter hypothesis where a test wants it.
 
-hm-simulator 1.0 is **not published yet** (roadmap task 5), so it is not a dependency. Until it is:
+`hm-simulator` is a devDependency of this package since its 1.0.0 release, so `npm ci` installs it:
 
 ```sh
-npm install --no-save ../hm-simulator      # from the repository root, path to your checkout
 npm test                                   # or: npm run test:sim -w @homematic-manager/backend
 ```
 
-Without it every simulator suite skips itself and prints one line saying why, so `npm test` is green
-either way. Once `hm-simulator@1.0.0-dev.0` is on npm it becomes a devDependency of this package -
-see the `//hm-simulator` note in `package.json`.
+Every suite still gates itself on `simulatorAvailable`, so a tree without dev dependencies stays
+green; `SIMULATOR_REQUIRED=1` turns that skip into a failure, and CI sets it. To try an unpublished
+change to the simulator, `npm install --no-save ../hm-simulator` from the repository root.
 
 Every port in those tests is `0`: the operating system picks one, `sim.ports` says which, and the
 backend is pointed at it through `InterfaceManager.portOverride`. That is what lets the suites run in

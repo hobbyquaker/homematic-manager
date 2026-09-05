@@ -10,10 +10,12 @@
  * ```
  *
  * `simulator: true` starts an in-process [hm-simulator](https://github.com/hobbyquaker/hm-simulator)
- * and points the backend at it. That package is not published yet (roadmap task 5), so it is
- * imported lazily and `simulatorAvailable()` says whether it is there - the same `describe.skipIf`
- * arrangement `packages/backend/test/simulator` uses. Every port is `0`, so several of these can
- * run in parallel and none of them cares what is already listening on the machine.
+ * and points the backend at it. It is a devDependency since 1.0.0, but it is still imported lazily
+ * and `simulatorAvailable()` still says whether it is there - the same `describe.skipIf`
+ * arrangement `packages/backend/test/simulator` uses, so a tree without dev dependencies stays
+ * green while `SIMULATOR_REQUIRED=1` (which CI sets) makes the skip a failure. Every port is `0`,
+ * so several of these can run in parallel and none of them cares what is already listening on the
+ * machine.
  */
 
 import fs from 'node:fs/promises';
@@ -27,7 +29,7 @@ import {createWebHost, type WebHost, type WebHostOptions} from './server.js';
 /* eslint-disable @typescript-eslint/no-explicit-any -- hm-simulator ships no types */
 
 export const SIMULATOR_SKIP_MESSAGE =
-    'hm-simulator is not installed - run `npm install --no-save ../hm-simulator` from the repository root';
+    'hm-simulator is not installed - it is a devDependency since 1.0.0, so run `npm ci`';
 
 let simulatorModule: any;
 let simulatorLoaded = false;

@@ -185,19 +185,21 @@ which is how the maintainer gets a dev build without cutting a release.
 ## hm-simulator
 
 The backend's integration suites and the web e2e suites drive
-[hm-simulator](https://github.com/hobbyquaker/hm-simulator) over real sockets. **Version 1.0 is not
-published yet** (its branch `1.0-dev` is not pushed or tagged either), so it is deliberately not a
-dependency of this repository:
+[hm-simulator](https://github.com/hobbyquaker/hm-simulator) over real sockets. Since 1.0.0 it is on
+npm and a devDependency of `packages/backend` and `apps/web`, so `npm ci` installs it and nothing
+has to be done by hand.
+
+The suites still gate themselves on `describe.skipIf(!simulatorAvailable)` (and
+`await simulatorAvailable()` in the web host's helper) so a checkout with a pruned dev tree stays
+green — but `SIMULATOR_REQUIRED=1` turns every such skip into a failure, and CI sets it on the test,
+coverage and e2e steps. A suite that quietly disappears from a green run is the thing that variable
+exists to prevent.
+
+To try a change to the simulator before it is published, point npm at a checkout:
 
 ```sh
-git clone https://github.com/hobbyquaker/hm-simulator ~/repos/hm-simulator
 npm install --no-save ~/repos/hm-simulator
 ```
-
-Without it those suites skip themselves with a warning (`describe.skipIf`, and
-`await simulatorAvailable()` in the web host's helper) rather than fail — 35 tests at the last full
-run. CI has no way to install it, so CI runs without them and says so. Once the maintainer publishes
-1.0 this becomes a normal dev dependency.
 
 ## Versioning (D-18)
 

@@ -2,11 +2,10 @@
  * The shared setup of the integration tests: an hm-simulator in the same process, and a `Backend`
  * pointed at it over real sockets.
  *
- * hm-simulator 1.0 is not published yet (roadmap task 5: the maintainer cuts the release), so it is
- * not a dependency of this package. `npm install --no-save ../hm-simulator` makes these tests run;
- * without it `simulatorAvailable` is false and every suite skips itself with a message. Once
- * `hm-simulator@1.0.0-dev.0` is on npm it becomes a devDependency of `packages/backend` and the
- * dynamic import below can become a static one.
+ * hm-simulator is a devDependency of this package since its 1.0.0 release, so `npm ci` installs it.
+ * The import below stays dynamic and the suites stay gated on `simulatorAvailable`, so a tree
+ * without dev dependencies is green rather than broken; `SIMULATOR_REQUIRED=1`, which CI sets,
+ * turns that skip into a failure so a whole suite cannot vanish from a green run.
  *
  * Every port is `0`: the operating system picks one, `sim.ports` says which, and the backend is
  * told about it through `portOverride`. That is also why the tests can run in parallel and why they
@@ -34,8 +33,7 @@ try {
 /** False when hm-simulator is not installed; every suite skips itself with a message. */
 export const simulatorAvailable = HmSim !== undefined;
 
-export const SKIP_MESSAGE =
-    'hm-simulator is not installed - run `npm install --no-save ../hm-simulator` from the repository root';
+export const SKIP_MESSAGE = 'hm-simulator is not installed - it is a devDependency since 1.0.0, so run `npm ci`';
 
 /**
  * `SIMULATOR_REQUIRED=1` turns the skip into a failure.

@@ -26,6 +26,18 @@ export interface ConnectionConfig {
     autoDetect: boolean;
     extraInterfaces: UserDefinedInterface[];
     tls: boolean;
+    /**
+     * We run on the CCU itself and talk to the interface processes directly, past the lighttpd
+     * proxy: binrpc on 32001/32000, hmipserver on 32010, the group process on 39292, ReGa on 8183
+     * and no CCU authentication. What the addon of task 13 sets; `local` wins over `tls`.
+     */
+    local?: boolean;
+    /**
+     * Prefer BIN-RPC where the interface offers it on its public port (rfd and hs485d listen for
+     * both). Faster than XML-RPC and what the integration tests use; ignored with `tls`, which
+     * BIN-RPC does not carry.
+     */
+    binrpc?: boolean;
     auth?: {user: string; password: string};
     /** ReGa is optional (D-2): names come from ReGa when present, else from the local store. */
     rega: boolean;

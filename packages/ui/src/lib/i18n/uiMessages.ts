@@ -259,6 +259,86 @@ export const UI_MESSAGES: MessageCatalogue = {
     Path: {de: 'Pfad', en: 'Path'},
     Protocol: {de: 'Protokoll', en: 'Protocol'},
     'Searching...': {de: 'Suche läuft...', en: 'Searching...'},
+
+    // The device-specific editors of task 10. The weekday names are the CCU's own parameter
+    // segments (MONDAY..SUNDAY) turned into something readable.
+    'Show the raw parameters as well': {
+        de: 'Rohe Parameter zusätzlich anzeigen',
+        en: 'Show the raw parameters as well',
+    },
+    Durations: {de: 'Zeitdauern', en: 'Durations'},
+    'A duration is stored as a unit and a count; both are shown next to the seconds.': {
+        de: 'Eine Zeitdauer wird als Einheit und Faktor gespeichert; beides steht neben den Sekunden.',
+        en: 'A duration is stored as a unit and a count; both are shown next to the seconds.',
+    },
+    seconds: {de: 'Sekunden', en: 'seconds'},
+    unit: {de: 'Einheit', en: 'unit'},
+    count: {de: 'Faktor', en: 'count'},
+    'Not used / for ever': {de: 'Nicht benutzt / dauerhaft', en: 'Not used / for ever'},
+    'The device holds a value this pair cannot express': {
+        de: 'Das Gerät hält einen Wert, den dieses Paar nicht ausdrücken kann',
+        en: 'The device holds a value this pair cannot express',
+    },
+    'The device can only do {seconds}': {
+        de: 'Das Gerät kann nur {seconds}',
+        en: 'The device can only do {seconds}',
+    },
+
+    'Week programme': {de: 'Wochenprogramm', en: 'Week programme'},
+    'Switching programme': {de: 'Schaltprogramm', en: 'Switching programme'},
+    Weekday: {de: 'Wochentag', en: 'Weekday'},
+    Weekdays: {de: 'Wochentage', en: 'Weekdays'},
+    Slot: {de: 'Abschnitt', en: 'Slot'},
+    until: {de: 'bis', en: 'until'},
+    Copy: {de: 'Kopieren', en: 'Copy'},
+    'Copy day to': {de: 'Tag kopieren nach', en: 'Copy day to'},
+    'Copy profile to': {de: 'Profil kopieren nach', en: 'Copy profile to'},
+    Monday: {de: 'Montag', en: 'Monday'},
+    Tuesday: {de: 'Dienstag', en: 'Tuesday'},
+    Wednesday: {de: 'Mittwoch', en: 'Wednesday'},
+    Thursday: {de: 'Donnerstag', en: 'Thursday'},
+    Friday: {de: 'Freitag', en: 'Friday'},
+    Saturday: {de: 'Samstag', en: 'Saturday'},
+    Sunday: {de: 'Sonntag', en: 'Sunday'},
+    'The end times of a day rise until {end}, and the last one is {end}': {
+        de: 'Die Endzeiten eines Tages steigen bis {end}, und die letzte ist {end}',
+        en: 'The end times of a day rise until {end}, and the last one is {end}',
+    },
+    '{day}: end time {slot} is not after the one before it': {
+        de: '{day}: Endzeit {slot} liegt nicht nach der vorherigen',
+        en: '{day}: end time {slot} is not after the one before it',
+    },
+    '{day}: end time {slot} comes after the day has ended': {
+        de: '{day}: Endzeit {slot} liegt hinter dem Ende des Tages',
+        en: '{day}: end time {slot} comes after the day has ended',
+    },
+    '{day}: the last end time must be {end}': {
+        de: '{day}: die letzte Endzeit muss {end} sein',
+        en: '{day}: the last end time must be {end}',
+    },
+    'A time between 00:00 and {end}': {de: 'Eine Zeit zwischen 00:00 und {end}', en: 'A time between 00:00 and {end}'},
+    Time: {de: 'Zeit', en: 'Time'},
+    Level: {de: 'Stufe', en: 'Level'},
+    Condition: {de: 'Bedingung', en: 'Condition'},
+    'Astro offset': {de: 'Astro-Versatz', en: 'Astro offset'},
+    'Target channels': {de: 'Zielkanäle', en: 'Target channels'},
+    Unused: {de: 'Unbenutzt', en: 'Unused'},
+    'No weekday chosen - the slot does nothing': {
+        de: 'Kein Wochentag gewählt - der Abschnitt tut nichts',
+        en: 'No weekday chosen - the slot does nothing',
+    },
+
+    'Blind calibration': {de: 'Jalousie-Kalibrierung', en: 'Blind calibration'},
+    'The running times of a reference run, in plain seconds next to the value the device stores.': {
+        de: 'Die Laufzeiten einer Referenzfahrt, in Sekunden neben dem Wert, den das Gerät speichert.',
+        en: 'The running times of a reference run, in plain seconds next to the value the device stores.',
+    },
+
+    'Named options': {de: 'Benannte Auswahlen', en: 'Named options'},
+    'These values have names in the CCU string table that the description does not carry.': {
+        de: 'Diese Werte haben Namen in der CCU-Zeichenkettentabelle, die die Beschreibung nicht mitliefert.',
+        en: 'These values have names in the CCU string table that the description does not carry.',
+    },
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

@@ -6,6 +6,7 @@
     import MultiSelect from '../../lib/components/MultiSelect.svelte';
     import type {MultiSelectOption} from '../../lib/components/multiSelect.js';
     import {getStores} from '../../lib/stores/context.js';
+    import {coveredParameters, detectDeviceEditors} from '../../lib/util/editors/index.js';
     import {
         buildPreview,
         formFields,
@@ -15,6 +16,7 @@
         type WritePreview,
     } from '../../lib/util/paramsetForm.js';
 
+    import DeviceEditors from './editors/DeviceEditors.svelte';
     import ParameterRow from './ParameterRow.svelte';
     import WritePreviewDialog from './WritePreviewDialog.svelte';
 
@@ -37,6 +39,7 @@
     let targets = $state<string[]>([]);
     let writeAll = $state(false);
     let showHidden = $state(false);
+    let showCovered = $state(false);
     let previewOpen = $state(false);
     let preview = $state<WritePreview | undefined>(undefined);
     let results = $state<WriteResult[]>([]);
@@ -47,7 +50,17 @@
     const channelType = $derived(index?.get(address)?.TYPE ?? '');
     const title = $derived(`${paramset} — ${stores.nameOf(address)} (${address})`);
     const fields = $derived(description ? formFields(description, view) : []);
-    const shownFields = $derived(fields.filter((field) => showHidden || field.visible));
+    /**
+     * The device-specific editors of task 10. They are plug-ins on top of this dialog: whatever
+     * they recognise they draw themselves, and exactly those rows leave the generic list - the
+     * rest of the paramset is untouched, so a firmware with one parameter more still shows it.
+     * `showCovered` puts the raw rows back, because nothing may ever become unreachable.
+     */
+    const editors = $derived(
+        description ? detectDeviceEditors({interfaceName, address, channelType, paramset, description}) : [],
+    );
+    const covered = $derived(showCovered ? new Set<string>() : coveredParameters(editors));
+    const shownFields = $derived(fields.filter((field) => (showHidden || field.visible) && !covered.has(field.name)));
     /** VALUES is the only paramset whose datapoints can be written one at a time. */
     const perDatapoint = $derived(paramset === 'VALUES');
     /** Multi-apply is a MASTER affair; 2.x offered its channel picker only there. */
@@ -160,6 +173,11 @@
         edited = {...edited, [field.name]: value};
     }
 
+    /** What a device editor writes: several parameters at once, into the very same map. */
+    function changeMany(values: Readonly<Record<string, ParamsetValue>>): void {
+        edited = {...edited, ...values};
+    }
+
     function labelOf(field: FormField): string {
         return stores.meta.parameterLabel(field.name, channelType);
     }
@@ -250,6 +268,12 @@
                 <input type="checkbox" bind:checked={writeAll} data-testid="paramset-write-all" />
                 <span>{t('Write every parameter, not only the changed ones')}</span>
             </label>
+            {#if editors.length > 0}
+                <label class="hmm-paramset-option">
+                    <input type="checkbox" bind:checked={showCovered} data-testid="paramset-show-covered" />
+                    <span>{t('Show the raw parameters as well')}</span>
+                </label>
+            {/if}
             {#if fields.some((field) => !field.visible)}
                 <label class="hmm-paramset-option">
                     <input type="checkbox" bind:checked={showHidden} data-testid="paramset-show-hidden" />
@@ -265,6 +289,8 @@
                 {/each}
             </ul>
         {/if}
+
+        <DeviceEditors specs={editors} values={merged()} {channelType} onchange={changeMany} />
 
         <div class="hmm-paramset-list">
             {#each shownFields as field (field.name)}

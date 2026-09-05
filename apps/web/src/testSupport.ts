@@ -1,0 +1,237 @@
+/**
+ * `startForTest()`: the whole stack on a free port with a temporary profile directory, for the
+ * Playwright suites of task 14 and for anything else that wants a real browser against a real
+ * backend without Electron.
+ *
+ * ```ts
+ * const host = await startForTest({simulator: true});
+ * await page.goto(host.url);          // the cookie is set by the page load, the socket connects
+ * await host.close();                 // backend, simulator and the temporary directory
+ * ```
+ *
+ * `simulator: true` starts an in-process [hm-simulator](https://github.com/hobbyquaker/hm-simulator)
+ * and points the backend at it. That package is not published yet (roadmap task 5), so it is
+ * imported lazily and `simulatorAvailable()` says whether it is there - the same `describe.skipIf`
+ * arrangement `packages/backend/test/simulator` uses. Every port is `0`, so several of these can
+ * run in parallel and none of them cares what is already listening on the machine.
+ */
+
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+
+import type {ConnectionConfig} from '@homematic-manager/core';
+
+import {createWebHost, type WebHost, type WebHostOptions} from './server.js';
+
+/* eslint-disable @typescript-eslint/no-explicit-any -- hm-simulator ships no types */
+
+export const SIMULATOR_SKIP_MESSAGE =
+    'hm-simulator is not installed - run `npm install --no-save ../hm-simulator` from the repository root';
+
+let simulatorModule: any;
+let simulatorLoaded = false;
+
+/** Loads hm-simulator once; `undefined` when the package is not installed. */
+export async function loadSimulator(): Promise<any> {
+    if (!simulatorLoaded) {
+        simulatorLoaded = true;
+        // not a literal: hm-simulator is not a dependency, so TypeScript must not try to resolve it
+        const specifier = 'hm-simulator/sim.mjs';
+        try {
+            simulatorModule = (await import(specifier)).default;
+        } catch {
+            simulatorModule = undefined;
+        }
+    }
+    return simulatorModule;
+}
+
+/** Is hm-simulator installed? Suites gate themselves on this. */
+export async function simulatorAvailable(): Promise<boolean> {
+    return (await loadSimulator()) !== undefined;
+}
+
+/**
+ * Two devices, enough for every tab of the UI: a BidCos switch actor (sender and receiver) and an
+ * HmIP push-button. Deliberately small - the exhaustive fixtures live with the backend's own
+ * integration tests, this one only has to make the grids non-empty for an e2e run.
+ */
+export const SIMULATOR_DEVICES = {
+    rfd: {
+        devices: [
+            {
+                ADDRESS: 'LEQ0000001',
+                TYPE: 'HM-LC-Sw1-Pl',
+                VERSION: 1,
+                FIRMWARE: '2.8',
+                CHILDREN: ['LEQ0000001:0', 'LEQ0000001:1'],
+                PARAMSETS: ['MASTER'],
+                RF_ADDRESS: 1,
+            },
+            {
+                ADDRESS: 'LEQ0000001:0',
+                TYPE: 'MAINTENANCE',
+                VERSION: 1,
+                PARENT: 'LEQ0000001',
+                PARENT_TYPE: 'HM-LC-Sw1-Pl',
+                PARAMSETS: ['MASTER', 'VALUES'],
+                INDEX: 0,
+            },
+            {
+                ADDRESS: 'LEQ0000001:1',
+                TYPE: 'SWITCH',
+                VERSION: 1,
+                PARENT: 'LEQ0000001',
+                PARENT_TYPE: 'HM-LC-Sw1-Pl',
+                PARAMSETS: ['MASTER', 'VALUES', 'LINK'],
+                LINK_TARGET_ROLES: 'SWITCH',
+                DIRECTION: 2,
+                INDEX: 1,
+            },
+        ],
+    },
+    hmip: {
+        devices: [
+            {
+                ADDRESS: '0002D3C99ABCDE',
+                TYPE: 'HmIP-WRC2',
+                VERSION: 1,
+                FIRMWARE: '1.4.8',
+                CHILDREN: ['0002D3C99ABCDE:0', '0002D3C99ABCDE:1'],
+                PARAMSETS: ['MASTER'],
+            },
+            {
+                ADDRESS: '0002D3C99ABCDE:0',
+                TYPE: 'MAINTENANCE',
+                VERSION: 1,
+                PARENT: '0002D3C99ABCDE',
+                PARENT_TYPE: 'HmIP-WRC2',
+                PARAMSETS: ['MASTER', 'VALUES'],
+                INDEX: 0,
+            },
+            {
+                ADDRESS: '0002D3C99ABCDE:1',
+                TYPE: 'KEY_TRANSCEIVER',
+                VERSION: 1,
+                PARENT: '0002D3C99ABCDE',
+                PARENT_TYPE: 'HmIP-WRC2',
+                PARAMSETS: ['MASTER', 'VALUES', 'LINK'],
+                LINK_SOURCE_ROLES: 'SWITCH',
+                DIRECTION: 1,
+                INDEX: 1,
+            },
+        ],
+    },
+};
+
+export const SIMULATOR_PARAMSET_DESCRIPTIONS: Record<string, unknown> = {
+    'BidCos-RF/HM-LC-Sw1-Pl/2.8/1/SWITCH/MASTER': {
+        LOGGING: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true},
+        TRANSMIT_TRY_MAX: {TYPE: 'INTEGER', OPERATIONS: 7, FLAGS: 1, DEFAULT: 6, MIN: 1, MAX: 10},
+    },
+    'BidCos-RF/HM-LC-Sw1-Pl/2.8/1/SWITCH/VALUES': {
+        STATE: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true},
+    },
+    'HmIP-RF/HmIP-WRC2/1.4.8/1/KEY_TRANSCEIVER/MASTER': {
+        LOGGING: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true},
+    },
+    'HmIP-RF/HmIP-WRC2/1.4.8/1/KEY_TRANSCEIVER/VALUES': {
+        PRESS_SHORT: {TYPE: 'ACTION', OPERATIONS: 6, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true},
+    },
+};
+
+export interface StartForTestOptions extends Omit<WebHostOptions, 'port' | 'dataDir'> {
+    /** Start an hm-simulator and connect the backend to it. Ignored when it is not installed. */
+    readonly simulator?: boolean;
+    /** Overrides the temporary profile directory. */
+    readonly dataDir?: string;
+    readonly port?: number;
+}
+
+export interface TestHost extends WebHost {
+    /** The temporary profile directory; removed by `close()` unless it was passed in. */
+    readonly dataDir: string;
+    /** The hm-simulator, when one was started. */
+    readonly simulator: any;
+}
+
+/** Starts the web host on a free port with a throw-away profile directory. */
+export async function startForTest(options: StartForTestOptions = {}): Promise<TestHost> {
+    const {simulator: wantsSimulator, dataDir: givenDataDir, ...hostOptions} = options;
+    const dataDir = givenDataDir ?? (await fs.mkdtemp(path.join(os.tmpdir(), 'hmm-web-')));
+
+    let simulator: any;
+    if (wantsSimulator === true) {
+        const HmSim = await loadSimulator();
+        if (HmSim) {
+            simulator = new HmSim({
+                devices: SIMULATOR_DEVICES,
+                paramsetDescriptions: SIMULATOR_PARAMSET_DESCRIPTIONS,
+                config: {listenAddress: '127.0.0.1', binrpcListenPort: 0, xmlrpcListenPort: 0},
+                behaviorPath: path.join(os.tmpdir(), 'hmm-web-no-behaviors'),
+                rega: {port: 0, listenAddress: '127.0.0.1', channels: []},
+                interfaces: {hmip: {configPendingMode: 'strict'}, rfd: {configPendingMode: 'strict'}},
+            });
+            await simulator.whenReady();
+        }
+    }
+
+    const ports: Record<string, number> = simulator
+        ? {'BidCos-RF': simulator.ports.rfd as number, 'HmIP-RF': simulator.ports.hmip as number}
+        : {};
+
+    const host = await createWebHost({
+        port: 0,
+        host: '127.0.0.1',
+        dataDir,
+        ...hostOptions,
+        backendOptions: {
+            importLegacy: false,
+            watchdogIntervalMs: 0,
+            serviceMessagePollMs: 0,
+            cacheWriteDelayMs: 0,
+            rpcTimeoutMs: 5000,
+            localAddresses: () => ['127.0.0.1'],
+            callbackHost: '127.0.0.1',
+            regaOptions: {port: (simulator?.regaSim?.port as number | undefined) ?? 1, timeoutMs: 1000},
+            interfaceManagerOptions: {portOverride: (name: string) => ports[name], watchdogIntervalMs: 0},
+            ...hostOptions.backendOptions,
+        },
+    });
+
+    if (simulator && host.backend) {
+        const connection: ConnectionConfig = {
+            host: '127.0.0.1',
+            interfaces: ['BidCos-RF', 'HmIP-RF'],
+            autoDetect: false,
+            extraInterfaces: [],
+            tls: false,
+            // hm-simulator serves rfd over BIN-RPC only, which is what a real rfd offers on the
+            // CCU's loopback and nowhere else (D-28) - so this is the addon's `local` mode, and
+            // `portOverride` points it at the ports the simulator happened to get
+            local: true,
+            rega: false,
+            callback: {ip: '127.0.0.1', xmlrpcPort: 0, binrpcPort: 0},
+            language: 'de',
+            writePaceMs: 0,
+            rpcLogFolder: '',
+        };
+        await host.backend.request('config.set', connection);
+    }
+
+    return {
+        ...host,
+        dataDir,
+        simulator,
+        close: async (): Promise<void> => {
+            await host.close();
+            if (simulator) {
+                await simulator.close();
+            }
+            if (givenDataDir === undefined) {
+                await fs.rm(dataDir, {recursive: true, force: true});
+            }
+        },
+    };
+}

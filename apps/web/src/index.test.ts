@@ -1,9 +1,15 @@
 import {describe, expect, it} from 'vitest';
 
-import {PACKAGE} from './index.js';
+import * as web from './index.js';
 
 describe('@homematic-manager/web', () => {
     it('exports its package name', () => {
-        expect(PACKAGE).toBe('@homematic-manager/web');
+        expect(web.PACKAGE).toBe('@homematic-manager/web');
+    });
+
+    it('exports what a host, the CLI and the e2e suites need', () => {
+        for (const name of ['createWebHost', 'runCli', 'parseOptions', 'helpText', 'startForTest', 'ImageService']) {
+            expect(web, name).toHaveProperty(name);
+        }
     });
 });

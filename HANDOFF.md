@@ -51,8 +51,10 @@ about every half hour while the agent works; the timestamp above is the last ref
 
 ## What the maintainer still has to do (agent cannot)
 
-- Enable GitHub Actions on `hobbyquaker/homematic-manager` (the API call was blocked for the
-  agent). Until then, no CI and no Windows build artifact from `build.yml`.
+- GitHub Actions is enabled (2026-09-06) and npm trusted publishing is configured for the
+  `homematic-manager` name; the trusted publisher on npmjs.com must name the workflow file
+  `release-npm.yml` (it was entered as `release.yml`). Workflow dispatch does not work while
+  `master` lacks the workflow files; the push trigger on `3.0-dev` does.
 - hm-simulator 1.0.0 is published (2026-09-05, tag `v1.0.0`, branch `1.0-dev` pushed; `master`
   of that repository still points at 0.1.1 and wants a fast-forward). Task 15 switches the
   backend to the registry package and makes a missing simulator a CI failure. Later simulator

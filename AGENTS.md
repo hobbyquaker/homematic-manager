@@ -59,3 +59,5 @@ the plan is built on is [docs/analysis-2026-09.md](docs/analysis-2026-09.md).
   the private lab note stay outside. Refer to "the lab", not to hosts.
 - **Report faithfully.** Say what was run, what passed, what failed and what was skipped. Do not
   claim hardware was tested when only the simulator was, and do not paper over a red check.
+
+- `HANDOFF.md` is the resume point for a new session: read it before `ROADMAP.md` when there is no conversation history. The main session refreshes it about every half hour and after each archived task; keep it short and never put decisions there.

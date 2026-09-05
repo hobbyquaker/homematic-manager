@@ -95,6 +95,8 @@ export function normaliseConnection(input: unknown): ConnectionConfig {
         autoDetect: typeof raw.autoDetect === 'boolean' ? raw.autoDetect : defaults.autoDetect,
         extraInterfaces,
         tls: typeof raw.tls === 'boolean' ? raw.tls : defaults.tls,
+        ...(raw.local === true ? {local: true} : {}),
+        ...(raw.binrpc === true ? {binrpc: true} : {}),
         rega: typeof raw.rega === 'boolean' ? raw.rega : defaults.rega,
         callback: {
             ip: stringOr(callback['ip'], defaults.callback.ip).trim(),
@@ -213,7 +215,11 @@ export function interfaceTargets(connection: ConnectionConfig): InterfaceTarget[
             continue;
         }
         targets.push({
-            resolved: resolveInterface(name, {tls: connection.tls}),
+            resolved: resolveInterface(name, {
+                tls: connection.tls,
+                local: connection.local === true,
+                binrpc: connection.binrpc === true,
+            }),
             host: connection.host,
             auth: connection.auth,
         });

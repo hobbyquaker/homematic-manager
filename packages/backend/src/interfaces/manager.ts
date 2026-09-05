@@ -64,6 +64,12 @@ export interface InterfaceManagerOptions {
     readonly probe?: (host: string, port: number) => Promise<boolean>;
     /** Injected for the callback address; defaults to this machine's IPv4 addresses. */
     readonly localAddresses?: () => string[];
+    /**
+     * Overrides the port of one interface, for a process that does not sit on the well-known one:
+     * the integration tests point at an hm-simulator on an ephemeral port, and an unusual proxy
+     * setup on a CCU can need the same. Returning `undefined` keeps the table's port.
+     */
+    readonly portOverride?: (interfaceName: string) => number | undefined;
 }
 
 /**
@@ -294,10 +300,11 @@ export class InterfaceManager {
 
     #create(target: InterfaceTarget): ManagedInterface {
         const {resolved} = target;
+        const port = this.#options.portOverride?.(resolved.name) ?? resolved.port;
         const options: RpcClientOptions = {
             name: resolved.name,
             host: target.host,
-            port: resolved.port,
+            port,
             protocol: resolved.protocol,
             path: resolved.path,
             tls: resolved.tls,
@@ -316,7 +323,7 @@ export class InterfaceManager {
                 type: isKnownInterface(resolved.name) ? resolved.name : 'custom',
                 protocol: resolved.protocol,
                 host: target.host,
-                port: resolved.port,
+                port,
                 connected: false,
             },
         };

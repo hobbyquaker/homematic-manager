@@ -45,9 +45,7 @@ describe('renameScript', () => {
             ],
             (address) => (address === 'ABC1' ? 4711 : 4712),
         );
-        expect(script).toBe(
-            'var hmm_o;\nhmm_o = dom.GetObject(4711);\nhmm_o.Name("Lampe");\nhmm_o = dom.GetObject(4712);\nhmm_o.Name("Lampe:0");\n',
-        );
+        expect(script).toBe('dom.GetObject(4711).Name("Lampe");\ndom.GetObject(4712).Name("Lampe:0");\n');
     });
 
     it('is undefined when ReGa knows none of the addresses', () => {

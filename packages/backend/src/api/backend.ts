@@ -687,7 +687,8 @@ export class Backend {
         if (cached) {
             return cached;
         }
-        const answer = await this.#read(interfaceName, 'getParamsetDescription', [address, paramset]);
+        // eQ-3 takes MASTER/VALUES/LINK here, never a peer address - that is only a paramset *key*
+        const answer = await this.#read(interfaceName, 'getParamsetDescription', [address, isLink ? 'LINK' : paramset]);
         if (typeof answer !== 'object' || answer === null || Array.isArray(answer)) {
             throw connectionError(`${interfaceName}: no paramset description for ${address} ${paramset}`);
         }

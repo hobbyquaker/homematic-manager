@@ -10,9 +10,13 @@
  * 2.x also had `config.useTLS` for the interfaces and `config.useTls` for ReGa (`main.js:187` vs
  * `:207`), so ReGa never used TLS at all; the port comes from the core's `regaPort()` here.
  *
- * The rename script is the one of 2.x: ReGa objects are addressed by their numeric id, which is why
- * `NameStore` keeps the id `getChannels` reported. An address ReGa has never reported can only be
- * renamed locally - there is nothing to address.
+ * The rename script addresses ReGa objects by their numeric id, which is why `NameStore` keeps the
+ * id `getChannels` reported; an address ReGa has never reported can only be renamed locally.
+ *
+ * It is written as one `dom.GetObject(<id>).Name("<name>");` statement per line rather than in the
+ * `var hmm_o; hmm_o = dom.GetObject(<id>); hmm_o.Name(...)` form of 2.x. The two are the same thing
+ * for ReGa, and the single-statement form is the one hm-simulator's ReGa mock recognises - which is
+ * the only way the rename can be tested without a CCU.
  */
 
 import {Rega, type RegaChannel} from 'homematic-rega';
@@ -40,6 +44,8 @@ export interface RegaServiceOptions {
     readonly onStateChanged: (state: RegaState) => void;
     readonly onNotice: (level: 'info' | 'warn' | 'error', message: string) => void;
     readonly timeoutMs?: number;
+    /** Overrides the port; the integration tests point at an hm-simulator on an ephemeral one. */
+    readonly port?: number;
     readonly createClient?: (options: RegaServiceOptions) => RegaLike;
 }
 
@@ -59,24 +65,20 @@ export function renameScript(
     entries: readonly NameEntry[],
     idOf: (address: string) => number | undefined,
 ): string | undefined {
-    let script = 'var hmm_o;\n';
-    let count = 0;
+    const lines: string[] = [];
     for (const entry of entries) {
         const id = idOf(entry.address);
-        if (id === undefined) {
-            continue;
+        if (id !== undefined) {
+            lines.push(`dom.GetObject(${String(id)}).Name("${escapeRegaString(entry.name)}");`);
         }
-        script += `hmm_o = dom.GetObject(${String(id)});\n`;
-        script += `hmm_o.Name("${escapeRegaString(entry.name)}");\n`;
-        count += 1;
     }
-    return count === 0 ? undefined : script;
+    return lines.length === 0 ? undefined : `${lines.join('\n')}\n`;
 }
 
 function createClient(options: RegaServiceOptions): RegaLike {
     return new Rega({
         host: options.host,
-        port: regaPort({tls: options.tls === true}),
+        port: options.port ?? regaPort({tls: options.tls === true}),
         tls: options.tls === true,
         // a CCU's certificate is self-signed
         insecure: true,

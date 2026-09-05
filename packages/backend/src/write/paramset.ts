@@ -287,7 +287,9 @@ export class ParamsetWriter {
         };
         let description: ParamsetDescription;
         try {
-            description = await this.#deps.describe(interfaceName, address, paramsetKey);
+            // the description is asked for by paramset *name* (MASTER/VALUES/LINK), the values by
+            // paramset *key* - which for a link is the peer channel's address
+            description = await this.#deps.describe(interfaceName, address, paramset);
         } catch (error) {
             return {...base, sent: {}, ok: false, problems: [{message: toApiError(error).message}], ...faultOf(error)};
         }

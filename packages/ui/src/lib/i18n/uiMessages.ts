@@ -77,6 +77,50 @@ export const UI_MESSAGES: MessageCatalogue = {
     },
     install: {de: 'installieren', en: 'install'},
     'Install firmware {version}': {de: 'Firmware {version} installieren', en: 'Install firmware {version}'},
+
+    // The device actions. 2.x had these as German literals that its own translator mapped to
+    // themselves in English (#119); here English is the key and German the translation.
+    'Overwrite channel names': {de: 'Kanalnamen überschreiben', en: 'Overwrite channel names'},
+    'Do you really want to delete the device {name}?': {
+        de: 'Wollen Sie das Gerät {name} wirklich löschen?',
+        en: 'Do you really want to delete the device {name}?',
+    },
+    'Unlearn and reset the device to factory defaults': {
+        de: 'Ablernen und Gerät auf Werkseinstellungen zurücksetzen',
+        en: 'Unlearn and reset the device to factory defaults',
+    },
+    'Unlearn only (direct links are kept)': {
+        de: 'Nur ablernen (Direktverknüpfungen bleiben erhalten)',
+        en: 'Unlearn only (direct links are kept)',
+    },
+    'If the device cannot be reached:': {
+        de: 'Falls Gerät nicht erreichbar:',
+        en: 'If the device cannot be reached:',
+    },
+    'Delete at the next opportunity': {
+        de: 'Bei nächster Gelegenheit löschen',
+        en: 'Delete at the next opportunity',
+    },
+    'Delete from the interface process only': {
+        de: 'Nur aus dem Schnittstellenprozess löschen',
+        en: 'Delete from the interface process only',
+    },
+    'New device': {de: 'Neues Gerät', en: 'New device'},
+    'No suitable device available': {de: 'Kein passendes Gerät vorhanden', en: 'No suitable device available'},
+    'Select a device': {de: 'Ein Gerät auswählen', en: 'Select a device'},
+    'Select one or more channels': {de: 'Einen oder mehrere Kanäle auswählen', en: 'Select one or more channels'},
+    'This device carries the DontDelete flag': {
+        de: 'Dieses Gerät trägt das Flag DontDelete',
+        en: 'This device carries the DontDelete flag',
+    },
+    'Only available on BidCos interfaces': {
+        de: 'Nur bei BidCos-Schnittstellen verfügbar',
+        en: 'Only available on BidCos interfaces',
+    },
+    'reportValueUsage {value}: {count} datapoints on {channels} channels': {
+        de: 'reportValueUsage {value}: {count} Datenpunkte auf {channels} Kanälen',
+        en: 'reportValueUsage {value}: {count} datapoints on {channels} channels',
+    },
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

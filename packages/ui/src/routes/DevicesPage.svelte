@@ -1,7 +1,15 @@
 <script lang="ts">
     import type {DeviceDescription} from '@homematic-manager/core';
-    import {decodeDeviceFlags, decodeDirection, decodeRxMode} from '@homematic-manager/core';
+    import {
+        decodeDeviceFlags,
+        decodeDirection,
+        decodeRxMode,
+        isDeviceAddress,
+        isMaintenanceAddress,
+    } from '@homematic-manager/core';
 
+    import ContextMenu from '../lib/components/ContextMenu.svelte';
+    import type {ContextMenuItem} from '../lib/components/contextMenu.js';
     import DataTable from '../lib/components/DataTable.svelte';
     import DeviceImage from '../lib/components/DeviceImage.svelte';
     import Toolbar from '../lib/components/Toolbar.svelte';
@@ -9,6 +17,10 @@
     import type {DataTableColumn} from '../lib/components/tableModel.js';
     import {getStores} from '../lib/stores/context.js';
     import {firmwareCell, serviceMarks} from '../lib/util/deviceGrid.js';
+
+    import DeleteDeviceDialog from './devices/DeleteDeviceDialog.svelte';
+    import RenameDialog from './devices/RenameDialog.svelte';
+    import ReplaceDeviceDialog from './devices/ReplaceDeviceDialog.svelte';
 
     const stores = getStores();
     const t = stores.i18n.t;
@@ -18,6 +30,16 @@
 
     let selected = $state<string[]>([]);
     let expanded = $state<string[]>([]);
+
+    let menuOpen = $state(false);
+    let menuX = $state(0);
+    let menuY = $state(0);
+    let menuAddress = $state('');
+
+    let renameOpen = $state(false);
+    let deleteOpen = $state(false);
+    let replaceOpen = $state(false);
+    let actionAddress = $state('');
 
     const interfaceName = $derived(stores.app.selectedInterface);
     const interfaceType = $derived(stores.interfaces.typeOf(interfaceName));
@@ -37,6 +59,39 @@
             ? t('Loading Homematic Manager...')
             : t('No devices - the interface has not reported any yet'),
     );
+
+    // ---------------------------------------------------------------- selection
+
+    const one = $derived(selected.length === 1 ? (selected[0] ?? '') : '');
+    const oneDevice = $derived(one !== '' && isDeviceAddress(one) ? one : '');
+    /** Channels the toolbar may act on: never a device, never the `:0` maintenance channel. */
+    const channelSelection = $derived(
+        selected.filter((address) => !isDeviceAddress(address) && !isMaintenanceAddress(address)),
+    );
+    const canRename = $derived(one !== '' && !isMaintenanceAddress(one));
+    /**
+     * `DontDelete` is set on the CCU's own virtual devices and on everything the interface refuses
+     * to remove; 2.x greyed delete, replace and rename out for those rows.
+     */
+    const dontDelete = $derived(oneDevice !== '' && decodeDeviceFlags(index?.get(oneDevice)?.FLAGS).dontDelete);
+    const canDelete = $derived(oneDevice !== '' && !dontDelete);
+    /** `restoreConfigToDevice` and `clearConfigCache` are BidCos-only, as the 2.x menu classes said. */
+    const isBidcos = $derived(interfaceType.startsWith('BidCos'));
+
+    function reasonFor(kind: 'device' | 'channel' | 'delete' | 'bidcos'): string {
+        switch (kind) {
+            case 'device':
+                return t('Select a device');
+            case 'channel':
+                return t('Select one or more channels');
+            case 'delete':
+                return dontDelete ? t('This device carries the DontDelete flag') : t('Select a device');
+            case 'bidcos':
+                return t('Only available on BidCos interfaces');
+        }
+    }
+
+    // ---------------------------------------------------------------- columns
 
     /**
      * The columns of the 2.7 device grid, in its order: icon, Name, ADDRESS, Msgs, TYPE, SUBTYPE,
@@ -131,6 +186,8 @@
         return stores.devices.channels(interfaceName, device.ADDRESS);
     }
 
+    // ---------------------------------------------------------------- firmware
+
     /** A device is "update pending" when one of its channels reports the service message. */
     function updatePending(address: string): boolean {
         return serviceMarks(address, messages, 99).some((mark) => mark.datapoint === 'UPDATE_PENDING');
@@ -169,18 +226,170 @@
             clearInterval(timer);
         };
     });
+
+    // ---------------------------------------------------------------- actions
+
+    function openRename(address: string): void {
+        actionAddress = address;
+        renameOpen = true;
+    }
+
+    function openDelete(address: string): void {
+        actionAddress = address;
+        deleteOpen = true;
+    }
+
+    function openReplace(address: string): void {
+        actionAddress = address;
+        replaceOpen = true;
+    }
+
+    /**
+     * `reportValueUsage` over every parameter of every selected channel (issue #18, PR #138). 2.x
+     * could only do the one channel the grid had selected and refused a device outright; here the
+     * multi-selection of the grid is the input and a notice reports how many calls went through.
+     */
+    async function reportValueUsage(refCounter: number): Promise<void> {
+        const addresses = [...channelSelection];
+        if (addresses.length === 0) {
+            return;
+        }
+        const done = await stores.devices.reportValueUsage(interfaceName, addresses, refCounter);
+        stores.notices.push(
+            'info',
+            t('reportValueUsage {value}: {count} datapoints on {channels} channels', {
+                value: refCounter,
+                count: done,
+                channels: addresses.length,
+            }),
+        );
+    }
+
+    function openMenu(row: DeviceDescription, event: MouseEvent): void {
+        menuAddress = row.ADDRESS;
+        menuX = event.clientX;
+        menuY = event.clientY;
+        menuOpen = true;
+    }
+
+    /**
+     * The two 2.7 context menus, merged into one that knows which row it was opened on: the device
+     * menu had rename / paramsets / restore / clear / replace / delete, the channel menu rename /
+     * reportValueUsage / paramsets, both with the entries greyed out that the row cannot do.
+     */
+    const menuItems = $derived<ContextMenuItem[]>(
+        isDeviceAddress(menuAddress)
+            ? [
+                  {id: 'rename', label: t('Rename')},
+                  {id: 'sep1', separator: true},
+                  {
+                      id: 'restore',
+                      label: t('restoreConfigToDevice'),
+                      disabled: !isBidcos,
+                  },
+                  {id: 'clear', label: t('clearConfigCache'), disabled: !isBidcos},
+                  {id: 'sep2', separator: true},
+                  {id: 'replace', label: t('Replace'), disabled: dontDeleteOf(menuAddress)},
+                  {id: 'delete', label: t('Delete'), danger: true, disabled: dontDeleteOf(menuAddress)},
+              ]
+            : [
+                  {id: 'rename', label: t('Rename'), disabled: isMaintenanceAddress(menuAddress)},
+                  {id: 'usage1', label: 'reportValueUsage 1', disabled: isMaintenanceAddress(menuAddress)},
+                  {id: 'usage0', label: 'reportValueUsage 0', disabled: isMaintenanceAddress(menuAddress)},
+              ],
+    );
+
+    function dontDeleteOf(address: string): boolean {
+        return decodeDeviceFlags(index?.get(address)?.FLAGS).dontDelete;
+    }
+
+    async function onMenuSelect(id: string): Promise<void> {
+        const address = menuAddress;
+        switch (id) {
+            case 'rename':
+                openRename(address);
+                break;
+            case 'restore':
+                await stores.devices.restoreConfig(interfaceName, address);
+                break;
+            case 'clear':
+                await stores.devices.clearConfigCache(interfaceName, address);
+                break;
+            case 'replace':
+                openReplace(address);
+                break;
+            case 'delete':
+                openDelete(address);
+                break;
+            case 'usage1':
+            case 'usage0':
+                await stores.devices.reportValueUsage(interfaceName, [address], id === 'usage1' ? 1 : 0);
+                break;
+            default:
+                break;
+        }
+    }
 </script>
 
 <div class="hmm-page">
     <Toolbar label={t('Devices')}>
         <ToolbarButton title={t('Add device')} icon="+" disabled reason={todo} />
-        <ToolbarButton title={t('Rename device')} icon="✎" disabled reason={todo} />
-        <ToolbarButton title="reportValueUsage 1" icon="⇩" disabled reason={todo} />
-        <ToolbarButton title="reportValueUsage 0" icon="⇧" disabled reason={todo} />
-        <ToolbarButton title={t('restoreConfigToDevice')} icon="⟲" disabled reason={todo} />
-        <ToolbarButton title={t('clearConfigCache')} icon="⌫" disabled reason={todo} />
-        <ToolbarButton title={t('Replace device')} icon="⇄" disabled reason={todo} />
-        <ToolbarButton title={t('Delete device')} icon="🗑" disabled reason={todo} />
+        <ToolbarButton
+            title={t('Rename device')}
+            icon="✎"
+            disabled={!canRename}
+            reason={reasonFor('device')}
+            testId="devices-rename"
+            onclick={() => openRename(one)}
+        />
+        <ToolbarButton
+            title="reportValueUsage 1"
+            icon="⇩"
+            disabled={channelSelection.length === 0}
+            reason={reasonFor('channel')}
+            testId="devices-usage-1"
+            onclick={() => void reportValueUsage(1)}
+        />
+        <ToolbarButton
+            title="reportValueUsage 0"
+            icon="⇧"
+            disabled={channelSelection.length === 0}
+            reason={reasonFor('channel')}
+            testId="devices-usage-0"
+            onclick={() => void reportValueUsage(0)}
+        />
+        <ToolbarButton
+            title={t('restoreConfigToDevice')}
+            icon="⟲"
+            disabled={oneDevice === '' || !isBidcos}
+            reason={isBidcos ? reasonFor('device') : reasonFor('bidcos')}
+            testId="devices-restore"
+            onclick={() => void stores.devices.restoreConfig(interfaceName, oneDevice)}
+        />
+        <ToolbarButton
+            title={t('clearConfigCache')}
+            icon="⌫"
+            disabled={oneDevice === '' || !isBidcos}
+            reason={isBidcos ? reasonFor('device') : reasonFor('bidcos')}
+            testId="devices-clear"
+            onclick={() => void stores.devices.clearConfigCache(interfaceName, oneDevice)}
+        />
+        <ToolbarButton
+            title={t('Replace device')}
+            icon="⇄"
+            disabled={!canDelete}
+            reason={reasonFor('delete')}
+            testId="devices-replace"
+            onclick={() => openReplace(oneDevice)}
+        />
+        <ToolbarButton
+            title={t('Delete device')}
+            icon="🗑"
+            disabled={!canDelete}
+            reason={reasonFor('delete')}
+            testId="devices-delete"
+            onclick={() => openDelete(oneDevice)}
+        />
         <ToolbarButton
             title={t('Refresh')}
             icon="⟳"
@@ -204,6 +413,7 @@
             caption={t('Devices')}
             filterLabel={t('Filter')}
             {emptyText}
+            onrowcontextmenu={openMenu}
             testId="devices-table"
         >
             {#snippet cell(row, column, flatRow)}
@@ -256,6 +466,20 @@
         </DataTable>
     </div>
 </div>
+
+<ContextMenu
+    bind:open={menuOpen}
+    items={menuItems}
+    x={menuX}
+    y={menuY}
+    label={t('Devices')}
+    testId="devices-menu"
+    onselect={(id) => void onMenuSelect(id)}
+/>
+
+<RenameDialog bind:open={renameOpen} address={actionAddress} />
+<DeleteDeviceDialog bind:open={deleteOpen} address={actionAddress} />
+<ReplaceDeviceDialog bind:open={replaceOpen} address={actionAddress} />
 
 <style>
     .hmm-page {

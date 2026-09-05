@@ -14,7 +14,7 @@
     "update": "npm run fetch && npm run convert",
     "compare-legacy": "node scripts/compare-legacy.mjs",
     "icons-subset": "node scripts/icons-subset.mjs",
-    "build": "node -e \"console.log('@homematic-manager/data: dist/ is committed, run `npm run update` to regenerate it')\"",
+    "build": "node -e \"console.log('@homematic-manager/data: dist/ is committed; npm run update regenerates it')\"",
     "test": "vitest run"
   },
   "devDependencies": {

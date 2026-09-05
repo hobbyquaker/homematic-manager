@@ -13,7 +13,8 @@ import path from 'node:path';
 
 import {resolveValues} from './lib/constraints.mjs';
 import {hasLegacy, legacyProfiles, legacyReceiverTypes} from './lib/legacy.mjs';
-import {dataDir, distDir, writeText} from './lib/paths.mjs';
+import {dataDir, distDir} from './lib/paths.mjs';
+import {writeMarkdown} from './lib/write-json.mjs';
 import {readFileSync, readdirSync} from 'node:fs';
 
 if (!hasLegacy()) {
@@ -217,7 +218,7 @@ say('## Per-receiver differences');
 say();
 say(...(details.length > 0 ? [details.join('\n')] : ['None.']));
 
-writeText(path.join(dataDir, 'COMPARISON.md'), lines.join('\n').replace(/\n{3,}/gu, '\n\n') + '\n');
+await writeMarkdown(path.join(dataDir, 'COMPARISON.md'), lines.join('\n').replace(/\n{3,}/gu, '\n\n') + '\n');
 
 console.log(
     `data/COMPARISON.md written: ${oldReceivers.length} -> ${newReceivers.length} receiver types, ` +

@@ -21,3 +21,14 @@ export async function writeJson(absolute, value) {
     writeText(absolute, pretty);
     return Buffer.byteLength(pretty);
 }
+
+/**
+ * The same for generated Markdown - `prettier --check .` covers `data/*.md`, so a generated file
+ * has to come out of the generator already formatted, or `npm run lint` fails after every run.
+ *
+ * @param {string} absolute
+ * @param {string} markdown
+ */
+export async function writeMarkdown(absolute, markdown) {
+    writeText(absolute, await format(markdown, {parser: 'markdown', tabWidth: 2, printWidth: 120, endOfLine: 'lf'}));
+}

@@ -327,9 +327,28 @@ Copied from hm2mqtt.js's `addon/` and the ccu-addon-howto, adapted:
 - Package per architecture (armv7l, aarch64, x86_64): bundled musl Node 24 (`build-runtime.sh`,
   `patchelf`, ICU), `app/` with backend + built UI, `rc.d/hmm`, `etc/monit.cfg`, `bin/
   update_addon` (tclsh), `www/` with `settings.cgi` (session check via `tclrega.so`, issues the
-  backend token, serves the UI), `service.cgi`, `update_check.cgi`, lighttpd proxy rule for
-  `/addons/hmm/api/` and the WebSocket, `update_script` with exit 10 on fresh install (CCU3
-  reboot install, live on OpenCCU), `.nobackup`, uninstall.
+  backend token, serves the UI), `service.cgi`, `update_check.cgi`, `update_script` with exit 10
+  on fresh install (CCU3 reboot install, live on OpenCCU), `.nobackup`, uninstall.
+- Bundled Node for the backend, the RedMatic way: the addon ships its own Node binary and runs
+  the task 12 web host as a daemon on 127.0.0.1 (`rc.d/hmm`, monit); the CCU firmware's own
+  Node (where present) is never used. hm2mqtt.js's `build-runtime.sh` (Alpine musl Node 24 with
+  `patchelf`ed loader for armv7l) is the starting point, RedMatic's `BUILD.md` the reference for
+  the release cadence and the `engines` check.
+- WebSocket through lighttpd (maintainer suggestion 2026-09-05): the UI talks to the backend
+  over the existing `ws` transport (`ApiFrame`), no socket.io; the lighttpd on the CCU reverse
+  proxies it. RedMatic proves the path: `/usr/local/etc/config/lighttpd/redmatic.conf` maps
+  `/addons/red/` to Node-RED on 1880 with `proxy.header = ("upgrade" => "enable")`, and the
+  Node-RED editor's WebSocket runs through it on the CCU3 and OpenCCU. The addon installs the
+  same rule as `/usr/local/etc/config/lighttpd/hmm.conf` (`/addons/hmm/api/` to the backend
+  port, upgrade enabled, error-file prefix), restarts lighttpd once from `update_script`, and
+  removes the file on uninstall. The web host (task 12) must accept the `/addons/hmm/api` base
+  path and the origin/host headers lighttpd forwards. To measure on all three lab boxes: the
+  lighttpd version and `mod_proxy` upgrade support on the CCU3 firmware (3.61.5+ reads the extra
+  config directory), idle timeouts on the proxied WebSocket (`server.max-read-idle`,
+  `server.max-write-idle`; the transport's ping keeps it alive), and behaviour when the WebUI
+  session expires. Fallback if a firmware cannot proxy the upgrade: the settings CGI hands the
+  UI the backend port and the browser connects directly (same host, different port), as the
+  current `ws` server already supports.
 - Backend in local mode: binrpc 32001/32000, hmipserver 32010, VirtualDevices 39292, CUxD 8701,
   ReGa 8183, callback server on 127.0.0.1; no discovery/config dialog; images from the CCU's own
   `/config/img/devices/`; German first.

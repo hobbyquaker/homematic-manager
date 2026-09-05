@@ -43,6 +43,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 | D-21 | (2026-09-05) The branch `3.0-dev` may be pushed to GitHub by the agent so that GitHub Actions builds the Windows/macOS/Linux artifacts (task 11) and runs CI; the maintainer downloads dev builds from the workflow artifacts. Tags, releases and pushes to `master` stay with the maintainer. |
 | D-22 | (2026-09-05) Dark mode is a requirement, not a nicety: a light and a dark theme, following the OS setting by default with a manual switch that is persisted; every tab, dialog, table state, RSSI colour and notice must be legible in both, and component tests cover both themes where colours carry meaning (RSSI classes, service-message severity, connection marks). |
 | D-23 | (2026-09-05) Component tests run in jsdom by default; vitest browser mode (Chromium via Playwright) is available as `npm run test:browser -w @homematic-manager/ui` and becomes the default in task 14, which adds the `playwright install chromium` step to CI (the e2e suites need it anyway). |
+| D-24 | (2026-09-05) Three deliverables, three independent release pipelines: the Electron app (GitHub release assets), the npm package with the Node backend and web UI (`apps/web`, npm trusted publishing with OIDC as in hm-simulator's `release.yml`), and the CCU addon (`.tar.gz` per architecture attached to the release). Each has its own workflow file, its own trigger and its own failure domain: one failing must never block or roll back the others, and any one of them can be re-run alone. No single "release everything" job with sequential steps. |
 
 ## Contents
 
@@ -310,6 +311,15 @@ editor, each with its own tests:
 - GitHub Actions: build matrix on push (artifacts), release workflow on tag with generated release
   notes (nrccu's script), assets attached, `electron-updater` against GitHub releases with a
   notification and user confirmation (D-16). Quarterly Electron and toolchain bump (OQ-12).
+  Per D-24 the Electron release is one workflow of three (`release-electron.yml`; task 12 owns
+  `release-npm.yml`, task 13 `release-addon.yml`). All three trigger on the same `v*` tag, each
+  creates or updates the GitHub release idempotently (`softprops/action-gh-release` or `gh release
+  create --notes-from-tag || gh release upload --clobber`), each has `workflow_dispatch` with a tag
+  input for a re-run of that one deliverable, and none has `needs:` on another. Inside the
+  Electron matrix the OS jobs are `fail-fast: false`, so a broken macOS notarisation still yields
+  the Windows and Linux assets. `electron-updater` only sees the release once the Electron assets
+  and `latest*.yml` are uploaded; the release is created as a draft by whichever workflow is
+  first and published by the maintainer, so a half-uploaded release never reaches updaters.
   Electron 44 has no `postinstall` download any more: the build jobs run `install-electron` (or let
   electron-builder fetch the binary) explicitly.
 - Playwright `_electron` smoke tests per OS (task 14).
@@ -319,6 +329,15 @@ editor, each with its own tests:
 `apps/web`: the backend as a local HTTP + WebSocket server serving the built UI. Development mode
 with hot reload, the fast e2e target in CI (browser + simulator, no Electron), and the exact
 process that runs on the CCU in task 13. Token-based auth from the start so the addon can use it.
+
+Also the third deliverable (D-24): the package is published to npm so that `npm install -g` gives
+a Homematic Manager server with the built UI on any machine with Node 22+ (Raspberry Pi next to
+a CCU, a Docker host, a NAS). `release-npm.yml` publishes on the `v*` tag with npm trusted
+publishing (OIDC, no token secret; hm-simulator's `release.yml` is the template) and provenance,
+independent of the Electron and addon workflows. The package name is OQ-14; the bin is
+`homematic-manager-web` with `--host`, `--port`, `--token`, `--profile`; the README gets a
+systemd unit example. CI builds it with `npm pack --dry-run` on every push so a broken `files`
+list is caught before a tag.
 
 ## 13. CCU addon
 
@@ -396,8 +415,11 @@ analysis when 3.0 ships.
 ## 17. Beta cycle and 3.0 release
 
 Alpha from M2 to the forum, beta with the addon, bug-fix buffer, hardware checklist on the three
-lab boxes, release 3.0.0 (Electron) and 3.1.0 (addon) through the workflows. The maintainer cuts
-releases; the agent never tags or pushes to `master` on its own (pushing `3.0-dev` for CI builds is D-21).
+lab boxes, release 3.0.0 (Electron and npm package) and 3.1.0 (addon) through the three
+independent release workflows of D-24 (a failed addon build never holds back the Electron and npm
+releases of the same tag, and vice versa; the failed one is re-run alone via `workflow_dispatch`).
+The maintainer cuts releases; the agent never tags or pushes to `master` on its own (pushing
+`3.0-dev` for CI builds is D-21).
 
 ## Open questions
 
@@ -410,6 +432,7 @@ devices from his own stock) and OQ-9 (the Turkish translations stay as a fallbac
 | --- | --- | --- |
 | OQ-12 | When to move to TypeScript 7 (native) and vite 8? Blocked today by typescript-eslint 8, svelte-check 4 and electron-vite 5 peer ranges. | Recurring "toolchain bump" check next to the quarterly Electron bump of task 11; bump when all three peers allow it. |
 | OQ-13 | `data/dist/` is 9.2 MB of pretty-printed JSON (65 profile files). Ship it gzipped or minified in the CCU addon and the Electron bundle? | Task 13 measures it on the CCU3 (inodes and flash); the apps load profiles lazily per receiver type either way. Decide there. |
+| OQ-14 | npm name for the web host package (D-24): reuse `homematic-manager` (the 2.x name on npm, which installed the Electron app through `npm i -g`; its users would get the server instead) or a new `homematic-manager-web` / `@homematic-manager/web` (the workspace scope is free on npm to check). | Reuse `homematic-manager`: the `npm i -g` audience of 2.x wanted a headless install anyway, and the Electron app was never a sensible npm install. Announce in the 3.0 changelog. Decide before the first alpha is tagged. |
 
 ## Lab and hardware
 

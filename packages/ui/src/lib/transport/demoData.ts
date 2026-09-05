@@ -18,6 +18,8 @@ import type {
     InterfaceState,
     LinkRecord,
     NameMap,
+    Paramset,
+    ParamsetDescription,
     RegaState,
     RpcMethodInfo,
     RssiInfo,
@@ -749,3 +751,219 @@ export const DEMO_EVENT_SCRIPT: ReadonlyArray<Omit<EventRecord, 'timestamp'>> = 
 export function isDemoInterface(name: string): name is DemoInterfaceName {
     return (DEMO_INTERFACE_NAMES as readonly string[]).includes(name);
 }
+
+/**
+ * Paramset descriptions per channel type, so the paramset editor, the link editor and the write
+ * preview can be operated in demo mode and asserted in a test.
+ *
+ * They are plausible, not dumps: a `SWITCH` really does have `LOGGING`, `TRANSMIT_TRY_MAX` and an
+ * `ON_TIME` with a `NOT_USED` special (the 111600 of issue #96), and that is the point - the shapes
+ * the editor has to render (bool, enum, integer with bounds, float with a unit, a `SPECIAL` value,
+ * a read-only datapoint) are all here.
+ */
+export const DEMO_DESCRIPTIONS: Readonly<Record<string, ParamsetDescription>> = {
+    'SWITCH|MASTER': {
+        LOGGING: {TYPE: 'ENUM', OPERATIONS: 3, FLAGS: 1, VALUE_LIST: ['OFF', 'ON'], DEFAULT: 1, TAB_ORDER: 1},
+        TRANSMIT_TRY_MAX: {TYPE: 'INTEGER', OPERATIONS: 3, FLAGS: 1, MIN: 1, MAX: 10, DEFAULT: 6, TAB_ORDER: 2},
+        ON_TIME: {
+            TYPE: 'FLOAT',
+            OPERATIONS: 3,
+            FLAGS: 1,
+            MIN: 0,
+            MAX: 8590,
+            UNIT: 's',
+            DEFAULT: 0,
+            TAB_ORDER: 3,
+            SPECIAL: [{ID: 'NOT_USED', VALUE: 111_600}],
+        },
+        STATUSINFO_MINDELAY: {TYPE: 'INTEGER', OPERATIONS: 3, FLAGS: 1, MIN: 0, MAX: 15, DEFAULT: 2, TAB_ORDER: 4},
+    },
+    'SWITCH|VALUES': {
+        STATE: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1, DEFAULT: false, TAB_ORDER: 1},
+        WORKING: {TYPE: 'BOOL', OPERATIONS: 5, FLAGS: 1, DEFAULT: false, TAB_ORDER: 2},
+        INHIBIT: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1, DEFAULT: false, TAB_ORDER: 3},
+    },
+    'DIMMER|MASTER': {
+        LOGGING: {TYPE: 'ENUM', OPERATIONS: 3, FLAGS: 1, VALUE_LIST: ['OFF', 'ON'], DEFAULT: 1, TAB_ORDER: 1},
+        DIM_STEP: {TYPE: 'FLOAT', OPERATIONS: 3, FLAGS: 1, MIN: 0, MAX: 1, UNIT: '100%', DEFAULT: 0.05, TAB_ORDER: 2},
+    },
+    'DIMMER|VALUES': {
+        LEVEL: {TYPE: 'FLOAT', OPERATIONS: 7, FLAGS: 1, MIN: 0, MAX: 1, UNIT: '100%', DEFAULT: 0, TAB_ORDER: 1},
+        WORKING: {TYPE: 'BOOL', OPERATIONS: 5, FLAGS: 1, DEFAULT: false, TAB_ORDER: 2},
+    },
+    'KEY|MASTER': {
+        LONG_PRESS_TIME: {TYPE: 'FLOAT', OPERATIONS: 3, FLAGS: 1, MIN: 0.3, MAX: 1.8, UNIT: 's', DEFAULT: 0.4},
+        DBL_PRESS_TIME: {TYPE: 'FLOAT', OPERATIONS: 3, FLAGS: 1, MIN: 0, MAX: 1.5, UNIT: 's', DEFAULT: 0},
+    },
+    'KEY|VALUES': {
+        PRESS_SHORT: {TYPE: 'ACTION', OPERATIONS: 6, FLAGS: 1},
+        PRESS_LONG: {TYPE: 'ACTION', OPERATIONS: 6, FLAGS: 1},
+    },
+    'SWITCH_VIRTUAL_RECEIVER|MASTER': {
+        LOGGING: {TYPE: 'ENUM', OPERATIONS: 3, FLAGS: 1, VALUE_LIST: ['OFF', 'ON'], DEFAULT: 1},
+    },
+    'SWITCH_VIRTUAL_RECEIVER|LINK': {
+        SHORT_ON_TIME: {
+            TYPE: 'FLOAT',
+            OPERATIONS: 3,
+            FLAGS: 1,
+            MIN: 0,
+            MAX: 8590,
+            UNIT: 's',
+            DEFAULT: 111_600,
+            SPECIAL: [{ID: 'NOT_USED', VALUE: 111_600}],
+        },
+        SHORT_ON_LEVEL: {TYPE: 'FLOAT', OPERATIONS: 3, FLAGS: 1, MIN: 0, MAX: 1, UNIT: '100%', DEFAULT: 1},
+        SHORT_ACTION_TYPE: {
+            TYPE: 'ENUM',
+            OPERATIONS: 3,
+            FLAGS: 1,
+            VALUE_LIST: ['INACTIVE', 'JUMP_TO_TARGET', 'TOGGLE_TO_COUNTER', 'TOGGLE_INVERSE_TO_COUNTER'],
+            DEFAULT: 1,
+        },
+        UI_HINT: {TYPE: 'STRING', OPERATIONS: 3, FLAGS: 2, DEFAULT: ''},
+    },
+    'KEY_TRANSCEIVER|LINK': {
+        LONG_PRESS_TIME: {TYPE: 'FLOAT', OPERATIONS: 3, FLAGS: 1, MIN: 0.3, MAX: 1.8, UNIT: 's', DEFAULT: 0.4},
+    },
+    'MAINTENANCE|VALUES': {
+        UNREACH: {TYPE: 'BOOL', OPERATIONS: 5, FLAGS: 9, DEFAULT: false},
+        STICKY_UNREACH: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 9, DEFAULT: false},
+        LOWBAT: {TYPE: 'BOOL', OPERATIONS: 5, FLAGS: 9, DEFAULT: false},
+    },
+    /** A device (not a channel) - keyed by the empty channel type. */
+    '|MASTER': {
+        ARR_TIMEOUT: {TYPE: 'INTEGER', OPERATIONS: 3, FLAGS: 1, MIN: 1, MAX: 20, DEFAULT: 10},
+    },
+};
+
+/** Current values per channel type and paramset; anything absent falls back to the DEFAULTs. */
+export const DEMO_PARAMSET_VALUES: Readonly<Record<string, Paramset>> = {
+    'SWITCH|MASTER': {LOGGING: 1, TRANSMIT_TRY_MAX: 6, ON_TIME: 111_600, STATUSINFO_MINDELAY: 2},
+    'SWITCH|VALUES': {STATE: true, WORKING: false, INHIBIT: false},
+    'DIMMER|MASTER': {LOGGING: 1, DIM_STEP: 0.05},
+    'DIMMER|VALUES': {LEVEL: 0.9, WORKING: false},
+    'KEY|MASTER': {LONG_PRESS_TIME: 0.4, DBL_PRESS_TIME: 0},
+    'SWITCH_VIRTUAL_RECEIVER|MASTER': {LOGGING: 1},
+    'SWITCH_VIRTUAL_RECEIVER|LINK': {
+        SHORT_ON_TIME: 111_600,
+        SHORT_ON_LEVEL: 1,
+        SHORT_ACTION_TYPE: 1,
+        UI_HINT: '',
+    },
+    'KEY_TRANSCEIVER|LINK': {LONG_PRESS_TIME: 0.4},
+    'MAINTENANCE|VALUES': {UNREACH: false, STICKY_UNREACH: false, LOWBAT: false},
+    '|MASTER': {ARR_TIMEOUT: 10},
+};
+
+/** Every demo description by address, so the mock can answer without a device index. */
+export function demoChannelType(address: string): string {
+    for (const list of Object.values(DEMO_DEVICES)) {
+        const found = list.find((device) => device.ADDRESS === address);
+        if (found) {
+            return found.PARENT === undefined || found.PARENT === '' ? '' : found.TYPE;
+        }
+    }
+    return '';
+}
+
+/** What `getParamsetDescription` answers in demo mode; `{}` for a combination nothing describes. */
+export function demoDescription(address: string, paramset: string): ParamsetDescription {
+    return DEMO_DESCRIPTIONS[`${demoChannelType(address)}|${paramset}`] ?? {};
+}
+
+/** What `getParamset` answers in demo mode. */
+export function demoParamset(address: string, paramset: string): Paramset {
+    return DEMO_PARAMSET_VALUES[`${demoChannelType(address)}|${paramset}`] ?? {};
+}
+
+/**
+ * The files `data.file` serves in demo mode - a hand-cut corner of `data/dist/` so the metadata
+ * layer (parameter order, hidden parameters, option presets, translations) is visible without the
+ * 9.2 MB data set.
+ */
+export const DEMO_DATA_FILES: Readonly<Record<string, unknown>> = {
+    'data/manifest.json': {
+        generatedAt: '2026-09-05T00:00:00.000Z',
+        sources: [{name: 'openccu-data', version: '2026.7.2'}],
+        receiverTypes: ['SWITCH_VIRTUAL_RECEIVER'],
+        languages: ['de', 'en'],
+    },
+    'data/receiver-type-aliases.json': {},
+    'data/master-metadata.json': {
+        SWITCH: {
+            channelType: 'SWITCH',
+            parameterOrder: ['TRANSMIT_TRY_MAX', 'LOGGING', 'ON_TIME'],
+            conditionalVisibility: [{trigger: 'LOGGING', triggerValue: 1, show: ['STATUSINFO_MINDELAY']}],
+            optionPresets: {ON_TIME: 'duration'},
+        },
+    },
+    'data/option-presets.json': {
+        duration: {
+            id: 'duration',
+            allowCustom: true,
+            presets: [
+                {label: '5s', value: 5},
+                {label: '30s', value: 30},
+                {labelKey: 'not_used', value: 111_600},
+            ],
+        },
+    },
+    'data/cross-validations.json': [
+        {id: 'onTime', rule: 'lte', paramA: 'STATUSINFO_MINDELAY', paramB: 'TRANSMIT_TRY_MAX', errorKey: 'delay_max'},
+    ],
+    'data/translations/de.json': {
+        language: 'de',
+        channelTypes: {SWITCH: 'Schaltaktor'},
+        deviceModels: {},
+        parameters: {LOGGING: 'Statusmeldungen', 'SWITCH|ON_TIME': 'Einschaltdauer'},
+        parameterValues: {'LOGGING|ON': 'an', 'LOGGING|OFF': 'aus'},
+        parameterHelp: {LOGGING: '<b>Sendet</b> zyklisch den Status.'},
+        uiLabels: {not_used: 'nicht benutzt', delay_max: 'Verzögerung größer als die Sendeversuche'},
+    },
+    'data/translations/en.json': {
+        language: 'en',
+        channelTypes: {SWITCH: 'Switch actuator'},
+        deviceModels: {},
+        parameters: {LOGGING: 'Status messages'},
+        parameterValues: {},
+        parameterHelp: {},
+        uiLabels: {not_used: 'not used', delay_max: 'delay larger than the transmit tries'},
+    },
+    'data/profiles/SWITCH_VIRTUAL_RECEIVER.json': {
+        receiverType: 'SWITCH_VIRTUAL_RECEIVER',
+        senders: {
+            KEY_TRANSCEIVER: [
+                {
+                    id: 1,
+                    key: 'switch_on',
+                    name: {de: 'Einschalten', en: 'Switch on'},
+                    description: {de: 'Schaltet ein', en: 'Switches on'},
+                    params: {
+                        SHORT_ACTION_TYPE: {kind: 'fixed', value: 1},
+                        SHORT_ON_LEVEL: {kind: 'fixed', value: 1},
+                        SHORT_ON_TIME: {kind: 'fixed', value: 111_600},
+                    },
+                },
+                {
+                    id: 2,
+                    key: 'staircase',
+                    name: {de: 'Treppenhauslicht', en: 'Staircase light'},
+                    description: {de: 'Schaltet für eine Zeit ein', en: 'Switches on for a while'},
+                    params: {
+                        SHORT_ACTION_TYPE: {kind: 'fixed', value: 1},
+                        SHORT_ON_LEVEL: {kind: 'fixed', value: 1},
+                        SHORT_ON_TIME: {kind: 'range', min: 0, max: 8590, default: 60},
+                    },
+                },
+            ],
+        },
+        senderMetadata: {
+            KEY_TRANSCEIVER: {
+                parameterOrder: ['SHORT_ACTION_TYPE', 'SHORT_ON_LEVEL', 'SHORT_ON_TIME'],
+                optionPresets: {SHORT_ON_TIME: 'duration'},
+            },
+        },
+    },
+    'data/device-icons.json': {},
+};

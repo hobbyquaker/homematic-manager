@@ -1,5 +1,7 @@
 import type {Transport} from '@homematic-manager/core';
 
+import type {DataSource} from '@homematic-manager/core';
+
 import type {HostBridge} from '../host/types.js';
 import {I18n} from '../i18n/i18n.svelte.js';
 
@@ -8,9 +10,11 @@ import {DevicesStore} from './DevicesStore.svelte.js';
 import {EventsStore} from './EventsStore.svelte.js';
 import {HostStore} from './HostStore.svelte.js';
 import {InterfacesStore} from './InterfacesStore.svelte.js';
+import {MetaStore} from './MetaStore.svelte.js';
 import {LinksStore} from './LinksStore.svelte.js';
 import {NamesStore} from './NamesStore.svelte.js';
 import {NoticesStore} from './NoticesStore.svelte.js';
+import {ParamsetStore} from './ParamsetStore.svelte.js';
 import {ServiceMessagesStore} from './ServiceMessagesStore.svelte.js';
 import {tabsForInterface, type TabId} from './routing.js';
 import {WriteLogStore} from './WriteLogStore.svelte.js';
@@ -22,6 +26,8 @@ export interface StoresOptions extends AppStoreOptions {
     readonly hostBridge?: HostBridge | undefined;
     /** Where to look for `window.__HMM_HOST__` when no bridge is injected. */
     readonly hostScope?: Record<string, unknown> | undefined;
+    /** The device metadata of task 9; by default read over the transport's `data.file`. */
+    readonly dataSource?: DataSource | undefined;
 }
 
 /**
@@ -44,6 +50,8 @@ export class Stores {
     readonly events: EventsStore;
     readonly writeLog: WriteLogStore;
     readonly host: HostStore;
+    readonly meta: MetaStore;
+    readonly paramsets: ParamsetStore;
 
     constructor(transport: Transport, options: StoresOptions = {}) {
         this.transport = transport;
@@ -59,6 +67,10 @@ export class Stores {
             ...(options.eventCapacity === undefined ? {} : {capacity: options.eventCapacity}),
         });
         this.writeLog = new WriteLogStore(transport, this.notices);
+        this.meta = new MetaStore(transport, {
+            ...(options.dataSource === undefined ? {} : {source: options.dataSource}),
+        });
+        this.paramsets = new ParamsetStore(transport, this.notices);
         this.host = new HostStore({
             ...(options.hostBridge === undefined ? {} : {bridge: options.hostBridge}),
             ...(options.hostScope === undefined ? {} : {scope: options.hostScope}),
@@ -80,6 +92,9 @@ export class Stores {
     async start(): Promise<void> {
         await this.app.load();
         this.i18n.language = this.app.language;
+        // The CCU string tables are 3 MB per language and nothing waits for them: a dialog that
+        // opens before they arrive shows the CCU's identifiers and re-renders when they do.
+        void this.meta.setLanguage(this.app.language).catch(() => undefined);
         // The host is optional and must never hold up the CCU work, so its failure is swallowed.
         void this.host.load().catch(() => undefined);
         await Promise.all([this.interfaces.load(), this.names.load(), this.writeLog.load()]);

@@ -11,6 +11,7 @@ import type {
 import {
     DEMO_BIDCOS_INTERFACES,
     DEMO_CONFIG,
+    DEMO_DATA_FILES,
     DEMO_DEVICES,
     DEMO_EVENTS,
     DEMO_INTERFACE_STATES,
@@ -21,6 +22,8 @@ import {
     DEMO_RSSI,
     DEMO_SERVICE_MESSAGES,
     DEMO_WRITE_LOG,
+    demoDescription,
+    demoParamset,
     isDemoInterface,
 } from './demoData.js';
 import {ApiRequestError} from './error.js';
@@ -203,6 +206,39 @@ export class MockTransport implements Transport {
         this.result('writeLog.list', DEMO_WRITE_LOG);
         this.result('writeLog.clear', null);
         this.result('rpc.methods', DEMO_RPC_METHODS);
+        this.respond('paramset.description', (_interfaceName, address, paramset) => demoDescription(address, paramset));
+        this.respond('paramset.get', (_interfaceName, address, paramset) => demoParamset(address, paramset));
+        this.respond('paramset.put', (interfaceName, addresses, paramset, values) =>
+            addresses.map((address) => ({
+                interfaceName,
+                address,
+                paramset,
+                sent: values,
+                ok: true,
+                problems: [],
+                durationMs: 42,
+            })),
+        );
+        this.respond('paramset.putLink', (interfaceName, links, values) =>
+            links.map((link) => ({
+                interfaceName,
+                address: link.receiver,
+                peer: link.sender,
+                paramset: 'LINK',
+                sent: values.receiverToSender ?? values.senderToReceiver ?? {},
+                ok: true,
+                problems: [],
+                durationMs: 42,
+            })),
+        );
+        this.result('value.set', null);
+        this.respond('data.file', (path) => {
+            const file = DEMO_DATA_FILES[path];
+            if (file === undefined) {
+                throw new ApiRequestError({message: `no demo data file ${path}`, kind: 'config'});
+            }
+            return file;
+        });
         return this;
     }
 }

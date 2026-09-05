@@ -335,7 +335,15 @@ describe('the context menu', () => {
             within(menu)
                 .getAllByRole('menuitem')
                 .map((item) => item.textContent?.trim()),
-        ).toEqual(['Umbenennen', 'restoreConfigToDevice', 'clearConfigCache', 'Gerät tauschen', 'Löschen']);
+        ).toEqual([
+            'Umbenennen',
+            'MASTER Paramset',
+            'SERVICE Parametersatz',
+            'restoreConfigToDevice',
+            'clearConfigCache',
+            'Gerät tauschen',
+            'Löschen',
+        ]);
     });
 
     it('offers the channel entries on a channel row, greyed out on :0', async () => {
@@ -348,8 +356,12 @@ describe('the context menu', () => {
             'Umbenennen',
             'reportValueUsage 1',
             'reportValueUsage 0',
+            'MASTER Paramset',
+            'VALUES Paramset',
         ]);
-        expect(items.every((item) => item.disabled)).toBe(true);
+        // The three that act on the channel are off for :0; the paramsets of :0 are readable.
+        expect(items.slice(0, 3).every((item) => item.disabled)).toBe(true);
+        expect(items.slice(3).some((item) => item.disabled)).toBe(false);
     });
 
     it('opens the delete dialog from the menu', async () => {

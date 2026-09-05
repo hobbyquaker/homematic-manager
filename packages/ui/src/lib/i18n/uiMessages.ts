@@ -121,6 +121,27 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'reportValueUsage {value}: {count} Datenpunkte auf {channels} Kanälen',
         en: 'reportValueUsage {value}: {count} datapoints on {channels} channels',
     },
+
+    // The paramset editor.
+    'SERVICE Paramset': {de: 'SERVICE Parametersatz', en: 'SERVICE Paramset'},
+    Preview: {de: 'Vorschau', en: 'Preview'},
+    Write: {de: 'Schreiben', en: 'Write'},
+    Parameter: {de: 'Parameter', en: 'Parameter'},
+    'Current value': {de: 'Aktueller Wert', en: 'Current value'},
+    'New value': {de: 'Neuer Wert', en: 'New value'},
+    'Nothing has changed - nothing will be written': {
+        de: 'Nichts geändert - es wird nichts geschrieben',
+        en: 'Nothing has changed - nothing will be written',
+    },
+    'Write every parameter, not only the changed ones': {
+        de: 'Alle Parameter schreiben, nicht nur die geänderten',
+        en: 'Write every parameter, not only the changed ones',
+    },
+    'Show hidden parameters': {de: 'Ausgeblendete Parameter zeigen', en: 'Show hidden parameters'},
+    'other firmware or device type': {
+        de: 'andere Firmware oder anderer Gerätetyp',
+        en: 'other firmware or device type',
+    },
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

@@ -18,6 +18,8 @@
     import {getStores} from '../lib/stores/context.js';
     import {firmwareCell, serviceMarks} from '../lib/util/deviceGrid.js';
 
+    import ParamsetDialog from './paramset/ParamsetDialog.svelte';
+
     import DeleteDeviceDialog from './devices/DeleteDeviceDialog.svelte';
     import RenameDialog from './devices/RenameDialog.svelte';
     import ReplaceDeviceDialog from './devices/ReplaceDeviceDialog.svelte';
@@ -40,6 +42,10 @@
     let deleteOpen = $state(false);
     let replaceOpen = $state(false);
     let actionAddress = $state('');
+
+    let paramsetOpen = $state(false);
+    let paramsetAddress = $state('');
+    let paramsetName = $state('MASTER');
 
     const interfaceName = $derived(stores.app.selectedInterface);
     const interfaceType = $derived(stores.interfaces.typeOf(interfaceName));
@@ -265,6 +271,13 @@
         );
     }
 
+    /** Opens the generic paramset editor. LINK is not reachable from here - it is the Links tab. */
+    function openParamset(address: string, name: string): void {
+        paramsetAddress = address;
+        paramsetName = name;
+        paramsetOpen = true;
+    }
+
     function openMenu(row: DeviceDescription, event: MouseEvent): void {
         menuAddress = row.ADDRESS;
         menuX = event.clientX;
@@ -281,6 +294,12 @@
         isDeviceAddress(menuAddress)
             ? [
                   {id: 'rename', label: t('Rename')},
+                  {id: 'paramset:MASTER', label: t('MASTER Paramset')},
+                  {
+                      id: 'paramset:SERVICE',
+                      label: t('SERVICE Paramset'),
+                      disabled: !(index?.get(menuAddress)?.PARAMSETS ?? []).includes('SERVICE'),
+                  },
                   {id: 'sep1', separator: true},
                   {
                       id: 'restore',
@@ -296,6 +315,9 @@
                   {id: 'rename', label: t('Rename'), disabled: isMaintenanceAddress(menuAddress)},
                   {id: 'usage1', label: 'reportValueUsage 1', disabled: isMaintenanceAddress(menuAddress)},
                   {id: 'usage0', label: 'reportValueUsage 0', disabled: isMaintenanceAddress(menuAddress)},
+                  {id: 'sep1', separator: true},
+                  {id: 'paramset:MASTER', label: t('MASTER Paramset')},
+                  {id: 'paramset:VALUES', label: t('VALUES Paramset')},
               ],
     );
 
@@ -305,6 +327,10 @@
 
     async function onMenuSelect(id: string): Promise<void> {
         const address = menuAddress;
+        if (id.startsWith('paramset:')) {
+            openParamset(address, id.slice('paramset:'.length));
+            return;
+        }
         switch (id) {
             case 'rename':
                 openRename(address);
@@ -453,6 +479,18 @@
                     {:else if cellState.status}
                         <span class="hmm-firmware-status">{cellState.status}</span>
                     {/if}
+                {:else if column.key === 'PARAMSETS'}
+                    {#each (row.PARAMSETS ?? []).filter((name) => name !== 'LINK') as name (name)}
+                        <button
+                            type="button"
+                            class="hmm-inline-button"
+                            data-testid={`paramset-${row.ADDRESS}-${name}`}
+                            onclick={(event) => {
+                                event.stopPropagation();
+                                openParamset(row.ADDRESS, name);
+                            }}>{name}</button
+                        >
+                    {/each}
                 {:else if column.key === 'AES_ACTIVE'}
                     {#if row.AES_ACTIVE}
                         <span title="AES_ACTIVE" aria-label="AES_ACTIVE" role="img">🔑</span>
@@ -480,6 +518,7 @@
 <RenameDialog bind:open={renameOpen} address={actionAddress} />
 <DeleteDeviceDialog bind:open={deleteOpen} address={actionAddress} />
 <ReplaceDeviceDialog bind:open={replaceOpen} address={actionAddress} />
+<ParamsetDialog bind:open={paramsetOpen} {interfaceName} address={paramsetAddress} paramset={paramsetName} />
 
 <style>
     .hmm-page {

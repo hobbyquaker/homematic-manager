@@ -60,7 +60,7 @@ about every half hour while the agent works; the timestamp above is the last ref
   backend to the registry package and makes a missing simulator a CI failure. Later simulator
   changes (task 15 adds `setTempKey`) are committed on `1.0-dev` and released as 1.0.1 by the
   main session on request.
-- Decide OQ-14 (npm name for the web host package; recommendation: reuse `homematic-manager`).
+- OQ-14 decided as D-33 (2026-09-06): the npm package is `homematic-manager`, trusted publishing configured; the npmjs.com publisher entry must name `release-npm.yml`.
 
 ## Next steps, in order
 
@@ -69,7 +69,7 @@ about every half hour while the agent works; the timestamp above is the last ref
    ROADMAP Contents, update the status line at the top of ROADMAP.md, commit, push `3.0-dev`
    (task 11 is archived and pushed already: `69cab48`).
 2. The beta itself: follow `docs/release-checklist.md` once the maintainer has enabled Actions
-   and decided OQ-14/OQ-15; the agent side of task 17 is done. hm-simulator 1.0.1 release on
+   and decided OQ-15; the agent side of task 17 is done. hm-simulator 1.0.1 release on
    request. Was: tasks 15 (backlog features), 16 (docs), 17 (beta). The first Electron
    click-through and the first dev bump (`npm run version:dev`, D-18) happen as soon as the
    maintainer enables Actions and a `build.yml` run has produced the Windows artifact.

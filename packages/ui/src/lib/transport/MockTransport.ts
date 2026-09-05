@@ -19,6 +19,7 @@ import {
     DEMO_LINKS,
     DEMO_NAMES,
     DEMO_REGA_STATE,
+    DEMO_TEAMS,
     DEMO_RPC_METHODS,
     DEMO_RSSI,
     DEMO_SERVICE_MESSAGES,
@@ -203,6 +204,8 @@ export class MockTransport implements Transport {
         );
         this.result('serviceMessages.ack', null);
         this.result('rega.confirmInbox', []);
+        this.respond('teams.list', (interfaceName) => (interfaceName === 'BidCos-RF' ? DEMO_TEAMS : []));
+        this.result('teams.set', null);
         this.respond('unreach.list', (interfaceName) =>
             interfaceName === undefined
                 ? DEMO_UNREACH

@@ -182,6 +182,62 @@ async function harness(
     return {backend, calls, handler: handler as CallbackHandler, events, dir, rega};
 }
 
+describe('smoke detector teams (#97)', () => {
+    const TEAM = {
+        ADDRESS: 'NEQ1000002-TEAM:1',
+        TYPE: 'SMOKE_DETECTOR_TEAM',
+        VERSION: 1,
+        TEAM_TAG: 'SMOKE_DETECTOR',
+        TEAM_CHANNELS: ['NEQ1000002:1'],
+    };
+
+    it('lists the teams and puts a channel into one', async () => {
+        const h = await harness({
+            answers: {
+                'BidCos-RF': (method) => {
+                    switch (method) {
+                        case 'listDevices':
+                            return BIDCOS_DEVICES as unknown as RpcValue;
+                        case 'listTeams':
+                            return [TEAM];
+                        default:
+                            return '';
+                    }
+                },
+            },
+        });
+
+        await expect(h.backend.request('teams.list', 'BidCos-RF')).resolves.toEqual([TEAM]);
+
+        await h.backend.request('teams.set', 'BidCos-RF', 'NEQ1000001:1', 'NEQ1000002-TEAM:1');
+        const call = h.calls.find((entry) => entry.method === 'setTeam');
+        expect(call?.params).toEqual(['NEQ1000001:1', 'NEQ1000002-TEAM:1']);
+        // the description changes with it, so the device list is re-read rather than left stale
+        expect(h.calls.filter((entry) => entry.method === 'listDevices').length).toBeGreaterThan(1);
+        await h.backend.stop();
+    });
+
+    it('sends the empty team address that puts a channel back into its own', async () => {
+        const h = await harness();
+        await h.backend.request('teams.set', 'BidCos-RF', 'NEQ1000001:1', '');
+        expect(h.calls.find((entry) => entry.method === 'setTeam')?.params).toEqual(['NEQ1000001:1', '']);
+        await h.backend.stop();
+    });
+
+    it('reports an interface that has no teams as a fault, not as an empty list', async () => {
+        const h = await harness({
+            answers: {
+                'HmIP-RF': (method) =>
+                    method === 'listTeams'
+                        ? new BackendError({message: 'unknown method name', kind: 'rpc', faultCode: -1})
+                        : (HMIP_DEVICES as unknown as RpcValue),
+            },
+        });
+        await expect(h.backend.request('teams.list', 'HmIP-RF')).rejects.toMatchObject({kind: 'rpc'});
+        await h.backend.stop();
+    });
+});
+
 describe('unreach counters and the auto-acknowledge (#26)', () => {
     it('counts one outage however often the interface repeats it, and persists it', async () => {
         const h = await harness();

@@ -45,6 +45,11 @@ its tooltip.
   of 2.x's modal (#77) and a quiet mode (#102).
 - **Events**: the two filter boxes over core's event filter, a pause, and the per-device counter of
   #129.
+- **Teams** (#97): a BidCos smoke detector is not linked to the others, it belongs to a team - a
+  pseudo device the interface process creates and deletes by itself. The channel context menu shows
+  which team a channel is in (`TEAM`), which teams it may join (`listTeams` filtered by `TEAM_TAG`)
+  and who is in them (`TEAM_CHANNELS`), and moves it with `setTeam`. HmIP smoke detectors are a
+  different mechanism and are not covered - see the note in the backend README.
 - **Add device**: BidCos install mode with mode, serial and temporary key (#20), HmIP with SGTIN and
   key or key server, a QR scanner (`@zxing/browser`, loaded lazily, #112) and naming right after
   pairing (#24).

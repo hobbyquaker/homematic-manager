@@ -26,6 +26,17 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Not present': {de: 'Nicht vorhanden', en: 'Not present'},
     Subscribing: {de: 'Anmeldung läuft', en: 'Subscribing'},
     'Pending changes': {de: 'Offene Änderungen', en: 'Pending changes'},
+    Team: {de: 'Team', en: 'Team'},
+    'Own team': {de: 'Eigenes Team', en: 'Own team'},
+    Members: {de: 'Mitglieder', en: 'Members'},
+    'This channel does not belong to a team': {
+        de: 'Dieser Kanal gehört zu keinem Team',
+        en: 'This channel does not belong to a team',
+    },
+    'The interface knows no other team yet': {
+        de: 'Die Schnittstelle kennt noch kein anderes Team',
+        en: 'The interface knows no other team yet',
+    },
     'Confirm the ReGa inbox': {de: 'ReGa-Posteingang bestätigen', en: 'Confirm the ReGa inbox'},
     'Confirm the ReGa inbox automatically': {
         de: 'ReGa-Posteingang automatisch bestätigen',

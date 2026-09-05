@@ -77,6 +77,31 @@ export class DevicesStore {
     }
 
     /**
+     * Issue #97: the teams this interface process knows. A BidCos smoke detector is not linked to
+     * the others - it belongs to a team, a pseudo device the interface creates and deletes itself.
+     */
+    async teams(interfaceName: string): Promise<DeviceDescription[]> {
+        try {
+            return await this.#transport.request('teams.list', interfaceName);
+        } catch (error) {
+            this.#notices.fromError(error, `listTeams ${interfaceName}`);
+            return [];
+        }
+    }
+
+    /** `setTeam`: puts a channel into a team, or back into its own with an empty address. */
+    async setTeam(interfaceName: string, address: string, teamAddress: string): Promise<boolean> {
+        try {
+            await this.#transport.request('teams.set', interfaceName, address, teamAddress);
+            await this.load(interfaceName, {refresh: true});
+            return true;
+        } catch (error) {
+            this.#notices.fromError(error, `setTeam ${address}`);
+            return false;
+        }
+    }
+
+    /**
      * Issue #54: confirm every device that is still in the CCU's inbox. Answers with the addresses,
      * and with nothing at all when ReGa is off (D-2) - which is not an error, just a system that
      * has no inbox.

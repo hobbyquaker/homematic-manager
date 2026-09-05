@@ -406,6 +406,14 @@ export class Backend {
                 await this.#write(p[0], 'setBidcosInterface', [p[1], p[2], p[3]]);
                 return null;
 
+            case 'teams.list':
+                return asDescriptions(await this.#read(p[0], 'listTeams', []));
+            case 'teams.set':
+                // a write: it changes the device, so it goes through the paced queue like one
+                await this.#write(p[0], 'setTeam', [p[1], p[2]]);
+                await this.#refreshDevices(p[0]);
+                return null;
+
             case 'rega.confirmInbox':
                 return (await (this.#rega?.confirmInbox() ?? Promise.resolve([]))).map((entry) => entry.address);
 
@@ -1247,6 +1255,8 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'rssi.get',
     'bidcos.interfaces',
     'bidcos.setInterface',
+    'teams.list',
+    'teams.set',
     'rega.confirmInbox',
     'linkTemplates.list',
     'linkTemplates.save',

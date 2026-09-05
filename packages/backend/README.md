@@ -145,6 +145,30 @@ Every port in those tests is `0`: the operating system picks one, `sim.ports` sa
 backend is pointed at it through `InterfaceManager.portOverride`. That is what lets the suites run in
 parallel, and why they do not care which ports are taken on the development machine.
 
+## Smoke detector teams, and what is not covered (#97)
+
+A BidCos smoke detector is not linked to its neighbours: it belongs to a **team**, a pseudo device
+(`HM-Sec-SD-Team`) that the interface process creates and deletes by itself. The whole mechanism is
+four things in the RPC surface, and all four are there:
+
+| what | where |
+| --- | --- |
+| which teams exist | `listTeams()` — device descriptions of the team pseudo devices |
+| which team a channel is in | `TEAM` in the channel's own description |
+| which family of team it fits | `TEAM_TAG`, on the channel and on the team |
+| who is in a team | `TEAM_CHANNELS` on the team |
+| moving a channel | `setTeam(channelAddress, teamAddress)`; `""` puts it back in its own |
+
+`teams.list` and `teams.set` are exactly those two calls, and `setTeam` goes through the paced write
+queue because it changes the device.
+
+**HmIP is not covered.** An HmIP-SWSD is not teamed with `setTeam`; the CCU builds an HmIP smoke
+alarm group through its group process (the `VirtualDevices` interface on `/groups`), with calls that
+are not part of the 51-method catalogue this application speaks (D-1: XML-RPC/BIN-RPC to the
+interface processes, no CCU JSON-API). Doing it would need a surface we deliberately do not use, so
+it is not done and not faked: on an HmIP channel the team entry stays disabled, because HmIP channels
+carry no `TEAM_TAG`.
+
 ## ISO-8859-1, and what is still wrong in the libraries
 
 The CCU's interface processes speak ISO-8859-1, and their XML carries no encoding declaration. What

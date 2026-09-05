@@ -392,6 +392,21 @@ export interface ApiMethods {
     };
     'devices.installMode.get': {params: [interfaceName: string]; result: number};
     'devices.replaceable': {params: [interfaceName: string, address: string]; result: DeviceDescription[]};
+    /**
+     * Issue #97: the teams an interface process knows, as device descriptions.
+     *
+     * A BidCos smoke detector is not linked to the others; it belongs to a *team*, a pseudo device
+     * (`HM-Sec-SD-Team`) whose `TEAM_CHANNELS` are its members. Every channel that can join one
+     * carries a `TEAM_TAG` saying which family of team it fits and a `TEAM` saying which one it is
+     * in right now - each detector starts in a team of its own, which is what the report describes.
+     */
+    'teams.list': {params: [interfaceName: string]; result: DeviceDescription[]};
+    /**
+     * `setTeam(channelAddress, teamAddress)`: puts a channel into a team. An empty `teamAddress`
+     * puts it back into its own. The interface process creates and deletes the team devices as
+     * needed - there is no "create team" call, and none is wanted.
+     */
+    'teams.set': {params: [interfaceName: string, channelAddress: string, teamAddress: string]; result: null};
 
     'names.get': {params: []; result: NameMap};
     'names.set': {params: [entries: Array<{address: string; name: string}>]; result: NameMap};

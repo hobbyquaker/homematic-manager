@@ -362,12 +362,52 @@ describe('the context menu', () => {
             'Verknüpfung als Sender anlegen',
             'Verknüpfung als Empfänger anlegen',
             'Verknüpfungen anzeigen (0)',
+            'Team',
         ]);
         // The three that act on the channel are off for :0; the paramsets of :0 are readable.
         expect(items.slice(0, 3).every((item) => item.disabled)).toBe(true);
         expect(items.slice(3, 5).some((item) => item.disabled)).toBe(false);
-        // MAINTENANCE has no link roles at all, so the three link entries of #25 are off too
+        // MAINTENANCE has no link roles and no TEAM_TAG, so the link and team entries are off
         expect(items.slice(5).every((item) => item.disabled)).toBe(true);
+    });
+
+    it('puts a smoke detector into the other detector team (#97)', async () => {
+        // "Im Moment hat jeder Melder seine eigene Gruppe": each detector starts in a team of its
+        // own, and joining one is `setTeam(channel, teamAddress)` - the detectors are never linked.
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await select('NEQ1000001:1');
+        await fireEvent.contextMenu(rowOf('NEQ1000001:1'));
+
+        const team = (within(screen.getByTestId('devices-menu')).getAllByRole('menuitem') as HTMLButtonElement[]).find(
+            (item) => item.textContent.trim() === 'Team',
+        );
+        expect(team?.disabled).toBe(false);
+        await fireEvent.click(team as HTMLButtonElement);
+
+        const select_ = (await screen.findByTestId('team-select')) as HTMLSelectElement;
+        // its own team is preselected, and the other detector's team is on offer
+        expect(select_.value).toBe('NEQ1000001-TEAM:1');
+        expect([...select_.options].map((option) => option.value)).toContain('NEQ1000002-TEAM:1');
+
+        await fireEvent.change(select_, {target: {value: 'NEQ1000002-TEAM:1'}});
+        await waitFor(() => {
+            expect(screen.getByTestId('team-members').textContent).toContain('NEQ1000002:1');
+        });
+        await fireEvent.click(screen.getByTestId('team-apply'));
+        await waitFor(() => {
+            expect(transport.lastCall('teams.set')).toEqual(['BidCos-RF', 'NEQ1000001:1', 'NEQ1000002-TEAM:1']);
+        });
+    });
+
+    it('says so on a channel that cannot be in a team at all (#97)', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await select('MEQ0123456:1');
+        await fireEvent.contextMenu(rowOf('MEQ0123456:1'));
+        const team = (within(screen.getByTestId('devices-menu')).getAllByRole('menuitem') as HTMLButtonElement[]).find(
+            (item) => item.textContent.trim() === 'Team',
+        );
+        // a switch actuator has no TEAM_TAG: the entry is there and off, as the others are
+        expect(team?.disabled).toBe(true);
     });
 
     it('creates a link from the Devices tab with the channel already chosen (#25)', async () => {

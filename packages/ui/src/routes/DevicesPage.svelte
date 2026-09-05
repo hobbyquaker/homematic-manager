@@ -20,6 +20,7 @@
     import {firmwareCell, offersRepair, serviceMarks, serviceMessageExplanation} from '../lib/util/deviceGrid.js';
 
     import AddLinkDialog from './links/AddLinkDialog.svelte';
+    import TeamDialog from './devices/TeamDialog.svelte';
     import ParamsetDialog from './paramset/ParamsetDialog.svelte';
 
     import AddDeviceDialog from './devices/AddDeviceDialog.svelte';
@@ -52,6 +53,8 @@
     let addLinkOpen = $state(false);
     let linkSenders = $state<string[]>([]);
     let linkReceivers = $state<string[]>([]);
+    /** #97: the team dialog, for a channel that carries a TEAM_TAG. */
+    let teamOpen = $state(false);
 
     let paramsetOpen = $state(false);
     let paramsetAddress = $state('');
@@ -380,6 +383,12 @@
                       label: `${t('Show links')} (${String(linkRolesOf(menuAddress).links)})`,
                       disabled: linkRolesOf(menuAddress).links === 0,
                   },
+                  // Issue #97: smoke detectors are not linked, they are in a team
+                  {
+                      id: 'team',
+                      label: t('Team'),
+                      disabled: (index?.get(menuAddress)?.TEAM_TAG ?? '') === '',
+                  },
               ],
     );
 
@@ -403,6 +412,10 @@
                 linkSenders = [];
                 linkReceivers = [address];
                 addLinkOpen = true;
+                break;
+            case 'team':
+                actionAddress = address;
+                teamOpen = true;
                 break;
             case 'link:show':
                 stores.app.linksFilter = address;
@@ -620,6 +633,7 @@
 <ReplaceDeviceDialog bind:open={replaceOpen} address={actionAddress} />
 <AddDeviceDialog bind:open={addOpen} />
 <AddLinkDialog bind:open={addLinkOpen} presetSenders={linkSenders} presetReceivers={linkReceivers} />
+<TeamDialog bind:open={teamOpen} address={actionAddress} />
 <RepairConfigDialog bind:open={repairOpen} address={actionAddress} />
 <ParamsetDialog bind:open={paramsetOpen} {interfaceName} address={paramsetAddress} paramset={paramsetName} />
 

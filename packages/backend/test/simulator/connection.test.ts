@@ -4,6 +4,8 @@
  */
 
 import fs from 'node:fs/promises';
+import net from 'node:net';
+import type {AddressInfo} from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -14,6 +16,15 @@ import {simulatorAvailable, startBackend, startSimulator, waitFor} from './helpe
 /* eslint-disable @typescript-eslint/no-explicit-any -- hm-simulator ships no types */
 
 const running: {close: () => unknown}[] = [];
+
+/** A port that was listening long enough to be allocated and refuses connections now. */
+async function closedPort(): Promise<number> {
+    const server = net.createServer();
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const {port} = server.address() as AddressInfo;
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+    return port;
+}
 
 afterEach(async () => {
     for (const item of running.splice(0)) {
@@ -270,6 +281,73 @@ describe.skipIf(!simulatorAvailable)('connecting to hm-simulator', () => {
                 (state) => state.connected && state.idle === undefined && state.subscribing === undefined,
             ),
         );
+    });
+
+    // Task 17 on the OpenCCU x86_64 box: the resubscribe after an idle unsubscribe logged
+    // `BidCos-Wired: init failed: Cannot call write after a stream was destroyed` once. binrpc
+    // destroys its socket the moment a connection fails and only reconnects from a timer 2.5 s
+    // later, so every call in between wrote into a destroyed stream - and the caller got that
+    // message instead of the `ECONNREFUSED` the whole "not present" back-off is built on.
+    //
+    // The interface that is not there is the one the lab saw it on: BidCos-Wired, binrpc on the
+    // CCU's loopback, pointed here at a port that was open long enough to be allocated and is
+    // closed again. BidCos-RF next to it is the simulator, and has to come back working.
+    it('reports a refused BIN-RPC port as refused, on the resubscribe too (D-31)', async () => {
+        const sim = await startSimulator();
+        running.push({close: () => sim.close()});
+        const closed = await closedPort();
+        const harness = await startBackend(sim, {
+            connection: {interfaces: ['BidCos-RF', 'BidCos-Wired']},
+            backend: {
+                idleUnsubscribeMs: 40,
+                interfaceManagerOptions: {
+                    watchdogIntervalMs: 0,
+                    portOverride: (name: string) =>
+                        name === 'BidCos-Wired' ? closed : (sim.ports.rfd as number | undefined),
+                },
+            },
+        });
+        running.unshift({close: () => harness.close()});
+
+        const subscribers = (): number => Object.keys(sim.clients.rfd as object).length;
+        expect(subscribers()).toBe(1);
+
+        harness.backend.noteSessions(1);
+        harness.backend.noteSessions(0);
+        await waitFor(() => subscribers() === 0);
+        await waitFor(async () =>
+            (await harness.backend.request('interfaces.list')).every((state) => state.idle === true),
+        );
+
+        // `unsubscribe()` clears the failure counters, so this really is the first failure again
+        // and the notice it produces is the one the lab read
+        harness.backend.noteSessions(1);
+        await waitFor(() => subscribers() === 1);
+        await waitFor(async () =>
+            (await harness.backend.request('interfaces.list')).some(
+                (state) => state.name === 'BidCos-Wired' && state.error !== undefined,
+            ),
+        );
+
+        expect(harness.notices.filter((notice) => notice.message.includes('stream was destroyed'))).toEqual([]);
+        expect(harness.notices.filter((notice) => notice.level === 'error')).toEqual([]);
+        // what the port really answered, which is what marks the interface "not present"
+        expect(
+            harness.notices.filter(
+                (notice) => notice.level === 'warn' && notice.message.includes('BidCos-Wired: nothing is listening'),
+            ).length,
+        ).toBeGreaterThan(0);
+        const states = await harness.backend.request('interfaces.list');
+        expect(states.find((state) => state.name === 'BidCos-Wired')?.absent).toBe(true);
+        expect(states.find((state) => state.name === 'BidCos-RF')?.connected).toBe(true);
+
+        // and the interface that is there is subscribed again for real: an event arrives on it
+        const events: unknown[] = [];
+        harness.backend.on('rpc.event', (event) => events.push(event));
+        sim.fireEvent('rfd', 'LEQ0000001:1', 'STATE', true);
+        await waitFor(() => events.length >= 1);
+        const recent = await harness.backend.request('events.recent', 'BidCos-RF');
+        expect(recent.some((entry) => entry.datapoint === 'STATE' && entry.value === true)).toBe(true);
     });
 
     it('confirms the ReGa inbox and acknowledges an alarm in ReGa (#54, #94)', async () => {

@@ -13,6 +13,12 @@
  * fields and does not tell the caller that it was a fault. Both become a `BackendError` with
  * `kind: 'rpc'` and the fault code intact.
  *
+ * **A socket that is really there.** `binrpc` reconnects from a timer 2.5 s after its socket
+ * died, and destroys whatever socket it holds on the way; a call in between writes into a
+ * destroyed stream, which node answers with `Cannot call write after a stream was destroyed`
+ * instead of the real reason. See {@link createTransport} - the timer is off and the socket is
+ * replaced before a call needs it.
+ *
  * **ISO-8859-1.** The interface processes speak ISO-8859-1 and their XML carries no encoding
  * declaration, so `responseEncoding: 'latin1'` is set on every XML-RPC client; without it a `°C`
  * unit arrives as the replacement character, which is the mojibake 2.x showed and which
@@ -92,13 +98,48 @@ function createTransport(options: RpcClientOptions): RpcTransport {
             port: options.port,
             responseTimeout: options.timeoutMs ?? DEFAULT_RPC_TIMEOUT_MS,
         });
+        /*
+         * No timer-driven reconnect. `binrpc` schedules one 2.5 s after its socket dies - from the
+         * socket's `error`, `end` *and* `close` handlers, and every reconnect destroys the current
+         * socket, which makes its old handlers fire and schedule more. Measured against a refused
+         * port: 2 connection attempts in the first 4 s, 90 after half a minute, 377 after a
+         * minute, for one interface that is not there. And in the window between the death and the
+         * reconnect - which for a refused port is practically all of it - a call writes into a
+         * destroyed stream and gets `Cannot call write after a stream was destroyed` back, so the
+         * caller never learns that the port is closed. That is the line the lab saw on the
+         * resubscribe after an idle unsubscribe (D-31, task 17): `BidCos-Wired: init failed:
+         * Cannot call write after a stream was destroyed`, on a box that has no wired gateway.
+         *
+         * `reconnectTimeout: 0` in the options cannot do it (`options.reconnectTimeout || 2500`),
+         * and the field is not in the library's type - but the handlers read it on every reconnect.
+         */
+        (client as unknown as {reconnectTimeout: number}).reconnectTimeout = 0;
+        let closed = false;
+        /**
+         * A live socket for the next call: reconnecting here means the failure a caller sees is the
+         * connection's own (`ECONNREFUSED`, a timeout), which is what `isConnectionRefused()` and
+         * the interface back-off are built on. A socket that is still connecting is left alone -
+         * it is writable, and the library's write queues behind it.
+         */
+        const ensureSocket = (): void => {
+            if (closed) {
+                return;
+            }
+            const {socket} = client;
+            if (socket.destroyed || !socket.writable) {
+                client.connect();
+            }
+        };
         return {
             methodCall: (method, params, callback) => {
+                ensureSocket();
                 client.methodCall(method, params as never, callback);
             },
             close: () => {
-                // the library reconnects from the socket's own close/end/error handlers, so they
-                // have to go before the socket does, or a closed client dials again 2.5 s later
+                closed = true;
+                // `closed` and the disabled timer above should be enough; the handlers still go
+                // first, because the library reconnects from the socket's own close/end/error
+                // handlers and a closed client that dials again is very hard to see
                 const {socket} = client;
                 socket.removeAllListeners();
                 socket.on('error', () => undefined);

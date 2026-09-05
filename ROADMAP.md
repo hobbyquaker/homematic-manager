@@ -15,7 +15,7 @@ Status 2026-09-05: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 
 version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); tasks 7 (UI foundation) and 11 (Electron
 host with the build and release workflows) and 12 (web host and npm package; its Docker part runs
 as a follow-up, also done) are done too, and so is task 6 (write-safety lab study, `docs/config-pending.md`):
-milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon, installed and checked on all three lab boxes) are done as well: milestones M2 and M4 are reached in the code. Tasks 14 (test infrastructure) and 10 (device-specific editors) are in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon, installed and checked on all three lab boxes) are done as well: milestones M2 and M4 are reached in the code. Task 10 (device-specific editors, initial set) is done; task 14 (test infrastructure) is in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
@@ -65,7 +65,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - 7. UI foundation ✅ [archived](roadmap-archive/task-7.md)
 - 8. UI feature parity ✅ [archived](roadmap-archive/task-8.md)
 - 9. Device metadata pipeline ✅ [archived](roadmap-archive/task-9.md)
-- [10. Device-specific editors](#10-device-specific-editors)
+- [10. Device-specific editors](#10-device-specific-editors) ✅ (initial set; extended set is M5)
 - [11. Electron host, builds, releases](#11-electron-host-builds-releases) ✅
 - [12. Web host for development and e2e](#12-web-host-for-development-and-e2e) ✅
 - [13. CCU addon](#13-ccu-addon) ✅
@@ -282,6 +282,11 @@ with the untyped rule set (task 14); the device-specific editors of task 10 plug
   locale (D-15); missing keys fall back to English.
 
 ## 10. Device-specific editors
+
+Initial set done 2026-09-05, report in `roadmap-archive/task-10.md`: heating week programme (four
+naming shapes from the description), HmIP switching programme, enum extensions from index-keyed
+translations and presets, blind calibration, duration pickers on every base/factor and unit/value
+pair. The extended set below stays M5, plus the small items the report lists.
 
 The procedural WebUI dialogs that no extraction can produce, as plug-ins on top of the generic
 editor, each with its own tests:
@@ -505,6 +510,7 @@ devices from his own stock) and OQ-9 (the Turkish translations stay as a fallbac
 | OQ-12 | When to move to TypeScript 7 (native) and vite 8? Blocked today by typescript-eslint 8, svelte-check 4 and electron-vite 5 peer ranges. | Recurring "toolchain bump" check next to the quarterly Electron bump of task 11; bump when all three peers allow it. |
 | OQ-14 | npm name for the web host package (D-24): reuse `homematic-manager` (the 2.x name on npm, which installed the Electron app through `npm i -g`; its users would get the server instead) or a new `homematic-manager-web` / `@homematic-manager/web` (the workspace scope is free on npm to check). The tarball is otherwise ready (task 12). | Reuse `homematic-manager`: the `npm i -g` audience of 2.x wanted a headless install anyway, and the Electron app was never a sensible npm install. Announce in the 3.0 changelog. Decide before the first alpha is tagged. |
 | OQ-15 | The Docker image sets `HMM_ISSUE_COOKIE=true` because a container never binds loopback and the UI's socket would otherwise be refused on every load; the consequence is that whoever reaches the published port is in. Keep that default (UI works out of the box, `docs/install-docker.md` names three ways to lock it down), or ship an image whose UI refuses until the user has read the page? | Keep it, and print a one-line warning at start when the cookie is issued on a non-loopback bind without TLS or a proxy in front. Decide before the first image is published. |
+| OQ-16 | The HmIP switching programme's `NN_WP_WEEKDAY` bit mask: nothing in the descriptions or `data/dist` says which bit is which weekday. Task 10 took bit 0 = Sunday from the documented HmIP weekday enums (BidCos enums start at Saturday) and always prints the raw mask beside the checkboxes. | A five-minute lab check: set one weekday in the WebUI's switching programme on the HmIP-PDT or DRS8, read the `NN_WP_WEEKDAY` value back through `getParamset`, record the order in `ASSUMPTIONS.md`. Do it in the task 17 hardware checklist. |
 
 ## Lab and hardware
 

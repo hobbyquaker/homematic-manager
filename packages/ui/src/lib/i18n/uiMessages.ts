@@ -204,6 +204,34 @@ export const UI_MESSAGES: MessageCatalogue = {
     // The RPC console.
     History: {de: 'Verlauf', en: 'History'},
     optional: {de: 'optional', en: 'optional'},
+
+    // Pairing a device.
+    Mode: {de: 'Modus', en: 'Mode'},
+    'Serial number': {de: 'Seriennummer', en: 'Serial number'},
+    'Temporary key': {de: 'Temporärer Schlüssel', en: 'Temporary key'},
+    'Normal install mode': {de: 'Normaler Anlernmodus', en: 'Normal install mode'},
+    'Write the MASTER defaults and delete the existing links': {
+        de: 'Default-Parameter in Paramset MASTER schreiben, bestehende Verknüpfungen löschen',
+        en: 'Write the MASTER defaults and delete the existing links',
+    },
+    'With SGTIN and key': {de: 'Mit SGTIN und Schlüssel', en: 'With SGTIN and key'},
+    'With SGTIN only (key server)': {de: 'Nur mit SGTIN (Key Server)', en: 'With SGTIN only (key server)'},
+    'QR scanner': {de: 'QR-Scanner', en: 'QR scanner'},
+    Scan: {de: 'Scannen', en: 'Scan'},
+    Stop: {de: 'Stoppen', en: 'Stop'},
+    'That is not a HomematicIP device code': {
+        de: 'Das ist kein HomematicIP-Gerätecode',
+        en: 'That is not a HomematicIP device code',
+    },
+    'Start install mode': {de: 'Anlernmodus aktivieren', en: 'Start install mode'},
+    '{count} seconds left': {
+        de: {one: 'Noch {count} Sekunde', other: 'Noch {count} Sekunden'},
+        en: {one: '{count} second left', other: '{count} seconds left'},
+    },
+    'BidCos-Wired has no install mode; the interface searches its bus for new devices.': {
+        de: 'BidCos-Wired hat keinen Anlernmodus; die Schnittstelle durchsucht ihren Bus nach neuen Geräten.',
+        en: 'BidCos-Wired has no install mode; the interface searches its bus for new devices.',
+    },
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

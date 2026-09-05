@@ -23,7 +23,9 @@
     "test:browser": "vitest run --config ./vitest.browser.config.ts"
   },
   "dependencies": {
-    "@homematic-manager/core": "3.0.0-dev.0"
+    "@homematic-manager/core": "3.0.0-dev.0",
+    "@zxing/browser": "0.1.5",
+    "@zxing/library": "0.21.3"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.4",

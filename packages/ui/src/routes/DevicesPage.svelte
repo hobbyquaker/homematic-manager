@@ -20,6 +20,7 @@
 
     import ParamsetDialog from './paramset/ParamsetDialog.svelte';
 
+    import AddDeviceDialog from './devices/AddDeviceDialog.svelte';
     import DeleteDeviceDialog from './devices/DeleteDeviceDialog.svelte';
     import RenameDialog from './devices/RenameDialog.svelte';
     import RepairConfigDialog from './devices/RepairConfigDialog.svelte';
@@ -43,6 +44,7 @@
     let deleteOpen = $state(false);
     let replaceOpen = $state(false);
     let repairOpen = $state(false);
+    let addOpen = $state(false);
     let actionAddress = $state('');
 
     let paramsetOpen = $state(false);
@@ -54,7 +56,6 @@
     const devices = $derived(stores.devices.devices(interfaceName));
     const index = $derived(stores.devices.index(interfaceName));
     const messages = $derived(stores.serviceMessages.of(interfaceName));
-    const todo = $derived(t('Comes with task 8'));
 
     /**
      * hmipserver empties its device cache on every `init` and re-sends the whole list (eq-3/occu#45,
@@ -370,7 +371,7 @@
 
 <div class="hmm-page">
     <Toolbar label={t('Devices')}>
-        <ToolbarButton title={t('Add device')} icon="+" disabled reason={todo} />
+        <ToolbarButton title={t('Add device')} icon="+" testId="devices-add" onclick={() => (addOpen = true)} />
         <ToolbarButton
             title={t('Rename device')}
             icon="✎"
@@ -550,6 +551,7 @@
 <RenameDialog bind:open={renameOpen} address={actionAddress} />
 <DeleteDeviceDialog bind:open={deleteOpen} address={actionAddress} />
 <ReplaceDeviceDialog bind:open={replaceOpen} address={actionAddress} />
+<AddDeviceDialog bind:open={addOpen} />
 <RepairConfigDialog bind:open={repairOpen} address={actionAddress} />
 <ParamsetDialog bind:open={paramsetOpen} {interfaceName} address={paramsetAddress} paramset={paramsetName} />
 

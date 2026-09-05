@@ -3,9 +3,16 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!--
+            The policy of `RENDERER_CSP` in src/main/protocol.ts, and a test in
+            src/main/images.test.ts fails when the two drift apart. Nothing may load or run code
+            from anywhere but this bundle: the UI talks to the backend over IPC, which no CSP
+            covers, and to nothing else at all. `img-src` carries `hmm-image:` for the device
+            pictures (D-10) and `style-src 'unsafe-inline'` is what Svelte's transitions need.
+        -->
         <meta
             http-equiv="Content-Security-Policy"
-            content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+            content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: hmm-image:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
         />
         <title>Homematic Manager</title>
     </head>

@@ -1,6 +1,6 @@
 <script lang="ts">
-    import type {ConnectionConfig, Language} from '@homematic-manager/core';
-    import {DEFAULT_INTERFACES, INTERFACE_NAMES} from '@homematic-manager/core';
+    import type {ConnectionConfig, Language, UserDefinedInterface} from '@homematic-manager/core';
+    import {DEFAULT_INTERFACES, INTERFACE_NAMES, validateUserDefinedInterface} from '@homematic-manager/core';
 
     import Dialog from '../lib/components/Dialog.svelte';
     import MultiSelect from '../lib/components/MultiSelect.svelte';
@@ -21,6 +21,7 @@
     let useAuth = $state(false);
     let clearCaches = $state(false);
     let saving = $state(false);
+    let discovering = $state(false);
 
     $effect(() => {
         if (open && draft === undefined) {
@@ -78,6 +79,31 @@
         }
     }
 
+    async function discover(): Promise<void> {
+        discovering = true;
+        await stores.app.discover();
+        discovering = false;
+    }
+
+    function addExtra(): void {
+        if (!draft) {
+            return;
+        }
+        const extra: UserDefinedInterface = {name: '', host: '', port: 2001, protocol: 'xmlrpc', path: ''};
+        draft.extraInterfaces = [...draft.extraInterfaces, extra];
+    }
+
+    function removeExtra(index: number): void {
+        if (!draft) {
+            return;
+        }
+        const removed = draft.extraInterfaces[index]?.name;
+        draft.extraInterfaces = draft.extraInterfaces.filter((_entry, at) => at !== index);
+        if (removed !== undefined && removed !== '') {
+            draft.interfaces = draft.interfaces.filter((name) => name !== removed);
+        }
+    }
+
     function setAuthField(field: 'user' | 'password', value: string): void {
         if (!draft) {
             return;
@@ -101,24 +127,36 @@
                 <input class="hmm-input" bind:value={draft.host} data-testid="config-host" />
             </label>
 
-            {#if discovered.length > 0}
-                <label class="hmm-config-row">
-                    <span>{t('Discovered CCUs')}</span>
-                    <select
-                        class="hmm-select"
-                        onchange={(event) => {
-                            if (draft && event.currentTarget.value !== '') {
-                                draft.host = event.currentTarget.value;
-                            }
-                        }}
-                    >
-                        <option value="">{t('Select')}</option>
-                        {#each discovered as ccu (ccu.address)}
-                            <option value={ccu.address}>{ccu.address} {ccu.serial ?? ''}</option>
-                        {/each}
-                    </select>
-                </label>
-            {/if}
+            <div class="hmm-config-row">
+                <span>{t('Discovered CCUs')}</span>
+                <select
+                    class="hmm-select"
+                    aria-label={t('Discovered CCUs')}
+                    disabled={discovered.length === 0}
+                    data-testid="config-discovered"
+                    onchange={(event) => {
+                        if (draft && event.currentTarget.value !== '') {
+                            draft.host = event.currentTarget.value;
+                        }
+                    }}
+                >
+                    <option value="">{discovering ? t('Searching...') : t('Select')}</option>
+                    {#each discovered as ccu (ccu.address)}
+                        <option value={ccu.address}>{ccu.address} {ccu.serial ?? ''} {ccu.firmware ?? ''}</option>
+                    {/each}
+                </select>
+                <!--
+                    UDP discovery on 43439, on demand. 2.x ran it once at start-up and never again,
+                    so a CCU that booted afterwards never appeared in the list.
+                -->
+                <button
+                    type="button"
+                    class="hmm-button"
+                    disabled={discovering}
+                    data-testid="config-discover"
+                    onclick={() => void discover()}>{t('Discover')}</button
+                >
+            </div>
 
             <div class="hmm-config-row">
                 <span>{t('Interfaces')}</span>
@@ -224,8 +262,71 @@
 
             <label class="hmm-config-row">
                 <span>{t('Clear Cache')}</span>
-                <input type="checkbox" bind:checked={clearCaches} />
+                <input type="checkbox" bind:checked={clearCaches} data-testid="config-clear-cache" />
             </label>
+
+            <!--
+                User-defined interfaces (#135, D-13): a CUxD on another port, a second rfd, a
+                Homegear. Anything the interface table does not know is described here, and the name
+                then appears in the interface list above. No protocol choice for the built-in ones
+                (D-28) - only an extra interface may declare `binrpc`, because only a non-CCU peer
+                can be reached that way.
+            -->
+            <fieldset class="hmm-config-extra">
+                <legend>{t('Extra interfaces')}</legend>
+                {#each draft.extraInterfaces as extra, index (index)}
+                    {@const problems = validateUserDefinedInterface(extra)}
+                    <div class="hmm-config-extra-row" data-testid={`config-extra-${String(index)}`}>
+                        <input
+                            class="hmm-input"
+                            placeholder={t('Name')}
+                            aria-label={`${t('Name')} ${String(index)}`}
+                            bind:value={extra.name}
+                        />
+                        <input
+                            class="hmm-input"
+                            placeholder={t('Host')}
+                            aria-label={`${t('Host')} ${String(index)}`}
+                            bind:value={extra.host}
+                        />
+                        <input
+                            class="hmm-input"
+                            type="number"
+                            placeholder={t('Port')}
+                            aria-label={`${t('Port')} ${String(index)}`}
+                            bind:value={extra.port}
+                        />
+                        <select
+                            class="hmm-select"
+                            aria-label={`${t('Protocol')} ${String(index)}`}
+                            bind:value={extra.protocol}
+                        >
+                            <option value="xmlrpc">xmlrpc</option>
+                            <option value="binrpc">binrpc</option>
+                        </select>
+                        <input
+                            class="hmm-input"
+                            placeholder={t('Path')}
+                            aria-label={`${t('Path')} ${String(index)}`}
+                            bind:value={extra.path}
+                        />
+                        <button
+                            type="button"
+                            class="hmm-button"
+                            aria-label={`${t('Remove')} ${String(index)}`}
+                            onclick={() => removeExtra(index)}>✕</button
+                        >
+                        {#if problems.length > 0}
+                            <span class="hmm-config-problem" data-testid={`config-extra-problem-${String(index)}`}
+                                >{problems.join(', ')}</span
+                            >
+                        {/if}
+                    </div>
+                {/each}
+                <button type="button" class="hmm-button" data-testid="config-extra-add" onclick={addExtra}
+                    >{t('Add interface')}</button
+                >
+            </fieldset>
         </div>
     {/if}
 
@@ -253,5 +354,25 @@
 
     .hmm-config-row small {
         color: var(--hmm-fg-muted);
+    }
+
+    .hmm-config-extra {
+        border: 1px solid var(--hmm-border);
+        border-radius: var(--hmm-radius);
+        padding: 6px;
+        margin: 4px 0 0;
+    }
+
+    .hmm-config-extra-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 80px 90px 1fr auto;
+        gap: 4px;
+        margin-bottom: 4px;
+    }
+
+    .hmm-config-problem {
+        grid-column: 1 / -1;
+        color: var(--hmm-error);
+        font-size: var(--hmm-font-size-small);
     }
 </style>

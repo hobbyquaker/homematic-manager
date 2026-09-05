@@ -16,5 +16,6 @@ export {default as Notices} from './Notices.svelte';
 export {default as RpcLogPanel} from './RpcLogPanel.svelte';
 export {default as RpcProgress} from './RpcProgress.svelte';
 export {default as ConnectionIndicator} from './ConnectionIndicator.svelte';
+export {default as UpdateNotice} from './UpdateNotice.svelte';
 export {default as LanguageSwitch} from './LanguageSwitch.svelte';
 export {default as ThemeSwitch} from './ThemeSwitch.svelte';

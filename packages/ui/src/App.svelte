@@ -13,6 +13,7 @@
     import RpcProgress from './lib/components/RpcProgress.svelte';
     import Tabs from './lib/components/Tabs.svelte';
     import ThemeSwitch from './lib/components/ThemeSwitch.svelte';
+    import UpdateNotice from './lib/components/UpdateNotice.svelte';
     import ToolbarButton from './lib/components/ToolbarButton.svelte';
     import {setStores} from './lib/stores/context.js';
     import type {TabId} from './lib/stores/routing.js';
@@ -71,7 +72,19 @@
         } else {
             root.setAttribute('data-theme', app.theme);
         }
+        // The host paints the window chrome and the native menus; it has to follow the same choice
+        // (D-22). Without a host this resolves and does nothing.
+        void stores.host.setTheme(app.theme);
     });
+
+    /** The application menu cannot reach into the page, so it asks (task 11's `menu.action`). */
+    $effect(() =>
+        stores.host.onMenuAction((action) => {
+            if (action === 'settings') {
+                app.configDialogOpen = true;
+            }
+        }),
+    );
 
     function setLanguage(language: Language): void {
         app.setLanguage(language);
@@ -128,6 +141,23 @@
             <ToolbarButton title={t('Help')} icon="?" testId="about-button" onclick={() => (aboutOpen = true)} />
         </div>
     </header>
+
+    <UpdateNotice
+        state={stores.host.updateNotice}
+        labels={{
+            available: t('A new version is available'),
+            downloading: t('Downloading'),
+            downloaded: t('The update is ready and will be installed when you quit'),
+            installOnQuit: t('The update will be installed when you quit'),
+            download: t('Download'),
+            install: t('Install on quit'),
+            dismiss: t('Dismiss'),
+        }}
+        testId="update-notice"
+        ondownload={() => void stores.host.downloadUpdate()}
+        oninstall={() => void stores.host.installUpdateOnQuit()}
+        ondismiss={() => void stores.host.dismissUpdate()}
+    />
 
     <main class="hmm-main">
         <div class="hmm-panel" id={`panel-${app.tab}`} role="tabpanel" aria-labelledby={`tab-${app.tab}`}>

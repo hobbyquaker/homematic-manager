@@ -157,6 +157,9 @@ describe('ConfigDialog', () => {
         await open(transport);
 
         expect((screen.getByTestId('config-host') as HTMLInputElement).value).toBe('');
-        expect(screen.queryByText('Gefundene CCUs')).toBeNull();
+        // The discovery row is always there now, with the select disabled until something answers:
+        // 2.x ran the UDP search once at start-up, so a CCU that booted later never showed up.
+        expect((screen.getByTestId('config-discovered') as HTMLSelectElement).disabled).toBe(true);
+        expect((screen.getByTestId('config-discover') as HTMLButtonElement).disabled).toBe(false);
     });
 });

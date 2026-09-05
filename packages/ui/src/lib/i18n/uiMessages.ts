@@ -232,6 +232,33 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'BidCos-Wired hat keinen Anlernmodus; die Schnittstelle durchsucht ihren Bus nach neuen Geräten.',
         en: 'BidCos-Wired has no install mode; the interface searches its bus for new devices.',
     },
+
+    // The update notice and the About dialog (D-16); all of it is silent without a host bridge.
+    Update: {de: 'Aktualisierung', en: 'Update'},
+    'A new version is available': {de: 'Eine neue Version ist verfügbar', en: 'A new version is available'},
+    Downloading: {de: 'Wird geladen', en: 'Downloading'},
+    'The update is ready and will be installed when you quit': {
+        de: 'Die Aktualisierung ist bereit und wird beim Beenden installiert',
+        en: 'The update is ready and will be installed when you quit',
+    },
+    'The update will be installed when you quit': {
+        de: 'Die Aktualisierung wird beim Beenden installiert',
+        en: 'The update will be installed when you quit',
+    },
+    Download: {de: 'Herunterladen', en: 'Download'},
+    'Install on quit': {de: 'Beim Beenden installieren', en: 'Install on quit'},
+    'Check for updates': {de: 'Nach Aktualisierungen suchen', en: 'Check for updates'},
+    'Device data': {de: 'Gerätedaten', en: 'Device data'},
+
+    // The settings dialog.
+    'Extra interfaces': {de: 'Zusätzliche Schnittstellen', en: 'Extra interfaces'},
+    'Add interface': {de: 'Schnittstelle hinzufügen', en: 'Add interface'},
+    Remove: {de: 'Entfernen', en: 'Remove'},
+    Host: {de: 'Host', en: 'Host'},
+    Port: {de: 'Port', en: 'Port'},
+    Path: {de: 'Pfad', en: 'Path'},
+    Protocol: {de: 'Protokoll', en: 'Protocol'},
+    'Searching...': {de: 'Suche läuft...', en: 'Searching...'},
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

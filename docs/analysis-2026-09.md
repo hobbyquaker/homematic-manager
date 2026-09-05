@@ -498,7 +498,7 @@ out of scope.
 | 59 | Homegear `setInterface` / roaming | O | answered 2018, close |
 | 54 | Auto-confirm new devices in ReGa inbox | F | task 15 (ReGa optional) |
 | 50 | HmIP link easy modes | R | task 9 (openccu-data profiles for all HmIP receivers) |
-| 41 | Rename not stored in Homegear | F | task 15: use Homegear's `setName` RPC when `system.listMethods` lists it |
+| 41 | Rename not stored in Homegear | X | no Homegear-specific work (D-20); close with that note |
 | 29, 28 | i18n plural/printf, split language files | R | task 7 |
 | 27 | Console: dynamic fields for putParamset | F | task 8 |
 | 26 | Auto-ack `STICKY_UNREACH`, unreach counter | F | task 15 |

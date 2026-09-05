@@ -10,9 +10,10 @@ reused. This file holds open items; a finished task moves to `roadmap-archive/ta
 was done, measured and found, and its line in the contents gets a ✅ marker. Decisions are **D-n**,
 open questions **OQ-n**; when the maintainer changes a decision, record it here with the date.
 
-Status 2026-09-05: roadmap written and all open questions answered by the maintainer (D-7 to
-D-18), nothing implemented. Next: task 2 (project foundation, first commit sets `3.0.0-dev.0`).
-The stopgap release was dropped the same day (D-7). Last release 2.7.1 (2023-01-28).
+Status 2026-09-05: task 2 (project foundation) is done, version `3.0.0-dev.0` on branch `3.0-dev`;
+tasks 3 (core), 5 (hm-simulator 1.0, in its own repository) and 9 (data pipeline) are in
+progress. The data contract between tasks 3 and 9 is `packages/core/src/data/types.ts`. Last
+release 2.7.1 (2023-01-28).
 
 ## Decisions
 
@@ -30,19 +31,20 @@ The stopgap release was dropped the same day (D-7). Last release 2.7.1 (2023-01-
 | D-10 | (OQ-4) Device images are fetched from the connected CCU (`/config/img/devices/`) with a local cache; a small webp subset ships for Homegear/rfd-only users; the addon ships none. |
 | D-11 | (OQ-5) `cast`/`validate` and the interface table start in `packages/core`; extraction into a shared package for nrccu/hm2mqtt is a later follow-up. |
 | D-12 | (OQ-6) Coverage is reported in CI (core 100 %, backend 95 %, ui 95 % as targets) but never fails a PR. |
-| D-13 | (OQ-7) Generic XML/BIN-RPC plus user-defined extra interfaces (host, port, protocol, path); the only vendor-specific code is Homegear `setName`. |
+| D-13 | (OQ-7) Generic XML/BIN-RPC plus user-defined extra interfaces (host, port, protocol, path); no vendor-specific code (Homegear: see D-20). |
 | D-14 | (OQ-8) The maintainer adds a BidCos-RF actor and a remote from his own stock to the Charly for the lab. |
 | D-15 | (OQ-9) The old Turkish easy-mode translations are carried over as a fallback; de/en come from openccu-data. |
 | D-16 | (OQ-10) Windows 10+, macOS 12+, Linux glibc 2.31+; `electron-updater` against GitHub releases, notification and user confirmation before install. |
 | D-17 | (OQ-11) On first start 3.0 imports the 2.x configuration (CCU address, TLS, auth, language, pacing) once; 2.x caches are discarded. |
-| D-19 | No support for the HVL addon (#123): the project is dead. The issue is closed with that note. |
 | D-18 | Version scheme and commits for the rebuild: work on 3.0 starts at `3.0.0-dev.0` and every dev build bumps the counter (`3.0.0-dev.1`, `3.0.0-dev.2`, ...), then `3.0.0-alpha.n`, `3.0.0-beta.n`, `3.0.0`. Every significant change is its own commit with a message that explains the why; no squashed "WIP" commits. The maintainer tags and releases. |
+| D-19 | No support for the HVL addon (#123): the project is dead. The issue is closed with that note. |
+| D-20 | No Homegear-specific work. Checked 2026-09-05: the Homegear repository still receives build-system commits (last 2026-05) but its last release is 0.7.40 from 2019-07, three issues were opened since 2025, 127 stars; the user base is small and the project barely maintained. Homegear keeps working through the generic XML-RPC path where it behaves like a CCU; the `setName` special case (#41) is dropped and #41, #59, #60, #100, #106 are closed with that note. |
 
 ## Contents
 
 - [0. Milestones and effort](#0-milestones-and-effort)
 - 1. Legacy stopgap release 2.8 ❌ dropped (D-7), number not reused
-- [2. Project foundation](#2-project-foundation)
+- 2. Project foundation ✅ [archived](roadmap-archive/task-2.md)
 - [3. Core package](#3-core-package)
 - [4. Backend package](#4-backend-package)
 - [5. hm-simulator 1.0](#5-hm-simulator-10)
@@ -116,10 +118,10 @@ answered with that pointer.
 ## 2. Project foundation
 
 - npm workspaces monorepo in this repository: `packages/core`, `packages/backend`, `packages/ui`,
-  `apps/electron`, `apps/web`, `apps/ccu-addon`, `data/`. TypeScript strict, ESM, Node 24 for
-  tooling (`engines` per package).
-- ESLint 9 + Prettier (nrccu/hm2mqtt config), `.editorconfig`, `.gitattributes` (`* text=auto
-  eol=lf`), vitest with `@vitest/coverage-v8` and per-package thresholds, `npm test` at the root.
+  `apps/electron`, `apps/web`, `apps/ccu-addon`, `data/`. TypeScript strict, ESM, `engines.node
+  >=22.12` (CI on 22 and 24, `.nvmrc` 24).
+- ESLint + Prettier (nrccu/hm2mqtt config), `.editorconfig`, `.gitattributes` (`* text=auto
+  eol=lf`), vitest with `@vitest/coverage-v8` reporting only (D-12), `npm test` at the root.
 - GitHub Actions `ci.yml`: lint, unit, integration on push and PR (Node 22/24). The Electron and
   addon jobs come with tasks 11 and 13.
 - `AGENTS.md` from the ccu-addon-howto template, adapted; `roadmap-archive/` created.
@@ -128,7 +130,7 @@ answered with that pointer.
   first commit of the rebuild, every dev build increments the counter (`npm version prerelease
   --preid dev`), one commit per significant change with an explanatory message; `AGENTS.md`
   states both rules.
-- Delete `.travis.yml`, `appveyor.yml`; keep `tools/` only until task 9 replaces it.
+- Delete `.travis.yml`, `appveyor.yml`; `legacy/tools/` stays only until task 9 replaces it.
 
 ## 3. Core package
 
@@ -167,7 +169,7 @@ Node, transport-agnostic, tested against mocks and the simulator:
   messages) in a per-CCU profile directory; one-time import of the 2.x `hm-manager` configuration,
   caches discarded (D-17).
 - ReGa (D-2): optional module for names (`getChannels`) and renames; any failure degrades to
-  local names with a status indicator, never an exception. Homegear `setName` when advertised (#41).
+  local names with a status indicator, never an exception. No Homegear-specific naming (D-20).
 - UDP discovery on 43439 (hm2mqtt implementation) replacing `hm-discover`.
 - Write queue: paced, cancellable, logged (method, params, result, duration), with the
   `rpcLogFolder` dump kept as an option. Read calls bypass the queue.
@@ -256,9 +258,11 @@ Everything in section 2.1 of the analysis, tab by tab, with e2e tests per workfl
   `translation_extract`, `device_icons`), a converter to the runtime format the core package
   loads lazily per channel type, a `NOTICE` for the HMSL 2.0 data, and a documented update
   procedure (bump the pinned openccu-data release, run the converter, diff, commit).
-- Replaces `www/easymodes`, `stringtable.json`, `helpLinkParamset.json`, `deviceImages.json`,
-  `tools/convert_*.js`. Closes #50 and #22 (all 66 receivers incl. every HmIP one), gives English
-  parameter names, values and help (#119).
+- Output format: the contract in `packages/core/src/data/types.ts` (`data/dist/` layout listed
+  there); the core loads it through the `DataSource` interface.
+- Replaces `legacy/www/easymodes`, `stringtable.json`, `helpLinkParamset.json`,
+  `deviceImages.json` and `legacy/tools/convert_*.js`. Closes #50 and #22 (all 66 receivers incl.
+  every HmIP one), gives English parameter names, values and help (#119).
 - Device images per D-10: runtime fetch from the CCU with a cache plus a small bundled webp
   subset; a script derives the subset from openccu-data's `device_icons` map and a lab CCU.
 - The 2015 Turkish easy-mode translations are converted once into the new format as a fallback
@@ -285,7 +289,9 @@ editor, each with its own tests:
   README workaround for Windows until SignPath accepts the project. Minimum OS versions per D-16.
 - GitHub Actions: build matrix on push (artifacts), release workflow on tag with generated release
   notes (nrccu's script), assets attached, `electron-updater` against GitHub releases with a
-  notification and user confirmation (D-16). Quarterly Electron bump task in the archive template.
+  notification and user confirmation (D-16). Quarterly Electron and toolchain bump (OQ-12).
+  Electron 44 has no `postinstall` download any more: the build jobs run `install-electron` (or let
+  electron-builder fetch the binary) explicitly.
 - Playwright `_electron` smoke tests per OS (task 14).
 
 ## 12. Web host for development and e2e
@@ -332,9 +338,9 @@ From section 10 of the analysis, after parity: staged changes with one Apply (#1
 links (#80), per-pair names in multi-links (#87), defective-link display (#79), best-interface
 auto-assignment (#69), `STICKY_UNREACH` auto-ack and unreach counters (#26), links from the
 Devices tab (#25), link profile templates (#21), ReGa inbox auto-confirm (#54, optional ReGa),
-ReGa service-message ack (#94, optional ReGa), smoke-detector teams (#97), Homegear `setName`
-(#41), per-device event counters (#129), user-defined extra interfaces for CCU-Jack (#135, verify
-its RPC surface first). HVL (#123) is not supported: the project is dead (D-19).
+ReGa service-message ack (#94, optional ReGa), smoke-detector teams (#97), per-device event
+counters (#129), user-defined extra interfaces for CCU-Jack (#135, verify its RPC surface first).
+HVL (#123) is not supported: the project is dead (D-19). No Homegear-specific features (D-20).
 
 ## 16. Documentation
 
@@ -354,8 +360,11 @@ releases; the agent never tags or pushes on its own.
 OQ-1 to OQ-11 were answered on 2026-09-05 and are recorded as D-7 to D-17 in the Decisions
 table. The answers that differ from the recommendation: OQ-1 (no stopgap release, reversed the
 same day), OQ-6 (coverage is reported, not enforced), OQ-8 (the maintainer supplies BidCos-RF
-devices from his own stock) and OQ-9 (the Turkish translations stay as a fallback). New questions
-continue at OQ-12.
+devices from his own stock) and OQ-9 (the Turkish translations stay as a fallback).
+
+| | Question | Recommendation |
+| --- | --- | --- |
+| OQ-12 | When to move to TypeScript 7 (native) and vite 8? Blocked today by typescript-eslint 8, svelte-check 4 and electron-vite 5 peer ranges. | Recurring "toolchain bump" check next to the quarterly Electron bump of task 11; bump when all three peers allow it. |
 
 ## Lab and hardware
 

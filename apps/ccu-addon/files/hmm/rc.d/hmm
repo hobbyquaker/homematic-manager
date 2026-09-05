@@ -103,10 +103,23 @@ Start() {
     if Running; then
         echo 800 > /proc/"$(cat $PIDFILE)"/oom_score_adj 2>/dev/null
     fi
+
+    # `ONREBOOT NOSTART` in monit.cfg leaves the check **unmonitored** every time monit starts or
+    # reloads - measured on both OpenCCU lab boxes 2026-09-05, where `monit status hmm` said "Not
+    # monitored" after a clean install, so none of the alerts in monit.cfg could ever fire. Arming
+    # it here is RedMatic's `bin/monit-start`: the addon is up, so monit may watch it; the delay is
+    # because monit needs a cycle before a freshly reloaded check accepts `monitor`.
+    if [ -x /usr/bin/monit ] && [ -e $MONIT_CONF ]; then
+        nohup sh -c 'sleep 20; /usr/bin/monit -g hmm monitor' >/dev/null 2>&1 &
+    fi
     echo "OK"
 }
 
 Stop() {
+    # before the checks below, so a deliberate stop is not reported as a failure
+    if [ -x /usr/bin/monit ] && [ -e $MONIT_CONF ]; then
+        /usr/bin/monit -g $ADDON unmonitor >/dev/null 2>&1
+    fi
     if ! Running; then
         rm -f $PIDFILE
         echo "$ADDON not running"

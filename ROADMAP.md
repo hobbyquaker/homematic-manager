@@ -14,7 +14,8 @@ Status 2026-09-05: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 
 `1.0-dev` in its own repository, not yet pushed or published) and 9 (data pipeline) are done,
 version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); tasks 7 (UI foundation) and 11 (Electron
 host with the build and release workflows) and 12 (web host and npm package; its Docker part runs
-as a follow-up) are done too; task 6 (write-safety lab study) and 8 (UI feature parity) are in
+as a follow-up) are done too, and so is task 6 (write-safety lab study, `docs/config-pending.md`):
+milestone M1 is complete. Task 8 (UI feature parity) and the Docker follow-up of task 12 are in
 progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
@@ -60,7 +61,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - 3. Core package ✅ [archived](roadmap-archive/task-3.md)
 - 4. Backend package ✅ [archived](roadmap-archive/task-4.md)
 - 5. hm-simulator 1.0 ✅ [archived](roadmap-archive/task-5.md) (branch `1.0-dev` in its own repository, release by the maintainer)
-- [6. Paramset write safety and the CONFIG_PENDING study](#6-paramset-write-safety-and-the-config_pending-study)
+- [6. Paramset write safety and the CONFIG_PENDING study](#6-paramset-write-safety-and-the-config_pending-study) ✅
 - 7. UI foundation ✅ [archived](roadmap-archive/task-7.md)
 - [8. UI feature parity](#8-ui-feature-parity)
 - 9. Device metadata pipeline ✅ [archived](roadmap-archive/task-9.md)
@@ -210,6 +211,13 @@ Shared asset in its own repository (hobbyquaker/hm-simulator), also used by nrcc
   test).
 
 ## 6. Paramset write safety and the CONFIG_PENDING study
+
+Done 2026-09-05, report in `roadmap-archive/task-6.md`, write-up in `docs/config-pending.md`. The
+#98 mechanism is measured: hmipserver persists every `putParamset` entry before validating, an
+unknown parameter poisons the channel for good, and the only recovery is a valid full MASTER
+write (`devices.repairConfig`). rfd clamps, coerces and drops silently, so a BidCos `ok` says
+nothing without a read-back. A-1 refuted (ENUM index everywhere), A-5 verified, D-28 confirmed on
+a stock CCU. UI consequences are listed in task 8's brief.
 
 The fix for #98 and the reason the write path is rebuilt before any UI exists:
 

@@ -23,14 +23,12 @@ about every half hour while the agent works; the timestamp above is the last ref
 - Done and archived: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 1.0), 7 (UI
   foundation), 9 (data pipeline), 11 (Electron host; `build.yml` builds the desktop artifacts on
   every push to `3.0-dev` once Actions is enabled), 12 (web host, npm package with `--install`,
-  `release-npm.yml`; Docker part as a follow-up). Workspace was green at the last full run: 73 test files,
+  `release-npm.yml`; Docker part as a follow-up), 6 (lab study: `docs/config-pending.md`,
+  `devices.repairConfig`, hm-simulator calibrated; M1 complete). Lab state after the study is in
+  the private lab note (one DRS8 channel poisoned on purpose, needs re-pairing). Workspace was green at the last full run: 73 test files,
   1082 tests, `npm run lint`, `npm run typecheck`.
-- In progress by three background subagents (Opus), each committing distinct commits on
+- In progress by two background subagents (Opus), each committing distinct commits on
   `3.0-dev` in the shared working tree (each stages only its own files):
-  - **Task 6** write-safety lab study: lab boxes only, never a production CCU, no deletes, no
-    install mode. Deliverables: `docs/config-pending.md`, calibrated hm-simulator faults,
-    `devices.repairConfig`, fix for two unhandled rejections in
-    `packages/backend/src/write/queue.test.ts`.
   - **Task 12 follow-up** (Docker image, `compose.yml`, `release-docker.yml` with image SBOM,
     CI image build, proxy snippets moved to `docs/`, two small `ApiWebSocketServer` options in
     the backend: `noServer`/`onUpgrade` and `keepAliveMs`, then `apps/web` uses them).
@@ -46,7 +44,7 @@ about every half hour while the agent works; the timestamp above is the last ref
 
 - Enable GitHub Actions on `hobbyquaker/homematic-manager` (the API call was blocked for the
   agent). Until then, no CI and no Windows build artifact from `build.yml`.
-- Push `~/repos/hm-simulator` branch `1.0-dev` and tag `v1.0.0-dev.0` (`release.yml` publishes
+- Push `~/repos/hm-simulator` branch `1.0-dev` (now 12 commits incl. task 6's calibration) and tag `v1.0.0-dev.0` (`release.yml` publishes
   with npm OIDC). Until then the backend installs it with
   `npm install --no-save /home/basti/repos/hm-simulator` and the simulator tests are
   `describe.skipIf`.
@@ -54,7 +52,7 @@ about every half hour while the agent works; the timestamp above is the last ref
 
 ## Next steps, in order
 
-1. When task 6, the task 12 follow-up and task 8 finish: verify (`npm run lint && npm run typecheck && npm test` in WSL,
+1. When the task 12 follow-up and task 8 finish: verify (`npm run lint && npm run typecheck && npm test` in WSL,
    with the simulator installed), write `roadmap-archive/task-{6,11,12}.md`, tick them in the
    ROADMAP Contents, update the status line at the top of ROADMAP.md, commit, push `3.0-dev`
    (task 11 is archived and pushed already: `69cab48`).

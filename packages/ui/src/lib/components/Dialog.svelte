@@ -7,6 +7,13 @@
         /** Modal by default, as every jQuery UI dialog of 2.7 was. */
         modal?: boolean;
         width?: string;
+        /**
+         * Fixed height. Without one a dialog is as tall as its content, up to the viewport; with
+         * one its box does not change while it is open, whatever the content does (D-34: nothing
+         * may change size when its content or state changes). Give one to every dialog whose
+         * content can grow after it opened - the paramset and link editors.
+         */
+        height?: string | undefined;
         /** ESC and the close button close the dialog. Off for a dialog that must be answered. */
         closable?: boolean;
         onclose?: (() => void) | undefined;
@@ -22,6 +29,7 @@
         title = '',
         modal = true,
         width = '640px',
+        height = undefined,
         closable = true,
         onclose = undefined,
         children = undefined,
@@ -80,6 +88,7 @@
     bind:this={element}
     class="hmm-dialog"
     style:width
+    style:height
     data-testid={testId}
     aria-label={title === '' ? undefined : title}
     oncancel={onCancel}
@@ -116,12 +125,22 @@
         font-size: var(--hmm-font-size);
     }
 
+    /* Only while it is open: an unconditional flex display would beat the browser's own rule for a
+       closed dialog and show every one of them inside the page.
+       The title bar and the button row keep their size; the body is what scrolls, so a dialog
+       never grows a second scrollbar around a list that already has one. */
+    .hmm-dialog[open] {
+        display: flex;
+        flex-direction: column;
+    }
+
     .hmm-dialog::backdrop {
         background: var(--hmm-backdrop);
     }
 
     .hmm-dialog-titlebar {
         display: flex;
+        flex: 0 0 auto;
         align-items: center;
         gap: 8px;
         padding: 4px 6px;
@@ -152,13 +171,23 @@
     }
 
     .hmm-dialog-body {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
         padding: 10px;
         overflow: auto;
-        max-height: calc(100vh - 140px);
+    }
+
+    /* The body is a column, so a block of the dialog's content keeps its natural height and the
+       one part that is meant to scroll (a parameter list) claims the rest with its own flex. */
+    .hmm-dialog-body > :global(*) {
+        flex-shrink: 0;
     }
 
     .hmm-dialog-buttons {
         display: flex;
+        flex: 0 0 auto;
         justify-content: flex-end;
         gap: 6px;
         padding: 6px 10px;

@@ -308,7 +308,13 @@
     }
 </script>
 
-<Dialog bind:open {title} width="900px" testId="paramset-dialog">
+<!--
+    A fixed box (D-34): 900 x 720, bounded by the viewport, so the dialog is the same size whether
+    the channel has three parameters or ninety, and the only thing that scrolls is the parameter
+    list. It used to be as tall as its content with three nested scrolling boxes - the dialog, its
+    body and the list - which is what the maintainer saw at 1280x800.
+-->
+<Dialog bind:open {title} width="900px" height="min(640px, calc(100vh - 32px))" testId="paramset-dialog">
     {#if stores.paramsets.loading && !description}
         <p>{t('Loading Homematic Manager...')}</p>
     {:else if !description}
@@ -430,8 +436,12 @@
     }
 
     .hmm-paramset-list {
-        max-height: 52vh;
-        overflow: auto;
+        flex: 1 1 auto;
+        /* Shrinks, but never away: a tall device editor above it makes the body scroll
+           instead of squeezing the list to nothing. */
+        min-height: 120px;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .hmm-paramset-results {

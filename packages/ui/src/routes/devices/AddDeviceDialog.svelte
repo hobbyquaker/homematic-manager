@@ -358,10 +358,21 @@
 <style>
     .hmm-add-row {
         display: grid;
-        grid-template-columns: 190px 1fr;
+        grid-template-columns: 190px minmax(0, 1fr);
         gap: 8px;
         align-items: center;
         margin-bottom: 6px;
+    }
+
+    /* D-34: nothing leaves the dialog sideways. A grid cell whose content is wider than its track
+       would push the whole row out, so every cell may shrink and the controls inside wrap. */
+    .hmm-add-row > * {
+        min-width: 0;
+    }
+
+    .hmm-add-row input,
+    .hmm-add-row select {
+        max-width: 100%;
     }
 
     .hmm-add-seconds {
@@ -370,12 +381,15 @@
 
     .hmm-add-inline {
         display: flex;
+        flex-wrap: wrap;
         gap: 8px;
         align-items: center;
+        min-width: 0;
     }
 
     .hmm-add-actions {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
         gap: 10px;
         margin-top: 6px;

@@ -372,7 +372,7 @@
     }
 </script>
 
-<Dialog bind:open {title} width="960px" testId="link-paramset-dialog">
+<Dialog bind:open {title} width="960px" height="min(640px, calc(100vh - 32px))" testId="link-paramset-dialog">
     {#if loading && !receiverDescription}
         <p>{t('Loading Homematic Manager...')}</p>
     {:else if !receiverDescription}
@@ -439,79 +439,94 @@
         <section class="hmm-link-section">
             <h4>{t('Receiver')}: {stores.nameOf(receiver)} ({receiver})</h4>
 
+            <!--
+                Three stacked blocks, not one long flex row (D-34): the profile picker, the
+                profile's description *underneath* the picker it explains, and the template
+                controls. As one row the description sat to the right of the selector and the last
+                two buttons were pushed out of the dialog.
+            -->
             <div class="hmm-link-profile">
-                <label>
-                    <span>{t('Profile')}</span>
-                    <select
-                        class="hmm-select"
-                        data-testid="link-profile"
-                        value={String(profileId)}
-                        onchange={(event) => chooseProfile(Number(event.currentTarget.value))}
-                    >
-                        {#each profiles as entry (entry.id)}
-                            <option value={String(entry.id)}>{profileLabel(entry, stores.i18n.language)}</option>
-                        {/each}
-                    </select>
-                </label>
-                <label class="hmm-link-expert">
-                    <input type="checkbox" bind:checked={expert} data-testid="link-expert" />
-                    <span>{t('Expert view')}</span>
-                </label>
+                <div class="hmm-link-row">
+                    <label>
+                        <span>{t('Profile')}</span>
+                        <select
+                            class="hmm-select"
+                            data-testid="link-profile"
+                            value={String(profileId)}
+                            onchange={(event) => chooseProfile(Number(event.currentTarget.value))}
+                        >
+                            {#each profiles as entry (entry.id)}
+                                <option value={String(entry.id)}>{profileLabel(entry, stores.i18n.language)}</option>
+                            {/each}
+                        </select>
+                    </label>
+                    <label class="hmm-link-expert">
+                        <input type="checkbox" bind:checked={expert} data-testid="link-expert" />
+                        <span>{t('Expert view')}</span>
+                    </label>
+                </div>
 
-                <!--
+                {#if profile && !expert}
+                    <p class="hmm-link-profile-text" data-testid="link-profile-description">
+                        {profileDescription(profile, stores.i18n.language)}
+                    </p>
+                {/if}
+
+                <div class="hmm-link-row">
+                    <!--
                     Issue #21: the profile of the metadata plus the values it was tuned to, under a
                     name. Only templates of the same description identity are offered; applying one
                     fills the form and writes nothing.
                 -->
-                <label>
-                    <span>{t('Template')}</span>
-                    <select
-                        class="hmm-select"
-                        data-testid="link-template"
-                        disabled={templates.length === 0}
-                        value={templateChoice}
-                        onchange={(event) => {
-                            templateChoice = event.currentTarget.value;
-                            applyTemplate(templateChoice);
-                        }}
-                    >
-                        <option value=""
-                            >{templates.length === 0
-                                ? t('No template for this pair of channel types')
-                                : t('Apply template')}</option
+                    <label>
+                        <span>{t('Template')}</span>
+                        <select
+                            class="hmm-select"
+                            data-testid="link-template"
+                            disabled={templates.length === 0}
+                            value={templateChoice}
+                            onchange={(event) => {
+                                templateChoice = event.currentTarget.value;
+                                applyTemplate(templateChoice);
+                            }}
                         >
-                        {#each templates as entry (entry.name)}
-                            <option value={entry.name}
-                                >{entry.name}{entry.profileName === undefined ? '' : ` — ${entry.profileName}`}</option
+                            <option value=""
+                                >{templates.length === 0
+                                    ? t('No template for this pair of channel types')
+                                    : t('Apply template')}</option
                             >
-                        {/each}
-                    </select>
-                </label>
-                <label>
-                    <span>{t('Template name')}</span>
-                    <input class="hmm-input" bind:value={templateName} data-testid="link-template-name" />
-                </label>
-                <button
-                    type="button"
-                    class="hmm-button"
-                    disabled={templateName.trim() === '' || templateIdentity === ''}
-                    data-testid="link-template-save"
-                    onclick={() => void saveTemplate()}>{t('Save as template')}</button
-                >
-                <button
-                    type="button"
-                    class="hmm-button"
-                    disabled={templateChoice === ''}
-                    data-testid="link-template-delete"
-                    onclick={() => {
-                        const name = templateChoice;
-                        templateChoice = '';
-                        void stores.links.removeTemplate(name, templateIdentity);
-                    }}>{t('Delete template')}</button
-                >
-                {#if profile && !expert}
-                    <span class="hmm-link-profile-text">{profileDescription(profile, stores.i18n.language)}</span>
-                {/if}
+                            {#each templates as entry (entry.name)}
+                                <option value={entry.name}
+                                    >{entry.name}{entry.profileName === undefined
+                                        ? ''
+                                        : ` — ${entry.profileName}`}</option
+                                >
+                            {/each}
+                        </select>
+                    </label>
+                    <label>
+                        <span>{t('Template name')}</span>
+                        <input class="hmm-input" bind:value={templateName} data-testid="link-template-name" />
+                    </label>
+                    <button
+                        type="button"
+                        class="hmm-button"
+                        disabled={templateName.trim() === '' || templateIdentity === ''}
+                        data-testid="link-template-save"
+                        onclick={() => void saveTemplate()}>{t('Save as template')}</button
+                    >
+                    <button
+                        type="button"
+                        class="hmm-button"
+                        disabled={templateChoice === ''}
+                        data-testid="link-template-delete"
+                        onclick={() => {
+                            const name = templateChoice;
+                            templateChoice = '';
+                            void stores.links.removeTemplate(name, templateIdentity);
+                        }}>{t('Delete template')}</button
+                    >
+                </div>
             </div>
 
             <div class="hmm-link-list" data-testid="link-receiver-params">
@@ -568,6 +583,7 @@
 <style>
     .hmm-link-info {
         display: flex;
+        flex-wrap: wrap;
         gap: 10px;
         align-items: flex-end;
         padding-bottom: 6px;
@@ -602,12 +618,22 @@
 
     .hmm-link-profile {
         display: flex;
-        align-items: center;
-        gap: 12px;
+        flex-direction: column;
+        gap: 6px;
         padding-bottom: 6px;
     }
 
-    .hmm-link-profile label {
+    .hmm-link-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        /* Nothing leaves the dialog sideways: a narrow window puts the template controls on a
+           second line instead of pushing the last button past the right edge. */
+        flex-wrap: wrap;
+        min-width: 0;
+    }
+
+    .hmm-link-row label {
         display: flex;
         align-items: center;
         gap: 6px;
@@ -618,12 +644,17 @@
     }
 
     .hmm-link-profile-text {
+        margin: 0;
         color: var(--hmm-fg-muted);
     }
 
     .hmm-link-list {
-        max-height: 34vh;
-        overflow: auto;
+        flex: 1 1 auto;
+        /* Shrinks, but never away: a tall device editor above it makes the body scroll
+           instead of squeezing the list to nothing. */
+        min-height: 120px;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .hmm-link-results {

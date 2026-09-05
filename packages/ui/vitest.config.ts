@@ -43,6 +43,9 @@ export default defineConfig({
         browser: {
             enabled: true,
             headless: true,
+            // The size the maintainer looks at the app in, and the one D-34 names: every layout
+            // assertion (dialogs that must not overflow, column tracks) is measured here.
+            viewport: {width: 1280, height: 800},
             provider: playwright(),
             instances: [{browser: 'chromium'}],
         },

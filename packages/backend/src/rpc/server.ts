@@ -86,10 +86,10 @@ export function hmipListDevicesEntry(description: DeviceDescription): Record<str
     }
     const entry: Record<string, RpcValue> = {};
     for (const field of HMIP_LIST_DEVICES_FIELDS) {
-        const value = description[field] as RpcValue | undefined;
+        const value = description[field] as unknown;
         // 2.x drops every falsy field, which is what keeps the answer small
         if (value !== undefined && value !== '' && value !== 0 && value !== false && value !== null) {
-            entry[field] = value;
+            entry[field] = value as RpcValue;
         }
     }
     return entry;
@@ -214,16 +214,16 @@ export class CallbackServer {
     }
 
     #multicall(params: readonly RpcValue[]): RpcValue[] {
-        const calls = Array.isArray(params[0]) ? params[0] : [];
+        const calls: unknown[] = Array.isArray(params[0]) ? params[0] : [];
         const results: RpcValue[] = [];
         for (const call of calls) {
             if (typeof call !== 'object' || call === null || Array.isArray(call)) {
                 results.push('');
                 continue;
             }
-            const entry = call as {methodName?: RpcValue; params?: RpcValue};
-            const inner = Array.isArray(entry.params) ? entry.params : [];
-            results.push(this.#safeDispatch(asString(entry.methodName), inner));
+            const entry = call as {methodName?: unknown; params?: unknown};
+            const inner: unknown[] = Array.isArray(entry.params) ? entry.params : [];
+            results.push(this.#safeDispatch(asString(entry.methodName), inner as RpcValue[]));
         }
         return results;
     }
@@ -259,11 +259,11 @@ export class CallbackServer {
                 const address = server.httpServer.address();
                 resolve(typeof address === 'object' && address !== null ? address.port : this.#requestedPort);
             });
-            server.on('NotFound', (method: string, params: RpcValue[]) => {
+            server.on('NotFound', (method: string, params: RpcValue[] | undefined) => {
                 this.#handler.unknownMethod?.(method, params ?? []);
             });
             for (const method of CALLBACK_METHODS) {
-                server.on(method, (_error, params, callback) => {
+                server.on(method, (_error, params: RpcValue[] | undefined, callback) => {
                     callback(null, this.#safeDispatch(method, params ?? []));
                 });
             }
@@ -291,29 +291,44 @@ export class CallbackServer {
                 this.#handler.unknownMethod?.(method ?? '', (params as RpcValue[] | undefined) ?? []);
             });
             for (const method of CALLBACK_METHODS) {
-                server.on(method, (_error, params, callback) => {
-                    callback(null, this.#safeDispatch(method, (params as RpcValue[] | undefined) ?? []) as never);
+                server.on(method, (_error, params: RpcValue[] | undefined, callback) => {
+                    callback(null, this.#safeDispatch(method, params ?? []));
                 });
             }
         });
     }
 }
 
-function asString(value: RpcValue | undefined): string {
-    return typeof value === 'string' ? value : value === undefined ? '' : String(value);
+/** A parameter as a string; a struct or an array becomes JSON rather than `[object Object]`. */
+function asString(value: unknown): string {
+    if (typeof value === 'string') {
+        return value;
+    }
+    if (value === undefined || value === null) {
+        return '';
+    }
+    if (typeof value === 'object') {
+        return JSON.stringify(value);
+    }
+    return typeof value === 'number' || typeof value === 'boolean' ? String(value) : '';
 }
 
-function asStrings(value: RpcValue | undefined): string[] {
+function asStrings(value: unknown): string[] {
     return Array.isArray(value) ? value.map((entry) => asString(entry)) : [];
 }
 
-function asDescriptions(value: RpcValue | undefined): DeviceDescription[] {
+function asDescriptions(value: unknown): DeviceDescription[] {
     if (!Array.isArray(value)) {
         return [];
     }
     const descriptions: DeviceDescription[] = [];
-    for (const entry of value) {
-        if (typeof entry === 'object' && !Array.isArray(entry) && typeof entry['ADDRESS'] === 'string') {
+    for (const entry of value as unknown[]) {
+        if (
+            typeof entry === 'object' &&
+            entry !== null &&
+            !Array.isArray(entry) &&
+            typeof (entry as Record<string, unknown>)['ADDRESS'] === 'string'
+        ) {
             descriptions.push(entry as unknown as DeviceDescription);
         }
     }

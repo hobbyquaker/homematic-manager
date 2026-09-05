@@ -39,6 +39,7 @@ import {
     type ParamsetDescription,
     type ParamsetValue,
     type RpcMethodInfo,
+    type WriteOptions,
     type RpcValue,
     type RpcWriteValue,
     type RssiInfo,
@@ -124,8 +125,12 @@ export class Backend {
         this.#writeLog = new WriteLog({
             file: config.cacheFile('write-log.json'),
             rpcLogFolder: config.connection.rpcLogFolder,
-            onAppended: (entry) => this.events.emit('writeLog.appended', entry),
-            onError: (error) => this.#notice('warn', `write log: ${errorMessage(error)}`),
+            onAppended: (entry) => {
+                this.events.emit('writeLog.appended', entry);
+            },
+            onError: (error) => {
+                this.#notice('warn', `write log: ${errorMessage(error)}`);
+            },
             ...(options.cacheWriteDelayMs === undefined ? {} : {writeDelayMs: options.cacheWriteDelayMs}),
         });
         this.#writer = new ParamsetWriter({
@@ -133,7 +138,9 @@ export class Backend {
             describe: (interfaceName, address, paramset) => this.#describe(interfaceName, address, paramset),
             read: (interfaceName, method, params) => this.#read(interfaceName, method, params),
             write: (interfaceName, method, params) => this.#write(interfaceName, method, params),
-            onProgress: (progress) => this.events.emit('write.progress', progress),
+            onProgress: (progress) => {
+                this.events.emit('write.progress', progress);
+            },
         });
         this.#files = new DataFileServer({roots: options.fileRoots ?? {}});
     }
@@ -190,7 +197,7 @@ export class Backend {
      */
     async request<M extends ApiMethodName>(method: M, ...params: ApiParams<M>): Promise<ApiResult<M>> {
         try {
-            return (await this.#dispatch(method, params as unknown[])) as ApiResult<M>;
+            return await this.#dispatch(method, params);
         } catch (error) {
             throw error instanceof BackendError ? error : internalError(errorMessage(error), error);
         }
@@ -255,9 +262,9 @@ export class Backend {
             case 'paramset.description':
                 return this.#describe(p[0], p[1], p[2]);
             case 'paramset.put':
-                return this.#writer.put(p[0], p[1], p[2], p[3], p[4] ?? {});
+                return this.#writer.put(p[0], p[1], p[2], p[3], (params[4] as WriteOptions | undefined) ?? {});
             case 'paramset.putLink':
-                return this.#writer.putLink(p[0], p[1], p[2], p[3] ?? {});
+                return this.#writer.putLink(p[0], p[1], p[2], (params[3] as WriteOptions | undefined) ?? {});
             case 'value.set':
                 await this.#writer.setValue(p[0], p[1], p[2], p[3]);
                 return null;
@@ -267,7 +274,12 @@ export class Backend {
             case 'links.list':
                 return asLinks(await this.#read(p[0], 'getLinks', []));
             case 'links.add':
-                await this.#write(p[0], 'addLink', [p[1], p[2], p[3] ?? '', p[4] ?? '']);
+                await this.#write(p[0], 'addLink', [
+                    p[1],
+                    p[2],
+                    (params[3] as string | undefined) ?? '',
+                    (params[4] as string | undefined) ?? '',
+                ]);
                 return null;
             case 'links.remove':
                 await this.#write(p[0], 'removeLink', [p[1], p[2]]);
@@ -338,10 +350,16 @@ export class Backend {
         const manager = (this.#options.createInterfaceManager ?? ((options) => new InterfaceManager(options)))({
             connection,
             handler: this.#callbackHandler(),
-            onStateChanged: (states) => this.events.emit('interfaces.changed', states),
-            onNotice: (level, message, interfaceName) => this.#notice(level, message, interfaceName),
+            onStateChanged: (states) => {
+                this.events.emit('interfaces.changed', states);
+            },
+            onNotice: (level, message, interfaceName) => {
+                this.#notice(level, message, interfaceName);
+            },
             onConnected: (interfaceName) => this.#onInterfaceConnected(interfaceName),
-            onCall: (record) => this.#onCall(record),
+            onCall: (record) => {
+                this.#onCall(record);
+            },
             ...(this.#options.callbackHost === undefined ? {} : {callbackHost: this.#options.callbackHost}),
             ...(this.#options.rpcTimeoutMs === undefined ? {} : {rpcTimeoutMs: this.#options.rpcTimeoutMs}),
             ...(this.#options.watchdogIntervalMs === undefined
@@ -360,8 +378,12 @@ export class Backend {
             auth: connection.auth,
             language: connection.language,
             names: this.#caches.names,
-            onStateChanged: (state) => this.events.emit('rega.changed', state),
-            onNotice: (level, message) => this.#notice(level, message),
+            onStateChanged: (state) => {
+                this.events.emit('rega.changed', state);
+            },
+            onNotice: (level, message) => {
+                this.#notice(level, message);
+            },
             ...this.#options.regaOptions,
         });
 
@@ -609,7 +631,7 @@ export class Backend {
         if (cached) {
             return cached;
         }
-        const answer = await this.#read(interfaceName, 'getDeviceDescription', [address]);
+        const answer: unknown = await this.#read(interfaceName, 'getDeviceDescription', [address]);
         if (typeof answer !== 'object' || answer === null || Array.isArray(answer)) {
             throw connectionError(`${interfaceName}: no description for ${address}`);
         }
@@ -649,7 +671,7 @@ export class Backend {
      */
 
     async #getParamset(interfaceName: string, address: string, paramset: string): Promise<Paramset> {
-        const answer = await this.#read(interfaceName, 'getParamset', [address, paramset]);
+        const answer: unknown = await this.#read(interfaceName, 'getParamset', [address, paramset]);
         const values: Record<string, ParamsetValue> = {};
         if (typeof answer === 'object' && answer !== null && !Array.isArray(answer)) {
             for (const [name, value] of Object.entries(answer)) {
@@ -688,7 +710,10 @@ export class Backend {
             return cached;
         }
         // eQ-3 takes MASTER/VALUES/LINK here, never a peer address - that is only a paramset *key*
-        const answer = await this.#read(interfaceName, 'getParamsetDescription', [address, isLink ? 'LINK' : paramset]);
+        const answer: unknown = await this.#read(interfaceName, 'getParamsetDescription', [
+            address,
+            isLink ? 'LINK' : paramset,
+        ]);
         if (typeof answer !== 'object' || answer === null || Array.isArray(answer)) {
             throw connectionError(`${interfaceName}: no paramset description for ${address} ${paramset}`);
         }
@@ -926,75 +951,75 @@ export class Backend {
  * the shapes an interface answers with, checked rather than trusted
  */
 
+/** An XML-RPC struct, as opposed to an array or a scalar. */
+function isStruct(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 function isScalar(value: unknown): value is ParamsetValue {
     return typeof value === 'boolean' || typeof value === 'number' || typeof value === 'string';
 }
 
-function asStrings(value: RpcValue): string[] {
+function asStrings(value: unknown): string[] {
     return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === 'string') : [];
 }
 
-function asBooleans(value: RpcValue): boolean[] {
+function asBooleans(value: unknown): boolean[] {
     return Array.isArray(value) ? value.map((entry) => Boolean(entry)) : [];
 }
 
-function asDescriptions(value: RpcValue): DeviceDescription[] {
+function asDescriptions(value: unknown): DeviceDescription[] {
     if (!Array.isArray(value)) {
         return [];
     }
     const descriptions: DeviceDescription[] = [];
     for (const entry of value) {
-        if (typeof entry === 'object' && !Array.isArray(entry) && typeof entry['ADDRESS'] === 'string') {
+        if (isStruct(entry) && typeof entry['ADDRESS'] === 'string') {
             descriptions.push(entry as unknown as DeviceDescription);
         }
     }
     return descriptions;
 }
 
-function asLinks(value: RpcValue): LinkRecord[] {
+function asLinks(value: unknown): LinkRecord[] {
     if (!Array.isArray(value)) {
         return [];
     }
     const links: LinkRecord[] = [];
     for (const entry of value) {
-        if (
-            typeof entry === 'object' &&
-            !Array.isArray(entry) &&
-            typeof entry['SENDER'] === 'string' &&
-            typeof entry['RECEIVER'] === 'string'
-        ) {
+        if (isStruct(entry) && typeof entry['SENDER'] === 'string' && typeof entry['RECEIVER'] === 'string') {
             links.push(entry as unknown as LinkRecord);
         }
     }
     return links;
 }
 
-function asLink(value: RpcValue, sender: string, receiver: string): LinkRecord {
+function asLink(value: unknown, sender: string, receiver: string): LinkRecord {
     if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         return {SENDER: sender, RECEIVER: receiver, ...(value as unknown as Partial<LinkRecord>)};
     }
     return {SENDER: sender, RECEIVER: receiver};
 }
 
-function asBidcosInterfaces(value: RpcValue): BidcosInterfaceInfo[] {
+function asBidcosInterfaces(value: unknown): BidcosInterfaceInfo[] {
     if (!Array.isArray(value)) {
         return [];
     }
     const interfaces: BidcosInterfaceInfo[] = [];
     for (const entry of value) {
-        if (typeof entry === 'object' && !Array.isArray(entry) && typeof entry['ADDRESS'] === 'string') {
+        if (isStruct(entry) && typeof entry['ADDRESS'] === 'string') {
             interfaces.push(entry as unknown as BidcosInterfaceInfo);
         }
     }
     return interfaces;
 }
 
-function asRssiRaw(value: RpcValue): Record<string, Record<string, unknown[]>> {
+function asRssiRaw(value: unknown): Record<string, Record<string, unknown[]>> {
     const raw: Record<string, Record<string, unknown[]>> = {};
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
         return raw;
     }
-    for (const [address, peers] of Object.entries(value)) {
+    for (const [address, peers] of Object.entries(value as Record<string, unknown>)) {
         if (typeof peers !== 'object' || peers === null || Array.isArray(peers)) {
             continue;
         }

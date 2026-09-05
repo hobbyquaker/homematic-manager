@@ -77,7 +77,7 @@ function harness(
             if (injected) {
                 return injected;
             }
-            const address = String(params[0]);
+            const address = params[0] as string;
             return Promise.resolve((options.current?.[address] ?? {}) as RpcValue);
         },
         write: (_interfaceName, method, params) => {

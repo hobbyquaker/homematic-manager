@@ -85,11 +85,7 @@ export class ApiWebSocketServer {
             ): void => {
                 // refusing during the handshake gives the client a real 401 instead of a socket
                 // that opens and closes again, which is what lighttpd in front of the addon needs
-                callback(
-                    this.authorise({url: info.req.url, headers: info.req.headers as Record<string, unknown>}),
-                    401,
-                    'Unauthorized',
-                );
+                callback(this.authorise({url: info.req.url, headers: info.req.headers}), 401, 'Unauthorized');
             };
             const server = new WebSocketServer(
                 this.#options.server
@@ -112,7 +108,9 @@ export class ApiWebSocketServer {
             if (this.#options.server) {
                 resolve(0);
             } else {
-                server.on('listening', () => resolve(this.port));
+                server.on('listening', () => {
+                    resolve(this.port);
+                });
             }
         });
     }
@@ -130,7 +128,9 @@ export class ApiWebSocketServer {
             return;
         }
         await new Promise<void>((resolve) => {
-            server.close(() => resolve());
+            server.close(() => {
+                resolve();
+            });
         });
     }
 
@@ -161,7 +161,7 @@ export class ApiWebSocketServer {
     }
 
     #accept(socket: WebSocket, request: IncomingMessage): void {
-        if (!this.authorise({url: request.url, headers: request.headers as Record<string, unknown>})) {
+        if (!this.authorise({url: request.url, headers: request.headers})) {
             socket.close(UNAUTHORIZED_CLOSE_CODE, 'unauthorized');
             return;
         }

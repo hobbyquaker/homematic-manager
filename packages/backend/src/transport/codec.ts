@@ -70,7 +70,7 @@ function bufferToString(data: unknown): string | undefined {
         return Buffer.from(data.buffer, data.byteOffset, data.byteLength).toString('utf8');
     }
     if (Array.isArray(data) && data.every((entry) => Buffer.isBuffer(entry))) {
-        return Buffer.concat(data as Buffer[]).toString('utf8');
+        return Buffer.concat(data).toString('utf8');
     }
     return undefined;
 }

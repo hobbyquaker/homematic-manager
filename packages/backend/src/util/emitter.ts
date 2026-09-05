@@ -29,10 +29,10 @@ export class ApiEventEmitter implements ApiEventSource {
     /** Subscribes; the returned function unsubscribes. */
     on<E extends ApiEventName>(event: E, handler: ApiEventHandler<E>): () => void {
         const handlers = this.#handlers.get(event) ?? new Set<(payload: never) => void>();
-        handlers.add(handler as (payload: never) => void);
+        handlers.add(handler);
         this.#handlers.set(event, handlers);
         return () => {
-            handlers.delete(handler as (payload: never) => void);
+            handlers.delete(handler);
         };
     }
 

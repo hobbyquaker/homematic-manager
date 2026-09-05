@@ -143,14 +143,14 @@ export class WriteLog {
 
     /** Reads the log of the previous session, if there is a file. */
     async load(): Promise<void> {
-        const stored = await this.#file?.read();
+        const stored: unknown = await this.#file?.read();
         if (!Array.isArray(stored)) {
             return;
         }
-        for (const entry of stored) {
-            if (typeof entry === 'object' && entry !== null && typeof entry.id === 'number') {
-                this.#entries.push(entry);
-                this.#nextId = Math.max(this.#nextId, entry.id + 1);
+        for (const entry of stored as unknown[]) {
+            if (typeof entry === 'object' && entry !== null && typeof (entry as WriteLogEntry).id === 'number') {
+                this.#entries.push(entry as WriteLogEntry);
+                this.#nextId = Math.max(this.#nextId, (entry as WriteLogEntry).id + 1);
             }
         }
     }

@@ -182,7 +182,7 @@ describe('InterfaceManager.start', () => {
         expect(h.connected).toEqual(['BidCos-RF']);
     });
 
-    it('finds the callback address itself when none is configured', async () => {
+    it('finds the callback address itself when none is configured', () => {
         const h = harness({connection: {callback: {ip: '', xmlrpcPort: 0, binrpcPort: 0}}});
         expect(h.manager.callbackIp).toBeTypeOf('string');
     });
@@ -268,7 +268,9 @@ describe('the watchdog', () => {
     it('ignores an event of an interface it does not manage', async () => {
         const h = harness();
         await h.manager.start();
-        expect(() => h.manager.noteEvent('Nothing')).not.toThrow();
+        expect(() => {
+            h.manager.noteEvent('Nothing');
+        }).not.toThrow();
     });
 });
 

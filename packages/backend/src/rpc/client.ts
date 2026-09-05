@@ -94,7 +94,7 @@ function createTransport(options: RpcClientOptions): RpcTransport {
         });
         return {
             methodCall: (method, params, callback) => {
-                client.methodCall(method, params as never, callback as never);
+                client.methodCall(method, params as never, callback);
             },
             close: () => {
                 // the library reconnects from the socket's own close/end/error handlers, so they
@@ -118,7 +118,7 @@ function createTransport(options: RpcClientOptions): RpcTransport {
     const client = options.tls === true ? xmlrpc.createSecureClient(clientOptions) : xmlrpc.createClient(clientOptions);
     return {
         methodCall: (method, params, callback) => {
-            client.methodCall(method, params as never, callback as never);
+            client.methodCall(method, params as never, callback);
         },
     };
 }

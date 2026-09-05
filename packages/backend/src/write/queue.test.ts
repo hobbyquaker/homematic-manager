@@ -98,7 +98,10 @@ describe('WriteQueue', () => {
 
     it('wraps a non-error rejection', async () => {
         const {queue} = harness({'HmIP-RF': 0});
-        await expect(queue.enqueue('HmIP-RF', () => Promise.reject('plain'))).rejects.toThrow('plain');
+        // a task that rejects with a bare string is what the wrapping in the queue is there for
+        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+        const task = (): Promise<never> => Promise.reject('plain');
+        await expect(queue.enqueue('HmIP-RF', task)).rejects.toThrow('plain');
     });
 
     it('cancels what has not started and leaves the running task alone', async () => {

@@ -42,6 +42,23 @@ export default tseslint.config(
         },
     },
     {
+        // Task 4 turns the same type-aware linting on for the backend, for the same reason: it is
+        // the layer that puts values on the wire, and `no-unsafe-*` is exactly the class of bug a
+        // struct from an interface process can cause. Only `src/**` again - `test/simulator/**` is
+        // outside the package's tsconfig program and talks to an untyped hm-simulator.
+        files: ['packages/backend/src/**/*.ts'],
+        extends: [tseslint.configs.strictTypeChecked],
+        languageOptions: {
+            parserOptions: {
+                projectService: true,
+                tsconfigRootDir: import.meta.dirname,
+            },
+        },
+        rules: {
+            '@typescript-eslint/restrict-template-expressions': ['error', {allowNumber: true}],
+        },
+    },
+    {
         files: ['**/*.svelte', '**/*.svelte.ts'],
         languageOptions: {
             globals: {...globals.browser},

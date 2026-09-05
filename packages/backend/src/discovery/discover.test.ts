@@ -33,7 +33,7 @@ function fakeSocket(
         }, 0);
         return socket;
     }) as never;
-    socket.setBroadcast = (() => undefined) as never;
+    socket.setBroadcast = () => undefined;
     socket.send = ((
         _message: Buffer,
         _offset: number,
@@ -166,10 +166,10 @@ describe('discoverCcus', () => {
 
     it('answers with an empty list when the socket cannot be bound', async () => {
         const socket = fakeSocket([]);
-        socket.bind = (() => {
+        socket.bind = () => {
             setTimeout(() => socket.emit('error', new Error('EACCES')), 0);
             return socket;
-        }) as never;
+        };
         const close = vi.fn();
         socket.close = close as never;
         await expect(discoverCcus({createSocket: () => socket, interfaces: noInterfaces})).resolves.toEqual([]);
@@ -178,9 +178,9 @@ describe('discoverCcus', () => {
 
     it('survives a socket that refuses broadcast and a send that throws', async () => {
         const socket = fakeSocket([]);
-        socket.setBroadcast = (() => {
+        socket.setBroadcast = () => {
             throw new Error('EPERM');
-        }) as never;
+        };
         socket.send = (() => {
             throw new Error('EINVAL');
         }) as never;

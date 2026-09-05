@@ -20,7 +20,7 @@
  * the root of the "endless loading" issues #121, #126, #128 and #134.
  */
 
-import type {ConnectionConfig, InterfaceState, RpcProtocol, RpcValue} from '@homematic-manager/core';
+import type {ConnectionConfig, InterfaceState, RpcProtocol} from '@homematic-manager/core';
 import {INTERFACE_NAMES, interfaceDefinition, interfacePort, isKnownInterface} from '@homematic-manager/core';
 
 import {configError, connectionError, errorMessage} from '../errors.js';
@@ -78,15 +78,15 @@ export interface InterfaceManagerOptions {
  * Issue #93: 2.x did `res[0].ADDRESS` and threw when the answer was empty or not an array, which
  * takes the whole connection down on a CCU whose HmIP access point is not paired yet.
  */
-export function firstBidcosInterfaceAddress(result: RpcValue): string | undefined {
+export function firstBidcosInterfaceAddress(result: unknown): string | undefined {
     if (!Array.isArray(result) || result.length === 0) {
         return undefined;
     }
-    const first = result[0];
+    const first: unknown = result[0];
     if (typeof first !== 'object' || first === null || Array.isArray(first)) {
         return undefined;
     }
-    const address = (first as Record<string, RpcValue>)['ADDRESS'];
+    const address = (first as Record<string, unknown>)['ADDRESS'];
     return typeof address === 'string' && address !== '' ? address : undefined;
 }
 

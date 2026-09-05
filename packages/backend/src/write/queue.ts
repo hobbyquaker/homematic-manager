@@ -129,7 +129,9 @@ export class WriteQueue {
         if (wait === 0) {
             next.run();
         } else {
-            this.#schedule(() => next.run(), wait);
+            this.#schedule(() => {
+                next.run();
+            }, wait);
         }
     }
 }

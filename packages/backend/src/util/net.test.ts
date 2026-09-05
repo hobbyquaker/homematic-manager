@@ -55,18 +55,20 @@ describe('probePort', () => {
 
     it('is false when the connection times out, and destroys the socket', async () => {
         const socket = new EventEmitter() as net.Socket & EventEmitter;
-        socket.destroy = vi.fn() as never;
+        const destroy = vi.fn();
+        socket.destroy = destroy as never;
         const connect = vi.fn(() => {
             setTimeout(() => socket.emit('timeout'), 0);
             return socket;
         });
         await expect(probePort('10.0.0.1', 2001, {connect: connect as never, timeoutMs: 10})).resolves.toBe(false);
-        expect(socket.destroy).toHaveBeenCalled();
+        expect(destroy).toHaveBeenCalled();
     });
 
     it('settles only once', async () => {
         const socket = new EventEmitter() as net.Socket & EventEmitter;
-        socket.destroy = vi.fn() as never;
+        const destroy = vi.fn();
+        socket.destroy = destroy as never;
         const connect = vi.fn((_options: unknown, onConnect: () => void) => {
             setTimeout(() => {
                 onConnect();
@@ -75,7 +77,7 @@ describe('probePort', () => {
             return socket;
         });
         await expect(probePort('10.0.0.1', 2001, {connect: connect as never})).resolves.toBe(true);
-        expect(socket.destroy).toHaveBeenCalledTimes(1);
+        expect(destroy).toHaveBeenCalledTimes(1);
     });
 });
 
@@ -101,6 +103,9 @@ describe('withTimeout', () => {
         await expect(withTimeout(Promise.reject(new Error('fault')), 100, () => new Error('late'))).rejects.toThrow(
             'fault',
         );
-        await expect(withTimeout(Promise.reject('plain'), 100, () => new Error('late'))).rejects.toThrow('plain');
+        // an RPC library that rejects with a bare string is exactly what this branch is for
+        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+        const rejected = Promise.reject('plain');
+        await expect(withTimeout(rejected, 100, () => new Error('late'))).rejects.toThrow('plain');
     });
 });

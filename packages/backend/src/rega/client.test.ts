@@ -18,11 +18,10 @@ function service(
         names,
         onStateChanged: (state) => states.push(state),
         onNotice: (_level, message) => notices.push(message),
-        createClient: () =>
-            ({
-                getChannels: client.getChannels ?? (() => Promise.resolve([])),
-                exec: client.exec ?? (() => Promise.resolve({output: '', objects: {}})),
-            }) as RegaLike,
+        createClient: () => ({
+            getChannels: client.getChannels ?? (() => Promise.resolve([])),
+            exec: client.exec ?? (() => Promise.resolve({output: '', objects: {}})),
+        }),
         ...overrides,
     });
     return {rega, names, states, notices};

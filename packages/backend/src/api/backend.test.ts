@@ -9,7 +9,6 @@ import type {ApiEventName, DeviceDescription, RpcValue} from '@homematic-manager
 import {BackendError} from '../errors.js';
 import type {RpcClient, RpcClientOptions, RpcOutValue} from '../rpc/client.js';
 import type {CallbackHandler, CallbackServerSet} from '../rpc/server.js';
-import type {RegaLike} from '../rega/client.js';
 import {Backend, type BackendOptions} from './backend.js';
 import {InProcessTransport} from './transport.js';
 
@@ -104,7 +103,7 @@ async function harness(
             protocol: clientOptions.protocol,
             closed: false,
             description: clientOptions.name,
-            call: async (method: string, params: readonly RpcOutValue[] = []) => {
+            call: (method: string, params: readonly RpcOutValue[] = []) => {
                 calls.push({interfaceName: clientOptions.name, method, params});
                 const answer = (answers[clientOptions.name] ?? (() => ''))(method, params);
                 // the real client reports every finished call; the write log hangs off that hook
@@ -117,10 +116,10 @@ async function harness(
                 };
                 if (answer instanceof Error) {
                     clientOptions.onCall?.({...record, ok: false, error: answer.message});
-                    throw answer;
+                    return Promise.reject(answer);
                 }
                 clientOptions.onCall?.({...record, ok: true, result: answer});
-                return answer;
+                return Promise.resolve(answer);
             },
             close: () => undefined,
         }) as unknown as RpcClient;
@@ -143,7 +142,7 @@ async function harness(
         cacheWriteDelayMs: 0,
         fileRoots: {data: dir},
         discover: () => Promise.resolve([{address: '10.0.0.1', name: 'ccu3', interfaces: ['HmIP-RF']}]),
-        regaOptions: {createClient: () => rega as unknown as RegaLike},
+        regaOptions: {createClient: () => rega},
         interfaceManagerOptions: {
             createClient,
             createCallbackServers: (incoming) => {
@@ -212,11 +211,10 @@ describe('config', () => {
             legacyEnvironment: {platform: 'linux', appData: '', home},
             watchdogIntervalMs: 0,
             regaOptions: {
-                createClient: () =>
-                    ({
-                        getChannels: () => Promise.reject(new Error('offline')),
-                        exec: () => Promise.reject(new Error('offline')),
-                    }) as never,
+                createClient: () => ({
+                    getChannels: () => Promise.reject(new Error('offline')),
+                    exec: () => Promise.reject(new Error('offline')),
+                }),
             },
             interfaceManagerOptions: {
                 createClient: () =>
@@ -322,7 +320,7 @@ describe('devices', () => {
             answers: {
                 'HmIP-RF': (method, params) =>
                     method === 'getDeviceDescription'
-                        ? {ADDRESS: String(params[0]), TYPE: 'HmIP-NEW'}
+                        ? {ADDRESS: params[0] as string, TYPE: 'HmIP-NEW'}
                         : (defaultAnswers['HmIP-RF'] as Answer)(method, params),
             },
         });

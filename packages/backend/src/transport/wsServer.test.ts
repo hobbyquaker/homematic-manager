@@ -44,15 +44,21 @@ function connect(url: string, protocols?: string[]): Promise<WebSocket> {
     const socket = protocols ? new WebSocket(url, protocols) : new WebSocket(url);
     sockets.push(socket);
     return new Promise((resolve, reject) => {
-        socket.once('open', () => resolve(socket));
+        socket.once('open', () => {
+            resolve(socket);
+        });
         socket.once('error', reject);
-        socket.once('close', (code: number) => reject(new Error(`closed with ${String(code)}`)));
+        socket.once('close', (code: number) => {
+            reject(new Error(`closed with ${String(code)}`));
+        });
     });
 }
 
 function nextFrame(socket: WebSocket, predicate: (frame: ApiFrame) => boolean): Promise<ApiFrame> {
     return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => reject(new Error('no frame')), 5000);
+        const timer = setTimeout(() => {
+            reject(new Error('no frame'));
+        }, 5000);
         const onMessage = (data: unknown): void => {
             const frame = decodeFrame(data);
             if (frame && predicate(frame)) {
@@ -155,7 +161,11 @@ describe('ApiWebSocketServer', () => {
         socket.send(encodeFrame({t: 'req', id: 4, m: 'rega.state', p: []}));
         expect(await nextFrame(socket, (frame) => frame.t === 'res')).toMatchObject({t: 'res', id: 4});
         await server.stop();
-        await new Promise<void>((resolve) => http_.close(() => resolve()));
+        await new Promise<void>((resolve) =>
+            http_.close(() => {
+                resolve();
+            }),
+        );
     });
 
     it('rejects when the port is taken', async () => {

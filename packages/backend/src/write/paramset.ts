@@ -89,7 +89,7 @@ async function readParamset(
     address: string,
     paramsetKey: string,
 ): Promise<Paramset> {
-    const value = await deps.read(interfaceName, 'getParamset', [address, paramsetKey]);
+    const value: unknown = await deps.read(interfaceName, 'getParamset', [address, paramsetKey]);
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
         return {};
     }

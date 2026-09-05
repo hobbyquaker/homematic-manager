@@ -1,6 +1,6 @@
 {
   "name": "@homematic-manager/electron",
-  "version": "3.0.0-dev.0",
+  "version": "3.0.0-dev.1",
   "private": true,
   "type": "module",
   "description": "Electron host of the Homematic Manager: main process, preload, renderer",
@@ -38,8 +38,8 @@
     "vite": "^7.3.6"
   },
   "dependencies": {
-    "@homematic-manager/backend": "3.0.0-dev.0",
-    "@homematic-manager/core": "3.0.0-dev.0",
+    "@homematic-manager/backend": "3.0.0-dev.1",
+    "@homematic-manager/core": "3.0.0-dev.1",
     "electron-updater": "^6.8.9"
   }
 }

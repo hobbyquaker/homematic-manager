@@ -1,13 +1,13 @@
 {
   "name": "homematic-manager",
-  "version": "3.0.0-dev.0",
+  "version": "3.0.0-dev.1",
   "private": true,
   "type": "module",
   "description": "Homematic device configuration and administration",
   "license": "AGPL-3.0-or-later",
   "author": "Sebastian 'hobbyquaker' Raff <hobbyquaker@gmail.com>",
   "contributors": [
-    "Andr\u00e9 'Anli' Litfin"
+    "André 'Anli' Litfin"
   ],
   "repository": {
     "type": "git",

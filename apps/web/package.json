@@ -1,6 +1,6 @@
 {
   "name": "@homematic-manager/web",
-  "version": "3.0.0-dev.0",
+  "version": "3.0.0-dev.1",
   "type": "module",
   "description": "Homematic Manager server: the backend as a local HTTP/WebSocket server serving the built web UI",
   "keywords": [
@@ -63,8 +63,8 @@
     "hm-simulator": "^1.0.0"
   },
   "dependencies": {
-    "@homematic-manager/backend": "3.0.0-dev.0",
-    "@homematic-manager/core": "3.0.0-dev.0",
+    "@homematic-manager/backend": "3.0.0-dev.1",
+    "@homematic-manager/core": "3.0.0-dev.1",
     "binrpc": "^4.2.0",
     "homematic-rega": "^2.0.0",
     "homematic-xmlrpc": "^2.0.0",

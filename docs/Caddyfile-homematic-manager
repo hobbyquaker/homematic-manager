@@ -1,0 +1,39 @@
+# Caddy in front of the Homematic Manager server (@homematic-manager/web).
+#
+# The shortest of the three: Caddy passes a WebSocket upgrade through on its own, needs no map for
+# the Connection header, and gets a certificate by itself. Include this in /etc/caddy/Caddyfile or
+# use it as one, then `systemctl reload caddy`.
+
+homematic-manager.example.lan {
+	# `handle_path` strips the prefix before proxying, so the backend would see `/` and its own
+	# links would point outside the prefix. `handle` keeps the URI, which is what --base expects:
+	# the backend serves the UI, the images, the metadata and the API socket under it itself.
+	handle /hmm/* {
+		reverse_proxy 127.0.0.1:8090 {
+			# An idle API socket is pinged every 25 s by the host; this only has to be larger.
+			transport http {
+				read_timeout 1h
+			}
+		}
+	}
+
+	# Optional: HTTP basic authentication in front of everything. It is *in addition to* the
+	# backend's token, never instead of it. Generate the hash with `caddy hash-password`.
+	#
+	#	basic_auth /hmm/* {
+	#		hmm $2a$14$...
+	#	}
+}
+
+# Start the backend behind it with:
+#
+#     homematic-manager-web --base /hmm/ --host 127.0.0.1 --no-issue-cookie --token "$TOKEN"
+#
+# Caddy terminates TLS for the name above automatically; the backend speaks plain HTTP and always
+# will. On a LAN name that has no public DNS, use `tls internal` inside the site block.
+#
+# For a whole host rather than a sub-path, drop --base and the `handle`:
+#
+#     homematic-manager.example.lan {
+#         reverse_proxy 127.0.0.1:8090
+#     }

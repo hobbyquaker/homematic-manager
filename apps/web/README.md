@@ -142,41 +142,19 @@ prefix; `/addons/hmm` without the trailing slash redirects to `/addons/hmm/`, an
 the prefix is a 404. The UI needs no build-time base: it builds with `base: './'` and
 `createTransport()` derives the socket URL from the page's own directory.
 
-An idle WebSocket is pinged every 25 seconds (`--` internally `keepAliveMs`), below lighttpd's
+An idle WebSocket is pinged every 25 seconds - the backend's `keepAliveMs`, below lighttpd's
 `server.max-read-idle` / `server.max-write-idle` default of 60 seconds, so a proxied socket is not
-cut for being quiet. A browser answers the ping on its own.
-
-lighttpd, the way RedMatic proves it works on the CCU3 and OpenCCU
-(`/usr/local/etc/config/lighttpd/hmm.conf`):
-
-```lighttpd
-$HTTP["url"] =~ "^/addons/hmm/" {
-    proxy.server = ( "" => (( "host" => "127.0.0.1", "port" => 8090 )) )
-    proxy.header = ( "upgrade" => "enable" )
-}
-```
-
-nginx:
-
-```nginx
-location /addons/hmm/ {
-    proxy_pass http://127.0.0.1:8090;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection $connection_upgrade;   # map $http_upgrade -> "upgrade"/""
-    proxy_read_timeout 3600s;
-}
-```
-
-Caddy:
-
-```caddy
-handle_path /addons/hmm/* {
-    reverse_proxy 127.0.0.1:8090
-}
-```
+cut for being quiet, and a peer that stops answering is dropped instead of lingering. A browser
+answers the ping on its own.
 
 Start the host with `--base /addons/hmm --host 127.0.0.1 --no-issue-cookie --token "$TOKEN"`.
+Working configurations for the three proxies live in `docs/`, commented with what each one has to
+pass through and why the token is still required behind it:
+[lighttpd](../../docs/lighttpd-homematic-manager.conf),
+[nginx](../../docs/nginx-homematic-manager.conf) and
+[Caddy](../../docs/Caddyfile-homematic-manager). The two server install types have a page each:
+[a Proxmox LXC](../../docs/install-lxc.md), which is the recommended one, and
+[Docker](../../docs/install-docker.md), where the callback needs saying out loud.
 
 ## As a systemd service
 

@@ -62,7 +62,9 @@ export class Stores {
         this.devices = new DevicesStore(transport, this.notices);
         this.names = new NamesStore(transport, this.notices);
         this.links = new LinksStore(transport, this.notices);
-        this.serviceMessages = new ServiceMessagesStore(transport, this.notices);
+        this.serviceMessages = new ServiceMessagesStore(transport, this.notices, {
+            ...(options.storage === undefined ? {} : {storage: options.storage}),
+        });
         this.events = new EventsStore(transport, this.notices, {
             ...(options.eventCapacity === undefined ? {} : {capacity: options.eventCapacity}),
         });

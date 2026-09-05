@@ -185,6 +185,17 @@ export const UI_MESSAGES: MessageCatalogue = {
         en: 'The interface answered ok but stored something else',
     },
     'What was sent': {de: 'Gesendet', en: 'What was sent'},
+
+    // The service messages tab.
+    'Quiet mode': {de: 'Ruhemodus', en: 'Quiet mode'},
+    'Only STICKY_UNREACH and SABOTAGE can be acknowledged': {
+        de: 'Nur STICKY_UNREACH und SABOTAGE lassen sich bestätigen',
+        en: 'Only STICKY_UNREACH and SABOTAGE can be acknowledged',
+    },
+
+    // The events tab.
+    Pause: {de: 'Anhalten', en: 'Pause'},
+    'Events per device': {de: 'Ereignisse je Gerät', en: 'Events per device'},
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

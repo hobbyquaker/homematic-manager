@@ -42,7 +42,7 @@ function defaultHashSubscribe(handler: () => void): () => void {
     };
 }
 
-function defaultStorage(): StorageLike | undefined {
+export function defaultStorage(): StorageLike | undefined {
     try {
         return typeof localStorage === 'undefined' ? undefined : localStorage;
     } catch {
@@ -50,6 +50,8 @@ function defaultStorage(): StorageLike | undefined {
         return undefined;
     }
 }
+
+/** `localStorage`, or `undefined` where the browser refuses it. */
 
 /**
  * The shell's own state: configuration, the selected interface, the active tab, language and

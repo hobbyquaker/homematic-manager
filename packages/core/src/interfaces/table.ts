@@ -8,6 +8,10 @@
  * `localPort` is what the interface process itself listens on; 2000/2001/2010/9292 are lighttpd
  * proxies in front of it. Running on the CCU (the addon, task 13) we talk to the process directly:
  * one hop less, binrpc for rfd/hs485d, and no CCU authentication.
+ *
+ * BIN-RPC exists on the CCU's loopback only (D-28): rfd and hs485d take it on 32001/32000, but the
+ * public ports are lighttpd's XML-RPC proxies and nothing on the LAN speaks BIN-RPC to a CCU. The
+ * one exception is CUxD, a third-party daemon with its own BIN-RPC listener on 8701.
  */
 
 /** How an interface is spoken to. `binrpc` is eQ-3's binary XML-RPC dialect. */
@@ -31,10 +35,8 @@ export interface InterfaceDefinition {
     readonly localPort?: number;
     /** The process port speaks binrpc (rfd and hs485d do, hmipserver and the group process do not). */
     readonly localBinrpc?: boolean;
-    /** Protocol on the public port. */
+    /** Protocol on the public port; always `xmlrpc` behind the CCU's lighttpd (D-28). */
     readonly protocol: RpcProtocol;
-    /** The public port also accepts binrpc (rfd/hs485d listen for both). */
-    readonly binrpc?: boolean;
     /** Request path, `/` unless the interface insists on something else. */
     readonly path?: string;
     /** Wants an `init(url, ident)` subscription. */
@@ -63,7 +65,6 @@ export const INTERFACES = {
         localPort: 32001,
         localBinrpc: true,
         protocol: 'xmlrpc',
-        binrpc: true,
         init: true,
         ping: true,
         dutyCycle: true,
@@ -75,7 +76,6 @@ export const INTERFACES = {
         localPort: 32000,
         localBinrpc: true,
         protocol: 'xmlrpc',
-        binrpc: true,
         init: true,
         ping: true,
     },
@@ -133,8 +133,6 @@ export interface ConnectionMode {
     readonly tls?: boolean;
     /** We run on the CCU itself and talk to the interface processes directly. */
     readonly local?: boolean;
-    /** Prefer binrpc where the interface offers it on the public port (rfd, hs485d). */
-    readonly binrpc?: boolean;
 }
 
 /** Everything a client needs to talk to one interface. */
@@ -204,17 +202,16 @@ export function interfacePort(definition: InterfaceDefinition, mode: ConnectionM
     return definition.port;
 }
 
-/** The protocol of a built-in interface for the given mode. */
+/**
+ * The protocol of a built-in interface for the given mode: what the table says, except that on the
+ * CCU itself rfd and hs485d are spoken to in binrpc. Off the CCU there is no binrpc (D-28).
+ */
 export function interfaceProtocol(definition: InterfaceDefinition, mode: ConnectionMode = {}): RpcProtocol {
     if (definition.protocol === 'binrpc') {
         return 'binrpc';
     }
     const useLocal = mode.local === true && definition.localPort !== undefined;
-    if (useLocal) {
-        return definition.localBinrpc === true ? 'binrpc' : 'xmlrpc';
-    }
-    // binrpc carries no TLS, so an explicit binrpc wish loses against an explicit TLS wish
-    return definition.binrpc === true && mode.binrpc === true && mode.tls !== true ? 'binrpc' : 'xmlrpc';
+    return useLocal && definition.localBinrpc === true ? 'binrpc' : 'xmlrpc';
 }
 
 /** Connection parameters of a built-in interface. Throws for a name the table does not know. */

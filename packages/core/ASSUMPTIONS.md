@@ -153,6 +153,14 @@ change the user did not ask for.
 **Verify:** compare `getParamset MASTER` with `getParamsetDescription MASTER` on every lab device
 and check that the value set is complete.
 
+## A-16 (settled) BIN-RPC is loopback-only on a CCU
+
+Not an assumption any more: the maintainer confirmed on 2026-09-05 that rfd and hs485d accept
+BIN-RPC on their process ports 32001/32000 only, and that the public ports are lighttpd XML-RPC
+proxies (D-28). The interface table therefore never resolves a public port to `binrpc`; only the
+addon's local mode and CUxD use it. Task 6 still compares umlauts over XML-RPC and BIN-RPC, but
+the BIN-RPC side of that only matters for the addon.
+
 ## A-15 `HmIP-WRC6` stands in for the `HmIP-WRC2` of the lab
 
 `test/fixtures/paramset-descriptions.json` has no HmIP-WRC2 - the source set does not contain one -

@@ -166,16 +166,11 @@
             </label>
 
             <!--
-                BIN-RPC is the faster of the two protocols where rfd and hs485d offer both, and it
-                cannot carry TLS - so the box is off the table as soon as TLS is on. `local`, the
-                other new flag of the contract, is deliberately not here: the addon sets it for its
-                own environment and a desktop user toggling it would just break their connection.
+                No protocol choice: off the CCU every interface is XML-RPC through lighttpd, BIN-RPC
+                exists on the CCU's loopback only (D-28). `local`, the contract flag for that, is
+                deliberately not here: the addon sets it for its own environment and a desktop user
+                toggling it would just break their connection.
             -->
-            <label class="hmm-config-row">
-                <span>{t('Prefer BIN-RPC')}</span>
-                <input type="checkbox" bind:checked={draft.binrpc} disabled={draft.tls} />
-                <small>{t('Faster; not available with TLS')}</small>
-            </label>
 
             <label class="hmm-config-row">
                 <span>{t('Use Auth')}</span>

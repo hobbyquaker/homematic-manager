@@ -596,7 +596,7 @@ export const DEMO_INTERFACE_STATES: InterfaceState[] = [
     {
         name: 'BidCos-RF',
         type: 'BidCos-RF',
-        protocol: 'binrpc',
+        protocol: 'xmlrpc',
         host: 'demo.local',
         port: 2001,
         connected: true,

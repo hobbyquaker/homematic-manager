@@ -319,8 +319,9 @@ export async function startBackend(
             host: '127.0.0.1',
             interfaces: ['BidCos-RF', 'HmIP-RF'],
             autoDetect: false,
-            // the simulator serves rfd over BIN-RPC only, which is what a real rfd also offers
-            binrpc: true,
+            // the simulator's rfd speaks BIN-RPC only, like the real rfd on the CCU's loopback: the
+            // harness therefore runs in local mode (D-28), ports overridden above
+            local: true,
             rega: true,
             callback: {ip: '127.0.0.1', xmlrpcPort: 0, binrpcPort: 0},
             writePaceMs: 0,

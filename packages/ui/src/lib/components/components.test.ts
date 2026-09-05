@@ -385,7 +385,7 @@ describe('RpcProgress', () => {
 
 describe('ConnectionIndicator', () => {
     const interfaces: InterfaceState[] = [
-        {name: 'BidCos-RF', type: 'BidCos-RF', protocol: 'binrpc', host: 'ccu', port: 2001, connected: true},
+        {name: 'BidCos-RF', type: 'BidCos-RF', protocol: 'xmlrpc', host: 'ccu', port: 2001, connected: true},
         {name: 'HmIP-RF', type: 'HmIP-RF', protocol: 'xmlrpc', host: 'ccu', port: 2010, connected: false},
     ];
 

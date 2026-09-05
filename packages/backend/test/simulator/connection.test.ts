@@ -75,7 +75,10 @@ describe.skipIf(!simulatorAvailable)('connecting to hm-simulator', () => {
     it('connects through TLS with a self-signed certificate', async () => {
         const sim = await startSimulator({tls: true});
         running.push({close: () => sim.close()});
-        const harness = await startBackend(sim, {connection: {tls: true, interfaces: ['HmIP-RF'], rega: false}});
+        // the remote view (D-28): TLS lives on lighttpd's ports, local mode would bypass it
+        const harness = await startBackend(sim, {
+            connection: {tls: true, local: false, interfaces: ['HmIP-RF'], rega: false},
+        });
         running.unshift({close: () => harness.close()});
         const states = await harness.backend.request('interfaces.list');
         expect(states.every((state) => state.connected)).toBe(true);

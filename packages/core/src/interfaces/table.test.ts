@@ -109,10 +109,11 @@ describe('port and protocol resolution', () => {
         expect(interfaceProtocol(INTERFACES.CUxD, {tls: true, local: true})).toBe('binrpc');
     });
 
-    it('uses binrpc on the public port only when asked and only without TLS', () => {
-        expect(interfaceProtocol(INTERFACES['BidCos-RF'], {binrpc: true})).toBe('binrpc');
-        expect(interfaceProtocol(INTERFACES['BidCos-RF'], {binrpc: true, tls: true})).toBe('xmlrpc');
-        expect(interfaceProtocol(INTERFACES['HmIP-RF'], {binrpc: true})).toBe('xmlrpc');
+    it('never speaks binrpc to a public port: those are lighttpd XML-RPC proxies (D-28)', () => {
+        expect(interfaceProtocol(INTERFACES['BidCos-RF'])).toBe('xmlrpc');
+        expect(interfaceProtocol(INTERFACES['BidCos-RF'], {tls: true})).toBe('xmlrpc');
+        expect(interfaceProtocol(INTERFACES['BidCos-Wired'])).toBe('xmlrpc');
+        expect(interfaceProtocol(INTERFACES['HmIP-RF'])).toBe('xmlrpc');
     });
 });
 

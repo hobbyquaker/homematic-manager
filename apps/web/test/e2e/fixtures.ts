@@ -259,6 +259,12 @@ export interface Simulator {
     getInstallMode(iface: string): number;
     /** Devices that appear the next time the install mode is switched on. */
     scriptNewDevices(iface: string, devices: unknown[], delay?: number): void;
+    /**
+     * The temporary BidCos pairing key (#20), as `setTempKey` left it. Optional on purpose: it
+     * arrived in hm-simulator 1.0.1, and the spec that uses it feature-detects rather than pinning
+     * a version, so this repository stays green against 1.0.0.
+     */
+    getTempKey?: (iface: string) => string;
     /** The ReGa mock; `renames` is every `dom.GetObject(id).Name(...)` script it was sent. */
     regaSim: {renames: {id: number; name: string; script: string}[]};
 }

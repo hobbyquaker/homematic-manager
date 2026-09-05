@@ -4,7 +4,7 @@
  * A WebSocket client for the container test, run by the *bundled* node from inside the installed
  * addon, so it uses the very `ws` the package ships.
  *
- *   node ws-probe.mjs <url> <cookie header|-> [idle seconds]
+ *   node ws-probe.mjs <url> <cookie header|-> [idle seconds] [method]
  *
  * It opens the API socket through the CCU's lighttpd, sends one `ApiFrame` request, optionally sits
  * idle for a while (the interesting case: longer than lighttpd's 60 s `server.max-read-idle`, which
@@ -19,12 +19,12 @@
 
 import WebSocket from 'ws';
 
-const [url, cookieArgument = '-', idleArgument = '0'] = process.argv.slice(2);
+const [url, cookieArgument = '-', idleArgument = '0', method = 'config.get'] = process.argv.slice(2);
 const cookie = cookieArgument === '-' ? undefined : cookieArgument;
 const idleMs = Number(idleArgument) * 1000;
 
 if (!url) {
-    console.error('usage: ws-probe.mjs <url> <cookie|-> [idle seconds]');
+    console.error('usage: ws-probe.mjs <url> <cookie|-> [idle seconds] [method]');
     process.exit(2);
 }
 
@@ -82,7 +82,7 @@ function step() {
         }
         console.log(`idle:${idleMs / 1000}`);
         setTimeout(() => {
-            request('config.get');
+            request(method);
         }, idleMs);
         return;
     }
@@ -99,5 +99,5 @@ function finish() {
 
 socket.on('open', () => {
     console.log('open');
-    request('config.get');
+    request(method);
 });

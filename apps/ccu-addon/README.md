@@ -307,7 +307,14 @@ apps/ccu-addon/test/container-test.sh --idle         # needs docker
   install (exit 10), the links, the token's mode, the session check over HTTP with a right and a
   wrong sid, the UI and the metadata through the proxy rule, the CGIs *not* being proxied, the
   WebSocket upgrade, a socket left idle past lighttpd's 60 second timeout, an update (exit 0, the
-  profile and the token kept), uninstall, reinstall and purge.
+  profile and the token kept), uninstall, reinstall and purge. Since task 18 it also switches the
+  installed addon to `HMM_AUTH_MODE=rega` against `ccu-auth-stub.mjs` — a stub ReGa on 8183 and a
+  stub authentication daemon on udp 1998, run by the *bundled* node — and drives the whole login
+  through lighttpd: the login page instead of the UI, a 401 for the metadata, a wrong password, an
+  unknown user, the right credentials (whose password contains a colon and a backslash, so the
+  datagram escaping is exercised), the cookie's attributes, the WebSocket and `session.info` on it,
+  the `settings.cgi` hand-over still bypassing the login, the settings page, logout, the rate limit,
+  and the way back to `token`.
 
 Without `tclsh` on the machine (a plain WSL Debian has none) the first two run in the test image:
 

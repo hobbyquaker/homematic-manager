@@ -320,13 +320,23 @@ function asDescriptions(value: RpcValue | undefined): DeviceDescription[] {
     return descriptions;
 }
 
+/** What the interface manager needs of the callback servers; a test substitutes its own. */
+export interface CallbackServerSet {
+    /** Starts the server of a protocol if it is not running, and returns its port. */
+    ensure(protocol: RpcProtocol): Promise<number>;
+    port(protocol: RpcProtocol): number;
+    /** The `init` URL for that protocol and the address the CCU should call back on. */
+    callbackUrl(protocol: RpcProtocol, ip: string): string;
+    stop(): Promise<void>;
+}
+
 /**
  * The two callback servers, started only for the protocols that are actually needed.
  *
  * The URL an interface is told to call back on differs by protocol - `http://` for xmlrpc,
  * `xmlrpc_bin://` for binrpc - and the ports differ too, which is why 2.x kept two of everything.
  */
-export class CallbackServers {
+export class CallbackServers implements CallbackServerSet {
     readonly #servers = new Map<RpcProtocol, CallbackServer>();
     readonly #handler: CallbackHandler;
     readonly #host: string;

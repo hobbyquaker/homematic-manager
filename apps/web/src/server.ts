@@ -22,13 +22,11 @@
  * one - so an Electron renderer and a browser see the same two roots under the same names.
  */
 
-import {EventEmitter} from 'node:events';
 import fs from 'node:fs/promises';
 import http from 'node:http';
 import type {IncomingMessage, ServerResponse} from 'node:http';
 import type {Socket} from 'node:net';
 import path from 'node:path';
-import type {Duplex} from 'node:stream';
 
 import type {AppConfig} from '@homematic-manager/core';
 import {ApiWebSocketServer, Backend, type BackendOptions} from '@homematic-manager/backend';
@@ -55,9 +53,6 @@ export const SHUTDOWN_TIMEOUT_MS = 5000;
  * CCU addon (task 13) after a minute without traffic.
  */
 export const KEEPALIVE_INTERVAL_MS = 25_000;
-
-/** An unmasked, empty WebSocket ping frame (RFC 6455: FIN + opcode 0x9, no payload). */
-const PING_FRAME = Buffer.from([0x89, 0x00]);
 
 export interface WebHostOptions {
     readonly port?: number;
@@ -282,44 +277,20 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
     }
 
     /*
-     * Keeps a proxied socket from being cut for being idle (task 13: lighttpd's `max-read-idle`).
+     * The upgrade routing belongs to the host, not to `ws`: attached to an HTTP server,
+     * `WebSocketServer` answers every upgrade of a path that is not its own with a 400, which would
+     * kill vite's HMR socket in development. `noServer` leaves the routing here and gets handed
+     * only the upgrades that are the API's; everything else is proxied or refused below.
      *
-     * `ApiWebSocketServer` has no heartbeat and exposes no `WebSocket` instance, so the ping is
-     * written as a raw frame onto the socket ws is using. That is safe here and only here: without
-     * permessage-deflate (the backend does not enable it) `ws` serialises every frame inside one
-     * synchronous block, and a timer callback can never land in the middle of one. A browser
-     * answers a ping with a pong on its own - no change in `packages/ui` is needed. The right home
-     * for this is a `keepAliveMs` option on `ApiWebSocketServer`; see the report of task 12.
+     * `keepAliveMs` pings an idle socket so lighttpd in front of the addon (task 13) does not cut
+     * it for being quiet, and drops one whose peer has stopped answering.
      */
-    function keepAlive(socket: Duplex): void {
-        const interval = options.keepAliveMs ?? KEEPALIVE_INTERVAL_MS;
-        if (interval <= 0 || socket.destroyed) {
-            return;
-        }
-        const timer = setInterval(() => {
-            if (socket.destroyed || !socket.writable) {
-                clearInterval(timer);
-                return;
-            }
-            socket.write(PING_FRAME);
-        }, interval);
-        timer.unref?.();
-        socket.once('close', () => clearInterval(timer));
-    }
-
-    /*
-     * The upgrade routing belongs to the host, not to `ws`: `WebSocketServer({server, path})`
-     * answers every upgrade of a path that is not its own with a 400, which would kill vite's HMR
-     * socket in development. So the ws server is attached to a private emitter and fed only the
-     * upgrades that are the API's; everything else is proxied or refused here. (A `noServer`
-     * option on `ApiWebSocketServer` would make this unnecessary - see the report of task 12.)
-     */
-    const wsHost = new EventEmitter() as unknown as http.Server;
     const api = backend
         ? new ApiWebSocketServer({
               backend,
-              server: wsHost,
+              noServer: true,
               path: apiPath,
+              keepAliveMs: options.keepAliveMs ?? KEEPALIVE_INTERVAL_MS,
               ...(token === undefined ? {} : {token}),
               onError: (error) => log.warn('api socket:', error),
           })
@@ -337,8 +308,7 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
             // no origin check on purpose: lighttpd forwards the browser's Origin and its own Host
             // unchanged (task 13), and the token - not the origin - is what guards this socket
             applyCookieToken(request, token);
-            wsHost.emit('upgrade', request, socket, head);
-            keepAlive(socket);
+            api.handleUpgrade(request, socket, head);
             return;
         }
         if (devTarget) {

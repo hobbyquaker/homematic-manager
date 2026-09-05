@@ -7,7 +7,7 @@
   "license": "AGPL-3.0-or-later",
   "author": "Sebastian 'hobbyquaker' Raff <hobbyquaker@gmail.com>",
   "contributors": [
-    "André 'Anli' Litfin"
+    "Andr\u00e9 'Anli' Litfin"
   ],
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
   "scripts": {
     "lint": "eslint . && prettier --check .",
     "lint:fix": "eslint . --fix && prettier --write .",
+    "lint:sh": "sh scripts/lint-sh.sh",
     "format": "prettier --write .",
     "typecheck": "tsc -b && tsc -p tsconfig.e2e.json && npm run typecheck --workspaces --if-present",
     "test": "vitest run",

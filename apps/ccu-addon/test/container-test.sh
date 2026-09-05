@@ -26,7 +26,7 @@ for argument in "$@"; do
     esac
 done
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 ADDON_SRC="$PWD"
 
 if [ -z "$PKG" ]; then

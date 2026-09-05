@@ -74,6 +74,7 @@ Start() {
     HMM_LOG_LEVEL=info
     if [ -f $ENV_FILE ]; then
         set -a
+        # shellcheck source=/dev/null
         . $ENV_FILE
         set +a
     fi
@@ -88,7 +89,7 @@ Start() {
         mv $LOG $LOG.1
     fi
 
-    echo -n "Starting $ADDON: "
+    printf '%s' "Starting $ADDON: "
     logger -t $ADDON -p daemon.info "starting homematic-manager $VERSION_ADDON (node $NODE_VERSION) on 127.0.0.1:$HMM_PORT"
     # cd / because the OpenCCU installer deletes its temp directory right after update_script
     # returns, and a process whose cwd is gone cannot spawn children.
@@ -111,7 +112,7 @@ Stop() {
         echo "$ADDON not running"
         return 1
     fi
-    echo -n "Stopping $ADDON: "
+    printf '%s' "Stopping $ADDON: "
     logger -t $ADDON -p daemon.info "stopping homematic-manager"
     # SIGTERM makes the host de-register its callbacks from the interface processes; give it time
     start-stop-daemon -K -q -p $PIDFILE

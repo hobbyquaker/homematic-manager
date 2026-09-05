@@ -19,6 +19,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # The addon runs on busybox `ash` on a CCU with no package manager and a read-only root: a
+      # syntax error in `rc.d/hmm` does not fail loudly, the addon simply never starts. `sh -n`
+      # plus shellcheck is the only check those files get, since nothing in the test suite executes
+      # them on a CCU. shellcheck ships with the runner image; the variable makes a runner that
+      # stopped shipping it a failure rather than a green check that tested nothing.
+      - run: npm run lint:sh
+        env:
+          LINT_SH_REQUIRE_SHELLCHECK: 1
 
   test:
     name: Test (Node ${{ matrix.node }})

@@ -12,7 +12,7 @@
 
 set -uo pipefail
 
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 ADDON_SRC="$PWD"
 command -v tclsh >/dev/null || {
     echo "tclsh is required" >&2

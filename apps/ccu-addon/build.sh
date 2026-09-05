@@ -103,7 +103,7 @@ fi
 for entry in "$STAGE/node_modules"/*; do
     name="$(basename "$entry")"
     case "$name" in
-        .* | .bin) continue ;;
+        .*) continue ;;
         @homematic-manager)
             for scoped in "$entry"/*; do
                 [ "$(basename "$scoped")" = web ] && continue

@@ -19,7 +19,7 @@ PKG="${1:-}"
 }
 # absolute before the cd, so a path relative to the caller's directory keeps working
 PKG="$(cd "$(dirname "$PKG")" && pwd)/$(basename "$PKG")"
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 ADDON_SRC="$PWD"
 command -v tclsh >/dev/null || {
     echo "tclsh is required" >&2

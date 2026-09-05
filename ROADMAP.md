@@ -35,6 +35,7 @@ The stopgap release was dropped the same day (D-7). Last release 2.7.1 (2023-01-
 | D-15 | (OQ-9) The old Turkish easy-mode translations are carried over as a fallback; de/en come from openccu-data. |
 | D-16 | (OQ-10) Windows 10+, macOS 12+, Linux glibc 2.31+; `electron-updater` against GitHub releases, notification and user confirmation before install. |
 | D-17 | (OQ-11) On first start 3.0 imports the 2.x configuration (CCU address, TLS, auth, language, pacing) once; 2.x caches are discarded. |
+| D-19 | No support for the HVL addon (#123): the project is dead. The issue is closed with that note. |
 | D-18 | Version scheme and commits for the rebuild: work on 3.0 starts at `3.0.0-dev.0` and every dev build bumps the counter (`3.0.0-dev.1`, `3.0.0-dev.2`, ...), then `3.0.0-alpha.n`, `3.0.0-beta.n`, `3.0.0`. Every significant change is its own commit with a message that explains the why; no squashed "WIP" commits. The maintainer tags and releases. |
 
 ## Contents
@@ -134,7 +135,7 @@ answered with that pointer.
 Pure TypeScript, no I/O, no DOM, 100 % coverage enforced:
 
 - Interface table (name, public/TLS/local ports, protocol, path, init/ping behaviour, ping
-  timeouts) from hm2mqtt's `lib/interfaces.js`, plus user-defined extra interfaces (#135, #123).
+  timeouts) from hm2mqtt's `lib/interfaces.js`, plus user-defined extra interfaces (#135).
 - Address and channel model, device index (devices, channels, parents, link source/target roles).
 - Paramset description model; the description identity key `interface/deviceType/firmware/
   version/channelType/paramset` (today `paramsetName()` in `main.js`).
@@ -332,8 +333,8 @@ links (#80), per-pair names in multi-links (#87), defective-link display (#79), 
 auto-assignment (#69), `STICKY_UNREACH` auto-ack and unreach counters (#26), links from the
 Devices tab (#25), link profile templates (#21), ReGa inbox auto-confirm (#54, optional ReGa),
 ReGa service-message ack (#94, optional ReGa), smoke-detector teams (#97), Homegear `setName`
-(#41), per-device event counters (#129), user-defined extra interfaces for CCU-Jack/HVL (#135,
-#123, verify their RPC surface first).
+(#41), per-device event counters (#129), user-defined extra interfaces for CCU-Jack (#135, verify
+its RPC surface first). HVL (#123) is not supported: the project is dead (D-19).
 
 ## 16. Documentation
 

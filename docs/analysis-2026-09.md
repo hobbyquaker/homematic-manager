@@ -468,7 +468,7 @@ out of scope.
 | 127 | Big Sur: 401 from ReGa crashes app | R | task 4 (ReGa optional, errors non-fatal, TLS flag typo) |
 | 126 | TypeError on start | R | duplicate of #121 |
 | 124 | Edit several links, apply once | F | task 15 (staged changes with one Apply) |
-| 123 | HVL addon devices | F | same mechanism as #135 (extra interface) |
+| 123 | HVL addon devices | X | HVL is a dead project (D-19); close with that note |
 | 122 | Roaming vs active interface | Q/F | answered 2019; UI: no interface marked active while roaming (task 8) |
 | 121 | Endless loading (33 comments) | R | task 4/7 ready handshake; e2e cold-start test (task 14) |
 | 119 | English UI | R | task 7 i18n de/en (openccu-data + own strings) |

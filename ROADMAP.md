@@ -381,7 +381,7 @@ HmIP-WRC2 and HmIP-PDT, OpenCCU 3.89.8 aarch64 without radio. WSL reaches the CC
 cannot reach WSL, so callback-based hardware tests of the desktop backend run on a CCU (the addon)
 or on the `mqtt-ifaces` box. The production CCU3 (firmware 3.87.6) is read-only and slow: client
 calls only, no `init`, useful for BidCos paramset fixtures. Per D-14 the maintainer paired two
-BidCos-RF devices to the Charly on 2026-09-05: a wall thermostat (HM-TC-CC / HM-CC-TC family) and a
-door/window contact. That covers BidCos-RF MASTER writes to battery devices and a sensor-to-
-thermostat link; a BidCos-RF mains actor and BidCos-Wired are still missing, those writes stay
-simulator-only.
+BidCos-RF devices to one of the OpenCCU lab boxes on 2026-09-05 (which one is recorded in the lab
+note): a wall thermostat (HM-TC-CC / HM-CC-TC family) and a door/window contact. That covers
+BidCos-RF MASTER writes to battery devices and a sensor-to-thermostat link; a BidCos-RF mains
+actor and BidCos-Wired are still missing, those writes stay simulator-only.

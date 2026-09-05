@@ -8,7 +8,10 @@
     "composite": false,
     "declaration": false,
     "declarationMap": false,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@homematic-manager/core": ["../core/src/index.ts"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.svelte", "*.config.ts", "svelte.config.js"]
 }

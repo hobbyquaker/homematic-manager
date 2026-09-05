@@ -1,0 +1,191 @@
+/*
+ * The theme. 2.7 used jQuery UI "smoothness" plus jqGrid's stylesheet; D-3 keeps that look, so the
+ * tokens below are the smoothness greys and blues, the 12 px grid font and the monospace address
+ * column, expressed as custom properties instead of four megabytes of theme CSS.
+ *
+ * Light is the default and is defined on bare `:root`. Dark is defined twice - once under
+ * `prefers-color-scheme` (guarded so an explicit light choice wins) and once under
+ * `[data-theme='dark']` - so the manual switch works in both directions.
+ */
+
+:root {
+    color-scheme: light;
+
+    /* Surfaces */
+    --hmm-bg: #ffffff;
+    --hmm-bg-sunken: #f2f5f7;
+    --hmm-header-bg: linear-gradient(to bottom, #f6f6f6 0%, #dfdfdf 100%);
+    --hmm-header-solid: #eaeaea;
+    --hmm-row-odd: #ffffff;
+    --hmm-row-even: #f7f9fb;
+    --hmm-row-hover: #eef4fb;
+    --hmm-row-selected: #d0e5f5;
+    --hmm-row-selected-text: #0b3d68;
+    --hmm-overlay: rgba(255, 255, 255, 0.72);
+    --hmm-backdrop: rgba(0, 0, 0, 0.35);
+
+    /* Lines */
+    --hmm-border: #c5dbec;
+    --hmm-border-muted: #dddddd;
+    --hmm-border-strong: #a6c9e2;
+
+    /* Text */
+    --hmm-fg: #222222;
+    --hmm-fg-muted: #666666;
+    --hmm-fg-faint: #8a8a8a;
+    --hmm-link: #2779aa;
+
+    /* Accents */
+    --hmm-accent: #2779aa;
+    --hmm-accent-bg: #d0e5f5;
+    --hmm-ok: #2e8b2e;
+    --hmm-warn: #cc8a00;
+    --hmm-error: #cc2222;
+    --hmm-focus: #4d90fe;
+
+    /* Metrics - the 2.x grid density */
+    --hmm-font: -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    --hmm-font-mono: 'Lucida Console', Consolas, Menlo, Monaco, monospace;
+    --hmm-font-size: 12px;
+    --hmm-font-size-small: 10px;
+    --hmm-font-size-tiny: 8px;
+    --hmm-row-height: 23px;
+    --hmm-header-height: 29px;
+    --hmm-radius: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+        color-scheme: dark;
+
+        --hmm-bg: #1e2126;
+        --hmm-bg-sunken: #191c20;
+        --hmm-header-bg: linear-gradient(to bottom, #33383f 0%, #262a30 100%);
+        --hmm-header-solid: #2c3037;
+        --hmm-row-odd: #1e2126;
+        --hmm-row-even: #22262c;
+        --hmm-row-hover: #2a323c;
+        --hmm-row-selected: #234b6e;
+        --hmm-row-selected-text: #e8f2fb;
+        --hmm-overlay: rgba(24, 27, 31, 0.72);
+        --hmm-backdrop: rgba(0, 0, 0, 0.6);
+
+        --hmm-border: #3b444f;
+        --hmm-border-muted: #333a42;
+        --hmm-border-strong: #4a5563;
+
+        --hmm-fg: #e3e6ea;
+        --hmm-fg-muted: #a4abb4;
+        --hmm-fg-faint: #7b838d;
+        --hmm-link: #6db3e8;
+
+        --hmm-accent: #6db3e8;
+        --hmm-accent-bg: #234b6e;
+        --hmm-ok: #5cc25c;
+        --hmm-warn: #e0a740;
+        --hmm-error: #f06a6a;
+        --hmm-focus: #6db3e8;
+    }
+}
+
+:root[data-theme='dark'] {
+    color-scheme: dark;
+
+    --hmm-bg: #1e2126;
+    --hmm-bg-sunken: #191c20;
+    --hmm-header-bg: linear-gradient(to bottom, #33383f 0%, #262a30 100%);
+    --hmm-header-solid: #2c3037;
+    --hmm-row-odd: #1e2126;
+    --hmm-row-even: #22262c;
+    --hmm-row-hover: #2a323c;
+    --hmm-row-selected: #234b6e;
+    --hmm-row-selected-text: #e8f2fb;
+    --hmm-overlay: rgba(24, 27, 31, 0.72);
+    --hmm-backdrop: rgba(0, 0, 0, 0.6);
+
+    --hmm-border: #3b444f;
+    --hmm-border-muted: #333a42;
+    --hmm-border-strong: #4a5563;
+
+    --hmm-fg: #e3e6ea;
+    --hmm-fg-muted: #a4abb4;
+    --hmm-fg-faint: #7b838d;
+    --hmm-link: #6db3e8;
+
+    --hmm-accent: #6db3e8;
+    --hmm-accent-bg: #234b6e;
+    --hmm-ok: #5cc25c;
+    --hmm-warn: #e0a740;
+    --hmm-error: #f06a6a;
+    --hmm-focus: #6db3e8;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--hmm-bg);
+    color: var(--hmm-fg);
+    font-family: var(--hmm-font);
+    font-size: var(--hmm-font-size);
+    /* 2.x refused to draw below this; the layout still assumes a desktop window. */
+    min-width: 1024px;
+    min-height: 584px;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+:focus-visible {
+    outline: 2px solid var(--hmm-focus);
+    outline-offset: -1px;
+}
+
+.hmm-mono {
+    font-family: var(--hmm-font-mono);
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+}
+
+/* The plain form controls of the toolbars and dialogs, in the smoothness idiom. */
+.hmm-input,
+.hmm-select {
+    height: 22px;
+    padding: 1px 4px;
+    border: 1px solid var(--hmm-border);
+    border-radius: var(--hmm-radius);
+    background: var(--hmm-bg);
+}
+
+.hmm-button {
+    min-height: 22px;
+    padding: 2px 10px;
+    border: 1px solid var(--hmm-border);
+    border-radius: var(--hmm-radius);
+    background: var(--hmm-header-bg);
+    cursor: pointer;
+}
+
+.hmm-button:hover:not(:disabled) {
+    border-color: var(--hmm-border-strong);
+    background: var(--hmm-accent-bg);
+}
+
+.hmm-button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}

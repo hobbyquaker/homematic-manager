@@ -1,0 +1,805 @@
+{
+  "receiverType": "DOOR_LOCK_TRANSCEIVER",
+  "senders": {
+    "ACCESS_TRANSCEIVER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes toggelt der Zustand des Schlosses (entriegelt / verriegelt).",
+          "en": "If authorisation is granted and the correct code is entered, the status of the lock toggles (unlocked/locked)."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_open",
+        "name": {"de": "T%FCr %F6ffnen", "en": "Open door"},
+        "description": {
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird die T%FCr ge%F6ffnet.",
+          "en": "If authorisation is granted and the correct code is entered, the door is opened"
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_unlock",
+        "name": {"de": "T%FCrschloss entriegeln", "en": "Unlock door lock"},
+        "description": {
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das T%FCrschloss entriegelt.",
+          "en": "If authorisation is granted and the correct code is entered, the lock is unlocked."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_lock",
+        "name": {"de": "T%FCrschloss verriegeln", "en": "Lock door lock"},
+        "description": {
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das T%FCrschloss verriegelt.",
+          "en": "If authorisation is granted and the correct code is entered, the lock is locked."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 5,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {"de": "Das Profil ist nicht aktiv", "en": "The profile is not active"},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "COND_SWITCH_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {
+          "de": "Bei Empfang des gewählten Entscheidungswertes toggelt der Zustand des Schlosses (entriegelt / verriegelt).",
+          "en": "When receiving the decision value defined, the status of the lock toggles (unlocked/locked)."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_open",
+        "name": {"de": "T%FCr %F6ffnen", "en": "Open door"},
+        "description": {
+          "de": "Bei Empfang des gewählten Entscheidungswertes wird T%FCr ge%F6ffnet.",
+          "en": "When receiving the decision value defined, the door is opened"
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_unlock",
+        "name": {"de": "T%FCrschloss entriegeln", "en": "Unlock door lock"},
+        "description": {
+          "de": "Bei Empfang des gewählten Entscheidungswertes wird das T%FCrschloss entriegelt.",
+          "en": "When receiving the decision value defined, the lock is unlocked."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_lock",
+        "name": {"de": "T%FCrschloss verriegeln", "en": "Lock door lock"},
+        "description": {
+          "de": "Bei Empfang des gewählten Entscheidungswertes wird das T%FCrschloss verriegelt.",
+          "en": "When receiving the decision value defined, the lock is locked."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 5,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {"de": "Das Profil ist nicht aktiv", "en": "The profile is not active"},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      }
+    ],
+    "DISPLAY_INPUT_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "toggle", "name": {"de": "Toggle", "en": "Toggle"}, "description": {}, "params": {}},
+      {
+        "id": 2,
+        "key": "toggleOpen",
+        "name": {"de": "Verriegeln / Entriegeln", "en": "Unlock / Lock"},
+        "description": {},
+        "params": {}
+      },
+      {"id": 3, "key": "switch_open", "name": {"de": "Öffnen", "en": "Opening"}, "description": {}, "params": {}},
+      {
+        "id": 4,
+        "key": "switch_unlock",
+        "name": {"de": "Türschloss entriegeln", "en": "Unlock door lock"},
+        "description": {},
+        "params": {}
+      },
+      {
+        "id": 5,
+        "key": "switch_lock",
+        "name": {"de": "Türschloss verriegeln", "en": "Lock door lock"},
+        "description": {},
+        "params": {}
+      },
+      {
+        "id": 6,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {},
+        "params": {}
+      }
+    ],
+    "DISPLAY_LEVEL_INPUT_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "toggle", "name": {"de": "Toggle", "en": "Toggle"}, "description": {}, "params": {}},
+      {
+        "id": 2,
+        "key": "toggleOpen",
+        "name": {"de": "Verriegeln / Entriegeln", "en": "Unlock / Lock"},
+        "description": {},
+        "params": {}
+      },
+      {"id": 3, "key": "switch_open", "name": {"de": "Öffnen", "en": "Opening"}, "description": {}, "params": {}},
+      {
+        "id": 4,
+        "key": "switch_unlock",
+        "name": {"de": "Türschloss entriegeln", "en": "Unlock door lock"},
+        "description": {},
+        "params": {}
+      },
+      {
+        "id": 5,
+        "key": "switch_lock",
+        "name": {"de": "Türschloss verriegeln", "en": "Lock door lock"},
+        "description": {},
+        "params": {}
+      },
+      {
+        "id": 6,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {},
+        "params": {}
+      }
+    ],
+    "KEY_TRANSCEIVER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {
+          "de": "Mit einem langen Tastendruck wird die T%FCr ge%F6ffnet. Ein kurzer Tastendruck toggelt den Zustand des Schlosses (entriegeln / verriegeln)",
+          "en": "With a long button press the door is opened. With a short button press, the status of the lock toggles (unlocked/locked)."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 2,
+        "key": "toggleOpen",
+        "name": {"de": "Verriegeln / Entriegeln", "en": "Unlock / Lock"},
+        "description": {
+          "de": "Ein kurzer oder langer Tastendruck toggelt den Zustand des Schlosses (entriegeln / verriegeln)",
+          "en": "With a short or long button press, the status of the lock toggles (unlocked/locked)."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_open",
+        "name": {"de": "T%FCr %F6ffnen", "en": "Open door"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird die T%FCr ge%F6ffnet.",
+          "en": "With a short or long button press, the door is opened."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_unlock",
+        "name": {"de": "T%FCrschloss entriegeln", "en": "Unlock door lock"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird das T%FCrschloss entriegelt.",
+          "en": "With a short or long button press, the lock is unlocked."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 5,
+        "key": "switch_lock",
+        "name": {"de": "T%FCrschloss verriegeln", "en": "Lock door lock"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird das T%FCrschloss verriegelt.",
+          "en": "With a short or long button press, the lock is locked."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 6,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {"de": "Das Profil ist nicht aktiv", "en": "The profile is not active"},
+        "params": {
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER": [
+      {"id": 0, "key": "profile_0", "name": {"de": "Experte", "en": "Expert"}, "description": {}, "params": {}}
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER_1": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "toggle", "name": {"de": "Toggle", "en": "Toggle"}, "description": {}, "params": {}},
+      {
+        "id": 2,
+        "key": "toggleOpen",
+        "name": {"de": "Verriegeln / Entriegeln", "en": "Unlock / Lock"},
+        "description": {},
+        "params": {}
+      },
+      {"id": 3, "key": "switch_open", "name": {"de": "Öffnen", "en": "Opening"}, "description": {}, "params": {}},
+      {
+        "id": 4,
+        "key": "switch_unlock",
+        "name": {"de": "Türschloss entriegeln", "en": "Unlock door lock"},
+        "description": {},
+        "params": {}
+      },
+      {
+        "id": 5,
+        "key": "switch_lock",
+        "name": {"de": "Türschloss verriegeln", "en": "Lock door lock"},
+        "description": {},
+        "params": {}
+      },
+      {
+        "id": 6,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {},
+        "params": {}
+      }
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER_2": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "toggle", "name": {"de": "Toggle", "en": "Toggle"}, "description": {}, "params": {}},
+      {"id": 2, "key": "switch_open", "name": {"de": "Öffnen", "en": "Opening"}, "description": {}, "params": {}},
+      {
+        "id": 3,
+        "key": "switch_unlock",
+        "name": {"de": "Türschloss entriegeln", "en": "Unlock door lock"},
+        "description": {},
+        "params": {}
+      },
+      {
+        "id": 4,
+        "key": "switch_lock",
+        "name": {"de": "Türschloss verriegeln", "en": "Lock door lock"},
+        "description": {},
+        "params": {}
+      },
+      {
+        "id": 5,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {},
+        "params": {}
+      }
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER_3": [
+      {
+        "id": 0,
+        "key": "no_profile",
+        "name": {"de": "Kein Profil vorhanden", "en": "No profile available"},
+        "description": {"de": "no"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "no_profile",
+        "name": {"de": "Kein Profil vorhanden", "en": "No profile available"},
+        "description": {"de": "no"},
+        "params": {}
+      }
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER_4": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "toggle", "name": {"de": "Toggle", "en": "Toggle"}, "description": {}, "params": {}},
+      {
+        "id": 2,
+        "key": "toggleOpen",
+        "name": {"de": "Verriegeln / Entriegeln", "en": "Unlock / Lock"},
+        "description": {},
+        "params": {}
+      },
+      {"id": 3, "key": "switch_open", "name": {"de": "Öffnen", "en": "Opening"}, "description": {}, "params": {}},
+      {
+        "id": 4,
+        "key": "switch_unlock",
+        "name": {"de": "Türschloss entriegeln", "en": "Unlock door lock"},
+        "description": {},
+        "params": {}
+      },
+      {
+        "id": 5,
+        "key": "switch_lock",
+        "name": {"de": "Türschloss verriegeln", "en": "Lock door lock"},
+        "description": {},
+        "params": {}
+      },
+      {
+        "id": 6,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {},
+        "params": {}
+      }
+    ],
+    "SHUTTER_CONTACT": [
+      {
+        "id": 0,
+        "key": "no_profile",
+        "name": {"de": "Experte", "en": "Expert"},
+        "description": {"de": "no"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "no_profile",
+        "name": {"de": "Profile 1", "en": "Profile 1"},
+        "description": {"de": "no"},
+        "params": {}
+      }
+    ],
+    "SWITCH_TRANSCEIVER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {
+          "de": "Bei Bet%E4tigung des Schalters toggelt der Zustand des Schlosses (entriegelt / verriegelt).",
+          "en": "When actuating the switch, the status of the lock toggles (unlocked/locked)."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_open",
+        "name": {"de": "T%FCr %F6ffnen", "en": "Open door"},
+        "description": {
+          "de": "Bei Bet%E4tigung des Schalters wird die T%FCr ge%F6ffnet.",
+          "en": "When actuating the switch, the door is opened"
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_unlock",
+        "name": {"de": "T%FCrschloss entriegeln", "en": "Unlock door lock"},
+        "description": {
+          "de": "Bei Bet%E4tigung des Schalters wird das T%FCrschloss entriegelt.",
+          "en": "When actuating the switch, the lock is unlocked."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_lock",
+        "name": {"de": "T%FCrschloss verriegeln", "en": "Lock door lock"},
+        "description": {
+          "de": "Bei Bet%E4tigung des Schalters wird das T%FCrschloss verriegelt.",
+          "en": "When actuating the switch, the lock is locked."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 5,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {"de": "Das Profil ist nicht aktiv", "en": "The profile is not active"},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      }
+    ]
+  }
+}

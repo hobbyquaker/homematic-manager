@@ -1,0 +1,419 @@
+{
+  "receiverType": "AUTO_RELOCK_TRANSCEIVER",
+  "senders": {
+    "ACCESS_TRANSCEIVER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes toggelt der Auto-Relock Status (ein / aus).",
+          "en": "If authorisation is granted and the correct code is entered, the status of Auto-Relock is toggling (on / off)."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 2,
+        "key": "autoRelockOn",
+        "name": {"de": "Ein", "en": "On"},
+        "description": {
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes schaltet Auto-Relock ein.",
+          "en": "If authorisation is granted and the correct code is entered, Auto-Relock is switchted on."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 3,
+        "key": "autoRelockOff",
+        "name": {"de": "Aus", "en": "Off"},
+        "description": {
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes schaltet Auto-Relock aus.",
+          "en": "If authorisation is granted and the correct code is entered, Auto-Relock is switchted off."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 4,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {"de": "Das Profil ist nicht aktiv", "en": "The profile is not active"},
+        "params": {
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "COND_SWITCH_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {
+          "de": "Bei Empfang des gewählten Entscheidungswertes toggelt der Auto-Relock Status (ein / aus).",
+          "en": "When receiving the decision value defined, the status of Auto-Relock is toggling (on / off)."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 2,
+        "key": "autoRelockOn",
+        "name": {"de": "Ein", "en": "On"},
+        "description": {
+          "de": "Bei Empfang des gewählten Entscheidungswertes schaltet Auto-Relock ein.",
+          "en": "When receiving the decision value defined, Auto-Relock is switchted on."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 3,
+        "key": "autoRelockOff",
+        "name": {"de": "Aus", "en": "Off"},
+        "description": {
+          "de": "Bei Empfang des gewählten Entscheidungswertesschaltet Auto-Relock aus.",
+          "en": "When receiving the decision value defined, Auto-Relock is switched off."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 4,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {"de": "Das Profil ist nicht aktiv", "en": "The profile is not active"},
+        "params": {
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "DISPLAY_INPUT_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "toggle", "name": {"de": "Toggle", "en": "Toggle"}, "description": {}, "params": {}},
+      {"id": 2, "key": "autoRelockOn", "name": {"de": "Ein", "en": "On"}, "description": {}, "params": {}},
+      {"id": 3, "key": "autoRelockOff", "name": {"de": "Aus", "en": "Off"}, "description": {}, "params": {}},
+      {
+        "id": 4,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {},
+        "params": {}
+      }
+    ],
+    "DISPLAY_LEVEL_INPUT_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "toggle", "name": {"de": "Toggle", "en": "Toggle"}, "description": {}, "params": {}},
+      {"id": 2, "key": "autoRelockOn", "name": {"de": "Ein", "en": "On"}, "description": {}, "params": {}},
+      {"id": 3, "key": "autoRelockOff", "name": {"de": "Aus", "en": "Off"}, "description": {}, "params": {}},
+      {
+        "id": 4,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {},
+        "params": {}
+      }
+    ],
+    "KEY_TRANSCEIVER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {
+          "de": "Ein kurzer oder langer Tastendruck toggelt den Auto-Relock Status (ein / aus).",
+          "en": "With a long button press, the status of Auto-Relock is toggling (on / off)."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 2,
+        "key": "autoRelockOn",
+        "name": {"de": "Ein", "en": "On"},
+        "description": {
+          "de": "Ein kurzer oder langer Tastendruck schaltet Auto-Relock ein.",
+          "en": "With a short or long button press, Auto-Relock is switchted on."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 3,
+        "key": "autoRelockOff",
+        "name": {"de": "Aus", "en": "Off"},
+        "description": {
+          "de": "Ein kurzer oder langer Tastendruck schaltet Auto-Relock aus.",
+          "en": "With a short or long button press, Auto-Relock is switchted off."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PERMISSION_MASK": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 4,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {"de": "Das Profil ist nicht aktiv", "en": "The profile is not active"},
+        "params": {
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER": [
+      {"id": 0, "key": "profile_0", "name": {"de": "Experte", "en": "Expert"}, "description": {}, "params": {}}
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER_1": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "toggle", "name": {"de": "Toggle", "en": "Toggle"}, "description": {}, "params": {}},
+      {"id": 2, "key": "autoRelockOn", "name": {"de": "Ein", "en": "On"}, "description": {}, "params": {}},
+      {"id": 3, "key": "autoRelockOff", "name": {"de": "Aus", "en": "Off"}, "description": {}, "params": {}},
+      {
+        "id": 4,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {},
+        "params": {}
+      }
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER_2": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "toggle", "name": {"de": "Toggle", "en": "Toggle"}, "description": {}, "params": {}},
+      {"id": 2, "key": "autoRelockOn", "name": {"de": "Ein", "en": "On"}, "description": {}, "params": {}},
+      {"id": 3, "key": "autoRelockOff", "name": {"de": "Aus", "en": "Off"}, "description": {}, "params": {}},
+      {
+        "id": 4,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {},
+        "params": {}
+      }
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER_3": [
+      {
+        "id": 0,
+        "key": "no_profile",
+        "name": {"de": "Kein Profil vorhanden", "en": "No profile available"},
+        "description": {"de": "no"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "no_profile",
+        "name": {"de": "Kein Profil vorhanden", "en": "No profile available"},
+        "description": {"de": "no"},
+        "params": {}
+      }
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER_4": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "toggle", "name": {"de": "Toggle", "en": "Toggle"}, "description": {}, "params": {}},
+      {"id": 2, "key": "autoRelockOn", "name": {"de": "Ein", "en": "On"}, "description": {}, "params": {}},
+      {"id": 3, "key": "autoRelockOff", "name": {"de": "Aus", "en": "Off"}, "description": {}, "params": {}},
+      {
+        "id": 4,
+        "key": "not_active",
+        "name": {"de": "nicht aktiv", "en": "inactive", "tr": "etkin degil"},
+        "description": {},
+        "params": {}
+      }
+    ]
+  }
+}

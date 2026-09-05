@@ -1,0 +1,1311 @@
+{
+  "receiverType": "SIGNAL_CHIMEM",
+  "senders": {
+    "CONDITION_CURRENT": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Signalleuchte aktiv", "en": "Signal lamp active"},
+        "description": {
+          "de": "Beim Senden des Schaltbefehls ertönt der Gong. Ist eine Einschaltverzögerungszeit eingestellt, so geschieht es erst nach Ablauf dieser Zeit."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "list", "values": [1, 0]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 5, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Signalleuchte nicht aktiv", "en": "Signal lamp inactive"},
+        "description": {"de": "Der Sensor ist deaktiviert."},
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "CONDITION_FREQUENCY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Signalleuchte aktiv", "en": "Signal lamp active"},
+        "description": {
+          "de": "Beim Senden des Schaltbefehls ertönt der Gong. Ist eine Einschaltverzögerungszeit eingestellt, so geschieht es erst nach Ablauf dieser Zeit."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "list", "values": [1, 0]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 5, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Signalleuchte nicht aktiv", "en": "Signal lamp inactive"},
+        "description": {"de": "Der Sensor ist deaktiviert."},
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "CONDITION_POWER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Signalleuchte aktiv", "en": "Signal lamp active"},
+        "description": {
+          "de": "Beim Senden des Schaltbefehls ertönt der Gong. Ist eine Einschaltverzögerungszeit eingestellt, so geschieht es erst nach Ablauf dieser Zeit."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "list", "values": [1, 0]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 5, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Signalleuchte nicht aktiv", "en": "Signal lamp inactive"},
+        "description": {"de": "Der Sensor ist deaktiviert."},
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "CONDITION_VOLTAGE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Signalleuchte aktiv", "en": "Signal lamp active"},
+        "description": {
+          "de": "Beim Senden des Schaltbefehls ertönt der Gong. Ist eine Einschaltverzögerungszeit eingestellt, so geschieht es erst nach Ablauf dieser Zeit."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "list", "values": [1, 0]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 5, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Signalleuchte nicht aktiv", "en": "Signal lamp inactive"},
+        "description": {"de": "Der Sensor ist deaktiviert."},
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Gong aktiv", "en": "Chime active"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Gong entsprechend des gewählten Modus geschaltet.",
+          "en": "With a short or long button press the chime will be triggered according to the selected mode.",
+          "tr": "Tusa kisa veya uzun süre basildiginda gong secilen moda göre kapanir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_ACT_INTENS": {"kind": "range", "min": 0, "max": 10, "default": 0},
+          "LONG_ACT_NUM": {"kind": "fixed", "value": 1},
+          "LONG_ACT_TYPE": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "list", "values": [111600, 6]},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "range", "min": 0, "max": 10, "default": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Gong nicht aktiv", "en": "Chime inactive"},
+        "description": {
+          "de": "Die Taste ist deaktiviert.",
+          "en": "The button is deactivated.",
+          "tr": "Tus etkin degildir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "KEY_PAIR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_off",
+        "name": {"de": "Signalleuchte aus", "en": "Signal lamp off"},
+        "description": {"de": "Falls der Gong unerwünscht ertönt, kann er mit dieser Taste ausgeschaltet werden."},
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_ACT_NUM": {"kind": "fixed", "value": 1},
+          "LONG_ACT_TYPE": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 3},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "list", "values": [111600, 6]},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_on",
+        "name": {"de": "Signalleuchte ein", "en": "Signal lamp on"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Gong entsprechend des gewählten Schaltmodus geschaltet."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_ACT_INTENS": {"kind": "range", "min": 0, "max": 10, "default": 0},
+          "LONG_ACT_NUM": {"kind": "fixed", "value": 1},
+          "LONG_ACT_TYPE": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "list", "values": [111600, 6]},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "range", "min": 0, "max": 10, "default": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "MOTION_DETECTOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Signalleuchte aktiv", "en": "Signal lamp active"},
+        "description": {
+          "de": "Beim Auslösen des Bewegungsmelders ertönt der Gong. Ist eine Einschaltverzögerungszeit eingestellt, so geschieht es erst nach Ablauf dieser Zeit.",
+          "en": "The chime will sound when the motion detector is triggered. If a delay time is set, the chime will be triggered after the time has expired.<br/><br/>The transmission interval of the motion detector (channel parameter) should be set to <b>dynamic</b> and the minimum transmission interval should be <b>15s</b> .",
+          "tr": "Hareket alarmi devreye girdiginde gong calmaya baslar. Eger bir gecikme zamani ayarlanmissa, gong bu süre dolduktan sonra calar.<br/><br/>Hareket alarminda (kanal parametresi) iletim araligi secenegi <b>dinamik</b> konumunda olmali ve en az <b>15s'lik</b> bir minimum aralik ayarlanmalidir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "range", "min": 0, "max": 10, "default": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "list", "values": [100, 255]},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 255},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "list", "values": [0, 2]},
+          "SHORT_JT_ON": {"kind": "list", "values": [0, 2]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [0, 2]},
+          "SHORT_OFFDELAY_TIME": {"kind": "list", "values": [0, 20]},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_MODE": {"kind": "list", "values": [0, 1]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Signalleuchte nicht aktiv", "en": "Signal lamp inactive"},
+        "description": {
+          "de": "Der Bewegungsmelder ist deaktiviert.",
+          "en": "The motion detector is deactivated.",
+          "tr": "Hareket alarmi devre disi."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "PULSE_SENSOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Signalleuchte aktiv", "en": "Signal lamp active"},
+        "description": {
+          "de": "Beim Senden des Schaltbefehls ertönt der Gong. Ist eine Einschaltverzögerungszeit eingestellt, so geschieht es erst nach Ablauf dieser Zeit.",
+          "en": "The chime will sound when a switching command is transmitted. If a delay is set the chime will be triggered after the delay time has expired.",
+          "tr": "Degistirme komutu iletildiginde gong calar. Bir gecikme süresi ayarlanmissa, gong bu süre dolduktan sonra calmaya baslar."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "list", "values": [1, 0]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 5, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Signalleuchte nicht aktiv", "en": "Signal lamp inactive"},
+        "description": {
+          "de": "Der Sensor ist deaktiviert.",
+          "en": "The sensor is deactivated.",
+          "tr": "Sensör etkin degil."
+        },
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "SENSOR_WINDOW": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Signalleuchte aktiv", "en": "Signal lamp active"},
+        "description": {
+          "de": "Bei Betätigung des Kontaktes wird der Gong entsprechend der gewählten Schaltrichtung geschaltet.",
+          "en": "When the window is operated the chime will be triggered according to the selected direction.",
+          "tr": "<span class=\"translated\">Pencereye basildiginda gong secilen yöne göre calmaya baslar.<span/><br/><br/>"
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "list", "values": [0, 1]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "list", "values": [0, 16]},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Signalleuchte nicht aktiv", "en": "Signal lamp inactive"},
+        "description": {
+          "de": "Der Kontakt ist deaktiviert.",
+          "en": "This direct link will be deactivated.",
+          "tr": "Bu baglanti devre disi birakilir."
+        },
+        "params": {
+          "LONG_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "LONG_ACT_NUM": {"kind": "fixed", "value": 0},
+          "LONG_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SHUTTER_CONTACT": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Gong aktiv", "en": "Chime active"},
+        "description": {
+          "de": "Beim Betätigen des Kontakts wird der Gong entsprechend der gewählten Richtung geschaltet.",
+          "en": "When the contact is operated the chime will be triggered according to the selected direction.",
+          "tr": "<span class=\"translated\">Kontaga basildiginda gong secilen yöne göre calmaya baslar.<span/><br/><br/>"
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "list", "values": [0, 16]},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [4, 3]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [4, 3]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 5, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Gong nicht aktiv", "en": "Chime inactive"},
+        "description": {
+          "de": "Der Kontakt ist deaktiviert.",
+          "en": "The contact is deactivated.",
+          "tr": "Kontak etkin degil."
+        },
+        "params": {
+          "LONG_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "LONG_ACT_NUM": {"kind": "fixed", "value": 0},
+          "LONG_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SMOKE_DETECTOR_TEAM": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Signalleuchte aktiv", "en": "Signal lamp active"},
+        "description": {
+          "de": "Bei Auslösen des Rauchmelders wird der Gong aktiviert.",
+          "en": "The chime will be activated when the smoke detector is triggered.",
+          "tr": "Duman alarmi devreye girdiginde gong etkinlesir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Signalleuchte nicht aktiv", "en": "Signal lamp inactive"},
+        "description": {
+          "de": "Der Rauchmelder ist deaktiviert.",
+          "en": "The smoke detector is deactivated.",
+          "tr": "Duman alarmi etkin degil."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SMOKE_DETECTOR_TEAM_V2": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Signalleuchte aktiv", "en": "Signal lamp active"},
+        "description": {
+          "de": "Bei Auslösen des Rauchmelders wird der Gong aktiviert.",
+          "en": "The chime will be activated when the smoke detector is triggered.",
+          "tr": "Duman alarmi devreye girdiginde gong etkinlesir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Signalleuchte nicht aktiv", "en": "Signal lamp inactive"},
+        "description": {
+          "de": "Der Rauchmelder ist deaktiviert.",
+          "en": "The smoke detector is deactivated.",
+          "tr": "Duman alarmi etkin degil."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SWITCH_INTERFACE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Signalleuchte aktiv", "en": "Signal lamp active"},
+        "description": {
+          "de": "Bei Betätigung des Schaltkontaktes wird der Gong entsprechend des gewählten Schaltmodus geschaltet.",
+          "en": "By pressing the switch contact the chime will be triggered according to the selected mode.",
+          "tr": "<span class=\"translated\">Salter kontagina basildiginda gong secilen moda göre calmaya baslar.<span/><br/><br/>"
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Signalleuchte nicht aktiv", "en": "Signal lamp inactive"},
+        "description": {
+          "de": "Das Schaltinterface ist deaktiviert.",
+          "en": "The switching interface is deactivated.",
+          "tr": "Salter arayüzü etkin degil."
+        },
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "TILT_SENSOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Signalleuchte aktiv", "en": "Signal lamp active"},
+        "description": {
+          "de": "Bei Betätigung des Schaltkontaktes wird der Gong entsprechend der gewählten Schaltrichtung geschaltet.",
+          "en": "When the switch contact is operated the chime will be triggered according to the selected direction.",
+          "tr": "Salter kontagina basildiginda gong secilen yöne göre calmaya baslar."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [4, 3]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [4, 3]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Signalleuchte nicht aktiv", "en": "Signal lamp inactive"},
+        "description": {
+          "de": "Der Tiltsensor ist deaktiviert.",
+          "en": "The tilt sensor is deactivated.",
+          "tr": "Egim sensörü etkin degil."
+        },
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "VIRTUAL_KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Signalleuchte aktiv", "en": "Signal lamp active"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck ertönt der Gong. Ist eine Einschaltverzögerungszeit eingestellt, so geschieht es erst nach Ablauf dieser Zeit.",
+          "en": "With a long or short button press the chime will sound. If a delay is set the chime will be triggered after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun süre basildiginda gong calar.  Bir gecikme süresi ayarlanmissa, gong bu süre dolduktan sonra calmaya baslar."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "LONG_ACT_NUM": {"kind": "fixed", "value": 1},
+          "LONG_ACT_TYPE": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "list", "values": [111600, 6]},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Signalleuchte nicht aktiv", "en": "Signal lamp inactive"},
+        "description": {
+          "de": "Die virtuelle Taste ist deaktiviert.",
+          "en": "The virtual button is deactivated.",
+          "tr": "Görsel tus etkin degildir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_ACT_NUM": {"kind": "fixed", "value": 0},
+          "LONG_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 4},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "LONG_JT_ON": {"kind": "fixed", "value": 4},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4}
+        }
+      }
+    ],
+    "WATERDETECTIONSENSOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "signal_led_chime_active",
+        "name": {"de": "Signalleuchte aktiv", "en": "Signal lamp active"},
+        "description": {
+          "de": "Bei Feuchte wird der Gong entsprechend der gewählten Schaltrichtung geschaltet.",
+          "en": "In case of humidity the chime will be triggered according to the selected operating mode.",
+          "tr": "<span class=\"translated\">Nemli havada gong secilen yöne dogru calar.<span/><br/><br/>"
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_INTENS": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 1},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [4, 3]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [4, 3]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "signal_led_chime_non_active",
+        "name": {"de": "Signalleuchte nicht aktiv", "en": "Signal lamp inactive"},
+        "description": {
+          "de": "Der Wassermelder ist deaktiviert.",
+          "en": "The water sensor is deactivated.",
+          "tr": "Su alarmi etkin degil."
+        },
+        "params": {
+          "LONG_ACT_NUM": {"kind": "fixed", "value": 0},
+          "LONG_ACT_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_NUM": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_TYPE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ]
+  },
+  "senderMetadata": {
+    "CONDITION_CURRENT": {"parameterOrder": ["SHORT_ONDELAY_TIME"], "optionPresets": {"SHORT_ONDELAY_TIME": "DELAY"}},
+    "CONDITION_FREQUENCY": {"parameterOrder": ["SHORT_ONDELAY_TIME"], "optionPresets": {"SHORT_ONDELAY_TIME": "DELAY"}},
+    "CONDITION_POWER": {"parameterOrder": ["SHORT_ONDELAY_TIME"], "optionPresets": {"SHORT_ONDELAY_TIME": "DELAY"}},
+    "CONDITION_VOLTAGE": {"parameterOrder": ["SHORT_ONDELAY_TIME"], "optionPresets": {"SHORT_ONDELAY_TIME": "DELAY"}},
+    "KEY": {
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_JT_OFF", "SHORT_JT_OFFDELAY", "SHORT_JT_ON", "SHORT_JT_ONDELAY"],
+          "values": {"SHORT_JT_OFF": 1, "SHORT_JT_OFFDELAY": 0, "SHORT_JT_ON": 0, "SHORT_JT_ONDELAY": 0}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_JT_OFF", "SHORT_JT_OFFDELAY", "SHORT_JT_ON", "SHORT_JT_ONDELAY"],
+          "values": {"SHORT_JT_OFF": 1, "SHORT_JT_OFFDELAY": 4, "SHORT_JT_ON": 3, "SHORT_JT_ONDELAY": 2}
+        }
+      ]
+    },
+    "SENSOR_WINDOW": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME"],
+      "optionPresets": {"SHORT_ONDELAY_TIME": "DELAY"},
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": [
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_CT_OFF": 0,
+            "SHORT_CT_OFFDELAY": 0,
+            "SHORT_CT_ON": 0,
+            "SHORT_CT_ONDELAY": 0,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 0,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 4,
+          "key": "subset_4",
+          "optionValue": 4,
+          "params": [
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_CT_OFF": 2,
+            "SHORT_CT_OFFDELAY": 2,
+            "SHORT_CT_ON": 2,
+            "SHORT_CT_ONDELAY": 2,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 1,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 1
+          }
+        },
+        {
+          "id": 5,
+          "key": "subset_5",
+          "optionValue": 5,
+          "params": [
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_CT_OFF": 5,
+            "SHORT_CT_OFFDELAY": 5,
+            "SHORT_CT_ON": 5,
+            "SHORT_CT_ONDELAY": 5,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 1,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 1
+          }
+        }
+      ]
+    },
+    "SHUTTER_CONTACT": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME"],
+      "optionPresets": {"SHORT_ONDELAY_TIME": "DELAY"},
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": [
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_CT_OFF": 1,
+            "SHORT_CT_OFFDELAY": 1,
+            "SHORT_CT_ON": 1,
+            "SHORT_CT_ONDELAY": 1,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 1,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 1
+          }
+        },
+        {
+          "id": 4,
+          "key": "subset_4",
+          "optionValue": 4,
+          "params": [
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_CT_OFF": 2,
+            "SHORT_CT_OFFDELAY": 2,
+            "SHORT_CT_ON": 2,
+            "SHORT_CT_ONDELAY": 2,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 1,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 1
+          }
+        },
+        {
+          "id": 5,
+          "key": "subset_5",
+          "optionValue": 5,
+          "params": [
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_CT_OFF": 5,
+            "SHORT_CT_OFFDELAY": 5,
+            "SHORT_CT_ON": 5,
+            "SHORT_CT_ONDELAY": 5,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 1,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 1
+          }
+        }
+      ]
+    },
+    "SWITCH_INTERFACE": {
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_JT_OFF", "SHORT_JT_OFFDELAY", "SHORT_JT_ON", "SHORT_JT_ONDELAY"],
+          "values": {"SHORT_JT_OFF": 1, "SHORT_JT_OFFDELAY": 4, "SHORT_JT_ON": 3, "SHORT_JT_ONDELAY": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_JT_OFF", "SHORT_JT_OFFDELAY", "SHORT_JT_ON", "SHORT_JT_ONDELAY"],
+          "values": {"SHORT_JT_OFF": 1, "SHORT_JT_OFFDELAY": 0, "SHORT_JT_ON": 0, "SHORT_JT_ONDELAY": 0}
+        }
+      ]
+    },
+    "TILT_SENSOR": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME"],
+      "optionPresets": {"SHORT_ONDELAY_TIME": "DELAY"},
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": [
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_CT_OFF": 1,
+            "SHORT_CT_OFFDELAY": 1,
+            "SHORT_CT_ON": 1,
+            "SHORT_CT_ONDELAY": 1,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 1,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 1
+          }
+        },
+        {
+          "id": 4,
+          "key": "subset_4",
+          "optionValue": 4,
+          "params": [
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_CT_OFF": 2,
+            "SHORT_CT_OFFDELAY": 2,
+            "SHORT_CT_ON": 2,
+            "SHORT_CT_ONDELAY": 2,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 1,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 1
+          }
+        },
+        {
+          "id": 5,
+          "key": "subset_5",
+          "optionValue": 5,
+          "params": [
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_CT_OFF": 5,
+            "SHORT_CT_OFFDELAY": 5,
+            "SHORT_CT_ON": 5,
+            "SHORT_CT_ONDELAY": 5,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 1,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 1
+          }
+        }
+      ]
+    },
+    "WATERDETECTIONSENSOR": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME"],
+      "optionPresets": {"SHORT_ONDELAY_TIME": "DELAY"},
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        }
+      ]
+    }
+  }
+}

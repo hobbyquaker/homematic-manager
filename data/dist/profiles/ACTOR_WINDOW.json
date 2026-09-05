@@ -1,0 +1,1969 @@
+{
+  "receiverType": "ACTOR_WINDOW",
+  "senders": {
+    "KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "closeWindow",
+        "name": {"de": "Fenster - Schließen / Stopp", "en": "Window - Close / Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster geschlossen. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Schließen verzögert.",
+          "en": "A keystroke will close the window. During window movement a keystroke will stop the window. An optional delay time will delay the closing.",
+          "tr": "Pencere tusa bir kere basilarak kapatilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde kapatma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "openWindow",
+        "name": {"de": "Fenster - Lüftungsstellung / Stopp", "en": "Window - Open / Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster in Lüftungsstellung (100%) geöffnet. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "A keystroke will open the window 100%. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+          "tr": "Pencere tusa bir kere basilarak havalandirma konumunda (%100) acilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "toggleWindow",
+        "name": {
+          "de": "Fenster - Natürliches Lüften / Stopp / Schließen",
+          "en": "Window - Natural ventilation / Stop / Close"
+        },
+        "description": {
+          "de": "Mit einem Tastendruck wird das geöffnete Fenster geschlossen, ein geschlossenes Fenster wird in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Ein Tastendruck während der Fahrt, stoppt das Fenster. Der folgende Tastendruck bewirkt eine Umkehrung des vorherigen Fahrbefehls. Zusätzlich wählbare Verzögerungszeiten verzögern das Öffnen bzw. Schließen.",
+          "en": "A keystroke will close an open window or will open a locked window 100% and close it automatically after the selected time elapsed. During window movement a keystroke will stop the window. The following keystroke causes a reversal of the previous driving direction. Optional delay times will delay the opening respectively closing.",
+          "tr": "Acik pencere tusa bir kere basilarak kapatilir, kapali bir pencere ise havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da tekrar kapanir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Tusa bir kere daha basildiginda bir önceki sürüs komutu tersine gerceklesir. Ek olarak secilebilen gecikme süreleri acilma veya kapanma islemini geciktirir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "automaticWindow",
+        "name": {"de": "Fenster - Automatikbetrieb", "en": "Window - Automatic"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Wird die Taste gedrückt, wenn das Fenster bereits in Lüftungsstellung steht, startet nur die Zeit neu.",
+          "en": "A keystroke will open the window 100% and close it automatically after the selected time elapsed. If the window is already 100% open, each keystroke will restart the timer.",
+          "tr": "Tusa bir kere basildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Pencere havalandirma konumundayken tusa basilirsa sadece zaman yeniden baslar."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 2},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 10},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 5,
+        "key": "stopWindow",
+        "name": {"de": "Fenster - Stopp", "en": "Window - Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird die Fahrt des Fensters angehalten.",
+          "en": "A keystroke will stop window movement.",
+          "tr": "Pencere tusa bir kere basilarak durdurulur."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 6,
+        "key": "windowAiring",
+        "name": {"de": "Fenster - Spaltlüften / Stopp", "en": "Window - Night ventilation / Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster in die gewählte Öffnungsposition gefahren. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "A keystroke will drive the window into the selected opening position. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+          "tr": "Tusa bir kere basildiginda pencere istenen acilma pozisyonuna hareket ettirilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 0.5},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 7,
+        "key": "windowAiringTime",
+        "name": {"de": "Fenster - Zeitlüften / Stopp", "en": "Window - Timed ventilation / Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Ein Tastendruck während der Fahrt stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "A keystroke will open the window 100% and close it automatically after the selected time elapsed. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+          "tr": "Tusa bir kere basildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 1800},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 8,
+        "key": "windowPosition",
+        "name": {"de": "Fenster - Positionsfahrt / Stopp", "en": "Window - Position movement / Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster in die gewählte Öffnungsposition gefahren. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "A keystroke will drive the window into the selected opening position. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+          "tr": "Tusa bir kere basildiginda pencere istenen acilma pozisyonuna hareket ettirilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 9,
+        "key": "windowNaturalAiring",
+        "name": {"de": "Fenster - Natürliches Lüften / Stopp", "en": "Window - Natural ventilation / Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster in die gewählte Öffnungsposition gefahren und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "A keystroke will drive the window into the selected opening position and close it automatically after the selected time elapsed. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+          "tr": "Tusa bir kere basildiginda pencere istenen havalandirma konumuna gelir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 0.5},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 10,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Diese Verknüpfung wird deaktiviert.",
+          "en": "This direct link will be deactivated.",
+          "tr": "Bu baglanti devre disi birakilir."
+        },
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "MOTION_DETECTOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "openWindowA",
+        "name": {
+          "de": "Fenster - Zeitlüften ohne Stopp-Option",
+          "en": "Window - Timed ventilation without stop option"
+        },
+        "description": {
+          "de": "Bei erkannter Bewegung wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen.",
+          "en": "When the sensor detects movement the window will open 100%. After the selected time elapsed the window will be closed automatically.",
+          "tr": "Hareket algilandiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "range", "min": 100, "max": 255, "default": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 255},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 0},
+          "SHORT_MULTIEXECUTE": {"kind": "list", "values": [0, 1]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 20},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 300},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 2,
+        "key": "stopWindow",
+        "name": {"de": "Fenster - Stopp", "en": "Window - Stop"},
+        "description": {
+          "de": "Bei erkannter Bewegung stoppt das Fenster seine Fahrt.",
+          "en": "When the sensor detects movement the window will stop immediately.",
+          "tr": "Hareket algilandiginda pencere hareketini durdurur."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 255},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 6},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 20},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 300},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 3,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Diese Verknüpfung wird deaktiviert",
+          "en": "This direct link will be deactivated.",
+          "tr": "Bu baglanti devre disi birakilir."
+        },
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "RAINDETECTOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "closeWindowA",
+        "name": {"de": "Fenster - Schließen ohne Stopp-Option", "en": "Window - Close without stop option"},
+        "description": {
+          "de": "Beginnt es zu regnen, wird das Fenster geschlossen. Durch die optional wählbare Verzögerungszeit wird das Schließen verzögert.",
+          "en": "When it starts raining, the window will be closed. An optional delay time will delay the closing.",
+          "tr": "Yagmur yagmaya basladiginda pencere kapanir. Opsiyonel secilebilen gecikme zamani sayesinde kapatma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 5},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 5},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 5},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "openWindowA",
+        "name": {
+          "de": "Fenster - Zeitlüften ohne Stopp-Option",
+          "en": "Window - Timed ventilation without stop option"
+        },
+        "description": {
+          "de": "Bei Regen wird das Fenster geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen.",
+          "en": "When it starts raining, the window will be opened and closed automatically after the selected time elapsed.",
+          "tr": "Yagmur yagdiginda pencere acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Diese Verknüpfung wird deaktiviert",
+          "en": "This direct link will be deactivated.",
+          "tr": "Bu baglanti devre disi birakilir."
+        },
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "SENSOR_FOR_CARBON_DIOXIDE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "openWindowA",
+        "name": {
+          "de": "Fenster - Zeitlüften ohne Stopp-Option",
+          "en": "Window - Timed ventilation without stop option"
+        },
+        "description": {
+          "de": "Bei erhöhtem CO2-Gehalt der Luft wird das Fenster für die gewünschte Zeit geöffnet.",
+          "en": "In case of increased CO2 concentrations in the room air the window will open 100% for ventilation and will close automatically after the selected time elapsed.",
+          "tr": "Odadaki havada CO2 orani yüksekse pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir."
+        },
+        "params": {
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 100},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 108000, "default": 111600}
+        }
+      },
+      {
+        "id": 2,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Der CO2-Sensor ist außer Betrieb.",
+          "en": "This direct link will be deactivated.",
+          "tr": "Bu baglanti devre disi birakilir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SHUTTER_CONTACT": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "closeWindow",
+        "name": {"de": "Fenster - Schließen / Stopp", "en": "Window - Close / Stop"},
+        "description": {
+          "de": "Beim Schließen des Schließerkontaktes wird das Fenster geschlossen. Das Öffnen des Schließerkontaktes während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Schließen verzögert.",
+          "en": "Closing the shutter contact will close the window. Toggling the switch during window movement will stop the window. An optional delay time will delay the closing.",
+          "tr": "Kilit kontagi kapatildiginda pencere de kapanir. Kilit kontaginin hareket sirasinda acilmasi pencereyi durdurur. Opsiyonel secilebilen gecikme zamani sayesinde kapatma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 2},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "openWindow",
+        "name": {"de": "Fenster - Lüftungsstellung / Stopp", "en": "Window - Open / Stop"},
+        "description": {
+          "de": "Beim Schließen des Schließerkontaktes wird das Fenster in Lüftungsstellung (100%) geöffnet. Das Öffnen des Schließerkontaktes während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "Closing the shutter contact will open the window 100%. Opening the switch during window movement will stop the window. An optional delay time will delay the opening.",
+          "tr": "Kilit kontagi kapatildiginda pencere havalandirma konumunda (%100) acilir. Kilit kontaginin hareket sirasinda acilmasi pencereyi durdurur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "toggleWindowA",
+        "name": {
+          "de": "Fenster - Natürliches Lüften / Schließen / ohne Stopp-Option",
+          "en": "Window - Natural ventilation / Close / without stop option"
+        },
+        "description": {
+          "de": "Beim Schließen des Schließerkontaktes wird das Fenster geschlossen. Beim Öffnen des Schließerkontaktes wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Zusätzlich wählbare Verzögerungszeiten verzögern das Öffnen bzw. Schließen.",
+          "en": "Closing the shutter contact will close the window. Closing the shutter contact will open the window 100% and close it automatically after the selected time elapsed. Optional delay times will delay the opening respectively closing.",
+          "tr": "Kilit kontagi kapatildiginda pencere de kapanir. Kilit kontagi acildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Ek olarak secilebilen gecikme süreleri acilma veya kapanma islemini geciktirir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "range", "min": 100, "max": 200, "default": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 4},
+          "SHORT_MULTIEXECUTE": {"kind": "list", "values": [0, 1]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "automaticWindow",
+        "name": {"de": "Fenster - Automatikbetrieb", "en": "Window - Automatic"},
+        "description": {
+          "de": "Beim Öffnen und Schließen des Schließerkontaktes wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Beim Umschalten, wenn das Fenster bereits in Lüftungsstellung steht, startet nur die Zeit neu.",
+          "en": "Opening or closing the shutter contact will open the window 100% and close it automatically after the selected time elapsed. Opening the switch, if the window is already 100% open, will restart the timer.",
+          "tr": "Kilit kontagi acildiginda ve kapatildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Pencere havalandirma konumundayken baska bir konuma degistirildiginde sadece zaman yeniden baslar."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 2},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 10},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 5,
+        "key": "stopWindow",
+        "name": {"de": "Fenster - Stopp", "en": "Window - Stop"},
+        "description": {
+          "de": "Beim Umschalten des Schließerkontaktes wird die Fahrt des Fensters angehalten.",
+          "en": "Toggling the shutter contact will stop window movement.",
+          "tr": "Kilit kontagi baska bir konuma gecirildiginde pencerenin hareketi durdurulur."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 6,
+        "key": "windowAiring",
+        "name": {"de": "Fenster - Spaltlüften / Stopp", "en": "Window - Night ventilation / Stop"},
+        "description": {
+          "de": "Beim Schließen des Schließerkontaktes wird das Fenster in die gewählte Öffnungsposition gefahren und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Das Öffnen des Schließerkontaktes während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "Closing the shutter contact will drive the window into the selected opening position. Opening the switch during window movement will stop the window. An optional delay time will delay the opening.",
+          "tr": "Kilit kontagi kapatildiginda pencere istenen havalandirma konumuna gelir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Kilit kontaginin hareket sirasinda acilmasi pencereyi durdurur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 0.5},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 7,
+        "key": "windowAiringTime",
+        "name": {"de": "Fenster - Zeitlüften / Stopp", "en": "Window - Timed ventilation / Stop"},
+        "description": {
+          "de": "Beim Schließen des Schließerkontaktes wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen.Das Öffnen des Schließerkontaktes während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "Closing the shutter contact will open the window 100% and close it automatically after the selected time elapsed. Opening the switch during window movement will stop the window. An optional delay time will delay the opening.",
+          "tr": "Kilit kontagi kapatildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Kilit kontagi hareket sirasinda acilirsa pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 1800},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 8,
+        "key": "windowPosition",
+        "name": {"de": "Fenster - Positionsfahrt / Stopp", "en": "Window - Position movement / Stop"},
+        "description": {
+          "de": "Beim Schließen des Schließerkontaktes wird das Fenster in die gewählte Öffnungsposition gefahren. Das Öffnen des Schließerkontaktes während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "Closing the shutter contact will drive the window into the selected opening position. Opening the switch during window movement will stop the window. An optional delay time will delay the opening.",
+          "tr": "Kilit kontagi kapatildiginda pencere istenen acilma pozisyonunu hareket ettirilir. Kilit kontaginin hareket sirasinda acilmasi pencereyi durdurur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 9,
+        "key": "windowNaturalAiring",
+        "name": {"de": "Fenster - Natürliches Lüften / Stopp", "en": "Window - Natural ventilation / Stop"},
+        "description": {
+          "de": "Beim Schließen des Schließerkontaktes wird das Fenster in die gewählte Öffnungsposition gefahren und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Das Öffnen des Schließerkontaktes während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "Closing the shutter contact will drive the window into the selected opening position and close it automatically after the selected time elapsed. Opening the switch during window movement will stop the window. An optional delay time will delay the opening.",
+          "tr": "Kilit kontagi kapatildiginda pencere istenen havalandirma konumuna gelir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Kilit kontaginin hareket sirasinda acilmasi pencereyi durdurur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 0.5},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 10,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Diese Verknüpfung wird deaktiviert.",
+          "en": "This direct link will be deactivated.",
+          "tr": "Bu baglanti devre disi birakilir."
+        },
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "SMOKE_DETECTOR_TEAM": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "openWindowA",
+        "name": {
+          "de": "Fenster - Zeitlüften ohne Stopp-Option",
+          "en": "Window - Timed ventilation without stop option"
+        },
+        "description": {
+          "de": "Bei Feueralarm wird das Fenster für die festgelegte Zeit geöffnet und nach Ablauf der gewählten Zeit oder nach Bestätigung des Alarms am Auslösenden oder einem Rauchmelder der gleichen Gruppe, automatisch wieder geschlossen.",
+          "en": "In case of fire alarm the window will open.  After the selected time elapsed or after confirmation of the alarm on any smoke detector of the same group, the window will be closed automatically.",
+          "tr": "Bir yangin alarmi durumunda pencere belirlenen süre boyunca acilir ve secilen bu süre dolduktan veya tetikleyicideki alarma ya da ayni gruptaki duman alarmina basildiktan sonra otomatik olarak tekrar kapanir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_A": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "closeWindowA",
+        "name": {"de": "Fenster - Schließen ohne Stopp-Option", "en": "Window - Close without stop option"},
+        "description": {
+          "de": "Bei Feueralarm wird das Fenster sofort geschlossen.",
+          "en": "In case of fire alarm the window will close immediately.",
+          "tr": "Bir yangin alarmi halinde pencere hemen kapanir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 5},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 5},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 5},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_A": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Diese Verknüpfung wird deaktiviert",
+          "en": "This direct link will be deactivated.",
+          "tr": "Bu baglanti devre disi birakilir."
+        },
+        "params": {}
+      }
+    ],
+    "SMOKE_DETECTOR_TEAM_V2": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "openWindowA",
+        "name": {
+          "de": "Fenster - Zeitlüften ohne Stopp-Option",
+          "en": "Window - Timed ventilation without stop option"
+        },
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_A": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "closeWindowA",
+        "name": {"de": "Fenster - Schließen ohne Stopp-Option", "en": "Window - Close without stop option"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 5},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 5},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 5},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_A": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {},
+        "params": {}
+      }
+    ],
+    "SWITCH_INTERFACE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "closeWindow",
+        "name": {"de": "Fenster - Schließen / Stopp", "en": "Window - Close / Stop"},
+        "description": {
+          "de": "Beim Betätigen des Schalters wird das Fenster geschlossen. Eine Betätigung während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Schließen verzögert.",
+          "en": "Toggling the switch will close the window. Toggling the switch during window movement will stop the window. An optional delay time will delay the closing.",
+          "tr": "Saltere basildiginda pencere de kapanir. Buna hareket sirasinda basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde kapatma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "openWindow",
+        "name": {"de": "Fenster - Lüftungsstellung / Stopp", "en": "Window - Open / Stop"},
+        "description": {
+          "de": "Beim Betätigen des Schalters wird das Fenster in Lüftungsstellung (100%) geöffnet. Eine Betätigung während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "Toggling the switch will open the window 100%. Toggling the switch during window movement will stop the window. An optional delay time will delay the opening.",
+          "tr": "Saltere basildiginda pencere havalandirma konumunda (%100) acilir. Buna hareket sirasinda basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "toggleWindow",
+        "name": {
+          "de": "Fenster - Natürliches Lüften / Stopp / Schließen",
+          "en": "Window - Natural ventilation / Stop / Close"
+        },
+        "description": {
+          "de": "Beim Betätigen des Schalters wird das geöffnete Fenster geschlossen, ein geschlossenes Fenster wird in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Eine Betätigung während der Fahrt, stoppt das Fenster. Der folgende Tastendruck bewirkt eine Umkehrung des vorherigen Fahrbefehls. Zusätzlich wählbare Verzögerungszeiten verzögern das Öffnen bzw. Schließen.",
+          "en": "Toggling the switch will close an open window or will open a locked window 100% and close it automatically after the selected time elapsed. Toggling the switch during window movement will stop the window. The following keystroke causes a reversal of the previous driving direction. Optional delay times will delay the opening respectively closing.",
+          "tr": "Saltere basildiginda acik pencere kapanir, kapali bir pencere ise havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da tekrar kapanir. Buna hareket sirasinda basildiginda pencere durur. Tusa bir kere daha basildiginda bir önceki sürüs komutu tersine gerceklesir. Ek olarak secilebilen gecikme süreleri acilma veya kapanma islemini geciktirir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "automaticWindow",
+        "name": {"de": "Fenster - Automatikbetrieb", "en": "Window - Automatic"},
+        "description": {
+          "de": "Beim Betätigen des Schalters wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Eine Betätigung, wenn das Fenster bereits in Lüftungsstellung steht, startet nur die Zeit neu.",
+          "en": "Toggling the switch will open the window 100% and close it automatically after the selected time elapsed. Toggling the switch, if the window is already 100% open, will restart the timer.",
+          "tr": "Saltere basildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Buna pencere havalandirma konumundayken basildiginda sadece zaman yeniden baslar."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 2},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 10},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 5,
+        "key": "stopWindow",
+        "name": {"de": "Fenster - Stopp", "en": "Window - Stop"},
+        "description": {
+          "de": "Beim Betätigen des Schalters wird die Fahrt des Fensters angehalten.",
+          "en": "Toggling the switch will stop window movement.",
+          "tr": "Saltere basildiginda pencerenin hareketi durdurulur."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 6,
+        "key": "windowAiring",
+        "name": {"de": "Fenster - Spaltlüften / Stopp", "en": "Window - Night ventilation / Stop"},
+        "description": {
+          "de": "Beim Betätigen des Schalters wird das Fenster in die gewählte Öffnungsposition gefahren. Eine Betätigung während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "Toggling the switch will drive the window into the selected opening position. Toggling the switch during window movement will stop the window. An optional delay time will delay the opening.",
+          "tr": "Saltere basildiginda pencere istenen acilma pozisyonunu hareket ettirilir. Buna hareket sirasinda basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 0.5},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 7,
+        "key": "windowAiringTime",
+        "name": {"de": "Fenster - Zeitlüften / Stopp", "en": "Window - Timed ventilation / Stop"},
+        "description": {
+          "de": "Beim Betätigen des Schalters wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Eine Betätigung während der Fahrt stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "Toggling the switch will open the window 100% and close it automatically after the selected time elapsed. Toggling the switch during window movement will stop the window. An optional delay time will delay the opening.",
+          "tr": "Saltere basildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Buna hareket sirasinda basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 1800},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 8,
+        "key": "windowPosition",
+        "name": {"de": "Fenster - Positionsfahrt / Stopp", "en": "Window - Position movement / Stop"},
+        "description": {
+          "de": "Beim Betätigen des Schalters wird das Fenster in die gewählte Öffnungsposition gefahren. Eine Betätigung während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "Toggling the switch will drive the window into the selected opening position. Toggling the switch during window movement will stop the window. An optional delay time will delay the opening.",
+          "tr": "Saltere basildiginda pencere istenen acilma pozisyonunu hareket ettirilir. Buna hareket sirasinda basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 9,
+        "key": "windowNaturalAiring",
+        "name": {"de": "Fenster - Natürliches Lüften / Stopp", "en": "Window - Natural ventilation / Stop"},
+        "description": {
+          "de": "Beim Betätigen des Schalters wird das Fenster in die gewählte Öffnungsposition gefahren und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Eine Betätigung während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "Toggling the switch will drive the window into the selected opening position and close it automatically after the selected time elapsed. Toggling the switch during window movement will stop the window. An optional delay time will delay the opening.",
+          "tr": "Saltere basildiginda pencere istenen havalandirma konumuna gelir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Buna hareket sirasinda basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 0.5},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 10,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Diese Verknüpfung wird deaktiviert.",
+          "en": "This direct link will be deactivated.",
+          "tr": "Bu baglanti devre disi birakilir."
+        },
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "VIRTUAL_KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "closeWindow",
+        "name": {"de": "Fenster - Schließen / Stopp", "en": "Window - Close / Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster geschlossen. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Schließen verzögert.",
+          "en": "A keystroke will close the window. During window movement a keystroke will stop the window. An optional delay time will delay the closing.",
+          "tr": "Pencere tusa bir kere basilarak kapatilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde kapatma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "openWindow",
+        "name": {"de": "Fenster - Lüftungsstellung / Stopp", "en": "Window - Open / Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster in Lüftungsstellung (100%) geöffnet. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "A keystroke will open the window 100%. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+          "tr": "Pencere tusa bir kere basilarak havalandirma konumunda (%100) acilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "toggleWindow",
+        "name": {
+          "de": "Fenster - Natürliches Lüften / Stopp / Schließen",
+          "en": "Window - Natural ventilation / Stop / Close"
+        },
+        "description": {
+          "de": "Mit einem Tastendruck wird das geöffnete Fenster geschlossen, ein geschlossenes Fenster wird in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Ein Tastendruck während der Fahrt, stoppt das Fenster. Der folgende Tastendruck bewirkt eine Umkehrung des vorherigen Fahrbefehls. Zusätzlich wählbare Verzögerungszeiten verzögern das Öffnen bzw. Schließen.",
+          "en": "A keystroke will close an open window or will open a locked window 100% and close it automatically after the selected time elapsed. During window movement a keystroke will stop the window. The following keystroke causes a reversal of the previous driving direction. Optional delay times will delay the opening respectively closing.",
+          "tr": "Acik pencere tusa bir kere basilarak kapatilir, kapali bir pencere ise havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da tekrar kapanir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Tusa bir kere daha basildiginda bir önceki sürüs komutu tersine gerceklesir. Ek olarak secilebilen gecikme süreleri acilma veya kapanma islemini geciktirir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "automaticWindow",
+        "name": {"de": "Fenster - Automatikbetrieb", "en": "Window - Automatic"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Wird die Taste gedrückt, wenn das Fenster bereits in Lüftungsstellung steht, startet nur die Zeit neu.",
+          "en": "A keystroke will open the window 100% and close it automatically after the selected time elapsed. If the window is already 100% open, each keystroke will restart the timer.",
+          "tr": "Tusa bir kere basildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Pencere havalandirma konumundayken tusa basilirsa sadece zaman yeniden baslar."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 2},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 10},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 5,
+        "key": "stopWindow",
+        "name": {"de": "Fenster - Stopp", "en": "Window - Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird die Fahrt des Fensters angehalten.",
+          "en": "A keystroke will stop window movement.",
+          "tr": "Pencere tusa bir kere basilarak durdurulur."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 6,
+        "key": "windowAiring",
+        "name": {"de": "Fenster - Spaltlüften / Stopp", "en": "Window - Night ventilation / Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster in die gewählte Öffnungsposition gefahren. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "A keystroke will drive the window into the selected opening position. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+          "tr": "Tusa bir kere basildiginda pencere istenen acilma pozisyonuna hareket ettirilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 0.5},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 7,
+        "key": "windowAiringTime",
+        "name": {"de": "Fenster - Zeitlüften / Stopp", "en": "Window - Timed ventilation / Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster in Lüftungsstellung (100%) geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Ein Tastendruck während der Fahrt stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "A keystroke will open the window 100% and close it automatically after the selected time elapsed. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+          "tr": "Tusa bir kere basildiginda pencere havalandirma konumunda (%100) acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 1800},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 8,
+        "key": "windowPosition",
+        "name": {"de": "Fenster - Positionsfahrt / Stopp", "en": "Window - Position movement / Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster in die gewählte Öffnungsposition gefahren. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "A keystroke will drive the window into the selected opening position. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+          "tr": "Tusa bir kere basildiginda pencere istenen acilma pozisyonuna hareket ettirilir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 9,
+        "key": "windowNaturalAiring",
+        "name": {"de": "Fenster - Natürliches Lüften / Stopp", "en": "Window - Natural ventilation / Stop"},
+        "description": {
+          "de": "Mit einem Tastendruck wird das Fenster in die gewählte Öffnungsposition gefahren und nach Ablauf der gewählten Zeit automatisch wieder geschlossen. Ein Tastendruck während der Fahrt, stoppt das Fenster. Durch die optional wählbare Verzögerungszeit wird das Öffnen verzögert.",
+          "en": "A keystroke will drive the window into the selected opening position and close it automatically after the selected time elapsed. During window movement a keystroke will stop the window. An optional delay time will delay the opening.",
+          "tr": "Tusa bir kere basildiginda pencere istenen havalandirma konumuna gelir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir. Hareket sirasinda tusa bir kere basildiginda pencere durur. Opsiyonel secilebilen gecikme zamani sayesinde acilma islemi geciktirilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 0.5},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 10,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Diese Verknüpfung wird deaktiviert.",
+          "en": "This direct link will be deactivated.",
+          "tr": "Bu baglanti devre disi birakilir."
+        },
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "WEATHER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "closeWindowA",
+        "name": {"de": "Fenster - Schließen ohne Stopp-Option", "en": "Window - Close without stop option"},
+        "description": {
+          "de": "Wird die eingestellte Windstärke überschritten, schließt das Fenster.",
+          "en": "When the entered wind strength is reached the window will be closed.",
+          "tr": "Ayarlanan rüzgar siddeti asilirsa havalandirma pencere kapanir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 200},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 5},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 5},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 5},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 5},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "openWindowA",
+        "name": {
+          "de": "Fenster - Zeitlüften ohne Stopp-Option",
+          "en": "Window - Timed ventilation without stop option"
+        },
+        "description": {
+          "de": "Wird die eingestellte Windstärke unterschritten, wird das Fenster geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen.",
+          "en": "Below the entered wind strength the window will be opened. After the selected time elapsed the window will be closed automatically.",
+          "tr": "Ayarlanan rüzgar siddetine ulasilmazsa pencere acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 200},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "openWindowB",
+        "name": {"de": "Fenster - Öffnen ohne Stopp-Option", "en": "Window - Open without stop option"},
+        "description": {
+          "de": "Wird die eingestellte Windstärke überschritten, wird das Fenster geöffnet und nach Ablauf der gewählten Zeit automatisch wieder geschlossen.",
+          "en": "When the entered wind strength is reached the window will be opened. After the selected time elapsed the window will be closed automatically.",
+          "tr": "Ayarlanan rüzgar siddeti asilirsa pencere acilir ve secilen süre dolduktan sonra da otomatik olarak tekrar kapanir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 200},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_RAMPOFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_RAMPON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_RAMPON": {"kind": "fixed", "value": 8},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_LEVEL": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Diese Verknüpfung wird deaktiviert",
+          "en": "This direct link will be deactivated.",
+          "tr": "Bu baglanti devre disi birakilir."
+        },
+        "params": {"SHORT_ACTION_TYPE": {"kind": "fixed", "value": 0}}
+      }
+    ]
+  },
+  "senderMetadata": {
+    "KEY": {
+      "parameterOrder": ["SHORT_OFFDELAY_TIME", "SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_ON_LEVEL"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_LEVEL": "WINDOW_OPEN_LEVEL",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      }
+    },
+    "MOTION_DETECTOR": {"parameterOrder": ["SHORT_ON_TIME"], "optionPresets": {"SHORT_ON_TIME": "LENGTH_OF_STAY"}},
+    "RAINDETECTOR": {
+      "parameterOrder": ["SHORT_OFFDELAY_TIME", "SHORT_ON_TIME"],
+      "optionPresets": {"SHORT_OFFDELAY_TIME": "DELAY", "SHORT_ON_TIME": "LENGTH_OF_STAY"}
+    },
+    "SENSOR_FOR_CARBON_DIOXIDE": {
+      "parameterOrder": ["SHORT_COND_VALUE_LO", "SHORT_ON_TIME"],
+      "optionPresets": {"SHORT_ON_TIME": "LENGTH_OF_STAY"}
+    },
+    "SHUTTER_CONTACT": {
+      "parameterOrder": ["SHORT_OFFDELAY_TIME", "SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_ON_LEVEL"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_LEVEL": "WINDOW_OPEN_LEVEL",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      }
+    },
+    "SMOKE_DETECTOR_TEAM": {
+      "parameterOrder": ["SHORT_ON_TIME"],
+      "optionPresets": {"SHORT_ON_TIME": "LENGTH_OF_STAY"},
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_COND_VALUE_HI", "SHORT_COND_VALUE_LO", "SHORT_CT_ON"],
+          "values": {"SHORT_COND_VALUE_HI": 180, "SHORT_COND_VALUE_LO": 50, "SHORT_CT_ON": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_COND_VALUE_HI", "SHORT_COND_VALUE_LO", "SHORT_CT_ON"],
+          "values": {"SHORT_COND_VALUE_HI": 200, "SHORT_COND_VALUE_LO": 0, "SHORT_CT_ON": 4}
+        }
+      ]
+    },
+    "SMOKE_DETECTOR_TEAM_V2": {
+      "parameterOrder": ["SHORT_ON_TIME"],
+      "optionPresets": {"SHORT_ON_TIME": "LENGTH_OF_STAY"},
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_COND_VALUE_HI", "SHORT_COND_VALUE_LO", "SHORT_CT_ON"],
+          "values": {"SHORT_COND_VALUE_HI": 180, "SHORT_COND_VALUE_LO": 2, "SHORT_CT_ON": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_COND_VALUE_HI", "SHORT_COND_VALUE_LO", "SHORT_CT_ON"],
+          "values": {"SHORT_COND_VALUE_HI": 180, "SHORT_COND_VALUE_LO": 4, "SHORT_CT_ON": 4}
+        }
+      ]
+    },
+    "SWITCH_INTERFACE": {
+      "parameterOrder": ["SHORT_OFFDELAY_TIME", "SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_ON_LEVEL"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_LEVEL": "WINDOW_OPEN_LEVEL",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      }
+    },
+    "VIRTUAL_KEY": {
+      "parameterOrder": ["SHORT_OFFDELAY_TIME", "SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_ON_LEVEL"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_LEVEL": "WINDOW_OPEN_LEVEL",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      }
+    },
+    "WEATHER": {
+      "parameterOrder": ["SHORT_OFFDELAY_TIME", "SHORT_ON_TIME"],
+      "optionPresets": {"SHORT_OFFDELAY_TIME": "DELAY", "SHORT_ON_TIME": "LENGTH_OF_STAY"}
+    }
+  }
+}

@@ -1,0 +1,529 @@
+{
+  "receiverType": "KEYMATIC",
+  "senders": {
+    "KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "door_unlock",
+        "name": {"de": "Tür entriegeln", "en": "unlock door"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird die Tür entriegelt. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+          "en": "With a short or long button press the door will be unlocked. The door will be locked again automatically after the time set.",
+          "tr": "Tusa kisa veya uzun süre basildiginda kapinin kilidi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 2,
+        "key": "door_lock",
+        "name": {"de": "Tür verriegeln", "en": "lock door"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird die Tür verriegelt.",
+          "en": "With a short or long button press the door will be locked.",
+          "tr": "Tusa kisa veya uzun süre basildiginda kapi kilitlenir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 6},
+          "LONG_JT_ON": {"kind": "fixed", "value": 6},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 6},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 3,
+        "key": "door_open",
+        "name": {"de": "Tür öffnen", "en": "open door"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird die Tür geöffnet. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+          "en": "With a short or long button press the door will be opened. The door will be locked again automatically after the time set.",
+          "tr": "Tusa kisa veya uzun süre basildiginda kapi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 7},
+          "LONG_JT_ON": {"kind": "fixed", "value": 7},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 7},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 7},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 4,
+        "key": "door_lock_unlock",
+        "name": {"de": "verriegeln / entriegeln", "en": "lock / unlock"},
+        "description": {
+          "de": "Mit einem kurzen Tastendruck wird die Tür verriegelt. Mit einem langen Tastendruck wird die Tür entriegelt. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+          "en": "With a short button press the door will be locked. With a long button press the door will be unlocked. The door will be locked again automatically after the time set.",
+          "tr": "Tusa kisa süre basildiginda kapi kilitlenir. Tusa uzun süre basildiktan sonra kapinin kilidi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 6},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 5,
+        "key": "door_lock_open",
+        "name": {"de": "verriegeln / öffnen", "en": "lock / open"},
+        "description": {
+          "de": "Mit einem kurzen Tastendruck wird die Tür verriegelt. Mit einem langen Tastendruck wird die Tür geöffnet. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+          "en": "With a short button press the door will be locked. With a long button press the door will be opened. The door will be locked again automatically after the time set.",
+          "tr": "Tusa kisa süre basildiginda kapi kilitlenir. Tusa uzun süre basildiginda kapi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 7},
+          "LONG_JT_ON": {"kind": "fixed", "value": 7},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 6},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 6,
+        "key": "door_unlock_open",
+        "name": {"de": "entriegeln / öffnen", "en": "unlock / open"},
+        "description": {
+          "de": "Mit einem kurzen Tastendruck wird die Tür entriegelt. Mit einem langen Tastendruck wird die Tür geöffnet. Nach der festgelegten Zeit wird die Tür automatisch wieder verriegelt.",
+          "en": "With a short button press the door will be unlocked. With a long button press the door will be opened. The door will be locked again automatically after the time set.",
+          "tr": "Tusa kisa süre basildiginda kapinin kilidi acilir. Tusa uzun süre basildiginda kapi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 7},
+          "LONG_JT_ON": {"kind": "fixed", "value": 7},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 7,
+        "key": "door_lock_toggle",
+        "name": {"de": "Verriegelung toggeln", "en": "toggle locking"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird die Tür, je nach aktuellem Zustand, entweder ent- oder verriegelt.",
+          "en": "With a short or long button press the door will be locked or unlocked, depending on the current status.",
+          "tr": "Tusa kisa veya uzun süre basildiginda kapi güncel duruma göre ya kilitlenir ya da kilit acilir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 6},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 6},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      }
+    ],
+    "SHUTTER_CONTACT": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "door_lock",
+        "name": {"de": "Tür verriegeln", "en": "lock door"},
+        "description": {
+          "de": "Nach dem Schließen der Tür wird sie unverzüglich verriegelt. Die Tür kann durch Entfernen des Kontakts geöffnet werden (nicht sabotagesicher).",
+          "en": "After the door is closed it will be locked immediately. The door can be opened by removing the contact (not sabotage-proof).",
+          "tr": "Kapi kapandiktan sonra hemen kilitlenir. Kontak cikarilarak kapi acilabilir (sabotaja karsi güvenli degil)."
+        },
+        "params": {
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 2,
+        "key": "door_lock_proof",
+        "name": {"de": "Tür verriegeln (sabotagesicher)", "en": "lock door (sabotage-proof)"},
+        "description": {
+          "de": "Nach dem Schließen der Tür wird sie unverzüglich verriegelt. Die Tür kann durch Entfernen des Kontakts nicht geöffnet werden (sabotagesicher).",
+          "en": "After the door is closed it will be locked immediately. The door can not be opened by removing the contact (sabotage-proof).",
+          "tr": "Kapi kapandiktan sonra hemen kilitlenir. Kontak cikarilarak kapi acilabilir (sabotaja karsi güvenli)."
+        },
+        "params": {
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 3,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Der Kontakt ist außer Betrieb.",
+          "en": "The contact is out of operation.",
+          "tr": "Kontak devre disi."
+        },
+        "params": {
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 5},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 5},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      }
+    ],
+    "SWITCH_INTERFACE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "door_open",
+        "name": {"de": "Tür öffnen", "en": "open door"},
+        "description": {
+          "de": "Bei Betätigung des Tasters wird die  Tür  geöffnet. Nach der eingestellten Zeit wird sie wieder verriegelt.",
+          "en": "By operating the switch the door will be opened. It will be locked again after the time set.",
+          "tr": "Saltere basildiginda kapi acilir. Belirlenen süre sonunda ise tekrar kilitlenir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 7},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 7},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 2,
+        "key": "door_unlock",
+        "name": {"de": "Tür entriegeln", "en": "unlock door"},
+        "description": {
+          "de": "Bei Betätigung des Tasters wird die  Tür  entriegelt. Nach der eingestellten Zeit wird sie wieder verriegelt.",
+          "en": "By operating the switch the door will be unlocked. It will be locked again after the time set.",
+          "tr": "Saltere basildiginda kapinin kildi acilir. Belirlenen süre sonunda ise tekrar kilitlenir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 3,
+        "key": "door_lock",
+        "name": {"de": "Tür verriegeln", "en": "lock door"},
+        "description": {
+          "de": "Bei Betätigung des Tasters wird die  Tür  verriegelt.",
+          "en": "<span class=\"translated\">By operating the switch the door will be locked.",
+          "tr": "Saltere basildiginda kapi kilitlenir."
+        },
+        "params": {"SHORT_JT_OFF": {"kind": "fixed", "value": 6}, "SHORT_JT_ON": {"kind": "fixed", "value": 6}}
+      },
+      {
+        "id": 4,
+        "key": "door_lock_toggle",
+        "name": {"de": "Verriegelung toggeln", "en": "toggle locking"},
+        "description": {
+          "de": "Bei Betätigung des Tasters wird die Tür, je nach aktuellem Zustand, entweder ent- oder verriegelt.",
+          "en": "By operating the switch the door will be locked or unlocked, depending on the current status.",
+          "tr": "Saltere basildiginda kapi güncel duruma göre ya kilitlenir ya da kilit acilir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 6},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      }
+    ],
+    "TEMPLATE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "xxxx", "name": {"de": "xxxx", "en": "xxxx", "tr": "xxxx"}, "description": {}, "params": {}},
+      {"id": 2, "key": "yyyy", "name": {"de": "yyyy", "en": "yyyy", "tr": "yyyy"}, "description": {}, "params": {}}
+    ],
+    "VIRTUAL_KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "door_unlock",
+        "name": {"de": "Tür entriegeln", "en": "unlock door"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird die Tür entriegelt. Nach der eingestellten Zeit wird die Tür automatisch wieder verriegelt.",
+          "en": "With a short or long button press the door will be unlocked. The door will be locked again automatically after the time set.",
+          "tr": "Tusa kisa veya uzun süre basildiginda kapinin kilidi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 2,
+        "key": "door_lock",
+        "name": {"de": "Tür verriegeln", "en": "lock door"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird die Tür verriegelt.",
+          "en": "With a short or long button press the door will be locked.",
+          "tr": "Tusa kisa veya uzun süre basildiginda kapi kilitlenir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 6},
+          "LONG_JT_ON": {"kind": "fixed", "value": 6},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 6},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 3,
+        "key": "door_open",
+        "name": {"de": "Tür öffnen", "en": "open door"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird die Tür geöffnet. Nach der eingestellten Zeit wird die Tür automatisch wieder verriegelt.",
+          "en": "With a short or long button press the door will be opened. The door will be locked again automatically after the time set.",
+          "tr": "Tusa kisa veya uzun süre basildiginda kapi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 7},
+          "LONG_JT_ON": {"kind": "fixed", "value": 7},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 7},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 7},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 4,
+        "key": "door_lock_unlock",
+        "name": {"de": "verriegeln / entriegeln", "en": "lock / unlock"},
+        "description": {
+          "de": "Mit einem kurzen Tastendruck wird die Tür verriegelt. Mit einem langen Tastendruck wird die Tür entriegelt. Nach der eingestellten Zeit wird die Tür automatisch wieder verriegelt.",
+          "en": "With a short button press the door will be locked. With a long button press the door will be unlocked. The door will be locked again automatically after the time set.",
+          "tr": "Tusa kisa süre basildiginda kapi kilitlenir. Tusa uzun süre basildiktan sonra kapinin kilidi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 6},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 5,
+        "key": "door_lock_open",
+        "name": {"de": "verriegeln / öffnen", "en": "lock / open"},
+        "description": {
+          "de": "Mit einem kurzen Tastendruck wird die Tür verriegelt. Mit einem langen Tastendruck wird die Tür geöffnet. Nach der eingestellten Zeit wird die Tür automatisch wieder verriegelt.",
+          "en": "With a short button press the door will be locked. With a long button press the door will be opened. The door will be locked again automatically after the time set.",
+          "tr": "Tusa kisa süre basildiginda kapi kilitlenir. Tusa uzun süre basildiginda kapi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 7},
+          "LONG_JT_ON": {"kind": "fixed", "value": 7},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 6},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 6,
+        "key": "door_unlock_open",
+        "name": {"de": "entriegeln / öffnen", "en": "unlock / open"},
+        "description": {
+          "de": "Mit einem kurzen Tastendruck wird die Tür entriegelt. Mit einem langen Tastendruck wird die Tür geöffnet. Nach der eingestellten Zeit wird die Tür automatisch wieder verriegelt.",
+          "en": "With a short button press the door will be unlocked. With a long button press the door will be opened. The door will be locked again automatically after the time set.",
+          "tr": "Tusa kisa süre basildiginda kapinin kilidi acilir. Tusa uzun süre basildiginda kapi acilir. Belirlenen süre sonunda kapi otomatik olarak tekrar kilitlenir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 7},
+          "LONG_JT_ON": {"kind": "fixed", "value": 7},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 7,
+        "key": "door_lock_toggle",
+        "name": {"de": "Verriegelung toggeln", "en": "toggle locking"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird die Tür, je nach aktuellem Zustand, entweder ent- oder verriegelt.",
+          "en": "With a short or long button press the door will be locked or unlocked, depending on the current status.",
+          "tr": "Tusa kisa veya uzun süre basildiginda kapi güncel duruma göre ya kilitlenir ya da kilit acilir."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 6},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 6},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      }
+    ]
+  }
+}

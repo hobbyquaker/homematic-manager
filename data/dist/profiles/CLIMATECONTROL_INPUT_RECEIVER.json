@@ -1,0 +1,21 @@
+{
+  "receiverType": "CLIMATECONTROL_INPUT_RECEIVER",
+  "senders": {
+    "CLIMATECONTROL_INPUT_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "no_profile",
+        "name": {"de": "Experte", "en": "Expert"},
+        "description": {"de": "no"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "no_profile",
+        "name": {"de": "Profile 1", "en": "Profile 1"},
+        "description": {"de": "no"},
+        "params": {}
+      }
+    ]
+  }
+}

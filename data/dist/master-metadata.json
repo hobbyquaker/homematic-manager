@@ -1,0 +1,1132 @@
+{
+  "ACCELERATION_TRANSCEIVER": {
+    "channelType": "ACCELERATION_TRANSCEIVER",
+    "parameterOrder": [
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_FILTER_NUMBER",
+      "CHANNEL_OPERATION_MODE",
+      "EVENT_FILTER_PERIOD",
+      "MSG_FOR_POS_A",
+      "MSG_FOR_POS_B",
+      "MSG_FOR_POS_C",
+      "NOTIFICATION_SOUND_TYPE_LOW_TO_HIGH",
+      "NOTIFICATION_SOUND_TYPE_HIGH_TO_LOW",
+      "SENSOR_SENSITIVITY",
+      "TRIGGER_ANGLE",
+      "TRIGGER_ANGLE_HYSTERESIS",
+      "TRIGGER_ANGLE_2",
+      "LED_DISABLE_CHANNELSTATE"
+    ],
+    "conditionalVisibility": [{"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]}],
+    "optionPresets": {
+      "CHANNEL_OPERATION_MODE": "_INLINE_ACCELERATION_TRANSCEIVER_CHANNEL_OPERATION_MODE",
+      "MSG_FOR_POS_A": "_INLINE_ACCELERATION_TRANSCEIVER_MSG_FOR_POS_A",
+      "MSG_FOR_POS_B": "_INLINE_ACCELERATION_TRANSCEIVER_MSG_FOR_POS_B",
+      "MSG_FOR_POS_C": "_INLINE_ACCELERATION_TRANSCEIVER_MSG_FOR_POS_C",
+      "NOTIFICATION_SOUND_TYPE_HIGH_TO_LOW": "_INLINE_ACCELERATION_TRANSCEIVER_NOTIFICATION_SOUND_TYPE_HIGH_TO_LOW",
+      "NOTIFICATION_SOUND_TYPE_LOW_TO_HIGH": "_INLINE_ACCELERATION_TRANSCEIVER_NOTIFICATION_SOUND_TYPE_LOW_TO_HIGH",
+      "SENSOR_SENSITIVITY": "_INLINE_ACCELERATION_TRANSCEIVER_SENSOR_SENSITIVITY"
+    }
+  },
+  "ACCESS_TRANSCEIVER": {
+    "channelType": "ACCESS_TRANSCEIVER",
+    "parameterOrder": ["NUMERIC_PIN_CODE", "INPUT_SELECT_FIELD", "ABORT_EVENT_SENDING_CHANNELS"]
+  },
+  "ACOUSTIC_SIGNAL_TRANSMITTER": {
+    "channelType": "ACOUSTIC_SIGNAL_TRANSMITTER",
+    "parameterOrder": ["EVENT_DELAY_UNIT", "EVENT_DELAY_VALUE", "EVENT_RANDOMTIME_UNIT", "EVENT_RANDOMTIME_VALUE"],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ]
+  },
+  "ACOUSTIC_SIGNAL_VIRTUAL_RECEIVER": {
+    "channelType": "ACOUSTIC_SIGNAL_VIRTUAL_RECEIVER",
+    "parameterOrder": ["POWERUP_JUMPTARGET"]
+  },
+  "ALARM_ACTUATOR_RECEIVER": {
+    "channelType": "ALARM_ACTUATOR_RECEIVER",
+    "parameterOrder": ["EVENT_DELAY_UNIT", "EVENT_DELAY_VALUE", "EVENT_RANDOMTIME_UNIT", "EVENT_RANDOMTIME_VALUE"],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ]
+  },
+  "ALARM_SWITCH_VIRTUAL_RECEIVER": {
+    "channelType": "ALARM_SWITCH_VIRTUAL_RECEIVER",
+    "parameterOrder": [
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE",
+      "SD_MULTICAST_ZONE_1",
+      "SILENT_ALARM_ZONE_1"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ]
+  },
+  "ANALOG_INPUT_TRANSMITTER": {"channelType": "ANALOG_INPUT_TRANSMITTER", "parameterOrder": ["FILTER_SIZE"]},
+  "ANALOG_OUTPUT_TRANSCEIVER": {
+    "channelType": "ANALOG_OUTPUT_TRANSCEIVER",
+    "parameterOrder": ["VOLTAGE_0", "VOLTAGE_100"]
+  },
+  "AUTO_RELOCK_TRANSCEIVER": {
+    "channelType": "AUTO_RELOCK_TRANSCEIVER",
+    "parameterOrder": ["POWERUP_JUMPTARGET", "SPEED_SELECT_1", "SPEED_SELECT_2"],
+    "optionPresets": {
+      "POWERUP_JUMPTARGET": "_INLINE_AUTO_RELOCK_TRANSCEIVER_POWERUP_JUMPTARGET",
+      "SPEED_SELECT_1": "_INLINE_AUTO_RELOCK_TRANSCEIVER_SPEED_SELECT_1",
+      "SPEED_SELECT_2": "_INLINE_AUTO_RELOCK_TRANSCEIVER_SPEED_SELECT_2"
+    }
+  },
+  "BACKLIGHTING_RECEIVER": {
+    "channelType": "BACKLIGHTING_RECEIVER",
+    "parameterOrder": [
+      "_POWERUP_JUMPTARGET",
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE",
+      "LED_DISABLE_CHANNELSTATE",
+      "POWERUP_ON_LEVEL",
+      "FEEDBACK_LEVEL_VALUE",
+      "ACTIVATE_LEVEL_VALUE",
+      "_ACTIVATE_LEVEL_ONTIME_UNIT",
+      "ACTIVATE_LEVEL_ONTIME_VALUE"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ],
+    "parameterGroups": [
+      {
+        "id": "group_0",
+        "labelKey": "stringtableeventdelay",
+        "parameters": [
+          "_POWERUP_JUMPTARGET",
+          "EVENT_DELAY_UNIT",
+          "EVENT_DELAY_VALUE",
+          "EVENT_RANDOMTIME_UNIT",
+          "EVENT_RANDOMTIME_VALUE",
+          "LED_DISABLE_CHANNELSTATE"
+        ]
+      },
+      {"id": "group_1", "labelKey": "stringtabledimmerlevel", "parameters": ["POWERUP_ON_LEVEL"]},
+      {"id": "group_2", "labelKey": "lblfeedbacklevelvalue", "parameters": ["FEEDBACK_LEVEL_VALUE"]},
+      {
+        "id": "group_3",
+        "labelKey": "stringtableactivatelevelontime",
+        "parameters": ["ACTIVATE_LEVEL_VALUE", "_ACTIVATE_LEVEL_ONTIME_UNIT", "ACTIVATE_LEVEL_ONTIME_VALUE"]
+      }
+    ]
+  },
+  "BLIND_TRANSMITTER": {
+    "channelType": "BLIND_TRANSMITTER",
+    "parameterOrder": [
+      "OUTPUT_SWAP",
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE",
+      "CHANGE_OVER_DELAY",
+      "REFERENCE_RUN_COUNTER",
+      "POSITION_SAVE_TIME",
+      "ENDPOSITION_AUTO_DETECT",
+      "REFERENCE_RUNNING_TIME_BOTTOM_TOP_UNIT",
+      "REFERENCE_RUNNING_TIME_BOTTOM_TOP_VALUE",
+      "REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT",
+      "REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE",
+      "REFERENCE_RUNNING_TIME_SLATS_UNIT",
+      "REFERENCE_RUNNING_TIME_SLATS_VALUE",
+      "DELAY_COMPENSATION"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]},
+      {
+        "trigger": "REFERENCE_RUNNING_TIME_BOTTOM_TOP_UNIT",
+        "triggerValue": "custom",
+        "show": ["REFERENCE_RUNNING_TIME_BOTTOM_TOP_VALUE"]
+      },
+      {
+        "trigger": "REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT",
+        "triggerValue": "custom",
+        "show": ["REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE"]
+      },
+      {
+        "trigger": "REFERENCE_RUNNING_TIME_SLATS_UNIT",
+        "triggerValue": "custom",
+        "show": ["REFERENCE_RUNNING_TIME_SLATS_VALUE"]
+      }
+    ],
+    "parameterGroups": [
+      {
+        "id": "group_0",
+        "labelKey": "lbloutputswap",
+        "parameters": [
+          "OUTPUT_SWAP",
+          "EVENT_DELAY_UNIT",
+          "EVENT_DELAY_VALUE",
+          "EVENT_RANDOMTIME_UNIT",
+          "EVENT_RANDOMTIME_VALUE",
+          "CHANGE_OVER_DELAY",
+          "REFERENCE_RUN_COUNTER",
+          "POSITION_SAVE_TIME",
+          "ENDPOSITION_AUTO_DETECT"
+        ]
+      },
+      {
+        "id": "group_1",
+        "labelKey": "stringtableblindrunninttimebottomtop",
+        "parameters": [
+          "REFERENCE_RUNNING_TIME_BOTTOM_TOP_UNIT",
+          "REFERENCE_RUNNING_TIME_BOTTOM_TOP_VALUE",
+          "REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT",
+          "REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE",
+          "REFERENCE_RUNNING_TIME_SLATS_UNIT",
+          "REFERENCE_RUNNING_TIME_SLATS_VALUE"
+        ]
+      },
+      {"id": "group_2", "labelKey": "stringtableblinddelaycompensation", "parameters": ["DELAY_COMPENSATION"]}
+    ]
+  },
+  "BLIND_VIRTUAL_RECEIVER": {
+    "channelType": "BLIND_VIRTUAL_RECEIVER",
+    "parameterOrder": ["POSITION_SAVE_TIME", "POWERUP_JUMPTARGET"],
+    "parameterGroups": [
+      {"id": "group_0", "labelKey": "stringtablepositionsavetime", "parameters": ["POSITION_SAVE_TIME"]},
+      {"id": "group_1", "labelKey": "virtualhelptxtdimmer", "parameters": ["POWERUP_JUMPTARGET"]}
+    ]
+  },
+  "CARBON_DIOXIDE_RECEIVER": {
+    "channelType": "CARBON_DIOXIDE_RECEIVER",
+    "parameterOrder": ["INTERVAL_UNIT", "CALIBRATION_PPM_VAL", "CALIBRATION_PPM_EXP", "INTERVAL_VALUE"]
+  },
+  "CLIMATECONTROL_FLOOR_DIRECT_TRANSMITTER": {
+    "channelType": "CLIMATECONTROL_FLOOR_DIRECT_TRANSMITTER",
+    "parameterOrder": [
+      "COOLING_DISABLE",
+      "HEATING_DISABLE",
+      "FLOOR_HEATING_MODE",
+      "HEATING_MODE_SELECTION",
+      "FROST_PROTECTION_TEMPERATURE",
+      "HEATING_VALVE_TYPE",
+      "HUMIDITY_LIMIT_DISABLE",
+      "HUMIDITY_LIMIT_VALUE",
+      "MINIMAL_FLOOR_TEMPERATURE",
+      "CLIMATE_CONTROL_TYPE",
+      "TWO_POINT_HYSTERESIS",
+      "SWITCHING_INTERVAL_BASE",
+      "SWITCHING_INTERVAL_FACTOR",
+      "ON_TIME_BASE",
+      "ON_TIME_FACTOR"
+    ],
+    "optionPresets": {
+      "CLIMATE_CONTROL_TYPE": "_INLINE_CLIMATECONTROL_FLOOR_DIRECT_TRANSMITTER_CLIMATE_CONTROL_TYPE",
+      "COOLING_DISABLE": "OPTION_DISABLE_ENABLE",
+      "FLOOR_HEATING_MODE": "FLOOR_HEATING_MODE",
+      "HEATING_DISABLE": "OPTION_DISABLE_ENABLE",
+      "HEATING_MODE_SELECTION": "HEATING_MODE_SELECTION",
+      "HEATING_VALVE_TYPE": "NORMALLY_CLOSE_OPEN",
+      "HUMIDITY_LIMIT_DISABLE": "OPTION_DISABLE_ENABLE"
+    },
+    "parameterGroups": [
+      {
+        "id": "group_0",
+        "labelKey": "stringtablecoolingdisable",
+        "parameters": [
+          "COOLING_DISABLE",
+          "HEATING_DISABLE",
+          "FLOOR_HEATING_MODE",
+          "HEATING_MODE_SELECTION",
+          "FROST_PROTECTION_TEMPERATURE",
+          "HEATING_VALVE_TYPE",
+          "HUMIDITY_LIMIT_DISABLE",
+          "HUMIDITY_LIMIT_VALUE",
+          "MINIMAL_FLOOR_TEMPERATURE",
+          "CLIMATE_CONTROL_TYPE"
+        ]
+      },
+      {
+        "id": "group_1",
+        "labelKey": "stringtableswitchtransmittwopointhysteresis",
+        "parameters": ["TWO_POINT_HYSTERESIS"]
+      },
+      {
+        "id": "group_2",
+        "labelKey": "stringtableswitchingintervalvalue",
+        "parameters": ["SWITCHING_INTERVAL_BASE", "SWITCHING_INTERVAL_FACTOR", "ON_TIME_BASE", "ON_TIME_FACTOR"]
+      }
+    ]
+  },
+  "CLIMATECONTROL_HEAT_DEMAND_BOILER_TRANSMITTER": {
+    "channelType": "CLIMATECONTROL_HEAT_DEMAND_BOILER_TRANSMITTER",
+    "parameterOrder": ["ONDELAY_TIME_BASE", "ONDELAY_TIME_FACTOR", "OFFDELAY_TIME_BASE", "OFFDELAY_TIME_FACTOR"]
+  },
+  "CLIMATE_TRANSCEIVER": {
+    "channelType": "CLIMATE_TRANSCEIVER",
+    "parameterOrder": ["TEMPERATURE_OFFSET", "TX_MINDELAY_UNIT", "TX_MINDELAY_VALUE"],
+    "conditionalVisibility": [{"trigger": "TX_MINDELAY_UNIT", "triggerValue": "custom", "show": ["TX_MINDELAY_VALUE"]}]
+  },
+  "COND_SWITCH_TRANSMITTER": {
+    "channelType": "COND_SWITCH_TRANSMITTER",
+    "parameterOrder": [
+      "COND_TX_FALLING",
+      "COND_TX_CYCLIC_BELOW",
+      "COND_TX_RISING",
+      "COND_TX_CYCLIC_ABOVE",
+      "COND_TX_DECISION_BELOW",
+      "COND_TX_DECISION_ABOVE",
+      "COND_TX_THRESHOLD_LO",
+      "COND_TX_THRESHOLD_HI",
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ]
+  },
+  "DIMMER_TRANSMITTER": {
+    "channelType": "DIMMER_TRANSMITTER",
+    "parameterOrder": [
+      "CHANNEL_OPERATION_MODE",
+      "DIM_LEVEL_LOWEST",
+      "DIM_LEVEL_HIGHEST",
+      "VOLTAGE_0",
+      "VOLTAGE_100",
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE",
+      "ON_MIN_LEVEL",
+      "UDI_DIMMING_MODE",
+      "FUSE_DELAY",
+      "OVERTEMP_LEVEL"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ]
+  },
+  "DIMMER_VIRTUAL_RECEIVER": {"channelType": "DIMMER_VIRTUAL_RECEIVER", "parameterOrder": ["POWERUP_JUMPTARGET"]},
+  "DISTANCE_TRANSMITTER": {
+    "channelType": "DISTANCE_TRANSMITTER",
+    "parameterOrder": [
+      "CHANNEL_OPERATION_MODE",
+      "FILTER_SELECT",
+      "FILTER_SIZE",
+      "INTERVAL_UNIT",
+      "INTERVAL_VALUE",
+      "REFERENCE_HEIGHT"
+    ],
+    "conditionalVisibility": [{"trigger": "INTERVAL_UNIT", "triggerValue": "custom", "show": ["INTERVAL_VALUE"]}],
+    "optionPresets": {
+      "CHANNEL_OPERATION_MODE": "_INLINE_DISTANCE_TRANSMITTER_CHANNEL_OPERATION_MODE",
+      "FILTER_SELECT": "_INLINE_DISTANCE_TRANSMITTER_FILTER_SELECT"
+    }
+  },
+  "DOOR_LOCK_STATE_TRANSCEIVER": {
+    "channelType": "DOOR_LOCK_STATE_TRANSCEIVER",
+    "parameterOrder": [
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE",
+      "DOOR_LOCK_DIRECTION",
+      "DOOR_LOCK_TURNS",
+      "DOOR_LOCK_NEUTRAL_POS",
+      "MSG_FOR_POS_A",
+      "MSG_FOR_POS_B"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ],
+    "optionPresets": {
+      "DOOR_LOCK_DIRECTION": "_INLINE_DOOR_LOCK_STATE_TRANSCEIVER_DOOR_LOCK_DIRECTION",
+      "DOOR_LOCK_NEUTRAL_POS": "_INLINE_DOOR_LOCK_STATE_TRANSCEIVER_DOOR_LOCK_NEUTRAL_POS"
+    },
+    "parameterGroups": [
+      {
+        "id": "group_0",
+        "labelKey": "stringtableeventdelay",
+        "parameters": ["EVENT_DELAY_UNIT", "EVENT_DELAY_VALUE", "EVENT_RANDOMTIME_UNIT", "EVENT_RANDOMTIME_VALUE"]
+      },
+      {
+        "id": "group_1",
+        "labelKey": "stringtabledoorlockdirection",
+        "parameters": [
+          "DOOR_LOCK_DIRECTION",
+          "DOOR_LOCK_TURNS",
+          "DOOR_LOCK_NEUTRAL_POS",
+          "MSG_FOR_POS_A",
+          "MSG_FOR_POS_B"
+        ]
+      }
+    ]
+  },
+  "DOOR_LOCK_STATE_TRANSMITTER": {
+    "channelType": "DOOR_LOCK_STATE_TRANSMITTER",
+    "parameterOrder": [
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE",
+      "POWERUP_ONTIME_UNIT",
+      "POWERUP_ONTIME_VALUE",
+      "DOOR_LOCK_DIRECTION",
+      "DOOR_LOCK_TURNS",
+      "DOOR_LOCK_NEUTRAL_POS",
+      "DOOR_LOCK_END_STOP_OFFSET_LOCKED",
+      "DOOR_LOCK_END_STOP_OFFSET_OPEN",
+      "HOLD_TIME",
+      "DISABLE_ACOUSTIC_CHANNELSTATE"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]},
+      {"trigger": "POWERUP_ONTIME_UNIT", "triggerValue": "custom", "show": ["POWERUP_ONTIME_VALUE"]}
+    ],
+    "optionPresets": {
+      "DOOR_LOCK_DIRECTION": "_INLINE_DOOR_LOCK_STATE_TRANSMITTER_DOOR_LOCK_DIRECTION",
+      "DOOR_LOCK_END_STOP_OFFSET_LOCKED": "DOOR_LOCK_ANGLE_RANGE",
+      "DOOR_LOCK_END_STOP_OFFSET_OPEN": "DOOR_LOCK_ANGLE_RANGE",
+      "DOOR_LOCK_NEUTRAL_POS": "_INLINE_DOOR_LOCK_STATE_TRANSMITTER_DOOR_LOCK_NEUTRAL_POS",
+      "HOLD_TIME": "_INLINE_DOOR_LOCK_STATE_TRANSMITTER_HOLD_TIME"
+    },
+    "parameterGroups": [
+      {
+        "id": "group_0",
+        "labelKey": "stringtableeventdelay",
+        "parameters": ["EVENT_DELAY_UNIT", "EVENT_DELAY_VALUE", "EVENT_RANDOMTIME_UNIT", "EVENT_RANDOMTIME_VALUE"]
+      },
+      {
+        "id": "group_1",
+        "labelKey": "stringtableautorelockdelay",
+        "parameters": [
+          "POWERUP_ONTIME_UNIT",
+          "POWERUP_ONTIME_VALUE",
+          "DOOR_LOCK_DIRECTION",
+          "DOOR_LOCK_TURNS",
+          "DOOR_LOCK_NEUTRAL_POS"
+        ]
+      },
+      {
+        "id": "group_2",
+        "labelKey": "stringtablekeymaticanglemax",
+        "parameters": [
+          "DOOR_LOCK_END_STOP_OFFSET_LOCKED",
+          "DOOR_LOCK_END_STOP_OFFSET_OPEN",
+          "HOLD_TIME",
+          "DISABLE_ACOUSTIC_CHANNELSTATE"
+        ]
+      }
+    ]
+  },
+  "DOOR_LOCK_TRANSCEIVER": {
+    "channelType": "DOOR_LOCK_TRANSCEIVER",
+    "parameterOrder": [
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE",
+      "POWERUP_ONTIME_UNIT",
+      "POWERUP_ONTIME_VALUE",
+      "DOOR_LOCK_DIRECTION",
+      "DOOR_LOCK_TURNS",
+      "DOOR_LOCK_NEUTRAL_POS",
+      "DOOR_LOCK_END_STOP_OFFSET_LOCKED",
+      "DOOR_LOCK_END_STOP_OFFSET_OPEN",
+      "HOLD_TIME",
+      "DISABLE_ACOUSTIC_CHANNELSTATE",
+      "CHANNEL_OPERATION_MODE",
+      "DOOR_OPENING_DIRECTION",
+      "SENSOR_SENSITIVITY"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]},
+      {"trigger": "POWERUP_ONTIME_UNIT", "triggerValue": "custom", "show": ["POWERUP_ONTIME_VALUE"]}
+    ],
+    "optionPresets": {
+      "CHANNEL_OPERATION_MODE": "_INLINE_DOOR_LOCK_TRANSCEIVER_CHANNEL_OPERATION_MODE",
+      "DOOR_LOCK_DIRECTION": "_INLINE_DOOR_LOCK_TRANSCEIVER_DOOR_LOCK_DIRECTION",
+      "DOOR_LOCK_END_STOP_OFFSET_LOCKED": "DOOR_LOCK_ANGLE_RANGE",
+      "DOOR_LOCK_END_STOP_OFFSET_OPEN": "DOOR_LOCK_ANGLE_RANGE",
+      "DOOR_LOCK_NEUTRAL_POS": "_INLINE_DOOR_LOCK_TRANSCEIVER_DOOR_LOCK_NEUTRAL_POS",
+      "DOOR_OPENING_DIRECTION": "_INLINE_DOOR_LOCK_TRANSCEIVER_DOOR_OPENING_DIRECTION",
+      "HOLD_TIME": "_INLINE_DOOR_LOCK_TRANSCEIVER_HOLD_TIME"
+    },
+    "parameterGroups": [
+      {
+        "id": "group_0",
+        "labelKey": "stringtableeventdelay",
+        "parameters": ["EVENT_DELAY_UNIT", "EVENT_DELAY_VALUE", "EVENT_RANDOMTIME_UNIT", "EVENT_RANDOMTIME_VALUE"]
+      },
+      {
+        "id": "group_1",
+        "labelKey": "stringtableautorelockdelay",
+        "parameters": [
+          "POWERUP_ONTIME_UNIT",
+          "POWERUP_ONTIME_VALUE",
+          "DOOR_LOCK_DIRECTION",
+          "DOOR_LOCK_TURNS",
+          "DOOR_LOCK_NEUTRAL_POS"
+        ]
+      },
+      {
+        "id": "group_2",
+        "labelKey": "stringtablekeymaticanglemax",
+        "parameters": [
+          "DOOR_LOCK_END_STOP_OFFSET_LOCKED",
+          "DOOR_LOCK_END_STOP_OFFSET_OPEN",
+          "HOLD_TIME",
+          "DISABLE_ACOUSTIC_CHANNELSTATE"
+        ]
+      },
+      {
+        "id": "group_3",
+        "labelKey": "lblautomaticlock",
+        "parameters": ["CHANNEL_OPERATION_MODE", "DOOR_OPENING_DIRECTION", "SENSOR_SENSITIVITY"]
+      }
+    ]
+  },
+  "DOOR_RECEIVER": {
+    "channelType": "DOOR_RECEIVER",
+    "parameterOrder": ["EVENT_DELAY_UNIT", "EVENT_DELAY_VALUE", "EVENT_RANDOMTIME_UNIT", "EVENT_RANDOMTIME_VALUE"],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ]
+  },
+  "DOOR_STATE_TRANSCEIVER": {
+    "channelType": "DOOR_STATE_TRANSCEIVER",
+    "parameterOrder": ["CHANNEL_OPERATION_MODE", "SAMPLE_INTERVAL", "SENSOR_SENSITIVITY"],
+    "optionPresets": {"CHANNEL_OPERATION_MODE": "_INLINE_DOOR_STATE_TRANSCEIVER_CHANNEL_OPERATION_MODE"}
+  },
+  "ENERGIE_METER_TRANSMITTER": {
+    "channelType": "ENERGIE_METER_TRANSMITTER",
+    "parameterOrder": [
+      "CHANNEL_OPERATION_MODE",
+      "METER_CONSTANT_VOLUME",
+      "METER_CONSTANT_ENERGY",
+      "METER_OBIS_SEARCH_STRING"
+    ],
+    "parameterGroups": [
+      {"id": "group_0", "labelKey": "lblsensormode", "parameters": ["CHANNEL_OPERATION_MODE"]},
+      {
+        "id": "group_1",
+        "labelKey": "stringtablepowermeterconstantvolume",
+        "parameters": ["METER_CONSTANT_VOLUME", "METER_CONSTANT_ENERGY", "METER_OBIS_SEARCH_STRING"]
+      }
+    ]
+  },
+  "GENERIC_INPUT_TRANSMITER": {
+    "channelType": "GENERIC_INPUT_TRANSMITER",
+    "parameterOrder": [
+      "MIOB_DIN_CONFIG",
+      "MIOB_DIN_MODE",
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "DBL_PRESS_TIME",
+      "LONG_PRESS_TIME",
+      "REPEATED_LONG_PRESS_TIMEOUT_UNIT",
+      "REPEATED_LONG_PRESS_TIMEOUT_VALUE"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {
+        "trigger": "REPEATED_LONG_PRESS_TIMEOUT_UNIT",
+        "triggerValue": "custom",
+        "show": ["REPEATED_LONG_PRESS_TIMEOUT_VALUE"]
+      }
+    ],
+    "optionPresets": {"MIOB_DIN_CONFIG": "MIOB_DIN_CONFIG", "MIOB_DIN_MODE": "NORMALLY_OPEN_CLOSE"}
+  },
+  "KEY_TRANSCEIVER": {
+    "channelType": "KEY_TRANSCEIVER",
+    "parameterOrder": [
+      "CHANNEL_OPERATION_MODE",
+      "DISABLE_ACOUSTIC_CHANNELSTATE",
+      "DISABLE_ACOUSTIC_SENDSTATE",
+      "LED_DISABLE_CHANNELSTATE",
+      "LED_DISABLE_SENDSTATE",
+      "DBL_PRESS_TIME",
+      "LONG_PRESS_TIME",
+      "REPEATED_LONG_PRESS_TIMEOUT_UNIT",
+      "REPEATED_LONG_PRESS_TIMEOUT_VALUE",
+      "ABORT_EVENT_SENDING_CHANNELS"
+    ],
+    "conditionalVisibility": [
+      {
+        "trigger": "REPEATED_LONG_PRESS_TIMEOUT_UNIT",
+        "triggerValue": "custom",
+        "show": ["REPEATED_LONG_PRESS_TIMEOUT_VALUE"]
+      }
+    ],
+    "optionPresets": {"CHANNEL_OPERATION_MODE": "_INLINE_KEY_TRANSCEIVER_CHANNEL_OPERATION_MODE"},
+    "parameterGroups": [
+      {
+        "id": "group_0",
+        "labelKey": "lblchannelactivinactiv",
+        "parameters": [
+          "CHANNEL_OPERATION_MODE",
+          "DISABLE_ACOUSTIC_CHANNELSTATE",
+          "DISABLE_ACOUSTIC_SENDSTATE",
+          "LED_DISABLE_CHANNELSTATE",
+          "LED_DISABLE_SENDSTATE"
+        ]
+      },
+      {
+        "id": "group_1",
+        "labelKey": "stringtablekeydblpresstime",
+        "parameters": [
+          "DBL_PRESS_TIME",
+          "LONG_PRESS_TIME",
+          "REPEATED_LONG_PRESS_TIMEOUT_UNIT",
+          "REPEATED_LONG_PRESS_TIMEOUT_VALUE",
+          "ABORT_EVENT_SENDING_CHANNELS"
+        ]
+      }
+    ]
+  },
+  "MAINTENANCE": {
+    "channelType": "MAINTENANCE",
+    "parameterOrder": [
+      "CYCLIC_INFO_MSG",
+      "CYCLIC_INFO_MSG_DIS",
+      "CYCLIC_INFO_MSG_DIS_UNCHANGED",
+      "OVERTEMP_LEVEL",
+      "DEVICE_OPERATION_MODE",
+      "LOW_BAT_LIMIT",
+      "LOCAL_RESET_DISABLED",
+      "GLOBAL_BUTTON_LOCK",
+      "ROUTER_MODULE_ENABLED",
+      "MULTICAST_ROUTER_MODULE_ENABLED",
+      "ENABLE_ROUTING",
+      "DEVICE_INPUT_LAYOUT_MODE",
+      "DEVICE_SWITCH_TRIGGERING_MODE",
+      "BUTTON_RESPONSE_WITHOUT_BACKLIGHT",
+      "DISABLE_DEVICE_ALIVE_SIGNAL",
+      "DISABLE_MSG_TO_AC",
+      "DEVICE_SENSOR_SENSITIVITY",
+      "DISPLAY_CONTRAST",
+      "BACKLIGHT_ON_TIME",
+      "ALTITUDE",
+      "SIGNAL_BRIGHTNESS",
+      "MOUNTING_ORIENTATION",
+      "DISPLAY_MODE",
+      "DISPLAY_INVERTED_COLORS",
+      "PERMANENT_FULL_RX",
+      "LONGITUDE",
+      "LATITUDE",
+      "BLOCKING_ON_SABOTAGE",
+      "SABOTAGE_CONTACT_TYPE",
+      "BLOCKING_TEMPORARY",
+      "BLOCKING_PERMANENT"
+    ],
+    "optionPresets": {
+      "DEVICE_INPUT_LAYOUT_MODE": "_INLINE_MAINTENANCE_DEVICE_INPUT_LAYOUT_MODE",
+      "DEVICE_OPERATION_MODE": "_INLINE_MAINTENANCE_DEVICE_OPERATION_MODE",
+      "DISPLAY_INVERTED_COLORS": "_INLINE_MAINTENANCE_DISPLAY_INVERTED_COLORS",
+      "DISPLAY_MODE": "_INLINE_MAINTENANCE_DISPLAY_MODE",
+      "MOUNTING_ORIENTATION": "_INLINE_MAINTENANCE_MOUNTING_ORIENTATION",
+      "SABOTAGE_CONTACT_TYPE": "NORMALLY_CLOSE_OPEN"
+    },
+    "parameterGroups": [
+      {
+        "id": "group_0",
+        "labelKey": "stringtablecyclicinfomsg",
+        "parameters": ["CYCLIC_INFO_MSG", "CYCLIC_INFO_MSG_DIS", "CYCLIC_INFO_MSG_DIS_UNCHANGED"]
+      },
+      {
+        "id": "group_1",
+        "labelKey": "stringtabledimmerovertemplevel",
+        "parameters": ["OVERTEMP_LEVEL", "DEVICE_OPERATION_MODE"]
+      },
+      {
+        "id": "group_2",
+        "labelKey": "stringtablebatterylowbatlimit",
+        "parameters": [
+          "LOW_BAT_LIMIT",
+          "LOCAL_RESET_DISABLED",
+          "GLOBAL_BUTTON_LOCK",
+          "ROUTER_MODULE_ENABLED",
+          "MULTICAST_ROUTER_MODULE_ENABLED",
+          "ENABLE_ROUTING",
+          "DEVICE_INPUT_LAYOUT_MODE"
+        ]
+      },
+      {
+        "id": "group_3",
+        "labelKey": "stringtablebuttonresponsewithoutbacklight",
+        "parameters": ["DEVICE_SWITCH_TRIGGERING_MODE", "BUTTON_RESPONSE_WITHOUT_BACKLIGHT"]
+      },
+      {
+        "id": "group_4",
+        "labelKey": "stringtabledisabledevicealivesignal",
+        "parameters": [
+          "DISABLE_DEVICE_ALIVE_SIGNAL",
+          "DISABLE_MSG_TO_AC",
+          "DEVICE_SENSOR_SENSITIVITY",
+          "DISPLAY_CONTRAST",
+          "BACKLIGHT_ON_TIME",
+          "ALTITUDE",
+          "SIGNAL_BRIGHTNESS",
+          "MOUNTING_ORIENTATION",
+          "DISPLAY_MODE",
+          "DISPLAY_INVERTED_COLORS",
+          "PERMANENT_FULL_RX"
+        ]
+      },
+      {"id": "group_5", "labelKey": "lbllocation", "parameters": ["LONGITUDE", "LATITUDE"]},
+      {
+        "id": "group_6",
+        "labelKey": "stringtablesabotagecontacttype",
+        "parameters": ["BLOCKING_ON_SABOTAGE", "SABOTAGE_CONTACT_TYPE", "BLOCKING_TEMPORARY", "BLOCKING_PERMANENT"]
+      }
+    ]
+  },
+  "MULTI_MODE_INPUT_TRANSMITTER": {
+    "channelType": "MULTI_MODE_INPUT_TRANSMITTER",
+    "parameterOrder": [
+      "LED_DISABLE_CHANNELSTATE",
+      "LED_DISABLE_SENDSTATE",
+      "CHANNEL_OPERATION_MODE",
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "DBL_PRESS_TIME",
+      "LONG_PRESS_TIME",
+      "REPEATED_LONG_PRESS_TIMEOUT_UNIT",
+      "REPEATED_LONG_PRESS_TIMEOUT_VALUE",
+      "MSG_FOR_POS_A",
+      "MSG_FOR_POS_B",
+      "CONTACT_BOOST",
+      "ABORT_EVENT_SENDING_CHANNELS"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {
+        "trigger": "REPEATED_LONG_PRESS_TIMEOUT_UNIT",
+        "triggerValue": "custom",
+        "show": ["REPEATED_LONG_PRESS_TIMEOUT_VALUE"]
+      }
+    ],
+    "optionPresets": {
+      "CHANNEL_OPERATION_MODE": "_INLINE_MULTI_MODE_INPUT_TRANSMITTER_CHANNEL_OPERATION_MODE",
+      "MSG_FOR_POS_A": "_INLINE_MULTI_MODE_INPUT_TRANSMITTER_MSG_FOR_POS_A",
+      "MSG_FOR_POS_B": "_INLINE_MULTI_MODE_INPUT_TRANSMITTER_MSG_FOR_POS_B"
+    }
+  },
+  "OPTICAL_SIGNAL_RECEIVER": {
+    "channelType": "OPTICAL_SIGNAL_RECEIVER",
+    "parameterOrder": [
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE",
+      "POWERUP_JUMPTARGET"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ],
+    "parameterGroups": [
+      {
+        "id": "group_0",
+        "labelKey": "stringtableeventdelay",
+        "parameters": [
+          "EVENT_DELAY_UNIT",
+          "EVENT_DELAY_VALUE",
+          "EVENT_RANDOMTIME_UNIT",
+          "EVENT_RANDOMTIME_VALUE",
+          "POWERUP_JUMPTARGET"
+        ]
+      }
+    ]
+  },
+  "PASSAGE_DETECTOR": {
+    "channelType": "PASSAGE_DETECTOR",
+    "parameterOrder": [
+      "ATC_MODE",
+      "ATC_ADAPTION_INTERVAL",
+      "EVENT_BLINDTIME_BASE",
+      "EVENT_BLINDTIME_VALUE",
+      "EVENT_TIMEOUT_BASE",
+      "EVENT_TIMEOUT_VALUE",
+      "LED_DISABLE_CHANNELSTATE",
+      "SENSOR_SENSITIVITY"
+    ]
+  },
+  "PASSAGE_DETECTOR_COUNTER_TRANSMITTER": {
+    "channelType": "PASSAGE_DETECTOR_COUNTER_TRANSMITTER",
+    "parameterOrder": [
+      "CHANNEL_OPERATION_MODE",
+      "COND_TX_DECISION_ABOVE",
+      "COND_TX_DECISION_BELOW",
+      "COND_TX_THRESHOLD_HI",
+      "COND_TX_THRESHOLD_LO"
+    ]
+  },
+  "PASSAGE_DETECTOR_DIRECTION_TRANSMITTER": {
+    "channelType": "PASSAGE_DETECTOR_DIRECTION_TRANSMITTER",
+    "parameterOrder": ["CHANNEL_OPERATION_MODE", "COND_TX_DECISION_ABOVE", "COND_TX_DECISION_BELOW"]
+  },
+  "RAIN_DETECTION_TRANSMITTER": {
+    "channelType": "RAIN_DETECTION_TRANSMITTER",
+    "parameterOrder": [
+      "LED_DISABLE_CHANNELSTATE",
+      "EVENT_TIMEOUT_BASE",
+      "EVENT_TIMEOUT_VALUE",
+      "SAMPLE_INTERVAL",
+      "SENSOR_SENSITIVITY"
+    ]
+  },
+  "SERVO_TRANSMITTER": {
+    "channelType": "SERVO_TRANSMITTER",
+    "parameterOrder": [
+      "CHANNEL_OPERATION_MODE",
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE",
+      "OUTPUT_SWAP",
+      "POWER_OFFDELAY_UNIT",
+      "POWER_OFFDELAY_VALUE"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]},
+      {"trigger": "POWER_OFFDELAY_UNIT", "triggerValue": "custom", "show": ["POWER_OFFDELAY_VALUE"]}
+    ],
+    "parameterGroups": [
+      {"id": "group_0", "labelKey": "lblchannelactivinactiv", "parameters": ["CHANNEL_OPERATION_MODE"]},
+      {
+        "id": "group_1",
+        "labelKey": "stringtableeventdelay",
+        "parameters": ["EVENT_DELAY_UNIT", "EVENT_DELAY_VALUE", "EVENT_RANDOMTIME_UNIT", "EVENT_RANDOMTIME_VALUE"]
+      },
+      {
+        "id": "group_2",
+        "labelKey": "lblrotationswap",
+        "parameters": ["OUTPUT_SWAP", "POWER_OFFDELAY_UNIT", "POWER_OFFDELAY_VALUE"]
+      }
+    ]
+  },
+  "SERVO_VIRTUAL_RECEIVER": {"channelType": "SERVO_VIRTUAL_RECEIVER", "parameterOrder": ["POWERUP_JUMPTARGET"]},
+  "SHUTTER_CONTACT": {
+    "channelType": "SHUTTER_CONTACT",
+    "parameterOrder": [
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_FILTER_NUMBER",
+      "EVENT_FILTER_PERIOD",
+      "SAMPLE_INTERVAL",
+      "MSG_FOR_POS_A",
+      "MSG_FOR_POS_B"
+    ],
+    "conditionalVisibility": [{"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]}]
+  },
+  "SHUTTER_TRANSMITTER": {
+    "channelType": "SHUTTER_TRANSMITTER",
+    "parameterOrder": [
+      "OUTPUT_SWAP",
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE",
+      "CHANGE_OVER_DELAY",
+      "REFERENCE_RUN_COUNTER",
+      "POSITION_SAVE_TIME",
+      "SENSOR_SENSITIVITY",
+      "ENDPOSITION_AUTO_DETECT",
+      "REFERENCE_RUNNING_TIME_BOTTOM_TOP_UNIT",
+      "REFERENCE_RUNNING_TIME_BOTTOM_TOP_VALUE",
+      "REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT",
+      "REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE",
+      "DELAY_COMPENSATION"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]},
+      {
+        "trigger": "REFERENCE_RUNNING_TIME_BOTTOM_TOP_UNIT",
+        "triggerValue": "custom",
+        "show": ["REFERENCE_RUNNING_TIME_BOTTOM_TOP_VALUE"]
+      },
+      {
+        "trigger": "REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT",
+        "triggerValue": "custom",
+        "show": ["REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE"]
+      }
+    ],
+    "optionPresets": {"SENSOR_SENSITIVITY": "_INLINE_SHUTTER_TRANSMITTER_SENSOR_SENSITIVITY"},
+    "parameterGroups": [
+      {
+        "id": "group_0",
+        "labelKey": "lbloutputswap",
+        "parameters": [
+          "OUTPUT_SWAP",
+          "EVENT_DELAY_UNIT",
+          "EVENT_DELAY_VALUE",
+          "EVENT_RANDOMTIME_UNIT",
+          "EVENT_RANDOMTIME_VALUE",
+          "CHANGE_OVER_DELAY",
+          "REFERENCE_RUN_COUNTER",
+          "POSITION_SAVE_TIME",
+          "SENSOR_SENSITIVITY",
+          "ENDPOSITION_AUTO_DETECT"
+        ]
+      },
+      {
+        "id": "group_1",
+        "labelKey": "stringtableblindrunninttimebottomtop",
+        "parameters": [
+          "REFERENCE_RUNNING_TIME_BOTTOM_TOP_UNIT",
+          "REFERENCE_RUNNING_TIME_BOTTOM_TOP_VALUE",
+          "REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT",
+          "REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE",
+          "DELAY_COMPENSATION"
+        ]
+      }
+    ]
+  },
+  "SHUTTER_VIRTUAL_RECEIVER": {
+    "channelType": "SHUTTER_VIRTUAL_RECEIVER",
+    "parameterOrder": [
+      "POSITION_SAVE_TIME",
+      "POWERUP_JUMPTARGET",
+      "CLIMATE_FUNCTION",
+      "HUMIDITY_LIMIT_VALUE",
+      "TWO_POINT_HYSTERESIS",
+      "_DEW_POINT_CONTROL_ENABLED",
+      "_DEW_POINT_TEMPERATURE",
+      "HEATING_COOLING",
+      "COOLING_ENABLE",
+      "HEATING_ENABLE",
+      "P6_TEMPERATURE_MONDAY_1",
+      "WEEK_PROGRAM_POINTER",
+      "SHOW_SET_TEMPERATURE",
+      "SHOW_HUMIDITY",
+      "CLIMATE_CONTROL_DISPLAY",
+      "ADAPTIVE_REGULATION",
+      "BUTTON_RESPONSE_WITHOUT_BACKLIGHT",
+      "TEMPERATURE_LOWERING_COOLING",
+      "TEMPERATURE_LOWERING",
+      "TEMPERATURE_MINIMUM",
+      "TEMPERATURE_MAXIMUM",
+      "MIN_MAX_VALUE_NOT_RELEVANT_FOR_MANU_MODE",
+      "OPTIMUM_START_STOP",
+      "DURATION_5MIN",
+      "TEMPERATURE_OFFSET",
+      "TEMPERATURE_WINDOW_OPEN",
+      "TEMPERATURE_WINDOW_OPEN_COOLING",
+      "BOOST_TIME_PERIOD",
+      "CHANNEL_OPERATION_MODE",
+      "ACOUSTIC_ALARM_SIGNAL",
+      "EFFECT_ADAPTION_FADE_OUT_TIME_FACTOR"
+    ],
+    "optionPresets": {
+      "CLIMATE_FUNCTION": "_INLINE_SHUTTER_VIRTUAL_RECEIVER_CLIMATE_FUNCTION",
+      "HEATING_COOLING": "_INLINE_SHUTTER_VIRTUAL_RECEIVER_HEATING_COOLING"
+    },
+    "parameterGroups": [
+      {"id": "group_0", "labelKey": "stringtablepositionsavetime", "parameters": ["POSITION_SAVE_TIME"]},
+      {
+        "id": "group_1",
+        "labelKey": "virtualhelptxtdimmer",
+        "parameters": [
+          "POWERUP_JUMPTARGET",
+          "CLIMATE_FUNCTION",
+          "HUMIDITY_LIMIT_VALUE",
+          "TWO_POINT_HYSTERESIS",
+          "_DEW_POINT_CONTROL_ENABLED",
+          "_DEW_POINT_TEMPERATURE",
+          "HEATING_COOLING",
+          "COOLING_ENABLE",
+          "HEATING_ENABLE",
+          "P6_TEMPERATURE_MONDAY_1",
+          "WEEK_PROGRAM_POINTER",
+          "SHOW_SET_TEMPERATURE",
+          "SHOW_HUMIDITY",
+          "CLIMATE_CONTROL_DISPLAY",
+          "ADAPTIVE_REGULATION",
+          "BUTTON_RESPONSE_WITHOUT_BACKLIGHT",
+          "TEMPERATURE_LOWERING_COOLING",
+          "TEMPERATURE_LOWERING",
+          "TEMPERATURE_MINIMUM",
+          "TEMPERATURE_MAXIMUM",
+          "MIN_MAX_VALUE_NOT_RELEVANT_FOR_MANU_MODE",
+          "OPTIMUM_START_STOP",
+          "DURATION_5MIN",
+          "TEMPERATURE_OFFSET",
+          "TEMPERATURE_WINDOW_OPEN",
+          "TEMPERATURE_WINDOW_OPEN_COOLING",
+          "BOOST_TIME_PERIOD",
+          "CHANNEL_OPERATION_MODE",
+          "ACOUSTIC_ALARM_SIGNAL",
+          "EFFECT_ADAPTION_FADE_OUT_TIME_FACTOR"
+        ]
+      }
+    ]
+  },
+  "SIMPLE_SWITCH_RECEIVER": {
+    "channelType": "SIMPLE_SWITCH_RECEIVER",
+    "parameterOrder": ["EVENT_DELAY_UNIT", "EVENT_DELAY_VALUE", "EVENT_RANDOMTIME_UNIT", "EVENT_RANDOMTIME_VALUE"],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ]
+  },
+  "SMOKE_DETECTOR": {"channelType": "SMOKE_DETECTOR", "parameterOrder": ["GROUP_1"]},
+  "SOIL_MOISTURE_TRANSMITTER": {
+    "channelType": "SOIL_MOISTURE_TRANSMITTER",
+    "parameterOrder": ["FILTER_SIZE", "INTERVAL_UNIT", "INTERVAL_VALUE", "REFERENCE_16BIT_MIN", "REFERENCE_16BIT_MAX"],
+    "conditionalVisibility": [{"trigger": "INTERVAL_UNIT", "triggerValue": "custom", "show": ["INTERVAL_VALUE"]}]
+  },
+  "STATE_RESET_RECEIVER": {
+    "channelType": "STATE_RESET_RECEIVER",
+    "parameterOrder": ["BLOCKING_PERIOD_UNIT", "BLOCKING_PERIOD_VALUE"],
+    "conditionalVisibility": [
+      {"trigger": "BLOCKING_PERIOD_UNIT", "triggerValue": "custom", "show": ["BLOCKING_PERIOD_VALUE"]}
+    ]
+  },
+  "STATE_RESET_VIRTUAL_RECEIVER": {
+    "channelType": "STATE_RESET_VIRTUAL_RECEIVER",
+    "parameterOrder": ["BLOCKING_PERIOD_UNIT", "BLOCKING_PERIOD_VALUE"],
+    "conditionalVisibility": [
+      {"trigger": "BLOCKING_PERIOD_UNIT", "triggerValue": "custom", "show": ["BLOCKING_PERIOD_VALUE"]}
+    ]
+  },
+  "SWITCH_TRANSCEIVER": {
+    "channelType": "SWITCH_TRANSCEIVER",
+    "parameterOrder": [
+      "POWERUP_JUMPTARGET",
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ]
+  },
+  "SWITCH_TRANSMITTER": {
+    "channelType": "SWITCH_TRANSMITTER",
+    "parameterOrder": [
+      "CURRENTDETECTION_BEHAVIOR",
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE",
+      "LED_DISABLE_CHANNELSTATE"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ]
+  },
+  "SWITCH_VIRTUAL_RECEIVER": {"channelType": "SWITCH_VIRTUAL_RECEIVER", "parameterOrder": ["POWERUP_JUMPTARGET"]},
+  "VALVE_ACTUATOR_RECEIVER": {
+    "channelType": "VALVE_ACTUATOR_RECEIVER",
+    "parameterOrder": [
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE",
+      "POWERUP_JUMPTARGET",
+      "POWERUP_ONTIME_UNIT",
+      "POWERUP_ONTIME_VALUE",
+      "POWERUP_OFFTIME_UNIT",
+      "POWERUP_OFFTIME_VALUE"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]},
+      {"trigger": "POWERUP_ONTIME_UNIT", "triggerValue": "custom", "show": ["POWERUP_ONTIME_VALUE"]},
+      {"trigger": "POWERUP_OFFTIME_UNIT", "triggerValue": "custom", "show": ["POWERUP_OFFTIME_VALUE"]}
+    ],
+    "optionPresets": {"POWERUP_JUMPTARGET": "_INLINE_VALVE_ACTUATOR_RECEIVER_POWERUP_JUMPTARGET"}
+  },
+  "WATER_DETECTION_TRANSMITTER": {
+    "channelType": "WATER_DETECTION_TRANSMITTER",
+    "parameterOrder": [
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_FILTER_NUMBER",
+      "EVENT_FILTER_PERIOD",
+      "ACOUSTIC_ALARM_SIGNAL",
+      "ACOUSTIC_ALARM_TIMING",
+      "ACOUSTIC_ALARM_TRIGGER",
+      "TRIGGER_ANGLE"
+    ],
+    "conditionalVisibility": [{"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]}]
+  },
+  "WATER_FLOW_TRANSMITTER": {
+    "channelType": "WATER_FLOW_TRANSMITTER",
+    "parameterOrder": [
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "CHANNEL_OPERATION_MODE",
+      "INTERVAL_UNIT",
+      "INTERVAL_VALUE",
+      "EVENT_BLINDTIME_VALUE",
+      "EVENT_BLINDTIME_BASE",
+      "COND_TX_THRESHOLD_HI"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "INTERVAL_UNIT", "triggerValue": "custom", "show": ["INTERVAL_VALUE"]}
+    ],
+    "optionPresets": {"CHANNEL_OPERATION_MODE": "_INLINE_WATER_FLOW_TRANSMITTER_CHANNEL_OPERATION_MODE"},
+    "parameterGroups": [
+      {
+        "id": "group_0",
+        "labelKey": "stringtableeventdelay",
+        "parameters": [
+          "EVENT_DELAY_UNIT",
+          "EVENT_DELAY_VALUE",
+          "CHANNEL_OPERATION_MODE",
+          "INTERVAL_UNIT",
+          "INTERVAL_VALUE"
+        ]
+      },
+      {
+        "id": "group_1",
+        "labelKey": "lblcondthresholdhi_wss",
+        "parameters": ["EVENT_BLINDTIME_VALUE", "EVENT_BLINDTIME_BASE", "COND_TX_THRESHOLD_HI"]
+      }
+    ]
+  },
+  "WATER_PRESSURE_TRANSMITTER": {
+    "channelType": "WATER_PRESSURE_TRANSMITTER",
+    "parameterOrder": ["EVENT_DELAY_UNIT", "EVENT_DELAY_VALUE", "CHANNEL_OPERATION_MODE"],
+    "conditionalVisibility": [{"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]}],
+    "optionPresets": {"CHANNEL_OPERATION_MODE": "_INLINE_WATER_PRESSURE_TRANSMITTER_CHANNEL_OPERATION_MODE"}
+  },
+  "WATER_SWITCH_VIRTUAL_RECEIVER": {
+    "channelType": "WATER_SWITCH_VIRTUAL_RECEIVER",
+    "parameterOrder": ["POWERUP_JUMPTARGET"]
+  },
+  "WINDOW_DRIVE_RECEIVER": {
+    "channelType": "WINDOW_DRIVE_RECEIVER",
+    "parameterOrder": [
+      "EVENT_DELAY_UNIT",
+      "EVENT_DELAY_VALUE",
+      "EVENT_RANDOMTIME_UNIT",
+      "EVENT_RANDOMTIME_VALUE",
+      "POWERUP_JUMPTARGET"
+    ],
+    "conditionalVisibility": [
+      {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
+      {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ]
+  }
+}

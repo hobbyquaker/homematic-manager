@@ -1,0 +1,120 @@
+{
+  "receiverType": "RGBW_AUTOMATIC",
+  "senders": {
+    "KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "dec_Program",
+        "name": {"de": "Verringere Programmnummer", "en": "Decrease program number"},
+        "description": {
+          "de": "Mit einem langen Tastendruck können Sie die Nummer des Farbwechselprogramms verringern. Ein kurzer Tastendruck schaltet die Programmfunktion aus.",
+          "en": "A long button press will decrease the number of the colour program. A brief button press will stop the program."
+        },
+        "params": {
+          "LONG_ACT_COLOR_PROGRAM": {"kind": "fixed", "value": 254},
+          "LONG_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "LONG_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_ACT_COLOR_PROGRAM": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "inc_Program",
+        "name": {"de": "Erhöhe Programmnummer", "en": "Increase program number"},
+        "description": {
+          "de": "Mit einem langen Tastendruck können Sie die Nummer des Farbwechselprogramms  erhöhen. Ein kurzer Tastendruck wählt das Program 'Normaler Durchlauf'",
+          "en": "A long button press will increase the number of the colour program. A brief button press will select the program 'Normal cycle'"
+        },
+        "params": {
+          "LONG_ACT_COLOR_PROGRAM": {"kind": "fixed", "value": 253},
+          "LONG_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "LONG_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_ACT_COLOR_PROGRAM": {"kind": "fixed", "value": 2},
+          "SHORT_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "set_Program",
+        "name": {"de": "Setze Programmnummer", "en": "Set program"},
+        "description": {
+          "de": "Hier können Sie ein Programm festlegen, welches bei kurzen und langem Tastendruck aktiviert wird.",
+          "en": "You can set the program for the brief and long button press here."
+        },
+        "params": {
+          "LONG_ACT_COLOR_PROGRAM": {"kind": "range", "min": 0, "max": 6, "default": 0},
+          "LONG_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "LONG_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_ACT_COLOR_PROGRAM": {"kind": "range", "min": 0, "max": 6, "default": 0},
+          "SHORT_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0}
+        }
+      }
+    ],
+    "VIRTUAL_KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "dec_Program",
+        "name": {"de": "Verringere Programmnummer", "en": "Decrease program number"},
+        "description": {"de": "Mit einem kurzen oder langen Tastendruck wird ....."},
+        "params": {
+          "LONG_ACT_COLOR_PROGRAM": {"kind": "fixed", "value": 254},
+          "LONG_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "LONG_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_ACT_COLOR_PROGRAM": {"kind": "fixed", "value": 0},
+          "SHORT_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "inc_Program",
+        "name": {"de": "Erhöhe Programmnummer", "en": "Increase program number"},
+        "description": {"de": "Mit einem kurzen oder langen Tastendruck wird ....."},
+        "params": {
+          "LONG_ACT_COLOR_PROGRAM": {"kind": "fixed", "value": 253},
+          "LONG_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "LONG_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_ACT_COLOR_PROGRAM": {"kind": "fixed", "value": 2},
+          "SHORT_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "set_Program",
+        "name": {"de": "Setze Programmnummer", "en": "Set program"},
+        "description": {"de": "Mit einem kurzen oder langen Tastendruck wird ....."},
+        "params": {
+          "LONG_ACT_COLOR_PROGRAM": {"kind": "range", "min": 0, "max": 6, "default": 0},
+          "LONG_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "LONG_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_ACT_COLOR_PROGRAM": {"kind": "range", "min": 0, "max": 6, "default": 0},
+          "SHORT_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0}
+        }
+      }
+    ]
+  },
+  "senderMetadata": {
+    "KEY": {"parameterOrder": ["SHORT_ACT_COLOR_PROGRAM", "LONG_ACT_COLOR_PROGRAM"]},
+    "VIRTUAL_KEY": {"parameterOrder": ["SHORT_ACT_COLOR_PROGRAM", "LONG_ACT_COLOR_PROGRAM"]}
+  }
+}

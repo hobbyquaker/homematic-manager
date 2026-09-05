@@ -1,0 +1,125 @@
+{
+  "receiverType": "ALARM_COND_SWITCH_RECEIVER",
+  "senders": {
+    "ALARM_COND_SWITCH_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {},
+        "params": {
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 7},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
+          "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
+          "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
+        }
+      }
+    ],
+    "DISPLAY_INPUT_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {},
+        "params": {
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 7},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
+          "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
+          "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {},
+        "params": {
+          "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "fixed", "value": 0},
+          "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "DISPLAY_LEVEL_INPUT_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {},
+        "params": {
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 7},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
+          "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
+          "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {},
+        "params": {
+          "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "fixed", "value": 0},
+          "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "KEY_TRANSCEIVER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Alarm ein", "en": "Alarm activated"},
+        "description": {
+          "de": "Sollte der Sabotagekontakt ausgel%F6st werden, wird der gewünschte Alarm für die festgelegte Zeit eingeschaltet.",
+          "en": "If the sabotage contact is triggered, the desired alarm is activated for the specified time."
+        },
+        "params": {
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 7},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
+          "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
+          "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_off",
+        "name": {"de": "Alarm aus", "en": "Alarm deactivated"},
+        "description": {
+          "de": "Der Sabotagekontakt wird f%FCr diese Verkn%FCpfung nicht genutzt.",
+          "en": "The sabotage contact is not in use for this link."
+        },
+        "params": {
+          "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "fixed", "value": 0},
+          "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "fixed", "value": 0}
+        }
+      }
+    ]
+  }
+}

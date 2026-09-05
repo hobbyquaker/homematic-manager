@@ -1,0 +1,38 @@
+{
+  "receiverType": "CLIMATECONTROL_FLOOR_PUMP_TRANSCEIVER",
+  "senders": {
+    "CLIMATECONTROL_FLOOR_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "profileSettings",
+        "name": {"de": "Profileinstellung", "en": "Profile setting"},
+        "description": {"de": "Standardprofil zur Heizungssteuerung", "en": "Standard profile for heating control"},
+        "params": {
+          "SHORT_COOLING_DISABLE": {"kind": "list", "values": [1, 0]},
+          "SHORT_ECO_COOLING_TEMPERATURE": {"kind": "range", "min": 0, "max": 30, "default": 23},
+          "SHORT_ECO_HEATING_TEMPERATURE": {"kind": "range", "min": 0, "max": 30, "default": 19},
+          "SHORT_FLOOR_HEATING_MODE": {"kind": "range", "min": 0, "max": 4, "default": 0},
+          "SHORT_HEATING_CLOCK_FUNCTION": {"kind": "list", "values": [1, 0]},
+          "SHORT_HEATING_DISABLE": {"kind": "list", "values": [1, 0]},
+          "SHORT_HUMIDITY_LIMIT_VALUE": {"kind": "range", "min": 40, "max": 80, "default": 40},
+          "SHORT_MINIMAL_FLOOR_TEMPERATURE": {"kind": "range", "min": 0, "max": 30, "default": 19},
+          "SHORT_OFFDELAY_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_OFFDELAY_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_ONDELAY_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ONDELAY_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 7},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
+          "SHORT_SWITCHING_INTERVAL_BASE": {"kind": "range", "min": 0, "max": 7, "default": 7},
+          "SHORT_SWITCHING_INTERVAL_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0}
+        }
+      }
+    ]
+  }
+}

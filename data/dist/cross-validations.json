@@ -1,0 +1,39 @@
+[
+  {
+    "id": "dim_max_gte_min",
+    "rule": "gte",
+    "errorKey": "cross_validation.max_must_be_gte_min",
+    "paramA": "DIM_MAX_LEVEL",
+    "paramB": "DIM_MIN_LEVEL"
+  },
+  {
+    "id": "short_on_level_in_dim_range",
+    "rule": "between",
+    "errorKey": "cross_validation.level_must_be_in_range",
+    "param": "SHORT_ON_LEVEL",
+    "minParam": "DIM_MIN_LEVEL",
+    "maxParam": "DIM_MAX_LEVEL"
+  },
+  {
+    "id": "long_on_level_in_dim_range",
+    "rule": "between",
+    "errorKey": "cross_validation.level_must_be_in_range",
+    "param": "LONG_ON_LEVEL",
+    "minParam": "DIM_MIN_LEVEL",
+    "maxParam": "DIM_MAX_LEVEL"
+  },
+  {
+    "id": "short_cond_hi_gte_lo",
+    "rule": "gte",
+    "errorKey": "cross_validation.hi_must_be_gte_lo",
+    "paramA": "SHORT_COND_VALUE_HI",
+    "paramB": "SHORT_COND_VALUE_LO"
+  },
+  {
+    "id": "long_cond_hi_gte_lo",
+    "rule": "gte",
+    "errorKey": "cross_validation.hi_must_be_gte_lo",
+    "paramA": "LONG_COND_VALUE_HI",
+    "paramB": "LONG_COND_VALUE_LO"
+  }
+]

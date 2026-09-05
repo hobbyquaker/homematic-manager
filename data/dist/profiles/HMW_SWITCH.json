@@ -1,0 +1,697 @@
+{
+  "receiverType": "HMW_SWITCH",
+  "senders": {
+    "INPUT_OUTPUT_0": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Schalter - ein / aus", "en": "Switch - on/off"},
+        "description": {
+          "de": "Beim Betätigen des Schaltkontakts wechselt der Schalter für die gewünschte Zeit in den jeweils anderen Zustand. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "By pressing the switch contact the switch changes for the set time to the other status. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Salter kontagina basildiginda salter istenen süre boyunca diger duruma gecer. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "light_stairway",
+        "name": {"de": "Treppenhauslicht", "en": "Staircase light", "tr": "Merdiven boslugu isigi"},
+        "description": {
+          "de": "Beim Betätigen des Schaltkontakts wird das Licht für die gewünschte Zeit eingeschaltet. Wird der Schaltkontakt während der ein-Phase nochmal betätigt, beginnt die Zeitzählung von vorne.",
+          "en": "By pressing the switch contact the light will be switched on for the set time. If the switch contact is pressed again while the light is switched on, the time count begins anew./span>",
+          "tr": "Salter kontagina basildiginda isik istenen süre boyunca acilir. Eger salter kontagina bir-fazinda tekrar basilirsa, zaman sayaci bastan saymaya baslar."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 300},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on",
+        "name": {"de": "Schalter - ein", "en": "Switch - on"},
+        "description": {
+          "de": "Beim Betätigen des Schaltkontakts wird der Schalter für die gewünschte Zeit eingeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "By pressing the switch contact the switch will be toggled on for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Salter kontagina basildiginda salter istenen süre boyunca acilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_off",
+        "name": {"de": "Schalter - aus", "en": "Switch - off"},
+        "description": {
+          "de": "Beim Betätigen des Schaltkontakts wird der Schalter für die gewünschte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "By pressing the switch contact the switch will be toggled off for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Salter kontagina basildiginda salter istenen süre boyunca kapatilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "INPUT_OUTPUT_1": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Schalter - ein / aus", "en": "Switch - on/off"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit ein- oder ausgeschaltet (Toggle-Funktion). Ist eine ein- oder Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "With a short or long button press the switch will be toggled on or off for the set time (toggle function). If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun süre basarak salter istenen süre boyunca acilir veya kapatilir (Toggle fonksiyonu). Bir acma veya gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_TOGGLE_USE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "light_stairway",
+        "name": {"de": "Treppenhauslicht", "en": "Staircase light", "tr": "Merdiven boslugu isigi"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck schaltet der Schalter für die gewünschte Zeit ein. Wird der Taster während der ein-Phase nochmal betätigt, beginnt die Zeitzählung von vorne.",
+          "en": "With a short or long button press the switch will be toggled off for the set time. If the switch is pressed again while the light is switched on, the time count begins anew./span>",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin acik konumuna getirilir. Eger tusa bir-fazinda tekrar basilirsa, zaman sayaci bastan saymaya baslar."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 300},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_TOGGLE_USE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 300},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on",
+        "name": {"de": "Schalter - ein", "en": "Switch - on"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit eingeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "With a short or long button press the switch will be toggled on for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin acik konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_TOGGLE_USE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_off",
+        "name": {"de": "Schalter - aus", "en": "Switch - off"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "With a short or long button press the switch will be toggled off for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin kapali konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 3},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_TOGGLE_USE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "KEY_0": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Schalter - ein / aus", "en": "Switch - on/off"},
+        "description": {
+          "de": "Beim Betätigen des Schaltkontakts wechselt der Schalter für die gewünschte Zeit in den jeweils anderen Zustand. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "By pressing the switch contact the switch changes for the set time to the other status. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Salter kontagina basildiginda salter istenen süre boyunca diger duruma gecer. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "light_stairway",
+        "name": {"de": "Treppenhauslicht", "en": "Staircase light", "tr": "Merdiven boslugu isigi"},
+        "description": {
+          "de": "Beim Betätigen des Schaltkontakts wird das Licht für die gewünschte Zeit eingeschaltet. Wird der Schaltkontakt während der ein-Phase nochmal betätigt, beginnt die Zeitzählung von vorne.",
+          "en": "By pressing the switch contact the light will be switched on for the set time. If the switch contact is pressed again while the light is switched on, the time count begins anew./span>",
+          "tr": "Salter kontagina basildiginda isik istenen süre boyunca acilir. Eger salter kontagina bir-fazinda tekrar basilirsa, zaman sayaci bastan saymaya baslar."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 300},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on",
+        "name": {"de": "Schalter - ein", "en": "Switch - on"},
+        "description": {
+          "de": "Beim Betätigen des Schaltkontakts wird der Schalter für die gewünschte Zeit eingeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "By pressing the switch contact the switch will be toggled on for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Salter kontagina basildiginda salter istenen süre boyunca acilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_off",
+        "name": {"de": "Schalter - aus", "en": "Switch - off"},
+        "description": {
+          "de": "Beim Betätigen des Schaltkontakts wird der Schalter für die gewünschte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "By pressing the switch contact the switch will be toggled off for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Salter kontagina basildiginda salter istenen süre boyunca kapatilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "KEY_1": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Schalter - ein / aus", "en": "Switch - on/off"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit ein- oder ausgeschaltet (Toggle-Funktion).  Ist eine ein- oder Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "With a short or long button press the switch will be toggled on or off for the set time (toggle function). If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun süre basarak salter istenen süre boyunca acilir veya kapatilir (Toggle fonksiyonu).  Bir acma veya gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_TOGGLE_USE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "light_stairway",
+        "name": {"de": "Treppenhauslicht", "en": "Staircase light", "tr": "Merdiven boslugu isigi"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck schaltet der Schalter für die gewünschte Zeit ein. Wird der Taster während der ein-Phase nochmal betätigt, beginnt die Zeitzählung von vorne.",
+          "en": "With a short or long button press the switch will be toggled off for the set time. If the switch is pressed again while the light is switched on, the time count begins anew./span>",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin acik konumuna getirilir. Eger tusa bir-fazinda tekrar basilirsa, zaman sayaci bastan saymaya baslar."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 300},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_TOGGLE_USE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 300},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on",
+        "name": {"de": "Schalter - ein", "en": "Switch - on"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit eingeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "With a short or long button press the switch will be toggled on for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin acik konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_TOGGLE_USE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_off",
+        "name": {"de": "Schalter - aus", "en": "Switch - off"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "With a short or long button press the switch will be toggled off for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin kapali konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 3},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_TOGGLE_USE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "TEMPLATE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "xxxx", "name": {"de": "xxxx", "en": "xxxx", "tr": "xxxx"}, "description": {}, "params": {}},
+      {"id": 2, "key": "yyyy", "name": {"de": "yyyy", "en": "yyyy", "tr": "yyyy"}, "description": {}, "params": {}}
+    ],
+    "VIRTUAL_KEY_1": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Schalter - ein / aus", "en": "Switch - on/off"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit ein- oder ausgeschaltet (Toggle-Funktion).  Ist eine ein- oder Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "With a short or long button press the switch will be toggled on or off for the set time (toggle function). If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun süre basarak salter istenen süre boyunca acilir veya kapatilir (Toggle fonksiyonu).  Bir acma veya gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_TOGGLE_USE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "light_stairway",
+        "name": {"de": "Treppenhauslicht", "en": "Staircase light", "tr": "Merdiven boslugu isigi"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck schaltet der Schalter für die gewünschte Zeit ein. Wird der Taster während der ein-Phase nochmal betätigt, beginnt die Zeitzählung von vorne.",
+          "en": "With a short or long button press the switch will be toggled off for the set time. If the switch is pressed again while the light is switched on, the time count begins anew./span>",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin acik konumuna getirilir. Eger tusa bir-fazinda tekrar basilirsa, zaman sayaci bastan saymaya baslar."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 300},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_TOGGLE_USE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 300},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on",
+        "name": {"de": "Schalter - ein", "en": "Switch - on"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit eingeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "With a short or long button press the switch will be toggled on for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin acik konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_TOGGLE_USE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_off",
+        "name": {"de": "Schalter - aus", "en": "Switch - off"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die gewünschte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "With a short or long button press the switch will be toggled off for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter istenen süre icin kapali konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 3},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "LONG_TOGGLE_USE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
+          "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ]
+  }
+}

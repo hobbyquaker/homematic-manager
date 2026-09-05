@@ -1,0 +1,385 @@
+{
+  "receiverType": "ACTOR_SECURITY",
+  "senders": {
+    "KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "security_on",
+        "name": {"de": "Lüftungssperre Ein", "en": "Ventilation lock On"},
+        "description": {
+          "de": "Mit einem Tastendruck wird die Lüftungssperre (Sicherheit) aktiviert.",
+          "en": "A keystroke will activate the ventilation lock (security).",
+          "tr": "Havalandirma kilidi (güvenlik) tusa bir kere basildiginda etkinlesir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 2,
+        "key": "security_off",
+        "name": {"de": "Lüftungssperre Aus", "en": "Ventilation lock Off"},
+        "description": {
+          "de": "Mit einem Tastendruck wird die Lüftungssperre (Sicherheit) deaktiviert.",
+          "en": "A keystroke will deactivate the ventilation lock (security).",
+          "tr": "Havalandirma kilidi (güvenlik) tusa bir kere basildiginda devre disi kalir."
+        },
+        "params": {"SHORT_JT_OFF": {"kind": "fixed", "value": 2}, "SHORT_JT_ON": {"kind": "fixed", "value": 2}}
+      },
+      {
+        "id": 3,
+        "key": "security_toggle",
+        "name": {"de": "Lüftungssperre Ein / Aus", "en": "Ventilation lock On / Off"},
+        "description": {
+          "de": "Mit einem Tastendruck wird der Zustand der Lüftungssperre (Sicherheit) umgekehrt.",
+          "en": "A keystroke will change the state of the ventilation lock (security).",
+          "tr": "Havalandirma kilidinin durumu (güvenlik) tusa bir kere basildiginda tersine cevrilir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 4,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Diese Direktverknüpfung wird deaktiviert.",
+          "en": "This direct link is deactivated.",
+          "tr": "Bu direkt baglanti devre disi birakilir."
+        },
+        "params": {"SHORT_JT_OFF": {"kind": "fixed", "value": 0}, "SHORT_JT_ON": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "RAINDETECTOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "security_on",
+        "name": {"de": "Lüftungssperre Ein", "en": "Ventilation lock On"},
+        "description": {
+          "de": "Beginnt es zu regnen, wird die Lüftungssperre (Sicherheit) aktiviert.",
+          "en": "When it starts raining, the ventilation lock (security) will be activated",
+          "tr": "Yagmur yagmaya basladiginda havalandirma kilidi (güvenlik) etkinlestirilir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 2,
+        "key": "security_off",
+        "name": {"de": "Lüftungssperre Aus", "en": "Ventilation lock Off"},
+        "description": {
+          "de": "Beginnt es zu regnen, wird die Lüftungssperre (Sicherheit) deaktiviert.",
+          "en": "When it starts raining, the ventilation lock (security) will be deactivated.",
+          "tr": "Yagmur yagmaya basladiginda havalandirma kilidi (güvenlik) devre disi birakilir."
+        },
+        "params": {"SHORT_JT_OFF": {"kind": "fixed", "value": 2}, "SHORT_JT_ON": {"kind": "fixed", "value": 2}}
+      },
+      {
+        "id": 3,
+        "key": "security_toggle",
+        "name": {"de": "Lüftungssperre Ein / Aus", "en": "Ventilation lock On / Off"},
+        "description": {
+          "de": "Beginnt es zu regnen, wird die Lüftungssperre (Sicherheit) aktiviert. Sobald der Regensensor wieder trocken ist, wird die Lüftungssperre deaktiviert.",
+          "en": "When it starts raining, the ventilation lock (security) will be activated. When the rain detector is drain again, the ventilation lock will be deactivated.",
+          "tr": "Yagmur yagmaya basladiginda havalandirma kilidi (güvenlik) etkinlestirilir. Yagmur sensörü kurur kurmaz havalandirma kilidi devre disi birakilir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 4,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Diese Direktverknüpfung wird deaktiviert.",
+          "en": "This direct link is deactivated.",
+          "tr": "Bu direkt baglanti devre disi birakilir."
+        },
+        "params": {"SHORT_JT_OFF": {"kind": "fixed", "value": 0}, "SHORT_JT_ON": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "SHUTTER_CONTACT": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "security_on",
+        "name": {"de": "Lüftungssperre Ein", "en": "Ventilation lock On"},
+        "description": {
+          "de": "Beim Schließen des Schließerkontaktes wird die Lüftungssperre (Sicherheit) aktiviert",
+          "en": "Closing the shutter contact will activate the ventilation lock (security)",
+          "tr": "Kilit kontagi kapatildiginda havalandirma kilidi (güvenlik) etkinlestirilir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 2,
+        "key": "security_off",
+        "name": {"de": "Lüftungssperre Aus", "en": "Ventilation lock Off"},
+        "description": {
+          "de": "Beim Schließen des Schließerkontaktes wird die Lüftungssperre (Sicherheit) deaktiviert.",
+          "en": "Closing the shutter contact will deactivate the ventilation lock (security).",
+          "tr": "Kilit kontagi kapatildiginda havalandirma kilidi (güvenlik) devre disi birakilir."
+        },
+        "params": {"SHORT_JT_OFF": {"kind": "fixed", "value": 2}, "SHORT_JT_ON": {"kind": "fixed", "value": 2}}
+      },
+      {
+        "id": 3,
+        "key": "security_toggle",
+        "name": {"de": "Lüftungssperre Ein / Aus", "en": "Ventilation lock On / Off"},
+        "description": {
+          "de": "Beim Schließen des Schließerkontaktes wird die Lüftungssperre (Sicherheit) aktiviert. Beim Öffnen des Schließerkontaktes wird die Lüftungssperre deaktiviert.",
+          "en": "Closing the shutter contact will activate the ventilation lock (security). Opening the shutter contact will deactivate the ventilation lock",
+          "tr": "Kilit kontagi kapatildiginda havalandirma kilidi (güvenlik) etkinlestirilir. Kilit kontagi acildiginda havalandirma kilidi devre disi birakilir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 4,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Diese Direktverknüpfung wird deaktiviert.",
+          "en": "This direct link is deactivated.",
+          "tr": "Bu direkt baglanti devre disi birakilir."
+        },
+        "params": {"SHORT_JT_OFF": {"kind": "fixed", "value": 0}, "SHORT_JT_ON": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "SWITCH_INTERFACE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "security_on",
+        "name": {"de": "Lüftungssperre Ein", "en": "Ventilation lock On"},
+        "description": {
+          "de": "Beim Betätigen des Schalters, wird die Lüftungssperre (Sicherheit) aktiviert.",
+          "en": "Toggling the switch will activate the ventilation lock (security).",
+          "tr": "Saltere basildiginda havalandirma kilidi (güvenlik) etkinlestirilir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 2,
+        "key": "security_off",
+        "name": {"de": "Lüftungssperre Aus", "en": "Ventilation lock Off"},
+        "description": {
+          "de": "Beim Betätigen des Schalters, wird die Lüftungssperre (Sicherheit) deaktiviert.",
+          "en": "Toggling the switch will deactivate the ventilation lock (security).",
+          "tr": "Saltere basildiginda havalandirma kilidi (güvenlik) devre disi kalir."
+        },
+        "params": {"SHORT_JT_OFF": {"kind": "fixed", "value": 2}, "SHORT_JT_ON": {"kind": "fixed", "value": 2}}
+      },
+      {
+        "id": 3,
+        "key": "security_toggle",
+        "name": {"de": "Lüftungssperre Ein / Aus", "en": "Ventilation lock On / Off"},
+        "description": {
+          "de": "Beim Betätigen des Schalters wechselt der Zustand der Lüftungssperre (Sicherheit).",
+          "en": "Toggling the switch will change the state of the ventilation lock (security).",
+          "tr": "Saltere basildiginda havalandirma kilidinin (güvenlik) durumu degisir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 4,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Die Verknüpfung wird deaktiviert",
+          "en": "This direct link is deactivated.",
+          "tr": "Bu baglanti devre disi birakilir."
+        },
+        "params": {"SHORT_JT_OFF": {"kind": "fixed", "value": 0}, "SHORT_JT_ON": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "VIRTUAL_KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "security_on",
+        "name": {"de": "Lüftungssperre Ein", "en": "Ventilation lock On"},
+        "description": {
+          "de": "Mit einem Tastendruck wird die Lüftungssperre (Sicherheit) aktiviert.",
+          "en": "A keystroke will activate the ventilation lock (security).",
+          "tr": "Havalandirma kilidi (güvenlik) tusa bir kere basildiginda etkinlesir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 2,
+        "key": "security_off",
+        "name": {"de": "Lüftungssperre Aus", "en": "Ventilation lock Off"},
+        "description": {
+          "de": "Mit einem Tastendruck wird die Lüftungssperre (Sicherheit) deaktiviert.",
+          "en": "A keystroke will deactivate the ventilation lock (security).",
+          "tr": "Havalandirma kilidi (güvenlik) tusa bir kere basildiginda devre disi kalir."
+        },
+        "params": {"SHORT_JT_OFF": {"kind": "fixed", "value": 2}, "SHORT_JT_ON": {"kind": "fixed", "value": 2}}
+      },
+      {
+        "id": 3,
+        "key": "security_toggle",
+        "name": {"de": "Lüftungssperre Ein / Aus", "en": "Ventilation lock On / Off"},
+        "description": {
+          "de": "Mit einem Tastendruck wird der Zustand der Lüftungssperre (Sicherheit) umgekehrt.",
+          "en": "A keystroke will change the state of the ventilation lock (security).",
+          "tr": "Havalandirma kilidinin durumu (güvenlik) tusa bir kere basildiginda tersine cevrilir."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 4,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Diese Direktverknüpfung wird deaktiviert.",
+          "en": "This direct link is deactivated.",
+          "tr": "Bu direkt baglanti devre disi birakilir."
+        },
+        "params": {"SHORT_JT_OFF": {"kind": "fixed", "value": 0}, "SHORT_JT_ON": {"kind": "fixed", "value": 0}}
+      }
+    ],
+    "WEATHER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "security_on",
+        "name": {"de": "Lüftungssperre Ein", "en": "Ventilation lock On"},
+        "description": {
+          "de": "Wird die eingestellte Windstärke überschritten, wird die Lüftungssperre (Sicherheit) aktiviert.",
+          "en": "When the entered wind strength is reached, the ventilation lock (security) will be activated.",
+          "tr": "Ayarlanan rüzgar siddeti asilirsa havalandirma kilidi (güvenlik) etkinlesir."
+        },
+        "params": {
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1}
+        }
+      },
+      {
+        "id": 2,
+        "key": "security_off",
+        "name": {"de": "Lüftungssperre Aus", "en": "Ventilation lock Off"},
+        "description": {
+          "de": "Wird die eingestellte Windstärke unterschritten, wird die Lüftungssperre (Sicherheit) deaktiviert.",
+          "en": "Below the entered wind strength, the ventilation lock (security) will be deactivated.",
+          "tr": "Ayarlanan rüzgar siddetine ulasilmazsa havalandirma kilidi (güvenlik) devre disi kalir."
+        },
+        "params": {
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2}
+        }
+      },
+      {
+        "id": 3,
+        "key": "security_toggle",
+        "name": {"de": "Lüftungssperre Ein / Aus", "en": "Ventilation lock On / Off"},
+        "description": {
+          "de": "Wird die eingestellte Windstärke überschritten, wird die Lüftungssperre (Sicherheit) aktiviert. Wird die Windstärke wieder unterschritten, wird die Lüftungssperre (Sicherheit) deaktiviert.",
+          "en": "When the entered wind strength is reached, the ventilation lock (security) will be activated. Below the entered wind strength, the ventilation lock (security) will be deactivated again.",
+          "tr": "Ayarlanan rüzgar siddeti asilirsa havalandirma kilidi (güvenlik) etkinlesir. Ayarlanan rüzgar siddetine yine ulasilmazsa havalandirma kilidi (güvenlik) devre disi kalir."
+        },
+        "params": {
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2}
+        }
+      },
+      {
+        "id": 4,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Diese Direktverknüpfung wird deaktiviert.",
+          "en": "This direct link is deactivated.",
+          "tr": "Bu direkt baglanti devre disi birakilir."
+        },
+        "params": {}
+      }
+    ]
+  },
+  "senderMetadata": {
+    "KEY": {"parameterOrder": ["SHORT_ON_TIME"], "optionPresets": {"SHORT_ON_TIME": "LENGTH_OF_STAY"}},
+    "RAINDETECTOR": {"parameterOrder": ["SHORT_ON_TIME"], "optionPresets": {"SHORT_ON_TIME": "LENGTH_OF_STAY"}},
+    "SHUTTER_CONTACT": {"parameterOrder": ["SHORT_ON_TIME"], "optionPresets": {"SHORT_ON_TIME": "LENGTH_OF_STAY"}},
+    "SWITCH_INTERFACE": {"parameterOrder": ["SHORT_ON_TIME"], "optionPresets": {"SHORT_ON_TIME": "LENGTH_OF_STAY"}},
+    "VIRTUAL_KEY": {"parameterOrder": ["SHORT_ON_TIME"], "optionPresets": {"SHORT_ON_TIME": "LENGTH_OF_STAY"}}
+  }
+}

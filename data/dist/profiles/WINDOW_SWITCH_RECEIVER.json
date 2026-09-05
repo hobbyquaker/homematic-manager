@@ -1,0 +1,134 @@
+{
+  "receiverType": "WINDOW_SWITCH_RECEIVER",
+  "senders": {
+    "KEY": [
+      {
+        "id": 0,
+        "key": "no_profile",
+        "name": {"de": "Experte", "en": "Expert"},
+        "description": {"de": "no"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "no_profile",
+        "name": {"de": "Profile 1", "en": "Profile 1"},
+        "description": {"de": "NIL", "en": "NIL", "tr": "NIL"},
+        "params": {}
+      }
+    ],
+    "ROTARY_HANDLE_SENSOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "temperature_lowering_value",
+        "name": {"de": "Absenktemperatur", "en": "Reduction temperature"},
+        "description": {
+          "de": "Beim Öffnen des Fensters wird die Temperatur auf die Absenktemperatur eingestellt.",
+          "en": "When the window is opened the reduction temperature will be activated.",
+          "tr": "Pencere acildiginda düsürme sicakligi etkinlesir."
+        },
+        "params": {"TEMPERATUR_WINDOW_OPEN_VALUE": {"kind": "range", "min": 6, "max": 30, "default": 12}}
+      }
+    ],
+    "SENSOR_WINDOW": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "temperature_lowering_value",
+        "name": {"de": "Absenktemperatur", "en": "Reduction temperature"},
+        "description": {
+          "de": "Beim Öffnen des Kontaktes wird die Temperatur auf die Absenktemperatur eingestellt.",
+          "en": "When the window is opened the reduction temperature will be activated.",
+          "tr": "Pencere acildiginda düsürme sicakligi etkinlesir."
+        },
+        "params": {"TEMPERATUR_WINDOW_OPEN_VALUE": {"kind": "range", "min": 5, "max": 30, "default": 12}}
+      }
+    ],
+    "SHUTTER_CONTACT": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "temperature_lowering_value",
+        "name": {"de": "Absenktemperatur", "en": "Reduction temperature:"},
+        "description": {
+          "de": "Beim Öffnen des Kontakts wird die Absenktemperatur aktiviert.",
+          "en": "When the contact is opened the reduction temperature will be activated.",
+          "tr": "Kontak acildiginda düsürme sicakligi etkinlesir."
+        },
+        "params": {"TEMPERATUR_WINDOW_OPEN_VALUE": {"kind": "range", "min": 5, "max": 30, "default": 12}}
+      }
+    ],
+    "TEMPLATE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "xxxx", "name": {"de": "xxxx", "en": "xxxx", "tr": "xxxx"}, "description": {}, "params": {}},
+      {"id": 2, "key": "yyyy", "name": {"de": "yyyy", "en": "yyyy", "tr": "yyyy"}, "description": {}, "params": {}}
+    ],
+    "TILT_SENSOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "temperature_lowering_value",
+        "name": {"de": "Absenktemperatur", "en": "Reduction temperature"},
+        "description": {
+          "de": "Beim Öffnen des Kontaktes wird die Temperatur auf die Absenktemperatur eingestellt.",
+          "en": "When the contact is opened the reduction temperature will be activated.",
+          "tr": "Kontak acildiginda düsürme sicakligi etkinlesir."
+        },
+        "params": {"TEMPERATUR_WINDOW_OPEN_VALUE": {"kind": "range", "min": 6, "max": 30, "default": 12}}
+      }
+    ],
+    "VIRTUAL_KEY": [
+      {
+        "id": 0,
+        "key": "no_profile",
+        "name": {"de": "Kein Profil vorhanden", "en": "No profile available"},
+        "description": {"de": "no"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "no_profile",
+        "name": {"de": "Kein Profil vorhanden", "en": "No profile available"},
+        "description": {"de": "no"},
+        "params": {}
+      }
+    ]
+  },
+  "senderMetadata": {
+    "ROTARY_HANDLE_SENSOR": {"parameterOrder": ["TEMPERATUR_WINDOW_OPEN_VALUE"]},
+    "SENSOR_WINDOW": {"parameterOrder": ["TEMPERATUR_WINDOW_OPEN_VALUE"]},
+    "SHUTTER_CONTACT": {"parameterOrder": ["TEMPERATUR_WINDOW_OPEN_VALUE"]},
+    "TILT_SENSOR": {"parameterOrder": ["TEMPERATUR_WINDOW_OPEN_VALUE"]}
+  }
+}

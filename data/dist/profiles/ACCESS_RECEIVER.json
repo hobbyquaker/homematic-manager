@@ -1,0 +1,841 @@
+{
+  "receiverType": "ACCESS_RECEIVER",
+  "senders": {
+    "ACCESS_TRANSCEIVER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das T%FCrschloss in den entgegengesetzten Zustand versetzt (verriegelt oder entriegelt/ge%F6ffnet).",
+          "en": "If authorisation is granted and the correct code is entered, the door lock is set to the opposite state (locked or unlocked/opened)."
+        },
+        "params": {
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "list", "values": [0, 1]},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "list", "values": [1, 3]},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_unlocked",
+        "name": {"de": "Entriegeln", "en": "Unlock"},
+        "description": {
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das T%FCrschloss entriegelt.",
+          "en": "If authorisation is granted and the correct code is entered, the door lock is unlocked."
+        },
+        "params": {
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_locked",
+        "name": {"de": "Verriegeln", "en": "Lock"},
+        "description": {
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das T%FCrschloss verriegelt.",
+          "en": "If authorisation is granted and the correct code is entered, the door lock is locked."
+        },
+        "params": {
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_open",
+        "name": {"de": "%D6ffnen", "en": "Open"},
+        "description": {
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird die T%FCr ge%F6ffnet.",
+          "en": "If authorisation is granted and the correct code is entered, the door is opened."
+        },
+        "params": {
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 5,
+        "key": "weeklyProgram",
+        "name": {"de": "Wochenprogramm", "en": "Weekly program"},
+        "description": {
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes kann das Wochenprogramm aktiviert/deaktiviert werden.",
+          "en": "If authorisation has been granted and the correct code has been entered, the weekly programme can be activated/deactivated."
+        },
+        "params": {
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]}
+        }
+      }
+    ],
+    "DISPLAY_INPUT_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "list", "values": [1, 3]},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "list", "values": [1, 3]},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_unlocked",
+        "name": {"de": "Entriegeln", "en": "Unlock"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_locked",
+        "name": {"de": "Verriegeln", "en": "Lock"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_open",
+        "name": {"de": "Öffnen", "en": "Opening"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 5,
+        "key": "weeklyProgram",
+        "name": {"de": "Wochenprogramm", "en": "Weekly program"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_JT_ON": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]}
+        }
+      }
+    ],
+    "DISPLAY_LEVEL_INPUT_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "list", "values": [1, 3]},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "list", "values": [1, 3]},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_unlocked",
+        "name": {"de": "Entriegeln", "en": "Unlock"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_locked",
+        "name": {"de": "Verriegeln", "en": "Lock"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_open",
+        "name": {"de": "Öffnen", "en": "Opening"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 5,
+        "key": "weeklyProgram",
+        "name": {"de": "Wochenprogramm", "en": "Weekly program"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_JT_ON": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]}
+        }
+      }
+    ],
+    "KEY_TRANSCEIVER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird das T%FCrschloss in den entgegengesetzten Zustand versetzt (verriegelt oder entriegelt/ge%F6ffnet).",
+          "en": "With a short or long button press, the door lock is set to the opposite status (locked or unlocked/opened)."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "list", "values": [1, 3]},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "list", "values": [1, 3]},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_unlocked",
+        "name": {"de": "Entriegeln", "en": "Unlock"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird das T%FCrschloss entriegelt.",
+          "en": "With a short or long button press, the door lock is unlocked."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_locked",
+        "name": {"de": "Verriegeln", "en": "Lock"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird das T%FCrschloss verriegelt.",
+          "en": "With a short or long button press, the door lock is locked."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_open",
+        "name": {"de": "%D6ffnen", "en": "Open"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird die T%FCr ge%F6ffnet.",
+          "en": "With a short or long button press, the door is opened."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 5,
+        "key": "weeklyProgram",
+        "name": {"de": "Wochenprogramm", "en": "Weekly program"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck kann das Wochenprogramm aktiviert/deaktiviert werden.",
+          "en": "The weekly programme can be activated/deactivated with a short or long key press."
+        },
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_JT_ON": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]}
+        }
+      }
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER": [
+      {"id": 0, "key": "profile_0", "name": {"de": "Experte", "en": "Expert"}, "description": {}, "params": {}}
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER_1": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "list", "values": [1, 3]},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "list", "values": [1, 3]},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_unlocked",
+        "name": {"de": "Entriegeln", "en": "Unlock"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_locked",
+        "name": {"de": "Verriegeln", "en": "Lock"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_open",
+        "name": {"de": "Öffnen", "en": "Opening"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 5,
+        "key": "weeklyProgram",
+        "name": {"de": "Wochenprogramm", "en": "Weekly program"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_JT_ON": {"kind": "fixed", "value": 0},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]}
+        }
+      }
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER_2": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_unlocked",
+        "name": {"de": "Entriegeln", "en": "Unlock"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_ON": {"kind": "fixed", "value": 1},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_locked",
+        "name": {"de": "Verriegeln", "en": "Lock"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_open",
+        "name": {"de": "Öffnen", "en": "Opening"},
+        "description": {},
+        "params": {
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 3},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_WP_OPTIONS": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER_3": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {},
+        "params": {
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "list", "values": [1, 3]},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_locked",
+        "name": {"de": "Verriegeln", "en": "Lock"},
+        "description": {},
+        "params": {
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SHUTTER_CONTACT": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "toggle",
+        "name": {"de": "Toggle", "en": "Toggle"},
+        "description": {
+          "de": "Beim Öffnen des Kontakts wird das T%FCrschloss in den entgegengesetzten Zustand versetzt (verriegelt oder entriegelt/ge%F6ffnet).",
+          "en": "When the contact is opened, the door lock is set to the opposite status (locked or unlocked/opened)."
+        },
+        "params": {
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "list", "values": [1, 3]},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_locked",
+        "name": {"de": "Verriegeln", "en": "Lock"},
+        "description": {
+          "de": "Beim Schlie%DFen des Kontakts wird das T%FCrschloss verriegelt.",
+          "en": "When the contact is closed, the door lock is locked."
+        },
+        "params": {
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 150},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
+        }
+      }
+    ]
+  }
+}

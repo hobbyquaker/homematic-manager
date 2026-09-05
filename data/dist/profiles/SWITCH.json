@@ -1,0 +1,2975 @@
+{
+  "receiverType": "SWITCH",
+  "senders": {
+    "CAPACITIVE_FILLING_LEVEL_SENSOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "upperFillLevel",
+        "name": {"de": "Oberer Füllstand", "en": "Upper fill level"},
+        "description": {
+          "de": "Wenn der maximale Füllstand über- oder unterschritten wird, kann entsprechend geschaltet werden.",
+          "en": "When the maximum fill level will be exceeded or falls below switching can be performed accordingly.",
+          "tr": "Maksimum dolum seviyesi asildiginda veya buna ulasilamadiginda duruma göre anahtarlama yapilabilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "range", "min": 0, "max": 255, "default": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "range", "min": 0, "max": 255, "default": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "lowerFillLevel",
+        "name": {"de": "Unterer Füllstand", "en": "Lower fill level"},
+        "description": {
+          "de": "Wenn der minimale Füllstand über- oder unterschritten wird, kann entsprechend geschaltet werden.",
+          "en": "When the minimum fill level will be exceeded or falls below switching can be performed accordingly.",
+          "tr": "Minimum dolum seviyesi asildiginda veya buna ulasilamadiginda duruma göre anahtarlama yapilabilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "range", "min": 0, "max": 255, "default": 90},
+          "SHORT_COND_VALUE_LO": {"kind": "range", "min": 0, "max": 255, "default": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "CONDITION_CURRENT": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "CONDITION_FREQUENCY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "CONDITION_POWER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "CONDITION_VOLTAGE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Schalter ein", "en": "Switch - on"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die festgelegte Zeit eingeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "With a short or long button press the switch will be toggled on for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter belirlenen süre icin acik konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "LONG_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_off",
+        "name": {"de": "Schalter aus", "en": "Switch - off"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die festgelegte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "With a short or long button press the switch will be toggled off for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter belirlenen süre icin kapali konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 4},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "LONG_OFF_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "LONG_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "SHORT_OFF_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on_off",
+        "name": {"de": "Schalter ein / aus", "en": "Switch - on/off"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die festgelegte Zeit ein- oder ausgeschaltet (Toggle-Funktion). Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "With a short or long button press the switch will be toggled on or off for the set time (toggle function). If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun süre basarak salter belirlenen süre boyunca acilir veya kapatilir (Toggle fonksiyonu). Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "light_stairway",
+        "name": {"de": "Treppenhauslicht", "en": "Staircase light", "tr": "Merdiven boslugu isigi"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die festgelegte Zeit eingeschaltet.",
+          "en": "With a short or long button press the switch will be toggled on for the set time.",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter belirlenen süre icin acik konumuna getirilir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 300},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 300},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "MOD_EM8BIT_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "range", "min": 0, "max": 255, "default": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "range", "min": 0, "max": 255, "default": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "MOTION_DETECTOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {
+          "de": "Beim Auslösen des Sensors wird der Schalter mindestens für die eingestellte Zeit eingeschaltet. Ist eine Einschaltverzögerungszeit eingestellt, so wird der Schalter erst nach Ablauf dieser Zeit eingeschaltet.<br />",
+          "en": "When the sensor is triggered the switch will be switched on at least for the time set. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Sensör devreye girdiginde salter en azindan belirlenen süre boyunca acik kalir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "list", "values": [0, 1]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "list", "values": [100, 255]},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 255},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "list", "values": [0, 20]},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 108000, "default": 320},
+          "SHORT_ON_TIME_MODE": {"kind": "list", "values": [1, 0]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "light_stairway",
+        "name": {"de": "Treppenhauslicht", "en": "Staircase light", "tr": "Merdiven boslugu isigi"},
+        "description": {
+          "de": "Beim Auslösen des Sensors wird der Schalter mindestens für die eingestellte Zeit ohne Verzögerung eingeschaltet.<br />",
+          "en": "When the sensor is triggered the switch will be switched on without delay at least for the time set.",
+          "tr": "Sensör devreye girdiginde salter en azindan belirlenen süre boyunca gecikmesiz acik kalir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 255},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 108000, "default": 320},
+          "SHORT_ON_TIME_MODE": {"kind": "list", "values": [1, 0]}
+        }
+      },
+      {
+        "id": 3,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Der Bewegungsmelder ist außer Betrieb.",
+          "en": "The motion detector is not active.",
+          "tr": "Hareket alarmi etkin degil."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "PULSE_SENSOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {
+          "de": "Bei Senden des Schaltbefehls wird der Schalter für die eingestellte Zeit eingeschaltet. Ist eine Einschaltverzögerungszeit eingestellt, so wird der Schalter erst nach Ablauf dieser Zeit eingeschaltet.",
+          "en": "When the switching command is transmitted the switch will be switched on for the time set. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Degistirme komutu iletildiginde salter belirlenen süre boyunca acik kalir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {
+          "de": "Beim Senden des Schaltbefehls wird der Schalter für die eingestellte Zeit ausgeschaltet. Ist eine Ausschaltverzögerungszeit eingestellt, so wird der Schalter erst nach Ablauf dieser Zeit ausgeschaltet.",
+          "en": "When the switching command is transmitted the switch will be switched off for the time set. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Degistirme komutu iletildiginde salter belirlenen süre boyunca kapali kalir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {
+          "de": "Bei Senden des Schaltbefehls wird der Schalter für die eingestellte Zeit je nach aktuellem Zustand ein- oder ausgeschaltet (Togglefunktion).  Ist eine Ein- oder Ausschaltverzögerungszeit eingestellt, so wird der Schalter erst nach Ablauf dieser Zeit ein- bzw. ausgeschaltet.",
+          "en": "When the switching command is transmitted the switch will be switched on or off for the time set (toggle function). If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Degistirme komutu iletildiginde salter belirlenen süre boyunca acik veya kapali kalir (toogle fonksiyonu). Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "light_stairway",
+        "name": {"de": "Treppenhauslicht", "en": "Staircase light", "tr": "Merdiven boslugu isigi"},
+        "description": {
+          "de": "Bei Senden des Schaltbefehls wird der Schalter für die eingestellte Zeit eingeschaltet.",
+          "en": "When the switching command is transmitted the switch will be switched on for the time set.",
+          "tr": "Degistirme komutu iletildiginde salter en azindan belirlenen süre boyunca acik kalir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 300},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "RAINDETECTOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {
+          "de": "Bei Regen wird der Schalter für die eingestellte Zeit je nach gewählter Schaltrichtung geschaltet.",
+          "en": "In case of rain the light will be switched on to the defined brightness value, in case of dry conditions it will be switched off. This function can be reversed.",
+          "tr": "Yagmur yagdiginda salter ayarlanan süre boyunca istenen salter yönüne göre konumlandirilir. "
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {
+          "de": "Bei Regen wird der Schalter für die eingestellte Zeit geschaltet.",
+          "tr": "Yagmurlu havada salter ayarlanan süre boyunca acik kalir. "
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {
+          "de": "Bei Regen wird der Schalter für die eingestellte Zeit ausgeschaltet.",
+          "tr": "Yagmurlu havada salter ayarlanan süre boyunca kapali kalir. "
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "ROTARY_HANDLE_SENSOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {
+          "de": "Beim Öffnen des Schaltkontaktes wird der Schalter ein- und beim Schließen ausgeschaltet. Die Schaltzuordnung lässt sich auch umkehren.",
+          "en": "When the switch contact is opened the switch will be switched on and switched off when the contact is closed. This function can be reversed.",
+          "tr": "Salter kontagi acildiginda salter acilir ve kontak kapatildiginda da kapanir. Bu fonksiyon tersine de cevrilebilir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "change_signal",
+        "name": {"de": "Änderungssignal", "en": "Change signal", "tr": "Degistirme sinyali"},
+        "description": {
+          "de": "Bei ausgewählten Kontaktzustandswechseln wird der Schalter für eine bestimmte Zeit eingeschaltet.",
+          "en": "The switch will be switched on if the defined change signal is recognized.",
+          "tr": "Belirlenen degistirme sinyali algilandiginda salter acilir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SENSOR_FOR_CARBON_DIOXIDE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {
+          "de": "Bei erhöhtem CO2-Gehalt der Luft wird der Schalter für die eingestellte Zeit eingeschaltet.",
+          "en": "In case of increased CO2 concentrations in the room air the switch will be switched on for the set time.",
+          "tr": "Odadaki havanin CO2 orani yükselmisse salter belirlenen süre icin acilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 0},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 100},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "list", "values": [1, 2]},
+          "SHORT_JT_OFFDELAY": {"kind": "list", "values": [1, 2]},
+          "SHORT_JT_ON": {"kind": "list", "values": [1, 2]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [1, 2]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 1200},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "no_action",
+        "name": {"de": "keine Aktion", "en": "no action", "tr": "eylem yok"},
+        "description": {
+          "de": "Der CO2-Sensor ist außer Betrieb.",
+          "en": "The CO2 sensor is not active.",
+          "tr": "CO2 sensörü etkin degil."
+        },
+        "params": {
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SENSOR_WINDOW": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {
+          "de": "Beim Öffnen des Schaltkontaktes wird der Schalter ein- und beim Schließen ausgeschaltet. Die Schaltzuordnung lässt sich auch umkehren.",
+          "en": "When the contact is opened the switch will be switched on and switched off when the contact is closed. This function can be reversed.",
+          "tr": "Pencere acildiginda salter acilir ve kontak kapatildiginda da kapanir. Bu fonksiyon tersine de cevrilebilir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "change_signal",
+        "name": {"de": "Änderungssignal", "en": "Change signal", "tr": "Degistirme sinyali"},
+        "description": {
+          "de": "Bei Erkennung des Änderungssignals wird der Schalter für eine bestimmte Zeit eingeschaltet.",
+          "en": "The switch will be switched on for the time set if the change signal is recognized.",
+          "tr": "Degistirme sinyali algilandiginda salter belirlenen süre boyunca acik kalir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "list", "values": [1, 2]},
+          "SHORT_JT_OFFDELAY": {"kind": "list", "values": [1, 2]},
+          "SHORT_JT_ON": {"kind": "list", "values": [1, 2]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [1, 2]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SHUTTER_CONTACT": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Schalter ein / aus", "en": "Switch - on/off"},
+        "description": {
+          "de": "Beim Öffnen des Kontakts wird der Schalter ein- und beim Schließen ausgeschaltet. Diese Funktion lässt sich auch umkehren.",
+          "en": "When the contact is opened the switch will be switched on and switched off when the contact is closed. This function can be reversed.",
+          "tr": "Kontak acildiginda salter acilir ve kontak kapatildiginda da kapanir. Bu fonksiyon tersine de cevrilebilir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "change_signal",
+        "name": {"de": "Änderungssignal", "en": "Change signal", "tr": "Degistirme sinyali"},
+        "description": {
+          "de": "Beim Erkennen des Änderungssignals wird der Schalter für eine festgelegte Zeit eingeschaltet.",
+          "en": "The switch will be switched on for the time set if the change signal is recognized.",
+          "tr": "Degistirme sinyali algilandiginda salter belirlenen süre boyunca acik kalir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SMOKE_DETECTOR_TEAM": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {
+          "de": "Bei Feueralarm wird der Schalter für die eingestellte Zeit eingeschaltet. Wird der Alarm am auslösenden oder, wahlweise, einem Rauchmelder der gleichen Gruppe bestätigt, wird der Schalter ausgeschaltet.",
+          "en": "In case of fire alarm the switch will be switched on for the set time. If the alarm will be confirmed by the triggering device or a smoke detector of the same group the switch will be switched off.",
+          "tr": "Yangin alarmi durumunda salter, belirlenen süre boyunca acik kalir. Alarm, tetikleyenden ya da ayni gruptaki bir duman alarmindan onaylanirsa, salter tekrar kapanir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SMOKE_DETECTOR_TEAM_V2": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {
+          "de": "Bei Feueralarm wird der Schalter für die eingestellte Zeit eingeschaltet. Wird der Alarm am auslösenden oder, wahlweise, einem Rauchmelder der gleichen Gruppe bestätigt, wird der Schalter ausgeschaltet."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SWITCH": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Schalter ein", "en": "Switch - on"},
+        "description": {
+          "de": "Mit einem Druck auf die Gerätetaste wird der Schalter für die festgelegte Zeit eingeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "By pressing the device button the switch will be switched on for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Cihaz tusuna bir kere basilarak salter belirlenen süre icin acik konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "LONG_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_off",
+        "name": {"de": "Schalter aus", "en": "Switch - off"},
+        "description": {
+          "de": "Mit einem Druck auf die Gerätetaste wird der Schalter für die festgelegte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "By pressing the device button the switch will be switched off for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Cihaz tusuna bir kere basilarak salter belirlenen süre icin kapali konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 4},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "LONG_OFF_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "SHORT_OFF_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on_off",
+        "name": {"de": "Schalter ein / aus", "en": "Switch - on/off"},
+        "description": {
+          "de": "Mit einem Druck auf die Gerätetaste wird der Schalter für die festgelegte Zeit ein- oder ausgeschaltet (Toggle-Funktion). Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "en": "By pressing the device button the switch will be switched on or off for the set time (toggle function). If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Cihaz tusuna bir kere basilarak salter belirlenen süre icin acik veya kapali konumuna getirilir (Toggle fonksiyonu). Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "range", "min": 0, "max": 116000, "default": 0},
+          "LONG_OFF_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "LONG_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "range", "min": 0, "max": 116000, "default": 0},
+          "SHORT_OFF_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "light_stairway",
+        "name": {"de": "Treppenhauslicht", "en": "Staircase light", "tr": "Merdiven boslugu isigi"},
+        "description": {
+          "de": "Mit einem Druck auf die Gerätetaste wird der Schalter für die festgelegte Zeit eingeschaltet.",
+          "en": "By pressing the device button the switch will be switched on for the set time.",
+          "tr": "Cihaz tusuna bir kere basilarak salter belirlenen süre icin acik konumuna getirilir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 101},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "range", "min": 0, "max": 108000, "default": 300},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 108000, "default": 300},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SWITCH_INTERFACE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off_toggle",
+        "name": {"de": "Schalter ein / aus / Toggle", "en": "Switch - on/off/toggle"},
+        "description": {
+          "de": "Bei Betätigung des Schaltkontaktes wechselt der Schalter für die eingestellte Zeit in den entgegengesetzten Zustand.",
+          "en": "By pressing the switch contact the switch changes for the set time to the other status.",
+          "tr": "Salter kontagina basildiginda salter belirlenen süre boyunca diger duruma gecer."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "light_stairway",
+        "name": {"de": "Treppenhauslicht", "en": "Staircase light", "tr": "Merdiven boslugu isigi"},
+        "description": {
+          "de": "Bei Betätigung des Schaltkontaktes schaltet der Schalter das Licht für die eingestellte Zeit ein. Wird der Schaltkontakt während der EIN-Phase nochmal betätigt, beginnt die Zeitzählung von vorne.",
+          "en": "<span class=\"translated\">By pressing the switch contact the switch turns on the light for the set time. If the switch contact is pressed again while the light is switched on, the time count begins anew./span><br/><br/>",
+          "tr": "Salter kontagina basildiginda salter isigi belirlenen süre icin acar. Eger salter kontagina bir fazinda tekrar basilirsa, bastan baslar."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 300},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {
+          "de": "Bei Betätigung des Schaltkontaktes wird der Schalter für eine bestimmte Zeit eingeschaltet.",
+          "en": "By pressing the switch contact the switch will be switched on for a defined time set.",
+          "tr": "Salter kontagina basildiginda salter belirlenen süre boyunca acik kalir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {
+          "de": "Bei Betätigung des Schaltkontaktes wird der Schalter für eine bestimmte Zeit ausgeschaltet.",
+          "en": "By pressing the switch contact the switch will be switched off for a defined time set.",
+          "tr": "Salter kontagina basildiginda salter belirlenen süre boyunca kapali kalir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 5,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {
+          "de": "Der Schaltkontakt arbeitet als gewöhnlicher Schalter",
+          "en": "The switch contact operates like a normal switch ",
+          "tr": "SWI-3 normal salter seklinde calisir"
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "SWITCH_TRANSMIT": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die eingestellte Zeit eingeschaltet. Ist eine Einschaltverzögerungszeit eingestellt, so wird der Schalter erst nach Ablauf dieser Zeit eingeschaltet."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "TEMPLATE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "xxxx", "name": {"de": "xxxx", "en": "xxxx", "tr": "xxxx"}, "description": {}, "params": {}},
+      {"id": 2, "key": "yyyy", "name": {"de": "yyyy", "en": "yyyy", "tr": "yyyy"}, "description": {}, "params": {}}
+    ],
+    "TILT_SENSOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {
+          "de": "Beim Öffnen des Schaltkontaktes wird der Schalter ein- und beim Schließen ausgeschaltet. Die Schaltzuordnung lässt sich auch umkehren.",
+          "en": "When the switch contact is opened the switch will be switched on and switched off when the contact is closed. This function can be reversed.",
+          "tr": "Salter kontagi acildiginda salter acilir ve kontak kapatildiginda da kapanir. Bu fonksiyon tersine de cevrilebilir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "change_signal",
+        "name": {"de": "Änderungssignal", "en": "Change signal", "tr": "Degistirme sinyali"},
+        "description": {
+          "de": "Bei ausgewählten Kontaktzustandswechseln wird der Schalter für die eingestellte Zeit eingeschaltet.",
+          "en": "The switch will be switched on if the defined change signal is recognized.",
+          "tr": "Secilen degistirme sinyali algilandiginda salter acilir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "light_garage",
+        "name": {"de": "Garagenlicht", "en": "Garage light", "tr": "Garaj isigi"},
+        "description": {
+          "de": "Beim Öffnen des Garagentores wird der Schalter ein- und beim Schließen ausgeschaltet.",
+          "en": "When the garage door is opened the switch will be switched on and switched off when it is closed again.",
+          "tr": "Garaj kapisi acildiginda salter acilir ve kapi kapatildiginda da kapanir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 300},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "VIRTUAL_KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die eingestellte Zeit eingeschaltet. Ist eine Einschaltverzögerungszeit eingestellt, so wird der Schalter erst nach Ablauf dieser Zeit eingeschaltet.",
+          "en": "With a short or long button press the switch will be toggled on for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter belirlenen süre icin acik konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die eingestellte Zeit ausgeschaltet. Ist eine Ausschaltverzögerungszeit eingestellt, so wird der Schalter erst nach Ablauf dieser Zeit ausgeschaltet.",
+          "en": "With a short or long button press the switch will be toggled off for the set time. If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter belirlenen süre icin kapali konumuna getirilir. Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 4},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die eingestellte Zeit je nach aktuellem Zustand ein- oder ausgeschaltet (Togglefunktion). Ist eine Ein- oder Ausschaltverzögerungszeit eingestellt, so wird der Schalter erst nach Ablauf dieser Zeit ein- bzw. ausgeschaltet.",
+          "en": "With a short or long button press the switch will be toggled on or off for the set time (toggle function). If a delay is set switching will be performed after the delay time has expired.",
+          "tr": "Tusa kisa veya uzun süre basarak salter belirlenen süre boyunca acilir veya kapatilir (Toggle fonksiyonu). Bir gecikme süresi ayarlanmissa degistirme islemi bu süre dolduktan sonra gerceklesir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 4,
+        "key": "light_stairway",
+        "name": {"de": "Treppenhauslicht", "en": "Staircase light", "tr": "Merdiven boslugu isigi"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Schalter für die eingestellte Zeit eingeschaltet.",
+          "en": "With a short or long button press the switch will be toggled on for the set time.",
+          "tr": "Tusa kisa veya uzun bir süre basildiginda salter belirlenen süre icin acik konumuna getirilir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 300},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 300},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "WATERDETECTIONSENSOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {
+          "de": "Bei Feuchte wird der Schalter für die eingestellte Zeit eingeschaltet. Die Schaltzuordnung lässt sich auch umkehren.",
+          "en": "In case of humidity the switch will be switched on for the set time. This function can be reversed.",
+          "tr": "Nemli havada salter, belirlenen süre boyunca acik kalir. Bu fonksiyon tersine de cevrilebilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "change_signal",
+        "name": {"de": "Änderungssignal", "en": "Change signal", "tr": "Degistirme sinyali"},
+        "description": {
+          "de": "Bei Änderung der Feuchtigkeit wird der Schalter für die eingestellte Zeit eingeschaltet.",
+          "en": "When the humidity changes the switch will be switched on for the set time.",
+          "tr": "Nem orani degistiginde salter belirlenen süre boyunca acik kalir."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "WEATHER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {
+          "de": "Bei starkem Wind wird der Schalter ein- und bei schwachem Wind ausgeschaltet. Die Schaltzuordnung lässt sich auch umkehren.",
+          "en": "In case of strong winds the switch will be switched on. In case of light winds it will be switched off. This function can be reversed.",
+          "tr": "Siddetli rüzgar durumunda salter acilir, zayif rüzgarda ise kapatilir. Bu fonksiyon tersine de cevrilebilir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "list", "values": [100, 0]},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 200},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {
+          "de": "Wenn die eingestellte Windgeschwindigkeit erreicht wird, schaltet der Schalter für die eingestellte Zeit ein.",
+          "en": "When the defined wind velocity is reached the switch will be switched on for the time set.",
+          "tr": "Belirlenen rüzgar hizina ulasildiginda salter belirlenen süre boyunca acik kalir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "list", "values": [100, 0]},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 200},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "WEATHER_2": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on_off",
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
+        "description": {
+          "de": "Bei starkem Wind wird der Schalter ein- und bei schwachem Wind ausgeschaltet. Die Schaltzuordnung lässt sich auch umkehren."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "range", "min": 0, "max": 255, "default": 25},
+          "SHORT_COND_VALUE_LO": {"kind": "range", "min": 0, "max": 255, "default": 5},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {
+          "de": "Wenn die eingestellte Windgeschwindigkeit erreicht wird, schaltet der Schalter für die eingestellte Zeit ein."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "range", "min": 0, "max": 255, "default": 25},
+          "SHORT_COND_VALUE_LO": {"kind": "range", "min": 0, "max": 255, "default": 5},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ]
+  },
+  "senderMetadata": {
+    "CAPACITIVE_FILLING_LEVEL_SENSOR": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME", "SHORT_OFF_TIME"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      },
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 3, "SHORT_CT_OFFDELAY": 3, "SHORT_CT_ON": 1, "SHORT_CT_ONDELAY": 1}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 1, "SHORT_CT_OFFDELAY": 1, "SHORT_CT_ON": 3, "SHORT_CT_ONDELAY": 3}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 4,
+          "key": "subset_4",
+          "optionValue": 4,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        }
+      ]
+    },
+    "CONDITION_CURRENT": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME", "SHORT_OFF_TIME"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      }
+    },
+    "CONDITION_FREQUENCY": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME", "SHORT_OFF_TIME"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      }
+    },
+    "CONDITION_POWER": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME", "SHORT_OFF_TIME"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      }
+    },
+    "CONDITION_VOLTAGE": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME", "SHORT_OFF_TIME"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      }
+    },
+    "MOD_EM8BIT_TRANSMITTER": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME", "SHORT_OFF_TIME"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      },
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        }
+      ]
+    },
+    "RAINDETECTOR": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME", "SHORT_OFF_TIME"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      },
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        }
+      ]
+    },
+    "ROTARY_HANDLE_SENSOR": {
+      "parameterOrder": [
+        "SHORT_COND_VALUE_LO",
+        "SHORT_ONDELAY_TIME",
+        "SHORT_ON_TIME",
+        "SHORT_OFFDELAY_TIME",
+        "SHORT_OFF_TIME"
+      ],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      },
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 2,
+            "SHORT_CT_OFFDELAY": 2,
+            "SHORT_CT_ON": 2,
+            "SHORT_CT_ONDELAY": 2,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 4,
+          "key": "subset_4",
+          "optionValue": 4,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 4,
+            "SHORT_CT_OFFDELAY": 4,
+            "SHORT_CT_ON": 4,
+            "SHORT_CT_ONDELAY": 4,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 5,
+          "key": "subset_5",
+          "optionValue": 5,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 1,
+            "SHORT_CT_OFFDELAY": 1,
+            "SHORT_CT_ON": 1,
+            "SHORT_CT_ONDELAY": 1,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 6,
+          "key": "subset_6",
+          "optionValue": 6,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 0,
+            "SHORT_CT_OFFDELAY": 0,
+            "SHORT_CT_ON": 0,
+            "SHORT_CT_ONDELAY": 0,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 7,
+          "key": "subset_7",
+          "optionValue": 7,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 150,
+            "SHORT_CT_OFF": 5,
+            "SHORT_CT_OFFDELAY": 5,
+            "SHORT_CT_ON": 5,
+            "SHORT_CT_ONDELAY": 5,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        }
+      ]
+    },
+    "SENSOR_FOR_CARBON_DIOXIDE": {
+      "parameterOrder": ["SHORT_COND_VALUE_LO", "SHORT_ONDELAY_TIME", "SHORT_ON_TIME"],
+      "optionPresets": {"SHORT_ONDELAY_TIME": "DELAY", "SHORT_ON_TIME": "LENGTH_OF_STAY"}
+    },
+    "SENSOR_WINDOW": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME", "SHORT_OFF_TIME"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      },
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 4,
+          "key": "subset_4",
+          "optionValue": 4,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 5,
+          "key": "subset_5",
+          "optionValue": 5,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 5, "SHORT_CT_OFFDELAY": 5, "SHORT_CT_ON": 5, "SHORT_CT_ONDELAY": 5}
+        }
+      ]
+    },
+    "SHUTTER_CONTACT": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME", "SHORT_OFF_TIME"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      },
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 4,
+          "key": "subset_4",
+          "optionValue": 4,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 5,
+          "key": "subset_5",
+          "optionValue": 5,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 5, "SHORT_CT_OFFDELAY": 5, "SHORT_CT_ON": 5, "SHORT_CT_ONDELAY": 5}
+        }
+      ]
+    },
+    "SMOKE_DETECTOR_TEAM": {
+      "parameterOrder": ["SHORT_ON_TIME"],
+      "optionPresets": {"SHORT_ON_TIME": "LENGTH_OF_STAY"},
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_COND_VALUE_HI", "SHORT_COND_VALUE_LO", "SHORT_CT_ON"],
+          "values": {"SHORT_COND_VALUE_HI": 180, "SHORT_COND_VALUE_LO": 50, "SHORT_CT_ON": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_COND_VALUE_HI", "SHORT_COND_VALUE_LO", "SHORT_CT_ON"],
+          "values": {"SHORT_COND_VALUE_HI": 200, "SHORT_COND_VALUE_LO": 0, "SHORT_CT_ON": 4}
+        }
+      ]
+    },
+    "SMOKE_DETECTOR_TEAM_V2": {
+      "parameterOrder": ["SHORT_ON_TIME"],
+      "optionPresets": {"SHORT_ON_TIME": "LENGTH_OF_STAY"},
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_COND_VALUE_HI", "SHORT_COND_VALUE_LO", "SHORT_CT_ON"],
+          "values": {"SHORT_COND_VALUE_HI": 180, "SHORT_COND_VALUE_LO": 2, "SHORT_CT_ON": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_COND_VALUE_HI", "SHORT_COND_VALUE_LO", "SHORT_CT_ON"],
+          "values": {"SHORT_COND_VALUE_HI": 180, "SHORT_COND_VALUE_LO": 4, "SHORT_CT_ON": 4}
+        }
+      ]
+    },
+    "SWITCH_INTERFACE": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME", "SHORT_OFF_TIME"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      }
+    },
+    "TILT_SENSOR": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME", "SHORT_OFF_TIME"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      },
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 4,
+          "key": "subset_4",
+          "optionValue": 4,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 5,
+          "key": "subset_5",
+          "optionValue": 5,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 5, "SHORT_CT_OFFDELAY": 5, "SHORT_CT_ON": 5, "SHORT_CT_ONDELAY": 5}
+        }
+      ]
+    },
+    "WATERDETECTIONSENSOR": {
+      "parameterOrder": [
+        "SHORT_COND_VALUE_LO",
+        "SHORT_ONDELAY_TIME",
+        "SHORT_ON_TIME",
+        "SHORT_OFFDELAY_TIME",
+        "SHORT_OFF_TIME"
+      ],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      },
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 2,
+            "SHORT_CT_OFFDELAY": 2,
+            "SHORT_CT_ON": 2,
+            "SHORT_CT_ONDELAY": 2,
+            "SHORT_JT_OFF": 2,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 4,
+          "key": "subset_4",
+          "optionValue": 4,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 4,
+            "SHORT_CT_OFFDELAY": 4,
+            "SHORT_CT_ON": 4,
+            "SHORT_CT_ONDELAY": 4,
+            "SHORT_JT_OFF": 2,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 5,
+          "key": "subset_5",
+          "optionValue": 5,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 1,
+            "SHORT_CT_OFFDELAY": 1,
+            "SHORT_CT_ON": 1,
+            "SHORT_CT_ONDELAY": 1,
+            "SHORT_JT_OFF": 2,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 6,
+          "key": "subset_6",
+          "optionValue": 6,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 0,
+            "SHORT_CT_OFFDELAY": 0,
+            "SHORT_CT_ON": 0,
+            "SHORT_CT_ONDELAY": 0,
+            "SHORT_JT_OFF": 2,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 7,
+          "key": "subset_7",
+          "optionValue": 7,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 150,
+            "SHORT_CT_OFF": 5,
+            "SHORT_CT_OFFDELAY": 5,
+            "SHORT_CT_ON": 5,
+            "SHORT_CT_ONDELAY": 5,
+            "SHORT_JT_OFF": 2,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 8,
+          "key": "subset_8",
+          "optionValue": 8,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 2,
+            "SHORT_CT_OFFDELAY": 2,
+            "SHORT_CT_ON": 2,
+            "SHORT_CT_ONDELAY": 2,
+            "SHORT_JT_OFF": 4,
+            "SHORT_JT_OFFDELAY": 4,
+            "SHORT_JT_ON": 3,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 9,
+          "key": "subset_9",
+          "optionValue": 9,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 4,
+            "SHORT_CT_OFFDELAY": 4,
+            "SHORT_CT_ON": 4,
+            "SHORT_CT_ONDELAY": 4,
+            "SHORT_JT_OFF": 4,
+            "SHORT_JT_OFFDELAY": 4,
+            "SHORT_JT_ON": 4,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 10,
+          "key": "subset_10",
+          "optionValue": 10,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 1,
+            "SHORT_CT_OFFDELAY": 1,
+            "SHORT_CT_ON": 1,
+            "SHORT_CT_ONDELAY": 1,
+            "SHORT_JT_OFF": 4,
+            "SHORT_JT_OFFDELAY": 4,
+            "SHORT_JT_ON": 4,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 11,
+          "key": "subset_11",
+          "optionValue": 11,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 0,
+            "SHORT_CT_OFFDELAY": 0,
+            "SHORT_CT_ON": 0,
+            "SHORT_CT_ONDELAY": 0,
+            "SHORT_JT_OFF": 4,
+            "SHORT_JT_OFFDELAY": 4,
+            "SHORT_JT_ON": 4,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 12,
+          "key": "subset_12",
+          "optionValue": 12,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 150,
+            "SHORT_CT_OFF": 5,
+            "SHORT_CT_OFFDELAY": 5,
+            "SHORT_CT_ON": 5,
+            "SHORT_CT_ONDELAY": 5,
+            "SHORT_JT_OFF": 4,
+            "SHORT_JT_OFFDELAY": 4,
+            "SHORT_JT_ON": 4,
+            "SHORT_JT_ONDELAY": 0
+          }
+        }
+      ]
+    },
+    "WEATHER": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME", "SHORT_OFF_TIME"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      },
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        }
+      ]
+    },
+    "WEATHER_2": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME", "SHORT_OFF_TIME"],
+      "optionPresets": {
+        "SHORT_OFFDELAY_TIME": "DELAY",
+        "SHORT_OFF_TIME": "LENGTH_OF_STAY",
+        "SHORT_ONDELAY_TIME": "DELAY",
+        "SHORT_ON_TIME": "LENGTH_OF_STAY"
+      },
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 1, "SHORT_CT_ONDELAY": 1}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 1, "SHORT_CT_OFFDELAY": 1, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        }
+      ]
+    }
+  }
+}

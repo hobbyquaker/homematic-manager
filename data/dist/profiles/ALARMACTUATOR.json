@@ -1,0 +1,1723 @@
+{
+  "receiverType": "ALARMACTUATOR",
+  "senders": {
+    "CONDITION_CURRENT": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on_hi",
+        "name": {"de": "Alarm ein bei Überschreitung", "en": "Alarm activated if value is exceeded"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "alarm_on_lo",
+        "name": {"de": "Alarm ein bei Unterschreitung", "en": "Alarm activated if value falls below"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 3,
+        "key": "alarm_on",
+        "name": {"de": "Alarm scharf", "en": "Alarm armed"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 5},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 5},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 4,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm scharf / unscharf", "en": "Alarm armed / disarmed"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      }
+    ],
+    "CONDITION_FREQUENCY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on_hi",
+        "name": {"de": "Alarm ein bei Überschreitung", "en": "Alarm activated if value is exceeded"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "alarm_on_lo",
+        "name": {"de": "Alarm ein bei Unterschreitung", "en": "Alarm activated if value falls below"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 3,
+        "key": "alarm_on",
+        "name": {"de": "Alarm scharf", "en": "Alarm armed"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 5},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 5},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 4,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm scharf / unscharf", "en": "Alarm armed / disarmed"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      }
+    ],
+    "CONDITION_POWER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on_hi",
+        "name": {"de": "Alarm ein bei Überschreitung", "en": "Alarm activated if value is exceeded"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "alarm_on_lo",
+        "name": {"de": "Alarm ein bei Unterschreitung", "en": "Alarm activated if value falls below"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 3,
+        "key": "alarm_on",
+        "name": {"de": "Alarm scharf", "en": "Alarm armed"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 5},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 5},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 4,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm scharf / unscharf", "en": "Alarm armed / disarmed"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      }
+    ],
+    "CONDITION_VOLTAGE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on_hi",
+        "name": {"de": "Alarm ein bei Überschreitung", "en": "Alarm activated if value is exceeded"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "alarm_on_lo",
+        "name": {"de": "Alarm ein bei Unterschreitung", "en": "Alarm activated if value falls below"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 3,
+        "key": "alarm_on",
+        "name": {"de": "Alarm scharf", "en": "Alarm armed"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 5},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 5},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 5},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 4,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm scharf / unscharf", "en": "Alarm armed / disarmed"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 3},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      }
+    ],
+    "KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on",
+        "name": {"de": "Alarm ein", "en": "Alarm on"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Alarm für die gewählte Zeit eingeschaltet.<br />"
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "list", "values": [120, 300]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm ein / aus", "en": "Alarm on / off"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Alarm je nach aktuellem Zustand ein- oder ausgeschaltet (Togglefunktion)."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "LONG_JT_ON": {"kind": "list", "values": [3, 4]},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "LONG_ON_TIME": {"kind": "list", "values": [120, 300]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 3,
+        "key": "alarm_emergency_off",
+        "name": {"de": "Alarm NOT-Aus", "en": "Emergency alarm - Off"},
+        "description": {"de": "Mit einem kurzen oder langen Tastendruck wird der Alarm sofort ausgeschaltet."},
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 4},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "LONG_ON_TIME": {"kind": "list", "values": [120, 300]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      }
+    ],
+    "MOTION_DETECTOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on",
+        "name": {"de": "Alarm scharf", "en": "Alarm armed"},
+        "description": {
+          "de": "Beim Auslösen des Sensors wird der Alarm mindestens für die eingestellte Zeit eingeschaltet. Ist eine Einschaltverzögerungszeit eingestellt, so wird der Alarm erst nach Ablauf dieser Zeit eingeschaltet.<br />"
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "list", "values": [0, 1]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "range", "min": 0, "max": 255, "default": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 255},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "list", "values": [0, 20]},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]},
+          "SHORT_ON_TIME_MODE": {"kind": "list", "values": [1, 0]}
+        }
+      }
+    ],
+    "ROTARY_HANDLE_SENSOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm scharf / unscharf", "en": "Alarm armed / disarmed"},
+        "description": {
+          "de": "Beim Öffnen des Fensters wird der Alarm entsprechend der gewählten Schaltrichtung geschaltet."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "alarm_change",
+        "name": {"de": "Alarm bei Änderungssignal", "en": "Alarm on change signal"},
+        "description": {"de": "Bei Erkennung des gewählten Änderungssignals wird der Alarm eingeschaltet."},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 120}
+        }
+      }
+    ],
+    "SENSOR_WINDOW": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm scharf / unscharf", "en": "Alarm armed / disarmed"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [4, 3]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [4, 3]},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "alarm_on",
+        "name": {"de": "Alarm scharf", "en": "Alarm armed"},
+        "description": {},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      }
+    ],
+    "SHUTTER_CONTACT": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm ein / aus", "en": "Alarm on / off"},
+        "description": {
+          "de": "Beim Öffnen des Schaltkontaktes wird der Alarm für die gewählte Zeit eingeschaltet. Die Schaltrichtung lässt sich auch umkehren."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [4, 3]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [4, 3]},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "alarm_on",
+        "name": {"de": "Alarm ein", "en": "Alarm on"},
+        "description": {
+          "de": "Beim Öffnen des Schaltkontaktes wird der Alarm für die gewählte Zeit eingeschaltet. Die Schaltrichtung lässt sich auch umkehren."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 120}
+        }
+      }
+    ],
+    "SMOKE_DETECTOR_TEAM": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm scharf / unscharf", "en": "Alarm armed / disarmed"},
+        "description": {
+          "de": "Bei Feueralarm wird der Alarm für die eingestellte Zeit eingeschaltet. Wird der Alarm am auslösenden oder, wahlweise, einem Rauchmelder der gleichen Gruppe bestätigt, wird er ausgeschaltet."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      }
+    ],
+    "SMOKE_DETECTOR_TEAM_V2": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm scharf / unscharf", "en": "Alarm armed / disarmed"},
+        "description": {
+          "de": "Bei Feueralarm wird der Alarm für die eingestellte Zeit eingeschaltet. Wird der Alarm am auslösenden oder, wahlweise, einem Rauchmelder der gleichen Gruppe bestätigt, wird er ausgeschaltet."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      }
+    ],
+    "SWITCH_INTERFACE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm scharf / unscharf", "en": "Alarm armed / disarmed"},
+        "description": {
+          "de": "Bei Betätigung des Schaltkontaktes wird der Alarm je nach aktuellem Zustand ein- bzw. ausgeschaltet."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "alarm_on",
+        "name": {"de": "Alarm scharf", "en": "Alarm armed"},
+        "description": {
+          "de": "Bei Betätigung des Schaltkontaktes wird der Alarm für eine bestimmte Zeit eingeschaltet."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      },
+      {
+        "id": 3,
+        "key": "alarm_emergency_off",
+        "name": {"de": "Alarm NOT-Aus", "en": "Emergency alarm - Off"},
+        "description": {"de": "Bei Betätigung des Schaltkontaktes wird der Alarm sofort ausgeschaltet."},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4}
+        }
+      }
+    ],
+    "TEMPLATE": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {"id": 1, "key": "xxxx", "name": {"de": "xxxx", "en": "xxxx", "tr": "xxxx"}, "description": {}, "params": {}},
+      {"id": 2, "key": "yyyy", "name": {"de": "yyyy", "en": "yyyy", "tr": "yyyy"}, "description": {}, "params": {}}
+    ],
+    "TILT_SENSOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm scharf / unscharf", "en": "Alarm armed / disarmed"},
+        "description": {
+          "de": "Beim Öffnen des Garagentores wird der Alarm je nach aktuellem Zustand für die gewählte Zeit ein- bzw. ausgeschaltet. Die Schaltrichtung lässt sich auch umkehren."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "alarm_on",
+        "name": {"de": "Alarm scharf", "en": "Alarm armed"},
+        "description": {"de": "Bei Erkennung des gewählten Änderungssignals wird der Alarm eingeschaltet."},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 120}
+        }
+      }
+    ],
+    "VIRTUAL_KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on",
+        "name": {"de": "Alarm scharf", "en": "Alarm armed"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Alarm für die gewählte Zeit eingeschaltet.<br />"
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_ON": {"kind": "fixed", "value": 0},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "list", "values": [120, 300]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm scharf / unscharf", "en": "Alarm armed / disarmed"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Alarm je nach aktuellem Zustand ein- oder ausgeschaltet (Togglefunktion)."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "LONG_JT_ON": {"kind": "list", "values": [3, 4]},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "LONG_ON_TIME": {"kind": "list", "values": [120, 300]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 3,
+        "key": "alarm_emergency_off",
+        "name": {"de": "Alarm NOT-Aus", "en": "Emergency alarm - Off"},
+        "description": {"de": "Mit einem kurzen oder langen Tastendruck wird der Alarm sofort ausgeschaltet."},
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 4},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "LONG_ON_TIME": {"kind": "list", "values": [120, 300]},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      }
+    ],
+    "WATERDETECTIONSENSOR": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on_off",
+        "name": {"de": "Alarm scharf / unscharf", "en": "Alarm armed / disarmed"},
+        "description": {
+          "de": "Bei Feuchte wird der Alarm für die eingestellte Zeit eingeschaltet. Die Schaltzuordnung lässt sich auch umkehren."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "list", "values": [3, 4]},
+          "SHORT_JT_ONDELAY": {"kind": "list", "values": [3, 4]},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]}
+        }
+      },
+      {
+        "id": 2,
+        "key": "alarm_change",
+        "name": {"de": "Alarm bei Änderungssignal", "en": "Alarm on change signal"},
+        "description": {"de": "Bei Änderung der Feuchtigkeit wird der Alarm für die eingestellte Zeit eingeschaltet."},
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 180},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
+        }
+      }
+    ],
+    "WEATHER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on",
+        "name": {"de": "Alarm scharf", "en": "Alarm armed"},
+        "description": {
+          "de": "Wenn die eingestellte Windgeschwindigkeit erreicht wird, schaltet der Alarm für die eingestellte Zeit ein."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "list", "values": [0, 100]},
+          "SHORT_COND_VALUE_LO": {"kind": "list", "values": [50, 200]},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ],
+    "WEATHER_2": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "alarm_on",
+        "name": {"de": "Alarm scharf", "en": "Alarm armed"},
+        "description": {
+          "de": "Wenn die eingestellte Windgeschwindigkeit erreicht wird, schaltet der Alarm für die eingestellte Zeit ein."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_COND_VALUE_LO": {"kind": "range", "min": 0, "max": 255, "default": 0},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 1},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "list", "values": [120, 300]},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ]
+  },
+  "senderMetadata": {
+    "CONDITION_CURRENT": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME"],
+      "optionPresets": {"SHORT_OFFDELAY_TIME": "DELAY", "SHORT_ONDELAY_TIME": "DELAY", "SHORT_ON_TIME": "DELAY"}
+    },
+    "CONDITION_FREQUENCY": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME"],
+      "optionPresets": {"SHORT_OFFDELAY_TIME": "DELAY", "SHORT_ONDELAY_TIME": "DELAY", "SHORT_ON_TIME": "DELAY"}
+    },
+    "CONDITION_POWER": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME"],
+      "optionPresets": {"SHORT_OFFDELAY_TIME": "DELAY", "SHORT_ONDELAY_TIME": "DELAY", "SHORT_ON_TIME": "DELAY"}
+    },
+    "CONDITION_VOLTAGE": {
+      "parameterOrder": ["SHORT_ONDELAY_TIME", "SHORT_ON_TIME", "SHORT_OFFDELAY_TIME"],
+      "optionPresets": {"SHORT_OFFDELAY_TIME": "DELAY", "SHORT_ONDELAY_TIME": "DELAY", "SHORT_ON_TIME": "DELAY"}
+    },
+    "ROTARY_HANDLE_SENSOR": {
+      "parameterOrder": ["SHORT_COND_VALUE_LO", "SHORT_ON_TIME"],
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 2,
+            "SHORT_CT_OFFDELAY": 2,
+            "SHORT_CT_ON": 2,
+            "SHORT_CT_ONDELAY": 2,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 4,
+          "key": "subset_4",
+          "optionValue": 4,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 4,
+            "SHORT_CT_OFFDELAY": 4,
+            "SHORT_CT_ON": 4,
+            "SHORT_CT_ONDELAY": 4,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 5,
+          "key": "subset_5",
+          "optionValue": 5,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 1,
+            "SHORT_CT_OFFDELAY": 1,
+            "SHORT_CT_ON": 1,
+            "SHORT_CT_ONDELAY": 1,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 6,
+          "key": "subset_6",
+          "optionValue": 6,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 0,
+            "SHORT_CT_OFFDELAY": 0,
+            "SHORT_CT_ON": 0,
+            "SHORT_CT_ONDELAY": 0,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 7,
+          "key": "subset_7",
+          "optionValue": 7,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 150,
+            "SHORT_CT_OFF": 5,
+            "SHORT_CT_OFFDELAY": 5,
+            "SHORT_CT_ON": 5,
+            "SHORT_CT_ONDELAY": 5,
+            "SHORT_JT_OFF": 1,
+            "SHORT_JT_OFFDELAY": 2,
+            "SHORT_JT_ON": 2,
+            "SHORT_JT_ONDELAY": 0
+          }
+        }
+      ]
+    },
+    "SENSOR_WINDOW": {
+      "parameterOrder": ["SHORT_ON_TIME"],
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 5, "SHORT_CT_OFFDELAY": 5, "SHORT_CT_ON": 5, "SHORT_CT_ONDELAY": 5}
+        }
+      ]
+    },
+    "SHUTTER_CONTACT": {
+      "parameterOrder": ["SHORT_ON_TIME"],
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 5, "SHORT_CT_OFFDELAY": 5, "SHORT_CT_ON": 5, "SHORT_CT_ONDELAY": 5}
+        }
+      ]
+    },
+    "SMOKE_DETECTOR_TEAM": {
+      "parameterOrder": ["SHORT_ON_TIME"],
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_COND_VALUE_HI", "SHORT_COND_VALUE_LO", "SHORT_CT_ON"],
+          "values": {"SHORT_COND_VALUE_HI": 180, "SHORT_COND_VALUE_LO": 50, "SHORT_CT_ON": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_COND_VALUE_HI", "SHORT_COND_VALUE_LO", "SHORT_CT_ON"],
+          "values": {"SHORT_COND_VALUE_HI": 200, "SHORT_COND_VALUE_LO": 0, "SHORT_CT_ON": 4}
+        }
+      ]
+    },
+    "SMOKE_DETECTOR_TEAM_V2": {
+      "parameterOrder": ["SHORT_ON_TIME"],
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_COND_VALUE_HI", "SHORT_COND_VALUE_LO", "SHORT_CT_ON"],
+          "values": {"SHORT_COND_VALUE_HI": 180, "SHORT_COND_VALUE_LO": 2, "SHORT_CT_ON": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_COND_VALUE_HI", "SHORT_COND_VALUE_LO", "SHORT_CT_ON"],
+          "values": {"SHORT_COND_VALUE_HI": 180, "SHORT_COND_VALUE_LO": 4, "SHORT_CT_ON": 4}
+        }
+      ]
+    },
+    "SWITCH_INTERFACE": {"parameterOrder": ["SHORT_ON_TIME"]},
+    "TILT_SENSOR": {
+      "parameterOrder": ["SHORT_ON_TIME"],
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 4,
+          "key": "subset_4",
+          "optionValue": 4,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 5,
+          "key": "subset_5",
+          "optionValue": 5,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 5, "SHORT_CT_OFFDELAY": 5, "SHORT_CT_ON": 5, "SHORT_CT_ONDELAY": 5}
+        }
+      ]
+    },
+    "WATERDETECTIONSENSOR": {
+      "parameterOrder": ["SHORT_COND_VALUE_LO", "SHORT_ON_TIME"],
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        },
+        {
+          "id": 3,
+          "key": "subset_3",
+          "optionValue": 3,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 2,
+            "SHORT_CT_OFFDELAY": 2,
+            "SHORT_CT_ON": 2,
+            "SHORT_CT_ONDELAY": 2,
+            "SHORT_JT_OFF": 2,
+            "SHORT_JT_OFFDELAY": 0,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 2
+          }
+        },
+        {
+          "id": 4,
+          "key": "subset_4",
+          "optionValue": 4,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 4,
+            "SHORT_CT_OFFDELAY": 4,
+            "SHORT_CT_ON": 4,
+            "SHORT_CT_ONDELAY": 4,
+            "SHORT_JT_OFF": 2,
+            "SHORT_JT_OFFDELAY": 0,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 2
+          }
+        },
+        {
+          "id": 5,
+          "key": "subset_5",
+          "optionValue": 5,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 1,
+            "SHORT_CT_OFFDELAY": 1,
+            "SHORT_CT_ON": 1,
+            "SHORT_CT_ONDELAY": 1,
+            "SHORT_JT_OFF": 2,
+            "SHORT_JT_OFFDELAY": 0,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 2
+          }
+        },
+        {
+          "id": 6,
+          "key": "subset_6",
+          "optionValue": 6,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 0,
+            "SHORT_CT_OFFDELAY": 0,
+            "SHORT_CT_ON": 0,
+            "SHORT_CT_ONDELAY": 0,
+            "SHORT_JT_OFF": 2,
+            "SHORT_JT_OFFDELAY": 0,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 2
+          }
+        },
+        {
+          "id": 7,
+          "key": "subset_7",
+          "optionValue": 7,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 150,
+            "SHORT_CT_OFF": 5,
+            "SHORT_CT_OFFDELAY": 5,
+            "SHORT_CT_ON": 5,
+            "SHORT_CT_ONDELAY": 5,
+            "SHORT_JT_OFF": 2,
+            "SHORT_JT_OFFDELAY": 0,
+            "SHORT_JT_ON": 0,
+            "SHORT_JT_ONDELAY": 2
+          }
+        },
+        {
+          "id": 8,
+          "key": "subset_8",
+          "optionValue": 8,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 2,
+            "SHORT_CT_OFFDELAY": 2,
+            "SHORT_CT_ON": 2,
+            "SHORT_CT_ONDELAY": 2,
+            "SHORT_JT_OFF": 4,
+            "SHORT_JT_OFFDELAY": 4,
+            "SHORT_JT_ON": 4,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 9,
+          "key": "subset_9",
+          "optionValue": 9,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 4,
+            "SHORT_CT_OFFDELAY": 4,
+            "SHORT_CT_ON": 4,
+            "SHORT_CT_ONDELAY": 4,
+            "SHORT_JT_OFF": 4,
+            "SHORT_JT_OFFDELAY": 4,
+            "SHORT_JT_ON": 4,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 10,
+          "key": "subset_10",
+          "optionValue": 10,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 1,
+            "SHORT_CT_OFFDELAY": 1,
+            "SHORT_CT_ON": 1,
+            "SHORT_CT_ONDELAY": 1,
+            "SHORT_JT_OFF": 4,
+            "SHORT_JT_OFFDELAY": 4,
+            "SHORT_JT_ON": 4,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 11,
+          "key": "subset_11",
+          "optionValue": 11,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 50,
+            "SHORT_CT_OFF": 0,
+            "SHORT_CT_OFFDELAY": 0,
+            "SHORT_CT_ON": 0,
+            "SHORT_CT_ONDELAY": 0,
+            "SHORT_JT_OFF": 4,
+            "SHORT_JT_OFFDELAY": 4,
+            "SHORT_JT_ON": 4,
+            "SHORT_JT_ONDELAY": 0
+          }
+        },
+        {
+          "id": 12,
+          "key": "subset_12",
+          "optionValue": 12,
+          "params": [
+            "SHORT_COND_VALUE_LO",
+            "SHORT_CT_OFF",
+            "SHORT_CT_OFFDELAY",
+            "SHORT_CT_ON",
+            "SHORT_CT_ONDELAY",
+            "SHORT_JT_OFF",
+            "SHORT_JT_OFFDELAY",
+            "SHORT_JT_ON",
+            "SHORT_JT_ONDELAY"
+          ],
+          "values": {
+            "SHORT_COND_VALUE_LO": 150,
+            "SHORT_CT_OFF": 5,
+            "SHORT_CT_OFFDELAY": 5,
+            "SHORT_CT_ON": 5,
+            "SHORT_CT_ONDELAY": 5,
+            "SHORT_JT_OFF": 4,
+            "SHORT_JT_OFFDELAY": 4,
+            "SHORT_JT_ON": 4,
+            "SHORT_JT_ONDELAY": 0
+          }
+        }
+      ]
+    },
+    "WEATHER": {
+      "subsets": [
+        {
+          "id": 1,
+          "key": "subset_1",
+          "optionValue": 1,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 2, "SHORT_CT_OFFDELAY": 2, "SHORT_CT_ON": 0, "SHORT_CT_ONDELAY": 0}
+        },
+        {
+          "id": 2,
+          "key": "subset_2",
+          "optionValue": 2,
+          "params": ["SHORT_CT_OFF", "SHORT_CT_OFFDELAY", "SHORT_CT_ON", "SHORT_CT_ONDELAY"],
+          "values": {"SHORT_CT_OFF": 0, "SHORT_CT_OFFDELAY": 0, "SHORT_CT_ON": 2, "SHORT_CT_ONDELAY": 2}
+        }
+      ]
+    }
+  }
+}

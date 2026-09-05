@@ -1,0 +1,21 @@
+{
+  "receiverType": "HEATING_CLIMATECONTROL_CL_RECEIVER",
+  "senders": {
+    "HEATING_CLIMATECONTROL_CL_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "no_profile",
+        "name": {"de": "Experte", "en": "Expert"},
+        "description": {"de": "no"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "no_profile",
+        "name": {"de": "Profile 1", "en": "Profile 1"},
+        "description": {"de": "no"},
+        "params": {}
+      }
+    ]
+  }
+}

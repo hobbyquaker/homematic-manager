@@ -1,0 +1,21 @@
+{
+  "receiverType": "WS_TH",
+  "senders": {
+    "WEATHER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "no"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "no_profile",
+        "name": {"de": "Profile 1", "en": "Profile 1"},
+        "description": {"de": "no"},
+        "params": {}
+      }
+    ]
+  }
+}

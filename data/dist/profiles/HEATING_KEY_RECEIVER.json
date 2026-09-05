@@ -1,0 +1,621 @@
+{
+  "receiverType": "HEATING_KEY_RECEIVER",
+  "senders": {
+    "DISPLAY_INPUT_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_temp",
+        "name": {"de": "Gewünschte Temperatur", "en": "Desired temperature"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "list", "values": [6, 0]},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 6},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_auto",
+        "name": {"de": "Auto-Modus", "en": "Auto mode"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 1},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 1},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_manu",
+        "name": {"de": "Manu-Modus", "en": "Manu mode"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 5},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 5},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 10},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 10},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 5,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 9},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 9},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 6,
+        "key": "boost_on_off",
+        "name": {"de": "Boostmodus \"ein \\ aus\"", "en": "Boost mode \"on \\ off\""},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 8},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 8},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      }
+    ],
+    "DISPLAY_LEVEL_INPUT_TRANSMITTER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_temp",
+        "name": {"de": "Gewünschte Temperatur", "en": "Desired temperature"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "list", "values": [6, 0]},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 6},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_auto",
+        "name": {"de": "Auto-Modus", "en": "Auto mode"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 1},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 1},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_manu",
+        "name": {"de": "Manu-Modus", "en": "Manu mode"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 5},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 5},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 10},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 10},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 5,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 9},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 9},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 6,
+        "key": "boost_on_off",
+        "name": {"de": "Boostmodus \"ein \\ aus\"", "en": "Boost mode \"on \\ off\""},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 8},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 8},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      }
+    ],
+    "KEY_TRANSCEIVER": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_temp",
+        "name": {"de": "Gewünschte Temperatur", "en": "Desired temperature"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "list", "values": [6, 0]},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 6},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_auto",
+        "name": {"de": "Auto-Modus", "en": "Auto mode"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Auto-Modus gewählt.",
+          "en": "With a short or long button press the auto mode will be selected."
+        },
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 1},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 1},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_manu",
+        "name": {"de": "Manu-Modus", "en": "Manu mode"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Manu-Modus gewählt.",
+          "en": "With a short or long button press the manu mode will be selected."
+        },
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 5},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 5},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_off",
+        "name": {"de": "Thermostat \"aus\"", "en": "Thermostat \"off\""},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Thermostat ausgeschaltet.",
+          "en": "With a short or long button press the thermostat will be switched off."
+        },
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 10},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 10},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 5,
+        "key": "switch_on",
+        "name": {"de": "Thermostat \"ein\"", "en": "Thermostat \"on\""},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Thermostat eingeschaltet..",
+          "en": "With a short or long button press the thermostat will be switched on."
+        },
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 9},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 9},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 6,
+        "key": "boost_on_off",
+        "name": {"de": "Boostmodus \"ein \\\\ aus\"", "en": "Boost mode \"on \\\\ off\""},
+        "description": {
+          "de": "Mit einem kurzen  oder langen Tastendruck wird der Boostmodus ein- bzw. ausgeschaltet..",
+          "en": "With a short or long button press the boost mode will be switched on or off."
+        },
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 8},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 8},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      }
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER": [
+      {"id": 0, "key": "profile_0", "name": {"de": "Experte", "en": "Expert"}, "description": {}, "params": {}}
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER_1": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_temp",
+        "name": {"de": "Gewünschte Temperatur", "en": "Desired temperature"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "list", "values": [6, 0]},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 6},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_auto",
+        "name": {"de": "Auto-Modus", "en": "Auto mode"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 1},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 1},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_manu",
+        "name": {"de": "Manu-Modus", "en": "Manu mode"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 5},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 5},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 10},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 10},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 5,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 9},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 9},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 6,
+        "key": "boost_on_off",
+        "name": {"de": "Boostmodus \"ein \\ aus\"", "en": "Boost mode \"on \\ off\""},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 8},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 8},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      }
+    ],
+    "MULTI_MODE_INPUT_TRANSMITTER_2": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_temp",
+        "name": {"de": "Gewünschte Temperatur", "en": "Desired temperature"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "list", "values": [6, 0]},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 6},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_auto",
+        "name": {"de": "Auto-Modus", "en": "Auto mode"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 1},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 1},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_manu",
+        "name": {"de": "Manu-Modus", "en": "Manu mode"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 5},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 5},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 4,
+        "key": "switch_off",
+        "name": {"de": "Fenster schließen", "en": "Close window"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 10},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 10},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 5,
+        "key": "switch_on",
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 9},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 9},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      },
+      {
+        "id": 6,
+        "key": "boost_on_off",
+        "name": {"de": "Boostmodus \"ein \\ aus\"", "en": "Boost mode \"on \\ off\""},
+        "description": {},
+        "params": {
+          "LONG_CONTROL_MODE_RC": {"kind": "fixed", "value": 8},
+          "LONG_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "LONG_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "LONG_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17},
+          "SHORT_CONTROL_MODE_RC": {"kind": "fixed", "value": 8},
+          "SHORT_DELTA_TEMPERATURE": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
+          "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
+          "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
+        }
+      }
+    ]
+  },
+  "senderMetadata": {
+    "DISPLAY_INPUT_TRANSMITTER": {
+      "parameterOrder": ["SHORT_TEMPERATURE_RC", "LONG_CONTROL_MODE_RC", "LONG_TEMPERATURE_RC"]
+    },
+    "DISPLAY_LEVEL_INPUT_TRANSMITTER": {
+      "parameterOrder": ["SHORT_TEMPERATURE_RC", "LONG_CONTROL_MODE_RC", "LONG_TEMPERATURE_RC"]
+    },
+    "KEY_TRANSCEIVER": {"parameterOrder": ["SHORT_TEMPERATURE_RC", "LONG_CONTROL_MODE_RC", "LONG_TEMPERATURE_RC"]},
+    "MULTI_MODE_INPUT_TRANSMITTER_1": {
+      "parameterOrder": ["SHORT_TEMPERATURE_RC", "LONG_CONTROL_MODE_RC", "LONG_TEMPERATURE_RC"]
+    },
+    "MULTI_MODE_INPUT_TRANSMITTER_2": {"parameterOrder": ["SHORT_TEMPERATURE_RC"]}
+  }
+}

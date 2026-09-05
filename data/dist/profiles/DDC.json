@@ -1,0 +1,137 @@
+{
+  "receiverType": "DDC",
+  "senders": {
+    "KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "switch_on",
+        "name": {"de": "Tür auf", "en": "Door closed"},
+        "description": {
+          "de": "Mit einem kurzen Tastendruck wird die Tür geöffnet. Ein langer Tastendruck führt die Funktion Tür Auf / AUTO zu aus.",
+          "en": "With a short button press the door will be opened. A long button press will activate the function Door open / AUTO closed.",
+          "tr": "Tusa kisa süre basildiginda kapi acilir. Tusa uzun süre basildiginda <b>Kapiyi ac / OTOMATIK kapat<b> fonksiyonunu uygular."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 1},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "LONG_JT_ON": {"kind": "fixed", "value": 2},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 2,
+        "key": "switch_off",
+        "name": {"de": "Tür zu", "en": "Door open"},
+        "description": {
+          "de": "Mit einem kurzen Tastendruck wird die Tür geschlossen. Ein langer Tastendruck führt die Funktion Tür Auf / AUTO zu aus.",
+          "en": "With a short button press the door will be closed. A long button press will activate the function Door open / AUTO closed.",
+          "tr": "Tusa kisa süre basildiginda kapi kapanir. Tusa uzun süre basildiginda <b>Kapiyi ac / OTOMATIK kapat<b> fonksiyonunu uygular."
+        },
+        "params": {
+          "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "LONG_CT_OFF": {"kind": "fixed", "value": 0},
+          "LONG_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "LONG_CT_ON": {"kind": "fixed", "value": 0},
+          "LONG_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "LONG_JT_OFF": {"kind": "fixed", "value": 4},
+          "LONG_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "LONG_JT_ON": {"kind": "fixed", "value": 3},
+          "LONG_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "LONG_MULTIEXECUTE": {"kind": "fixed", "value": 1},
+          "LONG_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "LONG_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "LONG_ON_TIME": {"kind": "fixed", "value": 111600},
+          "LONG_ON_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 4},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 4},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      },
+      {
+        "id": 3,
+        "key": "switch_on_off",
+        "name": {"de": "Tür auf / AUTO zu", "en": "Door open / AUTO closed"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird die Tür geöffnet. Nach einer am Türantrieb einstellbaren Zeit, schießt die Tür selbständig.",
+          "en": "With a short or long button press the door will be opened. The door will be closed automatically according to a defined time that can be adjusted via the door lock drive.",
+          "tr": "Tusa kisa veya uzun süre basildiginda kapi acilir. Kapi tahrikinden ayarlanabilen bir süre dolduktan sonra kapi kendiliginden kapanir."
+        },
+        "params": {
+          "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+          "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 100},
+          "SHORT_COND_VALUE_LO": {"kind": "fixed", "value": 50},
+          "SHORT_CT_OFF": {"kind": "fixed", "value": 0},
+          "SHORT_CT_OFFDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ON": {"kind": "fixed", "value": 0},
+          "SHORT_CT_ONDELAY": {"kind": "fixed", "value": 0},
+          "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
+          "SHORT_JT_OFFDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ON": {"kind": "fixed", "value": 2},
+          "SHORT_JT_ONDELAY": {"kind": "fixed", "value": 2},
+          "SHORT_OFFDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_OFF_TIME": {"kind": "fixed", "value": 111600},
+          "SHORT_OFF_TIME_MODE": {"kind": "fixed", "value": 0},
+          "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
+          "SHORT_ON_TIME": {"kind": "fixed", "value": 0.5},
+          "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
+        }
+      }
+    ]
+  }
+}

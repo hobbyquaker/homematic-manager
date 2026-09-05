@@ -1,0 +1,51 @@
+{
+  "receiverType": "REMOTECONTROL_RECEIVER",
+  "senders": {
+    "KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "mode",
+        "name": {"de": "Betriebsart", "en": "Operation mode"},
+        "description": {
+          "de": "Mit einem kurzen oder langen Tastendruck wird der Heizungsregler in die gewählte Betriebsart geschaltet.",
+          "en": "With a short or long button press the heating thermostat will be switched to the selected operation mode",
+          "tr": "Tusa kisa veya uzun süre basildiginda kalorifer regülatörü istenen isletim moduna alinir."
+        },
+        "params": {
+          "LONG_CONTROL_RC": {"kind": "range", "min": 0, "max": 6, "default": 0},
+          "LONG_TEMPERATUR_RC": {"kind": "range", "min": 4.5, "max": 30.5, "default": 17},
+          "SHORT_CONTROL_RC": {"kind": "range", "min": 0, "max": 6, "default": 1},
+          "SHORT_TEMPERATUR_RC": {"kind": "range", "min": 4.5, "max": 30.5, "default": 17}
+        }
+      }
+    ],
+    "VIRTUAL_KEY": [
+      {
+        "id": 0,
+        "key": "expert",
+        "name": {"de": "Experte", "en": "Expert", "tr": "Uzmanlar"},
+        "description": {"de": "Expertenprofil"},
+        "params": {}
+      },
+      {
+        "id": 1,
+        "key": "mode",
+        "name": {"de": "Betriebsart", "en": "Operation mode"},
+        "description": {"de": "Expertenprofil"},
+        "params": {
+          "LONG_CONTROL_RC": {"kind": "range", "min": 0, "max": 6, "default": 0},
+          "LONG_TEMPERATUR_RC": {"kind": "range", "min": 4.5, "max": 30.5, "default": 17},
+          "SHORT_CONTROL_RC": {"kind": "range", "min": 0, "max": 6, "default": 1},
+          "SHORT_TEMPERATUR_RC": {"kind": "range", "min": 4.5, "max": 30.5, "default": 17}
+        }
+      }
+    ]
+  }
+}

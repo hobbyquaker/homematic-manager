@@ -35,6 +35,9 @@ gleiche Arbeitsabläufe — nur neu implementiert. Wer 2.7 kennt, muss nichts ne
   Übertragen auf mehrere Kanäle.
 - **Deutsch und Englisch** in der ganzen Oberfläche, zur Laufzeit umschaltbar, und ein **Dark
   Mode**, der der Systemeinstellung folgt.
+- Das Addon kann auf Wunsch **nach einem CCU-Benutzer fragen**, wenn man es als Lesezeichen direkt
+  aufruft statt über die Systemsteuerung. Standardmäßig aus, umschaltbar auf der Einstellungsseite
+  des Addons.
 - **Easy-Mode-Profile für alle HmIP-Empfänger** (3521 Profile über 725 Empfänger/Sender-Kombinationen),
   statt der von Hand gepflegten Tabelle von 2015.
 - Geräte-spezifische Editoren für Heizungs-Wochenprogramme, HmIP-Schaltprogramme, Rollladen- und
@@ -87,6 +90,9 @@ Details dazu:
   lesen — dort stehen drei Wege, das abzusichern.
 - **Windows-Signierung fehlt noch**, SmartScreen warnt daher beim ersten Start ("Weitere
   Informationen → Trotzdem ausführen"). macOS ist notarisiert.
+- Im Log des CCU-Addons steht einmal pro Minute eine Zeile, dass `VirtualDevices` auf
+  `getServiceMessages` kein gültiges XML-RPC antwortet. Das ist harmlos und stört nichts, sieht im
+  ansonsten leeren Log aber nach mehr aus als es ist.
 - Noch **nicht wieder dabei**: automatische Zuweisung der besten BidCos-Schnittstelle, CCU-Jack als
   vordefinierte Schnittstelle (als benutzerdefinierte Schnittstelle geht es), und ein Teil der
   geräte-spezifischen Editoren (Lichteffekte, RGBW, Alarmzentrale, ESI-Energiezähler,

@@ -11,31 +11,24 @@
  * is what lets the tests drive the whole bridge with a pair of fakes.
  */
 
-import type {ApiError, ApiEventName, ApiFrame, ApiMethodName, Transport} from '@homematic-manager/core';
+import {
+    API_EVENT_NAMES,
+    type ApiError,
+    type ApiEventName,
+    type ApiFrame,
+    type ApiMethodName,
+    type Transport,
+} from '@homematic-manager/core';
 import {decodeFrame, encodeFrame, errorFrame, responseFrame} from '@homematic-manager/backend';
 
 import {API_CHANNEL, API_CONNECTED_CHANNEL} from '../shared/ipc.js';
 
 /**
- * Every event of the contract, because `ApiEvents` is a type and has no runtime shape. The
- * `satisfies` keeps it honest in one direction (no invented names) and {@link ALL_EVENTS_LISTED}
- * in the other: adding an event to the contract without adding it here fails `tsc`.
+ * Re-exported so that the bridge's own module stays the one place main imports event names from.
+ * The list itself is the contract's (`packages/core/src/api/types.ts`), where a `satisfies` keeps
+ * it complete; task 11 kept a copy here by hand, which is exactly the thing that goes stale.
  */
-export const API_EVENT_NAMES = [
-    'interfaces.changed',
-    'rega.changed',
-    'devices.changed',
-    'names.changed',
-    'rpc.event',
-    'serviceMessages.changed',
-    'writeLog.appended',
-    'write.progress',
-    'config.changed',
-    'notice',
-] as const satisfies readonly ApiEventName[];
-
-const ALL_EVENTS_LISTED: Exclude<ApiEventName, (typeof API_EVENT_NAMES)[number]> extends never ? true : never = true;
-void ALL_EVENTS_LISTED;
+export {API_EVENT_NAMES};
 
 /** The part of `WebContents` the bridge uses. */
 export interface WebContentsLike {

@@ -356,3 +356,27 @@ export type ApiFrame =
     | {t: 'res'; id: number; r: unknown}
     | {t: 'err'; id: number; e: ApiError}
     | {t: 'ev'; n: ApiEventName; d: unknown};
+
+/**
+ * Every event of {@link ApiEvents} as a runtime value, because a type has none.
+ *
+ * `satisfies Record<ApiEventName, true>` checks the contract in both directions: a new event added
+ * to `ApiEvents` and forgotten here fails to compile, and a name here that is not an event does
+ * too. Every transport subscribes to exactly this list - the Electron IPC bridge, the WebSocket
+ * server, the mock - so "the backend pushes it but the UI never sees it" cannot happen by omission.
+ */
+const API_EVENT_FLAGS = {
+    'interfaces.changed': true,
+    'rega.changed': true,
+    'devices.changed': true,
+    'names.changed': true,
+    'rpc.event': true,
+    'serviceMessages.changed': true,
+    'writeLog.appended': true,
+    'write.progress': true,
+    'config.changed': true,
+    notice: true,
+} as const satisfies Record<ApiEventName, true>;
+
+/** The ten event names of {@link ApiEvents}, in the order the contract declares them. */
+export const API_EVENT_NAMES: readonly ApiEventName[] = Object.freeze(Object.keys(API_EVENT_FLAGS) as ApiEventName[]);

@@ -1,15 +1,17 @@
 import {detectBlindCalibration, type BlindCalibrationSpec} from './blindCalibration.js';
 import {detectDurationPairs, type DurationPairsSpec} from './durationPairs.js';
 import {detectEnumOptions, type EnumOptionsSpec} from './enumOptions.js';
+import {detectWeekProfile, type WeekProfileSpec} from './weekProfile.js';
 import {EMPTY_CONTEXT, type EditorContext, type EditorTarget} from './types.js';
 
 export * from './blindCalibration.js';
 export * from './durationPairs.js';
 export * from './enumOptions.js';
+export * from './weekProfile.js';
 export * from './types.js';
 
 /** Everything a detector can return. One member per device-specific editor. */
-export type DeviceEditorSpec = BlindCalibrationSpec | DurationPairsSpec | EnumOptionsSpec;
+export type DeviceEditorSpec = BlindCalibrationSpec | DurationPairsSpec | EnumOptionsSpec | WeekProfileSpec;
 
 /**
  * The registry: every device-specific editor, in the order they get to claim parameters.
@@ -25,7 +27,12 @@ type Detector = (
     context: EditorContext,
 ) => DeviceEditorSpec | undefined;
 
-const DETECTORS: readonly Detector[] = [detectBlindCalibration, detectDurationPairs, detectEnumOptions];
+const DETECTORS: readonly Detector[] = [
+    detectWeekProfile,
+    detectBlindCalibration,
+    detectDurationPairs,
+    detectEnumOptions,
+];
 
 /** The editors that recognise this paramset, in registry order. */
 export function detectDeviceEditors(target: EditorTarget, context: EditorContext = EMPTY_CONTEXT): DeviceEditorSpec[] {

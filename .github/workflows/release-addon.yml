@@ -1,0 +1,114 @@
+name: Release (CCU addon)
+
+# One of the four independent release pipelines of D-24. This one builds the CCU3 / OpenCCU addon
+# package for armv7l, aarch64 and x86_64 and attaches the three archives, their checksums and their
+# SBOMs to the GitHub release for a `v*` tag.
+#
+# It has no `needs:` on anything. The Electron app (`release-electron.yml`), the npm package
+# (`release-npm.yml`) and the Docker image (`release-docker.yml`) run for the same tag in parallel,
+# and a failure in any of them must never hold this one back or roll it back; re-running one
+# deliverable alone is `workflow_dispatch` with the tag as its input. Inside this workflow the same
+# rule holds per architecture: `fail-fast: false`, so a broken armv7l runtime still ships the two
+# glibc packages.
+#
+# The release is created as a **draft** by whichever of the four workflows gets there first and
+# published by the maintainer (see `release-electron.yml` for why that matters to the updater).
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The existing tag to build and attach assets to, e.g. v3.1.0
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  # D-27: `actions/attest-sbom` and `actions/attest-build-provenance` sign through Sigstore with the
+  # job's OIDC token, so `gh attestation verify <package> --repo hobbyquaker/homematic-manager`
+  # works offline against this repository.
+  id-token: write
+  attestations: write
+
+concurrency:
+  # Per tag, not per branch: two runs for the same tag would race on the same assets.
+  group: release-addon-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [armv7l, aarch64, x86_64]
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install the build and test tools
+        run: sudo apt-get update && sudo apt-get install -y patchelf tcl shellcheck
+
+      - name: Test the CGIs
+        run: apps/ccu-addon/test/cgi-test.sh
+
+      # the package carries the built UI and the generated metadata through the apps/web tarball
+      - run: npm run build
+
+      - name: Build the addon package
+        run: apps/ccu-addon/build.sh ${{ matrix.arch }}
+
+      - name: Name the assets
+        id: assets
+        run: |
+          package=$(ls apps/ccu-addon/out/hmm-ccu-${{ matrix.arch }}-*.tar.gz)
+          echo "package=$package" >> "$GITHUB_OUTPUT"
+          echo "sbom=$package.cdx.json" >> "$GITHUB_OUTPUT"
+
+      # Unpacks the package into the layout a CCU installs it into, symlink included, serves the
+      # pages the way lighttpd does, and checks the SBOM against the runtime that is really inside.
+      - name: Test the built package as installed
+        run: apps/ccu-addon/test/package-test.sh "${{ steps.assets.outputs.package }}"
+
+      - name: Replay the firmware installer in a container
+        if: matrix.arch == 'x86_64'
+        run: apps/ccu-addon/test/container-test.sh --idle "${{ steps.assets.outputs.package }}"
+
+      # Both attestations are made before anything is attached, so a release never carries a package
+      # whose provenance could not be signed.
+      - name: Attest the build provenance
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: ${{ steps.assets.outputs.package }}
+
+      - name: Attest the SBOM
+        uses: actions/attest-sbom@v3
+        with:
+          subject-path: ${{ steps.assets.outputs.package }}
+          sbom-path: ${{ steps.assets.outputs.sbom }}
+
+      - name: Attach the package, its checksum and its SBOM to the draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          draft: true
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            ${{ steps.assets.outputs.package }}
+            ${{ steps.assets.outputs.package }}.sha256
+            ${{ steps.assets.outputs.sbom }}

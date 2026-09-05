@@ -1,0 +1,95 @@
+name: CCU addon
+
+# Builds the installable CCU addon package (apps/ccu-addon/build.sh) for all three architectures of
+# D-25 and runs the two test layers that need no CCU: the CGI tests against a Tcl stub, and the
+# replay of the firmware's `install_addon` in a container with a real lighttpd, where the WebSocket
+# upgrade through the proxy rule is exercised end to end.
+#
+# Separate from ci.yml on purpose (D-24): assembling the bundled Node runtime downloads Alpine
+# packages and a nodejs.org tarball, and takes minutes - that must not sit in front of every unit
+# test run. `release-addon.yml` builds the same thing for a tag and has no `needs:` on this one.
+
+on:
+  push:
+    branches: [master, main, 3.0-dev]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      node-major:
+        description: Node major version to bundle
+        required: false
+        default: '24'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: addon-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      # D-24: a broken armv7l runtime still has to yield the two glibc packages, and the other way
+      # round - each architecture is its own failure domain.
+      fail-fast: false
+      matrix:
+        arch: [armv7l, aarch64, x86_64]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # patchelf rewrites the armv7l runtime's ELF headers, tcl runs the CGIs, shellcheck reads the
+      # busybox scripts
+      - name: Install the build and test tools
+        run: sudo apt-get update && sudo apt-get install -y patchelf tcl shellcheck
+
+      # The CGIs and the shell scripts, against a Tcl stub. Cheap, and the first thing to fail when
+      # a Tcl 8.5 construct sneaks in - the CCU3 firmware runs 8.2.3 and would only show a broken
+      # WebUI page.
+      - name: Test the CGIs
+        run: apps/ccu-addon/test/cgi-test.sh
+
+      # The package carries the built UI and the generated metadata through the apps/web tarball.
+      - run: npm run build
+
+      - name: Build the addon package
+        run: apps/ccu-addon/build.sh ${{ matrix.arch }}
+        env:
+          NODE_MAJOR: ${{ inputs.node-major || '24' }}
+
+      - name: Test the built package as installed
+        run: apps/ccu-addon/test/package-test.sh apps/ccu-addon/out/hmm-ccu-${{ matrix.arch }}-*.tar.gz
+
+      # The full install / update / uninstall replay with a real lighttpd in front of the running
+      # backend, including the WebSocket upgrade and a socket left idle past lighttpd's 60 s
+      # timeout. Only for x86_64: the container runs the bundled node, so it has to be this runner's
+      # architecture.
+      - name: Replay the firmware installer in a container
+        if: matrix.arch == 'x86_64'
+        run: apps/ccu-addon/test/container-test.sh --idle apps/ccu-addon/out/hmm-ccu-x86_64-*.tar.gz
+
+      - name: Inspect the result
+        run: |
+          cat apps/ccu-addon/out/work/${{ matrix.arch }}/pkg/hmm/versions
+          file apps/ccu-addon/out/work/${{ matrix.arch }}/pkg/hmm/bin/node
+          tar tzf apps/ccu-addon/out/*.tar.gz | head -30
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hmm-ccu-addon-${{ matrix.arch }}
+          path: |
+            apps/ccu-addon/out/*.tar.gz
+            apps/ccu-addon/out/*.tar.gz.sha256
+            apps/ccu-addon/out/*.cdx.json
+          retention-days: 14

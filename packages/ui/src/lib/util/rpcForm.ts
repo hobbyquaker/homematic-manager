@@ -119,6 +119,17 @@ export function structValue(entry: StructEntry): RpcValue {
     }
 }
 
+/**
+ * `String()` of an `ArgValue`.
+ *
+ * The type admits a struct (`StructEntry[]`, or the `{type, value}` of a variant) which no scalar
+ * field ever holds - but the compiler cannot know that a `number` field's value is not an array,
+ * and `String([{...}])` would be "[object Object]" with no warning. JSON at least says what it was.
+ */
+function asText(value: ArgValue): string {
+    return typeof value === 'object' ? JSON.stringify(value) : String(value);
+}
+
 /** What one field sends. */
 export function argValue(field: ArgField, value: ArgValue): RpcValue {
     switch (field.kind) {
@@ -126,7 +137,7 @@ export function argValue(field: ArgField, value: ArgValue): RpcValue {
             return value === true || value === 'true';
         case 'number':
         case 'flags':
-            return typeof value === 'number' ? value : Number.parseInt(String(value), 10) || 0;
+            return typeof value === 'number' ? value : Number.parseInt(asText(value), 10) || 0;
         case 'struct': {
             const struct: Record<string, RpcValue> = {};
             for (const entry of Array.isArray(value) ? value : []) {
@@ -141,13 +152,13 @@ export function argValue(field: ArgField, value: ArgValue): RpcValue {
             return structValue({key: '', type: variant.type, value: variant.value});
         }
         case 'json':
-            return parseJson(String(value));
+            return parseJson(asText(value));
         case 'select':
             // The catalogue keys its `values` map by the value the CCU wants; a numeric key goes
             // out as a number, everything else as the string it is.
-            return /^-?\d+$/.test(String(value)) ? Number(value) : String(value);
+            return /^-?\d+$/.test(asText(value)) ? Number(value) : asText(value);
         default:
-            return String(value);
+            return asText(value);
     }
 }
 

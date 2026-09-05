@@ -89,7 +89,7 @@ describe('the links grid', () => {
 
     it('shows the 2.7 link columns and both device images', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/links'});
-        const labels = screen.getAllByRole('columnheader').map((header) => header.textContent?.trim());
+        const labels = screen.getAllByRole('columnheader').map((header) => header.textContent.trim());
         expect(labels).toEqual([
             '',
             'Sender Name',
@@ -158,7 +158,7 @@ describe('the add-link dialog', () => {
         await fireEvent.click(within(senders).getByRole('button'));
         const senderValues = within(senders)
             .getAllByRole('option')
-            .map((option) => option.textContent ?? '');
+            .map((option) => option.textContent);
         // MEQ0123456:1 is a SWITCH receiver with no LINK_SOURCE_ROLES: not a sender.
         expect(senderValues.join('|')).not.toContain('MEQ0123456:1');
         expect(senderValues.join('|')).toContain('JEQ0234567:1');
@@ -169,7 +169,7 @@ describe('the add-link dialog', () => {
         await fireEvent.click(within(receivers).getByRole('button'));
         const receiverValues = within(receivers)
             .getAllByRole('option')
-            .map((option) => option.textContent ?? '')
+            .map((option) => option.textContent)
             .join('|');
         // The BidCoS-RF virtual keys share the SWITCH role with the dimmer and the switch actuator.
         expect(receiverValues).toContain('MEQ0123456:1');
@@ -211,7 +211,7 @@ describe('the add-link dialog', () => {
         await waitFor(() => {
             expect(screen.getByTestId('add-link-none')).toBeTruthy();
         });
-        expect((screen.getByTestId('add-link-create') as HTMLButtonElement).disabled).toBe(true);
+        expect(screen.getByTestId<HTMLButtonElement>('add-link-create').disabled).toBe(true);
     });
 });
 
@@ -285,7 +285,7 @@ describe('the link paramset dialog', () => {
 
     it('offers the profiles of the data set, expert first', async () => {
         await openLink();
-        const select = screen.getByTestId('link-profile') as HTMLSelectElement;
+        const select = screen.getByTestId<HTMLSelectElement>('link-profile');
         await waitFor(() => {
             expect([...select.options].map((option) => option.textContent)).toEqual([
                 'Experte',
@@ -298,7 +298,7 @@ describe('the link paramset dialog', () => {
     it('applies a profile, greys out what it fixes and sets UI_HINT', async () => {
         await openLink();
         const select = await waitFor(() => {
-            const found = screen.getByTestId('link-profile') as HTMLSelectElement;
+            const found = screen.getByTestId<HTMLSelectElement>('link-profile');
             expect(found.options.length).toBe(3);
             return found;
         });

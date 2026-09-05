@@ -197,7 +197,7 @@ describe('HostStore without a host', () => {
 describe('DeviceImage', () => {
     it('draws the host image when there is one', () => {
         render(DeviceImage, {props: {deviceType: 'HmIP-BSM', src: 'hmm-image://device/HmIP-BSM', testId: 'img'}});
-        const image = screen.getByTestId('img') as HTMLImageElement;
+        const image = screen.getByTestId<HTMLImageElement>('img');
         expect(image.tagName).toBe('IMG');
         expect(image.getAttribute('src')).toBe('hmm-image://device/HmIP-BSM');
         expect(image.alt).toBe('HmIP-BSM');

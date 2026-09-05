@@ -71,6 +71,10 @@ export function cellValue<T>(row: T, column: DataTableColumn<T>): CellValue {
     if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
         return value;
     }
+    // "[object Object]" for an array or a struct, which is what 2.x put in the cell and what
+    // `tableModel.test.ts` pins down. Every real column has a `value` function, so this is the
+    // fallback for a column that was configured by key alone.
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- deliberate, see above
     return String(value);
 }
 

@@ -241,7 +241,7 @@ describe('Toolbar and ToolbarButton', () => {
         render(ToolbarButton, {
             props: {title: 'Delete device', disabled: true, reason: 'This function arrives with task 8.', onclick},
         });
-        const button = screen.getByRole('button', {name: 'Delete device'}) as HTMLButtonElement;
+        const button = screen.getByRole<HTMLButtonElement>('button', {name: 'Delete device'});
         expect(button.getAttribute('title')).toBe('Delete device — This function arrives with task 8.');
         // `disabled` is what stops the click; jsdom's `fireEvent.click` dispatches the event
         // regardless of it, so the attribute is what this asserts on.
@@ -410,7 +410,7 @@ describe('LanguageSwitch and ThemeSwitch', () => {
     it('offers exactly de and en and reports a change', async () => {
         const onchange = vi.fn();
         render(LanguageSwitch, {props: {language: 'de', onchange}});
-        const select = screen.getByLabelText('Language') as HTMLSelectElement;
+        const select = screen.getByLabelText<HTMLSelectElement>('Language');
         expect([...select.options].map((option) => option.value)).toEqual(['de', 'en']);
 
         await fireEvent.change(select, {target: {value: 'en'}});

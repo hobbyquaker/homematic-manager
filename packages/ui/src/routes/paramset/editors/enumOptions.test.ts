@@ -165,8 +165,8 @@ describe('the named options in the dialog', () => {
 
     it('shows the names the string table has, and the raw identifier next to them', async () => {
         await open();
-        const select = screen.getByTestId('enum-DISPLAY_INFORMATION-select') as HTMLSelectElement;
-        expect([...select.options].map((option) => option.textContent?.trim())).toEqual(['Uhrzeit', 'Datum']);
+        const select = screen.getByTestId<HTMLSelectElement>('enum-DISPLAY_INFORMATION-select');
+        expect([...select.options].map((option) => option.textContent.trim())).toEqual(['Uhrzeit', 'Datum']);
         expect(screen.getByTestId('enum-DISPLAY_INFORMATION-raw').textContent).toContain('TIME (0)');
         // The row it took over is gone from the generic list, the ones it did not take are not.
         expect(screen.queryByTestId('param-DISPLAY_INFORMATION')).toBeNull();

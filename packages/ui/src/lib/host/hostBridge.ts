@@ -21,6 +21,9 @@ export function isHostBridge(value: unknown): value is HostBridge {
         typeof candidate.onSystemTheme === 'function' &&
         typeof candidate.onMenuAction === 'function' &&
         typeof update === 'object' &&
+        // `typeof null === 'object'`, and this value crossed the preload boundary: its declared
+        // type is what the host promised, not what the page actually got.
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- see above
         update !== null &&
         typeof update.state === 'function' &&
         typeof update.check === 'function' &&

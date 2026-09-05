@@ -16,7 +16,7 @@ function rowOf(address: string): HTMLElement {
 describe('the device grid columns', () => {
     it('shows the 2.7 device columns, with SUBTYPE only on HmIP', async () => {
         await mountApp({hash: '#/BidCos-RF/devices'});
-        const labels = screen.getAllByRole('columnheader').map((header) => header.textContent?.trim());
+        const labels = screen.getAllByRole('columnheader').map((header) => header.textContent.trim());
         expect(labels).toEqual([
             '',
             '',
@@ -36,7 +36,7 @@ describe('the device grid columns', () => {
         await waitFor(() => {
             expect(stores.devices.devices('HmIP-RF').length).toBeGreaterThan(0);
         });
-        const labels = screen.getAllByRole('columnheader').map((header) => header.textContent?.trim());
+        const labels = screen.getAllByRole('columnheader').map((header) => header.textContent.trim());
         expect(labels).toContain('SUBTYPE');
     });
 

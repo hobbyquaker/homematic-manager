@@ -35,7 +35,9 @@
         if (!element) {
             return;
         }
-        let cancelled = false;
+        // An object and not a `let`: TypeScript's control flow analysis does not follow a local
+        // variable that a callback assigns, so `if (cancelled)` below would read as always false.
+        const run = {cancelled: false};
         void (async () => {
             try {
                 const reader = createReader ? await createReader() : await defaultReader();
@@ -44,7 +46,7 @@
                         onscan(result.getText());
                     }
                 });
-                if (cancelled) {
+                if (run.cancelled) {
                     started.stop();
                 } else {
                     controls = started;
@@ -54,7 +56,7 @@
             }
         })();
         return () => {
-            cancelled = true;
+            run.cancelled = true;
             stop();
         };
     });

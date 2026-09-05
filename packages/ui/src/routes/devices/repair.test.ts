@@ -127,7 +127,7 @@ describe('the repair dialog', () => {
         await waitFor(() => {
             expect(screen.getByTestId('repair-bidcos-note')).toBeTruthy();
         });
-        const select = screen.getByTestId('repair-recovery') as HTMLSelectElement;
+        const select = screen.getByTestId<HTMLSelectElement>('repair-recovery');
         expect([...select.options].map((option) => option.value)).toEqual([
             'none',
             'clearConfigCache',
@@ -233,7 +233,7 @@ describe('the read-back after a write', () => {
         await waitFor(() => {
             expect(screen.getByTestId('preview-call-MEQ0123456:1')).toBeTruthy();
         });
-        const call = screen.getByTestId('preview-call-MEQ0123456:1').textContent ?? '';
+        const call = screen.getByTestId('preview-call-MEQ0123456:1').textContent;
         expect(call).toContain('MEQ0123456:1');
         expect(call).toContain('MASTER');
         expect(call).toContain('{"LOGGING":0}');

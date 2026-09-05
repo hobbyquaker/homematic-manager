@@ -64,7 +64,7 @@ describe('App shell', () => {
 
     it('shows the six 2.7 tabs in their order, in German', async () => {
         await mountApp(transport);
-        const labels = screen.getAllByRole('tab').map((tab) => tab.textContent?.replace(/\s+/g, ' ').trim());
+        const labels = screen.getAllByRole('tab').map((tab) => tab.textContent.replace(/\s+/g, ' ').trim());
         expect(labels).toEqual([
             'Geräte',
             'Verknüpfungen',
@@ -198,7 +198,7 @@ describe('App shell', () => {
         await mountApp(transport);
         await fireEvent.click(screen.getByTestId('settings-button'));
 
-        const host = screen.getByTestId('config-host') as HTMLInputElement;
+        const host = screen.getByTestId<HTMLInputElement>('config-host');
         expect(host.value).toBe('demo.local');
 
         await fireEvent.input(host, {target: {value: 'ccu3'}});

@@ -230,15 +230,19 @@ export class WebSocketTransport implements Transport {
         if (typeof data !== 'string') {
             return;
         }
-        let frame: ApiFrame;
+        // `unknown` and not `as ApiFrame`: the assertion would tell the compiler the guard below
+        // is pointless, when the guard is the only thing standing between `JSON.parse('5')` and a
+        // property access on a number.
+        let parsed: unknown;
         try {
-            frame = JSON.parse(data) as ApiFrame;
+            parsed = JSON.parse(data);
         } catch {
             return;
         }
-        if (typeof frame !== 'object' || frame === null) {
+        if (typeof parsed !== 'object' || parsed === null) {
             return;
         }
+        const frame = parsed as ApiFrame;
         switch (frame.t) {
             case 'res':
                 this.#settle(frame.id, frame.r, undefined);

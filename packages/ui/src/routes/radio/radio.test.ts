@@ -54,7 +54,7 @@ describe('the radio tab', () => {
         const gateways = await waitFor(() => screen.getByTestId('radio-gateways'));
         const labels = within(gateways)
             .getAllByRole('columnheader')
-            .map((header) => header.textContent?.trim());
+            .map((header) => header.textContent.trim());
         expect(labels).toEqual([
             'ADDRESS',
             'DESCRIPTION',
@@ -154,7 +154,7 @@ describe('setBidcosInterface', () => {
         await waitFor(() => {
             expect(screen.getByTestId('set-interface-current').textContent).toBe('BidCoS-RF');
         });
-        expect((screen.getByTestId('set-interface-select') as HTMLSelectElement).value).toBe('BidCoS-RF');
+        expect(screen.getByTestId<HTMLSelectElement>('set-interface-select').value).toBe('BidCoS-RF');
     });
 
     it('sends the gateway and the roaming flag, then re-reads the device list', async () => {

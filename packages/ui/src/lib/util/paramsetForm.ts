@@ -181,6 +181,9 @@ export function displayValue(value: unknown, description: ParameterDescription |
     if (typeof plain === 'boolean') {
         return plain ? 'true' : 'false';
     }
+    // `ParamsetValue` is a scalar in practice; the type also admits the struct an interface process
+    // may answer with, and "[object Object]" is the honest rendering of one in a single-line field.
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- deliberate, see above
     return String(plain);
 }
 

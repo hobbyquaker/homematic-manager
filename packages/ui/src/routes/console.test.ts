@@ -92,7 +92,7 @@ describe('the RPC console', () => {
 
     it('offers the methods the interface reports', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/console'});
-        const select = await waitFor(() => screen.getByTestId('console-method') as HTMLSelectElement);
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('console-method'));
         await waitFor(() => {
             expect(select.options.length).toBeGreaterThan(1);
         });
@@ -101,7 +101,7 @@ describe('the RPC console', () => {
 
     it('generates a form per argument, and shows the exact tuple it will send', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/console'});
-        const select = await waitFor(() => screen.getByTestId('console-method') as HTMLSelectElement);
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('console-method'));
         await waitFor(() => {
             expect(select.options.length).toBeGreaterThan(1);
         });
@@ -122,7 +122,7 @@ describe('the RPC console', () => {
 
     it('edits a putParamset struct row by row - what 2.x could not do (#27, #136)', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/console'});
-        const select = await waitFor(() => screen.getByTestId('console-method') as HTMLSelectElement);
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('console-method'));
         await waitFor(() => {
             expect(select.options.length).toBeGreaterThan(1);
         });
@@ -149,7 +149,7 @@ describe('the RPC console', () => {
 
     it('edits a bit field as flags', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/console'});
-        const select = await waitFor(() => screen.getByTestId('console-method') as HTMLSelectElement);
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('console-method'));
         await waitFor(() => {
             expect(select.options.length).toBeGreaterThan(1);
         });
@@ -165,7 +165,7 @@ describe('the RPC console', () => {
 
     it('shows the raw response and keeps a fault as a result rather than a toast', async () => {
         const {stores} = await mountApp({transport, hash: '#/BidCos-RF/console'});
-        const select = await waitFor(() => screen.getByTestId('console-method') as HTMLSelectElement);
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('console-method'));
         await waitFor(() => {
             expect(select.options.length).toBeGreaterThan(1);
         });
@@ -173,9 +173,7 @@ describe('the RPC console', () => {
         await fireEvent.click(screen.getByTestId('console-send-button'));
 
         await waitFor(() => {
-            expect((screen.getByTestId('console-response') as HTMLTextAreaElement).value).toContain(
-                'listBidcosInterfaces',
-            );
+            expect(screen.getByTestId<HTMLTextAreaElement>('console-response').value).toContain('listBidcosInterfaces');
         });
 
         transport.fail('rpc.call', {message: 'Unknown instance', kind: 'rpc', faultCode: -2});
@@ -184,14 +182,14 @@ describe('the RPC console', () => {
         await waitFor(() => {
             expect(screen.getByTestId('console-error').textContent).toContain('Unknown instance');
         });
-        expect((screen.getByTestId('console-response') as HTMLTextAreaElement).value).toContain('-2');
+        expect(screen.getByTestId<HTMLTextAreaElement>('console-response').value).toContain('-2');
         // A console fault is the answer the user asked for, not a notice.
         expect(stores.notices.items).toHaveLength(0);
     });
 
     it('keeps a history and refills the form from it', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/console'});
-        const select = await waitFor(() => screen.getByTestId('console-method') as HTMLSelectElement);
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('console-method'));
         await waitFor(() => {
             expect(select.options.length).toBeGreaterThan(1);
         });
@@ -214,7 +212,7 @@ describe('the RPC console', () => {
 
     it('clears the history', async () => {
         const {stores} = await mountApp({transport, hash: '#/BidCos-RF/console'});
-        const select = await waitFor(() => screen.getByTestId('console-method') as HTMLSelectElement);
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('console-method'));
         await waitFor(() => {
             expect(select.options.length).toBeGreaterThan(1);
         });
@@ -230,7 +228,7 @@ describe('the RPC console', () => {
 
     it('shows the help text of the method, without its markup', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/console'});
-        const select = await waitFor(() => screen.getByTestId('console-method') as HTMLSelectElement);
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('console-method'));
         await waitFor(() => {
             expect(select.options.length).toBeGreaterThan(1);
         });

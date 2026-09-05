@@ -217,12 +217,12 @@ describe('the settings dialog', () => {
             expect(transport.countOf('config.discover')).toBe(1);
         });
 
-        const select = await waitFor(() => screen.getByTestId('config-discovered') as HTMLSelectElement);
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('config-discovered'));
         await waitFor(() => {
             expect([...select.options].map((option) => option.value)).toContain('192.168.1.99');
         });
         await fireEvent.change(select, {target: {value: '192.168.1.99'}});
-        expect((screen.getByTestId('config-host') as HTMLInputElement).value).toBe('192.168.1.99');
+        expect(screen.getByTestId<HTMLInputElement>('config-host').value).toBe('192.168.1.99');
     });
 
     it('adds, validates and removes a user-defined interface (#135, D-13)', async () => {

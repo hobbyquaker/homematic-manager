@@ -102,15 +102,15 @@ describe('the add-device dialog', () => {
         });
         await fireEvent.click(screen.getByTestId('devices-add'));
 
-        expect((screen.getByTestId('add-device-start') as HTMLButtonElement).disabled).toBe(true);
+        expect(screen.getByTestId<HTMLButtonElement>('add-device-start').disabled).toBe(true);
         await fireEvent.input(screen.getByTestId('add-device-sgtin'), {
             target: {value: '3014F711A000000000000001'},
         });
-        expect((screen.getByTestId('add-device-start') as HTMLButtonElement).disabled).toBe(true);
+        expect(screen.getByTestId<HTMLButtonElement>('add-device-start').disabled).toBe(true);
         await fireEvent.input(screen.getByTestId('add-device-key'), {target: {value: 'ABCDEFGHJKLMNPQR'}});
 
         await waitFor(() => {
-            expect((screen.getByTestId('add-device-start') as HTMLButtonElement).disabled).toBe(false);
+            expect(screen.getByTestId<HTMLButtonElement>('add-device-start').disabled).toBe(false);
         });
         await fireEvent.click(screen.getByTestId('add-device-start'));
         await waitFor(() => {

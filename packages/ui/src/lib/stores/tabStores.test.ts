@@ -355,6 +355,9 @@ describe('ConsoleStore', () => {
     it('survives a rejection that is not an ApiError', async () => {
         const {transport, notices} = setup();
         transport.respond('rpc.call', () => {
+            // a string on purpose: the point of the test is what the store does with a rejection
+            // that is not an `Error` and not an `ApiError`
+            // eslint-disable-next-line @typescript-eslint/only-throw-error -- see above
             throw 'boom';
         });
         const store = new ConsoleStore(transport, notices);

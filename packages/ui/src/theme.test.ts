@@ -186,7 +186,7 @@ describe('colours that carry meaning', () => {
         it(`marks a disabled toolbar button in the ${theme} theme`, () => {
             document.documentElement.setAttribute('data-theme', theme);
             render(ToolbarButton, {props: {title: 'Delete device', disabled: true}});
-            expect((screen.getByRole('button', {name: 'Delete device'}) as HTMLButtonElement).disabled).toBe(true);
+            expect(screen.getByRole<HTMLButtonElement>('button', {name: 'Delete device'}).disabled).toBe(true);
         });
     }
 });

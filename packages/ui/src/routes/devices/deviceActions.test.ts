@@ -34,7 +34,7 @@ describe('the devices toolbar', () => {
     it('disables everything while nothing is selected, and says why', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         for (const id of ['devices-rename', 'devices-delete', 'devices-replace', 'devices-usage-1']) {
-            expect((screen.getByTestId(id) as HTMLButtonElement).disabled, id).toBe(true);
+            expect(screen.getByTestId<HTMLButtonElement>(id).disabled, id).toBe(true);
         }
         expect(screen.getByTestId('devices-delete').getAttribute('title')).toContain('Gerät auswählen');
     });
@@ -43,30 +43,30 @@ describe('the devices toolbar', () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         await select('MEQ0123456');
 
-        expect((screen.getByTestId('devices-rename') as HTMLButtonElement).disabled).toBe(false);
-        expect((screen.getByTestId('devices-delete') as HTMLButtonElement).disabled).toBe(false);
-        expect((screen.getByTestId('devices-restore') as HTMLButtonElement).disabled).toBe(false);
-        expect((screen.getByTestId('devices-usage-1') as HTMLButtonElement).disabled).toBe(true);
+        expect(screen.getByTestId<HTMLButtonElement>('devices-rename').disabled).toBe(false);
+        expect(screen.getByTestId<HTMLButtonElement>('devices-delete').disabled).toBe(false);
+        expect(screen.getByTestId<HTMLButtonElement>('devices-restore').disabled).toBe(false);
+        expect(screen.getByTestId<HTMLButtonElement>('devices-usage-1').disabled).toBe(true);
     });
 
     it('keeps delete and replace off a DontDelete device and explains the flag', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         await select('BidCoS-RF');
 
-        expect((screen.getByTestId('devices-delete') as HTMLButtonElement).disabled).toBe(true);
+        expect(screen.getByTestId<HTMLButtonElement>('devices-delete').disabled).toBe(true);
         expect(screen.getByTestId('devices-delete').getAttribute('title')).toContain('DontDelete');
         // Renaming the CCU's own device is still allowed, as it was in 2.x.
-        expect((screen.getByTestId('devices-rename') as HTMLButtonElement).disabled).toBe(false);
+        expect(screen.getByTestId<HTMLButtonElement>('devices-rename').disabled).toBe(false);
     });
 
     it('enables reportValueUsage for a channel, but never for the :0 maintenance channel', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         await select('MEQ0123456:1');
-        expect((screen.getByTestId('devices-usage-1') as HTMLButtonElement).disabled).toBe(false);
+        expect(screen.getByTestId<HTMLButtonElement>('devices-usage-1').disabled).toBe(false);
 
         await fireEvent.click(rowOf('MEQ0123456:0'));
-        expect((screen.getByTestId('devices-usage-1') as HTMLButtonElement).disabled).toBe(true);
-        expect((screen.getByTestId('devices-rename') as HTMLButtonElement).disabled).toBe(true);
+        expect(screen.getByTestId<HTMLButtonElement>('devices-usage-1').disabled).toBe(true);
+        expect(screen.getByTestId<HTMLButtonElement>('devices-rename').disabled).toBe(true);
     });
 
     it('greys restore and clearConfigCache out on an interface that has neither', async () => {
@@ -76,7 +76,7 @@ describe('the devices toolbar', () => {
         });
         await select('0011D3C9A1B2C3');
 
-        expect((screen.getByTestId('devices-restore') as HTMLButtonElement).disabled).toBe(true);
+        expect(screen.getByTestId<HTMLButtonElement>('devices-restore').disabled).toBe(true);
         expect(screen.getByTestId('devices-restore').getAttribute('title')).toContain('BidCos');
     });
 
@@ -160,7 +160,7 @@ describe('the rename dialog', () => {
         await select('MEQ0123456');
         await fireEvent.click(screen.getByTestId('devices-rename'));
 
-        const input = screen.getByTestId('rename-input') as HTMLInputElement;
+        const input = screen.getByTestId<HTMLInputElement>('rename-input');
         expect(input.value).toBe('Licht Küche');
         await fireEvent.input(input, {target: {value: 'Küche Decke'}});
         await fireEvent.click(screen.getByTestId('rename-children'));
@@ -214,7 +214,7 @@ describe('the rename dialog', () => {
         await select('MEQ0123456');
         await fireEvent.click(screen.getByTestId('devices-rename'));
         await fireEvent.input(screen.getByTestId('rename-input'), {target: {value: '   '}});
-        expect((screen.getByTestId('rename-save') as HTMLButtonElement).disabled).toBe(true);
+        expect(screen.getByTestId<HTMLButtonElement>('rename-save').disabled).toBe(true);
     });
 
     it('starts empty for an address ReGa never named', async () => {
@@ -222,7 +222,7 @@ describe('the rename dialog', () => {
         expect(DEMO_NAMES['JEQ0234567:0']).toBeUndefined();
         await select('JEQ0234567:0');
         // `:0` cannot be renamed at all - the toolbar button stays off, as in 2.x.
-        expect((screen.getByTestId('devices-rename') as HTMLButtonElement).disabled).toBe(true);
+        expect(screen.getByTestId<HTMLButtonElement>('devices-rename').disabled).toBe(true);
     });
 });
 
@@ -315,7 +315,7 @@ describe('the replace dialog', () => {
         await waitFor(() => {
             expect(screen.getByTestId('replace-none')).toBeTruthy();
         });
-        expect((screen.getByTestId('replace-device-confirm') as HTMLButtonElement).disabled).toBe(true);
+        expect(screen.getByTestId<HTMLButtonElement>('replace-device-confirm').disabled).toBe(true);
     });
 });
 
@@ -334,7 +334,7 @@ describe('the context menu', () => {
         expect(
             within(menu)
                 .getAllByRole('menuitem')
-                .map((item) => item.textContent?.trim()),
+                .map((item) => item.textContent.trim()),
         ).toEqual([
             'Umbenennen',
             'MASTER Paramset',
@@ -353,7 +353,7 @@ describe('the context menu', () => {
         await fireEvent.contextMenu(rowOf('MEQ0123456:0'));
 
         const items = within(screen.getByTestId('devices-menu')).getAllByRole('menuitem') as HTMLButtonElement[];
-        expect(items.map((item) => item.textContent?.trim())).toEqual([
+        expect(items.map((item) => item.textContent.trim())).toEqual([
             'Umbenennen',
             'reportValueUsage 1',
             'reportValueUsage 0',

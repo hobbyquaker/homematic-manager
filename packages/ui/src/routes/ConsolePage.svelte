@@ -92,6 +92,11 @@
         answer = await stores.console.call(interfaceName, method, params);
     }
 
+    /** A struct parameter, as opposed to an array or a scalar - `typeof null` is `'object'`. */
+    function isStruct(value: unknown): value is Record<string, RpcValue> {
+        return typeof value === 'object' && value !== null && !Array.isArray(value);
+    }
+
     function replay(call: ConsoleCall): void {
         method = call.method;
         // The recorded parameters are what went out; the form is rebuilt around them where the
@@ -99,8 +104,8 @@
         const rebuilt = argFields(call.method);
         values = rebuilt.map((field, index) => {
             const recorded = call.params[index];
-            if (field.kind === 'struct' && typeof recorded === 'object' && recorded !== null) {
-                return Object.entries(recorded as Record<string, RpcValue>).map(([key, value]) => ({
+            if (field.kind === 'struct' && isStruct(recorded)) {
+                return Object.entries(recorded).map(([key, value]) => ({
                     key,
                     type: typeof value === 'boolean' ? 'bool' : typeof value === 'number' ? 'double' : 'string',
                     value: String(value),

@@ -85,12 +85,15 @@ export class MockTransport implements Transport {
         return this.respond(method, (() => value) as MockHandler<M>);
     }
 
-    /** Makes one method reject, so the notice and error paths can be exercised. */
-    fail<M extends ApiMethodName>(method: M, error: ApiError | string): this {
+    /**
+     * Makes one method reject, so the notice and error paths can be exercised. Not generic: the
+     * handler never produces a result, so there is no method type to relate anything to.
+     */
+    fail(method: ApiMethodName, error: ApiError | string): this {
         const apiError: ApiError = typeof error === 'string' ? {message: error, kind: 'internal'} : error;
         return this.respond(method, (() => {
             throw new ApiRequestError(apiError);
-        }) as MockHandler<M>);
+        }) as MockHandler<ApiMethodName>);
     }
 
     /** Pushes an event to every subscriber, exactly as the backend's event stream would. */

@@ -173,8 +173,8 @@ describe('the switching programme in the dialog', () => {
     it('shows the raw mask next to the day boxes, because the bit order is an assumption', async () => {
         await open();
         expect(screen.getByTestId('switch-01-mask').textContent).toContain('2');
-        expect((screen.getByTestId('switch-01-day-1') as HTMLInputElement).checked).toBe(true);
-        expect((screen.getByTestId('switch-01-day-0') as HTMLInputElement).checked).toBe(false);
+        expect(screen.getByTestId<HTMLInputElement>('switch-01-day-1').checked).toBe(true);
+        expect(screen.getByTestId<HTMLInputElement>('switch-01-day-0').checked).toBe(false);
     });
 
     it('writes the whole mask when one day is switched on', async () => {
@@ -219,7 +219,7 @@ describe('the switching programme in the dialog', () => {
 
     it('offers the eight astro conditions as a select', async () => {
         await open();
-        const select = screen.getByTestId('switch-01-CONDITION') as HTMLSelectElement;
+        const select = screen.getByTestId<HTMLSelectElement>('switch-01-CONDITION');
         expect(select.options).toHaveLength(8);
         await fireEvent.change(select, {target: {value: '1'}});
         await fireEvent.click(screen.getByTestId('paramset-preview'));

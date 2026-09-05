@@ -79,10 +79,10 @@
 
     /** The application menu cannot reach into the page, so it asks (task 11's `menu.action`). */
     $effect(() =>
-        stores.host.onMenuAction((action) => {
-            if (action === 'settings') {
-                app.configDialogOpen = true;
-            }
+        // `MenuAction` has exactly one member today, so there is nothing to distinguish; adding a
+        // second one makes the compiler ask for the switch back.
+        stores.host.onMenuAction(() => {
+            app.configDialogOpen = true;
         }),
     );
 

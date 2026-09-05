@@ -50,7 +50,7 @@ describe('ConfigDialog', () => {
     it('shows the whole ConnectionConfig of the backend', async () => {
         await open(transport);
 
-        expect((screen.getByTestId('config-host') as HTMLInputElement).value).toBe('demo.local');
+        expect(screen.getByTestId<HTMLInputElement>('config-host').value).toBe('demo.local');
         expect(screen.getByLabelText('Schnittstellen')).toBeTruthy();
         expect(screen.getByText('Gefundene CCUs')).toBeTruthy();
         expect(screen.getByText('ReGa verwenden')).toBeTruthy();
@@ -60,7 +60,7 @@ describe('ConfigDialog', () => {
 
     it('takes the host from the discovered list', async () => {
         await open(transport);
-        const host = screen.getByTestId('config-host') as HTMLInputElement;
+        const host = screen.getByTestId<HTMLInputElement>('config-host');
 
         await fireEvent.change(screen.getByText('Gefundene CCUs').parentElement!.querySelector('select')!, {
             target: {value: 'demo.local'},
@@ -156,10 +156,10 @@ describe('ConfigDialog', () => {
         });
         await open(transport);
 
-        expect((screen.getByTestId('config-host') as HTMLInputElement).value).toBe('');
+        expect(screen.getByTestId<HTMLInputElement>('config-host').value).toBe('');
         // The discovery row is always there now, with the select disabled until something answers:
         // 2.x ran the UDP search once at start-up, so a CCU that booted later never showed up.
-        expect((screen.getByTestId('config-discovered') as HTMLSelectElement).disabled).toBe(true);
-        expect((screen.getByTestId('config-discover') as HTMLButtonElement).disabled).toBe(false);
+        expect(screen.getByTestId<HTMLSelectElement>('config-discovered').disabled).toBe(true);
+        expect(screen.getByTestId<HTMLButtonElement>('config-discover').disabled).toBe(false);
     });
 });

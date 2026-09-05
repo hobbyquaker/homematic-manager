@@ -40,6 +40,11 @@ export function apiUrl(location: LocationLike, path = 'api'): string {
 
 /** Is demo mode selected - by `?demo` in the URL or by the `VITE_HMM_DEMO` build flag? */
 export function isDemoRequested(location: LocationLike | undefined): boolean {
+    // `vite/client` types `import.meta.env` as always present, so the `?.` reads as pointless -
+    // but this module is also loaded outside a vite build, where it is not. It has to stay written
+    // exactly like this: vite replaces the literal text of `import.meta.env[...]` at build time,
+    // and reading it through a variable first would leave the flag unreplaced.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- see above
     if (import.meta.env?.['VITE_HMM_DEMO'] === 'true') {
         return true;
     }

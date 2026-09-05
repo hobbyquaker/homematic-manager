@@ -249,7 +249,7 @@ describe('the paramset dialog', () => {
         await waitFor(() => {
             expect(screen.getByTestId('preview-empty')).toBeTruthy();
         });
-        expect((screen.getByTestId('write-confirm') as HTMLButtonElement).disabled).toBe(true);
+        expect(screen.getByTestId<HTMLButtonElement>('write-confirm').disabled).toBe(true);
         expect(transport.countOf('paramset.put')).toBe(0);
     });
 
@@ -298,7 +298,7 @@ describe('the paramset dialog', () => {
         // JEQ0234567:2 is the same device, same channel type, same firmware: eligible.
         await fireEvent.click(within(await waitFor(() => screen.getByTestId('paramset-targets'))).getByRole('button'));
         const options = within(screen.getByTestId('paramset-targets')).getAllByRole('option');
-        expect(options.map((option) => option.textContent ?? '').join('|')).toContain('Taster Flur:2 (JEQ0234567:2)');
+        expect(options.map((option) => option.textContent).join('|')).toContain('Taster Flur:2 (JEQ0234567:2)');
     });
 
     it('writes a multi-apply to every chosen channel in one call', async () => {

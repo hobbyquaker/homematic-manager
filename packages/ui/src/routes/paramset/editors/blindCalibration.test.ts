@@ -166,7 +166,7 @@ describe('the calibration block in the dialog', () => {
 
     it('shows the plain seconds next to the raw value, and hides the raw rows', async () => {
         await open(HMIP_BLIND_TRANSMITTER_MASTER, hmipValues);
-        expect((screen.getByTestId('blind-REFERENCE_RUNNING_TIME_TOP_BOTTOM-seconds') as HTMLInputElement).value).toBe(
+        expect(screen.getByTestId<HTMLInputElement>('blind-REFERENCE_RUNNING_TIME_TOP_BOTTOM-seconds').value).toBe(
             '90',
         );
         expect(screen.getByTestId('blind-REFERENCE_RUNNING_TIME_TOP_BOTTOM-raw').textContent).toContain('90 × 1S');

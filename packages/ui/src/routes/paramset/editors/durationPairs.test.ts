@@ -197,7 +197,7 @@ describe('the duration picker in the dialog', () => {
 
     it('sets the pair maximum for "not used", and clears it again', async () => {
         await openMaster();
-        const box = screen.getByTestId('duration-POWERUP_ONDELAY-not-used') as HTMLInputElement;
+        const box = screen.getByTestId<HTMLInputElement>('duration-POWERUP_ONDELAY-not-used');
         expect(box.checked).toBe(false);
         await fireEvent.click(box);
         await waitFor(() => {

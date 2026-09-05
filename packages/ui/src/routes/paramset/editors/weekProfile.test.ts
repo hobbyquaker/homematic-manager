@@ -267,10 +267,10 @@ describe('the week programme in the dialog', () => {
 
     it('shows the end times as clock times, and the slot before as the start', async () => {
         await open(HMIP_HEATING_MASTER);
-        expect((screen.getByTestId('week-slot-1-endtime') as HTMLInputElement).value).toBe('06:00');
-        expect((screen.getByTestId('week-slot-2-endtime') as HTMLInputElement).value).toBe('22:00');
+        expect(screen.getByTestId<HTMLInputElement>('week-slot-1-endtime').value).toBe('06:00');
+        expect(screen.getByTestId<HTMLInputElement>('week-slot-2-endtime').value).toBe('22:00');
         expect(screen.getByTestId('week-slot-2').textContent).toContain('06:00');
-        expect((screen.getByTestId('week-slot-2-value') as HTMLInputElement).value).toBe('21');
+        expect(screen.getByTestId<HTMLInputElement>('week-slot-2-value').value).toBe('21');
     });
 
     it('writes the minute the CCU wants when a clock time is typed', async () => {
@@ -298,7 +298,7 @@ describe('the week programme in the dialog', () => {
         await fireEvent.input(screen.getByTestId('week-slot-1-value'), {target: {value: '19'}});
         await fireEvent.click(screen.getByTestId('week-day-SUNDAY'));
         await waitFor(() => {
-            expect((screen.getByTestId('week-slot-1-value') as HTMLInputElement).value).toBe('17');
+            expect(screen.getByTestId<HTMLInputElement>('week-slot-1-value').value).toBe('17');
         });
 
         await fireEvent.click(screen.getByTestId('week-profile-P2'));

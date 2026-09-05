@@ -248,7 +248,7 @@ check "the ended session sees the login page again" 'name="password"' "$out"
 out="$(probe "$SESSION")"
 check "and its cookie no longer opens the socket" "error:http 401" "$out"
 
-for attempt in 1 2 3 4 5; do
+for _ in 1 2 3 4 5; do
     dex "curl -so /dev/null -X POST http://127.0.0.1/addons/hmm/login -d 'user=ccuadmin&password=wrong'" >/dev/null
 done
 out="$(dex "curl -so /dev/null -w '%{http_code}' -X POST http://127.0.0.1/addons/hmm/login -d 'user=ccuadmin&password=a%3Ab%5Cc'")"

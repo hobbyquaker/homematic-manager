@@ -1,0 +1,37 @@
+# The build stage copies the whole context and runs `npm ci` + `npm run build` in it, so what has
+# to be here is the sources, the manifests and `data/dist` (the generated device metadata, which is
+# committed). Everything below is either rebuilt inside the image or has no business in it.
+#
+# Careful: a bare `dist` rule would drop `data/dist` and the image would ship no metadata at all.
+
+node_modules
+**/node_modules
+
+.git
+.github
+.gitattributes
+
+# rebuilt by `npm run build`
+packages/*/dist
+apps/web/dist
+apps/electron/out
+apps/electron/dist
+**/*.tsbuildinfo
+
+# left behind by `npm pack`; `prepack.mjs` writes them again
+apps/web/ui
+apps/web/data
+
+# the 2.7.1 sources, kept for reference only - never built, never linted, 39 MB
+legacy
+
+# the pinned upstream artefacts the converter reads; `data/dist` is what ships
+data/occu
+data/upstream
+
+coverage
+*.log
+*.pid
+.idea
+.vscode
+.DS_Store

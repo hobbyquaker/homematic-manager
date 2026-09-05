@@ -423,7 +423,9 @@ async function applyConnectionOptions(backend: Backend, options: WebHostOptions,
     ) {
         return;
     }
-    log.info(`connection: host=${connection.host}${connection.local === true ? ' (local)' : ''}`);
+    if (wantsHost || wantsLocal) {
+        log.info(`connection: host=${connection.host}${connection.local === true ? ' (local)' : ''}`);
+    }
     if (wantsCallback) {
         const {ip, xmlrpcPort, binrpcPort} = connection.callback;
         log.info(`callback: ${ip === '' ? 'auto' : ip} xmlrpc=${String(xmlrpcPort)} binrpc=${String(binrpcPort)}`);

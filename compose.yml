@@ -1,0 +1,63 @@
+# Homematic Manager as a container - two variants of the same image. Copy the one that fits, delete
+# the other; docs/install-docker.md explains the trade-off in full.
+#
+#   docker compose up -d
+#   docker compose logs -f homematic-manager
+#
+# The first start writes `config.json` into the `/data` volume. Everything about the CCU -
+# interfaces, ReGa, callback address - is configured in the UI's settings dialog; the environment
+# variables here only cover what a container cannot work out for itself.
+
+services:
+  # ---------------------------------------------------------------------------------------
+  # Variant 1 (recommended): host networking.
+  #
+  # The container shares the host's network stack, so the CCU reaches the callback ports at the
+  # host's own address and the backend detects that address itself. Nothing has to be published
+  # and nothing has to be told where it is. Linux only - Docker Desktop on macOS and Windows has
+  # no real host network.
+  # ---------------------------------------------------------------------------------------
+  homematic-manager:
+    image: ghcr.io/hobbyquaker/homematic-manager:latest
+    container_name: homematic-manager
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      # the CCU; written to config.json on start when it differs from what is stored there
+      HMM_CCU: ccu3.local
+      # HMM_PORT: 8090
+      # HMM_LOG_LEVEL: info
+    volumes:
+      - homematic-manager-data:/data
+
+  # ---------------------------------------------------------------------------------------
+  # Variant 2: the default bridge network with published ports.
+  #
+  # The CCU pushes events to the address the backend announced in `init`. On a bridge network
+  # that address is the container's own 172.17.x.x, which the CCU cannot reach - the interfaces
+  # would show as connected and no event would ever arrive. So the callback address has to be
+  # given by hand, and the two callback ports have to be published unchanged (the CCU connects to
+  # exactly the port it was told, so no remapping).
+  #
+  # Replace 192.168.1.10 with the address of the *Docker host* on the CCU's network.
+  # ---------------------------------------------------------------------------------------
+  homematic-manager-bridge:
+    image: ghcr.io/hobbyquaker/homematic-manager:latest
+    container_name: homematic-manager-bridge
+    restart: unless-stopped
+    profiles: [bridge]
+    environment:
+      HMM_CCU: ccu3.local
+      HMM_CALLBACK_IP: 192.168.1.10
+      # the image's defaults, spelled out because the published ports have to match them
+      HMM_CALLBACK_XMLRPC_PORT: 2126
+      HMM_CALLBACK_BINRPC_PORT: 2127
+    ports:
+      - '8090:8090'
+      - '2126:2126'
+      - '2127:2127'
+    volumes:
+      - homematic-manager-data:/data
+
+volumes:
+  homematic-manager-data:

@@ -4,6 +4,7 @@
     import BlindCalibrationEditor from './BlindCalibrationEditor.svelte';
     import DurationPairsEditor from './DurationPairsEditor.svelte';
     import EnumOptionsEditor from './EnumOptionsEditor.svelte';
+    import SwitchProfileEditor from './SwitchProfileEditor.svelte';
     import WeekProfileEditor from './WeekProfileEditor.svelte';
 
     /**
@@ -30,6 +31,8 @@
         <DurationPairsEditor {spec} {values} {channelType} {onchange} />
     {:else if spec.kind === 'enum-options'}
         <EnumOptionsEditor {spec} {values} {channelType} {onchange} />
+    {:else if spec.kind === 'switch-week-profile'}
+        <SwitchProfileEditor {spec} {values} {channelType} {onchange} />
     {:else if spec.kind === 'week-profile'}
         <WeekProfileEditor {spec} {values} {channelType} {onchange} />
     {/if}

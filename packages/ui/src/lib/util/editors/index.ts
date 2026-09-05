@@ -1,17 +1,20 @@
 import {detectBlindCalibration, type BlindCalibrationSpec} from './blindCalibration.js';
 import {detectDurationPairs, type DurationPairsSpec} from './durationPairs.js';
 import {detectEnumOptions, type EnumOptionsSpec} from './enumOptions.js';
+import {detectSwitchProfile, type SwitchProfileSpec} from './switchProfile.js';
 import {detectWeekProfile, type WeekProfileSpec} from './weekProfile.js';
 import {EMPTY_CONTEXT, type EditorContext, type EditorTarget} from './types.js';
 
 export * from './blindCalibration.js';
 export * from './durationPairs.js';
 export * from './enumOptions.js';
+export * from './switchProfile.js';
 export * from './weekProfile.js';
 export * from './types.js';
 
 /** Everything a detector can return. One member per device-specific editor. */
-export type DeviceEditorSpec = BlindCalibrationSpec | DurationPairsSpec | EnumOptionsSpec | WeekProfileSpec;
+export type DeviceEditorSpec =
+    BlindCalibrationSpec | DurationPairsSpec | EnumOptionsSpec | SwitchProfileSpec | WeekProfileSpec;
 
 /**
  * The registry: every device-specific editor, in the order they get to claim parameters.
@@ -29,6 +32,7 @@ type Detector = (
 
 const DETECTORS: readonly Detector[] = [
     detectWeekProfile,
+    detectSwitchProfile,
     detectBlindCalibration,
     detectDurationPairs,
     detectEnumOptions,

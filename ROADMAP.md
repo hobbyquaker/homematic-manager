@@ -10,8 +10,8 @@ reused. This file holds open items; a finished task moves to `roadmap-archive/ta
 was done, measured and found, and its line in the contents gets a ✅ marker. Decisions are **D-n**,
 open questions **OQ-n**; when the maintainer changes a decision, record it here with the date.
 
-Status 2026-09-05: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 1.0, branch
-`1.0-dev` in its own repository, not yet pushed or published) and 9 (data pipeline) are done,
+Status 2026-09-05: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 1.0, released as 1.0.0 on
+npm and GitHub on 2026-09-05 at the maintainer's request; branch `1.0-dev`, `master` not merged yet) and 9 (data pipeline) are done,
 version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); tasks 7 (UI foundation) and 11 (Electron
 host with the build and release workflows) and 12 (web host and npm package; its Docker part runs
 as a follow-up, also done) are done too, and so is task 6 (write-safety lab study, `docs/config-pending.md`):

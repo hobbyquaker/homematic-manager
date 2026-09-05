@@ -73,6 +73,14 @@ export interface InterfaceState {
     lastEvent?: number;
     /** Last error text, cleared on reconnect. */
     error?: string;
+    /**
+     * Nothing is listening on that port: the interface process does not exist on this system.
+     *
+     * A CCU without a wired gateway answers like this for BidCos-Wired, which is in the default
+     * interface list. The manager then backs off (up to five minutes between attempts) instead of
+     * retrying every 15 s, and the UI shows "not present" rather than a connection error.
+     */
+    absent?: boolean;
 }
 
 export interface RegaState {

@@ -209,7 +209,7 @@ A fresh install pulls six packages in total.
 | The service does not start | `journalctl -u homematic-manager -n 50`. A port already in use and a profile directory the service user cannot write are the two usual ones. |
 | Interfaces stay red | The CCU's XML-RPC API firewall setting, or a wrong address in the settings dialog. `--ccu` only seeds it on the first start. |
 | Interfaces are green, nothing ever updates | The callback: the CCU cannot reach the container. Check the container's own firewall and Proxmox's, and pin the callback ports if a rule needs fixed numbers. |
-| `BidCos-Wired ... init failed` every 15 s | `hs485d` runs only on a CCU with a wired gateway, and the default interface list enables it anyway. Untick BidCos-Wired in the settings dialog. |
+| `BidCos-Wired` shows as "not present" | `hs485d` runs only on a CCU with a wired gateway, and the default interface list enables it anyway. One warning line, then a retry at most every five minutes. Untick BidCos-Wired in the settings dialog to hide it. |
 | Names are missing, ReGa shows red | ReGa is optional (D-2). Allow "Remote Homematic-Script API" in the CCU's firewall to get the CCU's names, or carry on with the local ones. |
 | Device pictures are missing | They are fetched from the CCU and cached under `/var/lib/homematic-manager/images`. With TLS the CCU's self-signed certificate cannot be accepted, and a small bundled set answers instead. |
 | The callback ports collide with hm2mqtt | Both default to 2126/2127. Move one of them. |

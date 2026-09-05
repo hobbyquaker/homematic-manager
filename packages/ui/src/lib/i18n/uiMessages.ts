@@ -23,6 +23,7 @@ export const UI_MESSAGES: MessageCatalogue = {
     Apply: {de: 'Übernehmen', en: 'Apply'},
     Connected: {de: 'Verbunden', en: 'Connected'},
     'Not connected': {de: 'Nicht verbunden', en: 'Not connected'},
+    'Not present': {de: 'Nicht vorhanden', en: 'Not present'},
     'RPC log': {de: 'RPC-Protokoll', en: 'RPC log'},
     'Show RPC log': {de: 'RPC-Protokoll anzeigen', en: 'Show RPC log'},
     'No RPC calls yet': {de: 'Noch keine RPC-Aufrufe', en: 'No RPC calls yet'},

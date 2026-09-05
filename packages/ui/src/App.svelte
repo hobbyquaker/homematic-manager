@@ -114,6 +114,7 @@
             interfaces={stores.interfaces.states}
             backendConnected={app.connected}
             notConnectedText={t('Not connected')}
+            notPresentText={t('Not present')}
             testId="connection-indicator"
         />
 

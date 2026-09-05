@@ -23,7 +23,7 @@
 import type {ConnectionConfig, InterfaceState, RpcProtocol} from '@homematic-manager/core';
 import {INTERFACE_NAMES, interfaceDefinition, interfacePort, isKnownInterface} from '@homematic-manager/core';
 
-import {configError, connectionError, errorMessage} from '../errors.js';
+import {configError, connectionError, errorMessage, isConnectionRefused} from '../errors.js';
 import {interfaceTargets, type InterfaceTarget} from '../config/defaults.js';
 import {RpcClient, type RpcCallRecord, type RpcClientOptions} from '../rpc/client.js';
 import {CallbackServers, type CallbackHandler, type CallbackServerSet} from '../rpc/server.js';
@@ -35,6 +35,16 @@ export const WATCHDOG_INTERVAL_MS = 15_000;
 /** How long `stop()` waits for the de-registering `init(url, '')` calls. */
 export const SHUTDOWN_TIMEOUT_MS = 5000;
 
+/**
+ * The longest wait between two `init` attempts for an interface that keeps failing.
+ *
+ * Task 13 found this on hardware: a CCU without a wired gateway runs no `hs485d`, BidCos-Wired is
+ * in the default interface list, and the watchdog re-`init`ed it every 15 s - four ERROR lines a
+ * minute, for as long as the app ran, on every stock CCU3. The interface is now tried once, and
+ * then with a doubling delay up to this ceiling, and only the first failure produces a notice.
+ */
+export const MAX_INIT_BACKOFF_MS = 300_000;
+
 export interface ManagedInterface {
     readonly name: string;
     readonly target: InterfaceTarget;
@@ -42,6 +52,10 @@ export interface ManagedInterface {
     state: InterfaceState;
     /** Milliseconds since epoch of the last event, ping answer or successful `init`. */
     lastEvent: number;
+    /** Consecutive failed `init` calls; 0 as soon as one succeeds. */
+    failures: number;
+    /** Milliseconds since epoch before which the watchdog does not try `init` again. */
+    retryAt: number;
 }
 
 export interface InterfaceManagerOptions {
@@ -56,6 +70,12 @@ export interface InterfaceManagerOptions {
     readonly now?: () => number;
     readonly rpcTimeoutMs?: number;
     readonly watchdogIntervalMs?: number;
+    /**
+     * First wait after a failed `init`; it doubles per further failure up to
+     * {@link MAX_INIT_BACKOFF_MS}. Defaults to the watchdog interval, so nothing changes for an
+     * interface that fails once and then works.
+     */
+    readonly initBackoffMs?: number;
     /** Address to bind the callback servers to; `0.0.0.0` unless the addon says loopback. */
     readonly callbackHost?: string;
     /** Injected by the tests. */
@@ -200,7 +220,10 @@ export class InterfaceManager {
             const elapsed = now - entry.lastEvent;
             if (elapsed > timeout) {
                 this.#update(entry, {connected: false});
-                work.push(this.#init(entry.name));
+                // an interface that is not there at all is not asked again on every round
+                if (entry.retryAt <= now) {
+                    work.push(this.#init(entry.name));
+                }
             } else if (entry.target.resolved.ping && elapsed > timeout / 1.5 - 1000) {
                 work.push(this.#ping(entry));
             }
@@ -227,6 +250,15 @@ export class InterfaceManager {
         const names = interfaceName === undefined ? [...this.#interfaces.keys()] : [interfaceName];
         if (interfaceName !== undefined && !this.#interfaces.has(interfaceName)) {
             throw configError(`interface "${interfaceName}" is not configured`);
+        }
+        for (const name of names) {
+            const entry = this.#interfaces.get(name);
+            if (entry) {
+                // an explicit reconnect is the user saying "try now", so the wait is dropped. The
+                // failure count is not: it is what makes a success say "answering again", and a
+                // reconnect that fails again must not produce a second notice either.
+                entry.retryAt = 0;
+            }
         }
         await Promise.all(names.map((name) => this.#init(name)));
         this.#options.onStateChanged(this.states());
@@ -291,10 +323,21 @@ export class InterfaceManager {
         );
         this.#detected = INTERFACE_NAMES.filter((name) => found.includes(name));
         for (const name of connection.interfaces) {
-            if (isKnownInterface(name) && !this.#detected.includes(name) && !this.isConnected(name)) {
+            // an interface whose `init` already refused says the same thing; one notice is enough
+            const known = this.#interfaces.get(name);
+            if (
+                isKnownInterface(name) &&
+                !this.#detected.includes(name) &&
+                !this.isConnected(name) &&
+                known?.state.absent !== true
+            ) {
                 this.#options.onNotice('warn', `${name}: the port is closed on ${connection.host}`, name);
             }
+            if (known && !this.#detected.includes(name) && !this.isConnected(name)) {
+                this.#update(known, {absent: true});
+            }
         }
+        this.#options.onStateChanged(this.states());
         return this.detected;
     }
 
@@ -318,6 +361,8 @@ export class InterfaceManager {
             target,
             client,
             lastEvent: 0,
+            failures: 0,
+            retryAt: 0,
             state: {
                 name: resolved.name,
                 type: isKnownInterface(resolved.name) ? resolved.name : 'custom',
@@ -349,15 +394,49 @@ export class InterfaceManager {
         try {
             await entry.client.call('init', [url, resolved.ident]);
             entry.lastEvent = this.#now();
-            this.#update(entry, {connected: true, error: undefined});
+            const wasFailing = entry.failures > 0;
+            entry.failures = 0;
+            entry.retryAt = 0;
+            this.#update(entry, {connected: true, error: undefined, absent: false});
+            if (wasFailing) {
+                this.#options.onNotice('info', `${interfaceName}: answering again`, interfaceName);
+            }
             this.#options.onStateChanged(this.states());
             await this.#options.onConnected?.(interfaceName);
         } catch (error) {
-            const message = errorMessage(error);
-            this.#update(entry, {connected: false, error: message});
-            this.#options.onNotice('error', `${interfaceName}: ${message}`, interfaceName);
+            this.#noteInitFailure(entry, error);
             this.#options.onStateChanged(this.states());
         }
+    }
+
+    /**
+     * A failed `init`: back off, and say so exactly once.
+     *
+     * Whether the port refuses the connection decides both the wording and the `absent` flag the
+     * indicator reads - "not present" is a different thing from "the CCU is unreachable", and only
+     * the first one is the normal state of BidCos-Wired on a CCU without a wired gateway.
+     */
+    #noteInitFailure(entry: ManagedInterface, error: unknown): void {
+        const message = errorMessage(error);
+        const absent = isConnectionRefused(error);
+        const first = entry.failures === 0;
+        entry.failures += 1;
+        const base = this.#options.initBackoffMs ?? WATCHDOG_INTERVAL_MS;
+        const wait = Math.min(base * 2 ** (entry.failures - 1), MAX_INIT_BACKOFF_MS);
+        entry.retryAt = this.#now() + wait;
+        this.#update(entry, {connected: false, error: message, absent});
+        if (!first) {
+            return;
+        }
+        const minutes = Math.round(MAX_INIT_BACKOFF_MS / 60_000);
+        this.#options.onNotice(
+            absent ? 'warn' : 'error',
+            absent
+                ? `${entry.name}: nothing is listening on ${entry.state.host}:${String(entry.state.port)} - ` +
+                      `treated as not present, retried at most every ${String(minutes)} minutes`
+                : `${entry.name}: ${message}`,
+            entry.name,
+        );
     }
 
     async #ping(entry: ManagedInterface): Promise<void> {
@@ -370,12 +449,20 @@ export class InterfaceManager {
         }
     }
 
-    #update(entry: ManagedInterface, changes: {connected?: boolean; error?: string | undefined}): void {
+    #update(
+        entry: ManagedInterface,
+        changes: {connected?: boolean; error?: string | undefined; absent?: boolean},
+    ): void {
         const state: InterfaceState = {
             ...entry.state,
             ...(changes.connected === undefined ? {} : {connected: changes.connected}),
             ...(entry.lastEvent > 0 ? {lastEvent: entry.lastEvent} : {}),
         };
+        if (changes.absent === true) {
+            state.absent = true;
+        } else if (changes.absent === false) {
+            delete (state as {absent?: boolean}).absent;
+        }
         if ('error' in changes) {
             if (changes.error === undefined) {
                 delete (state as {error?: string}).error;

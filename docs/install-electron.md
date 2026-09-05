@@ -180,7 +180,7 @@ pin them, and it offers this machine's addresses as callback-address candidates.
 | The app starts but no device list appears | The CCU's XML-RPC API firewall setting, or the wrong address. The settings dialog has a discovery button (UDP broadcast) that finds CCUs on the same subnet. |
 | Interfaces show as connected, but nothing ever updates | The callback. The CCU could reach the app but not the other way round: check the local firewall, and pin the callback address in the settings dialog if this machine has several. |
 | Names are missing, a ReGa indicator is red | ReGa is optional (D-2): the app carries on with local names. Enable "Remote Homematic-Script API" in the CCU's firewall to get the CCU's names back. |
-| `BidCos-Wired` keeps failing to init | `hs485d` runs only on a CCU that has a wired gateway. Untick BidCos-Wired in the settings dialog. |
+| `BidCos-Wired` shows as "not present" | `hs485d` runs only on a CCU that has a wired gateway. The app notices the refused port, says so once and stops retrying every 15 s. Untick BidCos-Wired in the settings dialog to hide it. |
 | Device pictures are missing | They are fetched from the CCU (D-10). Without a reachable CCU a small bundled set answers instead; with TLS the CCU's self-signed certificate cannot be accepted by the fetch, so the bundled picture is used. |
 | Something crashed | `logs/main.log` in the profile directory above; the Help menu opens the folder. |
 

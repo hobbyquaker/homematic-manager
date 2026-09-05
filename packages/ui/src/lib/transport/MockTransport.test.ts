@@ -143,7 +143,7 @@ describe('MockTransport', () => {
         });
 
         it('answers the remaining fixture methods', async () => {
-            await expect(transport.request('interfaces.list')).resolves.toHaveLength(2);
+            await expect(transport.request('interfaces.list')).resolves.toHaveLength(3);
             await expect(transport.request('interfaces.reconnect')).resolves.toBeNull();
             await expect(transport.request('rega.state')).resolves.toMatchObject({reachable: true});
             await expect(transport.request('config.discover')).resolves.toHaveLength(1);

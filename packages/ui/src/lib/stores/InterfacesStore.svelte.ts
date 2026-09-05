@@ -43,9 +43,17 @@ export class InterfacesStore {
         return this.get(name)?.connected === true;
     }
 
-    /** True when every configured interface answers - the header's overall state. */
+    /**
+     * True when every interface that exists on this system answers - the header's overall state.
+     *
+     * An interface the backend marked `absent` does not count: its port refuses the connection, so
+     * the process is not installed at all. BidCos-Wired is in the default list and missing on every
+     * CCU without a wired gateway, and treating that as "something is wrong" would put a warning on
+     * a perfectly healthy system (task 13, task 15).
+     */
     get allConnected(): boolean {
-        return this.states.length > 0 && this.states.every((state) => state.connected);
+        const present = this.states.filter((state) => state.absent !== true);
+        return present.length > 0 && present.every((state) => state.connected);
     }
 
     async load(): Promise<void> {

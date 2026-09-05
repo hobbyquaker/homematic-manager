@@ -287,6 +287,8 @@ describe('InterfacesStore', () => {
         expect(store.typeOf('CUxD')).toBe('');
         expect(store.isConnected('BidCos-RF')).toBe(true);
         expect(store.isConnected('CUxD')).toBe(false);
+        // the demo has a BidCos-Wired that is not there; an absent interface is not a fault
+        expect(store.isConnected('BidCos-Wired')).toBe(false);
         expect(store.allConnected).toBe(true);
         expect(store.rega?.reachable).toBe(true);
         expect(store.loading).toBe(false);

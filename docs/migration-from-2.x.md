@@ -255,8 +255,11 @@ Things that are known, measured and not fixed:
   descriptions or in the metadata says which bit is which weekday; the editor took bit 0 = Sunday
   from the documented HmIP weekday enums (BidCos enums start at Saturday) and always prints the raw
   mask next to the checkboxes so you can check it against the WebUI.
-- **BidCos-Wired retries `init` every 15 seconds** with an error line on any system that has no wired
-  gateway, because the default interface list enables it. Untick it in the settings dialog.
+- **BidCos-Wired is shown as "not present"** on any system that has no wired gateway. It is in
+  the default interface list, its port refuses the connection, and 2.x answered that with an
+  error line every 15 seconds for as long as it ran. 3.0 says it once, marks the interface with
+  a grey dash instead of a red cross and retries at most every five minutes. Untick it in the
+  settings dialog if you would rather not see it at all.
 
 ## See also
 

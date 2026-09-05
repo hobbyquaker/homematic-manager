@@ -48,10 +48,11 @@ about every half hour while the agent works; the timestamp above is the last ref
 
 - Enable GitHub Actions on `hobbyquaker/homematic-manager` (the API call was blocked for the
   agent). Until then, no CI and no Windows build artifact from `build.yml`.
-- Push `~/repos/hm-simulator` branch `1.0-dev` (now 12 commits incl. task 6's calibration) and tag `v1.0.0-dev.0` (`release.yml` publishes
-  with npm OIDC). Until then the backend installs it with
-  `npm install --no-save /home/basti/repos/hm-simulator` and the simulator tests are
-  `describe.skipIf`.
+- hm-simulator 1.0.0 is published (2026-09-05, tag `v1.0.0`, branch `1.0-dev` pushed; `master`
+  of that repository still points at 0.1.1 and wants a fast-forward). Task 15 switches the
+  backend to the registry package and makes a missing simulator a CI failure. Later simulator
+  changes (task 15 adds `setTempKey`) are committed on `1.0-dev` and released as 1.0.1 by the
+  main session on request.
 - Decide OQ-14 (npm name for the web host package; recommendation: reuse `homematic-manager`).
 
 ## Next steps, in order

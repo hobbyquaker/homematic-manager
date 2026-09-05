@@ -7,6 +7,7 @@ import {
     errorMessage,
     internalError,
     isApiError,
+    isConnectionRefused,
     isRpcFault,
     rpcFaultError,
     toApiError,
@@ -136,5 +137,43 @@ describe('errorMessage', () => {
     it('is the message of whatever was thrown', () => {
         expect(errorMessage(new Error('nope'))).toBe('nope');
         expect(errorMessage(42)).toBe('42');
+    });
+});
+
+describe('isConnectionRefused', () => {
+    it('finds the code on the error itself and along the cause chain', () => {
+        expect(isConnectionRefused(Object.assign(new Error('connect'), {code: 'ECONNREFUSED'}))).toBe(true);
+        const wrapped = connectionError(
+            'BidCos-Wired: init failed',
+            Object.assign(new Error('x'), {code: 'ECONNREFUSED'}),
+        );
+        expect(isConnectionRefused(wrapped)).toBe(true);
+    });
+
+    it('finds it in an aggregate of per-address failures, which is what happy eyeballs throws', () => {
+        const aggregate = Object.assign(new Error('all attempts failed'), {
+            errors: [
+                Object.assign(new Error('v6'), {code: 'EHOSTUNREACH'}),
+                Object.assign(new Error('v4'), {code: 'ECONNREFUSED'}),
+            ],
+        });
+        expect(isConnectionRefused(aggregate)).toBe(true);
+    });
+
+    it('falls back to the text, because the message is composed before the cause is attached', () => {
+        expect(isConnectionRefused(new Error('connect ECONNREFUSED 192.168.1.2:2000'))).toBe(true);
+    });
+
+    it('is false for a timeout, a fault and anything else', () => {
+        expect(isConnectionRefused(connectionError('HmIP-RF: ping timed out after 5000 ms'))).toBe(false);
+        expect(isConnectionRefused(rpcFaultError('x', {faultCode: -2, faultString: 'Unknown'}))).toBe(false);
+        expect(isConnectionRefused(undefined)).toBe(false);
+        expect(isConnectionRefused('ECONNREFUSED_LIKE')).toBe(false);
+    });
+
+    it('does not walk a cause cycle forever', () => {
+        const a: {message: string; cause?: unknown} = {message: 'a'};
+        a.cause = a;
+        expect(isConnectionRefused(a)).toBe(false);
     });
 });

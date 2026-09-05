@@ -7,6 +7,8 @@
         /** The connection to the backend, not to the CCU. */
         backendConnected?: boolean;
         notConnectedText?: string;
+        /** Title for an interface whose port refuses the connection - nothing runs there. */
+        notPresentText?: string;
         testId?: string | undefined;
     }
 
@@ -15,8 +17,25 @@
         interfaces,
         backendConnected = true,
         notConnectedText = 'Not connected',
+        notPresentText = 'Not present',
         testId = undefined,
     }: Props = $props();
+
+    /**
+     * Three states, not two. 2.7 knew ✔ and ✕ only, so BidCos-Wired on a CCU without a wired
+     * gateway - which is in the default interface list - sat there as a red ✕ forever and looked
+     * like a fault. A refused port means the interface process does not exist on this system
+     * (task 13 measured it), which the backend reports as `absent`; that gets a grey dash.
+     */
+    function mark(state: InterfaceState): {glyph: string; className: string; title: string} {
+        if (state.connected) {
+            return {glyph: '✔', className: 'hmm-connection-ok', title: ''};
+        }
+        if (state.absent === true) {
+            return {glyph: '–', className: 'hmm-connection-absent', title: notPresentText};
+        }
+        return {glyph: '✕', className: 'hmm-connection-bad', title: state.error ?? ''};
+    }
 </script>
 
 <!--
@@ -28,13 +47,10 @@
     <div class="hmm-connection-host">{host === '' ? notConnectedText : host}</div>
     <div class="hmm-connection-interfaces">
         {#each interfaces as state (state.name)}
-            <span class="hmm-connection-interface" title={state.error ?? ''}>
+            {@const shown = mark(state)}
+            <span class="hmm-connection-interface" title={shown.title}>
                 {state.name}
-                <span
-                    class="hmm-connection-mark"
-                    class:hmm-connection-ok={state.connected}
-                    class:hmm-connection-bad={!state.connected}>{state.connected ? '✔' : '✕'}</span
-                >
+                <span class="hmm-connection-mark {shown.className}">{shown.glyph}</span>
             </span>
         {/each}
     </div>
@@ -76,5 +92,10 @@
 
     .hmm-connection-bad {
         color: var(--hmm-error);
+    }
+
+    /* "not there" is not "broken": the same muted grey the surrounding text uses. */
+    .hmm-connection-absent {
+        color: var(--hmm-fg-muted);
     }
 </style>

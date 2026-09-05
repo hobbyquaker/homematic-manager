@@ -404,6 +404,32 @@ describe('ConnectionIndicator', () => {
         expect(screen.getByText('Nicht verbunden')).toBeTruthy();
         expect(container.querySelector('.hmm-connection-offline')).toBeTruthy();
     });
+
+    it('shows an interface whose port refuses as "not present", not as an error', () => {
+        // BidCos-Wired on a CCU without a wired gateway: it is in the default list, nothing is
+        // listening, and a red x made every such CCU look broken (task 13, task 15)
+        const {container} = render(ConnectionIndicator, {
+            props: {
+                host: 'ccu',
+                interfaces: [
+                    {
+                        name: 'BidCos-Wired',
+                        type: 'BidCos-Wired',
+                        protocol: 'xmlrpc',
+                        host: 'ccu',
+                        port: 2000,
+                        connected: false,
+                        absent: true,
+                        error: 'connect ECONNREFUSED',
+                    },
+                ],
+                notPresentText: 'Nicht vorhanden',
+            },
+        });
+        expect(container.querySelector('.hmm-connection-absent')?.textContent).toBe('\u2013');
+        expect(container.querySelector('.hmm-connection-bad')).toBeNull();
+        expect(container.querySelector('.hmm-connection-interface')?.getAttribute('title')).toBe('Nicht vorhanden');
+    });
 });
 
 describe('LanguageSwitch and ThemeSwitch', () => {

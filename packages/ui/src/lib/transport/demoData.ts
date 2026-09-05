@@ -613,6 +613,19 @@ export const DEMO_INTERFACE_STATES: InterfaceState[] = [
         connected: true,
         lastEvent: Date.parse('2026-09-05T09:59:12Z'),
     },
+    {
+        // in the default interface list, and not there: a CCU without a wired gateway runs no
+        // hs485d. The demo carries it so the "not present" mark of the indicator is visible
+        // without a CCU, and so nobody re-introduces the red x that made it look broken.
+        name: 'BidCos-Wired',
+        type: 'BidCos-Wired',
+        protocol: 'xmlrpc',
+        host: 'demo.local',
+        port: 2000,
+        connected: false,
+        absent: true,
+        error: 'connect ECONNREFUSED demo.local:2000',
+    },
 ];
 
 export const DEMO_REGA_STATE: RegaState = {

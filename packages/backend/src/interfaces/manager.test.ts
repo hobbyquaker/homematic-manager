@@ -76,6 +76,7 @@ function harness(
         connection?: Partial<ConnectionConfig>;
         answers?: Record<string, Answer>;
         probe?: (host: string, port: number) => Promise<boolean>;
+        initBackoffMs?: number;
     } = {},
 ): Harness {
     const states: InterfaceState[][] = [];
@@ -104,6 +105,7 @@ function harness(
         watchdogIntervalMs: 0,
         createClient: clients.create,
         createCallbackServers: () => servers,
+        ...(options.initBackoffMs === undefined ? {} : {initBackoffMs: options.initBackoffMs}),
         ...(options.probe ? {probe: options.probe} : {probe: () => Promise.resolve(true)}),
     });
     return {manager, states, notices, connected, servers, clients, clock};
@@ -178,8 +180,70 @@ describe('InterfaceManager.start', () => {
         expect(bidcos?.connected).toBe(true);
         expect(hmip?.connected).toBe(false);
         expect(hmip?.error).toContain('ECONNREFUSED');
-        expect(h.notices.some((notice) => notice.interfaceName === 'HmIP-RF' && notice.level === 'error')).toBe(true);
+        // a refused port is not an error of the interface: nothing is running there (task 13)
+        expect(hmip?.absent).toBe(true);
+        const notice = h.notices.find((entry) => entry.interfaceName === 'HmIP-RF');
+        expect(notice?.level).toBe('warn');
+        expect(notice?.message).toContain('not present');
         expect(h.connected).toEqual(['BidCos-RF']);
+    });
+
+    it('reports an interface that answers with something other than a refusal as an error', async () => {
+        const h = harness({answers: {'HmIP-RF': () => new BackendError({message: 'boom', kind: 'rpc'})}});
+        await h.manager.start();
+        expect(h.manager.states()[1]?.absent).toBeUndefined();
+        expect(h.notices.find((entry) => entry.interfaceName === 'HmIP-RF')?.level).toBe('error');
+    });
+
+    it('backs off instead of re-initing a missing interface every round (task 13)', async () => {
+        // this is BidCos-Wired on a CCU without a wired gateway: it is in the default interface
+        // list, hs485d is not running, and 2.x's watchdog produced four ERROR lines a minute
+        const h = harness({
+            answers: {'HmIP-RF': () => Object.assign(new Error('connect ECONNREFUSED'), {})},
+            initBackoffMs: 15_000,
+        });
+        await h.manager.start();
+        const initsAfterStart = h.clients.calls.filter((call) => call.name === 'HmIP-RF').length;
+        expect(initsAfterStart).toBe(1);
+
+        // twenty watchdog rounds of 15 s: without the back-off that is twenty more attempts
+        for (let round = 0; round < 20; round += 1) {
+            h.clock.value += 15_000;
+            await h.manager.tick();
+        }
+        const attempts = h.clients.calls.filter((call) => call.name === 'HmIP-RF').length;
+        // 15 s, 30 s, 60 s, 120 s, 240 s and then the 300 s ceiling: five within the five minutes
+        expect(attempts).toBeGreaterThan(1);
+        expect(attempts).toBeLessThan(8);
+        // and exactly one notice, however often it was tried
+        expect(h.notices.filter((entry) => entry.interfaceName === 'HmIP-RF')).toHaveLength(1);
+    });
+
+    it('never waits longer than five minutes, and starts over when the user asks', async () => {
+        let refuse = true;
+        const h = harness({
+            answers: {
+                'HmIP-RF': () => (refuse ? Object.assign(new Error('connect ECONNREFUSED'), {}) : ''),
+            },
+            initBackoffMs: 15_000,
+        });
+        await h.manager.start();
+        for (let round = 0; round < 40; round += 1) {
+            h.clock.value += 60_000;
+            await h.manager.tick();
+        }
+        const attempts = h.clients.calls.filter((call) => call.name === 'HmIP-RF').length;
+        // forty minutes at the 300 s ceiling is eight attempts, plus the ones before it
+        expect(attempts).toBeGreaterThanOrEqual(8);
+
+        refuse = false;
+        await h.manager.reconnect('HmIP-RF');
+        const state = h.manager.states()[1];
+        expect(state?.connected).toBe(true);
+        expect(state?.absent).toBeUndefined();
+        expect(h.notices.filter((entry) => entry.interfaceName === 'HmIP-RF' && entry.level === 'info')).toHaveLength(
+            1,
+        );
     });
 
     it('finds the callback address itself when none is configured', () => {

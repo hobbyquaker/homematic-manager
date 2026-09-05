@@ -132,3 +132,31 @@ export function toApiError(value: unknown, fallbackKind: ApiError['kind'] = 'int
 export function errorMessage(value: unknown): string {
     return toApiError(value).message;
 }
+
+/**
+ * Did nothing answer at all on that port?
+ *
+ * A CCU without a wired gateway runs no `hs485d`, so BidCos-Wired - which is in the default
+ * interface list - refuses the TCP connection. That is neither a fault of the interface process nor
+ * a transient error: the process is not there, and retrying it every 15 s produced one ERROR line
+ * per quarter minute for as long as the app ran (found by task 13 on hardware). The interface
+ * manager treats it as "not present" and backs off instead.
+ *
+ * The code is looked for along the whole `cause` chain, because the RPC libraries wrap it, and in
+ * the message text as well, because `connectionError()` composes its text before the cause is set.
+ */
+export function isConnectionRefused(value: unknown): boolean {
+    let current: unknown = value;
+    for (let depth = 0; current !== undefined && current !== null && depth < 10; depth += 1) {
+        const candidate = current as {code?: unknown; errors?: unknown; cause?: unknown};
+        if (candidate.code === 'ECONNREFUSED') {
+            return true;
+        }
+        // node's happy-eyeballs connect aggregates the per-address failures in `errors`
+        if (Array.isArray(candidate.errors) && candidate.errors.some((entry) => isConnectionRefused(entry))) {
+            return true;
+        }
+        current = candidate.cause;
+    }
+    return /\bECONNREFUSED\b/.test(errorMessage(value));
+}

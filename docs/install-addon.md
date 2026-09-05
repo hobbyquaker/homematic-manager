@@ -227,7 +227,7 @@ settings but the definition of "we are the addon".
 | The UI loads but stays disconnected | The WebSocket did not get through. `grep hmm /var/log/messages`, and check that `/usr/local/etc/config/lighttpd/hmm.conf` exists and lighttpd was restarted after the install (`/etc/init.d/S50lighttpd restart`). **CCU3 firmware older than 3.61.5 does not read that directory at all.** |
 | No devices, interfaces marked red | The interface processes answer on the CCU's loopback only (D-28). `netstat -tlnp` should show 32001 / 32010; a CCU in safe mode or with `HM_MODE` other than `NORMAL` starts neither them nor addons. |
 | Device pictures are missing | They come from the CCU's own `/config/img/devices/`; the app falls back to the pictures that ship in `app/data/icons/`. |
-| `BidCos-Wired ... init failed` every 15 seconds in the log | `hs485d` only runs on a CCU that has a BidCos-Wired gateway, and the default interface list enables it anyway. Untick BidCos-Wired in the app's settings dialog and the retries stop. A quieter default is on the backlog. |
+| `BidCos-Wired` shows as "not present" | `hs485d` only runs on a CCU that has a BidCos-Wired gateway, and the default interface list enables it anyway. Its port refuses the connection, so the app says so once, marks the interface as not present in the header and retries at most every five minutes. Nothing is wrong; untick BidCos-Wired in the settings dialog to be rid of the entry. |
 | `Error (13)` when installing | Wrong architecture. Compare `uname -m` with the package name. |
 | Everything is slow on a CCU3 | It is a 1 GB armv7 board. The addon raises its own `oom_score_adj` to 800, so the kernel takes it before it takes `rfd` or `ReGaHSS`. |
 

@@ -5,16 +5,15 @@ import {
     filterEvents,
     matchesEventFilter,
     RingBuffer,
-    type EventRecord,
+    type FilterableEvent,
 } from './ringBuffer.js';
 
-function event(partial: Partial<EventRecord> = {}): EventRecord {
+function event(partial: Partial<FilterableEvent> = {}): FilterableEvent {
     return {
         interfaceName: 'BidCos-RF',
         address: 'MEQ0123456:1',
         datapoint: 'STATE',
         value: true,
-        timestamp: 0,
         ...partial,
     };
 }
@@ -132,12 +131,22 @@ describe('matchesEventFilter', () => {
 
 describe('filterEvents', () => {
     it('filters a whole buffer', () => {
-        const buffer = new RingBuffer<EventRecord>(10);
+        const buffer = new RingBuffer<FilterableEvent>(10);
         buffer.push(event({datapoint: 'STATE', value: true}));
         buffer.push(event({datapoint: 'LEVEL', value: 0.5}));
         buffer.push(event({interfaceName: 'HmIP-RF', datapoint: 'LEVEL', value: 1}));
         expect(filterEvents(buffer, {datapoint: 'LEVEL'})).toHaveLength(2);
         expect(filterEvents(buffer, {interfaceName: 'HmIP-RF'})).toHaveLength(1);
         expect(filterEvents(buffer, {})).toHaveLength(3);
+    });
+});
+
+describe('an event without an address or a datapoint', () => {
+    it('passes an empty filter and fails a narrowing one', () => {
+        const bare: FilterableEvent = {interfaceName: 'BidCos-RF'};
+        expect(matchesEventFilter(bare, {})).toBe(true);
+        expect(matchesEventFilter(bare, {address: 'MEQ'})).toBe(false);
+        expect(matchesEventFilter(bare, {datapoint: 'STATE'})).toBe(false);
+        expect(matchesEventFilter(bare, {text: 'undefined'})).toBe(true);
     });
 });

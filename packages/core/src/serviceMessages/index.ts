@@ -65,7 +65,12 @@ export function countsAsServiceMessage(datapoint: string, value: ParamsetValue):
     return datapoint !== 'DUTY_CYCLE' || typeof value === 'boolean';
 }
 
-export interface ServiceMessage {
+/**
+ * One stored service message. The shape that crosses the transport is `ServiceMessage` in
+ * `api/types.ts`; this is what the store keeps, with the device and the acknowledgeable flag
+ * already resolved.
+ */
+export interface ServiceMessageRecord {
     readonly interfaceName: string;
     /** The channel the datapoint belongs to, usually `<device>:0`. */
     readonly address: string;
@@ -94,7 +99,7 @@ export interface ServiceMessageStoreOptions {
  * `getServiceMessages` is whatever is left.
  */
 export class ServiceMessageStore {
-    readonly #byInterface = new Map<string, Map<string, Map<string, ServiceMessage>>>();
+    readonly #byInterface = new Map<string, Map<string, Map<string, ServiceMessageRecord>>>();
     readonly #now: () => number;
 
     constructor(options: ServiceMessageStoreOptions = {}) {
@@ -167,8 +172,8 @@ export class ServiceMessageStore {
     }
 
     /** Every message, interfaces in insertion order, channels and datapoints sorted. */
-    list(): ServiceMessage[] {
-        const messages: ServiceMessage[] = [];
+    list(): ServiceMessageRecord[] {
+        const messages: ServiceMessageRecord[] = [];
         for (const channels of this.#byInterface.values()) {
             for (const [, datapoints] of sortByKey([...channels])) {
                 for (const [, message] of sortByKey([...datapoints])) {
@@ -180,12 +185,12 @@ export class ServiceMessageStore {
     }
 
     /** The messages of one interface. */
-    forInterface(interfaceName: string): ServiceMessage[] {
+    forInterface(interfaceName: string): ServiceMessageRecord[] {
         return this.list().filter((message) => message.interfaceName === interfaceName);
     }
 
     /** The messages of one device, whichever of its channels they sit on. */
-    forDevice(device: string): ServiceMessage[] {
+    forDevice(device: string): ServiceMessageRecord[] {
         return this.list().filter((message) => message.device === device);
     }
 

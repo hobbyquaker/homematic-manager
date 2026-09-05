@@ -6,19 +6,18 @@
  * the oldest entry, so a busy CCU cannot make the app grow without bound.
  */
 
-import type {ParamsetValue} from '../rpc/values.js';
-
 /** The number of events the 2.x grid kept, and the default here. */
 export const DEFAULT_EVENT_BUFFER_SIZE = 8192;
 
-/** One `event` callback from an interface process. */
-export interface EventRecord {
+/**
+ * What the filter needs of an event. Structural on purpose: the record that actually travels is
+ * `EventRecord` in `api/types.ts`, and the buffer itself does not care what it holds.
+ */
+export interface FilterableEvent {
     readonly interfaceName: string;
-    readonly address: string;
-    readonly datapoint: string;
-    readonly value: ParamsetValue;
-    /** Milliseconds since the epoch; the caller supplies it, the core owns no clock. */
-    readonly timestamp: number;
+    readonly address?: string;
+    readonly datapoint?: string;
+    readonly value?: unknown;
 }
 
 /** A fixed-size ring buffer, oldest entry first. */
@@ -81,25 +80,25 @@ export interface EventFilter {
 }
 
 /** Does this event pass the filter? An empty filter passes everything. */
-export function matchesEventFilter(record: EventRecord, filter: EventFilter): boolean {
+export function matchesEventFilter(record: FilterableEvent, filter: EventFilter): boolean {
     if (filter.interfaceName !== undefined && record.interfaceName !== filter.interfaceName) {
         return false;
     }
-    if (!contains(record.address, filter.address)) {
+    if (!contains(record.address ?? '', filter.address)) {
         return false;
     }
-    if (!contains(record.datapoint, filter.datapoint)) {
+    if (!contains(record.datapoint ?? '', filter.datapoint)) {
         return false;
     }
     if (filter.text !== undefined && filter.text !== '') {
-        const haystack = `${record.address} ${record.datapoint} ${String(record.value)}`;
+        const haystack = `${record.address ?? ''} ${record.datapoint ?? ''} ${String(record.value)}`;
         return haystack.toLowerCase().includes(filter.text.toLowerCase());
     }
     return true;
 }
 
 /** The buffer's entries that pass the filter, oldest first. */
-export function filterEvents(buffer: RingBuffer<EventRecord>, filter: EventFilter): EventRecord[] {
+export function filterEvents<T extends FilterableEvent>(buffer: RingBuffer<T>, filter: EventFilter): T[] {
     return buffer.filter((record) => matchesEventFilter(record, filter));
 }
 

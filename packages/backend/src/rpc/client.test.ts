@@ -3,10 +3,12 @@ import {describe, expect, it, vi} from 'vitest';
 import type {RpcValue} from '@homematic-manager/core';
 
 import {BackendError} from '../errors.js';
-import {RpcClient, type RpcCallRecord, type RpcClientOptions, type RpcTransport} from './client.js';
+import {RpcClient, type RpcCallRecord, type RpcClientOptions, type RpcOutValue, type RpcTransport} from './client.js';
 
 /** A transport that answers from a table instead of from a socket. */
-function fakeTransport(answer: (method: string, params: RpcValue[]) => {value?: RpcValue; error?: Error} | 'never'): {
+function fakeTransport(
+    answer: (method: string, params: RpcOutValue[]) => {value?: RpcValue; error?: Error} | 'never',
+): {
     transport: RpcTransport;
     close: ReturnType<typeof vi.fn>;
 } {

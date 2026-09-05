@@ -23,16 +23,23 @@
 import binrpc from 'binrpc';
 import xmlrpc from 'homematic-xmlrpc';
 
-import type {RpcProtocol, RpcValue} from '@homematic-manager/core';
+import type {ExplicitDouble, RpcProtocol, RpcValue} from '@homematic-manager/core';
 
 import {BackendError, connectionError, isRpcFault, rpcFaultError} from '../errors.js';
 import {withTimeout} from '../util/net.js';
+
+/**
+ * What may be sent to an interface: everything an answer can carry, plus the explicit-double
+ * wrapper both encoders understand. A paramset payload is full of them, and an interface that gets
+ * an integer where it expects a double answers with a type fault.
+ */
+export type RpcOutValue = boolean | number | string | ExplicitDouble | RpcOutValue[] | {[key: string]: RpcOutValue};
 
 /** What the write log and the RPC console record for one call. */
 export interface RpcCallRecord {
     readonly interfaceName: string;
     readonly method: string;
-    readonly params: RpcValue[];
+    readonly params: RpcOutValue[];
     readonly ok: boolean;
     readonly result?: RpcValue;
     readonly error?: string;
@@ -45,7 +52,7 @@ export interface RpcCallRecord {
 export interface RpcTransport {
     methodCall(
         method: string,
-        params: RpcValue[],
+        params: RpcOutValue[],
         callback: (error: Error | null | undefined, value?: RpcValue) => void,
     ): void;
     /** Not every library has one; the client closes what it can. */
@@ -147,7 +154,7 @@ export class RpcClient {
      * Calls a method. Rejects with a `BackendError`: `kind: 'rpc'` for a fault the interface
      * answered, `kind: 'connection'` for a timeout or a socket problem.
      */
-    async call(method: string, params: readonly RpcValue[] = []): Promise<RpcValue> {
+    async call(method: string, params: readonly RpcOutValue[] = []): Promise<RpcValue> {
         if (this.#closed) {
             throw connectionError(`${this.description}: the client is closed`);
         }
@@ -175,7 +182,7 @@ export class RpcClient {
         return this.#closed;
     }
 
-    #invoke(method: string, params: RpcValue[]): Promise<RpcValue> {
+    #invoke(method: string, params: RpcOutValue[]): Promise<RpcValue> {
         return new Promise<RpcValue>((resolve, reject) => {
             let settled = false;
             this.#transport.methodCall(method, params, (error, value) => {
@@ -210,7 +217,7 @@ export class RpcClient {
 
     #record(
         method: string,
-        params: readonly RpcValue[],
+        params: readonly RpcOutValue[],
         started: number,
         outcome: {ok: boolean; result?: RpcValue; error?: string},
     ): void {

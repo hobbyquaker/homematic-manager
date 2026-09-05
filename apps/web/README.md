@@ -78,7 +78,11 @@ interface processes want - with a five second bound, so a `systemctl restart` ca
 
 **Device images** (D-10) resolve memory → disk → CCU → bundled → 404. `data/dist/device-icons.json`
 maps the (upper-cased) device type to a file name; the CCU serves it as
-`/config/img/devices/50/<file>`, and what comes back is cached under `<data-dir>/images/`. When
+`/config/img/devices/250/<file>` (or `250/coupling/<file>`, or as `50/<base>_thumb<ext>` - the `50`
+directory holds the WebUI's list thumbnails and suffixes every name, which is why the single
+`50/<file>` this asked for until task 13 measured it on hardware found nothing at all: 0 of 278
+mapped files, against 278 of 278 for the four candidates now tried in turn). What comes back is
+cached under `<data-dir>/images/`. When
 there is no CCU - Homegear, a bare rfd, or one that is simply off - the webp subset that ships in
 `data/dist/icons/` answers instead, so the app is never without pictures (D-2). The response says
 which of the four it was in `X-Hmm-Image-Source`. Known limitation: with `tls` the CCU's

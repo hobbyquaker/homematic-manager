@@ -2,10 +2,25 @@
  * Device images (D-10): `<base>images/<deviceType>` - fetched from the connected CCU, cached on
  * disk, and falling back to the small webp subset that ships in `data/dist/icons/`.
  *
- * The CCU serves its device pictures as `/config/img/devices/50/<file>`, and which file belongs to
- * a device type is the mapping `data/dist/device-icons.json` of task 9. That mapping is also what
- * makes the bundled fallback work: `data/scripts/icons-subset.mjs` wrote the same base names as
- * webp, so `4_hm-lc-sw1-fm.png` on the CCU is `4_hm-lc-sw1-fm.webp` here.
+ * Which file belongs to a device type is the mapping `data/dist/device-icons.json` of task 9. That
+ * mapping is also what makes the bundled fallback work: `data/scripts/icons-subset.mjs` wrote the
+ * same base names as webp, so `4_hm-lc-sw1-fm.png` on the CCU is `4_hm-lc-sw1-fm.webp` here.
+ *
+ * *Where* the CCU serves that file from was measured on the lab CCU during task 13, against all 278
+ * distinct file names in the mapping:
+ *
+ * | url | files found |
+ * | --- | --- |
+ * | `/config/img/devices/250/<file>` | 267 |
+ * | `/config/img/devices/250/coupling/<file>` | 11 |
+ * | `/config/img/devices/50/<base>_thumb<ext>` | 254 |
+ * | `/config/img/devices/50/<file>` | **0** |
+ *
+ * The `50` directory holds the WebUI's list thumbnails and suffixes every name with `_thumb`, so
+ * the single `50/<file>` this used to ask for never existed and every picture came from the bundled
+ * subset - which only covers the BidCos types, so an HmIP device had none at all. The two `250`
+ * shapes together cover all 278, and are tried first; the `_thumb` shape stays as a fallback in
+ * case a firmware differs, and the historical one is kept because it costs nothing.
  *
  * The order is memory -> disk -> CCU -> bundled -> 404. A CCU that is off therefore costs one
  * failed request per device type and then serves the bundled picture, and a Homegear or bare rfd
@@ -27,8 +42,23 @@ import type {Logger} from './log.js';
 import {silentLogger} from './log.js';
 import {mimeType} from './static.js';
 
-/** Where the CCU keeps the pictures the WebUI shows in its device list. */
-export const CCU_IMAGE_PATH = '/config/img/devices/50';
+/** Where the CCU keeps its device pictures, in one directory per size. */
+export const CCU_IMAGE_BASE = '/config/img/devices';
+
+/**
+ * The urls to try for one file of `device-icons.json`, best first. See the table at the top for
+ * what each of them is worth on a real CCU.
+ */
+export function ccuImagePaths(iconFile: string): string[] {
+    const parsed = path.parse(iconFile);
+    const extension = parsed.ext === '' ? '.png' : parsed.ext;
+    return [
+        `${CCU_IMAGE_BASE}/250/${iconFile}`,
+        `${CCU_IMAGE_BASE}/250/coupling/${iconFile}`,
+        `${CCU_IMAGE_BASE}/50/${parsed.name}_thumb${extension}`,
+        `${CCU_IMAGE_BASE}/50/${iconFile}`,
+    ];
+}
 
 /** The key `device-icons.json` uses for "no idea what this is". */
 export const UNKNOWN_DEVICE_KEY = 'DEVICE';
@@ -139,26 +169,30 @@ export class ImageService {
         }
         const request = this.#options.fetch ?? globalThis.fetch;
         const scheme = upstream.tls === true ? 'https' : 'http';
-        const url = `${scheme}://${upstream.host}${CCU_IMAGE_PATH}/${iconFile}`;
         const headers: Record<string, string> = {};
         if (upstream.auth) {
             const credentials = Buffer.from(`${upstream.auth.user}:${upstream.auth.password}`).toString('base64');
             headers['Authorization'] = `Basic ${credentials}`;
         }
-        try {
-            const response = await request(url, {
-                headers,
-                signal: AbortSignal.timeout(this.#options.timeoutMs ?? DEFAULT_IMAGE_TIMEOUT_MS),
-            });
-            if (!response.ok) {
+        for (const candidate of ccuImagePaths(iconFile)) {
+            const url = `${scheme}://${upstream.host}${candidate}`;
+            try {
+                const response = await request(url, {
+                    headers,
+                    signal: AbortSignal.timeout(this.#options.timeoutMs ?? DEFAULT_IMAGE_TIMEOUT_MS),
+                });
+                if (response.ok) {
+                    return Buffer.from(await response.arrayBuffer());
+                }
                 this.#log.debug(`${url} answered ${response.status}`);
+            } catch (error) {
+                // a refused connection or a timeout is about the CCU, not about this file name:
+                // trying the other three would only multiply the wait before the bundled picture
+                this.#log.debug(`${url} failed:`, error);
                 return undefined;
             }
-            return Buffer.from(await response.arrayBuffer());
-        } catch (error) {
-            this.#log.debug(`${url} failed:`, error);
-            return undefined;
         }
+        return undefined;
     }
 
     async #store(file: string, body: Buffer): Promise<void> {

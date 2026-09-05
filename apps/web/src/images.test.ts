@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
-import {cacheFileName, CCU_IMAGE_PATH, ImageService, type ImageUpstream} from './images.js';
+import {cacheFileName, ccuImagePaths, ImageService, type ImageUpstream} from './images.js';
 
 let root: string;
 let cacheDir: string;
@@ -55,6 +55,24 @@ describe('cacheFileName', () => {
     });
 });
 
+describe('ccuImagePaths', () => {
+    // measured against the 278 file names of device-icons.json on the lab CCU (task 13): the two
+    // `250` shapes cover all of them, `50/<base>_thumb<ext>` covers 254, and the `50/<file>` this
+    // used to be the only candidate covers none - the `50` directory suffixes every name.
+    it('asks for the 250 picture first and the _thumb of the 50 directory after it', () => {
+        expect(ccuImagePaths('134_hmip-pdt.png')).toEqual([
+            '/config/img/devices/250/134_hmip-pdt.png',
+            '/config/img/devices/250/coupling/134_hmip-pdt.png',
+            '/config/img/devices/50/134_hmip-pdt_thumb.png',
+            '/config/img/devices/50/134_hmip-pdt.png',
+        ]);
+    });
+
+    it('assumes .png for a mapping entry without an extension', () => {
+        expect(ccuImagePaths('weird')).toContain('/config/img/devices/50/weird_thumb.png');
+    });
+});
+
 describe('ImageService', () => {
     it('fetches from the CCU, caches it on disk and answers the next call from memory', async () => {
         const upstreamFetch = okFetch('FROM-CCU');
@@ -63,7 +81,7 @@ describe('ImageService', () => {
         const first = await images.get('HmIP-PDT');
         expect(first).toMatchObject({source: 'ccu', mime: 'image/png'});
         expect(first?.body.toString()).toBe('FROM-CCU');
-        expect(vi.mocked(upstreamFetch).mock.calls[0]?.[0]).toBe(`http://ccu3${CCU_IMAGE_PATH}/134_hmip-pdt.png`);
+        expect(vi.mocked(upstreamFetch).mock.calls[0]?.[0]).toBe('http://ccu3/config/img/devices/250/134_hmip-pdt.png');
 
         expect(await images.get('HmIP-PDT')).toMatchObject({source: 'memory'});
         expect(vi.mocked(upstreamFetch)).toHaveBeenCalledTimes(1);
@@ -82,7 +100,7 @@ describe('ImageService', () => {
         });
         await images.get('HmIP-PDT');
         const call = vi.mocked(upstreamFetch).mock.calls[0];
-        expect(call?.[0]).toBe(`https://ccu3${CCU_IMAGE_PATH}/134_hmip-pdt.png`);
+        expect(call?.[0]).toBe('https://ccu3/config/img/devices/250/134_hmip-pdt.png');
         expect((call?.[1]?.headers as Record<string, string>)['Authorization']).toBe(
             `Basic ${Buffer.from('admin:pw').toString('base64')}`,
         );
@@ -102,11 +120,27 @@ describe('ImageService', () => {
         expect(await service({fetch: failing, upstream: {host: 'ccu3'}}).get('HM-LC-Sw1-Pl')).toMatchObject({
             source: 'bundled',
         });
+        // every candidate was tried before giving up on the file
+        expect(vi.mocked(failing)).toHaveBeenCalledTimes(ccuImagePaths('x.png').length);
 
         const throwing = vi.fn(() => Promise.reject(new Error('ECONNREFUSED'))) as unknown as typeof globalThis.fetch;
         expect(await service({fetch: throwing, upstream: {host: 'ccu3'}}).get('HM-LC-Sw1-Pl')).toMatchObject({
             source: 'bundled',
         });
+        // but a refused connection or a timeout says nothing about the file name: asking three more
+        // times would only make the user wait four timeouts for the bundled picture
+        expect(vi.mocked(throwing)).toHaveBeenCalledTimes(1);
+    });
+
+    it('takes the _thumb of the 50 directory when the 250 one is not there', async () => {
+        const upstreamFetch = vi.fn(async (url: string) =>
+            url.endsWith('/50/134_hmip-pdt_thumb.png')
+                ? new Response('THUMB', {status: 200})
+                : new Response('nope', {status: 404}),
+        ) as unknown as typeof globalThis.fetch;
+        const image = await service({fetch: upstreamFetch, upstream: {host: 'ccu3'}}).get('HmIP-PDT');
+        expect(image).toMatchObject({source: 'ccu', mime: 'image/png'});
+        expect(image?.body.toString()).toBe('THUMB');
     });
 
     it('looks the device type up upper-cased, the way openccu-data keys it', async () => {

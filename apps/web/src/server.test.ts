@@ -285,7 +285,7 @@ describe('the image proxy (D-10)', () => {
         const answer = await fetch(`${host.url}images/HM-LC-Sw1-Pl`);
         expect(answer.headers.get('x-hmm-image-source')).toBe('ccu');
         expect(await answer.text()).toBe('FROM-CCU');
-        expect(upstream.mock.calls[0]?.[0]).toContain('http://127.0.0.1/config/img/devices/50/OM55_DimmerSwitch.png');
+        expect(upstream.mock.calls[0]?.[0]).toContain('http://127.0.0.1/config/img/devices/250/OM55_DimmerSwitch.png');
         expect(await fs.readdir(path.join(dataDir, 'images'))).toContain('HM-LC-Sw1-Pl.png');
     });
 

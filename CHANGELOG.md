@@ -72,7 +72,15 @@ This is the change with the largest consequence, and it comes out of a measureme
 - Naming a device right after it pairs [#24].
 - BidCos install mode with mode, serial and **temporary key** [#20]; `searchDevices` on
   BidCos-Wired; HmIP with SGTIN and key or key server; a QR scanner that works more than once,
-  loaded lazily and started only on request [#112].
+  loaded lazily and started only on request [#112]. The scanner says that it needs https instead
+  of failing inside the decoder — a browser hands out no camera on a plain-http page.
+- A link count per channel, and "create a link as sender / as receiver" straight from the channel
+  sub-grid [#25].
+- An **unreach counter per device**, edge-triggered and persisted per CCU, plus an opt-in automatic
+  `STICKY_UNREACH` acknowledgement [#26].
+- **Smoke-detector teams** on BidCos through `listTeams` / `setTeam` [#97]. HmIP smoke groups are
+  built through the group process on `/groups`, outside the RPC catalogue, and are therefore out of
+  scope by D-1.
 
 ### Paramset editor
 
@@ -103,6 +111,14 @@ This is the change with the largest consequence, and it comes out of a measureme
   the link "expert".
 - **Easy modes for every HmIP receiver** and for WINMATIC, from pinned openccu-data artifacts: 3521
   link profiles over 725 receiver/sender combinations [#50, #22].
+- **A name and a description per pair** of a multi-link, instead of one name for the whole set
+  [#87].
+- **Link profile templates**: a tuned profile saved under a name and applied to another link of the
+  same receiver/sender kind. Only templates whose paramset description is identical are offered,
+  and applying one fills the form and writes nothing [#21].
+- **Changes across several links (and paramsets) staged and written with one Apply** [#124]: a
+  review dialog over the paced write queue with progress and cancel; a failed entry keeps its
+  reason and stays in the set.
 
 ### Radio (RSSI)
 
@@ -115,7 +131,8 @@ This is the change with the largest consequence, and it comes out of a measureme
 ### Service messages and events
 
 - Acknowledge one or all — only `STICKY_UNREACH` and `SABOTAGE` can be acknowledged, and the button
-  says so when it is off.
+  says so when it is off. Where ReGa is available the acknowledgement is also written there, so the
+  CCU's own WebUI stops showing the message [#94].
 - **Toasts and an RPC log drawer instead of the modal pop-up** [#77], with a persisted quiet mode
   [#102].
 - The event view has two filter boxes, a pause that freezes the view, and a per-device counter,
@@ -144,7 +161,16 @@ This is the change with the largest consequence, and it comes out of a measureme
 - **User-defined extra interfaces** (name, host, port, protocol, path) with validation [#135, D-13];
   CUxD and VirtualDevices are configured explicitly instead of only being port-probed [#128].
 - **ReGa is optional** [D-2]: a system without it works fully on locally stored names and shows a
-  status indicator. A ReGa 401 no longer crashes the app [#127].
+  status indicator. A ReGa 401 no longer crashes the app [#127]. Where it is there it can also
+  confirm new devices in the inbox [#54].
+- **An interface whose port refuses backs off** from 15 seconds to five minutes with one notice per
+  outage, is marked as not present in the header, and stops filling the log. BidCos-Wired is
+  enabled in the default interface list and does exactly this on every system without a wired
+  gateway.
+- **The web host and the addon de-register from the interface processes while no browser is
+  connected** and re-subscribe on the next page load (`init('')` after five minutes; D-31). Default
+  on for the addon, the npm install and Docker, off in the desktop app, and configurable with
+  `--idle-unsubscribe` / `HMM_IDLE_UNSUBSCRIBE`.
 - Per-interface host, port, TLS and authentication [#106].
 - Unhandled errors are always logged, not only when `showUnhandled` was set, and the dialog appears
   once rather than once per error.
@@ -213,29 +239,23 @@ This is the change with the largest consequence, and it comes out of a measureme
 - The **HmIP switching programme's weekday bit order is unverified** (OQ-16). Bit 0 was taken as
   Sunday from the documented HmIP weekday enums; the editor always prints the raw mask beside the
   checkboxes.
-- **BidCos-Wired retries `init` every 15 seconds** with an error line on any system without a wired
-  gateway, because the default interface list enables it. Untick it in the settings dialog.
 - The **Docker image issues its session cookie on a non-loopback bind** (`HMM_ISSUE_COOKIE=true`),
   so whoever reaches the published port is in. This is still an open question (OQ-15) and
   [docs/install-docker.md](docs/install-docker.md) names three ways to lock it down; the warning line
   the recommendation asks for is not implemented yet.
-- The **CCU addon logs its token at `info` level**, so it appears in the log that `service.cgi` shows
-  to a WebUI session — which already has the token. It should be a `debug` line.
-- `data/scripts/icons-from-ccu.mjs` still asks the CCU's thumbnail directory for plain file names;
-  the application itself was corrected after the addon measured it on hardware.
+- **Nothing has ever been released and no workflow has ever run.** GitHub Actions is not enabled on
+  the repository, so there is no CI run, no build artefact and no release to verify.
 - The **packaged desktop app has not been click-tested yet**: `app.whenReady()` never fires under
   WSL, so the first run happens on a CI artifact, and GitHub Actions is not enabled on the repository
   yet.
 
 ### Not in this rebuild yet
 
-Staged changes across several links with one Apply [#124]; names and descriptions per pair in a
-multi-link [#87]; automatic `STICKY_UNREACH` acknowledgement and unreach counters [#26]; links from
-the Devices tab [#25]; link profile templates [#21]; ReGa inbox auto-confirm [#54] and service-message
-acknowledgement in ReGa [#94]; smoke-detector teams [#97]; automatic best-interface assignment [#69
-shows the information, it does not act on it]; CCU-Jack as a user-defined interface [#135 — the
-mechanism exists, CCU-Jack's RPC surface has not been verified]; and the extended set of
-device-specific editors (universal light effects, RGBW/dual-white, alarm panel, the ESI energy meter,
-door locks).
+Automatic best-interface assignment [#69 shows the information, it does not act on it]; HmIP
+smoke-detector groups [#97 — they are built through the group process on `/groups`, outside the RPC
+catalogue, and are out of scope by D-1]; CCU-Jack as a pre-defined interface [#135 — it serves
+XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no CCU-Jack was
+available to verify that against]; and the extended set of device-specific editors (universal light
+effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
 [unreleased]: https://github.com/hobbyquaker/homematic-manager/compare/v2.7.1...3.0-dev

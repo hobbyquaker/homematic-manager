@@ -134,3 +134,41 @@ export function acknowledgeAlarmScript(interfaceName: string, address: string, d
 export function isPlainRegaName(value: string): boolean {
     return /^[A-Za-z0-9_.:-]+$/.test(value);
 }
+
+/**
+ * D-32: does this user exist, and what is their level?
+ *
+ * The one script the addon's optional login sends (`rega/auth.ts`). It is RedMatic's, unchanged in
+ * substance (`addon_files/redmatic/lib/rega-auth.js`), because that is the form which has been
+ * proving itself against real ReGaHSS versions for years: `ID_USERS` is the CCU's user list,
+ * `Get()` looks one up by name, and an object variable comes back in the response as the object's
+ * `Name()` - so `user` equalling the name that was asked for *is* the answer "this user exists".
+ *
+ * `UserLevel()` is 8 for an admin, 2 for a user and 1 for a guest. The login stores it in the
+ * session and shows it; it does not gate anything yet (D-32: everyone who may log in may write, as
+ * in the WebUI).
+ *
+ * The name comes from a login form, so it is escaped rather than concatenated, and a name that has
+ * no representation at all is refused. `escapeRegaString` also folds newlines away, which is what
+ * keeps a name from appending a second statement to the script.
+ */
+export function userLookupScript(name: string): string | undefined {
+    if (name === '' || name.length > 64) {
+        return undefined;
+    }
+    // written out rather than as a character class: a control character inside a regex literal is
+    // exactly what `no-control-regex` is about, and a loop needs no exception to a lint rule
+    for (let index = 0; index < name.length; index += 1) {
+        if (name.charCodeAt(index) < 32) {
+            return undefined;
+        }
+    }
+    return [
+        `var user = dom.GetObject(ID_USERS).Get("${escapeRegaString(name)}");`,
+        'var level;',
+        'if (user) {',
+        '    level = user.UserLevel();',
+        '}',
+        '',
+    ].join('\n');
+}

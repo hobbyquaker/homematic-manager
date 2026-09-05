@@ -44,6 +44,7 @@ export * from './write/log.js';
 export * from './write/paramset.js';
 
 // the optional and the peripheral
+export * from './rega/auth.js';
 export * from './rega/client.js';
 export * from './rega/scripts.js';
 export * from './discovery/discover.js';

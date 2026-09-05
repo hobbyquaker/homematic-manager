@@ -2,6 +2,7 @@ legacy/
 docs/
 coverage/
 dist/
+dist-electron/
 out/
 .vite/
 package-lock.json

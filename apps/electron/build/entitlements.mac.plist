@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+    The hardened runtime of D-9 forbids exactly the things Chromium needs, so those three have to
+    be asked for back. The two network entitlements are there because the app is an XML-RPC client
+    *and* runs callback servers the CCU's interface processes connect back to; they cost nothing
+    outside the Mac App Store, and this app is not distributed there.
+-->
+<plist version="1.0">
+    <dict>
+        <key>com.apple.security.cs.allow-jit</key>
+        <true/>
+        <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+        <true/>
+        <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+        <true/>
+        <key>com.apple.security.network.client</key>
+        <true/>
+        <key>com.apple.security.network.server</key>
+        <true/>
+    </dict>
+</plist>

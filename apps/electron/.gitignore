@@ -1,0 +1,3 @@
+# electron-builder writes here (`directories.output`). The root .gitignore already covers `dist/`
+# and `out/`, but not this one, and a 100 MB AppImage in a diff is nobody's idea of a good day.
+dist-electron/

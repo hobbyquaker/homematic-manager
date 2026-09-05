@@ -1,0 +1,132 @@
+# Packaging for the Homematic Manager desktop app (roadmap task 11, D-9, D-16).
+#
+# The version is not repeated here: it comes from apps/electron/package.json, which
+# `npm run version:dev` keeps identical to the root package (D-18). Nothing in this file may
+# hard-code a version, an Apple ID or a certificate.
+#
+# What is *not* configured, and why:
+#   - `asarUnpack`: nothing inside the asar is read with `fs`. The data of task 9 is an
+#     extraResource (below), outside the archive, because that is what the backend's `data.file`
+#     reads and what `resolvePaths()` in src/main/paths.ts points at.
+#   - `armv7l`: Electron 44 no longer publishes a `linux-armv7l` build (its checksums.json lists
+#     x64 and arm64 only), so the 32-bit ARM targets of issues #115/#139 cannot be built any more.
+#   - notarisation and signing: both are switched on from the workflow when the secrets exist, so
+#     that a build without them produces unsigned artifacts instead of failing. See
+#     .github/workflows/build.yml and the README.
+
+appId: de.hobbyquaker.homematic-manager
+productName: Homematic Manager
+# Without this the binary would be called `@homematic-manager/electron` after the workspace name,
+# which is not a file name on any of the three platforms.
+executableName: homematic-manager
+copyright: Copyright © 2016-2026 Sebastian Raff and contributors, GPL-3.0-or-later
+
+directories:
+  output: dist-electron
+  buildResources: build
+
+# Only the built output plus what npm decides is a runtime dependency. `out/**` is the three
+# bundles of electron-vite; the workspace packages (@homematic-manager/backend and the core it
+# uses) come in through `dependencies` in package.json, and their `dist/` has to be built first -
+# `npm run build` at the repository root does that for every workspace.
+files:
+  - out/**
+  - package.json
+  - '!**/*.map'
+
+extraResources:
+  - from: ../../data/dist
+    to: data
+
+asar: true
+# No native modules anywhere in the tree: rebuilding for every arch would only cost minutes.
+npmRebuild: false
+
+publish:
+  provider: github
+  owner: hobbyquaker
+  repo: homematic-manager
+
+mac:
+  category: public.app-category.utilities
+  icon: build/icon.icns
+  # D-16: macOS 12 and newer.
+  minimumSystemVersion: '12.0'
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  # D-9: turned on from the workflow with `-c.mac.notarize=true` when APPLE_ID,
+  # APPLE_APP_SPECIFIC_PASSWORD and APPLE_TEAM_ID are all set. A build without them is unsigned
+  # and un-notarised, and says so in the README.
+  notarize: false
+  target:
+    - target: dmg
+      arch: [universal]
+    - target: zip
+      arch: [universal]
+
+dmg:
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+    - target: portable
+      arch: [x64, arm64]
+
+nsis:
+  # Per user, so no UAC prompt and no administrator: the app writes nothing outside the profile.
+  oneClick: false
+  perMachine: false
+  allowElevation: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Homematic Manager
+  deleteAppDataOnUninstall: false
+
+portable:
+  artifactName: ${productName}-${version}-portable-${arch}.${ext}
+
+linux:
+  icon: build/icon.png
+  category: Utility
+  synopsis: Configure and administer Homematic and HomematicIP devices
+  description: |
+    Devices and channels, direct links, paramsets, RSSI, service messages, events and an RPC
+    console for Homematic and HomematicIP - over XML-RPC and BIN-RPC, with optional ReGa.
+  maintainer: Sebastian 'hobbyquaker' Raff <hobbyquaker@gmail.com>
+  # Electron uses the desktop entry's name as the WM_CLASS of its windows; without this the
+  # running window is not linked to the launcher entry and shows up as a second, nameless icon.
+  syncDesktopName: true
+  desktop:
+    entry:
+      Keywords: Homematic;HomematicIP;CCU;BidCos;eQ-3;smarthome;
+  target:
+    - target: AppImage
+      arch: [x64, arm64]
+    - target: deb
+      arch: [x64, arm64]
+
+deb:
+  # D-16: glibc 2.31 and newer, which is Debian 11 / Ubuntu 20.04 upwards.
+  depends:
+    - libgtk-3-0
+    - libnotify4
+    - libnss3
+    - libxss1
+    - libxtst6
+    - xdg-utils
+    - libatspi2.0-0
+    - libdrm2
+    - libgbm1
+    - libxcb-dri3-0

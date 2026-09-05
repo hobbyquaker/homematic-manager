@@ -4,18 +4,29 @@
   "private": true,
   "type": "module",
   "description": "Electron host of the Homematic Manager: main process, preload, renderer",
+  "//productName": "Electron derives app.getName() - and with it app.getPath('userData') - from this, falling back to `name`. Without it the profile would live in a directory called `@homematic-manager/electron`.",
+  "productName": "Homematic Manager",
   "license": "GPL-3.0-or-later",
+  "author": "Sebastian 'hobbyquaker' Raff <hobbyquaker@gmail.com>",
   "main": "./out/main/index.js",
+  "//desktopName": "Read by electron-builder, not by node: it becomes the Linux .desktop file name and, with linux.syncDesktopName, the WM_CLASS Electron reports - which is what links a running window to its launcher icon.",
+  "desktopName": "homematic-manager.desktop",
   "engines": {
     "node": ">=22.12"
   },
   "scripts": {
     "build": "electron-vite build",
-    "dev": "electron-vite dev"
+    "dev": "electron-vite dev",
+    "start": "electron-vite preview",
+    "typecheck": "svelte-check --tsconfig ./tsconfig.renderer.json",
+    "dist": "electron-builder --publish never",
+    "dist:linux": "electron-builder --linux --publish never",
+    "dist:mac": "electron-builder --mac --publish never",
+    "dist:win": "electron-builder --win --publish never"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
-    "electron": "^44.2.0",
+    "electron": "44.2.0",
     "electron-builder": "^26.15.3",
     "electron-vite": "^5.0.0",
     "svelte": "^5.57.0",

@@ -214,6 +214,7 @@ touched by it.
 | No devices, interfaces marked red | The interface processes answer on the CCU's loopback only (D-28). `netstat -tlnp` should show 32001 / 32010; a CCU in safe mode or with `HM_MODE` other than `NORMAL` starts neither them nor addons. |
 | Device pictures are missing | They come from the CCU's own `/config/img/devices/`; the app falls back to the pictures that ship in `app/data/icons/`. |
 | `BidCos-Wired ... init failed` every 15 seconds in the log | `hs485d` only runs on a CCU that has a BidCos-Wired gateway. Untick BidCos-Wired in the app's settings dialog and the retries stop. |
+| The QR scanner says the camera needs https | `getUserMedia` exists only in a secure context, and the addon is reached as `http://<ccu>/addons/hmm/`. Open the same page over the CCU's https port (`https://<ccu>/addons/hmm/`, accepting the certificate warning) and the scanner works; otherwise type the SGTIN and the key in by hand. |
 | `Error (13)` when installing | Wrong architecture. Compare `uname -m` with the package name. |
 | Everything is slow on a CCU3 | It is a 1 GB armv7 board. The addon raises its own `oom_score_adj` to 800 so the kernel takes it before it takes rfd or ReGaHSS. |
 

@@ -51,3 +51,25 @@ if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.sho
 if (typeof Element !== 'undefined' && !Element.prototype.scrollTo) {
     Element.prototype.scrollTo = function scrollTo(this: Element): void {};
 }
+
+/**
+ * jsdom has no `navigator.mediaDevices` at all, and the QR scanner checks for it before it loads
+ * `@zxing/browser` - a page served over plain http (the CCU addon, an LXC over http) has no camera
+ * API either, and the component says so instead of failing inside the decoder. Without this shim
+ * every scanner test in jsdom would take that branch, while browser mode - where the object exists -
+ * would take the other one, and the two runs would not be testing the same thing.
+ *
+ * `isSecureContext` is the other half of the same check and is not true in jsdom either. The test
+ * that covers the branch shadows both of these again.
+ */
+if (typeof navigator !== 'undefined' && navigator.mediaDevices === undefined) {
+    Object.defineProperty(navigator, 'mediaDevices', {
+        value: {getUserMedia: () => Promise.reject(new Error('no camera in jsdom'))},
+        configurable: true,
+        writable: true,
+    });
+}
+
+if (globalThis.isSecureContext !== true) {
+    Object.defineProperty(globalThis, 'isSecureContext', {value: true, configurable: true, writable: true});
+}

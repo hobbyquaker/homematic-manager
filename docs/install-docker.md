@@ -183,6 +183,7 @@ The `latest` tag is not moved by a pre-release, so an alpha or beta never become
 | Everything is gone after a recreate | `/data` was not on a volume. |
 | Port 2126 or 2127 already in use | hm2mqtt.js defaults to the same pair. Move one with `HMM_CALLBACK_XMLRPC_PORT` / `HMM_CALLBACK_BINRPC_PORT` and publish what you set. |
 | Device pictures are missing | They are fetched from the CCU and cached in `/data/images`. With TLS the CCU's certificate is self-signed and cannot be accepted, so the small bundled set answers instead. |
+| The QR scanner says the camera needs https | Browsers hand out a camera in a secure context only: https, or `localhost`. Reach the UI over https (a reverse proxy with a certificate, see above) or open it on the machine itself; otherwise type the SGTIN and the key in by hand. |
 | `--network host` does nothing useful | Docker Desktop on macOS/Windows and rootless Podman have no real host network. Use variant 2, or run in an LXC or a VM. |
 
 ## When Docker is the wrong answer

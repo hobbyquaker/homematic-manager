@@ -219,6 +219,7 @@ A fresh install pulls six packages in total.
 | Interfaces stay red | The CCU's XML-RPC API firewall setting, or a wrong address in the settings dialog. `--ccu` only seeds it on the first start. |
 | Interfaces are green, nothing ever updates | The callback: the CCU cannot reach the container. Check the container's own firewall and Proxmox's, and pin the callback ports if a rule needs fixed numbers. |
 | `BidCos-Wired` shows as "not present" | `hs485d` runs only on a CCU with a wired gateway, and the default interface list enables it anyway. One warning line, then a retry at most every five minutes. Untick BidCos-Wired in the settings dialog to hide it. |
+| The QR scanner says the camera needs https | Browsers hand out a camera in a secure context only: https, or `localhost`. Reach the UI over https (a reverse proxy with a certificate, see above) or open it on the machine itself; otherwise type the SGTIN and the key in by hand. |
 | Names are missing, ReGa shows red | ReGa is optional (D-2). Allow "Remote Homematic-Script API" in the CCU's firewall to get the CCU's names, or carry on with the local ones. |
 | Device pictures are missing | They are fetched from the CCU and cached under `/var/lib/homematic-manager/images`. With TLS the CCU's self-signed certificate cannot be accepted, and a small bundled set answers instead. |
 | The callback ports collide with hm2mqtt | Both default to 2126/2127. Move one of them. |

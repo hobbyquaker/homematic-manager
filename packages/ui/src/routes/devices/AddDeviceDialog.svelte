@@ -206,6 +206,9 @@
         <QrScanner
             active={scanning}
             {createReader}
+            insecureContextMessage={t(
+                'The camera is only available over https or on localhost. Open the page with its https address (the CCU serves it on its https port too, with a certificate warning) or type the key in by hand.',
+            )}
             onscan={applyScan}
             onerror={(message) => {
                 scanError = message;

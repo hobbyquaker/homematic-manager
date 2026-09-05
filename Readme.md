@@ -91,7 +91,10 @@ Dazu, quer über die Tabs:
   Beschreibung nur als Zahl kennt. Ein Häkchen zeigt zusätzlich die Rohparameter.
 - **Gerät anlernen**: BidCos-Anlernmodus mit Seriennummer und temporärem Schlüssel, `searchDevices`
   für BidCos-Wired, HmIP mit SGTIN und Schlüssel oder Schlüsselserver, QR-Scanner, und direkt nach
-  dem Anlernen ein Namensfeld.
+  dem Anlernen ein Namensfeld. Der QR-Scanner braucht einen _secure context_: Browser geben die
+  Kamera nur über https oder auf `localhost` frei. Auf der CCU heißt das die https-Adresse der
+  Weboberfläche, auf einem Server einen Reverse Proxy mit Zertifikat; ohne das bleibt die Eingabe
+  von Hand.
 - **Konfiguration**: CCU-Adresse mit Suche im Netz (UDP-Discovery), TLS, Authentifizierung, ReGa an
   oder aus, Callback-Adresse und -Ports, Sprache (Deutsch/Englisch), Schreibpause, RPC-Log-Ordner
   und selbstdefinierte Schnittstellen (Host, Port, Protokoll, Pfad).

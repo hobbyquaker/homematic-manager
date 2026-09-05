@@ -104,6 +104,13 @@ case "$out" in
     *'; Secure'*) pass "over https the cookie is Secure" ;;
     *) fail "over https the cookie is Secure" "$out" ;;
 esac
+# The https path has to land on a working UI: the QR scanner needs a secure context, so https is
+# what a user is told to open. A Location with a scheme in it would send them back to http.
+case "$out" in
+    *'Location: http'*) fail "the https redirect stays on the same origin" "$out" ;;
+    *'Location: /addons/hmm/'*) pass "the https redirect stays on the same origin" ;;
+    *) fail "the https redirect stays on the same origin" "$out" ;;
+esac
 
 echo "session"
 out="$(HMM_TEST_SESSION=invalid cgi settings.cgi 'sid=@1234567890@')"

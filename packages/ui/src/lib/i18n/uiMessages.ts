@@ -25,6 +25,17 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Not connected': {de: 'Nicht verbunden', en: 'Not connected'},
     'Not present': {de: 'Nicht vorhanden', en: 'Not present'},
     Subscribing: {de: 'Anmeldung läuft', en: 'Subscribing'},
+    'The camera is only available over https or on localhost. Open the page with its https address (the CCU serves it on its https port too, with a certificate warning) or type the key in by hand.':
+        {
+            de:
+                'Die Kamera ist nur über https oder auf localhost verfügbar. Öffnen Sie die Seite über ihre ' +
+                'https-Adresse (die CCU liefert sie auch über ihren https-Port aus, mit Zertifikatswarnung) ' +
+                'oder geben Sie den Schlüssel von Hand ein.',
+            en:
+                'The camera is only available over https or on localhost. Open the page with its https ' +
+                'address (the CCU serves it on its https port too, with a certificate warning) or type the ' +
+                'key in by hand.',
+        },
     'Add by serial number': {de: 'Per Seriennummer anlernen', en: 'Add by serial number'},
     'RPC log': {de: 'RPC-Protokoll', en: 'RPC log'},
     'Show RPC log': {de: 'RPC-Protokoll anzeigen', en: 'Show RPC log'},

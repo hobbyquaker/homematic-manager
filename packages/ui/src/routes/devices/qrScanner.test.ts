@@ -75,3 +75,69 @@ describe('QrScanner', () => {
         });
     });
 });
+
+describe('the secure-context check', () => {
+    /**
+     * Replaces a property of a global object for one test and puts it back afterwards. Both of
+     * these are getters on the prototype, so an own property shadows them; that works the same way
+     * in jsdom and in the real Chromium the component tests run in (D-23).
+     */
+    function shadow(target: object, key: string, value: unknown): () => void {
+        const previous = Object.getOwnPropertyDescriptor(target, key);
+        Object.defineProperty(target, key, {value, configurable: true, writable: true});
+        return () => {
+            if (previous) {
+                Object.defineProperty(target, key, previous);
+            } else {
+                Reflect.deleteProperty(target, key);
+            }
+        };
+    }
+
+    it('says what to do instead of failing inside the decoder, and never opens a camera', async () => {
+        // http://<ccu>/addons/hmm/ is not a secure context, so `navigator.mediaDevices` is simply
+        // not there and @zxing/browser dies on undefined. This is exactly the install where
+        // scanning a HomematicIP sticker is most useful.
+        const restoreDevices = shadow(navigator, 'mediaDevices', undefined);
+        const restoreSecure = shadow(window, 'isSecureContext', false);
+        try {
+            const onerror = vi.fn();
+            const reader = fakeReader();
+            const createReader = vi.fn(reader.create);
+            render(QrScanner, {
+                props: {
+                    active: true,
+                    onscan: vi.fn(),
+                    onerror,
+                    createReader,
+                    insecureContextMessage: 'Die Kamera braucht https.',
+                    testId: 'qr',
+                },
+            });
+            await waitFor(() => {
+                expect(onerror).toHaveBeenCalledWith('Die Kamera braucht https.');
+            });
+            expect(createReader).not.toHaveBeenCalled();
+        } finally {
+            restoreSecure();
+            restoreDevices();
+        }
+    });
+
+    it('scans as usual in a secure context', async () => {
+        const restoreSecure = shadow(window, 'isSecureContext', true);
+        try {
+            const onerror = vi.fn();
+            const onscan = vi.fn();
+            const reader = fakeReader();
+            render(QrScanner, {props: {active: true, onscan, onerror, createReader: reader.create, testId: 'qr'}});
+            await waitFor(() => {
+                reader.scan('3014F711A000000000000001');
+                expect(onscan).toHaveBeenCalledWith('3014F711A000000000000001');
+            });
+            expect(onerror).not.toHaveBeenCalled();
+        } finally {
+            restoreSecure();
+        }
+    });
+});

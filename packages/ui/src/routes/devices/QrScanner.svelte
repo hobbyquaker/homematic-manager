@@ -13,10 +13,22 @@
          * loads `@zxing/browser` the first time it is switched on.
          */
         createReader?: CreateQrReader | undefined;
+        /**
+         * What to report when the browser will not hand out a camera because the page is not a
+         * secure context. Passed in translated; this component holds no strings.
+         */
+        insecureContextMessage?: string;
         testId?: string | undefined;
     }
 
-    let {active = false, onscan, onerror = undefined, createReader = undefined, testId = undefined}: Props = $props();
+    let {
+        active = false,
+        onscan,
+        onerror = undefined,
+        createReader = undefined,
+        insecureContextMessage = 'The camera needs https or localhost.',
+        testId = undefined,
+    }: Props = $props();
 
     let video = $state<HTMLVideoElement | undefined>(undefined);
     let controls: {stop(): void} | undefined;
@@ -33,6 +45,10 @@
         }
         const element = video;
         if (!element) {
+            return;
+        }
+        if (!cameraIsReachable()) {
+            onerror?.(insecureContextMessage);
             return;
         }
         // An object and not a `let`: TypeScript's control flow analysis does not follow a local
@@ -60,6 +76,22 @@
             stop();
         };
     });
+
+    /**
+     * Will the browser even offer a camera?
+     *
+     * `navigator.mediaDevices` exists only in a secure context - https, `localhost` or a file URL.
+     * The addon is reached as `http://<ccu>/addons/hmm/`, and an LXC or Docker install over plain
+     * http is the same case, so on exactly the installs where scanning a HomematicIP sticker is
+     * most useful the object is simply not there and `@zxing/browser` fails with something like
+     * "Cannot read properties of undefined". Checking first turns that into a sentence that says
+     * what to do; the SGTIN and key can always be typed in instead.
+     */
+    function cameraIsReachable(): boolean {
+        // the DOM typings promise `mediaDevices` unconditionally; the browsers this is about do not
+        const media = (globalThis.navigator as {mediaDevices?: MediaDevices} | undefined)?.mediaDevices;
+        return media !== undefined && globalThis.isSecureContext;
+    }
 
     /** Loaded lazily, so a page that never scans never pays for the decoder. */
     async function defaultReader(): Promise<QrReader> {

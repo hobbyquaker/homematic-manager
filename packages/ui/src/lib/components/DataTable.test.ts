@@ -1,8 +1,16 @@
 import {fireEvent, render, screen, within} from '@testing-library/svelte';
+import type {Component} from 'svelte';
 import {describe, expect, it, vi} from 'vitest';
 
-import DataTable from './DataTable.svelte';
-import type {DataTableColumn} from './dataTable.js';
+import DataTableComponent from './DataTable.svelte';
+import type {DataTableColumn} from './tableModel.js';
+
+/**
+ * A generic Svelte component resolves its type parameter to `unknown` when it is handed to
+ * `render()`, which `exactOptionalPropertyTypes` then rejects. The props are checked by the
+ * component's own signature where it is really used; here they only have to be passed through.
+ */
+const DataTable = DataTableComponent as unknown as Component<Record<string, unknown>>;
 
 interface Row {
     address: string;

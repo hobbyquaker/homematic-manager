@@ -12,7 +12,7 @@
         type DataTableColumn,
         type FlatRow,
         type SortState,
-    } from './dataTable.js';
+    } from './tableModel.js';
 
     interface Props {
         rows: T[];

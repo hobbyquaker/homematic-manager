@@ -14,7 +14,7 @@ import {
     rangeIds,
     visibleWindow,
     type DataTableColumn,
-} from './dataTable.js';
+} from './tableModel.js';
 
 interface Row {
     address: string;

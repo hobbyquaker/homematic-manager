@@ -1,4 +1,4 @@
-export * from './dataTable.js';
+export * from './tableModel.js';
 export * from './multiSelect.js';
 export * from './contextMenu.js';
 

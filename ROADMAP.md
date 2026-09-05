@@ -15,7 +15,7 @@ npm and GitHub on 2026-09-05 at the maintainer's request; branch `1.0-dev`, `mas
 version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); tasks 7 (UI foundation) and 11 (Electron
 host with the build and release workflows) and 12 (web host and npm package; its Docker part runs
 as a follow-up, also done) are done too, and so is task 6 (write-safety lab study, `docs/config-pending.md`):
-milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon, installed and checked on all three lab boxes) are done as well: milestones M2 and M4 are reached in the code. Tasks 10 (device-specific editors, initial set) and 16 (documentation: README with the install matrix, one page per install type, migration notes, BUILD.md, changelog) are done, and so is task 14 (test infrastructure: browser mode default, Playwright e2e, merged coverage, strict UI lint, shellcheck): milestone M3 lacks only task 17. Task 15 (backlog features) is in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon, installed and checked on all three lab boxes) are done as well: milestones M2 and M4 are reached in the code. Tasks 10 (device-specific editors, initial set) and 16 (documentation: README with the install matrix, one page per install type, migration notes, BUILD.md, changelog) are done, and so is task 14 (test infrastructure: browser mode default, Playwright e2e, merged coverage, strict UI lint, shellcheck): milestone M3 lacks only task 17, and task 15 (backlog features: #124, #87, #26, #25, #21, #54, #94, #97 BidCos, D-31 idle unsubscribe, the hardware findings) is done, so M5's backlog half is in as well. Task 17 (beta cycle) is next; it waits on the maintainer for GitHub Actions. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
@@ -71,7 +71,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [12. Web host for development and e2e](#12-web-host-for-development-and-e2e) ✅
 - [13. CCU addon](#13-ccu-addon) ✅
 - [14. Test infrastructure and coverage gates](#14-test-infrastructure-and-coverage-gates) ✅
-- [15. Backlog features from the triage](#15-backlog-features-from-the-triage)
+- [15. Backlog features from the triage](#15-backlog-features-from-the-triage) ✅
 - [16. Documentation](#16-documentation) ✅
 - [17. Beta cycle and 3.0 release](#17-beta-cycle-and-30-release)
 - [Open questions](#open-questions)
@@ -466,6 +466,10 @@ in CI until hm-simulator is published, ui and backend are below the 95 % branch 
   credentials stay in the private lab note.
 
 ## 15. Backlog features from the triage
+
+Done 2026-09-05, report in `roadmap-archive/task-15.md`. Out of scope by D-1: HmIP smoke-detector
+groups (group process on `/groups`). hm-simulator 1.0.1 (`setTempKey`) is committed on its
+`1.0-dev` and not released yet; the temporary-key e2e skips until it is.
 
 Found by task 13 on hardware, for this task: `data/scripts/icons-from-ccu.mjs` still asks the
 CCU's thumbnail directory (`50/<file>`) for plain names that live in `250/`; BidCos-Wired in the

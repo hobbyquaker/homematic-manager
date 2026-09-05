@@ -60,4 +60,8 @@ the plan is built on is [docs/analysis-2026-09.md](docs/analysis-2026-09.md).
 - **Report faithfully.** Say what was run, what passed, what failed and what was skipped. Do not
   claim hardware was tested when only the simulator was, and do not paper over a red check.
 
+- `git commit` takes the whole index. In the shared working tree another agent may have staged
+  files at any moment, so commit with explicit paths (`git commit -- <files>`) or stage and commit
+  in one uninterrupted shell invocation; commit `23da912` swallowed sixteen files of task 15
+  that way.
 - `HANDOFF.md` is the resume point for a new session: read it before `ROADMAP.md` when there is no conversation history. The main session refreshes it about every half hour and after each archived task; keep it short and never put decisions there.

@@ -26,7 +26,9 @@ about every half hour while the agent works; the timestamp above is the last ref
   `release-npm.yml`, Docker image, compose, proxy docs, `release-docker.yml`), 8 (UI feature
   parity: every 2.7 tab in `packages/ui`, 445 component tests, browser mode green), 14 (test
   infrastructure: browser mode default, 20 Playwright e2e specs, merged coverage, strict UI lint,
-  shellcheck; 1739 tests in the workspace), 10 (five
+  shellcheck), 15 (backlog: #124 change set, #87, #26, #25, #21, #54, #94, #97 BidCos, D-31 idle
+  unsubscribe, image chain in the backend, hm-simulator 1.0.0 from npm; 1820 tests in the
+  workspace), 10 (five
   device-specific editors; OQ-16 weekday bit order to check in the lab), 16 (docs: README with
   the install matrix, one page per install type, migration notes, BUILD.md, CHANGELOG.md), 13 (CCU
   addon: three packages, container replay, all three lab boxes checked; the Charly runs the
@@ -34,11 +36,9 @@ about every half hour while the agent works; the timestamp above is the last ref
   `devices.repairConfig`, hm-simulator calibrated; M1 complete). Lab state after the study is in
   the private lab note (one DRS8 channel poisoned on purpose, needs re-pairing). Workspace was green at the last full run: 73 test files,
   1082 tests, `npm run lint`, `npm run typecheck`.
-- In progress by one background subagent (Opus), committing distinct commits on
+- In progress by background subagents (Opus), committing distinct commits on
   `3.0-dev` in the shared working tree (each stages only its own files):
-  - **Task 15** backlog features (started after task 14 landed): the triage items not yet
-    covered by task 8, the hardware findings of task 13 (Electron image chain into the backend,
-    icon script, BidCos-Wired back-off, token log level), `setTempKey` in hm-simulator.
+  - none at the moment; task 17 (beta cycle) is next and partly waits on the maintainer.
 - If a session ends with those agents mid-flight: uncommitted files in the working tree are
   theirs. Look at `git status`, `git diff`, run `npm test -w <workspace>`; either finish the
   piece and commit it with an explanatory message, or `git stash` it with a note here. Do not
@@ -57,11 +57,14 @@ about every half hour while the agent works; the timestamp above is the last ref
 
 ## Next steps, in order
 
-1. When task 15 finishes: verify (`npm run lint && npm run typecheck && npm test` in WSL,
+1. When a task finishes: verify (`npm run lint && npm run typecheck && npm test` in WSL,
    with the simulator installed), write `roadmap-archive/task-{6,11,12}.md`, tick them in the
    ROADMAP Contents, update the status line at the top of ROADMAP.md, commit, push `3.0-dev`
    (task 11 is archived and pushed already: `69cab48`).
-2. After 15: task 17 (beta cycle: first Actions run, first dev bump, screenshots, forum text, issue closing, OQ-16 lab check, hardware checklist). Was: tasks 15 (backlog features), 16 (docs), 17 (beta). The first Electron
+2. Task 17 (beta cycle): first Actions run (maintainer enables Actions), first dev bump
+   (`npm run version:dev`), screenshots from the demo mode, forum text, issue closing with the
+   changelog references, OQ-16 lab check, D-31 measurement on the lab boxes, hardware checklist
+   on the three boxes with the current build, hm-simulator 1.0.1 release on request. Was: tasks 15 (backlog features), 16 (docs), 17 (beta). The first Electron
    click-through and the first dev bump (`npm run version:dev`, D-18) happen as soon as the
    maintainer enables Actions and a `build.yml` run has produced the Windows artifact.
 3. Task 13 is done; task 14 (test infra, Playwright in

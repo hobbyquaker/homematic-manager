@@ -5,6 +5,7 @@ import type {
     LinkProfile,
     LinkSenderMetadata,
     MasterView,
+    OptionPreset,
     Paramset,
     ParamsetDescription,
     Transport,
@@ -35,6 +36,8 @@ export class MetaStore {
     manifest = $state<DataManifest | undefined>(undefined);
     /** False when the host serves no `data/` root at all. */
     available = $state(false);
+    /** The WebUI's dropdowns of typical values, by id; loaded on the first link dialog. */
+    presets = $state<Record<string, OptionPreset>>({});
 
     readonly source: DataSource;
     readonly engine: EasyModeEngine;
@@ -68,6 +71,14 @@ export class MetaStore {
         })();
         this.#loading = pending;
         await pending;
+    }
+
+    /** The option presets, loaded once. The link dialog needs them before it can draw a row. */
+    async loadPresets(): Promise<Record<string, OptionPreset>> {
+        if (Object.keys(this.presets).length === 0) {
+            this.presets = await this.source.optionPresets();
+        }
+        return this.presets;
     }
 
     /** The MASTER view of a channel type: order, visibility, presets and the failing rules. */

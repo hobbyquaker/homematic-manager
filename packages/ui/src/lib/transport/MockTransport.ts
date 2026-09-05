@@ -232,6 +232,25 @@ export class MockTransport implements Transport {
             })),
         );
         this.result('value.set', null);
+        this.result('links.add', null);
+        this.result('links.remove', null);
+        this.result('links.info.set', null);
+        this.result('links.activate', null);
+        this.respond('links.info.get', (interfaceName, sender, receiver) => {
+            const links = isDemoInterface(interfaceName) ? DEMO_LINKS[interfaceName] : [];
+            return (
+                links.find((link) => link.SENDER === sender && link.RECEIVER === receiver) ?? {
+                    SENDER: sender,
+                    RECEIVER: receiver,
+                }
+            );
+        });
+        this.respond('links.peers', (interfaceName, address) => {
+            const links = isDemoInterface(interfaceName) ? DEMO_LINKS[interfaceName] : [];
+            return links
+                .filter((link) => link.SENDER === address || link.RECEIVER === address)
+                .map((link) => (link.SENDER === address ? link.RECEIVER : link.SENDER));
+        });
         this.respond('data.file', (path) => {
             const file = DEMO_DATA_FILES[path];
             if (file === undefined) {

@@ -142,6 +142,20 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'andere Firmware oder anderer Gerätetyp',
         en: 'other firmware or device type',
     },
+
+    // The links tab.
+    'Select one link': {de: 'Eine Verknüpfung auswählen', en: 'Select one link'},
+    'No channel can receive from this sender': {
+        de: 'Kein Kanal kann von diesem Sender empfangen',
+        en: 'No channel can receive from this sender',
+    },
+    '{count} defective links': {
+        de: {one: '{count} defekte Verknüpfung', other: '{count} defekte Verknüpfungen'},
+        en: {one: '{count} defective link', other: '{count} defective links'},
+    },
+    'Defective link': {de: 'Defekte Verknüpfung', en: 'Defective link'},
+    Profile: {de: 'Profil', en: 'Profile'},
+    'Expert view': {de: 'Expertenansicht', en: 'Expert view'},
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

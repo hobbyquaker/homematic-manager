@@ -1,4 +1,5 @@
 import type {LinkRecord, Transport} from '@homematic-manager/core';
+import {decodeLinkFlags} from '@homematic-manager/core';
 
 import type {NoticesStore} from './NoticesStore.svelte.js';
 
@@ -39,6 +40,97 @@ export class LinksStore {
             this.#notices.fromError(error, `links.list ${interfaceName}`);
         } finally {
             this.loading = {...this.loading, [interfaceName]: false};
+        }
+    }
+
+    /** The links whose `FLAGS` say one side could not be written - issue #79. */
+    defective(interfaceName: string): LinkRecord[] {
+        return this.of(interfaceName).filter((link) => decodeLinkFlags(link.FLAGS).broken);
+    }
+
+    /**
+     * `addLink` for every sender/receiver combination, as 2.x's `createLinks` did. Returns how many
+     * were created; a failure is reported and the rest are still attempted.
+     */
+    async add(
+        interfaceName: string,
+        senders: readonly string[],
+        receivers: readonly string[],
+        name?: string,
+        description?: string,
+    ): Promise<number> {
+        let created = 0;
+        for (const sender of senders) {
+            for (const receiver of receivers) {
+                try {
+                    await this.#transport.request('links.add', interfaceName, sender, receiver, name, description);
+                    created += 1;
+                } catch (error) {
+                    this.#notices.fromError(error, `addLink ${sender} ${receiver}`);
+                }
+            }
+        }
+        if (created > 0) {
+            await this.load(interfaceName);
+        }
+        return created;
+    }
+
+    /** `removeLink` for a whole selection - issue #80; 2.x could only remove the selected row. */
+    async remove(interfaceName: string, links: ReadonlyArray<{sender: string; receiver: string}>): Promise<number> {
+        let removed = 0;
+        for (const link of links) {
+            try {
+                await this.#transport.request('links.remove', interfaceName, link.sender, link.receiver);
+                removed += 1;
+            } catch (error) {
+                this.#notices.fromError(error, `removeLink ${link.sender} ${link.receiver}`);
+            }
+        }
+        if (removed > 0) {
+            await this.load(interfaceName);
+        }
+        return removed;
+    }
+
+    async info(interfaceName: string, sender: string, receiver: string): Promise<LinkRecord | undefined> {
+        try {
+            return await this.#transport.request('links.info.get', interfaceName, sender, receiver);
+        } catch (error) {
+            this.#notices.fromError(error, `getLinkInfo ${sender} ${receiver}`);
+            return undefined;
+        }
+    }
+
+    /** `setLinkInfo` - the name and description of one link. */
+    async setInfo(
+        interfaceName: string,
+        sender: string,
+        receiver: string,
+        name: string,
+        description: string,
+    ): Promise<boolean> {
+        try {
+            await this.#transport.request('links.info.set', interfaceName, sender, receiver, name, description);
+            await this.load(interfaceName);
+            return true;
+        } catch (error) {
+            this.#notices.fromError(error, `setLinkInfo ${sender} ${receiver}`);
+            return false;
+        }
+    }
+
+    /**
+     * `activateLinkParamset` - the "play" buttons. It makes the receiver do what the link would do
+     * on a short (or long) press, without touching the sender; BidCos-RF only.
+     */
+    async activate(interfaceName: string, receiver: string, sender: string, long: boolean): Promise<boolean> {
+        try {
+            await this.#transport.request('links.activate', interfaceName, receiver, sender, long);
+            return true;
+        } catch (error) {
+            this.#notices.fromError(error, `activateLinkParamset ${receiver} ${sender}`);
+            return false;
         }
     }
 

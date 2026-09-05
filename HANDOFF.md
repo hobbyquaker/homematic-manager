@@ -25,20 +25,19 @@ about every half hour while the agent works; the timestamp above is the last ref
   every push to `3.0-dev` once Actions is enabled), 12 (web host, npm package with `--install`,
   `release-npm.yml`, Docker image, compose, proxy docs, `release-docker.yml`), 8 (UI feature
   parity: every 2.7 tab in `packages/ui`, 445 component tests, browser mode green), 10 (five
-  device-specific editors; OQ-16 weekday bit order to check in the lab), 13 (CCU
+  device-specific editors; OQ-16 weekday bit order to check in the lab), 16 (docs: README with
+  the install matrix, one page per install type, migration notes, BUILD.md, CHANGELOG.md), 13 (CCU
   addon: three packages, container replay, all three lab boxes checked; the Charly runs the
   addon now, pre-image-fix build), 6 (lab study: `docs/config-pending.md`,
   `devices.repairConfig`, hm-simulator calibrated; M1 complete). Lab state after the study is in
   the private lab note (one DRS8 channel poisoned on purpose, needs re-pairing). Workspace was green at the last full run: 73 test files,
   1082 tests, `npm run lint`, `npm run typecheck`.
-- In progress by two background subagents (Opus), each committing distinct commits on
+- In progress by one background subagent (Opus), committing distinct commits on
   `3.0-dev` in the shared working tree (each stages only its own files):
   - **Task 14** test infrastructure (started after task 8 landed): Playwright in CI, browser
     mode as the default for component tests (D-23), e2e suites against the web host + simulator,
     Electron smoke per OS, coverage merge and report, `strictTypeChecked` lint for `packages/ui`,
     shellcheck for the addon scripts.
-  - **Task 16** documentation (started after task 10 landed): README with the install matrix,
-    one page per install type from the archives, BUILD.md, migration notes, changelog.
 - If a session ends with those agents mid-flight: uncommitted files in the working tree are
   theirs. Look at `git status`, `git diff`, run `npm test -w <workspace>`; either finish the
   piece and commit it with an explanatory message, or `git stash` it with a note here. Do not
@@ -56,11 +55,11 @@ about every half hour while the agent works; the timestamp above is the last ref
 
 ## Next steps, in order
 
-1. When tasks 14 and 16 finish: verify (`npm run lint && npm run typecheck && npm test` in WSL,
+1. When task 14 finishes: verify (`npm run lint && npm run typecheck && npm test` in WSL,
    with the simulator installed), write `roadmap-archive/task-{6,11,12}.md`, tick them in the
    ROADMAP Contents, update the status line at the top of ROADMAP.md, commit, push `3.0-dev`
    (task 11 is archived and pushed already: `69cab48`).
-2. After 14: task 15 (backlog features; wait for 14's UI lint migration to land first), then 17. Task 16 is running. Was: tasks 15 (backlog features), 16 (docs), 17 (beta). The first Electron
+2. After 14: task 15 (backlog features incl. the small hardware findings listed in the roadmap's task 15 section; wait for 14's UI lint migration to land first), then 17. Was: tasks 15 (backlog features), 16 (docs), 17 (beta). The first Electron
    click-through and the first dev bump (`npm run version:dev`, D-18) happen as soon as the
    maintainer enables Actions and a `build.yml` run has produced the Windows artifact.
 3. Task 13 is done; task 14 (test infra, Playwright in

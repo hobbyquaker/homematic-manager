@@ -15,7 +15,7 @@ Status 2026-09-05: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 
 version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); tasks 7 (UI foundation) and 11 (Electron
 host with the build and release workflows) and 12 (web host and npm package; its Docker part runs
 as a follow-up, also done) are done too, and so is task 6 (write-safety lab study, `docs/config-pending.md`):
-milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon, installed and checked on all three lab boxes) are done as well: milestones M2 and M4 are reached in the code. Task 10 (device-specific editors, initial set) is done; task 14 (test infrastructure) is in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon, installed and checked on all three lab boxes) are done as well: milestones M2 and M4 are reached in the code. Tasks 10 (device-specific editors, initial set) and 16 (documentation: README with the install matrix, one page per install type, migration notes, BUILD.md, changelog) are done; task 14 (test infrastructure) is in progress, task 15 follows it. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
@@ -71,7 +71,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [13. CCU addon](#13-ccu-addon) ✅
 - [14. Test infrastructure and coverage gates](#14-test-infrastructure-and-coverage-gates)
 - [15. Backlog features from the triage](#15-backlog-features-from-the-triage)
-- [16. Documentation](#16-documentation)
+- [16. Documentation](#16-documentation) ✅
 - [17. Beta cycle and 3.0 release](#17-beta-cycle-and-30-release)
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
@@ -460,7 +460,9 @@ CCU's thumbnail directory (`50/<file>`) for plain names that live in `250/`; Bid
 default interface list retries `init` every 15 s with an error line on a CCU without a wired
 gateway (probe once, then back off, or drop it from the default list when the port refuses);
 `apps/web` logs a supplied token at `info` (should be `debug`); the addon's Node binaries are not
-stripped (14 % on x86_64, needs cross binutils for arm).
+stripped (14 % on x86_64, needs cross binutils for arm); `apps/electron/src/main/images.ts` still
+asks `50/<file>` and must walk the same four candidates as `apps/web` (`405f108`), ideally by
+moving that chain into `packages/backend` as task 11 suggested.
 
 From section 10 of the analysis, after parity: staged changes with one Apply (#124), multi-delete
 links (#80), per-pair names in multi-links (#87), defective-link display (#79), best-interface
@@ -474,6 +476,9 @@ Upstream one-liners found in task 4: latin1 decoding in `binrpc` (`decodeString`
 BIN-RPC arrives as U+FFFD.
 
 ## 16. Documentation
+
+Done 2026-09-05, report in `roadmap-archive/task-16.md`. Task 17 still owes the screenshots, the
+forum text and the issue closing.
 
 README (German user-facing, English section) opening with the install matrix of D-25 as one table
 (install type, hardware, command or download, where the config lives), one page per install type

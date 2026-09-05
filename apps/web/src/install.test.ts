@@ -179,6 +179,18 @@ describe('uninstallService', () => {
     });
 });
 
+describe('the root guard', () => {
+    it('refuses to touch a real system without root, before it writes anything', () => {
+        // no --prefix and no skipChecks: this is the guard as a user meets it. The suite does not
+        // run as root, so what it must do is throw with an explanation and write nothing at all.
+        const expected =
+            process.platform === 'linux' ? /must run as root|systemd is not running/ : /only supported on Linux/;
+        expect(() => installService(values(), {run, log: () => undefined})).toThrow(expected);
+        expect(() => uninstallService({run, log: () => undefined})).toThrow(expected);
+        expect(commands).toEqual([]);
+    });
+});
+
 describe('resolveExecStart', () => {
     it('resolves the symlink npm installs as the bin', () => {
         const target = path.join(prefix, 'cli.js');

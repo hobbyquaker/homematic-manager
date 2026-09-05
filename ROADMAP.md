@@ -12,8 +12,9 @@ open questions **OQ-n**; when the maintainer changes a decision, record it here 
 
 Status 2026-09-05: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 1.0, branch
 `1.0-dev` in its own repository, not yet pushed or published) and 9 (data pipeline) are done,
-version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); task 7 (UI foundation) is done too; task 6
-(write-safety lab study), 11 (Electron host) and 12 (web host) are in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); tasks 7 (UI foundation) and 11 (Electron
+host with the build and release workflows) are done too; task 6 (write-safety lab study) and 12
+(web host) are in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
@@ -62,7 +63,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [8. UI feature parity](#8-ui-feature-parity)
 - 9. Device metadata pipeline ✅ [archived](roadmap-archive/task-9.md)
 - [10. Device-specific editors](#10-device-specific-editors)
-- [11. Electron host, builds, releases](#11-electron-host-builds-releases)
+- [11. Electron host, builds, releases](#11-electron-host-builds-releases) ✅
 - [12. Web host for development and e2e](#12-web-host-for-development-and-e2e)
 - [13. CCU addon](#13-ccu-addon)
 - [14. Test infrastructure and coverage gates](#14-test-infrastructure-and-coverage-gates)
@@ -309,8 +310,9 @@ editor, each with its own tests:
 - electron-vite 5: main (backend in-process, typed IPC transport, window state, menus, unhandled
   error reporting, single-instance), preload (context isolation on, no Node in the renderer),
   renderer (`packages/ui`).
-- electron-builder 26: macOS universal dmg, Windows x64/arm64 nsis + portable, Linux x64/arm64/
-  armv7l deb + AppImage (#115, #139). Apple notarisation and SignPath for Windows per D-9;
+- electron-builder 26: macOS universal dmg, Windows x64/arm64 nsis + portable, Linux x64/arm64
+  deb + AppImage (#115, #139; Electron 44 ships no armv7l build any more, those machines use the
+  addon or the npm package). Apple notarisation and SignPath for Windows per D-9;
   README workaround for Windows until SignPath accepts the project. Minimum OS versions per D-16.
 - GitHub Actions: build matrix on push (artifacts), release workflow on tag with generated release
   notes (nrccu's script), assets attached, `electron-updater` against GitHub releases with a
@@ -334,6 +336,11 @@ editor, each with its own tests:
   Electron 44 has no `postinstall` download any more: the build jobs run `install-electron` (or let
   electron-builder fetch the binary) explicitly.
 - Playwright `_electron` smoke tests per OS (task 14).
+- Done 2026-09-05, report in `roadmap-archive/task-11.md`. Left for others: the device-image
+  chain (`src/main/images.ts`) belongs in `packages/backend` so `apps/web` does not copy it
+  (task 12); `API_EVENT_NAMES` exported from core replaces the hand-kept list in `ipcBridge.ts`
+  (task 8 or 12, whoever touches it first); the UI consumers of `window.__HMM_HOST__` (update
+  notice, About with `info()`, device images) are task 8.
 
 ## 12. Web host for development and e2e
 

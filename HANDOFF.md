@@ -21,17 +21,15 @@ about every half hour while the agent works; the timestamp above is the last ref
   writing (last pushed commit `037a637`). Push with `git push origin 3.0-dev` from WSL once the
   running agents have landed; nothing on the branch is secret.
 - Done and archived: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 1.0), 7 (UI
-  foundation), 9 (data pipeline). Workspace was green at the last full run: 73 test files,
+  foundation), 9 (data pipeline), 11 (Electron host; `build.yml` builds the desktop artifacts on
+  every push to `3.0-dev` once Actions is enabled). Workspace was green at the last full run: 73 test files,
   1082 tests, `npm run lint`, `npm run typecheck`.
-- In progress by three background subagents (Opus), each committing distinct commits on
+- In progress by two background subagents (Opus), each committing distinct commits on
   `3.0-dev`:
   - **Task 6** write-safety lab study: lab boxes only, never a production CCU, no deletes, no
     install mode. Deliverables: `docs/config-pending.md`, calibrated hm-simulator faults,
     `devices.repairConfig`, fix for two unhandled rejections in
     `packages/backend/src/write/queue.test.ts`.
-  - **Task 11** Electron host: ten commits landed (`3e759d0`..`9b65053`), `build.yml` and
-    `release-electron.yml` exist; the agent was last told about D-24 (independent workflows,
-    draft release, fail-fast false), D-26 (AGPL strings) and D-27 (SBOM per installer).
   - **Task 12** web host `apps/web`: uncommitted work in `apps/web/src/index.ts`,
     `index.test.ts`, `package.json`, `tsconfig.json`; the agent was told about the base path
     for the addon proxy, D-24/D-25 (npm package, `--install`, Dockerfile, proxy examples) and

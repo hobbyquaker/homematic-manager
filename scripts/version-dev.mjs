@@ -37,12 +37,27 @@ execFileSync(npm, ['version', 'prerelease', '--preid', 'dev', '--no-git-tag-vers
 
 const {version, workspaces} = readPackage(root);
 
+// The workspace packages depend on each other with exact versions (`"@homematic-manager/core":
+// "3.0.0-dev.0"`), so those ranges move with the version; otherwise `npm ci` refuses the lockfile
+// after the first bump (found by task 11).
+const DEPENDENCY_FIELDS = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
+const previous = readPackage(root).version;
+
 for (const dir of workspaceDirs(workspaces)) {
     const pkg = readPackage(dir);
-    if (pkg.version === version) {
+    let changed = pkg.version !== version;
+    pkg.version = version;
+    for (const field of DEPENDENCY_FIELDS) {
+        for (const [name, range] of Object.entries(pkg[field] ?? {})) {
+            if (name.startsWith('@homematic-manager/') && (range === previous || range === version)) {
+                pkg[field][name] = version;
+                changed = changed || range !== version;
+            }
+        }
+    }
+    if (!changed) {
         continue;
     }
-    pkg.version = version;
     writePackage(dir, pkg);
     console.log(`${relative(root, dir)}: ${version}`);
 }

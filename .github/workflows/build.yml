@@ -1,0 +1,145 @@
+name: Build
+
+# Development builds of the Electron app (roadmap task 11, D-21): every push to the development
+# branch produces installable artifacts for the three platforms, which is how the maintainer gets
+# a dev build without cutting a release. Nothing here publishes anything - `--publish never` is on
+# every electron-builder call, and the release workflow is `release-electron.yml` (D-24).
+#
+# Lint, typecheck, tests and coverage are `ci.yml`; this workflow only packages.
+
+on:
+  push:
+    branches: [3.0-dev]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'roadmap-archive/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      # One broken platform still yields the other two (D-24 asks for this in the release
+      # workflow; there is no reason for a dev build to behave differently).
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS (universal)
+            os: macos-latest
+            target: --mac
+            artifacts: |
+              apps/electron/dist-electron/*.dmg
+              apps/electron/dist-electron/*.zip
+              apps/electron/dist-electron/latest-mac.yml
+          - name: Windows (x64, arm64)
+            os: windows-latest
+            target: --win
+            artifacts: |
+              apps/electron/dist-electron/*.exe
+              apps/electron/dist-electron/latest.yml
+          - name: Linux (x64, arm64)
+            os: ubuntu-latest
+            target: --linux
+            artifacts: |
+              apps/electron/dist-electron/*.AppImage
+              apps/electron/dist-electron/*.deb
+              apps/electron/dist-electron/latest-linux*.yml
+
+    env:
+      # Both downloaders are pointed inside the workspace so that one cache action covers them on
+      # all three runners; the default locations differ per OS.
+      ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+      ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+      # A step's own `env:` is not visible to its `if:`, so the "are the Apple secrets there?"
+      # question is answered once here, at job level, where it is.
+      HAS_APPLE_SIGNING:
+        ${{ secrets.APPLE_ID != '' && secrets.APPLE_TEAM_ID != '' && secrets.APPLE_APP_SPECIFIC_PASSWORD != '' &&
+        secrets.APPLE_CERTIFICATE_P12 != '' }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Cache the Electron downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cache/electron
+            ${{ github.workspace }}/.cache/electron-builder
+          # The Electron version is pinned exactly in apps/electron/package.json, so the lock file
+          # is a precise key for both caches.
+          key: electron-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: electron-${{ runner.os }}-
+
+      - run: npm ci
+
+      # Electron 44 has no postinstall download any more, so the binary has to be fetched
+      # explicitly. electron-builder downloads its own copy for packaging; this one is what
+      # `electron .` and the Playwright `_electron` smoke tests of task 14 will use.
+      - run: npx install-electron
+
+      - run: npm run build
+
+      # Apple code signing and notarisation (D-9). Without the secrets the build is unsigned and
+      # says so in the artifact name of nothing at all - it simply is not signed, which is what a
+      # fork or a pull request gets. CSC_IDENTITY_AUTO_DISCOVERY=false stops electron-builder from
+      # picking up a stray keychain identity on a self-hosted runner.
+      - name: Package (macOS, signed and notarised)
+        if: matrix.os == 'macos-latest' && env.HAS_APPLE_SIGNING == 'true'
+        working-directory: apps/electron
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_LINK: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: npx electron-builder --mac --publish never -c.mac.notarize=true
+
+      - name: Package
+        if: matrix.os != 'macos-latest' || env.HAS_APPLE_SIGNING != 'true'
+        working-directory: apps/electron
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        run: npx electron-builder ${{ matrix.target }} --publish never
+
+      # TODO (D-9): Windows signing through SignPath, once the OSS project application is
+      # accepted. The step is left here rather than in a note because the shape of it decides
+      # where the artifact upload has to happen - SignPath signs an uploaded artifact and hands
+      # back a signed one, so it goes between the packaging and the upload below. Until then the
+      # Windows builds are unsigned and SmartScreen warns; the README says what to do about it.
+      #
+      # - name: Sign the Windows artifacts (SignPath)
+      #   if: matrix.os == 'windows-latest' && env.SIGNPATH_API_TOKEN != ''
+      #   uses: signpath/github-action-submit-signing-request@v1
+      #   with:
+      #     api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+      #     organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+      #     project-slug: homematic-manager
+      #     signing-policy-slug: test-signing
+      #     artifact-configuration-slug: electron-nsis
+      #     github-artifact-id: ${{ steps.upload.outputs.artifact-id }}
+      #     wait-for-completion: true
+      #     output-artifact-directory: apps/electron/dist-electron
+
+      - name: Upload the artifacts
+        id: upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: homematic-manager-${{ runner.os }}
+          path: ${{ matrix.artifacts }}
+          if-no-files-found: error
+          retention-days: 14

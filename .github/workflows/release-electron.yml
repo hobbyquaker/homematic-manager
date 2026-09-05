@@ -1,0 +1,145 @@
+name: Release (Electron app)
+
+# One of the three independent release pipelines of D-24. This one packages the desktop app and
+# attaches its assets to the GitHub release for a `v*` tag. It has no `needs:` on anything: the npm
+# package (`release-npm.yml`, task 12) and the CCU addon (`release-addon.yml`, task 13) run for the
+# same tag, in parallel, and a failure in either must never hold this one back or roll it back.
+#
+# The release is created as a **draft**, by whichever of the three workflows gets there first, and
+# published by the maintainer. That is not tidiness: `electron-updater` polls the latest published
+# release, and a release that is published while its `latest*.yml` and installers are still
+# uploading would offer every running app an update it cannot download.
+#
+# Re-running one deliverable alone is `workflow_dispatch` with the tag as its input.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The existing tag to build and attach assets to, e.g. v3.0.0-beta.1
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  # Per tag, not per branch: two runs for the same tag would race on the same assets.
+  group: release-electron-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      # D-24: a broken macOS notarisation still has to yield the Windows and Linux assets.
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS (universal)
+            os: macos-latest
+            target: --mac
+            assets: |
+              apps/electron/dist-electron/*.dmg
+              apps/electron/dist-electron/*.zip
+              apps/electron/dist-electron/*.blockmap
+              apps/electron/dist-electron/latest-mac.yml
+          - name: Windows (x64, arm64)
+            os: windows-latest
+            target: --win
+            assets: |
+              apps/electron/dist-electron/*.exe
+              apps/electron/dist-electron/*.blockmap
+              apps/electron/dist-electron/latest.yml
+          - name: Linux (x64, arm64)
+            os: ubuntu-latest
+            target: --linux
+            assets: |
+              apps/electron/dist-electron/*.AppImage
+              apps/electron/dist-electron/*.deb
+              apps/electron/dist-electron/latest-linux*.yml
+
+    env:
+      ELECTRON_CACHE: ${{ github.workspace }}/.cache/electron
+      ELECTRON_BUILDER_CACHE: ${{ github.workspace }}/.cache/electron-builder
+      HAS_APPLE_SIGNING:
+        ${{ secrets.APPLE_ID != '' && secrets.APPLE_TEAM_ID != '' && secrets.APPLE_APP_SPECIFIC_PASSWORD != '' &&
+        secrets.APPLE_CERTIFICATE_P12 != '' }}
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          # The release notes are generated from the history, so the history has to be there.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Cache the Electron downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/.cache/electron
+            ${{ github.workspace }}/.cache/electron-builder
+          key: electron-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: electron-${{ runner.os }}-
+
+      - run: npm ci
+
+      - run: npx install-electron
+
+      - run: npm run build
+
+      - name: Package (macOS, signed and notarised)
+        if: matrix.os == 'macos-latest' && env.HAS_APPLE_SIGNING == 'true'
+        working-directory: apps/electron
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_LINK: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: npx electron-builder --mac --publish never -c.mac.notarize=true
+
+      - name: Package
+        if: matrix.os != 'macos-latest' || env.HAS_APPLE_SIGNING != 'true'
+        working-directory: apps/electron
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+        run: npx electron-builder ${{ matrix.target }} --publish never
+
+      # TODO (D-9): Windows signing through SignPath, once the OSS project application is
+      # accepted. Until then the Windows assets are unsigned and SmartScreen warns on first run;
+      # apps/electron/README.md documents the "More info -> Run anyway" workaround.
+      #
+      # - name: Sign the Windows assets (SignPath)
+      #   if: matrix.os == 'windows-latest'
+      #   uses: signpath/github-action-submit-signing-request@v1
+      #   with:
+      #     api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+      #     organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+      #     project-slug: homematic-manager
+      #     signing-policy-slug: release-signing
+      #     artifact-configuration-slug: electron-nsis
+      #     github-artifact-id: ${{ steps.stage.outputs.artifact-id }}
+      #     wait-for-completion: true
+      #     output-artifact-directory: apps/electron/dist-electron
+
+      # Idempotent by design: the action creates the draft release when it is not there yet and
+      # only adds the files when it is, so all three OS jobs - and all three workflows of D-24 -
+      # can run in any order and be re-run alone.
+      - name: Attach the assets to the draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          draft: true
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: ${{ matrix.assets }}

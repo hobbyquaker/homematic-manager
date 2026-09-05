@@ -47,6 +47,20 @@ export interface InterfaceDefinition {
     readonly pingTimeout?: number;
     /** Reports a duty cycle (relevant for the radio tab). */
     readonly dutyCycle?: boolean;
+    /**
+     * Answers `getServiceMessages`. `false` means the process does not implement it and must not be
+     * asked at all - the service-message sweep skips such an interface silently.
+     *
+     * Measured on all three lab boxes on 2026-09-05 (task 17): the group process behind
+     * **VirtualDevices** answers `getServiceMessages` with something that is not XML-RPC, once per
+     * re-`init`, which on an idle CCU addon was the only thing in the log. **HmIP-RF** does not
+     * have the method either - hmipserver reports neither `rssiInfo` nor `getServiceMessages`, so
+     * its service messages are read out of the `VALUES` paramset of every `:0` channel instead.
+     *
+     * Omitted means yes. A user-defined interface is unknown territory and is therefore tried
+     * once; the backend remembers a method-not-found or an unparseable answer for that session.
+     */
+    readonly serviceMessages?: boolean;
     /** A fixed `init` identity string; only CUxD has one (it matches on the literal `CUxD`). */
     readonly ident?: string;
 }
@@ -90,6 +104,8 @@ export const INTERFACES = {
         ping: true,
         pingTimeout: 600,
         dutyCycle: true,
+        // hmipserver has none; the HmIP sweep reads the :0 channels instead (see `sweepHmip`)
+        serviceMessages: false,
     },
     VirtualDevices: {
         name: 'VirtualDevices',
@@ -101,6 +117,8 @@ export const INTERFACES = {
         init: true,
         // the group process answers no ping, so it is watched by events only
         ping: false,
+        // ... and it has no getServiceMessages either: it answers that one with invalid XML-RPC
+        serviceMessages: false,
     },
     CUxD: {
         name: 'CUxD',
@@ -147,6 +165,8 @@ export interface ResolvedInterface {
     readonly ping: boolean;
     readonly pingTimeoutSeconds: number;
     readonly dutyCycle: boolean;
+    /** Takes part in the service-message sweep. */
+    readonly serviceMessages: boolean;
 }
 
 /** An extra interface the user configured by hand (D-13, issue #135). */
@@ -257,6 +277,7 @@ export function resolveInterface(name: string, mode: ConnectionMode = {}): Resol
         ping: definition.ping,
         pingTimeoutSeconds: definition.pingTimeout ?? DEFAULT_PING_TIMEOUT_SECONDS,
         dutyCycle: definition.dutyCycle ?? false,
+        serviceMessages: definition.serviceMessages ?? true,
     };
 }
 
@@ -277,6 +298,8 @@ export function resolveUserDefinedInterface(definition: UserDefinedInterface): R
         ping: true,
         pingTimeoutSeconds: DEFAULT_PING_TIMEOUT_SECONDS,
         dutyCycle: false,
+        // tried once: what a hand-configured process implements is not knowable from here
+        serviceMessages: true,
     };
 }
 

@@ -8,6 +8,7 @@ import {
     internalError,
     isApiError,
     isConnectionRefused,
+    isMethodUnsupported,
     isRpcFault,
     rpcFaultError,
     toApiError,
@@ -175,5 +176,35 @@ describe('isConnectionRefused', () => {
         const a: {message: string; cause?: unknown} = {message: 'a'};
         a.cause = a;
         expect(isConnectionRefused(a)).toBe(false);
+    });
+});
+
+describe('isMethodUnsupported', () => {
+    it('recognises an answer that is not an XML-RPC method response', () => {
+        // what the CCU's group process gives the service-message sweep, measured on all three lab
+        // boxes in task 17; homematic-xmlrpc's deserializer words it exactly like this
+        expect(
+            isMethodUnsupported(
+                connectionError(
+                    'VirtualDevices (ccu:9292, xmlrpc): getServiceMessages failed: Invalid XML-RPC message',
+                ),
+            ),
+        ).toBe(true);
+        expect(isMethodUnsupported(new Error('Not a method response'))).toBe(true);
+        // binrpc's own parser
+        expect(isMethodUnsupported(new Error('malformed response'))).toBe(true);
+    });
+
+    it('recognises a fault that says the method does not exist', () => {
+        expect(isMethodUnsupported(rpcFaultError('x', {faultCode: -1, faultString: 'Unknown method'}))).toBe(true);
+        expect(isMethodUnsupported(rpcFaultError('x', {faultCode: -32601, faultString: 'whatever'}))).toBe(true);
+    });
+
+    it('is false for everything an interface can still be asked again about', () => {
+        expect(isMethodUnsupported(connectionError('BidCos-RF: getServiceMessages timed out after 5000 ms'))).toBe(
+            false,
+        );
+        expect(isMethodUnsupported(rpcFaultError('x', {faultCode: -2, faultString: 'Invalid device'}))).toBe(false);
+        expect(isMethodUnsupported(undefined)).toBe(false);
     });
 });

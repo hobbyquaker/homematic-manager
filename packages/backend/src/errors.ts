@@ -134,6 +134,52 @@ export function errorMessage(value: unknown): string {
 }
 
 /**
+ * What an answer looks like when the interface process does not have the method.
+ *
+ * There is no single shape for it. The CCU's group process (VirtualDevices) answers
+ * `getServiceMessages` with a body that is not an XML-RPC method response at all, which
+ * `homematic-xmlrpc`'s deserializer reports as `Invalid XML-RPC message`; hmipserver refuses an
+ * unknown method at the HTTP level with no fault code; something that does speak XML-RPC properly
+ * answers a fault, with either the eq-3 wording or the standard `-32601`.
+ *
+ * Only the *class* matters here: a call that will never work on this interface, so asking again is
+ * pointless. It is deliberately not the same thing as an error - the interface is fine, it simply
+ * cannot do this - which is why the caller remembers it instead of logging it.
+ */
+const UNSUPPORTED_METHOD_PATTERNS: readonly RegExp[] = [
+    // homematic-xmlrpc's deserializer, when the answer is not an XML-RPC method response
+    /invalid xml-rpc message/i,
+    /not a method response/i,
+    /invalid method response/i,
+    /unknown xml-rpc tag/i,
+    // binrpc's own parser
+    /malformed response/i,
+    // an interface that answers XML-RPC properly but has no handler for the method
+    /unknown method/i,
+    /method not found/i,
+];
+
+/** The standard XML-RPC fault code for a method the server does not have. */
+const FAULT_METHOD_NOT_FOUND = -32601;
+
+/**
+ * Does this say "this interface process does not have that method"?
+ *
+ * Task 17 found it on all three lab boxes: `VirtualDevices` answers `getServiceMessages` with
+ * invalid XML-RPC on every re-`init`, so the service-message sweep wrote one INFO line a minute -
+ * on an idle CCU addon the only thing in the log. The built-in table now says which interfaces have
+ * the method (`serviceMessages`); this is what a *user-defined* interface is judged by, once.
+ */
+export function isMethodUnsupported(value: unknown): boolean {
+    const error = toApiError(value);
+    if (error.faultCode === FAULT_METHOD_NOT_FOUND) {
+        return true;
+    }
+    const text = `${error.faultString ?? ''} ${error.message}`;
+    return UNSUPPORTED_METHOD_PATTERNS.some((pattern) => pattern.test(text));
+}
+
+/**
  * Did nothing answer at all on that port?
  *
  * A CCU without a wired gateway runs no `hs485d`, so BidCos-Wired - which is in the default

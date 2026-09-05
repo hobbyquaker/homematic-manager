@@ -264,6 +264,8 @@ export interface SimulatorOptions {
     readonly rfdConfigPendingMode?: 'strict' | 'pending' | 'hmip' | 'bidcos';
     readonly links?: Record<string, unknown[]>;
     readonly serviceMessages?: Record<string, unknown[]>;
+    /** Starts the VirtualDevices server (the CCU's group process) on `/groups`, port from the OS. */
+    readonly virtual?: boolean;
 }
 
 /** Starts a simulator with the fixtures above. */
@@ -271,7 +273,12 @@ export async function startSimulator(options: SimulatorOptions = {}): Promise<an
     const sim = new HmSim({
         devices: {rfd: RFD_DEVICES, hmip: HMIP_DEVICES},
         paramsetDescriptions: PARAMSET_DESCRIPTIONS,
-        config: {listenAddress: '127.0.0.1', binrpcListenPort: 0, xmlrpcListenPort: 0},
+        config: {
+            listenAddress: '127.0.0.1',
+            binrpcListenPort: 0,
+            xmlrpcListenPort: 0,
+            ...(options.virtual === true ? {virtualListenPort: 0} : {}),
+        },
         behaviorPath: path.join(os.tmpdir(), 'hmm-no-behaviors'),
         ...(options.tls === true ? {tls: true} : {}),
         ...(options.auth ? {auth: options.auth} : {}),
@@ -309,6 +316,9 @@ export async function startBackend(
     const ports: Record<string, number> = {
         'BidCos-RF': sim.ports.rfd as number,
         'HmIP-RF': sim.ports.hmip as number,
+        // undefined unless the simulator was started with `virtual: true`; `portOverride` then
+        // returns undefined and the table's own port is used, which is what every other test wants
+        VirtualDevices: sim.ports.virtual as number,
     };
     const backend = await Backend.open({
         dataDir,

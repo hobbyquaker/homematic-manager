@@ -56,7 +56,15 @@ import {validateConnection, writePaceFor} from '../config/defaults.js';
 import {DataFileServer} from '../data/files.js';
 import {installModeCalls} from '../devices/installMode.js';
 import {discoverCcus, type DiscoverOptions} from '../discovery/discover.js';
-import {BackendError, configError, connectionError, errorMessage, internalError, validationError} from '../errors.js';
+import {
+    BackendError,
+    configError,
+    connectionError,
+    errorMessage,
+    internalError,
+    isMethodUnsupported,
+    validationError,
+} from '../errors.js';
 import {InterfaceManager, firstBidcosInterfaceAddress, type InterfaceManagerOptions} from '../interfaces/manager.js';
 import {RegaService, type RegaServiceOptions} from '../rega/client.js';
 import type {RpcCallRecord, RpcOutValue} from '../rpc/client.js';
@@ -128,6 +136,12 @@ export class Backend {
     #hmipSweepRunning = false;
     #stopped = false;
     #sessions = 0;
+    /**
+     * Interfaces that were asked `getServiceMessages` once and answered that they do not have it.
+     * Only user-defined interfaces can land in here - the built-in ones are decided by the core's
+     * table - and it is emptied whenever the connection is rebuilt.
+     */
+    readonly #noServiceMessages = new Set<string>();
     #idleTimer: ReturnType<typeof setTimeout> | undefined;
 
     private constructor(options: BackendOptions, config: ConfigStore, caches: CacheStore) {
@@ -478,6 +492,7 @@ export class Backend {
 
     async #connect(): Promise<void> {
         const connection = this.#config.connection;
+        this.#noServiceMessages.clear();
         const manager = (this.#options.createInterfaceManager ?? ((options) => new InterfaceManager(options)))({
             connection,
             handler: this.#callbackHandler(),
@@ -924,8 +939,26 @@ export class Backend {
         return this.#caches.listServiceMessages(interfaceName);
     }
 
+    /**
+     * Does it make sense to ask this interface for its service messages?
+     *
+     * The built-in answer comes from the core's table: hmipserver has no `getServiceMessages` (the
+     * HmIP sweep below reads the `:0` channels instead) and the group process behind
+     * `VirtualDevices` answers it with invalid XML-RPC. A user-defined interface is asked once and
+     * then remembered for this session - see {@link isMethodUnsupported}.
+     */
+    #hasServiceMessages(interfaceName: string): boolean {
+        if (this.#noServiceMessages.has(interfaceName)) {
+            return false;
+        }
+        return this.#manager?.resolved(interfaceName)?.serviceMessages !== false;
+    }
+
     /** Reads the BidCos service messages of one interface into the store. */
     async #refreshServiceMessages(interfaceName: string): Promise<void> {
+        if (!this.#hasServiceMessages(interfaceName)) {
+            return;
+        }
         try {
             const answer = await this.#read(interfaceName, 'getServiceMessages', []);
             if (!Array.isArray(answer)) {
@@ -950,6 +983,13 @@ export class Backend {
                 this.#noteUnreach(interfaceName, address, datapoint, value);
             }
         } catch (error) {
+            // "you do not have this method" is not a failure worth a line - and worth even less
+            // once a minute, which is what the re-`init` of an interface that sends no events made
+            // of it on hardware (task 17). Remembered, and never asked again this session.
+            if (isMethodUnsupported(error)) {
+                this.#noServiceMessages.add(interfaceName);
+                return;
+            }
             this.#notice('info', `${interfaceName}: getServiceMessages failed: ${errorMessage(error)}`, interfaceName);
         }
     }
@@ -971,7 +1011,8 @@ export class Backend {
     /** One polling round; public so a test does not have to wait five minutes. */
     async pollServiceMessages(): Promise<void> {
         for (const interfaceName of this.#manager?.names() ?? []) {
-            if (interfaceName !== 'HmIP-RF' && this.#manager?.isConnected(interfaceName) === true) {
+            if (this.#manager?.isConnected(interfaceName) === true) {
+                // `#refreshServiceMessages` decides whether the interface has the method at all
                 await this.#refreshServiceMessages(interfaceName);
             }
         }

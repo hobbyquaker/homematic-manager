@@ -130,6 +130,7 @@ describe('resolveInterface', () => {
             ping: true,
             pingTimeoutSeconds: 60,
             dutyCycle: true,
+            serviceMessages: true,
         });
     });
 
@@ -147,6 +148,19 @@ describe('resolveInterface', () => {
         expect(resolved.ping).toBe(false);
         expect(resolved.dutyCycle).toBe(false);
         expect(resolved.pingTimeoutSeconds).toBe(DEFAULT_PING_TIMEOUT_SECONDS);
+    });
+
+    // task 17, all three lab boxes: the group process answers getServiceMessages with something
+    // that is not XML-RPC, and hmipserver has no such method at all. Neither may be asked.
+    it('leaves VirtualDevices and HmIP-RF out of the service-message sweep', () => {
+        expect(resolveInterface('VirtualDevices').serviceMessages).toBe(false);
+        expect(resolveInterface('HmIP-RF').serviceMessages).toBe(false);
+    });
+
+    it('lets every other built-in interface answer service messages', () => {
+        for (const name of ['BidCos-RF', 'BidCos-Wired', 'CUxD'] as const) {
+            expect(resolveInterface(name).serviceMessages).toBe(true);
+        }
     });
 
     it('drops TLS when talking to the process directly', () => {
@@ -185,7 +199,17 @@ describe('user-defined interfaces (D-13)', () => {
             ping: true,
             pingTimeoutSeconds: 60,
             dutyCycle: false,
+            serviceMessages: true,
         });
+    });
+
+    // nothing is known about a hand-configured process, so it is asked once and the backend
+    // remembers a method-not-found or an unparseable answer for the rest of the session
+    it('lets a user-defined interface try getServiceMessages once', () => {
+        expect(
+            resolveUserDefinedInterface({name: 'CCU-Jack', host: 'ccu', port: 2121, protocol: 'xmlrpc'})
+                .serviceMessages,
+        ).toBe(true);
     });
 
     it('defaults path to / and TLS to off', () => {

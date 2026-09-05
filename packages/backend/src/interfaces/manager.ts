@@ -20,7 +20,7 @@
  * the root of the "endless loading" issues #121, #126, #128 and #134.
  */
 
-import type {ConnectionConfig, InterfaceState, RpcProtocol} from '@homematic-manager/core';
+import type {ConnectionConfig, InterfaceState, ResolvedInterface, RpcProtocol} from '@homematic-manager/core';
 import {INTERFACE_NAMES, interfaceDefinition, interfacePort, isKnownInterface} from '@homematic-manager/core';
 
 import {configError, connectionError, errorMessage, isConnectionRefused} from '../errors.js';
@@ -190,6 +190,14 @@ export class InterfaceManager {
     /** The names of every configured interface. */
     names(): string[] {
         return [...this.#interfaces.keys()];
+    }
+
+    /**
+     * What the core's table (or the user's own definition) says about one interface - the ports,
+     * the protocol and the capability flags. `undefined` for a name that is not configured.
+     */
+    resolved(interfaceName: string): ResolvedInterface | undefined {
+        return this.#interfaces.get(interfaceName)?.target.resolved;
     }
 
     /**

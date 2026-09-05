@@ -1,0 +1,196 @@
+{
+  "_source": "Hand-built, shaped exactly like packages/core/src/data/types.ts. The SWITCH and DIMMER profiles follow the structure of the 2.x easy modes in legacy/www/easymodes/{SWITCH,DIMMER}/KEY.json (profile keys expert/switch_on/switch_off/light_stairway/dimmer_on_brighter, readonly params -> fixed constraints) and the openccu-data artifact description in docs/analysis-2026-09.md section 6.2. It is not a converted openccu-data release; task 9 produces the real thing.",
+  "manifest": {
+    "generatedAt": "2026-09-05T00:00:00.000Z",
+    "sources": [{"name": "openccu-data", "version": "2026.7.2", "url": "https://github.com/SukramJ/openccu-data"}],
+    "receiverTypes": ["SWITCH", "DIMMER"],
+    "languages": ["de", "en"]
+  },
+  "receiverTypeAliases": {
+    "SWITCH_VIRTUAL_RECEIVER": "SWITCH",
+    "OPTICAL_SIGNAL_RECEIVER": "DIMMER_VIRTUAL_RECEIVER",
+    "DIMMER_VIRTUAL_RECEIVER": "DIMMER",
+    "LOOP_A": "LOOP_B",
+    "LOOP_B": "LOOP_A"
+  },
+  "profiles": {
+    "SWITCH": {
+      "receiverType": "SWITCH",
+      "senderMetadata": {
+        "KEY": {
+          "parameterOrder": ["SHORT_ON_TIME", "SHORT_OFF_TIME"],
+          "optionPresets": {"SHORT_ON_TIME": "DELAY"},
+          "subsets": [
+            {
+              "id": 1,
+              "key": "subset_1",
+              "optionValue": 1,
+              "params": ["SHORT_JT_ON"],
+              "values": {"SHORT_JT_ON": 3}
+            }
+          ]
+        }
+      },
+      "senders": {
+        "KEY": [
+          {
+            "id": 0,
+            "key": "expert",
+            "name": {"de": "Experte", "en": "Expert"},
+            "description": {"de": "Alle Parameter", "en": "All parameters"},
+            "params": {}
+          },
+          {
+            "id": 1,
+            "key": "switch_on",
+            "name": {"de": "Schalten ein", "en": "Switch on"},
+            "description": {"de": "Der Aktor schaltet ein.", "en": "The actor switches on."},
+            "params": {
+              "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+              "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+              "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600}
+            }
+          },
+          {
+            "id": 2,
+            "key": "switch_off",
+            "name": {"de": "Schalten aus", "en": "Switch off"},
+            "description": {"de": "Der Aktor schaltet aus.", "en": "The actor switches off."},
+            "params": {
+              "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+              "SHORT_JT_ON": {"kind": "fixed", "value": 4},
+              "SHORT_OFF_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 111600}
+            }
+          },
+          {
+            "id": 4,
+            "key": "light_stairway",
+            "name": {"de": "Treppenhauslicht", "en": "Staircase light"},
+            "description": {"de": "Einschalten fuer eine feste Zeit.", "en": "Switch on for a fixed time."},
+            "params": {
+              "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+              "SHORT_JT_ON": {"kind": "fixed", "value": 3},
+              "SHORT_ON_TIME": {"kind": "list", "values": [5, 30, 60, 300], "default": 60},
+              "SHORT_MULTIEXECUTE": {"kind": "fixed", "value": true}
+            }
+          },
+          {
+            "id": 9,
+            "key": "not_on_this_firmware",
+            "name": {"de": "Unbekannt", "en": "Unknown"},
+            "description": {"de": "", "en": ""},
+            "params": {
+              "SHORT_NOT_A_PARAM": {"kind": "fixed", "value": 1},
+              "SHORT_EMPTY_LIST": {"kind": "list", "values": []}
+            }
+          }
+        ]
+      }
+    },
+    "DIMMER": {
+      "receiverType": "DIMMER",
+      "senders": {
+        "KEY": [
+          {
+            "id": 1,
+            "key": "dimmer_on_brighter",
+            "name": {"de": "Dimmer ein / heller", "en": "Dimmer on / brighter"},
+            "description": {"de": "", "en": ""},
+            "params": {
+              "SHORT_ACTION_TYPE": {"kind": "fixed", "value": 1},
+              "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1}
+            }
+          }
+        ]
+      }
+    }
+  },
+  "masterMetadata": {
+    "SWITCH": {
+      "channelType": "SWITCH",
+      "parameterOrder": ["POWERUP_ACTION", "STATUSINFO_MINDELAY", "STATUSINFO_RANDOM"],
+      "conditionalVisibility": [
+        {"trigger": "POWERUP_ACTION", "triggerValue": 1, "show": ["STATUSINFO_MINDELAY", "STATUSINFO_RANDOM"]}
+      ],
+      "optionPresets": {"STATUSINFO_MINDELAY": "DELAY", "STATUSINFO_RANDOM": "NO_SUCH_PRESET"}
+    },
+    "KEY": {
+      "channelType": "KEY"
+    }
+  },
+  "optionPresets": {
+    "DELAY": {
+      "id": "DELAY",
+      "allowCustom": true,
+      "presets": [
+        {"labelKey": "none", "value": 0},
+        {"label": "5s", "value": 5},
+        {"label": "1min", "value": 60},
+        {"label": "1h", "value": 3600}
+      ]
+    }
+  },
+  "crossValidations": [
+    {
+      "id": "dim_levels",
+      "rule": "gte",
+      "paramA": "DIM_MAX_LEVEL",
+      "paramB": "DIM_MIN_LEVEL",
+      "errorKey": "err_dim_max_ge_min"
+    },
+    {
+      "id": "statusinfo",
+      "rule": "lte",
+      "paramA": "STATUSINFO_MINDELAY",
+      "paramB": "STATUSINFO_RANDOM",
+      "errorKey": "err_statusinfo"
+    },
+    {
+      "id": "onlevel",
+      "rule": "between",
+      "param": "SHORT_ON_LEVEL",
+      "minParam": "DIM_MIN_LEVEL",
+      "maxParam": "DIM_MAX_LEVEL",
+      "errorKey": "err_on_level_between"
+    },
+    {
+      "id": "not_applicable",
+      "rule": "gte",
+      "paramA": "NOT_IN_DESCRIPTION",
+      "paramB": "DIM_MIN_LEVEL",
+      "errorKey": "err_nope"
+    }
+  ],
+  "translations": {
+    "de": {
+      "language": "de",
+      "channelTypes": {"SWITCH": "Schaltaktor", "KEY": "Taste"},
+      "deviceModels": {"HM-LC-Sw1-Pl-CT-R1": "Funk-Schaltaktor 1-fach"},
+      "parameters": {
+        "POWERUP_ACTION": "Verhalten nach Spannungswiederkehr",
+        "SWITCH|POWERUP_ACTION": "Schaltzustand nach Spannungswiederkehr",
+        "STATUSINFO_MINDELAY": "Mindestsendeverzoegerung"
+      },
+      "parameterValues": {
+        "SWITCH|POWERUP_ACTION|POWERUP_ON": "Kanal eingeschaltet",
+        "POWERUP_ACTION|POWERUP_ON": "eingeschaltet",
+        "POWERUP_OFF": "ausgeschaltet"
+      },
+      "parameterHelp": {
+        "POWERUP_ACTION": "Zustand nach Spannungswiederkehr.",
+        "SWITCH|POWERUP_ACTION": "Zustand des Schaltaktors nach Spannungswiederkehr."
+      },
+      "uiLabels": {"none": "keine", "err_dim_max_ge_min": "Max muss groesser als Min sein"}
+    },
+    "en": {
+      "language": "en",
+      "channelTypes": {"SWITCH": "Switch actor"},
+      "deviceModels": {},
+      "parameters": {"POWERUP_ACTION": "Behaviour after power up"},
+      "parameterValues": {"POWERUP_ACTION|POWERUP_ON": "on"},
+      "parameterHelp": {},
+      "uiLabels": {"none": "none", "err_dim_max_ge_min": "Max must be greater than min"}
+    }
+  },
+  "deviceIcons": {"HM-LC-Sw1-Pl-CT-R1": "hm-lc-sw1-pl-ct-r1.png"}
+}

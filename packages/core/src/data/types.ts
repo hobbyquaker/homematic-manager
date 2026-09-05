@@ -113,7 +113,7 @@ export interface Translations {
     deviceModels: Record<string, string>;
     /** parameter name or `CHANNEL_TYPE|PARAM` -> label */
     parameters: Record<string, string>;
-    /** `PARAM|VALUE` or `VALUE` -> label */
+    /** `CHANNEL_TYPE|PARAM|VALUE`, `PARAM|VALUE` or `VALUE` -> label */
     parameterValues: Record<string, string>;
     /** parameter name or `CHANNEL_TYPE|PARAM` -> help text (may contain simple HTML) */
     parameterHelp: Record<string, string>;

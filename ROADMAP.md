@@ -10,9 +10,9 @@ reused. This file holds open items; a finished task moves to `roadmap-archive/ta
 was done, measured and found, and its line in the contents gets a ✅ marker. Decisions are **D-n**,
 open questions **OQ-n**; when the maintainer changes a decision, record it here with the date.
 
-Status 2026-09-05: tasks 2 (project foundation) and 9 (data pipeline) are done, version
-`3.0.0-dev.0` on branch `3.0-dev`; tasks 3 (core) and 5 (hm-simulator 1.0, in its own repository)
-are in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+Status 2026-09-05: tasks 2 (foundation), 3 (core), 5 (hm-simulator 1.0, branch `1.0-dev` in its own
+repository, not yet pushed or published) and 9 (data pipeline) are done, version `3.0.0-dev.0` on
+branch `3.0-dev` (pushed, D-21); task 7 (UI foundation) is in progress, task 4 (backend) starts next. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
@@ -46,9 +46,9 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [0. Milestones and effort](#0-milestones-and-effort)
 - 1. Legacy stopgap release 2.8 ❌ dropped (D-7), number not reused
 - 2. Project foundation ✅ [archived](roadmap-archive/task-2.md)
-- [3. Core package](#3-core-package)
+- 3. Core package ✅ [archived](roadmap-archive/task-3.md)
 - [4. Backend package](#4-backend-package)
-- [5. hm-simulator 1.0](#5-hm-simulator-10)
+- 5. hm-simulator 1.0 ✅ [archived](roadmap-archive/task-5.md) (branch `1.0-dev` in its own repository, release by the maintainer)
 - [6. Paramset write safety and the CONFIG_PENDING study](#6-paramset-write-safety-and-the-config_pending-study)
 - [7. UI foundation](#7-ui-foundation)
 - [8. UI feature parity](#8-ui-feature-parity)
@@ -280,6 +280,9 @@ Everything in section 2.1 of the analysis, tab by tab, with e2e tests per workfl
 The procedural WebUI dialogs that no extraction can produce, as plug-ins on top of the generic
 editor, each with its own tests:
 
+- "Not used / infinite" values are the parameter's own `SPECIAL` entry (`NOT_USED`: 111600 s on
+  BidCos-RF, 16383000 s on BidCos-Wired, issue #96, found in task 3); every editor and easy-mode
+  select takes it from the description, never from a constant.
 - Initial set (M3): HmIP weekly program (heating, switching), BidCos thermostat week profile
   (HM-CC-RT/TC, also Max! via Homegear: #100), `DISPLAY_INFORMATION` and similar enum extensions,
   blind/shutter calibration parameters, time base/factor pickers.

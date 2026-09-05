@@ -5,6 +5,11 @@ coverage/
 .vite/
 *.tsbuildinfo
 
+# playwright: the traces of a failed e2e run and the HTML report
+test-results/
+playwright-report/
+.playwright-coverage/
+
 *.pid
 .idea
 .DS_Store

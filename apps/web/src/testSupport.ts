@@ -175,6 +175,15 @@ export const SIMULATOR_PARAMSET_DESCRIPTIONS: Record<string, unknown> = {
 export interface StartForTestOptions extends Omit<WebHostOptions, 'port' | 'dataDir'> {
     /** Start an hm-simulator and connect the backend to it. Ignored when it is not installed. */
     readonly simulator?: boolean;
+    /**
+     * Merged over the simulator options above, so a suite can bring its own fixture: `devices`,
+     * `paramsetDescriptions`, `links`, `serviceMessages`, `rega`, `interfaces`. The two devices
+     * here are the smallest thing that makes every grid non-empty; the e2e suite in
+     * `apps/web/test/e2e` replaces them with a set that can be linked, renamed and refused.
+     */
+    readonly simulatorOptions?: Readonly<Record<string, unknown>>;
+    /** Merged over the `ConnectionConfig` the host is configured with once the simulator is up. */
+    readonly connection?: Partial<ConnectionConfig>;
     /** Overrides the temporary profile directory. */
     readonly dataDir?: string;
     readonly port?: number;
@@ -189,7 +198,13 @@ export interface TestHost extends WebHost {
 
 /** Starts the web host on a free port with a throw-away profile directory. */
 export async function startForTest(options: StartForTestOptions = {}): Promise<TestHost> {
-    const {simulator: wantsSimulator, dataDir: givenDataDir, ...hostOptions} = options;
+    const {
+        simulator: wantsSimulator,
+        simulatorOptions,
+        connection: connectionOverrides,
+        dataDir: givenDataDir,
+        ...hostOptions
+    } = options;
     const dataDir = givenDataDir ?? (await fs.mkdtemp(path.join(os.tmpdir(), 'hmm-web-')));
 
     let simulator: any;
@@ -206,6 +221,7 @@ export async function startForTest(options: StartForTestOptions = {}): Promise<T
                 behaviorPath: path.join(os.tmpdir(), 'hmm-web-no-behaviors'),
                 rega: {port: 0, listenAddress: '127.0.0.1', channels: []},
                 interfaces: {hmip: {configPendingMode: 'strict'}, rfd: {configPendingMode: 'strict'}},
+                ...simulatorOptions,
             });
             await simulator.whenReady();
         }
@@ -250,6 +266,7 @@ export async function startForTest(options: StartForTestOptions = {}): Promise<T
             language: 'de',
             writePaceMs: 0,
             rpcLogFolder: '',
+            ...connectionOverrides,
         };
         await host.backend.request('config.set', connection);
     }

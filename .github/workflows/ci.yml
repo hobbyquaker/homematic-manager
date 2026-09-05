@@ -64,6 +64,36 @@ jobs:
           path: coverage/
           if-no-files-found: error
 
+  e2e:
+    # The web host, the real backend and an in-process hm-simulator, driven through chromium: one
+    # spec per workflow of the feature inventory (docs/analysis-2026-09.md 2.1). Its own job, not a
+    # step of `test`, because it needs `npm run build` - the host serves the *built* UI bundle, and
+    # `npm test` never builds one.
+    name: End-to-end (web)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      # Every spec skips itself and prints a `::warning::` while hm-simulator is unpublished; see
+      # the note on the `test` job. `SIMULATOR_REQUIRED: 1` here is what turns that into a failure.
+      - run: npm run test:e2e
+      - name: The traces of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
   npm-package:
     # D-24: `apps/web` is published to npm as its own deliverable, and what goes into that tarball
     # is decided by its `files` list plus `scripts/prepack.mjs` - neither of which any test touches.

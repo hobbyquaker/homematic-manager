@@ -1,0 +1,15 @@
+{
+  "//": "The Playwright suites and their configuration. They are not part of any package's program: `apps/web/tsconfig.json` has `rootDir: src`, and the electron host builds through electron-vite. Without this project they would be transpiled by Playwright and never type-checked, which for a suite that drives a typed API is exactly the wrong way round. `npm run typecheck` runs it.",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "noEmit": true
+  },
+  "include": ["playwright.config.ts", "apps/web/test/e2e/**/*.ts", "apps/electron/test/e2e/**/*.ts"]
+}

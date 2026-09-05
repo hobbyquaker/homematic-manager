@@ -49,3 +49,15 @@ mojibake. That is a real bug and the fix is as small (`request.write(xml, 'latin
 **not** prepared as a patch: changing what goes out changes what every existing consumer has
 already written to their CCUs, and whether to do that — and whether to do it behind an option — is
 the maintainer's call, not a one-liner. `docs/config-pending.md` has the measurement.
+
+## Third item, not prepared as a patch: the `binrpc` reconnect storm
+
+`binrpc@4.2` schedules a reconnect 2.5 s after its socket dies from the `error`, `end` and
+`close` handlers alike, and `connect()` destroys the current socket first, so every reconnect
+schedules more of them: against a refused port the client made 2 attempts in the first 4 s and
+377 within a minute, with the socket destroyed nearly the whole time, which turns every call's
+`ECONNREFUSED` into "Cannot call write after a stream was destroyed". Homematic Manager works
+around it in `packages/backend/src/rpc/client.ts` (timer reconnect off, a dead socket replaced
+before the call that needs it). The upstream fix is one reconnect per disconnect, cancelled by
+`connect()`, and honouring `reconnectTimeout: 0`; measured on 2026-09-06, worth an issue with
+these numbers.

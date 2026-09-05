@@ -41,9 +41,9 @@ about every half hour while the agent works; the timestamp above is the last ref
   1082 tests, `npm run lint`, `npm run typecheck`.
 - In progress by background subagents (Opus), committing distinct commits on
   `3.0-dev` in the shared working tree (each stages only its own files):
-  - **Loose ends before the beta** (small agent): `VirtualDevices` `getServiceMessages` noise,
-    the BIN-RPC "write after destroyed" line on resubscribe, the pid file for a live
-    `install_addon` in the CCU3 chroot.
+  - none; the three loose ends of the beta pass are fixed (`30023f9`, `1681a47`, `cc32363`).
+    Next lab run: a live `install_addon` update on the CCU3 box (the `/proc/1/root` start path
+    is container-tested only), and the task 18 login with a lower-level CCU user.
 - If a session ends with those agents mid-flight: uncommitted files in the working tree are
   theirs. Look at `git status`, `git diff`, run `npm test -w <workspace>`; either finish the
   piece and commit it with an explanatory message, or `git stash` it with a note here. Do not

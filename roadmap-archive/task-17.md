@@ -40,10 +40,16 @@ Workspace 1900 tests green at `3.0.0-dev.1`, lint and typecheck clean.
 
 ## Found, left open
 
-- The CCU3 chroot has no `/var/run`, so a live `install_addon` there leaves the old process
-  running; `VirtualDevices` answers `getServiceMessages` with invalid XML-RPC once a minute; the
-  BIN-RPC client logs "write after a stream was destroyed" once on the resubscribe after an idle
-  unsubscribe. All three handed to a follow-up agent the same day.
+- Three findings fixed by a follow-up agent the same day (`30023f9`, `1681a47`, `cc32363`):
+  `getServiceMessages` is a per-interface capability in the core table (off for VirtualDevices
+  and HmIP-RF, user-defined interfaces tried once); the "write after a stream was destroyed" line
+  was `binrpc@4.2`'s reconnect storm (377 attempts in a minute against a refused port, socket
+  destroyed nearly all the time, which also hid `ECONNREFUSED` and kept BidCos-Wired from being
+  marked absent) and is worked around by disabling the timer reconnect and replacing a dead
+  socket before a call; the addon's pid file moved under the addon's own `var/`, and
+  `update_script` stops the old process and starts the new one through `/proc/1/root` on the
+  CCU3 firmware. The last one is container-tested only; the next lab run checks a live
+  `install_addon` on the CCU3 box.
 - The CCU3 firmware's `install_addon` never propagates an exit code (ends with `sync`).
 - Task 18 was exercised with the lab's admin user only; a lower-level CCU user is untested.
 - PNG optimisation skipped (no oxipng or pngquant on the machine; the script uses them when found).

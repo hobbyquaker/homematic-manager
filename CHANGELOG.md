@@ -240,9 +240,6 @@ This is the change with the largest consequence, and it comes out of a measureme
 
 - A `°` from `rfd` or CUxD over **BIN-RPC** arrives as U+FFFD: `binrpc@4.2` decodes strings as UTF-8.
   This affects the CCU addon and CUxD, not the XML-RPC path; the fix is a one-line change upstream.
-- The **HmIP switching programme's weekday bit order is unverified** (OQ-16). Bit 0 was taken as
-  Sunday from the documented HmIP weekday enums; the editor always prints the raw mask beside the
-  checkboxes.
 - The **Docker image issues its session cookie on a non-loopback bind** (`HMM_ISSUE_COOKIE=true`),
   so whoever reaches the published port is in. This is still an open question (OQ-15) and
   [docs/install-docker.md](docs/install-docker.md) names three ways to lock it down; the warning line

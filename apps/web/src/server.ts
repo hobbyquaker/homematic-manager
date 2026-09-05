@@ -65,6 +65,11 @@ export interface WebHostOptions {
     readonly uiDir?: string;
     /** `data/dist`. */
     readonly metadataDir?: string;
+    /**
+     * D-31: milliseconds with no WebSocket session before the backend de-registers from the
+     * interface processes. `0` (the default here; the CLI's default is five minutes) is off.
+     */
+    readonly idleUnsubscribeMs?: number;
     /** `http://127.0.0.1:5173` - proxy everything that is not the API to a vite dev server. */
     readonly uiDevServer?: string | undefined;
     /** The token clients have to present. Generated when auth is on and none is given. */
@@ -157,6 +162,10 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
             dataDir,
             version: options.version ?? packageVersion(),
             fileRoots: {data: metadataDir, images: imageCacheDir},
+            // D-31: only this host switches it on. `Backend` counts sessions, `ApiWebSocketServer`
+            // reports them, and Electron's in-process transport reports none - so an Electron
+            // window can never be idled out however the backend is configured.
+            ...(options.idleUnsubscribeMs === undefined ? {} : {idleUnsubscribeMs: options.idleUnsubscribeMs}),
             ...options.backendOptions,
         });
         backend.on('notice', (notice) => {

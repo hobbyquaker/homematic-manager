@@ -9,6 +9,8 @@
         notConnectedText?: string;
         /** Title for an interface whose port refuses the connection - nothing runs there. */
         notPresentText?: string;
+        /** Title while `init` has been sent and the first device sweep is still running (D-31). */
+        subscribingText?: string;
         testId?: string | undefined;
     }
 
@@ -18,6 +20,7 @@
         backendConnected = true,
         notConnectedText = 'Not connected',
         notPresentText = 'Not present',
+        subscribingText = 'Subscribing',
         testId = undefined,
     }: Props = $props();
 
@@ -28,6 +31,11 @@
      * (task 13 measured it), which the backend reports as `absent`; that gets a grey dash.
      */
     function mark(state: InterfaceState): {glyph: string; className: string; title: string} {
+        // D-31: `init` is through but the interface is still re-sending its devices; the grids are
+        // incomplete until the sweep ends, so this is neither "connected" nor "broken"
+        if (state.subscribing === true) {
+            return {glyph: '↻', className: 'hmm-connection-busy', title: subscribingText};
+        }
         if (state.connected) {
             return {glyph: '✔', className: 'hmm-connection-ok', title: ''};
         }
@@ -97,5 +105,10 @@
     /* "not there" is not "broken": the same muted grey the surrounding text uses. */
     .hmm-connection-absent {
         color: var(--hmm-fg-muted);
+    }
+
+    /* subscribing: on its way to green, and not an error either */
+    .hmm-connection-busy {
+        color: var(--hmm-warn);
     }
 </style>

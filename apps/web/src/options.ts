@@ -15,6 +15,31 @@ import {DEFAULT_HOST, DEFAULT_PORT} from './server.js';
 /** Prefix of every environment variable: `--data-dir` is `HMM_DATA_DIR`. */
 export const ENV_PREFIX = 'HMM';
 
+/**
+ * D-31: how long a server install waits with no page open before it de-registers from the interface
+ * processes. On by default for every server install type - npm, Docker and the CCU addon all run
+ * unattended for days, and an interface process pushing events at nobody costs the CCU's own CPU.
+ * `0` disables it; Electron never gets here (its transport reports no sessions).
+ */
+export const DEFAULT_IDLE_UNSUBSCRIBE = '5m';
+
+/**
+ * A duration as `90` (seconds), `300s`, `5m` or `1h`, in milliseconds. `0` is off.
+ *
+ * Not a general parser: three suffixes, no fractions, no `1m30s`. It exists so the addon's rc.d
+ * line and the Docker environment can say `5m` instead of `300000`, and so a typo is a usage error
+ * rather than a silently disabled feature.
+ */
+export function parseDuration(value: string, option: string): number {
+    const match = /^(\d+)\s*(ms|s|m|h)?$/.exec(value.trim().toLowerCase());
+    if (!match) {
+        throw new CliError(`${option}: "${value}" is not a duration (e.g. 300s, 5m, 0)`);
+    }
+    const amount = Number(match[1]);
+    const factor = {ms: 1, s: 1000, m: 60_000, h: 3_600_000}[match[2] ?? 's'] ?? 1000;
+    return amount * factor;
+}
+
 export type OptionType = 'string' | 'number' | 'boolean';
 
 export interface OptionDefinition {
@@ -105,6 +130,11 @@ export const OPTIONS = {
         describe: 'fixed port for the binrpc callback server; must differ from the xmlrpc one',
         defaultDescription: '0, a free port',
     },
+    'idle-unsubscribe': {
+        type: 'string',
+        describe: 'drop the event subscriptions after this long with no page open (5m, 300s, 0 to disable)',
+        default: DEFAULT_IDLE_UNSUBSCRIBE,
+    },
     demo: {
         type: 'boolean',
         describe: 'serve the UI on its demo fixture and start no backend at all',
@@ -161,6 +191,8 @@ export interface WebOptions {
     readonly callbackXmlrpcPort: number | undefined;
     readonly callbackBinrpcPort: number | undefined;
     readonly demo: boolean;
+    /** D-31, in milliseconds; `0` disables the idle unsubscribe. */
+    readonly idleUnsubscribeMs: number;
     readonly logLevel: LogLevel;
     readonly help: boolean;
     readonly version: boolean;
@@ -305,6 +337,7 @@ export function parseOptions(argv: readonly string[], env: NodeJS.ProcessEnv = p
         callbackXmlrpcPort: number('callback-xmlrpc-port'),
         callbackBinrpcPort: number('callback-binrpc-port'),
         demo: boolean('demo') as boolean,
+        idleUnsubscribeMs: parseDuration(string('idle-unsubscribe') as string, '--idle-unsubscribe'),
         logLevel: isLogLevel(logLevel) ? logLevel : 'info',
         help: boolean('help') ?? false,
         version: boolean('version') ?? false,

@@ -161,6 +161,8 @@ export class ApiWebSocketServer {
             socket.close();
         }
         this.#sockets.clear();
+        // not `noteSessions(0)`: the host is shutting down, and starting an idle grace period for a
+        // backend that is about to be stopped would only leave a timer behind
         const server = this.#server;
         this.#server = undefined;
         if (!server) {
@@ -205,8 +207,13 @@ export class ApiWebSocketServer {
             return;
         }
         this.#sockets.add(socket);
+        // D-31: the backend counts sessions, not sockets it knows nothing about. This is the only
+        // transport that has any - `InProcessTransport` never reports one, which is why Electron
+        // never idles out.
+        this.#options.backend.noteSessions(this.#sockets.size);
         socket.on('close', () => {
             this.#sockets.delete(socket);
+            this.#options.backend.noteSessions(this.#sockets.size);
         });
         socket.on('error', (error: Error) => {
             this.#options.onError?.(error);

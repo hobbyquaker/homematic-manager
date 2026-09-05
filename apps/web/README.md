@@ -67,6 +67,25 @@ hard-coding it.
 `SIGINT` and `SIGTERM` stop the host and run `backend.stop()` - the de-registration the CCU's
 interface processes want - with a five second bound, so a `systemctl restart` cannot hang.
 
+## Idle unsubscribe (D-31)
+
+After five minutes with no page open, the backend sends `init(url, '')` to every interface and
+stops its service-message poll: an interface process should not push events at a browser tab that
+does not exist, and on the CCU those events cost the CCU's own CPU. Nothing else is torn down - the
+configuration, the names and every cache stay, the sockets stay, and the next page that connects
+subscribes again with one `init` per interface. That page sees the interfaces marked `subscribing`
+until their first `listDevices` sweep is through, because `hmipserver` re-sends every device on
+`init` (occu#45).
+
+`--idle-unsubscribe <duration>` / `HMM_IDLE_UNSUBSCRIBE` changes the grace period (`5m`, `300s`,
+`90`), and `0` switches it off. It is on by default for every server install type - npm, Docker and
+the CCU addon all run unattended for days. The Electron app never does this: its in-process
+transport reports no sessions at all, so nothing there can ever be counted as idle.
+
+What is **not** replayed after a resubscribe are the events and service messages of the idle
+period. Values are re-read (the sweep does that), but the Events tab starts where the subscription
+does. If that matters - watching a duty cycle overnight, say - set `0`.
+
 ## What is served, and where
 
 | route | what |

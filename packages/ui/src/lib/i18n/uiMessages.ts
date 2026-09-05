@@ -24,6 +24,7 @@ export const UI_MESSAGES: MessageCatalogue = {
     Connected: {de: 'Verbunden', en: 'Connected'},
     'Not connected': {de: 'Nicht verbunden', en: 'Not connected'},
     'Not present': {de: 'Nicht vorhanden', en: 'Not present'},
+    Subscribing: {de: 'Anmeldung läuft', en: 'Subscribing'},
     'Add by serial number': {de: 'Per Seriennummer anlernen', en: 'Add by serial number'},
     'RPC log': {de: 'RPC-Protokoll', en: 'RPC log'},
     'Show RPC log': {de: 'RPC-Protokoll anzeigen', en: 'Show RPC log'},

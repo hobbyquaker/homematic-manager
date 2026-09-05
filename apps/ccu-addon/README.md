@@ -195,6 +195,15 @@ passes on the command line — `--local --ccu 127.0.0.1 --base /addons/hmm --hos
 --no-issue-cookie --data-dir /usr/local/hmm` — wins over the file, because those are not settings
 but the definition of "we are the addon".
 
+## Idle unsubscribe
+
+With no browser page open for five minutes the backend de-registers from `rfd`, `hmipserver` and
+the rest with `init('')` and stops polling for service messages; the next page load subscribes
+again and the header shows "subscribing" until the first device sweep is through. That is the
+host's default (D-31) and the addon does not override it - `HMM_IDLE_UNSUBSCRIBE` in
+`etc/hmm.env` changes the grace period, `0` disables it. Caches, names and `config.json` are not
+touched by it.
+
 ## Troubleshooting
 
 | Symptom | Look at |

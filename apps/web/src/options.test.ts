@@ -1,6 +1,16 @@
 import {describe, expect, it} from 'vitest';
 
-import {camelCase, CliError, coerce, configSchema, envVarName, helpText, OPTIONS, parseOptions} from './options.js';
+import {
+    camelCase,
+    CliError,
+    coerce,
+    configSchema,
+    envVarName,
+    helpText,
+    OPTIONS,
+    parseDuration,
+    parseOptions,
+} from './options.js';
 
 const noEnv: NodeJS.ProcessEnv = {HOME: '/home/tester'};
 
@@ -146,5 +156,33 @@ describe('configSchema', () => {
         expect(schema.properties['help']).toBeUndefined();
         expect(schema.properties['configSchema']).toBeUndefined();
         expect(JSON.parse(JSON.stringify(schema))).toEqual(schema);
+    });
+});
+
+describe('parseDuration and --idle-unsubscribe (D-31)', () => {
+    it('reads the four spellings the addon and the compose file use', () => {
+        expect(parseDuration('5m', 'x')).toBe(300_000);
+        expect(parseDuration('300s', 'x')).toBe(300_000);
+        expect(parseDuration('90', 'x')).toBe(90_000);
+        expect(parseDuration(' 1h ', 'x')).toBe(3_600_000);
+        expect(parseDuration('250ms', 'x')).toBe(250);
+        expect(parseDuration('0', 'x')).toBe(0);
+    });
+
+    it('is a usage error rather than a silently disabled feature', () => {
+        expect(() => parseDuration('five minutes', '--idle-unsubscribe')).toThrow(CliError);
+        expect(() => parseDuration('-1', '--idle-unsubscribe')).toThrow(/not a duration/);
+        expect(() => parseDuration('5 days', '--idle-unsubscribe')).toThrow(/not a duration/);
+    });
+
+    it('defaults to five minutes for every server install type, and 0 turns it off', () => {
+        expect(parseOptions([], noEnv).idleUnsubscribeMs).toBe(300_000);
+        expect(parseOptions(['--idle-unsubscribe', '30s'], noEnv).idleUnsubscribeMs).toBe(30_000);
+        expect(parseOptions([], {...noEnv, HMM_IDLE_UNSUBSCRIBE: '2m'}).idleUnsubscribeMs).toBe(120_000);
+        expect(parseOptions(['--idle-unsubscribe', '0'], noEnv).idleUnsubscribeMs).toBe(0);
+        // the command line wins over the environment, as everywhere else
+        expect(
+            parseOptions(['--idle-unsubscribe', '0'], {...noEnv, HMM_IDLE_UNSUBSCRIBE: '9m'}).idleUnsubscribeMs,
+        ).toBe(0);
     });
 });

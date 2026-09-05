@@ -134,6 +134,15 @@ same position 2.x was in. Where it is not acceptable:
 > warning at start when the cookie is issued on a non-loopback bind without TLS or a proxy in front;
 > that warning is **not implemented yet**. It is decided before the first image is published.
 
+## Idle unsubscribe (D-31)
+
+After five minutes with no browser page open, the backend de-registers from the CCU's interface
+processes (`init('')` per interface) and stops polling for service messages; the next page load
+subscribes again and shows "subscribing" in the header for a moment while the devices are re-read.
+Configuration, names and caches are untouched. It is on by default; `--idle-unsubscribe 0` /
+`HMM_IDLE_UNSUBSCRIBE=0` keeps the subscriptions up permanently, which is what to do if the point
+of the installation is to watch events around the clock.
+
 ## State, updates, logs
 
 `/data` holds `config.json`, the per-CCU caches, the device image cache and the write log. Keep it

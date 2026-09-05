@@ -181,6 +181,100 @@ async function harness(
     return {backend, calls, handler: handler as CallbackHandler, events, dir, rega};
 }
 
+describe('idle unsubscribe (D-31)', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    /** The `init` calls of one interface, in order, as `[url, ident]` pairs. */
+    const inits = (h: Awaited<ReturnType<typeof harness>>, name = 'HmIP-RF'): string[] =>
+        h.calls
+            .filter((call) => call.interfaceName === name && call.method === 'init')
+            .map((call) => (typeof call.params[1] === 'string' ? call.params[1] : ''));
+
+    it('drops the subscriptions after the grace period and takes them up again on connect', async () => {
+        const h = await harness({backend: {idleUnsubscribeMs: 60_000}});
+        expect(inits(h)).toEqual(['hmm_HmIP-RF']);
+
+        // one session opens and closes again
+        h.backend.noteSessions(1);
+        h.backend.noteSessions(0);
+        await vi.advanceTimersByTimeAsync(59_000);
+        expect(inits(h)).toEqual(['hmm_HmIP-RF']);
+
+        await vi.advanceTimersByTimeAsync(2000);
+        expect(inits(h)).toEqual(['hmm_HmIP-RF', '']);
+        const idle = (await h.backend.request('interfaces.list')).find((state) => state.name === 'HmIP-RF');
+        expect(idle?.idle).toBe(true);
+        expect(idle?.connected).toBe(false);
+        // the caches are kept: a `devices.list` still answers without asking the interface
+        const before = h.calls.filter((call) => call.method === 'listDevices').length;
+        expect(await h.backend.request('devices.list', 'HmIP-RF')).toHaveLength(3);
+        expect(h.calls.filter((call) => call.method === 'listDevices')).toHaveLength(before);
+
+        h.backend.noteSessions(1);
+        await vi.advanceTimersByTimeAsync(10);
+        expect(inits(h)).toEqual(['hmm_HmIP-RF', '', 'hmm_HmIP-RF']);
+        const back = (await h.backend.request('interfaces.list')).find((state) => state.name === 'HmIP-RF');
+        expect(back?.connected).toBe(true);
+        expect(back?.idle).toBeUndefined();
+        expect(back?.subscribing).toBeUndefined();
+        await h.backend.stop();
+    });
+
+    it('cancels the grace period when a session comes back inside it', async () => {
+        const h = await harness({backend: {idleUnsubscribeMs: 60_000}});
+        h.backend.noteSessions(1);
+        h.backend.noteSessions(0);
+        await vi.advanceTimersByTimeAsync(30_000);
+        h.backend.noteSessions(1);
+        await vi.advanceTimersByTimeAsync(120_000);
+        // nothing was dropped, and nothing was subscribed a second time
+        expect(inits(h)).toEqual(['hmm_HmIP-RF']);
+        await h.backend.stop();
+    });
+
+    it('never subscribes twice for a second session', async () => {
+        const h = await harness({backend: {idleUnsubscribeMs: 60_000}});
+        h.backend.noteSessions(1);
+        h.backend.noteSessions(2);
+        h.backend.noteSessions(1);
+        await vi.advanceTimersByTimeAsync(120_000);
+        expect(inits(h)).toEqual(['hmm_HmIP-RF']);
+        await h.backend.stop();
+    });
+
+    it('does nothing at all when the option is off, which is the Electron case', async () => {
+        const h = await harness();
+        h.backend.noteSessions(1);
+        h.backend.noteSessions(0);
+        await vi.advanceTimersByTimeAsync(600_000);
+        expect(inits(h)).toEqual(['hmm_HmIP-RF']);
+        await h.backend.stop();
+    });
+
+    it('reports the interface as subscribing until the device sweep is through', async () => {
+        const h = await harness({backend: {idleUnsubscribeMs: 60_000}});
+        h.backend.noteSessions(1);
+        h.backend.noteSessions(0);
+        await vi.advanceTimersByTimeAsync(61_000);
+
+        const states: unknown[] = [];
+        h.backend.on('interfaces.changed', (payload) => states.push(payload));
+        h.backend.noteSessions(1);
+        await vi.advanceTimersByTimeAsync(10);
+        // one of the intermediate broadcasts had the flag set; the last one has it cleared
+        const flat = states.flat() as {name: string; subscribing?: boolean}[];
+        expect(flat.some((state) => state.subscribing === true)).toBe(true);
+        expect((await h.backend.request('interfaces.list')).every((state) => state.subscribing !== true)).toBe(true);
+        await h.backend.stop();
+    });
+});
+
 describe('config', () => {
     it('answers config.get with the defaults on a fresh profile', async () => {
         const backend = await Backend.open({dataDir: dir, importLegacy: false, localAddresses: () => ['10.0.0.2']});

@@ -430,6 +430,31 @@ describe('ConnectionIndicator', () => {
         expect(container.querySelector('.hmm-connection-bad')).toBeNull();
         expect(container.querySelector('.hmm-connection-interface')?.getAttribute('title')).toBe('Nicht vorhanden');
     });
+
+    it('shows an interface that is re-subscribing as busy, not as connected (D-31)', () => {
+        // after an idle unsubscribe the interface is back but hmipserver is still re-sending every
+        // device (occu#45): the grids are incomplete, so neither a tick nor a cross is honest
+        const {container} = render(ConnectionIndicator, {
+            props: {
+                host: 'ccu',
+                interfaces: [
+                    {
+                        name: 'HmIP-RF',
+                        type: 'HmIP-RF',
+                        protocol: 'xmlrpc',
+                        host: 'ccu',
+                        port: 2010,
+                        connected: true,
+                        subscribing: true,
+                    },
+                ],
+                subscribingText: 'Anmeldung läuft',
+            },
+        });
+        expect(container.querySelector('.hmm-connection-busy')).toBeTruthy();
+        expect(container.querySelector('.hmm-connection-ok')).toBeNull();
+        expect(container.querySelector('.hmm-connection-interface')?.getAttribute('title')).toBe('Anmeldung läuft');
+    });
 });
 
 describe('LanguageSwitch and ThemeSwitch', () => {

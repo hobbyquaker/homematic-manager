@@ -124,6 +124,13 @@ export async function runCli(options: RunCliOptions = {}): Promise<CliRun> {
     if (parsed.uiDevServer !== undefined) {
         log.info(`development mode: everything but the api is proxied to ${parsed.uiDevServer}`);
     }
+    if (!parsed.demo) {
+        log.info(
+            parsed.idleUnsubscribeMs > 0
+                ? `idle unsubscribe after ${String(Math.round(parsed.idleUnsubscribeMs / 1000))} s without an open page`
+                : 'idle unsubscribe is off: the interfaces stay subscribed with no page open',
+        );
+    }
 
     const exit = options.exit ?? ((code: number) => process.exit(code));
     let stopping: Promise<void> | undefined;
@@ -171,6 +178,7 @@ function startHost(values: WebOptions, log: Logger, version: string): Promise<We
         ...(values.callbackIp === undefined ? {} : {callbackIp: values.callbackIp}),
         ...(values.callbackXmlrpcPort === undefined ? {} : {callbackXmlrpcPort: values.callbackXmlrpcPort}),
         ...(values.callbackBinrpcPort === undefined ? {} : {callbackBinrpcPort: values.callbackBinrpcPort}),
+        idleUnsubscribeMs: values.idleUnsubscribeMs,
     });
 }
 

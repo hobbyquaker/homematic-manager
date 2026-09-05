@@ -115,6 +115,7 @@
             backendConnected={app.connected}
             notConnectedText={t('Not connected')}
             notPresentText={t('Not present')}
+            subscribingText={t('Subscribing')}
             testId="connection-indicator"
         />
 

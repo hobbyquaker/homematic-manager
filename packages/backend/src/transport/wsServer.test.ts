@@ -336,3 +336,37 @@ describe('ApiWebSocketServer', () => {
         await expect(server.stop()).resolves.toBeUndefined();
     });
 });
+
+describe('session counting (D-31)', () => {
+    it('reports the number of open sockets to the backend, and 0 when the last one goes', async () => {
+        const counts: number[] = [];
+        const original = backend.noteSessions.bind(backend);
+        backend.noteSessions = (count: number): void => {
+            counts.push(count);
+            original(count);
+        };
+
+        const {url} = await serve();
+        const first = await connect(url);
+        await connect(url);
+        expect(counts).toEqual([1, 2]);
+
+        first.close();
+        await until(() => counts.length === 3);
+        expect(counts).toEqual([1, 2, 1]);
+    });
+
+    it('does not start an idle grace period while the host is shutting the server down', async () => {
+        const counts: number[] = [];
+        backend.noteSessions = (count: number): void => {
+            counts.push(count);
+        };
+        const {server, url} = await serve();
+        await connect(url);
+        expect(counts).toEqual([1]);
+        await server.stop();
+        // `stop()` clears its own set; telling a backend that is about to be stopped that it has no
+        // sessions would only leave a timer behind
+        expect(counts).toEqual([1]);
+    });
+});

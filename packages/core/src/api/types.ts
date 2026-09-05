@@ -81,6 +81,18 @@ export interface InterfaceState {
      * retrying every 15 s, and the UI shows "not present" rather than a connection error.
      */
     absent?: boolean;
+    /**
+     * `init` has been sent and the first `listDevices` / service-message sweep after it is still
+     * running. The UI shows "subscribing" for as long as this is true: `hmipserver` re-sends every
+     * device on `init` (occu#45) and the grids are not complete until that has been taken in.
+     */
+    subscribing?: boolean;
+    /**
+     * D-31: no UI session was connected for the grace period, so the backend sent `init('')` and
+     * the interface pushes nothing at us. Caches, names and the configuration are untouched; the
+     * next session that connects subscribes again. Never set in Electron.
+     */
+    idle?: boolean;
 }
 
 export interface RegaState {

@@ -45,6 +45,12 @@ export const SHUTDOWN_TIMEOUT_MS = 5000;
  */
 export const MAX_INIT_BACKOFF_MS = 300_000;
 
+/**
+ * D-31: the grace period a server install waits, with no UI session connected, before it drops its
+ * event subscriptions. Five minutes; `0` turns the whole thing off, which is what Electron uses.
+ */
+export const DEFAULT_IDLE_UNSUBSCRIBE_MS = 300_000;
+
 export interface ManagedInterface {
     readonly name: string;
     readonly target: InterfaceTarget;
@@ -120,6 +126,7 @@ export class InterfaceManager {
     #watchdog: ReturnType<typeof setInterval> | undefined;
     #detected: string[] = [];
     #stopping = false;
+    #idle = false;
 
     constructor(options: InterfaceManagerOptions) {
         this.#options = options;
@@ -149,6 +156,11 @@ export class InterfaceManager {
         }
         const addresses = (this.#options.localAddresses ?? (() => localIPv4Addresses()))();
         return addresses[0] ?? '127.0.0.1';
+    }
+
+    /** D-31: are the subscriptions currently dropped because nobody is looking? */
+    get idle(): boolean {
+        return this.#idle;
     }
 
     /** The interfaces whose ports answered the last background probe. */
@@ -211,8 +223,53 @@ export class InterfaceManager {
         this.#startWatchdog();
     }
 
+    /**
+     * D-31: de-register with `init(url, '')` and stop the watchdog, keeping the clients, the
+     * callback servers and every cache. Nothing is torn down - this is the difference to `stop()`:
+     * the same manager subscribes again in {@link subscribe}, so a resubscribe costs one `init`
+     * per interface and no socket setup.
+     *
+     * Idempotent, and a de-registration that fails is not worth a notice: the interface will simply
+     * keep sending events until it notices that nobody answers.
+     */
+    async unsubscribe(): Promise<void> {
+        if (this.#idle || this.#interfaces.size === 0) {
+            return;
+        }
+        this.#idle = true;
+        if (this.#watchdog !== undefined) {
+            clearInterval(this.#watchdog);
+            this.#watchdog = undefined;
+        }
+        await Promise.all([...this.#interfaces.values()].map((entry) => this.#deregister(entry)));
+        for (const entry of this.#interfaces.values()) {
+            entry.lastEvent = 0;
+            entry.failures = 0;
+            entry.retryAt = 0;
+            this.#update(entry, {connected: false, error: undefined, idle: true, subscribing: false});
+        }
+        this.#options.onStateChanged(this.states());
+    }
+
+    /** D-31: subscribe again after {@link unsubscribe}. Idempotent. */
+    async subscribe(): Promise<void> {
+        if (!this.#idle) {
+            return;
+        }
+        this.#idle = false;
+        for (const entry of this.#interfaces.values()) {
+            this.#update(entry, {idle: false});
+        }
+        await Promise.all([...this.#interfaces.keys()].map((name) => this.#init(name)));
+        this.#startWatchdog();
+        this.#options.onStateChanged(this.states());
+    }
+
     /** One watchdog round; public so a test can drive it without waiting 15 s. */
     async tick(): Promise<void> {
+        if (this.#idle) {
+            return;
+        }
         const now = this.#now();
         const work: Promise<void>[] = [];
         for (const entry of this.#interfaces.values()) {
@@ -276,22 +333,7 @@ export class InterfaceManager {
             clearInterval(this.#watchdog);
             this.#watchdog = undefined;
         }
-        const timeout = SHUTDOWN_TIMEOUT_MS;
-        await Promise.all(
-            [...this.#interfaces.values()].map(async (entry) => {
-                if (!entry.target.resolved.init) {
-                    return;
-                }
-                const url = this.#callbackUrl(entry.target.resolved.protocol);
-                try {
-                    await withTimeout(entry.client.call('init', [url, '']), timeout, () =>
-                        connectionError(`${entry.name}: de-registering timed out`),
-                    );
-                } catch {
-                    // a CCU that is already gone cannot be told that we are going too
-                }
-            }),
-        );
+        await Promise.all([...this.#interfaces.values()].map((entry) => this.#deregister(entry)));
         for (const entry of this.#interfaces.values()) {
             entry.client.close();
         }
@@ -339,6 +381,21 @@ export class InterfaceManager {
         }
         this.#options.onStateChanged(this.states());
         return this.detected;
+    }
+
+    /** `init(url, '')` with a hard timeout; a CCU that is gone must not hold anything up. */
+    async #deregister(entry: ManagedInterface): Promise<void> {
+        if (!entry.target.resolved.init) {
+            return;
+        }
+        const url = this.#callbackUrl(entry.target.resolved.protocol);
+        try {
+            await withTimeout(entry.client.call('init', [url, '']), SHUTDOWN_TIMEOUT_MS, () =>
+                connectionError(`${entry.name}: de-registering timed out`),
+            );
+        } catch {
+            // a CCU that is already gone cannot be told that we are going too
+        }
     }
 
     #create(target: InterfaceTarget): ManagedInterface {
@@ -397,12 +454,19 @@ export class InterfaceManager {
             const wasFailing = entry.failures > 0;
             entry.failures = 0;
             entry.retryAt = 0;
-            this.#update(entry, {connected: true, error: undefined, absent: false});
+            // hmipserver re-sends every device on `init` (occu#45), so the grids are not complete
+            // until the sweep below is through; the UI shows "subscribing" until then
+            this.#update(entry, {connected: true, error: undefined, absent: false, subscribing: true});
             if (wasFailing) {
                 this.#options.onNotice('info', `${interfaceName}: answering again`, interfaceName);
             }
             this.#options.onStateChanged(this.states());
-            await this.#options.onConnected?.(interfaceName);
+            try {
+                await this.#options.onConnected?.(interfaceName);
+            } finally {
+                this.#update(entry, {subscribing: false});
+                this.#options.onStateChanged(this.states());
+            }
         } catch (error) {
             this.#noteInitFailure(entry, error);
             this.#options.onStateChanged(this.states());
@@ -424,7 +488,7 @@ export class InterfaceManager {
         const base = this.#options.initBackoffMs ?? WATCHDOG_INTERVAL_MS;
         const wait = Math.min(base * 2 ** (entry.failures - 1), MAX_INIT_BACKOFF_MS);
         entry.retryAt = this.#now() + wait;
-        this.#update(entry, {connected: false, error: message, absent});
+        this.#update(entry, {connected: false, error: message, absent, subscribing: false});
         if (!first) {
             return;
         }
@@ -451,18 +515,22 @@ export class InterfaceManager {
 
     #update(
         entry: ManagedInterface,
-        changes: {connected?: boolean; error?: string | undefined; absent?: boolean},
+        changes: {
+            connected?: boolean;
+            error?: string | undefined;
+            absent?: boolean;
+            subscribing?: boolean;
+            idle?: boolean;
+        },
     ): void {
         const state: InterfaceState = {
             ...entry.state,
             ...(changes.connected === undefined ? {} : {connected: changes.connected}),
             ...(entry.lastEvent > 0 ? {lastEvent: entry.lastEvent} : {}),
         };
-        if (changes.absent === true) {
-            state.absent = true;
-        } else if (changes.absent === false) {
-            delete (state as {absent?: boolean}).absent;
-        }
+        setFlag(state, 'absent', changes.absent);
+        setFlag(state, 'subscribing', changes.subscribing);
+        setFlag(state, 'idle', changes.idle);
         if ('error' in changes) {
             if (changes.error === undefined) {
                 delete (state as {error?: string}).error;
@@ -485,5 +553,15 @@ export class InterfaceManager {
             timer.unref();
         }
         this.#watchdog = timer;
+    }
+}
+
+/** A boolean that is present when true and absent otherwise, so a state stays small on the wire. */
+function setFlag(state: InterfaceState, key: 'absent' | 'subscribing' | 'idle', value: boolean | undefined): void {
+    if (value === true) {
+        state[key] = true;
+    } else if (value === false) {
+        // `delete state[key]` with a computed key is banned by the rule set; this is the same thing
+        Reflect.deleteProperty(state, key);
     }
 }

@@ -240,4 +240,32 @@ describe.skipIf(!simulatorAvailable)('connecting to hm-simulator', () => {
         expect(await second.backend.request('names.get')).toMatchObject({'LEQ0000001:1': 'Persisted'});
         await fs.rm(dataDir, {recursive: true, force: true});
     });
+
+    it('de-registers with init(url, "") when nobody is looking and subscribes again (D-31)', async () => {
+        const sim = await startSimulator();
+        running.push({close: () => sim.close()});
+        const harness = await startBackend(sim, {backend: {idleUnsubscribeMs: 40}});
+        running.unshift({close: () => harness.close()});
+
+        // the simulator keeps one entry per subscribed client per interface: that map is the
+        // subscription, and it is what `init(url, '')` removes
+        const subscribers = (): number =>
+            Object.keys(sim.clients.rfd as object).length + Object.keys(sim.clients.hmip as object).length;
+        expect(subscribers()).toBe(2);
+
+        harness.backend.noteSessions(1);
+        harness.backend.noteSessions(0);
+        await waitFor(() => subscribers() === 0);
+        expect((await harness.backend.request('interfaces.list')).every((state) => state.idle === true)).toBe(true);
+        // the device cache survived the idle period: no interface was asked again
+        expect(await harness.backend.request('devices.list', 'BidCos-RF')).toHaveLength(3);
+
+        harness.backend.noteSessions(1);
+        await waitFor(() => subscribers() === 2);
+        await waitFor(async () =>
+            (await harness.backend.request('interfaces.list')).every(
+                (state) => state.connected && state.idle === undefined && state.subscribing === undefined,
+            ),
+        );
+    });
 });

@@ -169,6 +169,15 @@ journalctl -u homematic-manager -f          # with HMM_LOG_LEVEL=debug in config
 ss -lntp | grep -i node                     # the ports the callback servers took
 ```
 
+## Idle unsubscribe (D-31)
+
+After five minutes with no browser page open, the backend de-registers from the CCU's interface
+processes (`init('')` per interface) and stops polling for service messages; the next page load
+subscribes again and shows "subscribing" in the header for a moment while the devices are re-read.
+Configuration, names and caches are untouched. It is on by default; `--idle-unsubscribe 0` /
+`HMM_IDLE_UNSUBSCRIBE=0` keeps the subscriptions up permanently, which is what to do if the point
+of the installation is to watch events around the clock.
+
 ## Update, backup, uninstall
 
 ```sh

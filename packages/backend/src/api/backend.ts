@@ -80,6 +80,16 @@ export interface BackendOptions extends Omit<ConfigStoreOptions, 'version'> {
     readonly rpcTimeoutMs?: number;
     readonly watchdogIntervalMs?: number;
     readonly serviceMessagePollMs?: number;
+    /**
+     * D-31: how long the backend waits, with no UI session connected, before it drops its event
+     * subscriptions (`init('')` per interface, watchdog and service-message poll stopped, caches
+     * and configuration kept). The next session that connects subscribes again.
+     *
+     * `0` or omitted turns it off, which is the Electron case: `InProcessTransport` never reports
+     * a session, so the count is always zero and a grace period would unsubscribe a running window.
+     * Only a transport that really counts sessions - `ApiWebSocketServer` - may switch this on.
+     */
+    readonly idleUnsubscribeMs?: number;
     readonly hmipSweepDelayMs?: number;
     readonly cacheWriteDelayMs?: number;
     readonly now?: () => number;
@@ -112,6 +122,8 @@ export class Backend {
     #hmipSweepTimer: ReturnType<typeof setTimeout> | undefined;
     #hmipSweepRunning = false;
     #stopped = false;
+    #sessions = 0;
+    #idleTimer: ReturnType<typeof setTimeout> | undefined;
 
     private constructor(options: BackendOptions, config: ConfigStore, caches: CacheStore) {
         this.#options = options;
@@ -201,6 +213,66 @@ export class Backend {
         await this.#caches.flush();
         await this.#writeLog.flush();
         this.events.clear();
+    }
+
+    /**
+     * D-31: how many UI sessions a transport currently holds.
+     *
+     * `ApiWebSocketServer` calls this on every connect and disconnect. When the count reaches zero
+     * and stays there for `idleUnsubscribeMs`, every interface is de-registered with `init('')` -
+     * a CCU should not push events at a page nobody has open, and on the addon those events cost
+     * the CCU's own CPU. The first session to connect again subscribes, and the interfaces report
+     * `subscribing` until their `listDevices` sweep is through.
+     *
+     * `InProcessTransport` never calls it, so Electron never goes idle whatever the option says.
+     */
+    noteSessions(count: number): void {
+        const previous = this.#sessions;
+        this.#sessions = Math.max(0, count);
+        if (this.#idleTimer !== undefined) {
+            clearTimeout(this.#idleTimer);
+            this.#idleTimer = undefined;
+        }
+        if (this.#sessions > 0) {
+            if (previous === 0) {
+                void this.#resubscribe();
+            }
+            return;
+        }
+        const grace = this.#options.idleUnsubscribeMs ?? 0;
+        if (grace <= 0 || this.#stopped) {
+            return;
+        }
+        const timer = setTimeout(() => {
+            this.#idleTimer = undefined;
+            void this.#unsubscribeIdle();
+        }, grace);
+        if (typeof timer.unref === 'function') {
+            timer.unref();
+        }
+        this.#idleTimer = timer;
+    }
+
+    async #unsubscribeIdle(): Promise<void> {
+        const manager = this.#manager;
+        if (!manager || this.#sessions > 0 || this.#stopped || manager.idle) {
+            return;
+        }
+        this.#clearTimers();
+        await manager.unsubscribe();
+        this.events.emit('interfaces.changed', manager.states());
+        this.#notice('info', 'no user interface is open: the event subscriptions were dropped (D-31)');
+    }
+
+    async #resubscribe(): Promise<void> {
+        const manager = this.#manager;
+        if (!manager || !manager.idle || this.#stopped) {
+            return;
+        }
+        this.#notice('info', 'a user interface connected: subscribing to the interfaces again');
+        await manager.subscribe();
+        this.events.emit('interfaces.changed', manager.states());
+        this.#startServiceMessagePolling();
     }
 
     /**
@@ -433,6 +505,10 @@ export class Backend {
     }
 
     #clearTimers(): void {
+        if (this.#idleTimer !== undefined) {
+            clearTimeout(this.#idleTimer);
+            this.#idleTimer = undefined;
+        }
         if (this.#serviceMessageTimer !== undefined) {
             clearInterval(this.#serviceMessageTimer);
             this.#serviceMessageTimer = undefined;

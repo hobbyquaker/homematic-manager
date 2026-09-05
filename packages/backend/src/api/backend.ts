@@ -396,6 +396,10 @@ export class Backend {
                 await this.#write(p[0], 'setBidcosInterface', [p[1], p[2], p[3]]);
                 return null;
 
+            case 'unreach.list':
+                return this.#caches.unreach.list(p[0]);
+            case 'unreach.reset':
+                return this.#resetUnreach(p[0], p[1]);
             case 'serviceMessages.list':
                 return this.#serviceMessages(p[0]);
             case 'serviceMessages.ack':
@@ -618,10 +622,44 @@ export class Backend {
             ) {
                 this.events.emit('serviceMessages.changed', this.#caches.listServiceMessages());
             }
+            this.#noteUnreach(interfaceName, address, datapoint, value);
             if (interfaceName === 'HmIP-RF') {
                 this.#caches.rssi(interfaceName).applyHmipValue(address.split(':')[0] ?? address, datapoint, value);
             }
         }
+    }
+
+    /**
+     * Issue #26: count the outage, and acknowledge it when the user asked for that.
+     *
+     * The order matters: the counter is written first, so switching the auto-acknowledge on never
+     * costs information. The acknowledgement itself is the ordinary `serviceMessages.ack` path - a
+     * `setValue` through the paced write queue - and its failure is a notice, never an exception:
+     * a device that is unreachable is not going to take a write either, which is the normal case
+     * here and not worth an error dialog.
+     */
+    #noteUnreach(interfaceName: string, address: string, datapoint: string, value: RpcValue): void {
+        if (!this.#caches.unreach.note(interfaceName, address, datapoint, value, this.#now())) {
+            return;
+        }
+        this.#caches.saveUnreach();
+        this.events.emit('unreach.changed', this.#caches.unreach.list());
+        if (datapoint === 'STICKY_UNREACH' && value === true && this.#config.connection.autoAckStickyUnreach === true) {
+            void this.#acknowledge(interfaceName, address, datapoint).catch((error: unknown) => {
+                this.#notice(
+                    'info',
+                    `${address}: STICKY_UNREACH could not be acknowledged automatically: ${errorMessage(error)}`,
+                    interfaceName,
+                );
+            });
+        }
+    }
+
+    #resetUnreach(interfaceName?: string, address?: string): null {
+        this.#caches.unreach.reset(interfaceName, address);
+        this.#caches.saveUnreach();
+        this.events.emit('unreach.changed', this.#caches.unreach.list());
+        return null;
     }
 
     #recordDeviceEvent(interfaceName: string, method: EventRecord['method'], payload: RpcValue): void {
@@ -866,6 +904,11 @@ export class Backend {
             }
             this.#caches.serviceMessages.replaceInterface(interfaceName, tuples);
             this.events.emit('serviceMessages.changed', this.#caches.listServiceMessages());
+            // #26: a sticky flag can be raised while nothing was listening, so the poll counts too.
+            // `note()` is edge-triggered, so the same flag on every round is one outage.
+            for (const [address, datapoint, value] of tuples) {
+                this.#noteUnreach(interfaceName, address, datapoint, value);
+            }
         } catch (error) {
             this.#notice('info', `${interfaceName}: getServiceMessages failed: ${errorMessage(error)}`, interfaceName);
         }
@@ -1174,6 +1217,8 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'rssi.get',
     'bidcos.interfaces',
     'bidcos.setInterface',
+    'unreach.list',
+    'unreach.reset',
     'serviceMessages.list',
     'serviceMessages.ack',
     'events.recent',

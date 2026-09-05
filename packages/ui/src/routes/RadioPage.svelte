@@ -81,6 +81,20 @@
             align: 'center',
             value: (device) => (device.ROAMING === true || device.ROAMING === 1 ? '✔' : ''),
         },
+        {
+            // Issue #26 asked for the unreach counter "im Tab Funk", next to the receive levels:
+            // a device with a bad link is a device that keeps dropping out, and that is the number
+            // that says so. The value survives restarts and the auto-acknowledge.
+            key: 'unreach',
+            label: t('Unreach'),
+            width: 90,
+            align: 'right',
+            filterable: false,
+            value: (device) => {
+                const count = stores.unreach.countOf(interfaceName, device.ADDRESS);
+                return count === 0 ? '' : count;
+            },
+        },
         ...gateways.flatMap((gateway) => [
             {
                 key: `rx:${gateway.ADDRESS}`,
@@ -129,13 +143,20 @@
     }
 
     async function refresh(): Promise<void> {
-        await Promise.all([stores.radio.load(interfaceName), stores.interfaces.load()]);
+        await Promise.all([stores.radio.load(interfaceName), stores.interfaces.load(), stores.unreach.load()]);
     }
 
     $effect(() => {
         const name = interfaceName;
         if (name !== '' && stores.radio.gateways(name).length === 0 && !stores.radio.loading) {
             void stores.radio.load(name);
+        }
+    });
+
+    /** The counters of #26 are per CCU, so they are read once and then kept by the event. */
+    $effect(() => {
+        if (stores.unreach.counters.length === 0) {
+            void stores.unreach.load();
         }
     });
 </script>
@@ -153,6 +174,14 @@
                 setInterfaceAddress = one;
                 setInterfaceOpen = true;
             }}
+        />
+        <ToolbarButton
+            title={t('Reset the unreach counters')}
+            icon="⟲"
+            disabled={stores.unreach.of(interfaceName).length === 0}
+            reason={t('No data')}
+            testId="radio-reset-unreach"
+            onclick={() => void stores.unreach.reset(interfaceName)}
         />
         {#snippet trailing()}
             <span>{t('{count} devices', {}, devices.length)}</span>

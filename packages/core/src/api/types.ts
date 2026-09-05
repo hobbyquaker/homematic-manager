@@ -42,6 +42,19 @@ export interface ConnectionConfig {
     writePaceMs: number;
     /** Directory for the `putParamset` JSON dumps of 2.x; empty = off. */
     rpcLogFolder: string;
+    /**
+     * Issue #26: acknowledge `STICKY_UNREACH` as soon as it is reported, instead of leaving it in
+     * the service-message list until somebody presses the button.
+     *
+     * Off by default and never on by accident: acknowledging is a write to the device, and a user
+     * who watches the list to see *which* devices were unreachable would lose exactly that. The
+     * unreach counter is what replaces it - it is kept whether this is on or off, so the
+     * information survives the acknowledgement.
+     *
+     * Nothing to do with ReGa (D-2): this writes the datapoint through the interface process, the
+     * same call the acknowledge button makes.
+     */
+    autoAckStickyUnreach?: boolean;
 }
 
 export interface AppConfig {
@@ -93,6 +106,25 @@ export interface InterfaceState {
      * next session that connects subscribes again. Never set in Electron.
      */
     idle?: boolean;
+}
+
+/**
+ * Issue #26: how often a device went unreachable, kept per CCU across restarts.
+ *
+ * `UNREACH` and `STICKY_UNREACH` are the two datapoints that say it; the first one comes and goes
+ * with the radio, the second one stays until it is acknowledged. Either of them going true counts,
+ * once - a device that is unreachable for an hour and reports it three times is one outage as far
+ * as this is concerned, because it is one continuous state and not three.
+ */
+export interface UnreachCounter {
+    interfaceName: string;
+    /** The device address, never a channel: `:0` is where the datapoint lives, not what failed. */
+    address: string;
+    count: number;
+    /** Milliseconds since epoch of the last time it went unreachable. */
+    lastAt?: number;
+    /** True while the device is unreachable now. */
+    unreach?: boolean;
 }
 
 export interface RegaState {
@@ -373,6 +405,11 @@ export interface ApiMethods {
         result: null;
     };
 
+    /** Issue #26: the unreach counters, all of them or those of one interface. */
+    'unreach.list': {params: [interfaceName?: string]; result: UnreachCounter[]};
+    /** Resets one device's counter, an interface's, or every one of them. */
+    'unreach.reset': {params: [interfaceName?: string, address?: string]; result: null};
+
     'serviceMessages.list': {params: [interfaceName?: string]; result: ServiceMessage[]};
     /** Acknowledge by writing the datapoint (STICKY_UNREACH etc.). */
     'serviceMessages.ack': {params: [interfaceName: string, address: string, datapoint: string]; result: null};
@@ -413,6 +450,8 @@ export interface ApiEvents {
     'writeLog.appended': WriteLogEntry;
     /** Progress of a bulk write: done of total, last result. */
     'write.progress': {done: number; total: number; last?: WriteResult};
+    /** Issue #26: a device went unreachable, or a counter was reset. */
+    'unreach.changed': UnreachCounter[];
     'config.changed': AppConfig;
     /** Backend-side problem the user should see (ReGa down, port in use, ...). */
     notice: {level: 'info' | 'warn' | 'error'; message: string; interfaceName?: string};
@@ -465,6 +504,7 @@ const API_EVENT_FLAGS = {
     'serviceMessages.changed': true,
     'writeLog.appended': true,
     'write.progress': true,
+    'unreach.changed': true,
     'config.changed': true,
     notice: true,
 } as const satisfies Record<ApiEventName, true>;

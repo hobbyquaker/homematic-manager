@@ -180,6 +180,26 @@ describe('setBidcosInterface', () => {
         });
     });
 
+    it('shows the unreach counter of #26 next to the receive levels, and resets it', async () => {
+        // "für jedes Gerät einen Unreach-Counter speichern (Anzeige im Tab Funk)": the demo has
+        // one device that dropped out seven times and one that is away right now
+        const {stores} = await mountApp({transport, hash: '#/BidCos-RF/rssi'});
+        await waitFor(() => {
+            expect(stores.unreach.counters.length).toBeGreaterThan(0);
+        });
+        const row = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]');
+        await waitFor(() => {
+            expect(row?.textContent).toContain('7');
+        });
+        // a device that never failed shows nothing at all rather than a zero
+        expect(document.querySelector('[data-row-id="GEQ0567890"]')?.textContent).not.toContain('0 dBm7');
+
+        await fireEvent.click(screen.getByTestId('radio-reset-unreach'));
+        await waitFor(() => {
+            expect(transport.lastCall('unreach.reset')).toEqual(['BidCos-RF', undefined]);
+        });
+    });
+
     it('reports a refused setBidcosInterface and keeps the dialog open', async () => {
         transport.fail('bidcos.setInterface', {message: 'Failure', kind: 'rpc', faultCode: -1});
         const {stores} = await mountApp({transport, hash: '#/BidCos-RF/rssi'});

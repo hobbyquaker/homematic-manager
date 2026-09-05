@@ -18,6 +18,7 @@ describe('API_EVENT_NAMES', () => {
             'rega.changed',
             'rpc.event',
             'serviceMessages.changed',
+            'unreach.changed',
             'write.progress',
             'writeLog.appended',
         ]);

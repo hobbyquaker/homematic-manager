@@ -164,6 +164,7 @@ async function harness(
         'serviceMessages.changed',
         'writeLog.appended',
         'write.progress',
+        'unreach.changed',
         'config.changed',
         'notice',
     ] satisfies ApiEventName[]) {
@@ -180,6 +181,128 @@ async function harness(
 
     return {backend, calls, handler: handler as CallbackHandler, events, dir, rega};
 }
+
+describe('unreach counters and the auto-acknowledge (#26)', () => {
+    it('counts one outage however often the interface repeats it, and persists it', async () => {
+        const h = await harness();
+        h.handler.event('BidCos-RF', 'LEQ1:0', 'UNREACH', true);
+        h.handler.event('BidCos-RF', 'LEQ1:0', 'UNREACH', true);
+        h.handler.event('BidCos-RF', 'LEQ1:0', 'STICKY_UNREACH', true);
+
+        expect(await h.backend.request('unreach.list')).toEqual([
+            {
+                interfaceName: 'BidCos-RF',
+                address: 'LEQ1',
+                count: 1,
+                lastAt: expect.any(Number) as number,
+                unreach: true,
+            },
+        ]);
+        expect(h.events.filter((event) => event.name === 'unreach.changed')).toHaveLength(1);
+
+        // back, then away again: that is a second outage
+        h.handler.event('BidCos-RF', 'LEQ1:0', 'UNREACH', false);
+        h.handler.event('BidCos-RF', 'LEQ1:0', 'UNREACH', true);
+        expect((await h.backend.request('unreach.list'))[0]?.count).toBe(2);
+
+        // and it survives a restart of the backend against the same profile
+        await h.backend.stop();
+        const second = await harness({backend: {dataDir: dir}});
+        expect((await second.backend.request('unreach.list', 'BidCos-RF'))[0]).toMatchObject({
+            address: 'LEQ1',
+            count: 2,
+        });
+        await second.backend.stop();
+    });
+
+    it('leaves STICKY_UNREACH alone unless the setting is on', async () => {
+        const h = await harness();
+        h.handler.event('BidCos-RF', 'LEQ1:0', 'STICKY_UNREACH', true);
+        await Promise.resolve();
+        expect(h.calls.filter((call) => call.method === 'setValue')).toHaveLength(0);
+        expect(await h.backend.request('serviceMessages.list', 'BidCos-RF')).toHaveLength(1);
+        await h.backend.stop();
+    });
+
+    it('acknowledges it when the setting is on, and keeps the count (#26)', async () => {
+        const h = await harness({
+            answers: {
+                'BidCos-RF': (method) => {
+                    switch (method) {
+                        case 'listDevices':
+                            return BIDCOS_DEVICES as unknown as RpcValue;
+                        case 'getParamsetDescription':
+                            return {STICKY_UNREACH: {TYPE: 'BOOL', OPERATIONS: 7}};
+                        default:
+                            return '';
+                    }
+                },
+            },
+        });
+        const config = await h.backend.request('config.get');
+        await h.backend.request('config.set', {...config.connection, autoAckStickyUnreach: true});
+
+        h.handler.event('BidCos-RF', 'LEQ1:0', 'STICKY_UNREACH', true);
+        await vi.waitFor(() => {
+            expect(
+                h.calls.filter((call) => call.method === 'setValue' && call.params[1] === 'STICKY_UNREACH'),
+            ).toHaveLength(1);
+        });
+        // the value written is `false`, which is what the acknowledge button sends
+        const write = h.calls.find((call) => call.method === 'setValue' && call.params[1] === 'STICKY_UNREACH');
+        expect(write?.params[2]).toBe(false);
+        // the message is gone, the counter is not - that is what makes the setting safe to use
+        expect((await h.backend.request('unreach.list'))[0]?.count).toBe(1);
+        await h.backend.stop();
+    });
+
+    it('reports a device that will not take the acknowledgement as a notice, not as a failure', async () => {
+        const h = await harness({
+            answers: {
+                'BidCos-RF': (method) => {
+                    switch (method) {
+                        case 'setValue':
+                            return new BackendError({message: 'not reachable', kind: 'rpc'});
+                        case 'listDevices':
+                            return BIDCOS_DEVICES as unknown as RpcValue;
+                        case 'getParamsetDescription':
+                            return {STICKY_UNREACH: {TYPE: 'BOOL', OPERATIONS: 7}};
+                        default:
+                            return '';
+                    }
+                },
+            },
+        });
+        const config = await h.backend.request('config.get');
+        await h.backend.request('config.set', {...config.connection, autoAckStickyUnreach: true});
+
+        h.handler.event('BidCos-RF', 'LEQ1:0', 'STICKY_UNREACH', true);
+        await vi.waitFor(() => {
+            expect(
+                h.events.some(
+                    (event) =>
+                        event.name === 'notice' &&
+                        JSON.stringify(event.payload).includes('could not be acknowledged automatically'),
+                ),
+            ).toBe(true);
+        });
+        await h.backend.stop();
+    });
+
+    it('resets one device, one interface and everything', async () => {
+        const h = await harness();
+        h.handler.event('BidCos-RF', 'LEQ1:0', 'UNREACH', true);
+        h.handler.event('BidCos-RF', 'LEQ1:0', 'UNREACH', false);
+        h.handler.event('HmIP-RF', 'ABC1:0', 'UNREACH', true);
+        h.handler.event('HmIP-RF', 'ABC1:0', 'UNREACH', false);
+
+        await h.backend.request('unreach.reset', 'BidCos-RF', 'LEQ1');
+        expect(await h.backend.request('unreach.list', 'BidCos-RF')).toEqual([]);
+        await h.backend.request('unreach.reset');
+        expect(await h.backend.request('unreach.list')).toEqual([]);
+        await h.backend.stop();
+    });
+});
 
 describe('idle unsubscribe (D-31)', () => {
     beforeEach(() => {

@@ -21,6 +21,7 @@ import {
     DEMO_RPC_METHODS,
     DEMO_RSSI,
     DEMO_SERVICE_MESSAGES,
+    DEMO_UNREACH,
     DEMO_WRITE_LOG,
     demoDescription,
     demoParamset,
@@ -200,6 +201,12 @@ export class MockTransport implements Transport {
                 : DEMO_SERVICE_MESSAGES.filter((message) => message.interfaceName === interfaceName),
         );
         this.result('serviceMessages.ack', null);
+        this.respond('unreach.list', (interfaceName) =>
+            interfaceName === undefined
+                ? DEMO_UNREACH
+                : DEMO_UNREACH.filter((entry) => entry.interfaceName === interfaceName),
+        );
+        this.result('unreach.reset', null);
         this.respond('events.recent', (interfaceName) =>
             interfaceName === undefined
                 ? DEMO_EVENTS

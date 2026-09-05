@@ -54,6 +54,9 @@ export function defaultConnection(): ConnectionConfig {
         language: 'de',
         writePaceMs: DEFAULT_WRITE_PACE_MS,
         rpcLogFolder: '',
+        // #26: off unless the user asks. Acknowledging is a write, and the list of what was
+        // unreachable is exactly what a user watching it would lose.
+        autoAckStickyUnreach: false,
     };
 }
 
@@ -108,6 +111,10 @@ export function normaliseConnection(input: unknown): ConnectionConfig {
                 ? Math.round(raw.writePaceMs)
                 : defaults.writePaceMs,
         rpcLogFolder: stringOr(raw.rpcLogFolder, defaults.rpcLogFolder),
+        autoAckStickyUnreach:
+            typeof raw.autoAckStickyUnreach === 'boolean'
+                ? raw.autoAckStickyUnreach
+                : defaults.autoAckStickyUnreach === true,
     };
 
     const auth = normaliseAuth(raw.auth);

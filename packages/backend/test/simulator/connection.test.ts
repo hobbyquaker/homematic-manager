@@ -256,7 +256,10 @@ describe.skipIf(!simulatorAvailable)('connecting to hm-simulator', () => {
         harness.backend.noteSessions(1);
         harness.backend.noteSessions(0);
         await waitFor(() => subscribers() === 0);
-        expect((await harness.backend.request('interfaces.list')).every((state) => state.idle === true)).toBe(true);
+        // `init('')` is on the wire before the manager has updated its states, so this waits
+        await waitFor(async () =>
+            (await harness.backend.request('interfaces.list')).every((state) => state.idle === true),
+        );
         // the device cache survived the idle period: no interface was asked again
         expect(await harness.backend.request('devices.list', 'BidCos-RF')).toHaveLength(3);
 

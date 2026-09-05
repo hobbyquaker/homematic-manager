@@ -19,6 +19,7 @@ import {NoticesStore} from './NoticesStore.svelte.js';
 import {ParamsetStore} from './ParamsetStore.svelte.js';
 import {RadioStore} from './RadioStore.svelte.js';
 import {ServiceMessagesStore} from './ServiceMessagesStore.svelte.js';
+import {UnreachStore} from './UnreachStore.svelte.js';
 import {tabsForInterface, type TabId} from './routing.js';
 import {WriteLogStore} from './WriteLogStore.svelte.js';
 
@@ -50,6 +51,8 @@ export class Stores {
     readonly names: NamesStore;
     readonly links: LinksStore;
     readonly serviceMessages: ServiceMessagesStore;
+    /** Issue #26: how often each device went unreachable. */
+    readonly unreach: UnreachStore;
     readonly events: EventsStore;
     readonly writeLog: WriteLogStore;
     readonly host: HostStore;
@@ -72,6 +75,7 @@ export class Stores {
         this.serviceMessages = new ServiceMessagesStore(transport, this.notices, {
             ...(options.storage === undefined ? {} : {storage: options.storage}),
         });
+        this.unreach = new UnreachStore(transport, this.notices);
         this.events = new EventsStore(transport, this.notices, {
             ...(options.eventCapacity === undefined ? {} : {capacity: options.eventCapacity}),
         });

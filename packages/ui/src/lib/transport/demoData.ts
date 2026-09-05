@@ -24,6 +24,7 @@ import type {
     RpcMethodInfo,
     RssiInfo,
     ServiceMessage,
+    UnreachCounter,
     WriteLogEntry,
 } from '@homematic-manager/core';
 
@@ -625,6 +626,26 @@ export const DEMO_INTERFACE_STATES: InterfaceState[] = [
         connected: false,
         absent: true,
         error: 'connect ECONNREFUSED demo.local:2000',
+    },
+];
+
+/**
+ * Issue #26: the unreach counters of the demo. One device that drops out now and then, one that is
+ * away right now - enough for the Funk tab's column to have something to show without a CCU.
+ */
+export const DEMO_UNREACH: UnreachCounter[] = [
+    {
+        interfaceName: 'BidCos-RF',
+        address: 'MEQ0123456',
+        count: 7,
+        lastAt: Date.parse('2026-09-05T08:12:00Z'),
+    },
+    {
+        interfaceName: 'BidCos-RF',
+        address: 'JEQ0234567',
+        count: 2,
+        lastAt: Date.parse('2026-09-05T09:58:00Z'),
+        unreach: true,
     },
 ];
 

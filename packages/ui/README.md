@@ -32,8 +32,9 @@ its tooltip.
   matrix with a name and a description **per pair** (#87), remove a whole selection (#80), play
   short and long on BidCos-RF, and the link paramset editor with the profiles of the data set, the
   sender's full option list and an expert view.
-- **RSSI**: the gateway grid, a receive/send pair per gateway, the peer sub-grid, and
-  `setBidcosInterface` that shows the assignment the interface reports now (#122).
+- **RSSI**: the gateway grid, a receive/send pair per gateway, the peer sub-grid,
+  `setBidcosInterface` that shows the assignment the interface reports now (#122), and the unreach
+  counter of #26 - how often each device has dropped out, kept across restarts, with a reset.
 - **RPC console**: a generated argument form for all 51 catalogue methods including structs
   (#27, #136), a history and the raw response.
 - **Service messages**: acknowledge one or all, the two meanings of `CONFIG_PENDING`, toasts instead

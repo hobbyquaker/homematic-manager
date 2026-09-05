@@ -104,6 +104,13 @@
         }
     }
 
+    /** #26: the auto-acknowledge switch, guarded the way every other draft field is. */
+    function setAutoAck(value: boolean): void {
+        if (draft) {
+            draft.autoAckStickyUnreach = value;
+        }
+    }
+
     function setAuthField(field: 'user' | 'password', value: string): void {
         if (!draft) {
             return;
@@ -239,6 +246,21 @@
             <label class="hmm-config-row">
                 <span>{t('Use ReGa')}</span>
                 <input type="checkbox" bind:checked={draft.rega} />
+            </label>
+
+            <!--
+                Issue #26. Off by default and never on by accident: acknowledging is a write to the
+                device, and the list of what was unreachable is what a user watching it would lose.
+                The unreach counter in the Funk tab is what keeps that information either way.
+            -->
+            <label class="hmm-config-row">
+                <span>{t('Acknowledge STICKY_UNREACH automatically')}</span>
+                <input
+                    type="checkbox"
+                    checked={draft.autoAckStickyUnreach === true}
+                    data-testid="config-auto-ack-unreach"
+                    onchange={(event) => setAutoAck(event.currentTarget.checked)}
+                />
             </label>
 
             <label class="hmm-config-row">

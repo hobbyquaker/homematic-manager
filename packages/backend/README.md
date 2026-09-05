@@ -43,6 +43,7 @@ a WebSocket, and the CCU addon (task 13) runs the same process on the CCU.
 | `cache/devices.ts` | device descriptions per interface, and the core's `DeviceIndex` |
 | `cache/descriptions.ts` | paramset descriptions by `paramsetIdentity()` |
 | `cache/names.ts` | the local name store, with ReGa as an overlay (D-2) |
+| `cache/unreach.ts` | how often each device went unreachable (#26), edge-counted and persisted |
 | `cache/store.ts` | all caches of one connection, and what of them is persisted |
 | `rega/client.ts` | names and renames through ReGa; every failure is a state, never an exception |
 | `discovery/discover.ts` | the eQ-3 UDP broadcast probe on 43439 (ported from hm2mqtt.js) |

@@ -162,4 +162,16 @@ describe('ConfigDialog', () => {
         expect(screen.getByTestId<HTMLSelectElement>('config-discovered').disabled).toBe(true);
         expect(screen.getByTestId<HTMLButtonElement>('config-discover').disabled).toBe(false);
     });
+
+    it('offers the STICKY_UNREACH auto-acknowledge, off, and saves it when it is ticked (#26)', async () => {
+        await open(transport);
+        const box = screen.getByTestId<HTMLInputElement>('config-auto-ack-unreach');
+        expect(box.checked).toBe(false);
+
+        await fireEvent.click(box);
+        await fireEvent.click(screen.getByTestId('config-save'));
+        await waitFor(() => {
+            expect(transport.lastCall('config.set')?.[0]?.autoAckStickyUnreach).toBe(true);
+        });
+    });
 });

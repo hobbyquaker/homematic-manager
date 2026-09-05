@@ -26,6 +26,12 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Not present': {de: 'Nicht vorhanden', en: 'Not present'},
     Subscribing: {de: 'Anmeldung läuft', en: 'Subscribing'},
     'Pending changes': {de: 'Offene Änderungen', en: 'Pending changes'},
+    Unreach: {de: 'Ausfälle', en: 'Unreach'},
+    'Reset the unreach counters': {de: 'Ausfallzähler zurücksetzen', en: 'Reset the unreach counters'},
+    'Acknowledge STICKY_UNREACH automatically': {
+        de: 'STICKY_UNREACH automatisch bestätigen',
+        en: 'Acknowledge STICKY_UNREACH automatically',
+    },
     'Used for every pair without its own name': {
         de: 'Gilt für jedes Paar ohne eigenen Namen',
         en: 'Used for every pair without its own name',

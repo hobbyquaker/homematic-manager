@@ -2,11 +2,13 @@
  * Everything the backend keeps about one CCU, and what of it survives a restart.
  *
  * Persisted (per host, under `<dataDir>/cache/<host>/`): the device descriptions, the paramset
- * descriptions and the local names. Not persisted: RSSI, service messages and the event buffer -
- * all three are a snapshot of the radio's current state and a stale one is worse than none.
+ * descriptions, the local names and the unreach counters of #26. Not persisted: RSSI, service
+ * messages and the event buffer - all three are a snapshot of the radio's current state and a stale
+ * one is worse than none. The unreach counters are the opposite: they are a history, and a history
+ * that is thrown away on restart answers no question at all.
  *
- * The three files are written debounced (`DebouncedJsonFile`), so a CCU that reports 400 devices in
- * one burst causes one write, not 400 as 2.x did.
+ * The files are written debounced (`DebouncedJsonFile`), so a CCU that reports 400 devices in one
+ * burst causes one write, not 400 as 2.x did.
  */
 
 import {
@@ -21,6 +23,7 @@ import {DebouncedJsonFile} from '../util/jsonFile.js';
 import {DeviceCache} from './devices.js';
 import {ParamsetDescriptionCache} from './descriptions.js';
 import {NameStore} from './names.js';
+import {UnreachCache} from './unreach.js';
 
 export interface CacheStoreOptions {
     /** `<dataDir>/cache/<host>`; created on the first write. */
@@ -40,6 +43,8 @@ export class CacheStore {
     readonly devices = new DeviceCache();
     readonly descriptions = new ParamsetDescriptionCache();
     readonly names = new NameStore();
+    /** Issue #26: how often each device went unreachable. Persisted - that is the whole point. */
+    readonly unreach = new UnreachCache();
     readonly serviceMessages: ServiceMessageStore;
     readonly events: RingBuffer<EventRecord>;
 
@@ -48,6 +53,7 @@ export class CacheStore {
     readonly #deviceFile: DebouncedJsonFile<unknown>;
     readonly #descriptionFile: DebouncedJsonFile<unknown>;
     readonly #nameFile: DebouncedJsonFile<unknown>;
+    readonly #unreachFile: DebouncedJsonFile<unknown>;
 
     constructor(options: CacheStoreOptions) {
         this.#now = options.now ?? (() => Date.now());
@@ -60,6 +66,7 @@ export class CacheStore {
         this.#deviceFile = new DebouncedJsonFile(`${options.cacheDir}/devices.json`, fileOptions);
         this.#descriptionFile = new DebouncedJsonFile(`${options.cacheDir}/descriptions.json`, fileOptions);
         this.#nameFile = new DebouncedJsonFile(`${options.cacheDir}/names.json`, fileOptions);
+        this.#unreachFile = new DebouncedJsonFile(`${options.cacheDir}/unreach.json`, fileOptions);
     }
 
     /** The RSSI matrix of one interface; created on first use. */
@@ -78,6 +85,7 @@ export class CacheStore {
         this.devices.load(await this.#deviceFile.read());
         this.descriptions.load(await this.#descriptionFile.read());
         this.names.load(await this.#nameFile.read());
+        this.unreach.load(await this.#unreachFile.read());
     }
 
     saveDevices(): void {
@@ -93,9 +101,18 @@ export class CacheStore {
         this.#nameFile.save(this.names.toJSON());
     }
 
+    saveUnreach(): void {
+        this.#unreachFile.save(this.unreach.toJSON());
+    }
+
     /** Writes whatever is pending; part of `Backend.stop()`. */
     async flush(): Promise<void> {
-        await Promise.all([this.#deviceFile.flush(), this.#descriptionFile.flush(), this.#nameFile.flush()]);
+        await Promise.all([
+            this.#deviceFile.flush(),
+            this.#descriptionFile.flush(),
+            this.#nameFile.flush(),
+            this.#unreachFile.flush(),
+        ]);
     }
 
     /** `config.clearCaches`: empties everything in memory and removes the three files. */
@@ -103,12 +120,18 @@ export class CacheStore {
         this.devices.clear();
         this.descriptions.clear();
         this.names.clear();
+        this.unreach.clear();
         this.#rssi.clear();
         this.events.clear();
         for (const interfaceName of this.serviceMessages.list().map((message) => message.interfaceName)) {
             this.serviceMessages.replaceInterface(interfaceName, []);
         }
-        await Promise.all([this.#deviceFile.remove(), this.#descriptionFile.remove(), this.#nameFile.remove()]);
+        await Promise.all([
+            this.#deviceFile.remove(),
+            this.#descriptionFile.remove(),
+            this.#nameFile.remove(),
+            this.#unreachFile.remove(),
+        ]);
     }
 
     /** The service messages in the shape the contract asks for. */

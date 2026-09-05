@@ -34,6 +34,7 @@ export * from './interfaces/manager.js';
 export * from './cache/devices.js';
 export * from './cache/descriptions.js';
 export * from './cache/names.js';
+export * from './cache/unreach.js';
 export * from './cache/store.js';
 
 // the write path (task 6)

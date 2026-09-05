@@ -9,12 +9,17 @@ name: Release (npm package)
 # must never hold this one back or roll it back; re-running one alone is `workflow_dispatch` with
 # the tag as its input.
 #
+# D-33: the package is `homematic-manager`, the name the 2.x desktop app had on npm, so what this
+# workflow packs and publishes is `homematic-manager-<version>.tgz` and its SBOM is
+# `homematic-manager-<version>.tgz.cdx.json`. The 1.x versions under that name stay deprecated; a
+# deprecated version does not block a new one.
+#
 # Publishing uses npm **trusted publishing**: the `id-token: write` permission plus npm >= 11.5.1
 # means the registry accepts an OIDC token from this workflow and no `NODE_AUTH_TOKEN` secret
-# exists to be leaked. The trusted publisher has to be configured once on npmjs.com for the package
-# (repository `hobbyquaker/homematic-manager`, workflow `release-npm.yml`); until that is done the
-# publish step fails with `ENEEDAUTH`, which is the intended failure - it is not a reason to add a
-# token secret.
+# exists to be leaked. The trusted publisher is configured on npmjs.com for `homematic-manager`
+# with repository `hobbyquaker/homematic-manager` and workflow **`release-npm.yml`** - renaming
+# this file therefore breaks publishing with `ENEEDAUTH` until the publisher is updated, and an
+# `ENEEDAUTH` here is the intended failure, not a reason to add a token secret.
 #
 # The GitHub release is created as a draft by whichever of the three workflows gets there first and
 # published by the maintainer (see `release-electron.yml` for why).
@@ -69,6 +74,9 @@ jobs:
 
       - run: npm test
 
+      # `npm pack` writes its file list and the tarball details to stderr and only the file name to
+      # stdout, so `tail -1` is the name - `homematic-manager-<version>.tgz`. Taken from npm rather
+      # than spelled out here, so a version or a name never has to be kept in sync in two places.
       - name: Pack
         id: pack
         run: |
@@ -101,8 +109,10 @@ jobs:
       # provenance statement on top of the GitHub attestations.
       - name: Publish
         # A pre-release (3.0.0-dev.n, -alpha.n, -beta.n) goes out under the `next` dist-tag so
-        # that `npm install -g` keeps giving users the last stable version; a plain version moves
-        # `latest`.
+        # that `npm install -g homematic-manager` keeps giving whatever `latest` points at - which
+        # until 3.0.0 is released is still the deprecated 2.x-era 1.0.14, with its deprecation
+        # notice. Pre-release testers install `homematic-manager@next`. A plain version moves
+        # `latest` and ends that.
         run: |
           VERSION="$(node -p "require('./apps/web/package.json').version")"
           case "$VERSION" in

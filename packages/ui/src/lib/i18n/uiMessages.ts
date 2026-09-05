@@ -71,6 +71,12 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Sorted ascending': {de: 'Aufsteigend sortiert', en: 'Sorted ascending'},
     'Sorted descending': {de: 'Absteigend sortiert', en: 'Sorted descending'},
     'Showing {shown} of {total}': {de: 'Zeige {shown} von {total}', en: 'Showing {shown} of {total}'},
+    'No devices - the interface has not reported any yet': {
+        de: 'Keine Geräte - die Schnittstelle hat noch keine gemeldet',
+        en: 'No devices - the interface has not reported any yet',
+    },
+    install: {de: 'installieren', en: 'install'},
+    'Install firmware {version}': {de: 'Firmware {version} installieren', en: 'Install firmware {version}'},
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

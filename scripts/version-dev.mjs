@@ -30,6 +30,13 @@ const workspaceDirs = (patterns) =>
         return existsSync(join(base, 'package.json')) ? [base] : [];
     });
 
+// **Before** the bump: this is the version the cross-dependency ranges are pinned to today, and
+// reading it afterwards - which is what this script did until the first real run of it, task 17 -
+// yields the *new* version, so no range is ever rewritten. `npm install --package-lock-only` then
+// cannot resolve `@homematic-manager/backend@<old>` inside the workspace, goes to the registry and
+// fails with a 404 on a package that was never published.
+const previous = readPackage(root).version;
+
 execFileSync(npm, ['version', 'prerelease', '--preid', 'dev', '--no-git-tag-version'], {
     cwd: root,
     stdio: 'inherit',
@@ -41,7 +48,6 @@ const {version, workspaces} = readPackage(root);
 // "3.0.0-dev.0"`), so those ranges move with the version; otherwise `npm ci` refuses the lockfile
 // after the first bump (found by task 11).
 const DEPENDENCY_FIELDS = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
-const previous = readPackage(root).version;
 
 for (const dir of workspaceDirs(workspaces)) {
     const pkg = readPackage(dir);
@@ -60,6 +66,27 @@ for (const dir of workspaceDirs(workspaces)) {
     }
     writePackage(dir, pkg);
     console.log(`${relative(root, dir)}: ${version}`);
+}
+
+// Every workspace range has to point at a version that exists inside the workspace now. If one
+// still points at the old one, `npm install` below goes to the registry for a package that was
+// never published and fails with a 404 that says nothing about the cause - which is exactly how
+// the `previous` bug above showed itself. Say it here instead, before npm does.
+const stale = [];
+for (const dir of workspaceDirs(workspaces)) {
+    const pkg = readPackage(dir);
+    for (const field of DEPENDENCY_FIELDS) {
+        for (const [name, range] of Object.entries(pkg[field] ?? {})) {
+            if (name.startsWith('@homematic-manager/') && range !== version) {
+                stale.push(`${relative(root, dir)}: ${field}.${name} is "${range}", not "${version}"`);
+            }
+        }
+    }
+}
+if (stale.length > 0) {
+    console.error(`\nworkspace ranges were not moved to ${version}:\n  ${stale.join('\n  ')}`);
+    console.error('package.json files are already bumped; fix the ranges by hand or `git checkout` them.');
+    process.exit(1);
 }
 
 // Keep package-lock.json consistent with the bumped workspace versions.

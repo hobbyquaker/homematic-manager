@@ -34,6 +34,9 @@ through and why the token is still required behind it:
 - [config-pending.md](config-pending.md) — the lab study of the paramset write path: what `rfd` and
   `hmipserver` really do with a bad `putParamset`, why a channel can end up permanently unwritable,
   which recoveries work on which interface, and what was **not** tested.
+- [hardware-checklist.md](hardware-checklist.md) — what was actually run on real CCUs, per run and
+  per box, with the results and what each pass found. Where a page here says "measured on
+  hardware", this is the run it means.
 
 ## Building and contributing
 

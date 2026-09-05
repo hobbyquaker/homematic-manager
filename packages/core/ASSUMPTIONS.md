@@ -31,7 +31,7 @@ is `tools/lab/config-pending-study.mjs`. Each entry below now starts with what c
 | A-13 | a `100%` unit means a fraction                               | untested - no such parameter on the lab devices                       |
 | A-14 | `writeAll` may fall back to `DEFAULT`                        | **verified as a real case** - the repair reports it                   |
 | A-15 | the HmIP-WRC6 stands in for the WRC2                         | **fixed** - the WRC2's own descriptions were dumped                   |
-| A-17 | `NN_WP_WEEKDAY` bit 0 is Sunday                              | **verified 2026-09-05** in the lab (task 17, OQ-16)                    |
+| A-17 | `NN_WP_WEEKDAY` bit 0 is Sunday                              | **verified 2026-09-05** in the lab (task 17, OQ-16)                   |
 
 Two things the study found that were not on this list at all, and that matter more than most of
 it: hmipserver **stores what it rejects**, so a parameter a channel does not have is kept for ever
@@ -232,7 +232,7 @@ The anonymised `listDevices` dumps are in hm-simulator's `data/fixtures/lab-devi
 the HmIP switching programme's weekday mask Sunday first. Nothing in the paramset description and
 nothing in `data/dist` says which bit is which day; task 10 inferred it from the HmIP weekday enums
 the descriptions do document (`DECALCIFICATION_WEEKDAY` and `DST_START_DAY_OF_WEEK` on HmIP start at
-Sunday, while the *BidCos* `DECALCIFICATION_WEEKDAY` starts at Saturday), and printed the raw mask
+Sunday, while the _BidCos_ `DECALCIFICATION_WEEKDAY` starts at Saturday), and printed the raw mask
 beside the checkboxes because of the doubt.
 
 **Measured 2026-09-05 on the lab boxes, and the inference was right.** The mask is produced by the

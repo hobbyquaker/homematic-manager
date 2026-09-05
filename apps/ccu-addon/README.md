@@ -212,13 +212,26 @@ The rc.d script is the only interface:
 
 The same commands are behind `service.cgi` (`?sid=…&cmd=start|stop|restart|status|log`), and the
 _Neu starten_ and _Deinstallieren_ buttons on the Zusatzsoftware page call `restart` and
-`uninstall`. On OpenCCU monit restarts the process when it dies (passively — the boot is
-`S98StartAddons`'s job, and two backends on one port would fight over the interface callbacks).
+`uninstall`. On OpenCCU monit watches the process (passively — starting it is `S98StartAddons`'s
+job, and two backends on one port would fight over the interface callbacks); `rc.d/hmm` arms that
+watch after it starts the service and disarms it before it stops one, because `ONREBOOT NOSTART`
+leaves the check unmonitored on every monit reload — measured in the lab, see `etc/monit.cfg`.
 
 **Update**: upload the new package the same way. `update_script` stops the service, replaces
 `/usr/local/addons/hmm` wholesale, keeps `etc/hmm.env`, keeps the profile and the token, rewrites
 the lighttpd rule and starts the service again — exit code 0, no reboot. The Zusatzsoftware page
 shows the newest release through `update_check.cgi`.
+
+On the **CCU3 firmware** the update runs in a chroot during the reboot the WebUI asks for, and that
+chroot binds `/usr/local`, `/dev`, `/proc` and `/sys` — not `/var/run`, where the pidfile is. So
+`update_script`'s stop finds nothing to stop there, which is harmless in the firmware's own flow
+(the box is going down anyway) but means that **running `/bin/install_addon` by hand on a CCU3 to
+avoid the reboot leaves the old process running on the replaced tree**: finish such an update with
+`/usr/local/etc/config/rc.d/hmm restart`. Measured in the lab on 2026-09-05, see
+[`docs/hardware-checklist.md`](../../docs/hardware-checklist.md). The firmware's
+`/bin/install_addon` also ends with `sync` rather than propagating the exit code, so a CCU3 always
+reports 0 whether the install was an update or a fresh one; only OpenCCU's wrapper passes the 0/10
+through.
 
 **Uninstall** through the WebUI stops the service and removes the addon directory, both symlinks,
 the lighttpd rule, the monit link and the Systemsteuerung entry. It **keeps** `/usr/local/hmm`: the
@@ -334,11 +347,14 @@ WebSocket upgrade and an ApiFrame round trip, a socket left idle for ten minutes
 restart, and the device list filling from `rfd` and `HmIPServer` on the loopback. The lookahead in
 the proxy rule works on lighttpd 1.4.50 (CCU3 firmware) and 1.4.82 (OpenCCU) alike.
 
-### Still to check on hardware: the optional login (D-32, task 18)
+### The optional login on hardware (D-32, task 18) — **checked 2026-09-05**
 
-Everything below was exercised in the container replay with a stub ReGa and a stub UDP 1998, never
-against a real ReGaHSS. One OpenCCU box with a real CCU user is what is missing; run this in task
-17's next hardware pass and record the result here:
+All eight steps below were run in task 17's hardware pass on the OpenCCU x86_64 box against the
+real ReGaHSS and the real authentication daemon on UDP 1998, and the settings page plus one login
+round on the CCU3-firmware box (Tcl 8.2.3). Everything passed, ReGa reports **level 8** for the
+lab's admin user, and both boxes were left in `token` mode. The results are in
+[`docs/hardware-checklist.md`](../../docs/hardware-checklist.md); what is still untested is a CCU
+user at a *lower* ReGa level. The recipe stays here because it is how the check is repeated:
 
 ```sh
 # 1. switch the addon over and restart it
@@ -374,9 +390,11 @@ ssh root@<box> "sed -i 's/^HMM_AUTH_MODE=rega/HMM_AUTH_MODE=token/' \
     /usr/local/addons/hmm/etc/hmm.env; /usr/local/etc/config/rc.d/hmm restart"
 ```
 
-Also worth one look on the CCU3 firmware box (Tcl 8.2.3): the settings page,
-`/addons/hmm/settings.cgi?cmd=config`, and that switching the mode from it really rewrites
-`etc/hmm.env` and restarts the service.
+Steps 1 and 8 are easier through the addon's own settings page than by editing `hmm.env`:
+`/addons/hmm/settings.cgi?cmd=config&auth_mode=rega&sid=@<sid>@` writes the variable and restarts
+the service itself, which is also what a user would do. That page was checked on the CCU3 firmware
+box too (Tcl 8.2.3): it renders with no Tcl error, names the mode in force, writes `HMM_AUTH_MODE`
+**once** on a second switch rather than appending a line, and restarts the service.
 
 ## Rules for anything added here
 

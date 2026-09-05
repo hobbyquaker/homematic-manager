@@ -41,6 +41,16 @@ through and why the token is still required behind it:
   SBOMs and the lab scripts.
 - [../AGENTS.md](../AGENTS.md) — the working rules for this repository.
 
+## Releasing
+
+For the maintainer; nothing here is run by an agent.
+
+- [release-checklist.md](release-checklist.md) — the steps for a beta and for 3.0.0: the one-time
+  setup, the version bump, the tag, the four independent release workflows and how to re-run one
+  alone, verifying every asset's SBOM and attestation, publishing the draft, and the issue list to
+  close with its comments.
+- [announcement-3.0-beta.md](announcement-3.0-beta.md) — the draft of the forum post for the beta.
+
 ## Background
 
 - [../ROADMAP.md](../ROADMAP.md) — the plan for 3.0: tasks, the decisions **D-1..D-30** and the open

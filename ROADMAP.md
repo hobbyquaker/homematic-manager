@@ -43,7 +43,8 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 | D-21 | (2026-09-05) The branch `3.0-dev` may be pushed to GitHub by the agent so that GitHub Actions builds the Windows/macOS/Linux artifacts (task 11) and runs CI; the maintainer downloads dev builds from the workflow artifacts. Tags, releases and pushes to `master` stay with the maintainer. |
 | D-22 | (2026-09-05) Dark mode is a requirement, not a nicety: a light and a dark theme, following the OS setting by default with a manual switch that is persisted; every tab, dialog, table state, RSSI colour and notice must be legible in both, and component tests cover both themes where colours carry meaning (RSSI classes, service-message severity, connection marks). |
 | D-23 | (2026-09-05) Component tests run in jsdom by default; vitest browser mode (Chromium via Playwright) is available as `npm run test:browser -w @homematic-manager/ui` and becomes the default in task 14, which adds the `playwright install chromium` step to CI (the e2e suites need it anyway). |
-| D-24 | (2026-09-05) Three deliverables, three independent release pipelines: the Electron app (GitHub release assets), the npm package with the Node backend and web UI (`apps/web`, npm trusted publishing with OIDC as in hm-simulator's `release.yml`), and the CCU addon (`.tar.gz` per architecture attached to the release). Each has its own workflow file, its own trigger and its own failure domain: one failing must never block or roll back the others, and any one of them can be re-run alone. No single "release everything" job with sequential steps. |
+| D-24 | (2026-09-05) Four independent release pipelines for the deliverables of D-25: the Electron app (GitHub release assets), the npm package with the Node backend and web UI (`apps/web`, npm trusted publishing with OIDC as in hm-simulator's `release.yml`), the Docker image (ghcr.io, multi-arch) and the CCU addon (`.tar.gz` per architecture attached to the release). Each has its own workflow file, its own trigger and its own failure domain: one failing must never block or roll back the others, and any one of them can be re-run alone. No single "release everything" job with sequential steps, and no final job with `needs:` on all of them (hm2mqtt.js's `github-release` job is the pattern to avoid). |
+| D-25 | (2026-09-05) The install matrix of 3.0: CCU addon in three variants (armv7l, aarch64, x86_64); Docker image (amd64, arm64, arm/v7); npm install with `--install` creating a system user, systemd unit and state directory the way `she` and hm2mqtt.js do it, with a Proxmox LXC as the recommended server deployment and a lighttpd reverse-proxy example config; Electron apps for Windows, Linux and macOS. All install types run the same backend and UI and share one config format, so a user can move between them (task 16 documents the move). |
 
 ## Contents
 
@@ -78,15 +79,15 @@ infrastructure and the e2e suites.
 | Milestone | Tasks | Result | PD |
 | --- | --- | --- | --- |
 | M1 Foundation and safety | 2, 3, 4, 5, 6 | headless backend against simulator and lab CCUs; write path fixed and verified on hardware | 25-37 |
-| M2 Parity | 7, 8, 9, 11, 12 | 3.0.0-alpha.0 (after the 3.0.0-dev.n series of M1/M2, D-18): Electron app with every feature of 2.7, English, HmIP easy modes | 34-48 |
-| M3 Quality | 10 (initial set), 14, 16, 17 | 3.0.0 | 20-31 |
+| M2 Parity | 7, 8, 9, 11, 12 | 3.0.0-alpha.0 (after the 3.0.0-dev.n series of M1/M2, D-18): Electron app with every feature of 2.7, English, HmIP easy modes; npm package with `--install` and Docker image (D-25) | 37-53 |
+| M3 Quality | 10 (initial set), 14, 16, 17 | 3.0.0 | 21-33 |
 | M4 Addon | 13 | 3.1.0: CCU addon for CCU3 firmware and OpenCCU (armv7l, aarch64, x86_64) | 8-12 |
 | M5 Growth | 10 (extended), 15 | 3.2+: device-specific editors, backlog features | 6-10 (+ open-ended editors) |
 
 | Path | PD |
 | --- | --- |
-| Electron only (tasks 2-12, 14-17) | **85-126** |
-| Electron + CCU addon (adds task 13) | **93-138** |
+| Electron, npm package and Docker (tasks 2-12, 14-17) | **89-134** |
+| Plus the CCU addon (adds task 13) | **97-146** |
 
 At two focused days a week that is roughly 10-16 months; full-time roughly 4-6 months. M1 and M2
 are the critical path; M4 can run in parallel with M3 once task 12 exists.
@@ -105,11 +106,11 @@ Per task:
 | 9 Device metadata pipeline | 3-4 | 2 |
 | 10 Device-specific editors (initial set) | 5-8 | 8, 9 |
 | 11 Electron host, builds, releases | 5-8 | 4, 7 |
-| 12 Web host | 2-3 | 4, 7 |
+| 12 Web host, npm package, `--install`, Docker, proxy examples (D-25) | 5-8 | 4, 7 |
 | 13 CCU addon | 8-12 | 12, lab |
 | 14 Test infrastructure and coverage gates | 8-12 | 8, 11, 12 |
 | 15 Backlog features | 6-10 | 8 |
-| 16 Documentation | 2-3 | 8 |
+| 16 Documentation (one page per install type, D-25) | 3-5 | 8 |
 | 17 Beta cycle and 3.0 release | 5-8 | all of M2/M3 |
 
 ## 1. Legacy stopgap release 2.8 (dropped)
@@ -334,10 +335,41 @@ Also the third deliverable (D-24): the package is published to npm so that `npm 
 a Homematic Manager server with the built UI on any machine with Node 22+ (Raspberry Pi next to
 a CCU, a Docker host, a NAS). `release-npm.yml` publishes on the `v*` tag with npm trusted
 publishing (OIDC, no token secret; hm-simulator's `release.yml` is the template) and provenance,
-independent of the Electron and addon workflows. The package name is OQ-14; the bin is
-`homematic-manager-web` with `--host`, `--port`, `--token`, `--profile`; the README gets a
-systemd unit example. CI builds it with `npm pack --dry-run` on every push so a broken `files`
-list is caught before a tag.
+independent of the Electron, Docker and addon workflows. The package name is OQ-14; the bin is
+`homematic-manager-web` with `--host`, `--port`, `--token`, `--profile`, `--base`. CI builds it
+with `npm pack --dry-run` on every push so a broken `files` list is caught before a tag.
+
+Server install types (D-25), all on top of that package:
+
+- `--install` / `--uninstall` (she and hm2mqtt.js pattern; hm2mqtt.js's comes from
+  `mqtt-interfaces-core/lib/install.js` and is the template, MQTT branding removed): as root,
+  `useradd --system` a `homematic-manager` user, write `/etc/homematic-manager/config.env` from
+  the given options (token generated if absent, printed once), the unit
+  `/etc/systemd/system/homematic-manager.service` with `User=`, `StateDirectory=homematic-manager`
+  (profiles, caches, write log under `/var/lib/homematic-manager`), `EnvironmentFile=`,
+  `Restart=always`, `NoNewPrivileges=true`, `ProtectSystem=full`, `ExecStart` resolved to the
+  installed bin so a later `npm update -g` keeps working, then `daemon-reload` and
+  `enable --now`. `--uninstall` disables the unit and removes unit and env file, keeps the state
+  directory unless `--purge`. Idempotent: a second `--install` rewrites the unit and keeps the
+  config. Tested with a fake root (`--prefix` for the paths, `systemctl` stubbed) in vitest and
+  once for real in a Debian container in CI.
+- Reverse proxy: `docs/lighttpd-homematic-manager.conf` (the lighttpd on a Debian/LXC host:
+  `mod_proxy` to 127.0.0.1 with `proxy.header = ("upgrade" => "enable")`, an optional
+  `auth.require` in front, TLS termination), plus short nginx and Caddy equivalents; the host
+  must accept the forwarded `Host`/`Origin` and the base path (`--base`), which the addon's
+  lighttpd rule of task 13 needs anyway. `she`'s `doc/nginx.conf` is the model for the
+  commentary (what the proxy must strip, why the token is still required behind the proxy).
+- Recommended deployment: a Proxmox LXC (Debian 12/13, unprivileged, Node 22 from NodeSource or
+  the distro's 22+, `npm install -g`, `--install`, `--host 0.0.0.0` or the lighttpd proxy). The
+  callback ports the CCU pushes events to must be reachable from the CCU (no NAT in an LXC, which
+  is why it is recommended over Docker). Documented step by step in task 16, including the CCU
+  firewall entry.
+- Docker: `Dockerfile` on `node:22-alpine` (hm2mqtt.js's is the template: `npm ci --omit=dev`,
+  non-root `node` user, `/data` volume for the state directory, config by `HMM_*` environment
+  variables mirroring the CLI options), multi-arch amd64/arm64/arm/v7 to `ghcr.io/hobbyquaker/
+  homematic-manager` from `release-docker.yml` (independent per D-24; CI builds the image without
+  pushing on every push). Documented with `--network host`, or published callback ports plus
+  `--callback-ip` set to the Docker host's address, and a `compose.yml` example.
 
 ## 13. CCU addon
 
@@ -407,17 +439,24 @@ BIN-RPC arrives as U+FFFD.
 
 ## 16. Documentation
 
-README (German user-facing, English section), `BUILD.md`, `docs/config-pending.md` (from task 6),
-addon install notes per platform, migration notes from 2.x (config and cache locations), changelog
+README (German user-facing, English section) opening with the install matrix of D-25 as one table
+(install type, hardware, command or download, where the config lives), one page per install type
+(`docs/install-addon.md`, `docs/install-lxc.md` as the recommended server path, `docs/install-docker.md`,
+`docs/install-electron.md`) with the reverse-proxy examples, `BUILD.md`, `docs/config-pending.md` (from task 6),
+migration notes from 2.x (config and cache locations) and between install types, changelog
 from release notes, forum announcement text. Close the triaged issues with the references from the
 analysis when 3.0 ships.
 
 ## 17. Beta cycle and 3.0 release
 
 Alpha from M2 to the forum, beta with the addon, bug-fix buffer, hardware checklist on the three
-lab boxes, release 3.0.0 (Electron and npm package) and 3.1.0 (addon) through the three
-independent release workflows of D-24 (a failed addon build never holds back the Electron and npm
-releases of the same tag, and vice versa; the failed one is re-run alone via `workflow_dispatch`).
+lab boxes, release 3.0.0 (Electron, npm package, Docker image) and 3.1.0 (addon) through the four
+independent release workflows of D-24 (a failed addon build never holds back the Electron, npm and
+Docker releases of the same tag, and vice versa; the failed one is re-run alone via
+`workflow_dispatch`). Before the beta every install type of D-25 is installed once from the
+published artefacts, not from the checkout: the three addon packages on the lab boxes, the image
+with `docker run`, the npm package with `--install` in a fresh Proxmox LXC, the three Electron
+apps.
 The maintainer cuts releases; the agent never tags or pushes to `master` on its own (pushing
 `3.0-dev` for CI builds is D-21).
 

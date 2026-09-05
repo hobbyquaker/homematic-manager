@@ -57,7 +57,7 @@
         border-left-width: 4px;
         border-radius: var(--hmm-radius);
         background: var(--hmm-bg);
-        box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+        box-shadow: var(--hmm-shadow-toast);
     }
 
     .hmm-notice-warn {

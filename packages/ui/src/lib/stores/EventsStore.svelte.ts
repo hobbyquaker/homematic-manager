@@ -3,6 +3,13 @@ import {DEFAULT_EVENT_BUFFER_SIZE, filterEvents, RingBuffer} from '@homematic-ma
 
 import type {NoticesStore} from './NoticesStore.svelte.js';
 
+/**
+ * An event with the sequence number the store gave it. The contract's `EventRecord` has no id, and
+ * two identical presses of the same button one second apart are indistinguishable without one -
+ * which a keyed list cannot live with. The number is local to this session and never sent anywhere.
+ */
+export type IndexedEvent = EventRecord & {readonly seq: number};
+
 export interface EventsStoreOptions {
     /** 8192 by default, the number of rows the 2.x events grid kept. */
     readonly capacity?: number;
@@ -16,11 +23,12 @@ export interface EventsStoreOptions {
  * instead of one per event - 2.x rebuilt the whole grid on a one-second timer for the same reason.
  */
 export class EventsStore {
-    readonly buffer: RingBuffer<EventRecord>;
+    readonly buffer: RingBuffer<IndexedEvent>;
 
     #version = $state(0);
+    #seq = 0;
     /** Newest first, which is the order the 2.x grid sorted by. */
-    readonly records: EventRecord[] = $derived.by(() => {
+    readonly records: IndexedEvent[] = $derived.by(() => {
         void this.#version;
         return this.buffer.toArray().reverse();
     });
@@ -30,7 +38,7 @@ export class EventsStore {
     readonly #unsubscribe: () => void;
 
     constructor(transport: Transport, notices: NoticesStore, options: EventsStoreOptions = {}) {
-        this.buffer = new RingBuffer<EventRecord>(options.capacity ?? DEFAULT_EVENT_BUFFER_SIZE);
+        this.buffer = new RingBuffer<IndexedEvent>(options.capacity ?? DEFAULT_EVENT_BUFFER_SIZE);
         this.#transport = transport;
         this.#notices = notices;
         this.#unsubscribe = transport.on('rpc.event', (record) => {
@@ -44,12 +52,13 @@ export class EventsStore {
     }
 
     push(record: EventRecord): void {
-        this.buffer.push(record);
+        this.buffer.push({...record, seq: this.#seq});
+        this.#seq += 1;
         this.#version += 1;
     }
 
     /** Newest first, narrowed by core's event filter. */
-    filtered(filter: EventFilter): EventRecord[] {
+    filtered(filter: EventFilter): IndexedEvent[] {
         void this.#version;
         return filterEvents(this.buffer, filter).reverse();
     }
@@ -65,7 +74,8 @@ export class EventsStore {
         try {
             const records = await this.#transport.request('events.recent', interfaceName, limit);
             for (const record of records) {
-                this.buffer.push(record);
+                this.buffer.push({...record, seq: this.#seq});
+                this.#seq += 1;
             }
             this.#version += 1;
         } catch (error) {

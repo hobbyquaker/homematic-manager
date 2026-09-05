@@ -113,7 +113,7 @@
         border: 1px solid var(--hmm-border-strong);
         border-radius: var(--hmm-radius);
         background: var(--hmm-bg);
-        box-shadow: 0 4px 10px rgb(0 0 0 / 25%);
+        box-shadow: var(--hmm-shadow-menu);
     }
 
     .hmm-context-item {

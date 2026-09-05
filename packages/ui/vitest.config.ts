@@ -26,5 +26,8 @@ export default defineConfig({
         environment: 'jsdom',
         include: ['src/**/*.test.ts'],
         setupFiles: ['./vitest.setup.ts'],
+        // The theme test (D-22) reads app.css as source. Vitest defaults to css:false, which
+        // hands back an empty module for every stylesheet, a "?raw" import of one included.
+        css: true,
     },
 });

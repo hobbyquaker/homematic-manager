@@ -17,8 +17,3 @@ export function getStores(): Stores {
     }
     return getContext<Stores>(STORES_KEY);
 }
-
-/** The stores if there are any - for components that can also stand on their own. */
-export function tryGetStores(): Stores | undefined {
-    return hasContext(STORES_KEY) ? getContext<Stores>(STORES_KEY) : undefined;
-}

@@ -1,6 +1,7 @@
 <script lang="ts">
     import type {DeviceEditorSpec, EditorChange, EditorValues} from '../../../lib/util/editors/index.js';
 
+    import BlindCalibrationEditor from './BlindCalibrationEditor.svelte';
     import DurationPairsEditor from './DurationPairsEditor.svelte';
 
     /**
@@ -21,7 +22,9 @@
 </script>
 
 {#each specs as spec (spec.id)}
-    {#if spec.kind === 'duration-pairs'}
+    {#if spec.kind === 'blind-calibration'}
+        <BlindCalibrationEditor {spec} {values} {channelType} {onchange} />
+    {:else if spec.kind === 'duration-pairs'}
         <DurationPairsEditor {spec} {values} {channelType} {onchange} />
     {/if}
 {/each}

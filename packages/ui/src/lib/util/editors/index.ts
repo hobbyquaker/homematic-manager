@@ -1,11 +1,13 @@
+import {detectBlindCalibration, type BlindCalibrationSpec} from './blindCalibration.js';
 import {detectDurationPairs, type DurationPairsSpec} from './durationPairs.js';
 import type {EditorTarget} from './types.js';
 
+export * from './blindCalibration.js';
 export * from './durationPairs.js';
 export * from './types.js';
 
 /** Everything a detector can return. One member per device-specific editor. */
-export type DeviceEditorSpec = DurationPairsSpec;
+export type DeviceEditorSpec = BlindCalibrationSpec | DurationPairsSpec;
 
 /**
  * The registry: every device-specific editor, in the order they get to claim parameters.
@@ -16,6 +18,7 @@ export type DeviceEditorSpec = DurationPairsSpec;
  * detector is therefore handed the names the earlier ones already claimed.
  */
 const DETECTORS: readonly ((target: EditorTarget, taken: ReadonlySet<string>) => DeviceEditorSpec | undefined)[] = [
+    detectBlindCalibration,
     detectDurationPairs,
 ];
 

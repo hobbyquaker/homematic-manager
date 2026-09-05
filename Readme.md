@@ -97,7 +97,9 @@ Dazu, quer über die Tabs:
   von Hand.
 - **Konfiguration**: CCU-Adresse mit Suche im Netz (UDP-Discovery), TLS, Authentifizierung, ReGa an
   oder aus, Callback-Adresse und -Ports, Sprache (Deutsch/Englisch), Schreibpause, RPC-Log-Ordner
-  und selbstdefinierte Schnittstellen (Host, Port, Protokoll, Pfad).
+  und selbstdefinierte Schnittstellen (Host, Port, Protokoll, Pfad). Damit lassen sich auch
+  Schnittstellenprozesse einbinden, die nicht zur CCU gehören — etwa die virtuellen Geräte des
+  [CCU-Jack](https://github.com/mdzio/ccu-jack): Protokoll `xmlrpc`, Port `2121`, Pfad `/RPC3`.
 - **Helles und dunkles Design**, das der Systemeinstellung folgt, mit einem Schalter, der gemerkt
   wird.
 

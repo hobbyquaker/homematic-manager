@@ -1,0 +1,57 @@
+Subject: [PATCH] Server: accept a responseEncoding, as Client already does
+
+`Client` takes a `responseEncoding` and hands it to its `Deserializer`, which
+has taken an `encoding` argument since the beginning. `Server` does not: it
+constructs `new Deserializer()` with no arguments, so an incoming `event`,
+`newDevices` or `setReadyConfig` whose payload carries a non-ASCII string is
+decoded as UTF-8 and mangled - the same bug the client option exists to fix, on
+the other side of the connection.
+
+The CCU's interface processes speak ISO-8859-1 and their XML carries no encoding
+declaration, so the deserializer cannot work it out on its own; only the caller
+knows. In practice a callback payload is addresses, datapoint names and numbers,
+so nothing has been observed in the wild - but a device name in a `newDevices`
+answer or a string datapoint in an `event` is enough, and there is currently no
+way to ask for the right encoding.
+
+The change keeps the default (`utf8`, from `Deserializer`), so nothing that
+exists behaves differently. `xmlrpc.createServer(options)` passes the whole
+options object through, so `responseEncoding` needs no plumbing of its own.
+
+Verified against homematic-xmlrpc 2.0.0.
+
+---
+ lib/server.js | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/lib/server.js b/lib/server.js
+index 0000000..1111111 100644
+--- a/lib/server.js
++++ b/lib/server.js
+@@ -20,6 +20,8 @@
+  *                                  with fields:
+  *   - {String} host              - (optional)
+  *   - {Number} port
++ *   - {String} responseEncoding  - (optional) encoding of incoming request
++ *                                  bodies; 'utf8' by default, 'latin1' for a CCU
+  * @param {Boolean} isSecure      - True if using https for making calls,
+  *                                  otherwise false.
+  * @param {Function} onListening  - (optional) called once listening
+@@ -35,6 +37,8 @@ function Server(options, isSecure, onListening) {
+   onListening = onListening || function() {}
+   var that = this
+
++  var responseEncoding = (options && options.responseEncoding) || 'utf8'
++
+   // If a string URI is passed in, converts to URI fields
+   if (typeof options === 'string') {
+     options = url.parse(options)
+@@ -49,7 +53,7 @@ function Server(options, isSecure, onListening) {
+   }
+
+   function handleMethodCall(request, response) {
+-    var deserializer = new Deserializer()
++    var deserializer = new Deserializer(responseEncoding)
+     deserializer.deserializeMethodCall(request, function(error, methodName, params) {
+       if (!error && that.listenerCount(methodName) > 0) {
+         that.emit(methodName, null, params, function(error, value) {

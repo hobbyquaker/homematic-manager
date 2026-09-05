@@ -150,6 +150,30 @@ export interface ResolvedInterface {
 }
 
 /** An extra interface the user configured by hand (D-13, issue #135). */
+/**
+ * An interface the table does not know, configured by hand (D-13, issue #135).
+ *
+ * **CCU-Jack** (#135) was the case this was asked for, and it needs nothing more than these five
+ * fields. Verified 2026-09-05 against `mdzio/ccu-jack`: its README offers REST/VEAP and MQTT, and
+ * the BIN-RPC in its credits is its *client* side towards CUxD - but its virtual devices
+ * ("Fremdgeräte") are served to logic layers over plain XML-RPC. `virtdev/virtdev.go` registers
+ * `xmlrpc.Handler` with the standard `go-hmccu` interface dispatcher on the path `/RPC3` of its own
+ * HTTP server, and announces itself in `/etc/config/InterfacesList.xml` as
+ * `xmlrpc://<ccu>:<HTTP.Port>/RPC3` so the CCU sees it like any other interface process.
+ *
+ * So a user-defined interface for it is:
+ *
+ * | field | value |
+ * | --- | --- |
+ * | `name` | anything, e.g. `CCU-Jack` (it is the `init` ident, `hmm_CCU-Jack`) |
+ * | `host` | where CCU-Jack runs - the CCU itself in the usual addon install |
+ * | `port` | `2121`, its `HTTP.Port` (`2122` is `PortTLS`; `2123` is its BIN-RPC *client* port) |
+ * | `protocol` | `xmlrpc` |
+ * | `path` | `/RPC3` |
+ *
+ * No code is needed for it, which is why there is none: the only thing #135 wanted that was missing
+ * is a `path`, and a user-defined interface has had one since task 4.
+ */
 export interface UserDefinedInterface {
     /** Free text; must not collide with a built-in name. */
     readonly name: string;

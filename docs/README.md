@@ -57,3 +57,6 @@ through and why the token is still required behind it:
 
 `hmm1.png`, `hmm2.png` and `hmm3.png` in this directory are the ones the README shows. They are
 still from 2.7; the layout is unchanged in 3.0 by design (D-3), and new ones come with the beta.
+
+- [upstream/](upstream/) — the two library bugs found while building 3.0, as patches for
+  `binrpc` and `homematic-xmlrpc`, with what each one is and where it goes

@@ -1,0 +1,41 @@
+Subject: [PATCH] decodeString: decode ISO-8859-1, not UTF-8
+
+The CCU's interface processes speak ISO-8859-1. `decodeString()` ends in
+`strContent.toString()`, which is UTF-8, so every byte above 0x7F comes back as
+U+FFFD and the character is unrecoverable: a `°C` unit from rfd or a `Tür` in a
+device name arrives as replacement characters.
+
+The encoder is already right. `encodeString()` uses `Buffer.from(str, 'ascii')`,
+which in node keeps the low byte of each code unit - the same bytes `latin1`
+would write - so `0xFC` goes out as `0xFC` and only comes back wrong. Measured
+on a CCU3 (firmware 3.89.8) by writing `Tür Küche äöüß °C` into device metadata
+and reading the raw bytes back over both transports.
+
+`latin1` is what the protocol is: binrpc is a HomeMatic-specific library and
+every peer that speaks it is an eQ-3 interface process. If a per-instance option
+is preferred to a fixed encoding, the equivalent change is to thread an
+`encoding` option from `Client`/`Server` down to `decodeString` and default it
+to `'latin1'`; the one-line form below is what this application needs and what
+it patches locally today.
+
+Verified against binrpc 4.2.0.
+
+---
+ lib/protocol.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/protocol.js b/lib/protocol.js
+index 0000000..1111111 100644
+--- a/lib/protocol.js
++++ b/lib/protocol.js
+@@ -233,7 +233,9 @@
+             strContent: strContent,
+             rest: elem.subarray(4 + strContent.length),
+         };
+-        str.content = str.strContent.toString();
++        // The CCU's interface processes speak ISO-8859-1 and send no encoding
++        // declaration; `toString()` would decode UTF-8 and lose every byte > 0x7F.
++        str.content = str.strContent.toString('latin1');
+         return str;
+     },
+     /**

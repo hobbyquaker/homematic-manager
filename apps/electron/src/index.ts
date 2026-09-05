@@ -1,2 +1,0 @@
-/** Name of this package, used by the workspace smoke tests until task 11 fills it with content. */
-export const PACKAGE = '@homematic-manager/electron';

@@ -6,5 +6,7 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["node"]
   },
-  "include": ["src/**/*.ts"]
+  "references": [{"path": "../../packages/core"}, {"path": "../../packages/backend"}],
+  "//": "The renderer is not in this program: it imports .svelte modules, which tsc cannot read. `npm run typecheck -w @homematic-manager/electron` checks it with svelte-check and tsconfig.renderer.json.",
+  "include": ["src/main/**/*.ts", "src/preload/**/*.ts", "src/shared/**/*.ts"]
 }

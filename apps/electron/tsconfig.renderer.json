@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": [],
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": false,
+    "paths": {
+      "@homematic-manager/ui": ["../../packages/ui/src/index.ts"],
+      "@homematic-manager/core": ["../../packages/core/src/index.ts"]
+    }
+  },
+  "include": ["src/renderer/**/*.ts", "src/shared/**/*.ts"]
+}

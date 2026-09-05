@@ -1,6 +1,6 @@
 {
   "name": "@homematic-manager/core",
-  "version": "3.0.0-dev.2",
+  "version": "3.0.0-dev.3",
   "private": true,
   "type": "module",
   "description": "Pure domain logic of the Homematic Manager: no I/O, no DOM",

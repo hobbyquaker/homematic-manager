@@ -20,6 +20,7 @@
     "build": "tsc -b"
   },
   "dependencies": {
+    "@homematic-manager/core": "3.0.0-dev.0",
     "binrpc": "^4.2.0",
     "homematic-rega": "^2.0.0",
     "homematic-xmlrpc": "^2.0.0",

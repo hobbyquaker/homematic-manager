@@ -37,6 +37,18 @@ function deferred(): {task: () => Promise<string>; resolve: (value: string) => v
     };
 }
 
+/**
+ * Starts a write without waiting for it.
+ *
+ * `void promise` does **not** attach a rejection handler: a task that is cancelled or fails after
+ * the test stopped looking at it becomes an unhandled rejection, and vitest reports those at the
+ * end of a whole run, far away from the test that caused them. Every `enqueue` a test does not
+ * await goes through here instead, so the rejection is swallowed on purpose and visibly.
+ */
+function unwatched<T>(promise: Promise<T>): void {
+    promise.catch(() => undefined);
+}
+
 describe('WriteQueue', () => {
     it('runs the first task immediately', async () => {
         const {queue} = harness();
@@ -83,7 +95,7 @@ describe('WriteQueue', () => {
     it('paces the interfaces independently', async () => {
         const {queue} = harness({'HmIP-RF': 1000, 'BidCos-RF': 0});
         const hmip = deferred();
-        void queue.enqueue('HmIP-RF', hmip.task);
+        unwatched(queue.enqueue('HmIP-RF', hmip.task));
         await expect(queue.enqueue('BidCos-RF', () => Promise.resolve('bidcos'))).resolves.toBe('bidcos');
         hmip.resolve('hmip');
     });
@@ -121,14 +133,28 @@ describe('WriteQueue', () => {
         const {queue} = harness({'HmIP-RF': 0, 'BidCos-RF': 0});
         const hmip = deferred();
         const bidcos = deferred();
-        void queue.enqueue('HmIP-RF', hmip.task);
-        void queue.enqueue('BidCos-RF', bidcos.task);
+        unwatched(queue.enqueue('HmIP-RF', hmip.task));
+        unwatched(queue.enqueue('BidCos-RF', bidcos.task));
         const queued = queue.enqueue('HmIP-RF', () => Promise.resolve('x'));
         expect(queue.cancel('BidCos-RF')).toBe(0);
         expect(queue.cancel('HmIP-RF')).toBe(1);
         await expect(queued).rejects.toThrow(CANCELLED_MESSAGE);
         hmip.resolve('a');
         bidcos.resolve('b');
+    });
+
+    it('takes writes again after a cancel', async () => {
+        const {queue, runTimers} = harness({'HmIP-RF': 0});
+        const running = deferred();
+        const first = queue.enqueue('HmIP-RF', running.task);
+        const cancelled = queue.enqueue('HmIP-RF', () => Promise.resolve('never'));
+        expect(queue.cancel('HmIP-RF')).toBe(1);
+        await expect(cancelled).rejects.toThrow(CANCELLED_MESSAGE);
+        running.resolve('done');
+        await expect(first).resolves.toBe('done');
+        runTimers();
+        await expect(queue.enqueue('HmIP-RF', () => Promise.resolve('after'))).resolves.toBe('after');
+        expect(queue.pending).toBe(0);
     });
 
     it('uses a real timer when none is injected', async () => {
@@ -164,7 +190,7 @@ describe('WriteQueue', () => {
         const {queue, runTimers} = harness({x: 0});
         const run = vi.fn(() => Promise.resolve(1));
         const first = deferred();
-        void queue.enqueue('x', first.task);
+        unwatched(queue.enqueue('x', first.task));
         const second = queue.enqueue('x', run);
         first.resolve('a');
         await Promise.resolve();

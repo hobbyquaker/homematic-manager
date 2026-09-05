@@ -496,3 +496,48 @@ describe('link profile templates (#21)', () => {
         expect(transport.lastCall('linkTemplates.list')?.[0]).toContain('HmIP-RF/');
     });
 });
+
+describe('staging link work instead of sending it (#124)', () => {
+    let transport: MockTransport;
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+    });
+
+    it('stages a removal rather than removing it now', async () => {
+        const {stores} = await mountApp({transport, hash: '#/BidCos-RF/links'});
+        await waitFor(() => {
+            expect(document.querySelector('[data-row-id]')).toBeTruthy();
+        });
+        await fireEvent.click(document.querySelector('[data-row-id]')!);
+        await fireEvent.click(screen.getByTestId('links-delete'));
+
+        await fireEvent.click(await screen.findByTestId('remove-link-stage'));
+        expect(transport.countOf('links.remove')).toBe(0);
+        expect(stores.changeSet.count).toBe(1);
+        const staged = stores.changeSet.changes[0];
+        expect(staged?.kind).toBe('linkRemove');
+        expect(staged?.calls[0]).toContain('removeLink(');
+    });
+
+    it('stages a link paramset write with both directions', async () => {
+        const {stores} = await mountApp({transport, hash: '#/HmIP-RF/links'});
+        await waitFor(() => {
+            expect(document.querySelector('[data-row-id]')).toBeTruthy();
+        });
+        await fireEvent.dblClick(document.querySelector('[data-row-id]')!);
+        await waitFor(() => {
+            expect(screen.getByTestId('link-profile')).toBeTruthy();
+        });
+
+        const before = transport.countOf('paramset.putLink');
+        await fireEvent.click(screen.getByTestId('link-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('write-preview')).toBeTruthy();
+        });
+        // nothing changed yet, so there is nothing to stage and the button says so
+        expect(screen.getByTestId<HTMLButtonElement>('write-stage').disabled).toBe(true);
+        expect(transport.countOf('paramset.putLink')).toBe(before);
+        expect(stores.changeSet.count).toBe(0);
+    });
+});

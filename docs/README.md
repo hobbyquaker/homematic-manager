@@ -58,5 +58,9 @@ through and why the token is still required behind it:
 
 ## Screenshots
 
-`hmm1.png`, `hmm2.png` and `hmm3.png` in this directory are the ones the README shows. They are
-still from 2.7; the layout is unchanged in 3.0 by design (D-3), and new ones come with the beta.
+`hmm1.png`, `hmm2.png` and `hmm3.png` in this directory are the ones the README shows, and
+`hmm1-dark.png`, `hmm2-dark.png`, `hmm3-dark.png` are the same three in the dark theme (D-22).
+They are taken from the running 3.0 UI by [`../tools/screenshots.mjs`](../tools/screenshots.mjs)
+(`npm run screenshots`), which starts `apps/web` in `--demo` mode and drives chromium through the
+three workflows at 1280×800 in German. Nothing in them comes from a real installation. Re-run the
+script rather than editing an image; the header of the script says what each shot shows.

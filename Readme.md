@@ -24,12 +24,16 @@ Eine ausführliche Beschreibung der 2.x-Oberfläche steht im
 > gelaufen. Die Downloads und Kommandos unten beschreiben, was 3.0 ausliefert; verfügbar sind sie
 > erst mit dem ersten Tag. Der Plan dazu: [ROADMAP.md](ROADMAP.md).
 
-![](docs/hmm1.png)
-![](docs/hmm2.png)
-![](docs/hmm3.png)
+| hell | dunkel (D-22) |
+| --- | --- |
+| [![Geräte](docs/hmm1.png)](docs/hmm1.png) | [![Geräte, dunkel](docs/hmm1-dark.png)](docs/hmm1-dark.png) |
+| [![Paramset-Editor mit Vorschau](docs/hmm2.png)](docs/hmm2.png) | [![Paramset-Editor mit Vorschau, dunkel](docs/hmm2-dark.png)](docs/hmm2-dark.png) |
+| [![Verknüpfungen](docs/hmm3.png)](docs/hmm3.png) | [![Verknüpfungen, dunkel](docs/hmm3-dark.png)](docs/hmm3-dark.png) |
 
-_Die Screenshots zeigen 2.7. Der Aufbau bleibt in 3.0 gleich — gleiche Tabs, gleiche Tabellen,
-gleiche Dialoge, nur neu implementiert (D-3). Aktuelle Screenshots kommen mit dem Beta-Zyklus._
+_Oben die Geräteliste mit aufgeklappter Kanaltabelle, in der Mitte der Paramset-Editor mit der
+Schreibvorschau (es wird nur geschrieben, was geändert wurde), unten die Verknüpfungen mit dem
+Easy-Mode-Dialog. Die Bilder entstehen aus der laufenden 3.0-Oberfläche im Demo-Modus
+(`npm run screenshots`), nicht aus einer Installation — die Geräte darin sind erfunden._
 
 ## Installation
 

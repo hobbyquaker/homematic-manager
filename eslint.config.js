@@ -158,4 +158,14 @@ export default tseslint.config(
             '@typescript-eslint/require-await': 'off',
         },
     },
+    {
+        // The screenshot script is a Node program that also ships two callbacks into the browser
+        // (`page.evaluate`, `addInitScript`). Those bodies are serialised and run in chromium, so
+        // `document` and `window` are defined exactly where they are used - and nowhere else in
+        // the file. Both global sets, rather than a suppression on each line.
+        files: ['tools/screenshots.mjs'],
+        languageOptions: {
+            globals: {...globals.node, ...globals.browser},
+        },
+    },
 );

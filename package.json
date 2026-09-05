@@ -37,6 +37,7 @@
     "test:e2e:electron": "playwright test --project=electron",
     "test:e2e:cov": "c8 --reporter=lcovonly --report-dir=coverage-e2e --temp-directory=.playwright-coverage --exclude='**/node_modules/**' --exclude='**/*.test.*' --exclude='**/test/**' --exclude='playwright.config.ts' --exclude='**/*.config.ts' playwright test --project=web",
     "coverage:report": "node scripts/coverage-report.mjs",
+    "screenshots": "node tools/screenshots.mjs",
     "build": "npm run build --workspaces --if-present",
     "version:dev": "node scripts/version-dev.mjs"
   },

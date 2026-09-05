@@ -72,6 +72,7 @@ At the root:
 | `npm run test:e2e`                    | Playwright against the web host (`--project=web`)                                                                                                                                                          |
 | `npm run test:e2e:electron`           | the Electron smoke suites                                                                                                                                                                                  |
 | `npm run coverage:report`             | merges the unit, component and e2e coverage into one report                                                                                                                                                |
+| `npm run screenshots`                 | the six README screenshots, from the UI in `--demo` mode; needs `npm run build` first ([`tools/screenshots.mjs`](tools/screenshots.mjs))                                                                   |
 | `npm run version:dev`                 | the version bump, see [below](#versioning-d-18)                                                                                                                                                            |
 
 Per workspace (`npm run <script> -w <package>`):

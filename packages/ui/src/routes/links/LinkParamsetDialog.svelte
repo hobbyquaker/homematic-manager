@@ -14,7 +14,12 @@
     import type {MultiSelectOption} from '../../lib/components/multiSelect.js';
     import {getStores} from '../../lib/stores/context.js';
     import {linkFields, profileDescription, profileLabel, type LinkField} from '../../lib/util/linkForm.js';
-    import {buildPreview, type WritePreview} from '../../lib/util/paramsetForm.js';
+    import {
+        buildPreview,
+        readBack as computeReadBack,
+        type ReadBackEntry,
+        type WritePreview,
+    } from '../../lib/util/paramsetForm.js';
     import ParameterRow from '../paramset/ParameterRow.svelte';
     import WritePreviewDialog from '../paramset/WritePreviewDialog.svelte';
 
@@ -46,6 +51,7 @@
     let previewOpen = $state(false);
     let preview = $state<WritePreview | undefined>(undefined);
     let results = $state<WriteResult[]>([]);
+    let readBack = $state<ReadBackEntry[]>([]);
     let loading = $state(false);
     let loadToken = 0;
 
@@ -108,6 +114,7 @@
             senderEdited = {};
             targets = [];
             results = [];
+            readBack = [];
             loading = false;
         })();
     });
@@ -216,11 +223,16 @@
             ...(Object.keys(senderPayload).length > 0 ? {senderToReceiver: senderPayload} : {}),
         });
         results = written;
-        if (written.length > 0 && written.every((result) => result.ok)) {
-            previewOpen = false;
-            receiverValues = (await stores.paramsets.read(interfaceName, receiver, sender)) ?? receiverValues;
+        // `ok` means nothing on BidCos: read back what the interface really stored (task 6).
+        const reread = await stores.paramsets.read(interfaceName, receiver, sender);
+        if (reread && receiverDescription) {
+            readBack = computeReadBack(payload.values, reread, receiverDescription);
+            receiverValues = reread;
             edited = {};
             senderEdited = {};
+        }
+        if (written.length > 0 && written.every((result) => result.ok) && !readBack.some((entry) => entry.differs)) {
+            previewOpen = false;
         }
     }
 </script>
@@ -360,6 +372,7 @@
     {preview}
     paramset="LINK"
     {results}
+    {readBack}
     writing={stores.paramsets.writing}
     onconfirm={() => void write()}
 />

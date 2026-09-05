@@ -3,7 +3,7 @@
 
     import Dialog from '../../lib/components/Dialog.svelte';
     import {getStores} from '../../lib/stores/context.js';
-    import type {WritePreview} from '../../lib/util/paramsetForm.js';
+    import type {ReadBackEntry, WritePreview} from '../../lib/util/paramsetForm.js';
 
     interface Props {
         open?: boolean;
@@ -13,6 +13,8 @@
         warnings?: readonly string[];
         writing?: boolean;
         results?: readonly WriteResult[];
+        /** What the interface really stored, read back after the write (task 6, item 7). */
+        readBack?: readonly ReadBackEntry[];
         onconfirm: () => void;
     }
 
@@ -23,6 +25,7 @@
         warnings = [],
         writing = false,
         results = [],
+        readBack = [],
         onconfirm,
     }: Props = $props();
 
@@ -39,9 +42,16 @@
 -->
 <Dialog bind:open title={t('Preview')} width="640px" testId="write-preview">
     {#if preview}
-        <p class="hmm-preview-call">
-            putParamset(<span class="hmm-mono">{preview.targets.join(', ')}</span>, {paramset}, …)
-        </p>
+        <!--
+            The exact call, with the exact struct: task 6 found that both interface processes take
+            whatever they are given, so "what is really going out" is the only thing worth showing.
+        -->
+        {#each preview.targets as target (target)}
+            <p class="hmm-preview-call" data-testid={`preview-call-${target}`}>
+                putParamset(<span class="hmm-mono">{target}</span>, <span class="hmm-mono">{paramset}</span>,
+                <span class="hmm-mono">{JSON.stringify(preview.values)}</span>)
+            </p>
+        {/each}
 
         {#if warnings.length > 0}
             <ul class="hmm-preview-warnings" data-testid="preview-warnings">
@@ -80,6 +90,28 @@
                     <li>{problem.param}: {problem.message}</li>
                 {/each}
             </ul>
+        {/if}
+
+        {#if readBack.length > 0}
+            <table class="hmm-preview-table" data-testid="preview-readback">
+                <thead>
+                    <tr><th>{t('Parameter')}</th><th>{t('What was sent')}</th><th>{t('Read back')}</th></tr>
+                </thead>
+                <tbody>
+                    {#each readBack as entry (entry.param)}
+                        <tr class:hmm-preview-differs={entry.differs} data-testid={`readback-${entry.param}`}>
+                            <td class="hmm-mono">{entry.param}</td>
+                            <td>{entry.sent}</td>
+                            <td>{entry.stored}</td>
+                        </tr>
+                    {/each}
+                </tbody>
+            </table>
+            {#if readBack.some((entry) => entry.differs)}
+                <p class="hmm-preview-warn" data-testid="readback-warning">
+                    {t('The interface answered ok but stored something else')}
+                </p>
+            {/if}
         {/if}
 
         {#if results.length > 0}
@@ -153,5 +185,13 @@
 
     .hmm-preview-failed {
         color: var(--hmm-error);
+    }
+
+    .hmm-preview-differs {
+        color: var(--hmm-warn);
+    }
+
+    .hmm-preview-warn {
+        color: var(--hmm-warn);
     }
 </style>

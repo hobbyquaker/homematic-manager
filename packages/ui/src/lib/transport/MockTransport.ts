@@ -232,6 +232,38 @@ export class MockTransport implements Transport {
             })),
         );
         this.result('value.set', null);
+        this.respond('devices.repairConfig', (interfaceName, address, options) => ({
+            interfaceName,
+            address,
+            configPendingBefore: true,
+            configPendingAfter: options?.dryRun === true ? true : false,
+            channels: [
+                {
+                    address: `${address}:1`,
+                    unknown: [],
+                    corrected: [
+                        {
+                            parameter: 'TRANSMIT_TRY_MAX',
+                            stored: 62,
+                            replacement: 10,
+                            reason: 'above MAX 10',
+                        },
+                    ],
+                    write: {
+                        interfaceName,
+                        address: `${address}:1`,
+                        paramset: 'MASTER',
+                        sent: {TRANSMIT_TRY_MAX: 10},
+                        ok: true,
+                        problems: [],
+                    },
+                },
+            ],
+            unrepairable: [],
+            ...(options?.bidcosRecovery === undefined || options.bidcosRecovery === 'none'
+                ? {}
+                : {bidcosRecovery: options.bidcosRecovery}),
+        }));
         this.result('links.add', null);
         this.result('links.remove', null);
         this.result('links.info.set', null);

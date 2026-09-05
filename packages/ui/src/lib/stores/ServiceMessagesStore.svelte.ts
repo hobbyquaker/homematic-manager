@@ -21,7 +21,7 @@ export class ServiceMessagesStore {
         this.#transport = transport;
         this.#notices = notices;
         this.#unsubscribe = transport.on('serviceMessages.changed', (messages) => {
-            this.messages = messages;
+            this.messages = asList(messages);
         });
     }
 
@@ -36,7 +36,7 @@ export class ServiceMessagesStore {
     async load(interfaceName?: string): Promise<void> {
         this.loading = true;
         try {
-            this.messages = await this.#transport.request('serviceMessages.list', interfaceName);
+            this.messages = asList(await this.#transport.request('serviceMessages.list', interfaceName));
         } catch (error) {
             this.#notices.fromError(error, 'serviceMessages.list');
         } finally {
@@ -58,4 +58,13 @@ export class ServiceMessagesStore {
     dispose(): void {
         this.#unsubscribe();
     }
+}
+
+/**
+ * `getServiceMessages` on rfd answers the empty **string** when there is nothing, not an empty
+ * array (task 6, measured on hardware). The backend normalises its own reads, but an event carries
+ * whatever the interface process produced, and one `.filter()` on a string is a blank tab.
+ */
+function asList(messages: unknown): ServiceMessage[] {
+    return Array.isArray(messages) ? (messages as ServiceMessage[]) : [];
 }

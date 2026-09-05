@@ -6,7 +6,14 @@
     import MultiSelect from '../../lib/components/MultiSelect.svelte';
     import type {MultiSelectOption} from '../../lib/components/multiSelect.js';
     import {getStores} from '../../lib/stores/context.js';
-    import {buildPreview, formFields, type FormField, type WritePreview} from '../../lib/util/paramsetForm.js';
+    import {
+        buildPreview,
+        formFields,
+        readBack as computeReadBack,
+        type FormField,
+        type ReadBackEntry,
+        type WritePreview,
+    } from '../../lib/util/paramsetForm.js';
 
     import ParameterRow from './ParameterRow.svelte';
     import WritePreviewDialog from './WritePreviewDialog.svelte';
@@ -33,6 +40,7 @@
     let previewOpen = $state(false);
     let preview = $state<WritePreview | undefined>(undefined);
     let results = $state<WriteResult[]>([]);
+    let readBack = $state<ReadBackEntry[]>([]);
     let loadToken = 0;
 
     const index = $derived(stores.devices.index(interfaceName));
@@ -103,6 +111,7 @@
             original = loaded?.values ?? {};
             edited = {};
             results = [];
+            readBack = [];
             targets = [];
             writeAll = false;
         });
@@ -171,6 +180,7 @@
             return;
         }
         results = [];
+        readBack = [];
         preview = buildPreview(original, edited, description, {
             interfaceName,
             targets: [address, ...targets],
@@ -192,12 +202,17 @@
             writeAll ? {writeAll: true} : undefined,
         );
         results = written;
-        if (written.length > 0 && written.every((result) => result.ok)) {
-            previewOpen = false;
-            // Re-read, so the dialog compares against what the device really holds now.
-            const reread = await stores.paramsets.read(interfaceName, address, paramset);
-            original = reread ?? original;
+        // Always read back: `ok` means nothing on BidCos, where rfd silently drops, coerces and
+        // clamps what it does not like (task 6, measured). The preview stays open while the two
+        // disagree, because that is the only place the difference is visible.
+        const reread = await stores.paramsets.read(interfaceName, address, paramset);
+        if (reread) {
+            readBack = computeReadBack(payload.values, reread, description);
+            original = reread;
             edited = {};
+        }
+        if (written.length > 0 && written.every((result) => result.ok) && !readBack.some((entry) => entry.differs)) {
+            previewOpen = false;
         }
     }
 
@@ -296,6 +311,7 @@
     {paramset}
     {warnings}
     {results}
+    {readBack}
     writing={stores.paramsets.writing}
     onconfirm={() => void write()}
 />

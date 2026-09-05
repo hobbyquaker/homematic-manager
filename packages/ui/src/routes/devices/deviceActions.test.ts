@@ -341,6 +341,7 @@ describe('the context menu', () => {
             'SERVICE Parametersatz',
             'restoreConfigToDevice',
             'clearConfigCache',
+            'Konfiguration reparieren',
             'Gerät tauschen',
             'Löschen',
         ]);

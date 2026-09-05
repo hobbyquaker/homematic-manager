@@ -183,3 +183,28 @@ export function displayValue(value: unknown, description: ParameterDescription |
     }
     return String(plain);
 }
+
+/** One line of the read-back: what was sent, and what the interface process really stored. */
+export interface ReadBackEntry {
+    readonly param: string;
+    readonly sent: string;
+    readonly stored: string;
+    /** The two differ - on BidCos the usual reason is a silent clamp or a dropped value. */
+    readonly differs: boolean;
+}
+
+/**
+ * What a write really did, by comparing the payload with a fresh `getParamset`.
+ *
+ * Task 6 measured that rfd answers `ok` to writes it silently drops, coerces or clamps: an unknown
+ * parameter is dropped, a string in an `INTEGER` becomes `MIN`, a value above `MAX` becomes `MAX`,
+ * a `FLOAT` sent as an int is ignored. `ok` therefore means nothing on BidCos, and the only
+ * feedback the interface gives is the value it holds afterwards.
+ */
+export function readBack(sent: ParamsetWrite, stored: Paramset, description: ParamsetDescription): ReadBackEntry[] {
+    return Object.keys(sent).map((param) => {
+        const sentText = displayValue(sent[param], description[param]);
+        const storedText = displayValue(stored[param], description[param]);
+        return {param, sent: sentText, stored: storedText, differs: sentText !== storedText};
+    });
+}

@@ -60,6 +60,32 @@ export function serviceMarks(address: string, messages: readonly ServiceMessage[
     return marks.slice(0, limit);
 }
 
+/**
+ * What a service message means, as a message key - and whether the "repair configuration" action is
+ * any use against it.
+ *
+ * `CONFIG_PENDING` is the one that needs two texts, measured in the lab (task 6,
+ * `docs/config-pending.md`): on BidCos it means "a configuration is queued and the device has not
+ * picked it up yet", which is the normal state of a battery device for 160-300 s and clears by
+ * itself - there is nothing to repair. On HmIP it means the configuration could not be transferred,
+ * and the valid full MASTER re-write of `devices.repairConfig` is the recovery that was measured to
+ * work. Offering the repair on BidCos would only queue another transfer the device is already
+ * waiting for.
+ */
+export function serviceMessageExplanation(datapoint: string, hmip: boolean): string | undefined {
+    if (datapoint !== 'CONFIG_PENDING') {
+        return undefined;
+    }
+    return hmip
+        ? 'The configuration could not be transferred to the device'
+        : 'A configuration is queued; the device takes it when it next wakes up';
+}
+
+/** Is `devices.repairConfig` worth offering for this service message on this interface? */
+export function offersRepair(datapoint: string, hmip: boolean): boolean {
+    return hmip && datapoint === 'CONFIG_PENDING';
+}
+
 /** What the FIRMWARE column shows besides the version. */
 export type FirmwareAction =
     /** rfd: `updateFirmware`, the interface fetches the image and sends it at the next wake-up. */

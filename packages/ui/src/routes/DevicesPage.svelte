@@ -16,12 +16,13 @@
     import ToolbarButton from '../lib/components/ToolbarButton.svelte';
     import type {DataTableColumn} from '../lib/components/tableModel.js';
     import {getStores} from '../lib/stores/context.js';
-    import {firmwareCell, serviceMarks} from '../lib/util/deviceGrid.js';
+    import {firmwareCell, offersRepair, serviceMarks, serviceMessageExplanation} from '../lib/util/deviceGrid.js';
 
     import ParamsetDialog from './paramset/ParamsetDialog.svelte';
 
     import DeleteDeviceDialog from './devices/DeleteDeviceDialog.svelte';
     import RenameDialog from './devices/RenameDialog.svelte';
+    import RepairConfigDialog from './devices/RepairConfigDialog.svelte';
     import ReplaceDeviceDialog from './devices/ReplaceDeviceDialog.svelte';
 
     const stores = getStores();
@@ -41,6 +42,7 @@
     let renameOpen = $state(false);
     let deleteOpen = $state(false);
     let replaceOpen = $state(false);
+    let repairOpen = $state(false);
     let actionAddress = $state('');
 
     let paramsetOpen = $state(false);
@@ -250,6 +252,11 @@
         replaceOpen = true;
     }
 
+    function openRepair(address: string): void {
+        actionAddress = address;
+        repairOpen = true;
+    }
+
     /**
      * `reportValueUsage` over every parameter of every selected channel (issue #18, PR #138). 2.x
      * could only do the one channel the grid had selected and refused a device outright; here the
@@ -307,6 +314,7 @@
                       disabled: !isBidcos,
                   },
                   {id: 'clear', label: t('clearConfigCache'), disabled: !isBidcos},
+                  {id: 'repair', label: t('Repair configuration')},
                   {id: 'sep2', separator: true},
                   {id: 'replace', label: t('Replace'), disabled: dontDeleteOf(menuAddress)},
                   {id: 'delete', label: t('Delete'), danger: true, disabled: dontDeleteOf(menuAddress)},
@@ -340,6 +348,9 @@
                 break;
             case 'clear':
                 await stores.devices.clearConfigCache(interfaceName, address);
+                break;
+            case 'repair':
+                openRepair(address);
                 break;
             case 'replace':
                 openReplace(address);
@@ -401,6 +412,14 @@
             onclick={() => void stores.devices.clearConfigCache(interfaceName, oneDevice)}
         />
         <ToolbarButton
+            title={t('Repair configuration')}
+            icon="⚒"
+            disabled={oneDevice === ''}
+            reason={reasonFor('device')}
+            testId="devices-repair"
+            onclick={() => openRepair(oneDevice)}
+        />
+        <ToolbarButton
             title={t('Replace device')}
             icon="⇄"
             disabled={!canDelete}
@@ -451,14 +470,27 @@
                     />
                 {:else if column.key === 'msgs' && flatRow.depth === 0}
                     {#each serviceMarks(row.ADDRESS, messages) as mark (mark.datapoint)}
+                        {@const explanation = serviceMessageExplanation(mark.datapoint, !isBidcos)}
                         <span
                             class="hmm-msg-mark"
                             class:hmm-msg-error={mark.level === 'error'}
                             class:hmm-msg-warn={mark.level === 'warn'}
-                            title={mark.title}
+                            title={explanation === undefined ? mark.title : `${mark.title} — ${t(explanation)}`}
                             aria-label={mark.datapoint}
                             role="img">{mark.symbol}</span
                         >
+                        {#if offersRepair(mark.datapoint, !isBidcos)}
+                            <button
+                                type="button"
+                                class="hmm-inline-button"
+                                data-testid={`repair-${row.ADDRESS}`}
+                                title={t('Repair configuration')}
+                                onclick={(event) => {
+                                    event.stopPropagation();
+                                    openRepair(row.ADDRESS);
+                                }}>⚒</button
+                            >
+                        {/if}
                     {/each}
                 {:else if column.key === 'FIRMWARE' && flatRow.depth === 0}
                     {@const cellState = firmwareOf(row)}
@@ -518,6 +550,7 @@
 <RenameDialog bind:open={renameOpen} address={actionAddress} />
 <DeleteDeviceDialog bind:open={deleteOpen} address={actionAddress} />
 <ReplaceDeviceDialog bind:open={replaceOpen} address={actionAddress} />
+<RepairConfigDialog bind:open={repairOpen} address={actionAddress} />
 <ParamsetDialog bind:open={paramsetOpen} {interfaceName} address={paramsetAddress} paramset={paramsetName} />
 
 <style>

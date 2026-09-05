@@ -1,4 +1,10 @@
-import type {DeviceDescription, InstallModeOptions, Transport} from '@homematic-manager/core';
+import type {
+    DeviceDescription,
+    InstallModeOptions,
+    RepairConfigOptions,
+    RepairConfigResult,
+    Transport,
+} from '@homematic-manager/core';
 import {DeviceIndex} from '@homematic-manager/core';
 
 import type {NoticesStore} from './NoticesStore.svelte.js';
@@ -182,6 +188,24 @@ export class DevicesStore {
         } catch (error) {
             this.#notices.fromError(error, `replaceDevice ${oldAddress} ${newAddress}`);
             return false;
+        }
+    }
+
+    /**
+     * The recovery of task 6.7: a valid full MASTER re-write built from the channel's own
+     * description. `dryRun` works the repair out without sending anything, which is what the dialog
+     * shows before it asks.
+     */
+    async repairConfig(
+        interfaceName: string,
+        address: string,
+        options?: RepairConfigOptions,
+    ): Promise<RepairConfigResult | undefined> {
+        try {
+            return await this.#transport.request('devices.repairConfig', interfaceName, address, options);
+        } catch (error) {
+            this.#notices.fromError(error, `devices.repairConfig ${address}`);
+            return undefined;
         }
     }
 

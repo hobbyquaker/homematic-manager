@@ -156,6 +156,35 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Defective link': {de: 'Defekte Verknüpfung', en: 'Defective link'},
     Profile: {de: 'Profil', en: 'Profile'},
     'Expert view': {de: 'Expertenansicht', en: 'Expert view'},
+
+    // What the lab measured about CONFIG_PENDING and the repair (task 6, docs/config-pending.md).
+    'Repair configuration': {de: 'Konfiguration reparieren', en: 'Repair configuration'},
+    'The configuration could not be transferred to the device': {
+        de: 'Die Konfiguration konnte nicht zum Gerät übertragen werden',
+        en: 'The configuration could not be transferred to the device',
+    },
+    'A configuration is queued; the device takes it when it next wakes up': {
+        de: 'Eine Konfiguration ist eingereiht; das Gerät übernimmt sie beim nächsten Aufwachen',
+        en: 'A configuration is queued; the device takes it when it next wakes up',
+    },
+    'On BidCos a pending configuration is normal: it is queued and the device takes it when it next wakes up.': {
+        de: 'Bei BidCos ist eine ausstehende Konfiguration normal: sie ist eingereiht und das Gerät übernimmt sie beim nächsten Aufwachen.',
+        en: 'On BidCos a pending configuration is normal: it is queued and the device takes it when it next wakes up.',
+    },
+    'These channels store a parameter their description does not have. No RPC method removes it: the device has to be deleted and paired again, or a CCU backup from before the bad write restored.':
+        {
+            de: 'Diese Kanäle speichern einen Parameter, den ihre Beschreibung nicht kennt. Keine RPC-Methode entfernt ihn: das Gerät muss gelöscht und neu angelernt werden, oder ein CCU-Backup von vor dem fehlerhaften Schreibvorgang eingespielt werden.',
+            en: 'These channels store a parameter their description does not have. No RPC method removes it: the device has to be deleted and paired again, or a CCU backup from before the bad write restored.',
+        },
+    'Nothing has to be corrected': {de: 'Es muss nichts korrigiert werden', en: 'Nothing has to be corrected'},
+    'Additional BidCos recovery': {de: 'Zusätzliche BidCos-Reparatur', en: 'Additional BidCos recovery'},
+    Channel: {de: 'Kanal', en: 'Channel'},
+    'Read back': {de: 'Rückgelesen', en: 'Read back'},
+    'The interface answered ok but stored something else': {
+        de: 'Die Schnittstelle hat ok geantwortet, aber etwas anderes gespeichert',
+        en: 'The interface answered ok but stored something else',
+    },
+    'What was sent': {de: 'Gesendet', en: 'What was sent'},
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

@@ -26,6 +26,10 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Not present': {de: 'Nicht vorhanden', en: 'Not present'},
     Subscribing: {de: 'Anmeldung läuft', en: 'Subscribing'},
     'Pending changes': {de: 'Offene Änderungen', en: 'Pending changes'},
+    'Used for every pair without its own name': {
+        de: 'Gilt für jedes Paar ohne eigenen Namen',
+        en: 'Used for every pair without its own name',
+    },
     'Nothing is staged': {de: 'Nichts vorgemerkt', en: 'Nothing is staged'},
     'Add to pending changes': {de: 'Zu den offenen Änderungen', en: 'Add to pending changes'},
     'Discard all': {de: 'Alle verwerfen', en: 'Discard all'},

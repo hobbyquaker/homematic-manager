@@ -21,6 +21,17 @@
     let senders = $state<string[]>([]);
     let receivers = $state<string[]>([]);
     let busy = $state(false);
+    /**
+     * Issue #87: a name and a description **per pair**, keyed by `sender>receiver`.
+     *
+     * 2.7 had one name field for the whole dialog, so one wall switch against six blinds produced
+     * six links with the same name and the user had to open each of them afterwards to tell them
+     * apart. The two boxes below fill every empty row at once, which is what that single field was
+     * good for; anything typed into a row wins over them.
+     */
+    let pairNames = $state<Record<string, {name: string; description: string}>>({});
+    let nameForAll = $state('');
+    let descriptionForAll = $state('');
 
     const interfaceName = $derived(stores.app.selectedInterface);
     const index = $derived(stores.devices.index(interfaceName));
@@ -29,6 +40,9 @@
         if (open) {
             senders = [];
             receivers = [];
+            pairNames = {};
+            nameForAll = '';
+            descriptionForAll = '';
         }
     });
 
@@ -71,9 +85,34 @@
         };
     }
 
-    /** Every sender/receiver combination, in the order 2.x created them. */
-    function pairs(): Array<{sender: string; receiver: string}> {
-        return senders.flatMap((sender) => receivers.map((receiver) => ({sender, receiver})));
+    /** Every sender/receiver combination, in the order 2.x created them, with its own name. */
+    function pairs(): Array<{sender: string; receiver: string; name?: string; description?: string}> {
+        return senders.flatMap((sender) =>
+            receivers.map((receiver) => {
+                const entry = pairNames[pairKey(sender, receiver)];
+                const name = entry?.name.trim() === '' || entry === undefined ? nameForAll.trim() : entry.name.trim();
+                const description =
+                    entry?.description.trim() === '' || entry === undefined
+                        ? descriptionForAll.trim()
+                        : entry.description.trim();
+                return {
+                    sender,
+                    receiver,
+                    ...(name === '' ? {} : {name}),
+                    ...(description === '' ? {} : {description}),
+                };
+            }),
+        );
+    }
+
+    function pairKey(sender: string, receiver: string): string {
+        return `${sender}>${receiver}`;
+    }
+
+    function setPair(sender: string, receiver: string, field: 'name' | 'description', value: string): void {
+        const key = pairKey(sender, receiver);
+        const current = pairNames[key] ?? {name: '', description: ''};
+        pairNames = {...pairNames, [key]: {...current, [field]: value}};
     }
 
     /**
@@ -92,9 +131,12 @@
             interfaceName,
             title: t('{count} links', {}, combinations.length),
             pairs: combinations,
-            calls: combinations.map((pair) => `addLink(${pair.sender}, ${pair.receiver})`),
+            calls: combinations.map(
+                (pair) => `addLink(${pair.sender}, ${pair.receiver}, ${JSON.stringify(pair.name ?? '')})`,
+            ),
             lines: combinations.map((pair) => ({
                 label: `${stores.nameOf(pair.sender)} → ${stores.nameOf(pair.receiver)}`,
+                to: pair.name ?? '',
             })),
         });
         open = false;
@@ -102,7 +144,7 @@
 
     async function create(thenEdit: boolean): Promise<void> {
         busy = true;
-        const created = await stores.links.add(interfaceName, senders, receivers);
+        const created = await stores.links.addPairs(interfaceName, pairs());
         busy = false;
         if (created === 0) {
             return;
@@ -147,6 +189,16 @@
         />
         <span class="hmm-add-link-roles">LINK_TARGET_ROLES: {targetRoles}</span>
 
+        {#if pairs().length > 0}
+            <span>{t('Name')}</span>
+            <input class="hmm-input" bind:value={nameForAll} data-testid="add-link-name-all" />
+            <span class="hmm-add-link-roles">{t('Used for every pair without its own name')}</span>
+
+            <span>{t('Description')}</span>
+            <input class="hmm-input" bind:value={descriptionForAll} data-testid="add-link-description-all" />
+            <span></span>
+        {/if}
+
         {#if senders.length > 0 && receiverOptions.length === 0}
             <span></span>
             <span class="hmm-add-link-empty" data-testid="add-link-none"
@@ -155,6 +207,51 @@
             <span></span>
         {/if}
     </div>
+
+    <!--
+        Issue #87: one row per pair, so a wall switch against six blinds gives six links that can be
+        told apart in the grid without opening any of them.
+    -->
+    {#if pairs().length > 1}
+        <table class="hmm-pair-names" data-testid="add-link-pairs">
+            <thead>
+                <tr>
+                    <th>{t('Sender')}</th>
+                    <th>{t('Receiver')}</th>
+                    <th>{t('Name')}</th>
+                    <th>{t('Description')}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each pairs() as pair (pairKey(pair.sender, pair.receiver))}
+                    <tr data-testid={`add-link-pair-${pairKey(pair.sender, pair.receiver)}`}>
+                        <td class="hmm-mono">{stores.nameOf(pair.sender)}</td>
+                        <td class="hmm-mono">{stores.nameOf(pair.receiver)}</td>
+                        <td>
+                            <input
+                                class="hmm-input"
+                                aria-label={`${t('Name')} ${pair.sender} ${pair.receiver}`}
+                                value={pairNames[pairKey(pair.sender, pair.receiver)]?.name ?? ''}
+                                placeholder={nameForAll}
+                                oninput={(event) =>
+                                    setPair(pair.sender, pair.receiver, 'name', event.currentTarget.value)}
+                            />
+                        </td>
+                        <td>
+                            <input
+                                class="hmm-input"
+                                aria-label={`${t('Description')} ${pair.sender} ${pair.receiver}`}
+                                value={pairNames[pairKey(pair.sender, pair.receiver)]?.description ?? ''}
+                                placeholder={descriptionForAll}
+                                oninput={(event) =>
+                                    setPair(pair.sender, pair.receiver, 'description', event.currentTarget.value)}
+                            />
+                        </td>
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
+    {/if}
 
     {#snippet buttons()}
         <button type="button" class="hmm-button" onclick={() => (open = false)}>{t('Cancel')}</button>
@@ -200,5 +297,25 @@
 
     .hmm-add-link-empty {
         color: var(--hmm-warn);
+    }
+
+    .hmm-pair-names {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .hmm-pair-names th {
+        text-align: left;
+        font-size: var(--hmm-font-size-small);
+        color: var(--hmm-fg-muted);
+    }
+
+    .hmm-pair-names td {
+        padding: 2px 4px 2px 0;
+    }
+
+    .hmm-pair-names input {
+        width: 100%;
     }
 </style>

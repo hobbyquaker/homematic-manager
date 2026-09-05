@@ -196,6 +196,59 @@ describe('the add-link dialog', () => {
         });
     });
 
+    it('gives every pair its own name and description (#87)', async () => {
+        // 2.7 had one name field for the whole dialog: one switch against two actuators produced
+        // two links with the same name, and telling them apart meant opening each one afterwards.
+        await mountApp({transport, hash: '#/BidCos-RF/links'});
+        await fireEvent.click(screen.getByTestId('links-add'));
+
+        const senders = screen.getByTestId('add-link-senders');
+        await fireEvent.click(within(senders).getByRole('button'));
+        await fireEvent.click(within(senders).getAllByRole('option')[0]!);
+
+        const receivers = screen.getByTestId('add-link-receivers');
+        await fireEvent.click(within(receivers).getByRole('button'));
+        const first = within(receivers).getAllByRole('option')[0]!;
+        const second = within(receivers).getAllByRole('option')[1]!;
+        await fireEvent.click(first);
+        await fireEvent.click(second);
+
+        const rows = await screen.findByTestId('add-link-pairs');
+        const inputs = within(rows).getAllByRole('textbox');
+        // one row per pair, four inputs each pair: name and description
+        expect(inputs).toHaveLength(4);
+
+        await fireEvent.input(screen.getByTestId('add-link-name-all'), {target: {value: 'Hallway'}});
+        await fireEvent.input(inputs[2] as HTMLInputElement, {target: {value: 'Second blind'}});
+
+        await fireEvent.click(screen.getByTestId('add-link-create'));
+        await waitFor(() => {
+            expect(transport.countOf('links.add')).toBe(2);
+        });
+        const calls = transport.calls.filter((call) => call.method === 'links.add').map((call) => call.params);
+        // the shared box fills the row that was left empty, the row that was typed into wins
+        expect(calls[0]?.[3]).toBe('Hallway');
+        expect(calls[1]?.[3]).toBe('Second blind');
+    });
+
+    it('offers no pair table for a single link, where one name is the whole story', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/links'});
+        await fireEvent.click(screen.getByTestId('links-add'));
+        const senders = screen.getByTestId('add-link-senders');
+        await fireEvent.click(within(senders).getByRole('button'));
+        await fireEvent.click(within(senders).getAllByRole('option')[0]!);
+        const receivers = screen.getByTestId('add-link-receivers');
+        await fireEvent.click(within(receivers).getByRole('button'));
+        await fireEvent.click(within(receivers).getAllByRole('option')[0]!);
+
+        expect(screen.queryByTestId('add-link-pairs')).toBeNull();
+        await fireEvent.input(screen.getByTestId('add-link-name-all'), {target: {value: 'Kitchen'}});
+        await fireEvent.click(screen.getByTestId('add-link-create'));
+        await waitFor(() => {
+            expect(transport.lastCall('links.add')?.[3]).toBe('Kitchen');
+        });
+    });
+
     it('says so when the chosen sender has no possible receiver', async () => {
         transport.respond('devices.list', () => [
             {ADDRESS: 'A', TYPE: 'HM-X', PARENT: '', CHILDREN: ['A:1']},

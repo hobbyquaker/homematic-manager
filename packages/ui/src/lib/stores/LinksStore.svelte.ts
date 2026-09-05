@@ -59,15 +59,42 @@ export class LinksStore {
         name?: string,
         description?: string,
     ): Promise<number> {
+        const pairs = senders.flatMap((sender) =>
+            receivers.map((receiver) => ({
+                sender,
+                receiver,
+                ...(name === undefined ? {} : {name}),
+                ...(description === undefined ? {} : {description}),
+            })),
+        );
+        return this.addPairs(interfaceName, pairs);
+    }
+
+    /**
+     * `addLink` for a list of pairs that each carry their own name and description - issue #87.
+     *
+     * 2.7 had one name field for the whole dialog, so creating one sender against six blinds gave
+     * six links called the same thing, and telling them apart afterwards meant opening each one and
+     * renaming it. The pairs are created in the order they are given.
+     */
+    async addPairs(
+        interfaceName: string,
+        pairs: ReadonlyArray<{sender: string; receiver: string; name?: string; description?: string}>,
+    ): Promise<number> {
         let created = 0;
-        for (const sender of senders) {
-            for (const receiver of receivers) {
-                try {
-                    await this.#transport.request('links.add', interfaceName, sender, receiver, name, description);
-                    created += 1;
-                } catch (error) {
-                    this.#notices.fromError(error, `addLink ${sender} ${receiver}`);
-                }
+        for (const pair of pairs) {
+            try {
+                await this.#transport.request(
+                    'links.add',
+                    interfaceName,
+                    pair.sender,
+                    pair.receiver,
+                    pair.name,
+                    pair.description,
+                );
+                created += 1;
+            } catch (error) {
+                this.#notices.fromError(error, `addLink ${pair.sender} ${pair.receiver}`);
             }
         }
         if (created > 0) {

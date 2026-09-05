@@ -29,8 +29,9 @@ its tooltip.
   either recognises the description or stands down, draws exactly the parameters it lists in
   `covers` and writes into the same changed-only diff; a checkbox puts the raw rows back.
 - **Links**: the grid with both device images and the defective mark of #79, add through core's role
-  matrix, remove a whole selection (#80), play short and long on BidCos-RF, and the link paramset
-  editor with the profiles of the data set, the sender's full option list and an expert view.
+  matrix with a name and a description **per pair** (#87), remove a whole selection (#80), play
+  short and long on BidCos-RF, and the link paramset editor with the profiles of the data set, the
+  sender's full option list and an expert view.
 - **RSSI**: the gateway grid, a receive/send pair per gateway, the peer sub-grid, and
   `setBidcosInterface` that shows the assignment the interface reports now (#122).
 - **RPC console**: a generated argument form for all 51 catalogue methods including structs

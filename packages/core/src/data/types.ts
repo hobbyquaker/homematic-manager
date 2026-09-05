@@ -32,10 +32,34 @@ export interface LinkProfile {
     params: Record<string, ProfileConstraint>;
 }
 
+/**
+ * One group of link parameters the WebUI offers as a preset value, e.g. "switch on immediately"
+ * versus "switch on after the ramp": picking `optionValue` writes `values` to `params`.
+ */
+export interface LinkParameterSubset {
+    id: number;
+    /** Stable key of the subset (openccu-data `name_key`). */
+    key: string;
+    optionValue: number;
+    params: string[];
+    values: Record<string, number | string | boolean>;
+}
+
+/** Link-paramset metadata for one sender channel type: what the easy-mode dialog shows besides the profile. */
+export interface LinkSenderMetadata {
+    /** Display order of the editable link parameters; parameters not listed come afterwards. */
+    parameterOrder?: string[];
+    /** parameter name -> `OptionPreset.id` */
+    optionPresets?: Record<string, string>;
+    subsets?: LinkParameterSubset[];
+}
+
 /** All profiles of one receiver channel type, keyed by sender channel type. */
 export interface ReceiverProfiles {
     receiverType: string;
     senders: Record<string, LinkProfile[]>;
+    /** Optional, keyed by sender channel type; the 2.x easy-mode dialog called this the profile's `options`. */
+    senderMetadata?: Record<string, LinkSenderMetadata>;
 }
 
 /** `OPTICAL_SIGNAL_RECEIVER -> DIMMER_VIRTUAL_RECEIVER` etc.: receiver types that reuse another type's profiles. */
@@ -56,6 +80,8 @@ export interface MasterMetadata {
     conditionalVisibility?: ConditionalVisibility[];
     /** parameter name -> `OptionPreset.id` */
     optionPresets?: Record<string, string>;
+    /** Optional fieldsets the WebUI renders the MASTER parameters in; `labelKey` refers to `Translations.uiLabels`. */
+    parameterGroups?: Array<{id: string; labelKey?: string; parameters: string[]}>;
 }
 
 export interface OptionPresetEntry {

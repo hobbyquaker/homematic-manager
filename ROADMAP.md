@@ -46,6 +46,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 | D-24 | (2026-09-05) Four independent release pipelines for the deliverables of D-25: the Electron app (GitHub release assets), the npm package with the Node backend and web UI (`apps/web`, npm trusted publishing with OIDC as in hm-simulator's `release.yml`), the Docker image (ghcr.io, multi-arch) and the CCU addon (`.tar.gz` per architecture attached to the release). Each has its own workflow file, its own trigger and its own failure domain: one failing must never block or roll back the others, and any one of them can be re-run alone. No single "release everything" job with sequential steps, and no final job with `needs:` on all of them (hm2mqtt.js's `github-release` job is the pattern to avoid). |
 | D-25 | (2026-09-05) The install matrix of 3.0: CCU addon in three variants (armv7l, aarch64, x86_64); Docker image (amd64, arm64, arm/v7); npm install with `--install` creating a system user, systemd unit and state directory the way `she` and hm2mqtt.js do it, with a Proxmox LXC as the recommended server deployment and a lighttpd reverse-proxy example config; Electron apps for Windows, Linux and macOS. All install types run the same backend and UI and share one config format, so a user can move between them (task 16 documents the move). |
 | D-26 | (2026-09-05) Licence: the 3.0 code base is `AGPL-3.0-or-later` (`LICENSE`, every workspace `package.json`, the release notes and the about dialog). 2.x was GPL-3.0; the 2.x sources kept under `legacy/` carry the contributions of others (anli-ger, Stefan Simroth, Homoran, Sathya Laufer and more) and stay GPL-3.0-or-later, which GPLv3 section 13 lets the AGPL work combine with; nothing from `legacy/` is copied into the new packages without checking its author. Ported MIT code from the maintainer's own repositories (`cast.js` from node-red-contrib-ccu, the installer from mqtt-interfaces-core) keeps its attribution in the file header. `data/dist/` stays under the HMSL 2.0 notice of `data/NOTICE.md`: it is eQ-3 data, not part of the AGPL program. |
+| D-27 | (2026-09-05) Every release artefact ships with an SBOM: CycloneDX 1.6 JSON named `<artefact>.cdx.json` next to the artefact (GitHub release asset for the Electron installers and the addon packages, `sbom` attestation on the ghcr.io image, npm provenance plus the SBOM attached to the release for the npm package), and each one is signed as a GitHub artifact attestation (`actions/attest-sbom`, `actions/attest-build-provenance`) so `gh attestation verify` works offline against the repository. The SBOM lists what is really inside the artefact, including the runtime that is not an npm dependency (Electron and its Chromium, the bundled Node and the Alpine packages of the addon, the base image of the Docker build), so a CVE in one of them is searchable per release. Generated on every push build too, so a broken SBOM step fails before a tag. |
 
 ## Contents
 
@@ -80,15 +81,15 @@ infrastructure and the e2e suites.
 | Milestone | Tasks | Result | PD |
 | --- | --- | --- | --- |
 | M1 Foundation and safety | 2, 3, 4, 5, 6 | headless backend against simulator and lab CCUs; write path fixed and verified on hardware | 25-37 |
-| M2 Parity | 7, 8, 9, 11, 12 | 3.0.0-alpha.0 (after the 3.0.0-dev.n series of M1/M2, D-18): Electron app with every feature of 2.7, English, HmIP easy modes; npm package with `--install` and Docker image (D-25) | 37-53 |
+| M2 Parity | 7, 8, 9, 11, 12 | 3.0.0-alpha.0 (after the 3.0.0-dev.n series of M1/M2, D-18): Electron app with every feature of 2.7, English, HmIP easy modes; npm package with `--install` and Docker image (D-25) | 38-54 |
 | M3 Quality | 10 (initial set), 14, 16, 17 | 3.0.0 | 21-33 |
-| M4 Addon | 13 | 3.1.0: CCU addon for CCU3 firmware and OpenCCU (armv7l, aarch64, x86_64) | 8-12 |
+| M4 Addon | 13 | 3.1.0: CCU addon for CCU3 firmware and OpenCCU (armv7l, aarch64, x86_64) | 9-13 |
 | M5 Growth | 10 (extended), 15 | 3.2+: device-specific editors, backlog features | 6-10 (+ open-ended editors) |
 
 | Path | PD |
 | --- | --- |
-| Electron, npm package and Docker (tasks 2-12, 14-17) | **89-134** |
-| Plus the CCU addon (adds task 13) | **97-146** |
+| Electron, npm package and Docker (tasks 2-12, 14-17) | **90-135** |
+| Plus the CCU addon (adds task 13) | **99-148** |
 
 At two focused days a week that is roughly 10-16 months; full-time roughly 4-6 months. M1 and M2
 are the critical path; M4 can run in parallel with M3 once task 12 exists.
@@ -106,9 +107,9 @@ Per task:
 | 8 UI feature parity | 18-25 | 7, 4, 9 |
 | 9 Device metadata pipeline | 3-4 | 2 |
 | 10 Device-specific editors (initial set) | 5-8 | 8, 9 |
-| 11 Electron host, builds, releases | 5-8 | 4, 7 |
+| 11 Electron host, builds, releases, SBOMs (D-27) | 6-9 | 4, 7 |
 | 12 Web host, npm package, `--install`, Docker, proxy examples (D-25) | 5-8 | 4, 7 |
-| 13 CCU addon | 8-12 | 12, lab |
+| 13 CCU addon | 9-13 | 12, lab |
 | 14 Test infrastructure and coverage gates | 8-12 | 8, 11, 12 |
 | 15 Backlog features | 6-10 | 8 |
 | 16 Documentation (one page per install type, D-25) | 3-5 | 8 |
@@ -322,6 +323,13 @@ editor, each with its own tests:
   the Windows and Linux assets. `electron-updater` only sees the release once the Electron assets
   and `latest*.yml` are uploaded; the release is created as a draft by whichever workflow is
   first and published by the maintainer, so a half-uploaded release never reaches updaters.
+- SBOM per installer (D-27): `@cyclonedx/cyclonedx-npm` on the `apps/electron` workspace
+  (production dependencies only, from the lockfile, workspace packages resolved) merged with the
+  components that are not npm dependencies: Electron with its Chromium, Node and V8 versions
+  (`process.versions` read at build time), the electron-builder target and the OS-specific
+  bundled tools (7za, elevate, the AppImage runtime). One `.cdx.json` per installer file, uploaded
+  with it and attested. A test in the build job opens the generated SBOM and checks that the
+  component count is above a floor and that Electron is in it.
   Electron 44 has no `postinstall` download any more: the build jobs run `install-electron` (or let
   electron-builder fetch the binary) explicitly.
 - Playwright `_electron` smoke tests per OS (task 14).
@@ -339,6 +347,12 @@ publishing (OIDC, no token secret; hm-simulator's `release.yml` is the template)
 independent of the Electron, Docker and addon workflows. The package name is OQ-14; the bin is
 `homematic-manager-web` with `--host`, `--port`, `--token`, `--profile`, `--base`. CI builds it
 with `npm pack --dry-run` on every push so a broken `files` list is caught before a tag.
+SBOMs (D-27): `@cyclonedx/cyclonedx-npm` for the package (the tarball's real dependency tree,
+including the workspace packages it bundles), attached to the GitHub release as
+`homematic-manager-web-<version>.tgz.cdx.json` and attested; the Docker image gets `sbom: true`
+and `provenance: mode=max` in `docker/build-push-action` (syft-based image SBOM including the
+Alpine base packages and Node) plus the same CycloneDX file as a release asset, so the image and
+the npm package of one version can be compared.
 
 Server install types (D-25), all on top of that package:
 
@@ -410,6 +424,13 @@ Copied from hm2mqtt.js's `addon/` and the ccu-addon-howto, adapted:
   release attaches them.
 - Inode and size budget: `node_modules` limited to the four runtime dependencies, UI as one file,
   measured on the CCU3 (96k inodes on `/usr/local`).
+- SBOM per package (D-27): the npm tree of the addon's `app/` (`@cyclonedx/cyclonedx-npm`) merged
+  with the bundled runtime: the Node version and the Alpine packages `build-runtime.sh` took
+  (`alpine-packages.js` already resolves name, version and the apk origin; emit them as
+  components with `purl` `pkg:apk/alpine/...`), musl, ICU and OpenSSL among them. One
+  `hmm-ccu-<arch>-<version>.tar.gz.cdx.json` per architecture next to the package, attested. The
+  `package-test.sh` step checks the SBOM's Node version equals the runtime's `node -v` in the
+  package.
 
 ## 14. Test infrastructure and coverage gates
 
@@ -457,7 +478,9 @@ Docker releases of the same tag, and vice versa; the failed one is re-run alone 
 `workflow_dispatch`). Before the beta every install type of D-25 is installed once from the
 published artefacts, not from the checkout: the three addon packages on the lab boxes, the image
 with `docker run`, the npm package with `--install` in a fresh Proxmox LXC, the three Electron
-apps.
+apps. The release checklist verifies every asset has its `.cdx.json` and that
+`gh attestation verify <asset> --repo hobbyquaker/homematic-manager` passes for each (D-27); a
+release with a missing SBOM is not published.
 The maintainer cuts releases; the agent never tags or pushes to `master` on its own (pushing
 `3.0-dev` for CI builds is D-21).
 

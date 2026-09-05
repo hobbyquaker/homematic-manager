@@ -25,8 +25,11 @@ const STRING = {TYPE: 'STRING', OPERATIONS: 3};
 const ENUM = {TYPE: 'ENUM', OPERATIONS: 3, MIN: 0, MAX: 2, VALUE_LIST: ['OFF', 'ON', 'AUTO']};
 
 describe('enumEncodingFor', () => {
-    it('wants names on HmIP and indexes everywhere else', () => {
-        expect(enumEncodingFor('HmIP-RF')).toBe('name');
+    // A-1 refuted in the lab on 2026-09-05: hmipserver and rfd both take the name and the index,
+    // and both answer getParamset with the index - so the index is what a changed-only diff can
+    // compare against. See docs/config-pending.md.
+    it('wants the index on every interface', () => {
+        expect(enumEncodingFor('HmIP-RF')).toBe('index');
         expect(enumEncodingFor('BidCos-RF')).toBe('index');
         expect(enumEncodingFor('BidCos-Wired')).toBe('index');
         expect(enumEncodingFor('CUxD')).toBe('index');

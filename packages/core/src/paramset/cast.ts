@@ -27,16 +27,28 @@ import type {RpcWriteValue} from '../rpc/values.js';
 export type EnumEncoding = 'index' | 'name';
 
 /**
- * hmipserver rejects an `ENUM` sent as an index and wants the name from `VALUE_LIST`; rfd, hs485d,
- * the group process and CUxD want the index.
+ * Every interface gets the **index**.
  *
- * ASSUMPTION (A-1, see packages/core/ASSUMPTIONS.md): this is what the 2.x code did
- * (homematic-manager.js:1782 - `daemon === 'HmIP' ? VALUE_LIST[i] : i`) and it has worked in
- * production for years, but it has never been verified against hmipserver's actual behaviour -
- * whether it also accepts the index is unknown. Task 6 checks it in the lab.
+ * A-1 said hmipserver wants the name from `VALUE_LIST` and everything else the index, because that
+ * is what 2.x did (`homematic-manager.js:1782`: `daemon === 'HmIP' ? VALUE_LIST[i] : i`). The lab
+ * measured it on 2026-09-05 (task 6, `docs/config-pending.md`) and **both interface processes take
+ * both forms**: hmipserver stores `"100MS"` and `0` identically, rfd converts a name to its index.
+ * The split was never necessary - and sending the name is actively worse, because `getParamset`
+ * answers with the index on both, so a changed-only diff would see every `ENUM` as changed on every
+ * write and send parameters the user never touched.
+ *
+ * What is dangerous is a value that is in neither form: an unknown name or an index outside the
+ * `VALUE_LIST` is a fault plus a sticky `CONFIG_PENDING` on hmipserver, and is silently ignored by
+ * rfd. `validate.ts` catches both.
+ *
+ * `ENUM_NAME_INTERFACES` is empty and is meant to stay empty; it exists so that an interface that
+ * one day turns out to insist on the name has one place to be named, instead of the split coming
+ * back as a condition somewhere in the write path.
  */
+const ENUM_NAME_INTERFACES: ReadonlySet<string> = new Set<string>();
+
 export function enumEncodingFor(interfaceName: string): EnumEncoding {
-    return interfaceName === 'HmIP-RF' ? 'name' : 'index';
+    return ENUM_NAME_INTERFACES.has(interfaceName) ? 'name' : 'index';
 }
 
 export interface CastOptions {

@@ -18,7 +18,7 @@ describe('@homematic-manager/core', () => {
         expect(core.castValue('1', {TYPE: 'INTEGER', OPERATIONS: 3})).toBe(1);
         expect(core.validateValue('P', 1, undefined)).toHaveLength(1);
         expect(core.diffParamset({}, {}, {}).values).toEqual({});
-        expect(core.enumEncodingFor('HmIP-RF')).toBe('name');
+        expect(core.enumEncodingFor('HmIP-RF')).toBe('index');
         expect(core.MAX_BASE_FACTOR_SECONDS).toBe(111600);
         expect(core.unitLabel({TYPE: 'FLOAT', OPERATIONS: 3, UNIT: '100%'})).toBe('%');
     });

@@ -376,14 +376,24 @@ describe('the enum encoding of the interface (A-1)', () => {
         MODE: {TYPE: 'ENUM', OPERATIONS: 7, VALUE_LIST: ['OFF', 'ON', 'AUTO'], MIN: 0, MAX: 2, DEFAULT: 0},
     };
 
-    it('sends the name to HmIP and the index to BidCos', async () => {
+    // A-1 was refuted in the lab on 2026-09-05: both interface processes take the name and the
+    // index, and both answer getParamset with the index, so the index is what a changed-only diff
+    // can compare against. See docs/config-pending.md.
+    it('sends the index to every interface', async () => {
         const hmip = harness({descriptions: {MASTER: description}});
         await hmip.writer.put('HmIP-RF', ['ABC1:1'], 'MASTER', {MODE: 'AUTO'}, {writeAll: true});
-        expect(hmip.writes[0]?.params[2]).toEqual({MODE: 'AUTO'});
+        expect(hmip.writes[0]?.params[2]).toEqual({MODE: 2});
 
         const bidcos = harness({descriptions: {MASTER: description}});
         await bidcos.writer.put('BidCos-RF', ['ABC1:1'], 'MASTER', {MODE: 'AUTO'}, {writeAll: true});
         expect(bidcos.writes[0]?.params[2]).toEqual({MODE: 2});
+    });
+
+    it('sends nothing when the stored index already matches the name the dialog shows', async () => {
+        const h = harness({descriptions: {MASTER: description}, current: {'ABC1:1': {MODE: 2}}});
+        const [result] = await h.writer.put('HmIP-RF', ['ABC1:1'], 'MASTER', {MODE: 'AUTO'});
+        expect(result).toMatchObject({ok: true, skipped: true, sent: {}});
+        expect(h.writes).toEqual([]);
     });
 
     it('applies the same rule to setValue', async () => {

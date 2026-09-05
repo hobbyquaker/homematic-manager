@@ -225,6 +225,8 @@
     <Notices
         notices={stores.notices.items}
         dismissLabel={t('Dismiss')}
+        moreLabel={(count) => t('{count} more', {}, count)}
+        lessLabel={t('Show fewer')}
         testId="notices"
         ondismiss={(id) => stores.notices.dismiss(id)}
     />

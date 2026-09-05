@@ -103,6 +103,89 @@ describe('NoticesStore', () => {
         expect(notices.items).toEqual([]);
         expect(transport.listenerCount('notice')).toBe(0);
     });
+
+    /**
+     * D-34: the toasts piled up into a wall. The cap is a *view* - what leaves the screen is still
+     * held and counted, because an error never expires and must not be pushed out of existence by
+     * five status messages.
+     */
+    it('shows at most five and counts the rest', () => {
+        const notices = new NoticesStore(new MockTransport());
+        for (let index = 1; index <= 7; index += 1) {
+            notices.push('error', `error ${index}`);
+        }
+
+        expect(notices.items).toHaveLength(7);
+        expect(notices.visible.map((notice) => notice.message)).toEqual([
+            'error 3',
+            'error 4',
+            'error 5',
+            'error 6',
+            'error 7',
+        ]);
+        expect(notices.hidden).toBe(2);
+    });
+
+    it('has nothing hidden while the stack is short', () => {
+        const notices = new NoticesStore(new MockTransport());
+        notices.push('error', 'one');
+        expect(notices.visible.map((notice) => notice.message)).toEqual(['one']);
+        expect(notices.hidden).toBe(0);
+    });
+
+    it('expires an info toast, gives a warning longer and keeps an error until it is dismissed', async () => {
+        vi.useFakeTimers();
+        try {
+            const notices = new NoticesStore(new MockTransport(), {infoTtlMs: 5000, warnTtlMs: 15_000});
+            notices.push('info', 'written');
+            notices.push('warn', 'ReGa is slow');
+            const failure = notices.push('error', 'putParamset failed');
+
+            await vi.advanceTimersByTimeAsync(5000);
+            expect(notices.items.map((notice) => notice.message)).toEqual(['ReGa is slow', 'putParamset failed']);
+
+            await vi.advanceTimersByTimeAsync(10_000);
+            expect(notices.items.map((notice) => notice.message)).toEqual(['putParamset failed']);
+
+            await vi.advanceTimersByTimeAsync(600_000);
+            expect(notices.items).toHaveLength(1);
+
+            notices.dismiss(failure);
+            expect(notices.items).toEqual([]);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('never expires anything when the lifetimes are zero', async () => {
+        vi.useFakeTimers();
+        try {
+            const notices = new NoticesStore(new MockTransport(), {infoTtlMs: 0, warnTtlMs: 0});
+            notices.push('info', 'stays');
+            notices.push('warn', 'stays too');
+            await vi.advanceTimersByTimeAsync(600_000);
+            expect(notices.items).toHaveLength(2);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('forgets the timer of a dismissed notice, so a later one keeps its own lifetime', async () => {
+        vi.useFakeTimers();
+        try {
+            const notices = new NoticesStore(new MockTransport(), {infoTtlMs: 1000});
+            const first = notices.push('info', 'one');
+            notices.dismiss(first);
+            notices.push('info', 'two');
+
+            await vi.advanceTimersByTimeAsync(999);
+            expect(notices.items.map((notice) => notice.message)).toEqual(['two']);
+            await vi.advanceTimersByTimeAsync(1);
+            expect(notices.items).toEqual([]);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
 });
 
 describe('AppStore', () => {

@@ -128,6 +128,12 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Free port': {de: 'freier Port', en: 'Free port'},
     '0 picks a free port': {de: '0 wählt einen freien Port', en: '0 picks a free port'},
     Dismiss: {de: 'Ausblenden', en: 'Dismiss'},
+    // The toast stack collapses everything past the fifth into this counter (D-34).
+    '{count} more': {
+        de: {one: '{count} weitere', other: '{count} weitere'},
+        en: {one: '{count} more', other: '{count} more'},
+    },
+    'Show fewer': {de: 'Weniger anzeigen', en: 'Show fewer'},
     'Add device': {de: 'Gerät anlernen', en: 'Add device'},
     'reportValueUsage 0': {de: 'reportValueUsage 0', en: 'reportValueUsage 0'},
     'reportValueUsage 1': {de: 'reportValueUsage 1', en: 'reportValueUsage 1'},

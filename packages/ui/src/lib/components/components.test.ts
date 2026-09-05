@@ -278,6 +278,14 @@ describe('Notices', () => {
         {id: 3, level: 'error', message: 'putParamset failed', timestamp: 0},
     ];
 
+    /** Seven toasts, oldest first - two more than the stack draws. */
+    const many: Notice[] = Array.from({length: 7}, (_, index) => ({
+        id: index + 1,
+        level: 'error' as const,
+        message: `failure ${index + 1}`,
+        timestamp: 0,
+    }));
+
     it('lists the notices and dismisses one', async () => {
         const ondismiss = vi.fn();
         render(Notices, {props: {notices, ondismiss}});
@@ -286,6 +294,47 @@ describe('Notices', () => {
         expect(screen.getByText('ReGa')).toBeTruthy();
         await fireEvent.click(screen.getAllByLabelText('Dismiss')[2]!);
         expect(ondismiss).toHaveBeenCalledExactlyOnceWith(3);
+    });
+
+    it('draws no counter while the stack fits', () => {
+        render(Notices, {props: {notices, testId: 'notices'}});
+        expect(screen.queryByTestId('notices-more')).toBeNull();
+        expect(screen.getAllByLabelText('Dismiss')).toHaveLength(3);
+    });
+
+    // D-34: at most five on screen, the oldest fall behind a counter rather than off a cliff.
+    it('shows the newest five and counts the older ones', () => {
+        render(Notices, {props: {notices: many, testId: 'notices'}});
+
+        expect(screen.getAllByLabelText('Dismiss')).toHaveLength(5);
+        expect(screen.queryByText('failure 1')).toBeNull();
+        expect(screen.queryByText('failure 2')).toBeNull();
+        expect(screen.getByText('failure 3')).toBeTruthy();
+        expect(screen.getByText('failure 7')).toBeTruthy();
+        expect(screen.getByTestId('notices-more').textContent.trim()).toBe('2 more');
+    });
+
+    it('opens the whole stack and folds it again', async () => {
+        render(Notices, {props: {notices: many, testId: 'notices'}});
+
+        const toggle = screen.getByTestId('notices-more');
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+        await fireEvent.click(toggle);
+
+        expect(toggle.getAttribute('aria-expanded')).toBe('true');
+        expect(screen.getAllByLabelText('Dismiss')).toHaveLength(7);
+        expect(screen.getByText('failure 1')).toBeTruthy();
+        expect(toggle.textContent.trim()).toBe('Show fewer');
+
+        await fireEvent.click(toggle);
+        expect(screen.getAllByLabelText('Dismiss')).toHaveLength(5);
+    });
+
+    it('takes the labels from the caller, so the plural stays with the translator', () => {
+        render(Notices, {
+            props: {notices: many, testId: 'notices', moreLabel: (count: number) => `${count} weitere`},
+        });
+        expect(screen.getByTestId('notices-more').textContent.trim()).toBe('2 weitere');
     });
 });
 

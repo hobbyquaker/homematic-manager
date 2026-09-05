@@ -1,11 +1,13 @@
-<img width="152px" src="build/icon.png" align="left"/> 
+<img width="152px" src="legacy/build/icon.png" align="left"/> 
 
 # Homematic Manager
 
+> **Hinweis:** 2.7.1 ist das letzte Release der 2.x-Reihe. Version 3.0 wird derzeit auf dem
+> Branch `3.0-dev` neu entwickelt (Electron, Svelte 5, TypeScript, zusätzlich als CCU-Addon),
+> der Stand von 2.7.1 liegt unverändert unter `legacy/`. Der Plan dazu: [ROADMAP.md](ROADMAP.md).
+
 [![Current Release](https://img.shields.io/github/release/hobbyquaker/homematic-manager.svg?colorB=4cc61e)](https://github.com/hobbyquaker/homematic-manager/releases/latest)
 [![Dependency Status](https://david-dm.org/hobbyquaker/homematic-manager/status.svg)](https://david-dm.org/hobbyquaker/homematic-manager)
-[![macOS and Linux Build Status](https://travis-ci.org/hobbyquaker/homematic-manager.svg?branch=master)](https://travis-ci.org/hobbyquaker/homematic-manager)
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/hobbyquaker/homematic-manager?branch=master&svg=true)](https://ci.appveyor.com/project/hobbyquaker/homematic-manager)
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
 [![License: GPLv3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 

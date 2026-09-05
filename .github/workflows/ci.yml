@@ -68,3 +68,61 @@ jobs:
           name: web-sbom
           path: /tmp/web.cdx.json
           if-no-files-found: error
+
+  docker-image:
+    # D-25: the third install type. The image is the one artefact whose content is decided entirely
+    # outside the test suites - by the Dockerfile, the `.dockerignore` and what `npm install -g` of
+    # the packed tarball produces - so it is built and started on every push, for linux/amd64 only
+    # (the arm builds are emulated and belong to the tag). It has already caught the class of bug
+    # that only shows up in a global install; see 6746180.
+    name: Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build for linux/amd64, without pushing
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: homematic-manager:ci
+          # `load: true` cannot take an image with attestations; the release workflow makes them
+          provenance: false
+
+      - name: It runs and knows its version
+        run: docker run --rm homematic-manager:ci --version
+
+      - name: It serves the UI
+        run: |
+          docker run -d --name hmm-ci -p 8090:8090 homematic-manager:ci --demo
+          for _ in $(seq 1 30); do
+            code=$(curl -fsS -o /dev/null -w '%{http_code}' -L http://127.0.0.1:8090/ || echo 000)
+            # `if`, not `&&`: the runner's shell has `set -e`, and a failing `&&` list would end
+            # the step on the first attempt instead of waiting for the container to come up
+            if [ "$code" = 200 ]; then break; fi
+            sleep 1
+          done
+          docker logs hmm-ci
+          docker rm -f hmm-ci
+          # `--demo` redirects `/` to `/?demo`, hence -L; anything but 200 fails the job
+          [ "$code" = 200 ]
+
+      # D-27 wants a broken SBOM step found on a push and not at a tag, so the image SBOM is
+      # generated here too - the release workflow does the same against the pushed digest.
+      - name: SBOM of the image (D-27)
+        uses: anchore/sbom-action@v0
+        with:
+          image: homematic-manager:ci
+          format: cyclonedx-json
+          output-file: /tmp/docker.cdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: docker-sbom
+          path: /tmp/docker.cdx.json
+          if-no-files-found: error

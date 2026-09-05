@@ -1,0 +1,146 @@
+name: Release (Docker image)
+
+# One of the four independent release pipelines of D-24. This one builds the multi-architecture
+# image of `Dockerfile` - the Homematic Manager server with the built UI, the same tarball
+# `release-npm.yml` publishes - and pushes it to ghcr.io/hobbyquaker/homematic-manager.
+#
+# It has no `needs:` on anything, and nothing has a `needs:` on it. The Electron app, the npm
+# package and the CCU addon run for the same tag in parallel; a failure in any of them must never
+# hold this one back or roll it back, and re-running this one alone is `workflow_dispatch` with the
+# tag as its input. That is why there is no shared "create the release" job here either: whichever
+# workflow gets there first creates the draft and the others attach to it.
+#
+# D-27, twice over: `sbom: true` and `provenance: mode=max` put syft's SBOM and a full SLSA
+# provenance statement into the registry next to the image, where `docker buildx imagetools
+# inspect` and `cosign` find them - and the same content is written out as a CycloneDX 1.6 file,
+# attached to the GitHub release and attested with `actions/attest-sbom`, so one version's image
+# and npm package can be compared without pulling anything. The image SBOM covers what npm never
+# sees: the Alpine packages of the base image and the Node binary inside it.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The existing tag to build, e.g. v3.0.0-beta.1
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+  # the two attestations of D-27
+  id-token: write
+  attestations: write
+
+concurrency:
+  # Per tag, not per branch: two runs for the same tag would push the same image twice.
+  group: release-docker-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  release:
+    name: Build and push
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: The version this tag carries
+        id: version
+        env:
+          TAG: ${{ inputs.tag || github.ref_name }}
+        run: echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      # arm64 and arm/v7 are emulated. Only the runtime stage's `npm install -g` runs under
+      # qemu - the Dockerfile pins its build stage to $BUILDPLATFORM - so this stays minutes,
+      # not hours.
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tags and OCI labels
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ inputs.tag || github.ref_name }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ inputs.tag || github.ref_name }}
+            type=semver,pattern={{major}},value=${{ inputs.tag || github.ref_name }}
+            type=raw,value=latest,enable=${{ !contains(inputs.tag || github.ref_name, '-') }}
+          labels: |
+            org.opencontainers.image.licenses=AGPL-3.0-or-later
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+
+      # `latest` above is deliberately not moved by a pre-release: `3.0.0-alpha.1` contains a
+      # `-`, so an alpha or beta publishes its own tags and leaves `latest` on the last stable
+      # release. metadata-action skips {{major}} and {{major}}.{{minor}} for those anyway.
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          sbom: true
+          provenance: mode=max
+
+      # The same content as the registry's `sbom: true` attestation, in the file form D-27
+      # asks for: read back from the pushed digest, so it describes what was published and not
+      # a local build that could differ.
+      - name: CycloneDX SBOM of the image (D-27)
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
+          format: cyclonedx-json
+          output-file: homematic-manager-docker-${{ steps.version.outputs.version }}.cdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      # Attests the image by digest and pushes the attestation to the registry, so
+      # `gh attestation verify oci://ghcr.io/hobbyquaker/homematic-manager:<version>
+      # --repo hobbyquaker/homematic-manager` works without the file.
+      - name: Attest the SBOM against the image
+        uses: actions/attest-sbom@v3
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          sbom-path: homematic-manager-docker-${{ steps.version.outputs.version }}.cdx.json
+          push-to-registry: true
+
+      - name: Attach the SBOM to the draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          draft: true
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: homematic-manager-docker-${{ steps.version.outputs.version }}.cdx.json
+
+      - name: What was published
+        run: |
+          {
+            echo "### Docker"
+            echo
+            echo '```'
+            echo "${{ steps.meta.outputs.tags }}"
+            echo "digest: ${{ steps.build.outputs.digest }}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,10 +1,12 @@
 import type {Transport} from '@homematic-manager/core';
 
+import type {HostBridge} from '../host/types.js';
 import {I18n} from '../i18n/i18n.svelte.js';
 
 import {AppStore, type AppStoreOptions} from './AppStore.svelte.js';
 import {DevicesStore} from './DevicesStore.svelte.js';
 import {EventsStore} from './EventsStore.svelte.js';
+import {HostStore} from './HostStore.svelte.js';
 import {InterfacesStore} from './InterfacesStore.svelte.js';
 import {LinksStore} from './LinksStore.svelte.js';
 import {NamesStore} from './NamesStore.svelte.js';
@@ -16,6 +18,10 @@ import {WriteLogStore} from './WriteLogStore.svelte.js';
 export interface StoresOptions extends AppStoreOptions {
     /** Passed to the events ring buffer; the tests use a small one. */
     readonly eventCapacity?: number | undefined;
+    /** The Electron host bridge. Absent in `apps/web`, the addon and every test that has no host. */
+    readonly hostBridge?: HostBridge | undefined;
+    /** Where to look for `window.__HMM_HOST__` when no bridge is injected. */
+    readonly hostScope?: Record<string, unknown> | undefined;
 }
 
 /**
@@ -37,6 +43,7 @@ export class Stores {
     readonly serviceMessages: ServiceMessagesStore;
     readonly events: EventsStore;
     readonly writeLog: WriteLogStore;
+    readonly host: HostStore;
 
     constructor(transport: Transport, options: StoresOptions = {}) {
         this.transport = transport;
@@ -52,6 +59,10 @@ export class Stores {
             ...(options.eventCapacity === undefined ? {} : {capacity: options.eventCapacity}),
         });
         this.writeLog = new WriteLogStore(transport, this.notices);
+        this.host = new HostStore({
+            ...(options.hostBridge === undefined ? {} : {bridge: options.hostBridge}),
+            ...(options.hostScope === undefined ? {} : {scope: options.hostScope}),
+        });
     }
 
     /** The tabs the selected interface offers, in the 2.7 order. */
@@ -69,6 +80,8 @@ export class Stores {
     async start(): Promise<void> {
         await this.app.load();
         this.i18n.language = this.app.language;
+        // The host is optional and must never hold up the CCU work, so its failure is swallowed.
+        void this.host.load().catch(() => undefined);
         await Promise.all([this.interfaces.load(), this.names.load(), this.writeLog.load()]);
         await this.selectInterface(this.app.selectedInterface);
     }
@@ -108,6 +121,7 @@ export class Stores {
     }
 
     dispose(): void {
+        this.host.dispose();
         this.writeLog.dispose();
         this.events.dispose();
         this.serviceMessages.dispose();

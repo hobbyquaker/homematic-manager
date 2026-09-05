@@ -14,6 +14,7 @@ export const PACKAGE = '@homematic-manager/ui';
 
 export {default as App} from './App.svelte';
 
+export * from './lib/host/index.js';
 export * from './lib/transport/index.js';
 export * from './lib/stores/index.js';
 export * from './lib/i18n/index.js';

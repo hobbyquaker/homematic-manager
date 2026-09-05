@@ -9,4 +9,5 @@ export * from './LinksStore.svelte.js';
 export * from './ServiceMessagesStore.svelte.js';
 export * from './EventsStore.svelte.js';
 export * from './WriteLogStore.svelte.js';
+export * from './HostStore.svelte.js';
 export * from './Stores.svelte.js';

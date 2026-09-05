@@ -3,6 +3,7 @@ export * from './multiSelect.js';
 export * from './contextMenu.js';
 
 export {default as DataTable} from './DataTable.svelte';
+export {default as DeviceImage} from './DeviceImage.svelte';
 export {default as Dialog} from './Dialog.svelte';
 export {default as MultiSelect} from './MultiSelect.svelte';
 export {default as ContextMenu} from './ContextMenu.svelte';

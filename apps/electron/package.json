@@ -14,9 +14,17 @@
     "dev": "electron-vite dev"
   },
   "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "electron": "^44.2.0",
     "electron-builder": "^26.15.3",
     "electron-vite": "^5.0.0",
+    "svelte": "^5.57.0",
+    "svelte-check": "^4.7.6",
     "vite": "^7.3.6"
+  },
+  "dependencies": {
+    "@homematic-manager/backend": "3.0.0-dev.0",
+    "@homematic-manager/core": "3.0.0-dev.0",
+    "electron-updater": "^6.8.9"
   }
 }

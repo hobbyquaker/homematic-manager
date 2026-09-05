@@ -7,8 +7,9 @@ API contract in `packages/core/src/api/types.ts`.
 
 Task 7 built the foundation, task 8 filled the six tabs: the device grid with its channel sub-grid,
 the generic paramset editor, the link editor with the easy-mode profiles, the RPC console, the RSSI
-matrix, the service messages, the events and the pairing dialog. A toolbar button that is disabled
-always says why in its tooltip.
+matrix, the service messages, the events and the pairing dialog. Task 10 added the device-specific
+editors that plug into the paramset dialog. A toolbar button that is disabled always says why in
+its tooltip.
 
 ## What the tabs do
 
@@ -22,6 +23,11 @@ always says why in its tooltip.
   across an identical paramset description (task 6.3), a preview of the changed-only payload before
   every write, `writeAll` as the explicit opt-out, `setValue` per datapoint of VALUES, and the
   read-back afterwards - `ok` means nothing on BidCos (`docs/config-pending.md`).
+- **Device-specific editors** (task 10): plug-ins on top of that dialog for the paramsets that are
+  really one procedural dialog - the heating week programme, the HmIP switching programme, the
+  blind calibration, the duration pairs and the enums the description alone cannot render. Each one
+  either recognises the description or stands down, draws exactly the parameters it lists in
+  `covers` and writes into the same changed-only diff; a checkbox puts the raw rows back.
 - **Links**: the grid with both device images and the defective mark of #79, add through core's role
   matrix, remove a whole selection (#80), play short and long on BidCos-RF, and the link paramset
   editor with the profiles of the data set, the sender's full option list and an expert view.
@@ -36,6 +42,31 @@ always says why in its tooltip.
 - **Add device**: BidCos install mode with mode, serial and temporary key (#20), HmIP with SGTIN and
   key or key server, a QR scanner (`@zxing/browser`, loaded lazily, #112) and naming right after
   pairing (#24).
+
+## Device-specific editors (task 10)
+
+The generic paramset editor draws one row per parameter. For a handful of paramsets that is
+useless: a heating week programme is 546 numbered parameters, an HmIP switching programme 750, a
+calibration is a base and a factor to multiply in the head. Those get a hand-written editor - the
+WebUI has one too, in Tcl, and no extraction can produce it (`docs/analysis-2026-09.md`, 6.2).
+
+They are plug-ins, never a second dialog. `lib/util/editors/` holds one pure module per editor plus
+the registry; `routes/paramset/editors/` holds the components and the typed dispatch. The rules:
+
+- a detector is offered the description (plus the string table and the MASTER metadata as an
+  injected `EditorContext`) and either recognises it or returns `undefined`;
+- what it recognises it lists in `covers`, and exactly those rows leave the generic list -
+  everything else stays a normal row, and "Show the raw parameters as well" puts the covered ones
+  back, so nothing is ever unreachable;
+- it writes into the same `edited` map the generic rows write into, so the payload is still
+  `diffParamset`'s changed-only diff. No editor calls `putParamset` itself.
+
+The initial set: the heating week programme (HmIP `P1_ENDTIME_MONDAY_1`, BidCos
+`ENDTIME_MONDAY_1` and the 24-slot `TIMEOUT`/`TEMPERATUR` of a HM-CC-TC), the HmIP switching
+programme (`NN_WP_*`), the blind and shutter calibration, the duration pairs
+(`*_TIME_BASE`/`*_TIME_FACTOR`, `*_BASE`/`*_FACTOR`, HmIP `*_UNIT`/`*_VALUE`) and the enums whose
+names only the string table has. `packages/ui/test/fixtures/deviceDescriptions.ts` holds the real
+descriptions they are tested against.
 
 ## The host bridge
 
@@ -103,6 +134,7 @@ src/
   routes/               one component per tab, plus the settings and about dialogs
   routes/devices/       rename, delete, replace, repair, add device and the QR scanner
   routes/paramset/      the generic paramset editor, one parameter row, the write preview
+  routes/paramset/editors/  the device-specific editors of task 10 and their dispatch
   routes/links/         add link, remove links, the link paramset editor
   routes/radio/         setBidcosInterface
   lib/components/       DataTable, Dialog, MultiSelect, ContextMenu, Tabs, Toolbar, Loader,
@@ -112,6 +144,8 @@ src/
   lib/stores/           runes stores, all built around an injected Transport
   lib/transport/        MockTransport, WebSocketTransport, createTransport, the demo fixture
   lib/i18n/             the reactive binding to core's translator, plus the UI's own strings
+  lib/util/editors/     the registry of the device-specific editors: detection, the covered
+                        parameter names, and the pure read/write helpers of each one
   lib/util/             the pure parts of the tabs: the device grid cells, the paramset and link
                         forms, the RPC argument form, the HmIP key, value and time formatting
   testHarness.ts        `mountApp()` and the three doubles every tab test starts with

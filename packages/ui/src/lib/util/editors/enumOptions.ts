@@ -118,16 +118,18 @@ function presetOptions(
  * description carries are already translated - then there is nothing this editor could add.
  */
 function namedOptions(param: string, list: readonly string[], context: EditorContext): EnumOption[] | undefined {
+    const options: EnumOption[] = [];
     let added = false;
-    const options = list.map((raw, value) => {
+    for (const [value, raw] of list.entries()) {
         const byName = context.optionByName(param, raw);
         const byIndex = context.optionByIndex(param, value);
         if (byName === undefined && byIndex !== undefined) {
             added = true;
-            return {value, label: byIndex, raw, named: true};
+            options.push({value, label: byIndex, raw, named: true});
+        } else {
+            options.push({value, label: byName ?? raw, raw, named: byName !== undefined});
         }
-        return {value, label: byName ?? raw, raw, named: byName !== undefined};
-    });
+    }
     return added ? options : undefined;
 }
 

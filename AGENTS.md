@@ -60,6 +60,10 @@ the plan is built on is [docs/analysis-2026-09.md](docs/analysis-2026-09.md).
 - **Report faithfully.** Say what was run, what passed, what failed and what was skipped. Do not
   claim hardware was tested when only the simulator was, and do not paper over a red check.
 
+- Versions (D-18, D-35): every significant change bumps the number behind `-dev` with
+  `npm run version:dev`. Only the main session bumps, at the end of an archived task or feature
+  batch, in its own commit before pushing; subagents never run the bump (it rewrites every
+  package.json and the lockfile).
 - `git commit` takes the whole index. In the shared working tree another agent may have staged
   files at any moment, so commit with explicit paths (`git commit -- <files>`) or stage and commit
   in one uninterrupted shell invocation; commit `23da912` swallowed sixteen files of task 15

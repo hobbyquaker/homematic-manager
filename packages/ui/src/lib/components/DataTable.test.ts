@@ -243,3 +243,39 @@ describe('DataTable', () => {
         expect(screen.getByText('HM-LC-Sw1')).toBeTruthy();
     });
 });
+
+describe('the channel sub-grid', () => {
+    const subColumns: DataTableColumn<Row>[] = [
+        {key: 'address', label: 'ADDRESS', width: 120, mono: true},
+        {key: 'type', label: 'CHANNEL TYPE'},
+    ];
+
+    it('draws the sub-rows with their own columns under their own label row', async () => {
+        render(DataTable, {props: {...base, rows: makeRows(1), subRows: (row: Row) => row.channels ?? [], subColumns}});
+
+        await fireEvent.click(screen.getByRole('button', {name: 'Expand row'}));
+
+        const rows = rowsInDom();
+        expect(rows[1]?.dataset['rowKind']).toBe('header');
+        expect(within(rows[1]!).getByText('CHANNEL TYPE')).toBeTruthy();
+        expect(rows[2]?.dataset['rowId']).toBe('ADDR00000:1');
+        // The channel row has the two sub-columns, not the three device ones.
+        expect(rows[2]?.querySelectorAll('[role="gridcell"]')).toHaveLength(2);
+        expect(within(rows[2]!).getByText('SWITCH')).toBeTruthy();
+    });
+
+    it('does not select the label row, and does not activate on a double click', async () => {
+        const onactivate = vi.fn();
+        render(DataTable, {
+            props: {...base, rows: makeRows(1), subRows: (row: Row) => row.channels ?? [], subColumns, onactivate},
+        });
+        await fireEvent.click(screen.getByRole('button', {name: 'Expand row'}));
+
+        const header = rowsInDom()[1]!;
+        await fireEvent.click(header);
+        await fireEvent.dblClick(header);
+
+        expect(header.classList.contains('hmm-tr-selected')).toBe(false);
+        expect(onactivate).not.toHaveBeenCalled();
+    });
+});

@@ -32,7 +32,15 @@ export interface SortState {
     readonly direction: SortDirection;
 }
 
-/** One line of the rendered grid: a top-level row or one of its sub-rows. */
+/**
+ * One line of the rendered grid: a top-level row, one of its sub-rows, or the label row of a
+ * sub-grid.
+ *
+ * 2.x drew the channels of a device in a jqGrid *subgrid* - its own table with its own headers
+ * inside the expanded device row. Reproducing that as a nested grid would cost the virtualiser, so
+ * the label row is a line of the same flat list, marked `kind: 'header'`, and the renderer draws
+ * the sub-column labels instead of cell values for it.
+ */
 export interface FlatRow<T> {
     readonly id: string;
     readonly row: T;
@@ -42,6 +50,8 @@ export interface FlatRow<T> {
     readonly expanded: boolean;
     /** The id of the top-level row this belongs to. */
     readonly rootId: string;
+    /** `header` is the sub-grid's label row; everything else is a real row. */
+    readonly kind: 'row' | 'header';
 }
 
 export function cellValue<T>(row: T, column: DataTableColumn<T>): CellValue {
@@ -126,6 +136,14 @@ export interface BuildRowsOptions<T> {
     readonly globalFilter?: string;
     readonly columnFilters?: Readonly<Record<string, string>>;
     readonly sort?: SortState | undefined;
+    /**
+     * The columns the sub-rows have of their own. Without them a channel is drawn with the device
+     * columns (task 7's behaviour); with them the filter also reads a channel through its own
+     * columns, so filtering for a channel TYPE finds the device whose channel matches.
+     */
+    readonly subColumns?: readonly DataTableColumn<T>[] | undefined;
+    /** Put a label row above each expanded row's children, the way the 2.x subgrid had one. */
+    readonly subHeader?: boolean;
 }
 
 /**
@@ -136,13 +154,16 @@ export function buildRows<T>(options: BuildRowsOptions<T>): FlatRow<T>[] {
     const {rows, columns, getId, children, expanded} = options;
     const globalFilter = options.globalFilter ?? '';
     const columnFilters = options.columnFilters ?? {};
+    const childColumns = options.subColumns ?? columns;
     const hasFilter = globalFilter.trim() !== '' || Object.values(columnFilters).some((value) => value !== '');
 
     const kept = hasFilter
         ? rows.filter(
               (row) =>
                   matchesFilters(row, columns, globalFilter, columnFilters) ||
-                  (children?.(row) ?? []).some((child) => matchesFilters(child, columns, globalFilter, columnFilters)),
+                  (children?.(row) ?? []).some((child) =>
+                      matchesFilters(child, childColumns, globalFilter, columnFilters),
+                  ),
           )
         : [...rows];
 
@@ -160,18 +181,39 @@ export function buildRows<T>(options: BuildRowsOptions<T>): FlatRow<T>[] {
         const id = getId(row);
         const subRows = children?.(row) ?? [];
         const isExpanded = expanded.has(id);
-        flat.push({id, row, depth: 0, hasChildren: subRows.length > 0, expanded: isExpanded, rootId: id});
-        if (isExpanded) {
-            for (const child of subRows) {
-                flat.push({
-                    id: getId(child),
-                    row: child,
-                    depth: 1,
-                    hasChildren: false,
-                    expanded: false,
-                    rootId: id,
-                });
-            }
+        flat.push({
+            id,
+            row,
+            depth: 0,
+            hasChildren: subRows.length > 0,
+            expanded: isExpanded,
+            rootId: id,
+            kind: 'row',
+        });
+        if (!isExpanded) {
+            continue;
+        }
+        if (options.subHeader === true && subRows.length > 0) {
+            flat.push({
+                id: `${id}::header`,
+                row,
+                depth: 1,
+                hasChildren: false,
+                expanded: false,
+                rootId: id,
+                kind: 'header',
+            });
+        }
+        for (const child of subRows) {
+            flat.push({
+                id: getId(child),
+                row: child,
+                depth: 1,
+                hasChildren: false,
+                expanded: false,
+                rootId: id,
+                kind: 'row',
+            });
         }
     }
     return flat;
@@ -223,7 +265,10 @@ export function rangeIds<T>(rows: readonly FlatRow<T>[], anchorId: string, targe
         return target === -1 ? [] : [targetId];
     }
     const [from, to] = anchor <= target ? [anchor, target] : [target, anchor];
-    return rows.slice(from, to + 1).map((row) => row.id);
+    return rows
+        .slice(from, to + 1)
+        .filter((row) => row.kind !== 'header')
+        .map((row) => row.id);
 }
 
 /** Click, ctrl/meta-click and shift-click, as every grid in 2.7 behaved. */

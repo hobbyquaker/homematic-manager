@@ -48,6 +48,7 @@ const rows: Row[] = [
 ];
 
 const subRows = (row: Row) => row.channels ?? [];
+const getId = (row: Row) => row.address;
 
 describe('cell values', () => {
     it('reads the column key, a custom accessor and nothing at all', () => {
@@ -105,8 +106,6 @@ describe('compareCells', () => {
 });
 
 describe('buildRows', () => {
-    const getId = (row: Row) => row.address;
-
     it('flattens only the expanded rows', () => {
         const collapsed = buildRows({rows, columns, getId, children: subRows, expanded: new Set()});
         expect(collapsed).toHaveLength(3);
@@ -232,5 +231,78 @@ describe('selection', () => {
         expect(nextSelection(flat, [], undefined, 'MEQ0000001', {shift: true}).selected).toEqual(['MEQ0000001']);
         expect(rangeIds(flat, 'gone', 'MEQ0000001')).toEqual(['MEQ0000001']);
         expect(rangeIds(flat, 'MEQ0000001', 'gone')).toEqual([]);
+    });
+});
+
+describe('per-depth columns', () => {
+    const subColumns: DataTableColumn<Row>[] = [
+        {key: 'address', label: 'ADDRESS', mono: true},
+        {key: 'name', label: 'Name'},
+    ];
+
+    it("puts a label row above a device's channels when the sub-grid has its own columns", () => {
+        const flat = buildRows({
+            rows,
+            columns,
+            getId,
+            children: subRows,
+            expanded: new Set(['MEQ0000002']),
+            subColumns,
+            subHeader: true,
+        });
+
+        expect(flat.map((row) => [row.id, row.depth, row.kind])).toEqual([
+            ['MEQ0000002', 0, 'row'],
+            ['MEQ0000002::header', 1, 'header'],
+            ['MEQ0000002:1', 1, 'row'],
+            ['MEQ0000001', 0, 'row'],
+            ['JEQ0000003', 0, 'row'],
+        ]);
+    });
+
+    it("adds no label row without `subHeader`, so task 7's grids are unchanged", () => {
+        const flat = buildRows({rows, columns, getId, children: subRows, expanded: new Set(['MEQ0000002'])});
+        expect(flat.every((row) => row.kind === 'row')).toBe(true);
+        expect(flat).toHaveLength(4);
+    });
+
+    it('adds no label row for a device without channels', () => {
+        const flat = buildRows({
+            rows,
+            columns,
+            getId,
+            children: subRows,
+            expanded: new Set(['MEQ0000001']),
+            subColumns,
+            subHeader: true,
+        });
+        expect(flat.map((row) => row.id)).toEqual(['MEQ0000002', 'MEQ0000001', 'JEQ0000003']);
+    });
+
+    it('filters a channel through the sub-columns, not through the device columns', () => {
+        // `version` is a device column only; the channel matches through the sub-columns' ADDRESS.
+        const flat = buildRows({
+            rows,
+            columns,
+            getId,
+            children: subRows,
+            expanded: new Set(),
+            subColumns,
+            columnFilters: {address: 'MEQ0000002:1'},
+        });
+        expect(flat.map((row) => row.id)).toEqual(['MEQ0000002']);
+    });
+
+    it('never selects a label row in a shift-range', () => {
+        const flat = buildRows({
+            rows,
+            columns,
+            getId,
+            children: subRows,
+            expanded: new Set(['MEQ0000002']),
+            subColumns,
+            subHeader: true,
+        });
+        expect(rangeIds(flat, 'MEQ0000002', 'MEQ0000002:1')).toEqual(['MEQ0000002', 'MEQ0000002:1']);
     });
 });

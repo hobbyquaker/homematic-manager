@@ -21,6 +21,12 @@
         getId: (row: T) => string;
         /** Sub-rows of a row; a device's channels. Absent means no expander column. */
         subRows?: ((row: T) => readonly T[]) | undefined;
+        /**
+         * The columns of the sub-rows, when they differ from the parent's - the channel sub-grid of
+         * 2.x had its own (INDEX, TYPE, DIRECTION, roles, ...). Given, the sub-rows are drawn with
+         * these columns under their own label row; absent, a channel shares the device columns.
+         */
+        subColumns?: DataTableColumn<T>[] | undefined;
         /** Row height in pixels; the virtualiser needs it to be uniform. */
         rowHeight?: number;
         /** Fixed body height. Without one the body fills its parent and is measured. */
@@ -52,6 +58,7 @@
         columns,
         getId,
         subRows = undefined,
+        subColumns = undefined,
         rowHeight = 23,
         height = undefined,
         overscan = 6,
@@ -79,8 +86,10 @@
     let viewport = $state<HTMLDivElement | undefined>(undefined);
 
     const visibleColumns = $derived(columns.filter((column) => column.hidden !== true));
+    const visibleSubColumns = $derived((subColumns ?? columns).filter((column) => column.hidden !== true));
     const hasExpander = $derived(subRows !== undefined);
     const template = $derived(gridTemplate(columns, hasExpander));
+    const subTemplate = $derived(gridTemplate(subColumns ?? columns, hasExpander));
     const expandedSet = $derived(new Set(expanded));
     const selectedSet = $derived(new Set(selected));
 
@@ -94,6 +103,8 @@
             globalFilter: filter,
             columnFilters,
             sort,
+            subColumns,
+            subHeader: subColumns !== undefined,
         }),
     );
 
@@ -134,6 +145,9 @@
     }
 
     function selectRow(row: FlatRow<T>, modifiers: {ctrl?: boolean; shift?: boolean}): void {
+        if (row.kind === 'header') {
+            return;
+        }
         const next = nextSelection(flat, selected, anchorId, row.id, modifiers);
         selected = next.selected;
         anchorId = next.anchorId;
@@ -145,7 +159,7 @@
     }
 
     function onRowContextMenu(row: FlatRow<T>, event: MouseEvent): void {
-        if (!onrowcontextmenu) {
+        if (!onrowcontextmenu || row.kind === 'header') {
             return;
         }
         event.preventDefault();
@@ -329,15 +343,21 @@
                                 class="hmm-tr"
                                 class:hmm-tr-even={(window_.start + index) % 2 === 1}
                                 class:hmm-tr-selected={selectedSet.has(flatRow.id)}
-                                class:hmm-tr-child={flatRow.depth > 0}
+                                class:hmm-tr-child={flatRow.depth > 0 && flatRow.kind === 'row'}
+                                class:hmm-tr-subhead={flatRow.kind === 'header'}
                                 role="row"
                                 tabindex="-1"
-                                aria-selected={selectedSet.has(flatRow.id)}
+                                aria-selected={flatRow.kind === 'header' ? undefined : selectedSet.has(flatRow.id)}
                                 data-row-id={flatRow.id}
-                                style:grid-template-columns={template}
+                                data-row-kind={flatRow.kind}
+                                style:grid-template-columns={flatRow.depth > 0 ? subTemplate : template}
                                 style:height={`${rowHeight}px`}
                                 onclick={(event) => onRowClick(flatRow, event)}
-                                ondblclick={() => onactivate?.(flatRow.row)}
+                                ondblclick={() => {
+                                    if (flatRow.kind === 'row') {
+                                        onactivate?.(flatRow.row);
+                                    }
+                                }}
                                 oncontextmenu={(event) => onRowContextMenu(flatRow, event)}
                             >
                                 {#if hasExpander}
@@ -356,14 +376,16 @@
                                         {/if}
                                     </div>
                                 {/if}
-                                {#each visibleColumns as column (column.key)}
+                                {#each flatRow.depth > 0 ? visibleSubColumns : visibleColumns as column (column.key)}
                                     <div
                                         class="hmm-td"
-                                        class:hmm-mono={column.mono === true}
+                                        class:hmm-mono={column.mono === true && flatRow.kind === 'row'}
                                         role="gridcell"
                                         style:text-align={column.align ?? 'left'}
                                     >
-                                        {#if cell}
+                                        {#if flatRow.kind === 'header'}
+                                            {column.label}
+                                        {:else if cell}
                                             {@render cell(flatRow.row, column, flatRow)}
                                         {:else}
                                             {cellText(flatRow.row, column)}
@@ -506,6 +528,14 @@
 
     .hmm-tr-child {
         background: var(--hmm-bg-sunken);
+    }
+
+    /* The 2.x subgrid drew its own header line above a device's channels. */
+    .hmm-tr-subhead,
+    .hmm-tr-subhead:hover {
+        background: var(--hmm-header-solid);
+        font-weight: bold;
+        cursor: default;
     }
 
     .hmm-tr-selected,

@@ -2,8 +2,8 @@
  * The WebSocket transport: `ApiFrame` JSON over `ws`, one backend shared by every socket.
  *
  * Task 12 mounts this in `apps/web` next to the static UI, and task 13 puts the same process on the
- * CCU behind lighttpd. It can bind its own HTTP server or attach to one the host already has, which
- * is what the addon needs - lighttpd proxies `/addons/hmm/api` to it.
+ * CCU behind lighttpd. It can bind its own HTTP server, attach to one the host already has, or -
+ * with `noServer` - let the host route the upgrades and hand over only the ones that are the API's.
  *
  * **Token auth from the start** (task 12): the CCU addon issues a token from its session-checked
  * CGI, and without one the socket is closed with 4401 before it can send a frame. A backend with no
@@ -35,13 +35,32 @@ export interface ApiWebSocketServerOptions {
     readonly host?: string;
     /** Attach to an HTTP server the host already runs (apps/web, the addon). */
     readonly server?: HttpServer;
-    /** The path the socket lives on. */
+    /**
+     * Bind nothing and take the upgrades the host routes here with {@link
+     * ApiWebSocketServer.handleUpgrade}. Wins over `server` and `port`.
+     *
+     * This is what a host with more than one WebSocket wants: attached to an HTTP server, `ws`
+     * answers every upgrade of a *foreign* path with a 400 and there is no way to tell it not to,
+     * which kills a vite HMR socket or a second proxied endpoint on the same origin.
+     */
+    readonly noServer?: boolean;
+    /** The path the socket lives on. Not consulted in `noServer` mode - the host routes. */
     readonly path?: string;
     /**
      * The token a client has to present, as `?token=` or in the `sec-websocket-protocol` header.
      * Omitted or empty means no authentication.
      */
     readonly token?: string;
+    /**
+     * Send a ping frame to every idle client this often and terminate one that does not answer
+     * before the next ping is due. `0` or omitted turns the heartbeat off.
+     *
+     * A proxied socket needs it: lighttpd in front of the CCU addon (task 13) cuts a connection
+     * that was quiet for `server.max-read-idle` (60 s by default), and a socket that died with the
+     * network - a CCU rebooting, a laptop suspending - is otherwise only noticed when the next
+     * request is written into it. Browsers answer a ping on their own, so no client needs to know.
+     */
+    readonly keepAliveMs?: number;
     readonly onError?: (error: unknown) => void;
 }
 
@@ -64,7 +83,7 @@ export class ApiWebSocketServer {
 
     /** The port the server listens on; 0 when it was attached to someone else's server. */
     get port(): number {
-        if (this.#options.server) {
+        if (this.#options.server || this.#options.noServer) {
             return 0;
         }
         const address = this.#server?.address();
@@ -88,14 +107,16 @@ export class ApiWebSocketServer {
                 callback(this.authorise({url: info.req.url, headers: info.req.headers}), 401, 'Unauthorized');
             };
             const server = new WebSocketServer(
-                this.#options.server
-                    ? {server: this.#options.server, path: this.path, verifyClient}
-                    : {
-                          port: this.#options.port ?? 0,
-                          host: this.#options.host ?? '127.0.0.1',
-                          path: this.path,
-                          verifyClient,
-                      },
+                this.#options.noServer
+                    ? {noServer: true, verifyClient}
+                    : this.#options.server
+                      ? {server: this.#options.server, path: this.path, verifyClient}
+                      : {
+                            port: this.#options.port ?? 0,
+                            host: this.#options.host ?? '127.0.0.1',
+                            path: this.path,
+                            verifyClient,
+                        },
             );
             this.#server = server;
             server.on('error', (error: Error) => {
@@ -105,13 +126,31 @@ export class ApiWebSocketServer {
             server.on('connection', (socket, request) => {
                 this.#accept(socket, request);
             });
-            if (this.#options.server) {
+            if (this.#options.noServer || this.#options.server) {
                 resolve(0);
             } else {
                 server.on('listening', () => {
                     resolve(this.port);
                 });
             }
+        });
+    }
+
+    /**
+     * Takes over an upgrade the host has routed here (`noServer` mode). An unauthorised one is
+     * answered with a 401 before a socket exists; every other path stays the host's business.
+     */
+    handleUpgrade(request: IncomingMessage, socket: Duplex, head: Buffer): void {
+        const server = this.#server;
+        if (!server) {
+            throw new Error('handleUpgrade before start()');
+        }
+        if (!this.#options.noServer) {
+            throw new Error('handleUpgrade needs the noServer option');
+        }
+        // `verifyClient` runs inside this call, so the 401 of an unauthorised upgrade is ws's own
+        server.handleUpgrade(request, socket, head, (client) => {
+            server.emit('connection', client, request);
         });
     }
 
@@ -174,6 +213,44 @@ export class ApiWebSocketServer {
         });
         socket.on('message', (data: unknown) => {
             void this.#handle(socket, data);
+        });
+        this.#keepAlive(socket);
+    }
+
+    /**
+     * Pings this socket every `keepAliveMs` and terminates it when a pong is still missing when the
+     * next ping is due - so a dead peer costs at most two intervals, and a live but silent one
+     * keeps every proxy in between convinced that the connection is in use.
+     */
+    #keepAlive(socket: WebSocket): void {
+        const interval = this.#options.keepAliveMs ?? 0;
+        if (interval <= 0) {
+            return;
+        }
+        let answered = true;
+        socket.on('pong', () => {
+            answered = true;
+        });
+        const timer = setInterval(() => {
+            if (socket.readyState !== socket.OPEN) {
+                return;
+            }
+            if (!answered) {
+                // `terminate()` and not `close()`: the peer has already proven it is not listening
+                socket.terminate();
+                return;
+            }
+            answered = false;
+            try {
+                socket.ping();
+            } catch (error) {
+                this.#options.onError?.(error);
+            }
+        }, interval);
+        // a heartbeat is not a reason for the process to stay alive
+        timer.unref();
+        socket.once('close', () => {
+            clearInterval(timer);
         });
     }
 

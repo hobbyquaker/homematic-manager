@@ -15,7 +15,7 @@ import {pathToFileURL} from 'node:url';
 
 import {createWebHost, type WebHost} from './server.js';
 import {installService, uninstallService, type InstallerOptions} from './install.js';
-import {createLogger, type Logger} from './log.js';
+import {createLogger, type CreateLoggerOptions, type Logger} from './log.js';
 import {CliError, configSchema, helpText, parseOptions, type WebOptions} from './options.js';
 import {packageVersion} from './paths.js';
 
@@ -31,6 +31,8 @@ export interface RunCliOptions {
     readonly onSignal?: (handler: () => void) => void;
     /** Injected by the tests; the real one ends the process. */
     readonly exit?: (code: number) => void;
+    /** Injected by the tests: where the log lines go instead of stdout/stderr. */
+    readonly logWrite?: CreateLoggerOptions['write'];
     /** Injected by the tests: a fake root and a stubbed `systemctl` for `--install`. */
     readonly installer?: InstallerOptions;
 }
@@ -92,7 +94,7 @@ export async function runCli(options: RunCliOptions = {}): Promise<CliRun> {
         }
     }
 
-    const log = createLogger({level: parsed.logLevel});
+    const log = createLogger({level: parsed.logLevel, ...(options.logWrite ? {write: options.logWrite} : {})});
     const start = options.start ?? ((values, logger) => startHost(values, logger, version));
     let host: WebHost;
     try {
@@ -107,10 +109,18 @@ export async function runCli(options: RunCliOptions = {}): Promise<CliRun> {
         log.info('demo mode: the UI runs on its fixture, no backend was started');
     } else if (host.token === undefined) {
         log.info('authentication is off (--no-auth): every client of this port may talk to the backend');
-    } else {
+    } else if (parsed.token === undefined) {
+        // a generated token exists nowhere else, so printing it once is the only way the user can
+        // reach the UI from another machine
         log.info(`token ${host.token}`);
-        log.debug(`a client without a cookie can use ${host.url}?token=${host.token}`);
+    } else {
+        // one the caller supplied is already known to whoever supplied it, and it must not end up
+        // in the log a second time: on the CCU the addon passes it in through the environment and
+        // `service.cgi?cmd=log` shows that log to any WebUI session (found by task 13)
+        log.info('token: as supplied');
+        log.debug(`token ${host.token}`);
     }
+    log.debug(`a client without a cookie can use ${host.url}?token=${host.token}`);
     if (parsed.uiDevServer !== undefined) {
         log.info(`development mode: everything but the api is proxied to ${parsed.uiDevServer}`);
     }

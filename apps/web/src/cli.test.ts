@@ -66,6 +66,37 @@ describe('runCli', () => {
         expect(io.err.join('')).toContain('--help');
     });
 
+    it('prints a generated token once, and never one it was given (task 13)', async () => {
+        const lines: string[] = [];
+        const io = capture();
+        const write = (level: string, line: string): void => {
+            lines.push(`${level} ${line}`);
+        };
+
+        await runCli({
+            argv: ['--log-level', 'debug'],
+            env: {},
+            ...io,
+            logWrite: write,
+            start: () => Promise.resolve(fakeHost('generated')),
+            onSignal: () => undefined,
+        });
+        expect(lines.filter((line) => line.startsWith('info') && line.includes('generated'))).toHaveLength(1);
+
+        lines.length = 0;
+        await runCli({
+            argv: ['--token', 'S3CRET', '--log-level', 'debug'],
+            env: {},
+            ...io,
+            logWrite: write,
+            start: () => Promise.resolve(fakeHost('S3CRET')),
+            onSignal: () => undefined,
+        });
+        // the value appears at debug only; the info line just says a token is in force
+        expect(lines.filter((line) => line.startsWith('info') && line.includes('S3CRET'))).toHaveLength(0);
+        expect(lines.some((line) => line.startsWith('debug') && line.includes('S3CRET'))).toBe(true);
+    });
+
     it('reports a host that will not start and exits 1', async () => {
         const io = capture();
         const run = await runCli({

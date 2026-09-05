@@ -37,7 +37,22 @@ export const simulatorAvailable = HmSim !== undefined;
 export const SKIP_MESSAGE =
     'hm-simulator is not installed - run `npm install --no-save ../hm-simulator` from the repository root';
 
+/**
+ * `SIMULATOR_REQUIRED=1` turns the skip into a failure.
+ *
+ * The skip is what keeps `npm test` green on a machine without hm-simulator, but it is also a way
+ * to lose a whole integration suite without anybody noticing. Wherever the package *is* installed -
+ * the maintainer's machine, and CI once hm-simulator 1.0 is published - setting this variable makes
+ * a missing simulator an error instead of a warning. `apps/web/src/testSupport.ts` reads the same
+ * variable; the two are deliberately not shared, because `packages/backend` must not depend on an
+ * app.
+ */
+export const simulatorRequired = process.env.SIMULATOR_REQUIRED === '1';
+
 if (!simulatorAvailable) {
+    if (simulatorRequired) {
+        throw new Error(`SIMULATOR_REQUIRED=1, but ${SKIP_MESSAGE}`);
+    }
     // one line, once, so a green run does not quietly hide that the integration suites did not run
     console.warn(`[backend] skipping the simulator integration tests: ${SKIP_MESSAGE}`);
 }

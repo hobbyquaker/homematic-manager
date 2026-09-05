@@ -10,7 +10,15 @@ import path from 'node:path';
 import {afterEach, describe, expect, it} from 'vitest';
 
 import {defaultUiDir} from './paths.js';
-import {SIMULATOR_SKIP_MESSAGE, simulatorAvailable, startForTest, type TestHost} from './testSupport.js';
+import {
+    SIMULATOR_SKIP_MESSAGE,
+    requireSimulator,
+    simulatorAvailable,
+    simulatorGate,
+    simulatorRequired,
+    startForTest,
+    type TestHost,
+} from './testSupport.js';
 
 const hosts: TestHost[] = [];
 
@@ -66,6 +74,51 @@ describe('startForTest', () => {
         const host = await startForTest({simulator: true});
         hosts.push(host);
         expect(host.simulator).toBeUndefined();
+    });
+});
+
+describe('SIMULATOR_REQUIRED', () => {
+    const before = process.env['SIMULATOR_REQUIRED'];
+
+    afterEach(() => {
+        if (before === undefined) {
+            delete process.env['SIMULATOR_REQUIRED'];
+        } else {
+            process.env['SIMULATOR_REQUIRED'] = before;
+        }
+    });
+
+    it('is off unless the variable is exactly "1"', () => {
+        delete process.env['SIMULATOR_REQUIRED'];
+        expect(simulatorRequired()).toBe(false);
+        process.env['SIMULATOR_REQUIRED'] = 'yes';
+        expect(simulatorRequired()).toBe(false);
+        process.env['SIMULATOR_REQUIRED'] = '1';
+        expect(simulatorRequired()).toBe(true);
+    });
+
+    it('lets requireSimulator report the truth while it is off', async () => {
+        delete process.env['SIMULATOR_REQUIRED'];
+        expect(await requireSimulator()).toBe(withSimulator);
+    });
+
+    it('names the install command when it refuses a missing simulator', () => {
+        expect(simulatorGate(true, true)).toBe(true);
+        expect(simulatorGate(true, false)).toBe(true);
+        expect(simulatorGate(false, false)).toBe(false);
+        expect(() => simulatorGate(false, true)).toThrow(SIMULATOR_SKIP_MESSAGE);
+        expect(() => simulatorGate(false, true)).toThrow('SIMULATOR_REQUIRED=1');
+    });
+
+    it('turns a missing simulator into an error while it is on', async () => {
+        process.env['SIMULATOR_REQUIRED'] = '1';
+        if (withSimulator) {
+            expect(await requireSimulator()).toBe(true);
+            return;
+        }
+        await expect(requireSimulator()).rejects.toThrow(SIMULATOR_SKIP_MESSAGE);
+        // and asking startForTest for one is the same error, not a host without a simulator
+        await expect(startForTest({simulator: true})).rejects.toThrow('SIMULATOR_REQUIRED=1');
     });
 });
 

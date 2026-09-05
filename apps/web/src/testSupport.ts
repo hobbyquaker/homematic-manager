@@ -53,6 +53,37 @@ export async function simulatorAvailable(): Promise<boolean> {
 }
 
 /**
+ * `SIMULATOR_REQUIRED=1` turns the skip into a failure.
+ *
+ * Skipping keeps a checkout without hm-simulator green, and that is the point - but it also means a
+ * whole e2e suite can vanish from a green run. Anywhere the package is expected to be there, this
+ * variable says so, and a missing simulator becomes an error. `packages/backend/test/simulator`
+ * reads the same variable.
+ */
+export function simulatorRequired(): boolean {
+    return process.env['SIMULATOR_REQUIRED'] === '1';
+}
+
+/**
+ * The decision itself, as a pure function, so both of its branches are testable on a machine that
+ * happens to have hm-simulator installed as well as on one that does not.
+ */
+export function simulatorGate(available: boolean, required: boolean): boolean {
+    if (!available && required) {
+        throw new Error(`SIMULATOR_REQUIRED=1, but ${SIMULATOR_SKIP_MESSAGE}`);
+    }
+    return available;
+}
+
+/**
+ * `simulatorAvailable()`, but it throws instead of returning false when `SIMULATOR_REQUIRED=1`.
+ * Suites call this rather than `simulatorAvailable()` when they mean to skip.
+ */
+export async function requireSimulator(): Promise<boolean> {
+    return simulatorGate(await simulatorAvailable(), simulatorRequired());
+}
+
+/**
  * Two devices, enough for every tab of the UI: a BidCos switch actor (sender and receiver) and an
  * HmIP push-button. Deliberately small - the exhaustive fixtures live with the backend's own
  * integration tests, this one only has to make the grids non-empty for an e2e run.
@@ -163,6 +194,9 @@ export async function startForTest(options: StartForTestOptions = {}): Promise<T
 
     let simulator: any;
     if (wantsSimulator === true) {
+        // `requireSimulator`, not `loadSimulator`: asking for a simulator and silently getting a
+        // host without one is the failure mode SIMULATOR_REQUIRED exists to make loud.
+        await requireSimulator();
         const HmSim = await loadSimulator();
         if (HmSim) {
             simulator = new HmSim({

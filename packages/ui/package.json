@@ -20,7 +20,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json",
-    "test:browser": "vitest run --config ./vitest.browser.config.ts"
+    "test:browser": "vitest run",
+    "test:jsdom": "vitest run --config ./vitest.jsdom.config.ts"
   },
   "dependencies": {
     "@homematic-manager/core": "3.0.0-dev.0",

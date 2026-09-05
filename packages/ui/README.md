@@ -130,16 +130,21 @@ carries meaning keep their semantic class in both themes.
 ## Tests
 
 ```sh
-npx vitest run --project ui              # from the repository root, or:
-npm test -w @homematic-manager/ui        # (the root `npm test` runs every workspace)
-npm run test:browser -w @homematic-manager/ui
+npx playwright install --with-deps chromium   # once
+npx vitest run --project ui                   # from the repository root, or:
+npm test -w @homematic-manager/ui             # (the root `npm test` runs every workspace)
+npm run test:jsdom -w @homematic-manager/ui   # the fallback, no browser download
 ```
 
-The suite runs in jsdom by default and unchanged in a real chromium through
-`vitest.browser.config.ts`. Browser mode needs `npx playwright install chromium` once; until the CI
-workflow does that (task 14), jsdom is what `npm test` uses. `vitest.setup.ts` shims the four APIs
-jsdom lacks (`ResizeObserver`, `matchMedia`, `HTMLDialogElement.showModal`, `Element.scrollTo`) so
-both environments see the same API surface.
+The suite runs in a real headless chromium (D-23, flipped by task 14): jsdom has no layout, so it
+measures every element as 0 x 0 and implements `showModal()` as a flag, and the virtualised table,
+the dialog stacking and the focus handling are exactly what needs a browser. It is also about four
+times faster, because there is no DOM shim to build per test file.
+
+`vitest.jsdom.config.ts` runs the same files in jsdom for a machine that cannot download a browser,
+and `vitest.setup.ts` shims the four APIs jsdom lacks (`ResizeObserver`, `matchMedia`,
+`HTMLDialogElement.showModal`, `Element.scrollTo`) so both environments see the same API surface.
+CI reports on browser mode, so a test that only passes in jsdom is not a passing test.
 
 ## Routing
 

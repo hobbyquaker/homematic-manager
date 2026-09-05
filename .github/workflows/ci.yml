@@ -34,6 +34,25 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
+      # D-23: the component tests of `packages/ui` run in a real chromium, so every job that runs
+      # them needs the browser. `--with-deps` installs the shared libraries the runner image does
+      # not have; the download is ~120 MB and takes about 20 s.
+      - run: npx playwright install --with-deps chromium
+      # hm-simulator 1.0 lives on the unpushed branch `1.0-dev` of its own repository and is not on
+      # npm (roadmap task 5, released by the maintainer). There is therefore nothing CI can install:
+      # neither `npm install --no-save github:hobbyquaker/hm-simulator#1.0-dev` nor a tarball URL
+      # resolves. The integration suites of `packages/backend/test/simulator` and the simulator half
+      # of the web e2e skip themselves and each print one warning line, which the step below makes
+      # impossible to miss in a green log. When hm-simulator is published, replace that step with
+      #
+      #     - run: npm install --no-save hm-simulator@^1.0.0
+      #
+      # and set `SIMULATOR_REQUIRED: 1` on the test steps, which turns every skip into a failure.
+      - name: hm-simulator is not installable in CI yet
+        run: |
+          echo "::warning title=hm-simulator missing::The simulator integration suites are skipped:"\
+               "hm-simulator 1.0 is not published yet (roadmap task 5). Set SIMULATOR_REQUIRED=1"\
+               "once it is, so a missing simulator fails instead of skipping."
       - run: npm run typecheck
       - run: npm test
       - run: npm run test:cov

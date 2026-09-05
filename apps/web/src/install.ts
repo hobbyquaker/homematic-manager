@@ -46,6 +46,9 @@ export const ENV_OPTIONS: readonly OptionName[] = [
     'issue-cookie',
     'ccu',
     'local',
+    'callback-ip',
+    'callback-xmlrpc-port',
+    'callback-binrpc-port',
     'log-level',
 ];
 

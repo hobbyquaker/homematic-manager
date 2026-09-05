@@ -56,6 +56,8 @@ hard-coding it.
 | `--issue-cookie` | loopback binds only | hand the token to the browser on the page load |
 | `-a, --ccu` | - | CCU address; written to the configuration when it differs |
 | `--local` | - | we run on the CCU itself: talk to the interface processes directly |
+| `--callback-ip` | auto | address the interfaces call back to; needed where this host cannot see it (Docker) |
+| `--callback-xmlrpc-port`, `--callback-binrpc-port` | free ports | fixed callback ports, so a container can publish them |
 | `--demo` | off | serve the UI on its demo fixture and start no backend |
 | `--log-level` | `info` | `error`, `warn`, `info`, `debug` |
 | `--install` / `--uninstall` | - | systemd service; `--purge` also deletes the state |

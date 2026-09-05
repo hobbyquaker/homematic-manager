@@ -79,6 +79,15 @@ export interface WebHostOptions {
     readonly ccu?: string | undefined;
     /** Written to `ConnectionConfig.local` - the addon's "we run on the CCU" mode. */
     readonly local?: boolean | undefined;
+    /**
+     * Written to `ConnectionConfig.callback`. A host that cannot see the address the CCU reaches it
+     * on has to be told: a container on a bridge network sees `172.17.0.x`, and an `init` that
+     * announces that address gets no events at all. With `--network host` none of this is needed.
+     */
+    readonly callbackIp?: string | undefined;
+    /** Fixed callback ports, so a container can publish them. `0` picks a free one. */
+    readonly callbackXmlrpcPort?: number | undefined;
+    readonly callbackBinrpcPort?: number | undefined;
     /** How long `close()` waits for `backend.stop()`. */
     readonly shutdownTimeoutMs?: number;
     /** How often an idle api socket is pinged; `0` turns the heartbeat off. */
@@ -385,11 +394,17 @@ function upstreamOf(connection: AppConfig['connection'] | undefined): ImageUpstr
     };
 }
 
-/** `--ccu` and `--local` win over what `config.json` holds; nothing else is touched. */
+/** `--ccu`, `--local` and the callback options win over what `config.json` holds. */
 async function applyConnectionOptions(backend: Backend, options: WebHostOptions, log: Logger): Promise<void> {
     const wantsHost = options.ccu !== undefined && options.ccu !== '';
     const wantsLocal = options.local !== undefined;
-    if (!wantsHost && !wantsLocal) {
+    const callback = {
+        ...(options.callbackIp === undefined ? {} : {ip: options.callbackIp}),
+        ...(options.callbackXmlrpcPort === undefined ? {} : {xmlrpcPort: options.callbackXmlrpcPort}),
+        ...(options.callbackBinrpcPort === undefined ? {} : {binrpcPort: options.callbackBinrpcPort}),
+    };
+    const wantsCallback = Object.keys(callback).length > 0;
+    if (!wantsHost && !wantsLocal && !wantsCallback) {
         return;
     }
     const config: AppConfig = await backend.request('config.get');
@@ -397,11 +412,22 @@ async function applyConnectionOptions(backend: Backend, options: WebHostOptions,
         ...config.connection,
         ...(wantsHost ? {host: options.ccu as string} : {}),
         ...(wantsLocal ? {local: options.local as boolean} : {}),
+        callback: {...config.connection.callback, ...callback},
     };
-    if (connection.host === config.connection.host && connection.local === config.connection.local) {
+    if (
+        connection.host === config.connection.host &&
+        connection.local === config.connection.local &&
+        connection.callback.ip === config.connection.callback.ip &&
+        connection.callback.xmlrpcPort === config.connection.callback.xmlrpcPort &&
+        connection.callback.binrpcPort === config.connection.callback.binrpcPort
+    ) {
         return;
     }
     log.info(`connection: host=${connection.host}${connection.local === true ? ' (local)' : ''}`);
+    if (wantsCallback) {
+        const {ip, xmlrpcPort, binrpcPort} = connection.callback;
+        log.info(`callback: ${ip === '' ? 'auto' : ip} xmlrpc=${String(xmlrpcPort)} binrpc=${String(binrpcPort)}`);
+    }
     await backend.request('config.set', connection);
 }
 

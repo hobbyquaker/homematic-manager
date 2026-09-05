@@ -90,6 +90,21 @@ export const OPTIONS = {
         type: 'boolean',
         describe: 'we run on the CCU itself: talk to the interface processes directly (task 13)',
     },
+    'callback-ip': {
+        type: 'string',
+        describe: 'address the interface processes call back to; set it where this host cannot see its own (docker)',
+        defaultDescription: 'the local address the CCU is reachable from',
+    },
+    'callback-xmlrpc-port': {
+        type: 'number',
+        describe: 'fixed port for the xmlrpc callback server; needed when the ports are published, not host-networked',
+        defaultDescription: '0, a free port',
+    },
+    'callback-binrpc-port': {
+        type: 'number',
+        describe: 'fixed port for the binrpc callback server; must differ from the xmlrpc one',
+        defaultDescription: '0, a free port',
+    },
     demo: {
         type: 'boolean',
         describe: 'serve the UI on its demo fixture and start no backend at all',
@@ -142,6 +157,9 @@ export interface WebOptions {
     readonly issueCookie: boolean | undefined;
     readonly ccu: string | undefined;
     readonly local: boolean | undefined;
+    readonly callbackIp: string | undefined;
+    readonly callbackXmlrpcPort: number | undefined;
+    readonly callbackBinrpcPort: number | undefined;
     readonly demo: boolean;
     readonly logLevel: LogLevel;
     readonly help: boolean;
@@ -265,6 +283,10 @@ export function parseOptions(argv: readonly string[], env: NodeJS.ProcessEnv = p
         const value = raw[name] ?? (OPTIONS[name] as OptionDefinition).default;
         return value === undefined ? undefined : Boolean(value);
     };
+    const number = (name: OptionName): number | undefined => {
+        const value = raw[name] ?? (OPTIONS[name] as OptionDefinition).default;
+        return value === undefined ? undefined : Number(value);
+    };
     const logLevel = string('log-level');
     return {
         port: Number(raw['port'] ?? OPTIONS.port.default),
@@ -279,6 +301,9 @@ export function parseOptions(argv: readonly string[], env: NodeJS.ProcessEnv = p
         issueCookie: boolean('issue-cookie'),
         ccu: string('ccu'),
         local: boolean('local'),
+        callbackIp: string('callback-ip'),
+        callbackXmlrpcPort: number('callback-xmlrpc-port'),
+        callbackBinrpcPort: number('callback-binrpc-port'),
         demo: boolean('demo') as boolean,
         logLevel: isLogLevel(logLevel) ? logLevel : 'info',
         help: boolean('help') ?? false,

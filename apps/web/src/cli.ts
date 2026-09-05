@@ -158,6 +158,9 @@ function startHost(values: WebOptions, log: Logger, version: string): Promise<We
         ...(values.issueCookie === undefined ? {} : {issueCookie: values.issueCookie}),
         ...(values.ccu === undefined ? {} : {ccu: values.ccu}),
         ...(values.local === undefined ? {} : {local: values.local}),
+        ...(values.callbackIp === undefined ? {} : {callbackIp: values.callbackIp}),
+        ...(values.callbackXmlrpcPort === undefined ? {} : {callbackXmlrpcPort: values.callbackXmlrpcPort}),
+        ...(values.callbackBinrpcPort === undefined ? {} : {callbackBinrpcPort: values.callbackBinrpcPort}),
     });
 }
 

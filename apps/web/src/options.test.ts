@@ -50,6 +50,19 @@ describe('parseOptions', () => {
         expect(values.token).toBeUndefined();
     });
 
+    it('reads the callback address a container behind NAT has to be told', () => {
+        const values = parseOptions(['--callback-ip', '192.168.1.10', '--callback-xmlrpc-port=2126'], {
+            ...noEnv,
+            HMM_CALLBACK_BINRPC_PORT: '2127',
+        });
+        expect(values.callbackIp).toBe('192.168.1.10');
+        expect(values.callbackXmlrpcPort).toBe(2126);
+        expect(values.callbackBinrpcPort).toBe(2127);
+        const none = parseOptions([], noEnv);
+        expect(none.callbackIp).toBeUndefined();
+        expect(none.callbackXmlrpcPort).toBeUndefined();
+    });
+
     it('reads long options with a space and with an equals sign', () => {
         expect(parseOptions(['--port', '9000'], noEnv).port).toBe(9000);
         expect(parseOptions(['--port=9000'], noEnv).port).toBe(9000);

@@ -23,7 +23,12 @@
  * using the workspace symlinks and never a stale copy.
  *
  * Their own registry dependencies (`binrpc`, `homematic-rega`, `homematic-xmlrpc`, `ws`) are
- * declared as dependencies of this package, so npm installs them for the bundled code normally.
+ * declared as dependencies of this package, so npm installs them for the bundled code normally -
+ * and they are deliberately **not** repeated in the bundled manifests. npm counts a dependency of
+ * a bundled package as part of the bundle: with them declared, `npm install -g <tarball>` creates
+ * an empty directory for each and never fills it, and the first `import 'ws'` fails with
+ * ERR_MODULE_NOT_FOUND (npm 10.9 and 12.0 alike). A plain `npm install` hoists them into the
+ * consumer's own `node_modules` and hides the problem, which is why it went unnoticed.
  */
 
 import fs from 'node:fs';
@@ -89,10 +94,14 @@ function manifest(file) {
         main: source.main,
         types: source.types,
         engines: source.engines,
-        // the registry ones are dependencies of apps/web; the workspace ones sit next to this copy
-        dependencies: Object.fromEntries(
-            Object.entries(source.dependencies ?? {}).filter(([name]) => !name.startsWith('@homematic-manager/')),
-        ),
+        // No `dependencies` field at all: every one of them is declared by apps/web, which is what
+        // installs them, and node finds them from here by walking up to `<web>/node_modules`.
+        // Repeating them here makes npm treat them as bundled and a global install ends up with
+        // empty directories - see the module comment. Their names stay as a comment so the tarball
+        // still says what the bundled code needs.
+        '//dependencies': Object.keys(source.dependencies ?? {})
+            .filter((name) => !name.startsWith('@homematic-manager/'))
+            .join(', '),
     };
     return `${JSON.stringify(bundled, undefined, 2)}\n`;
 }

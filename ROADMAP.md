@@ -15,7 +15,7 @@ Status 2026-09-05: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 
 version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); tasks 7 (UI foundation) and 11 (Electron
 host with the build and release workflows) and 12 (web host and npm package; its Docker part runs
 as a follow-up, also done) are done too, and so is task 6 (write-safety lab study, `docs/config-pending.md`):
-milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon, installed and checked on all three lab boxes) are done as well: milestones M2 and M4 are reached in the code. Tasks 10 (device-specific editors, initial set) and 16 (documentation: README with the install matrix, one page per install type, migration notes, BUILD.md, changelog) are done; task 14 (test infrastructure) is in progress, task 15 follows it. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon, installed and checked on all three lab boxes) are done as well: milestones M2 and M4 are reached in the code. Tasks 10 (device-specific editors, initial set) and 16 (documentation: README with the install matrix, one page per install type, migration notes, BUILD.md, changelog) are done, and so is task 14 (test infrastructure: browser mode default, Playwright e2e, merged coverage, strict UI lint, shellcheck): milestone M3 lacks only task 17. Task 15 (backlog features) is in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
@@ -69,7 +69,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [11. Electron host, builds, releases](#11-electron-host-builds-releases) ✅
 - [12. Web host for development and e2e](#12-web-host-for-development-and-e2e) ✅
 - [13. CCU addon](#13-ccu-addon) ✅
-- [14. Test infrastructure and coverage gates](#14-test-infrastructure-and-coverage-gates)
+- [14. Test infrastructure and coverage gates](#14-test-infrastructure-and-coverage-gates) ✅
 - [15. Backlog features from the triage](#15-backlog-features-from-the-triage)
 - [16. Documentation](#16-documentation) ✅
 - [17. Beta cycle and 3.0 release](#17-beta-cycle-and-30-release)
@@ -440,6 +440,11 @@ Copied from hm2mqtt.js's `addon/` and the ccu-addon-howto, adapted:
   package.
 
 ## 14. Test infrastructure and coverage gates
+
+Done 2026-09-05, report in `roadmap-archive/task-14.md`. Caveats that stay: the Electron smoke
+runs only in CI (never executed locally), every simulator suite including the 20 e2e specs skips
+in CI until hm-simulator is published, ui and backend are below the 95 % branch target
+(reported, not enforced, D-12).
 
 - `npx playwright install --with-deps chromium` in CI, then vitest browser mode becomes the default
   for the component tests (D-23).

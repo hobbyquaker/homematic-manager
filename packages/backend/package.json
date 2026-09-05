@@ -1,6 +1,6 @@
 {
   "name": "@homematic-manager/backend",
-  "version": "3.0.0-dev.1",
+  "version": "3.0.0-dev.2",
   "private": true,
   "type": "module",
   "description": "Homematic Manager backend: XML-RPC/BIN-RPC clients and callback servers, caches, optional ReGa",
@@ -21,7 +21,7 @@
     "test:sim": "vitest run test/simulator"
   },
   "dependencies": {
-    "@homematic-manager/core": "3.0.0-dev.1",
+    "@homematic-manager/core": "3.0.0-dev.2",
     "binrpc": "^4.2.0",
     "homematic-rega": "^2.0.0",
     "homematic-xmlrpc": "^2.0.0",

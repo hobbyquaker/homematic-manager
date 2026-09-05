@@ -187,7 +187,8 @@ export interface RpcMethodInfo {
 
 /**
  * Request methods: `params` is the positional tuple the UI sends, `result` what it receives.
- * Every method rejects with `ApiError` on failure; RPC faults keep their `faultCode`.
+ * Every method rejects with `ApiError` on failure; RPC faults keep their `faultCode`. Methods
+ * without a result value resolve with `null`, which both transports carry verbatim.
  */
 export interface ApiMethods {
     'config.get': {params: []; result: AppConfig};

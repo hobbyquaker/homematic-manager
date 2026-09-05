@@ -3,14 +3,27 @@
 The image is `ghcr.io/hobbyquaker/homematic-manager`, built for `linux/amd64`, `linux/arm64` and
 `linux/arm/v7`. It contains the same program the npm package does: the backend of
 `packages/backend` behind an HTTP/WebSocket host serving the built UI, running as the unprivileged
-`node` user with `/data` as its state directory.
+`node` user with `/data` as its state directory. Base image `node:22-alpine`, two build stages, about
+59 MB on amd64 and arm64 and 55 MB on arm/v7.
 
-Task 16 will polish this page. It is meant to be correct rather than complete.
+Contents: [The callback](#the-one-thing-to-get-right-the-callback) ·
+[Host networking](#variant-1-recommended-host-networking) ·
+[Bridge with published ports](#variant-2-bridge-network-with-published-ports) ·
+[The CCU's firewall](#the-ccus-own-firewall) · [Configuration](#configuration) ·
+[Authentication](#authentication-and-what-the-default-means) · [State, updates, logs](#state-updates-logs) ·
+[Verifying what you pulled](#verifying-what-you-pulled-d-27) · [Troubleshooting](#troubleshooting) ·
+[When Docker is the wrong answer](#when-docker-is-the-wrong-answer)
+
+> **There is no release of 3.0 yet.** `release-docker.yml` pushes the multi-arch image to ghcr.io on
+> a `v*` tag (or by dispatch) and has never run, so nothing is published under that name. The image
+> builds from a checkout with `docker build .` — see [BUILD.md](../BUILD.md). CI builds the amd64
+> image on every push and checks `--version`, `--demo` and the SBOM, so the recipe below is known to
+> work; the sizes above were measured locally with qemu.
 
 ## The one thing to get right: the callback
 
 The CCU does not answer questions the app asks and then go quiet. Every interface process is told,
-in its `init` call, an **address and port to push events to**, and it opens a connection *back* to
+in its `init` call, an **address and port to push events to**, and it opens a connection _back_ to
 that address. So a Homematic Manager that the CCU cannot reach shows its interfaces as connected
 and receives no state changes at all.
 
@@ -40,7 +53,7 @@ neither has Podman in a rootless user namespace with the default settings.
 ## Variant 2: bridge network with published ports
 
 Two things have to be added: the address the CCU should call back to, and the two callback ports,
-published **unchanged** - the CCU connects to precisely the port it was told, so `-p 12126:2126`
+published **unchanged** — the CCU connects to precisely the port it was told, so `-p 12126:2126`
 would not work.
 
 ```sh
@@ -54,10 +67,10 @@ docker run -d --name homematic-manager \
 ```
 
 `HMM_CALLBACK_IP` is the address of the **Docker host** on the CCU's network, not the container's.
-`2126` is the XML-RPC callback (every built-in interface off the CCU speaks XML-RPC) and `2127` the
-BIN-RPC one (CUxD, which is its own daemon on port 8701). They are the image's defaults; change
-them with `HMM_CALLBACK_XMLRPC_PORT` and `HMM_CALLBACK_BINRPC_PORT` and publish whatever you set -
-hm2mqtt.js uses the same pair, so one of the two has to move when both run on the same host.
+`2126` is the XML-RPC callback (every built-in interface off the CCU speaks XML-RPC, D-28) and
+`2127` the BIN-RPC one (CUxD, which is its own daemon on port 8701). They are the image's defaults;
+change them with `HMM_CALLBACK_XMLRPC_PORT` and `HMM_CALLBACK_BINRPC_PORT` and publish whatever you
+set — hm2mqtt.js uses the same pair, so one of the two has to move when both run on the same host.
 
 `compose.yml` in the repository root has both variants written out.
 
@@ -66,7 +79,10 @@ hm2mqtt.js uses the same pair, so one of the two has to move when both run on th
 `Settings → Control panel → Security → Firewall`: "Remote Homematic-Script API" and "XML-RPC API"
 have to allow the Docker host's address (`Restricted access` with the address in the list, or
 `Full access` on a trusted LAN). The callback direction is outbound from the CCU, so nothing else
-needs opening there - but a firewall on the Docker host does need the callback ports open.
+needs opening there — but a firewall on the Docker host does need the callback ports open.
+
+ReGa ("Remote Homematic-Script API") is optional (D-2): without it the app works fully and uses
+locally stored names instead of the CCU's.
 
 ## Configuration
 
@@ -75,44 +91,53 @@ one (`--data-dir` is `HMM_DATA_DIR`, `--no-auth` is `HMM_AUTH=false`). `docker r
 ghcr.io/hobbyquaker/homematic-manager --help` prints the whole list, `--config-schema` prints it as
 JSON Schema.
 
-Only what a container cannot work out for itself belongs here. Everything about the CCU -
-interfaces, ReGa, the callback address once it is reachable - is configured in the UI's settings
-dialog and stored in `/data/config.json`.
+Only what a container cannot work out for itself belongs here. Everything about the CCU —
+interfaces, ReGa, the language, the write pace, the callback address once it is reachable — is
+configured in the UI's settings dialog and stored in `/data/config.json`. That file is the same
+profile format every other install type uses; see
+[moving-between-installs.md](moving-between-installs.md).
 
 The image sets these by default:
 
-| variable                    | default | why                                                       |
-| --------------------------- | ------- | --------------------------------------------------------- |
-| `HMM_HOST`                  | `0.0.0.0` | a container's loopback is nobody's                       |
-| `HMM_PORT`                  | `8090`  |                                                           |
-| `HMM_DATA_DIR`              | `/data` | the volume                                                |
-| `HMM_ISSUE_COOKIE`          | `true`  | see below                                                 |
-| `HMM_CALLBACK_XMLRPC_PORT`  | `2126`  | a freely picked port cannot be published                   |
-| `HMM_CALLBACK_BINRPC_PORT`  | `2127`  | likewise                                                   |
+| variable | default | why |
+| --- | --- | --- |
+| `HMM_HOST` | `0.0.0.0` | a container's loopback is nobody's |
+| `HMM_PORT` | `8090` | |
+| `HMM_DATA_DIR` | `/data` | the volume |
+| `HMM_ISSUE_COOKIE` | `true` | see below |
+| `HMM_CALLBACK_XMLRPC_PORT` | `2126` | a freely picked port cannot be published |
+| `HMM_CALLBACK_BINRPC_PORT` | `2127` | likewise |
 
 ## Authentication, and what the default means
 
 The API socket is guarded by a token. A browser cannot set headers on a WebSocket, so the page load
 hands the token over as a cookie and the browser replays it on the upgrade of the same origin. The
-host issues that cookie **only on a loopback bind** by default - and a container never binds
+host issues that cookie **only on a loopback bind** by default — and a container never binds
 loopback, so the image turns cookie issuing on explicitly. Without it the UI would load and its
 socket would be refused with a 401.
 
 The consequence is plain: **whoever can reach the published port is in.** On a home LAN that is the
 same position 2.x was in. Where it is not acceptable:
 
-- put a reverse proxy with `auth.require` / `auth_basic` in front and let it be the gate - see
-  `docs/lighttpd-homematic-manager.conf`, `docs/nginx-homematic-manager.conf` and
-  `docs/Caddyfile-homematic-manager`;
+- put a reverse proxy with `auth.require` / `auth_basic` in front and let it be the gate — see
+  [lighttpd-homematic-manager.conf](lighttpd-homematic-manager.conf),
+  [nginx-homematic-manager.conf](nginx-homematic-manager.conf) and
+  [Caddyfile-homematic-manager](Caddyfile-homematic-manager);
 - publish `8090` on the loopback of the Docker host only (`-p 127.0.0.1:8090:8090`) and reach it
   through that proxy or an SSH tunnel;
 - set `HMM_ISSUE_COOKIE=false` and `HMM_TOKEN=<something long>`, and open the UI once as
   `http://host:8090/?token=<the token>`; nothing else will get in.
 
+> **This default is still open (OQ-15).** The question is whether the image keeps `true` — the UI
+> works out of the box and this page names three ways to lock it down — or whether it ships refusing
+> until the user has read this page. The roadmap's recommendation is to keep it and print a one-line
+> warning at start when the cookie is issued on a non-loopback bind without TLS or a proxy in front;
+> that warning is **not implemented yet**. It is decided before the first image is published.
+
 ## State, updates, logs
 
 `/data` holds `config.json`, the per-CCU caches, the device image cache and the write log. Keep it
-on a named volume or a bind mount - a fresh one means configuring the CCU again.
+on a named volume or a bind mount — a fresh one means configuring the CCU again.
 
 ```sh
 docker compose pull && docker compose up -d      # update
@@ -136,8 +161,26 @@ docker buildx imagetools inspect ghcr.io/hobbyquaker/homematic-manager:3.0.0 \
     --format '{{ json .SBOM }}'
 ```
 
+The `latest` tag is not moved by a pre-release, so an alpha or beta never becomes what a plain
+`docker pull` gets.
+
+## Troubleshooting
+
+| Symptom | Look at |
+| --- | --- |
+| The UI loads and stays disconnected | The socket was refused. With `HMM_ISSUE_COOKIE=false` and no `?token=` that is expected; otherwise check a reverse proxy in front passes the upgrade through. |
+| Interfaces green, no state ever changes | The callback. On a bridge network `HMM_CALLBACK_IP` must be the **Docker host's** address, and 2126/2127 must be published unchanged. `--network host` avoids the whole question. |
+| Interfaces stay red | The CCU's XML-RPC API firewall setting, or the wrong `HMM_CCU`. |
+| Everything is gone after a recreate | `/data` was not on a volume. |
+| Port 2126 or 2127 already in use | hm2mqtt.js defaults to the same pair. Move one with `HMM_CALLBACK_XMLRPC_PORT` / `HMM_CALLBACK_BINRPC_PORT` and publish what you set. |
+| Device pictures are missing | They are fetched from the CCU and cached in `/data/images`. With TLS the CCU's certificate is self-signed and cannot be accepted, so the small bundled set answers instead. |
+| `--network host` does nothing useful | Docker Desktop on macOS/Windows and rootless Podman have no real host network. Use variant 2, or run in an LXC or a VM. |
+
 ## When Docker is the wrong answer
 
 The callback is why the recommended server deployment is a Proxmox LXC and not a container: an LXC
 has no NAT, so the address the backend finds is the address the CCU reaches, and nothing has to be
 told anything. See [install-lxc.md](install-lxc.md).
+
+And if the CCU is the only machine in the house that runs all the time, skip the server altogether:
+the [CCU addon](install-addon.md) is the same program on the CCU itself.

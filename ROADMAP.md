@@ -1,4 +1,4 @@
-# Homematic Manager RoadmapThe simulator's rfd BIN-RPC port stands for the CCU-local case in tests (the backend harness runs in local mode); an XML-RPC listener for rfd in hm-simulator, the lighttpd view, is a task 14 follow-up so the remote path is tested as well. |
+# Homematic Manager Roadmap
 
 Plan for Homematic Manager 3: the same tool (devices, direct links, paramsets, RSSI, service
 messages, events, RPC console), rebuilt on current Electron, Svelte 5 and a tested core, delivered
@@ -13,8 +13,9 @@ open questions **OQ-n**; when the maintainer changes a decision, record it here 
 Status 2026-09-05: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 1.0, branch
 `1.0-dev` in its own repository, not yet pushed or published) and 9 (data pipeline) are done,
 version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); tasks 7 (UI foundation) and 11 (Electron
-host with the build and release workflows) are done too; task 6 (write-safety lab study) and 12
-(web host) are in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+host with the build and release workflows) and 12 (web host and npm package; its Docker part runs
+as a follow-up) are done too; task 6 (write-safety lab study) and 8 (UI feature parity) are in
+progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
@@ -48,7 +49,8 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 | D-25 | (2026-09-05) The install matrix of 3.0: CCU addon in three variants (armv7l, aarch64, x86_64); Docker image (amd64, arm64, arm/v7); npm install with `--install` creating a system user, systemd unit and state directory the way `she` and hm2mqtt.js do it, with a Proxmox LXC as the recommended server deployment and a lighttpd reverse-proxy example config; Electron apps for Windows, Linux and macOS. All install types run the same backend and UI and share one config format, so a user can move between them (task 16 documents the move). |
 | D-26 | (2026-09-05) Licence: the 3.0 code base is `AGPL-3.0-or-later` (`LICENSE`, every workspace `package.json`, the release notes and the about dialog). 2.x was GPL-3.0; the 2.x sources kept under `legacy/` carry the contributions of others (anli-ger, Stefan Simroth, Homoran, Sathya Laufer and more) and stay GPL-3.0-or-later, which GPLv3 section 13 lets the AGPL work combine with; nothing from `legacy/` is copied into the new packages without checking its author. Ported MIT code from the maintainer's own repositories (`cast.js` from node-red-contrib-ccu, the installer from mqtt-interfaces-core) keeps its attribution in the file header. `data/dist/` stays under the HMSL 2.0 notice of `data/NOTICE.md`: it is eQ-3 data, not part of the AGPL program. |
 | D-27 | (2026-09-05) Every release artefact ships with an SBOM: CycloneDX 1.6 JSON named `<artefact>.cdx.json` next to the artefact (GitHub release asset for the Electron installers and the addon packages, `sbom` attestation on the ghcr.io image, npm provenance plus the SBOM attached to the release for the npm package), and each one is signed as a GitHub artifact attestation (`actions/attest-sbom`, `actions/attest-build-provenance`) so `gh attestation verify` works offline against the repository. The SBOM lists what is really inside the artefact, including the runtime that is not an npm dependency (Electron and its Chromium, the bundled Node and the Alpine packages of the addon, the base image of the Docker build), so a CVE in one of them is searchable per release. Generated on every push build too, so a broken SBOM step fails before a tag. |
-| D-28 | (2026-09-05, maintainer correction) BIN-RPC exists on a CCU's loopback only: rfd and hs485d take it on 32001/32000, the public ports 2001/2000 (and 42001/42000) are lighttpd's XML-RPC proxies, and no CCU listens for BIN-RPC on the LAN. Off the CCU (Electron, npm, Docker) every built-in interface is XML-RPC; BIN-RPC is used by the addon in local mode (D-5) and for CUxD, which is its own daemon with its own BIN-RPC listener on 8701 (2.x did the same). The "prefer BIN-RPC" option that tasks 4 and 7 had added to the contract, the config store and the settings dialog is removed; a user-defined interface (D-13) may still declare `binrpc` for a non-CCU peer. The simulator's rfd BIN-RPC port stands for the CCU-local case in tests. |
+| D-28 | (2026-09-05, maintainer correction) BIN-RPC exists on a CCU's loopback only: rfd and hs485d take it on 32001/32000, the public ports 2001/2000 (and 42001/42000) are lighttpd's XML-RPC proxies, and no CCU listens for BIN-RPC on the LAN. Off the CCU (Electron, npm, Docker) every built-in interface is XML-RPC; BIN-RPC is used by the addon in local mode (D-5) and for CUxD, which is its own daemon with its own BIN-RPC listener on 8701 (2.x did the same). The "prefer BIN-RPC" option that tasks 4 and 7 had added to the contract, the config store and the settings dialog is removed; a user-defined interface (D-13) may still declare `binrpc` for a non-CCU peer. The simulator's rfd BIN-RPC port stands for the CCU-local case in tests (the backend harness runs in local mode); an XML-RPC listener for rfd in hm-simulator, the lighttpd view, is a task 14 follow-up so the remote path is tested as well. |
+| D-29 | (2026-09-05) The npm deliverable bundles the workspace packages (`bundleDependencies` materialised at `prepack`, removed at `postpack`); `@homematic-manager/core`, `backend`, `ui` and `data` are not published separately. Their APIs are internal and one version-locked tarball cannot produce a mismatched tree. If a second consumer of the core ever appears (D-11, shared cast library), that is the moment to publish `core` on its own. |
 
 ## Contents
 
@@ -64,7 +66,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - 9. Device metadata pipeline ✅ [archived](roadmap-archive/task-9.md)
 - [10. Device-specific editors](#10-device-specific-editors)
 - [11. Electron host, builds, releases](#11-electron-host-builds-releases) ✅
-- [12. Web host for development and e2e](#12-web-host-for-development-and-e2e)
+- [12. Web host for development and e2e](#12-web-host-for-development-and-e2e) ✅ (Docker follow-up open)
 - [13. CCU addon](#13-ccu-addon)
 - [14. Test infrastructure and coverage gates](#14-test-infrastructure-and-coverage-gates)
 - [15. Backlog features from the triage](#15-backlog-features-from-the-triage)
@@ -486,7 +488,7 @@ Docker releases of the same tag, and vice versa; the failed one is re-run alone 
 `workflow_dispatch`). Before the beta every install type of D-25 is installed once from the
 published artefacts, not from the checkout: the three addon packages on the lab boxes, the image
 with `docker run`, the npm package with `--install` in a fresh Proxmox LXC, the three Electron
-apps. The release checklist verifies every asset has its `.cdx.json` and that
+apps. Task 12 done 2026-09-05 except the Docker part; report in `roadmap-archive/task-12.md`. The release checklist verifies every asset has its `.cdx.json` and that
 `gh attestation verify <asset> --repo hobbyquaker/homematic-manager` passes for each (D-27); a
 release with a missing SBOM is not published.
 The maintainer cuts releases; the agent never tags or pushes to `master` on its own (pushing
@@ -503,7 +505,7 @@ devices from his own stock) and OQ-9 (the Turkish translations stay as a fallbac
 | --- | --- | --- |
 | OQ-12 | When to move to TypeScript 7 (native) and vite 8? Blocked today by typescript-eslint 8, svelte-check 4 and electron-vite 5 peer ranges. | Recurring "toolchain bump" check next to the quarterly Electron bump of task 11; bump when all three peers allow it. |
 | OQ-13 | `data/dist/` is 9.2 MB of pretty-printed JSON (65 profile files). Ship it gzipped or minified in the CCU addon and the Electron bundle? | Task 13 measures it on the CCU3 (inodes and flash); the apps load profiles lazily per receiver type either way. Decide there. |
-| OQ-14 | npm name for the web host package (D-24): reuse `homematic-manager` (the 2.x name on npm, which installed the Electron app through `npm i -g`; its users would get the server instead) or a new `homematic-manager-web` / `@homematic-manager/web` (the workspace scope is free on npm to check). | Reuse `homematic-manager`: the `npm i -g` audience of 2.x wanted a headless install anyway, and the Electron app was never a sensible npm install. Announce in the 3.0 changelog. Decide before the first alpha is tagged. |
+| OQ-14 | npm name for the web host package (D-24): reuse `homematic-manager` (the 2.x name on npm, which installed the Electron app through `npm i -g`; its users would get the server instead) or a new `homematic-manager-web` / `@homematic-manager/web` (the workspace scope is free on npm to check). The tarball is otherwise ready (task 12). | Reuse `homematic-manager`: the `npm i -g` audience of 2.x wanted a headless install anyway, and the Electron app was never a sensible npm install. Announce in the 3.0 changelog. Decide before the first alpha is tagged. |
 
 ## Lab and hardware
 

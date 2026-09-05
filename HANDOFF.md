@@ -22,7 +22,8 @@ about every half hour while the agent works; the timestamp above is the last ref
   secret.
 - Done and archived: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 1.0), 7 (UI
   foundation), 9 (data pipeline), 11 (Electron host; `build.yml` builds the desktop artifacts on
-  every push to `3.0-dev` once Actions is enabled). Workspace was green at the last full run: 73 test files,
+  every push to `3.0-dev` once Actions is enabled), 12 (web host, npm package with `--install`,
+  `release-npm.yml`; Docker part as a follow-up). Workspace was green at the last full run: 73 test files,
   1082 tests, `npm run lint`, `npm run typecheck`.
 - In progress by three background subagents (Opus), each committing distinct commits on
   `3.0-dev` in the shared working tree (each stages only its own files):
@@ -30,11 +31,9 @@ about every half hour while the agent works; the timestamp above is the last ref
     install mode. Deliverables: `docs/config-pending.md`, calibrated hm-simulator faults,
     `devices.repairConfig`, fix for two unhandled rejections in
     `packages/backend/src/write/queue.test.ts`.
-  - **Task 12** web host `apps/web`: uncommitted work in `apps/web/src/index.ts`,
-    `index.test.ts`, `package.json`, `tsconfig.json`; the agent was told about the base path
-    for the addon proxy, D-24/D-25 (npm package, `--install`, Dockerfile, proxy examples) and
-    D-27 (SBOMs), with permission to stop after host + base path + npm packaging + `--install`
-    and report the rest.
+  - **Task 12 follow-up** (Docker image, `compose.yml`, `release-docker.yml` with image SBOM,
+    CI image build, proxy snippets moved to `docs/`, two small `ApiWebSocketServer` options in
+    the backend: `noServer`/`onUpgrade` and `keepAliveMs`, then `apps/web` uses them).
   - **Task 8** UI feature parity (started after task 11 was archived): tab by tab in
     `packages/ui`, additive API changes in core/backend, `API_EVENT_NAMES` export from core,
     host bridge consumers (update notice, About, device images). Expected to take the longest.
@@ -55,12 +54,12 @@ about every half hour while the agent works; the timestamp above is the last ref
 
 ## Next steps, in order
 
-1. When task 6, 12 (and later 8) finish: verify (`npm run lint && npm run typecheck && npm test` in WSL,
+1. When task 6, the task 12 follow-up and task 8 finish: verify (`npm run lint && npm run typecheck && npm test` in WSL,
    with the simulator installed), write `roadmap-archive/task-{6,11,12}.md`, tick them in the
    ROADMAP Contents, update the status line at the top of ROADMAP.md, commit, push `3.0-dev`
    (task 11 is archived and pushed already: `69cab48`).
 2. Task 8 is running (see above); when it finishes, verify and archive it the same way.
-3. Task 13 (CCU addon) can start once task 12 has landed; task 14 (test infra, Playwright in
+3. Task 13 (CCU addon) can start now (task 12 landed; see its archive for the CGI/cookie/base-path recipe); task 14 (test infra, Playwright in
    CI, browser mode default) after 8/11/12; then 10, 15, 16, 17.
 4. Bump `npm run version:dev` when a dev build is cut for the maintainer (D-18).
 

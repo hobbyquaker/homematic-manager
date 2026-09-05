@@ -10,8 +10,17 @@ export interface DataTableColumn<T> {
     /** Identifies the column; also the property read from the row when `value` is absent. */
     readonly key: string;
     readonly label: string;
-    /** Fixed pixel width; a column without one shares the remaining space. */
+    /**
+     * The column's share of the width, in pixels at the size the grid was designed for. It is a
+     * *weight*, not a pixel width (see {@link tableLayout}); a column without one shares whatever
+     * is left. Use {@link fixed} for the ones that must keep their pixels.
+     */
     readonly width?: number;
+    /**
+     * Never proportional: an icon, a badge or a count that has no more to say when it is wider.
+     * Requires {@link width}.
+     */
+    readonly fixed?: boolean;
     readonly align?: 'left' | 'center' | 'right';
     /** Sortable by default. */
     readonly sortable?: boolean;
@@ -259,12 +268,93 @@ export function visibleWindow(
     return {start: first, end: last};
 }
 
+/** The narrowest a proportional column may become before the grid starts to scroll sideways. */
+const MIN_TRACK_PX = 56;
+
+/** The weight of a column that declares no width: as much as an ordinary text column. */
+const DEFAULT_WEIGHT = 120;
+
+/** One column track of the grid: the merged width of everything that is drawn in that column. */
+interface Track {
+    readonly key: string;
+    readonly width: number | undefined;
+    readonly fixed: boolean;
+}
+
+/** Where each column of a depth sits, and the template every row of the table uses. */
+export interface TableLayout {
+    /** The `grid-template-columns` of the head, the filter row and **every** row, at any depth. */
+    readonly template: string;
+    /** 1-based grid track of a column, by key. Shared keys share a track. */
+    readonly track: Readonly<Record<string, number>>;
+}
+
+/**
+ * `minmax(<min>px, <width>fr)` unless the column asked to stay fixed.
+ *
+ * The declared width is a weight, the way `she`'s tables give their `<col>`s a percentage under
+ * `table-layout: fixed`: the grid then fills its container exactly, whatever the window is, so
+ * there is no ragged strip on the right at one size and no horizontal scrollbar at another. The
+ * minimum keeps a text column readable; below it the grid scrolls, which is what it did before.
+ */
+function trackSize(track: Track): string {
+    if (track.width === undefined) {
+        return `minmax(${MIN_TRACK_PX}px, ${DEFAULT_WEIGHT}fr)`;
+    }
+    if (track.fixed) {
+        return `${track.width}px`;
+    }
+    return `minmax(${Math.min(track.width, MIN_TRACK_PX)}px, ${track.width}fr)`;
+}
+
+function trackOf<T>(column: DataTableColumn<T>): Track {
+    return {key: column.key, width: column.width, fixed: column.fixed === true};
+}
+
+/**
+ * The one grid the whole table is drawn on - the device rows, the channel sub-grid and the head.
+ *
+ * The sub-grid used to get a template of its own (task 8), so a channel's Name started where the
+ * device's icon did and no column of the sub-grid stood under the column it belongs to. D-34 after
+ * the first look: "table columns are not regularly sized when the channel sub-grid is expanded".
+ *
+ * Columns are therefore merged **by key** into one track list: a key both depths know shares one
+ * track and keeps the parent's width, so expanding a device can never move a device column; a key
+ * only the sub-grid has gets a track of its own, inserted after the track its predecessor sits in,
+ * so the sub-grid keeps its reading order. A depth that has nothing for a track leaves it empty -
+ * which is why every cell is placed explicitly rather than by auto-flow.
+ */
+export function tableLayout<T>(
+    columns: readonly DataTableColumn<T>[],
+    subColumns: readonly DataTableColumn<T>[] | undefined,
+    expander: boolean,
+): TableLayout {
+    const tracks: Track[] = columns.filter((column) => column.hidden !== true).map((column) => trackOf(column));
+    let next = 0;
+    for (const column of subColumns ?? []) {
+        if (column.hidden === true) {
+            continue;
+        }
+        const found = tracks.findIndex((track) => track.key === column.key);
+        if (found >= 0) {
+            next = found + 1;
+            continue;
+        }
+        tracks.splice(next, 0, trackOf(column));
+        next += 1;
+    }
+    const offset = expander ? 2 : 1;
+    const track: Record<string, number> = {};
+    for (const [index, entry] of tracks.entries()) {
+        track[entry.key] = index + offset;
+    }
+    const parts = tracks.map((entry) => trackSize(entry));
+    return {template: expander ? `22px ${parts.join(' ')}` : parts.join(' '), track};
+}
+
 /** The `grid-template-columns` for a set of columns, plus the leading expander when there is one. */
 export function gridTemplate<T>(columns: readonly DataTableColumn<T>[], expander: boolean): string {
-    const parts = columns
-        .filter((column) => column.hidden !== true)
-        .map((column) => (column.width === undefined ? 'minmax(80px, 1fr)' : `${column.width}px`));
-    return expander ? `22px ${parts.join(' ')}` : parts.join(' ');
+    return tableLayout(columns, undefined, expander).template;
 }
 
 /**

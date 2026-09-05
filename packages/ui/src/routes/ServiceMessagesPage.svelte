@@ -33,7 +33,16 @@
     }
 
     const columns = $derived<DataTableColumn<ServiceMessage>[]>([
-        {key: 'icon', label: '', width: 24, sortable: false, filterable: false, align: 'center', value: () => ''},
+        {
+            key: 'icon',
+            label: '',
+            width: 24,
+            fixed: true,
+            sortable: false,
+            filterable: false,
+            align: 'center',
+            value: () => '',
+        },
         {key: 'name', label: t('Name'), width: 220, value: (message) => stores.nameOf(message.address)},
         {key: 'address', label: 'ADDRESS', width: 160, mono: true},
         {

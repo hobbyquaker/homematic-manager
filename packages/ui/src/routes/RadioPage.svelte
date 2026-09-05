@@ -62,7 +62,16 @@
      * here every gateway gets its pair, which is what a CCU with two LAN gateways needs.
      */
     const rssiColumns = $derived<DataTableColumn<DeviceDescription>[]>([
-        {key: 'icon', label: '', width: 24, sortable: false, filterable: false, align: 'center', value: () => ''},
+        {
+            key: 'icon',
+            label: '',
+            width: 24,
+            fixed: true,
+            sortable: false,
+            filterable: false,
+            align: 'center',
+            value: () => '',
+        },
         {key: 'name', label: t('Name'), width: 180, value: (device) => stores.nameOf(device.ADDRESS)},
         {key: 'ADDRESS', label: 'ADDRESS', width: 140, mono: true},
         {key: 'TYPE', label: 'TYPE', width: 150},

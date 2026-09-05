@@ -4,10 +4,10 @@
     import {
         buildRows,
         cellText,
-        gridTemplate,
         isFilterable,
         isSortable,
         nextSelection,
+        tableLayout,
         visibleWindow,
         type DataTableColumn,
         type FlatRow,
@@ -82,14 +82,25 @@
     let scrollTop = $state(0);
     let measuredHeight = $state(0);
     let focusIndex = $state(0);
+    /**
+     * Width of the body's vertical scrollbar. The head and the filter row are siblings of the
+     * scrolling body, so without this the proportional columns of the head would be a scrollbar
+     * wider than the columns of the rows as soon as a device is expanded and the body scrolls.
+     */
+    let gutter = $state(0);
     let anchorId = $state<string | undefined>(undefined);
     let viewport = $state<HTMLDivElement | undefined>(undefined);
 
     const visibleColumns = $derived(columns.filter((column) => column.hidden !== true));
     const visibleSubColumns = $derived((subColumns ?? columns).filter((column) => column.hidden !== true));
     const hasExpander = $derived(subRows !== undefined);
-    const template = $derived(gridTemplate(columns, hasExpander));
-    const subTemplate = $derived(gridTemplate(subColumns ?? columns, hasExpander));
+    /**
+     * One template for the whole table (D-34). The head, the filter row, the device rows and the
+     * channel sub-grid all sit on the same tracks, so a column never moves when a device is
+     * expanded and the sub-grid stands under the columns it belongs to.
+     */
+    const layout = $derived(tableLayout(columns, subColumns, hasExpander));
+    const template = $derived(layout.template);
     const expandedSet = $derived(new Set(expanded));
     const selectedSet = $derived(new Set(selected));
 
@@ -114,13 +125,17 @@
 
     $effect(() => {
         const element = viewport;
-        if (!element || height !== undefined) {
+        if (!element) {
             return;
         }
-        measuredHeight = element.clientHeight;
-        const observer = new ResizeObserver(() => {
-            measuredHeight = element.clientHeight;
-        });
+        const measure = (): void => {
+            if (height === undefined) {
+                measuredHeight = element.clientHeight;
+            }
+            gutter = element.offsetWidth - element.clientWidth;
+        };
+        measure();
+        const observer = new ResizeObserver(measure);
         observer.observe(element);
         return () => {
             observer.disconnect();
@@ -271,12 +286,18 @@
         tabindex="0"
         onkeydown={onKeyDown}
     >
-        <div class="hmm-table-head" role="row" style:grid-template-columns={template}>
+        <div
+            class="hmm-table-head"
+            role="row"
+            style:grid-template-columns={template}
+            style:padding-right={`${gutter}px`}
+        >
             {#if hasExpander}<div class="hmm-th hmm-th-expander" role="columnheader"></div>{/if}
             {#each visibleColumns as column (column.key)}
                 <div
                     class="hmm-th"
                     role="columnheader"
+                    style:grid-column={layout.track[column.key]}
                     aria-sort={sort?.key === column.key
                         ? sort.direction === 'asc'
                             ? 'ascending'
@@ -301,10 +322,10 @@
         </div>
 
         {#if columnFilterRow}
-            <div class="hmm-table-filters" style:grid-template-columns={template}>
+            <div class="hmm-table-filters" style:grid-template-columns={template} style:padding-right={`${gutter}px`}>
                 {#if hasExpander}<div class="hmm-tf-spacer"></div>{/if}
                 {#each visibleColumns as column (column.key)}
-                    <div class="hmm-tf">
+                    <div class="hmm-tf" style:grid-column={layout.track[column.key]}>
                         {#if isFilterable(column)}
                             <input
                                 class="hmm-input hmm-tf-input"
@@ -350,7 +371,7 @@
                                 aria-selected={flatRow.kind === 'header' ? undefined : selectedSet.has(flatRow.id)}
                                 data-row-id={flatRow.id}
                                 data-row-kind={flatRow.kind}
-                                style:grid-template-columns={flatRow.depth > 0 ? subTemplate : template}
+                                style:grid-template-columns={template}
                                 style:height={`${rowHeight}px`}
                                 onclick={(event) => onRowClick(flatRow, event)}
                                 ondblclick={() => {
@@ -381,6 +402,7 @@
                                         class="hmm-td"
                                         class:hmm-mono={column.mono === true && flatRow.kind === 'row'}
                                         role="gridcell"
+                                        style:grid-column={layout.track[column.key]}
                                         style:text-align={column.align ?? 'left'}
                                     >
                                         {#if flatRow.kind === 'header'}
@@ -493,6 +515,9 @@
         flex: 1 1 auto;
         min-height: 0;
         overflow: auto;
+        /* The head is a sibling and does not scroll; a gutter that appears and disappears with the
+           row count would move every proportional column under it. */
+        scrollbar-gutter: stable;
         position: relative;
     }
 

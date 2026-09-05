@@ -12,6 +12,7 @@ import {
     matchesText,
     nextSelection,
     rangeIds,
+    tableLayout,
     visibleWindow,
     type DataTableColumn,
 } from './tableModel.js';
@@ -190,9 +191,61 @@ describe('visibleWindow', () => {
 describe('gridTemplate', () => {
     it('turns widths into a grid template and skips hidden columns', () => {
         expect(gridTemplate(columns, false)).toBe(
-            'minmax(80px, 1fr) minmax(80px, 1fr) minmax(80px, 1fr) minmax(80px, 1fr)',
+            'minmax(56px, 120fr) minmax(56px, 120fr) minmax(56px, 120fr) minmax(56px, 120fr)',
         );
-        expect(gridTemplate([{key: 'a', label: 'a', width: 120}], true)).toBe('22px 120px');
+        // A width is a weight, so the grid fills its container exactly (D-34, `she`'s tables) -
+        // unless the column says it is not to be stretched.
+        expect(gridTemplate([{key: 'a', label: 'a', width: 120}], true)).toBe('22px minmax(56px, 120fr)');
+        expect(gridTemplate([{key: 'a', label: 'a', width: 24, fixed: true}], false)).toBe('24px');
+        // The minimum never exceeds the declared width: a 24 px column stays 24 px wide.
+        expect(gridTemplate([{key: 'a', label: 'a', width: 40}], false)).toBe('minmax(40px, 40fr)');
+    });
+});
+
+/**
+ * D-34: the channel sub-grid used to get a template of its own, so none of its columns stood under
+ * the column it belongs to, and expanding a device turned the grid ragged.
+ */
+describe('tableLayout', () => {
+    const parent: DataTableColumn<Row>[] = [
+        {key: 'icon', label: '', width: 24, fixed: true},
+        {key: 'name', label: 'Name', width: 200},
+        {key: 'address', label: 'ADDRESS', width: 160},
+        {key: 'firmware', label: 'FIRMWARE', width: 150},
+    ];
+    const child: DataTableColumn<Row>[] = [
+        {key: 'name', label: 'Name', width: 90},
+        {key: 'address', label: 'ADDRESS', width: 90},
+        {key: 'direction', label: 'DIRECTION', width: 100},
+    ];
+
+    it('merges the two column sets into one track list, by key', () => {
+        const layout = tableLayout(parent, child, true);
+        // `direction` is new and follows `address`; `name` and `address` keep the parent's width,
+        // so a device column can never move when a device is expanded.
+        expect(layout.template).toBe(
+            '22px 24px minmax(56px, 200fr) minmax(56px, 160fr) minmax(56px, 100fr) minmax(56px, 150fr)',
+        );
+        expect(layout.track).toEqual({icon: 2, name: 3, address: 4, direction: 5, firmware: 6});
+    });
+
+    it('puts a sub column that matches nothing in front when it comes first', () => {
+        const layout = tableLayout(parent, [{key: 'flag', label: 'F', width: 30}], false);
+        expect(layout.track['flag']).toBe(1);
+        expect(layout.track['icon']).toBe(2);
+    });
+
+    it('skips hidden columns on both sides', () => {
+        const layout = tableLayout(
+            [...parent, {key: 'gone', label: '', width: 10, hidden: true}],
+            [...child, {key: 'alsogone', label: '', width: 10, hidden: true}],
+            false,
+        );
+        expect(Object.keys(layout.track)).toEqual(['icon', 'name', 'address', 'direction', 'firmware']);
+    });
+
+    it('is the plain column template when there is no sub-grid', () => {
+        expect(tableLayout(parent, undefined, false).template).toBe(gridTemplate(parent, false));
     });
 });
 

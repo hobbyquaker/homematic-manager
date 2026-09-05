@@ -279,3 +279,100 @@ describe('the channel sub-grid', () => {
         expect(onactivate).not.toHaveBeenCalled();
     });
 });
+
+/**
+ * D-34, after the maintainer's first look: "table columns are not regularly sized when the channel
+ * sub-grid is expanded". The whole table is drawn on one set of tracks now, so this measures
+ * pixels rather than class names - which is what browser mode is for. jsdom has no layout and
+ * reports every box as zero, so the file skips these there rather than asserting nothing.
+ */
+const hasLayout = document.body.getBoundingClientRect().width > 0;
+
+describe('column tracks at 1280 px', () => {
+    const deviceColumns: DataTableColumn<Row>[] = [
+        {key: 'icon', label: '', width: 24, fixed: true, sortable: false, filterable: false, value: () => ''},
+        {key: 'name', label: 'Name', width: 200},
+        {key: 'address', label: 'ADDRESS', width: 160, mono: true},
+        {key: 'type', label: 'TYPE', width: 150},
+    ];
+    const channelColumns: DataTableColumn<Row>[] = [
+        {key: 'name', label: 'Name', width: 200},
+        {key: 'address', label: 'ADDRESS', width: 160, mono: true},
+        {key: 'direction', label: 'DIRECTION', width: 110},
+    ];
+
+    /** Left edge of every header cell, expander included, in order. */
+    function headerXs(): number[] {
+        return screen.getAllByRole('columnheader').map((cell) => Math.round(cell.getBoundingClientRect().left));
+    }
+
+    function cellXs(row: HTMLElement): number[] {
+        return [...row.querySelectorAll('[role="gridcell"]')].map((cell) =>
+            Math.round(cell.getBoundingClientRect().left),
+        );
+    }
+
+    function renderTable(): HTMLElement {
+        render(DataTable, {
+            props: {
+                ...base,
+                columns: deviceColumns,
+                subColumns: channelColumns,
+                subRows: (row: Row) => row.channels ?? [],
+                rows: makeRows(40),
+            },
+        });
+        const table = document.querySelector<HTMLElement>('.hmm-table')!;
+        // Pinned rather than inherited: the assertion is about the layout, not about whatever size
+        // the test runner gives its iframe.
+        table.style.width = '1280px';
+        return table;
+    }
+
+    it.skipIf(!hasLayout)('does not move a device column when a device is expanded', async () => {
+        renderTable();
+        const before = headerXs();
+        const deviceBefore = cellXs(rowsInDom()[0]!);
+        expect(before).toHaveLength(5);
+
+        await fireEvent.click(screen.getAllByRole('button', {name: 'Expand row'})[0]!);
+
+        expect(headerXs()).toEqual(before);
+        expect(cellXs(rowsInDom()[0]!)).toEqual(deviceBefore);
+    });
+
+    it.skipIf(!hasLayout)('puts every channel column under the device column of the same name', async () => {
+        renderTable();
+        const header = headerXs();
+        await fireEvent.click(screen.getAllByRole('button', {name: 'Expand row'})[0]!);
+
+        const rows = rowsInDom();
+        // 0 device, 1 the sub-grid's label row, 2 the channel.
+        const labels = cellXs(rows[1]!);
+        const channel = cellXs(rows[2]!);
+        expect(channel).toEqual(labels);
+        // Name and ADDRESS are columns both depths have: same track, same pixel.
+        expect(channel[0]).toBe(header[2]);
+        expect(channel[1]).toBe(header[3]);
+        // DIRECTION belongs to the sub-grid alone and gets a track of its own, between ADDRESS and
+        // TYPE - after the device's ADDRESS column and before its TYPE column.
+        expect(channel[2]).toBeGreaterThan(header[3]!);
+        expect(channel[2]).toBeLessThan(header[4]!);
+    });
+
+    it.skipIf(!hasLayout)('keeps the head over the rows although only the body scrolls', () => {
+        renderTable();
+        const body = document.querySelector<HTMLElement>('.hmm-table-body')!;
+        // 40 rows at 23 px in a 230 px body: the body really does have a scrollbar here.
+        expect(body.scrollHeight).toBeGreaterThan(body.clientHeight);
+        expect(cellXs(rowsInDom()[0]!)).toEqual(headerXs().slice(1));
+    });
+
+    it.skipIf(!hasLayout)('fills the width exactly instead of scrolling sideways', () => {
+        const table = renderTable();
+        const body = document.querySelector<HTMLElement>('.hmm-table-body')!;
+        expect(body.scrollWidth).toBeLessThanOrEqual(body.clientWidth);
+        const last = screen.getAllByRole('columnheader').at(-1)!.getBoundingClientRect();
+        expect(Math.round(last.right)).toBeLessThanOrEqual(Math.round(table.getBoundingClientRect().right));
+    });
+});

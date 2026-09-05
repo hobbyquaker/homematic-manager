@@ -59,7 +59,16 @@
 
     /** The 2.7 link grid: sender image and name, SENDER, TYPE, receiver image and name, RECEIVER, TYPE, NAME, DESCRIPTION. */
     const columns = $derived<DataTableColumn<LinkRecord>[]>([
-        {key: 'senderIcon', label: '', width: 24, sortable: false, filterable: false, align: 'center', value: () => ''},
+        {
+            key: 'senderIcon',
+            label: '',
+            width: 24,
+            fixed: true,
+            sortable: false,
+            filterable: false,
+            align: 'center',
+            value: () => '',
+        },
         {
             key: 'senderName',
             label: `${t('Sender')} ${t('Name')}`,
@@ -77,6 +86,7 @@
             key: 'receiverIcon',
             label: '',
             width: 24,
+            fixed: true,
             sortable: false,
             filterable: false,
             align: 'center',
@@ -99,6 +109,7 @@
             key: 'FLAGS',
             label: 'FLAGS',
             width: 48,
+            fixed: true,
             align: 'center',
             sortable: false,
             value: (link) => (decodeLinkFlags(link.FLAGS).broken ? 'broken' : ''),

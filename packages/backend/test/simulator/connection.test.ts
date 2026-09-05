@@ -76,11 +76,18 @@ describe.skipIf(!simulatorAvailable)('connecting to hm-simulator', () => {
             callback: {ip: '127.0.0.1', xmlrpcPort: 0, binrpcPort: 0},
             extraInterfaces: [],
         } as never);
-        // CUxD is not started by the simulator, so this is the "interface is not there" path
+        // CUxD is not started by the simulator, so this is the "interface is not there" path. A
+        // refused port marks the interface absent with a warn notice (task 15); where the connect
+        // attempt times out instead of being refused (WSL with mirrored networking does that), it
+        // stays an error notice. Both mean "not connected, and the user was told".
         const states = await harness.backend.request('interfaces.list');
         expect(states[0]?.protocol).toBe('binrpc');
         expect(states[0]?.connected).toBe(false);
-        expect(harness.notices.some((notice) => notice.level === 'error')).toBe(true);
+        const told = harness.notices.filter((notice) => notice.level === 'error' || notice.level === 'warn');
+        expect(told.length).toBeGreaterThan(0);
+        if (states[0]?.absent === true) {
+            expect(told.some((notice) => notice.level === 'warn')).toBe(true);
+        }
     });
 
     it('connects through TLS with a self-signed certificate', async () => {

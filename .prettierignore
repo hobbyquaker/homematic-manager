@@ -1,6 +1,7 @@
 legacy/
 docs/
 coverage/
+coverage-e2e/
 dist/
 dist-electron/
 out/

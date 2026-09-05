@@ -82,7 +82,16 @@ jobs:
       - run: npm run build
       # Every spec skips itself and prints a `::warning::` while hm-simulator is unpublished; see
       # the note on the `test` job. `SIMULATOR_REQUIRED: 1` here is what turns that into a failure.
-      - run: npm run test:e2e
+      # `c8` around the whole Playwright run: the workers inherit NODE_V8_COVERAGE, and the build's
+      # source maps put the result back on the TypeScript sources. This is the only coverage the
+      # backend and the web host get from a real browser over a real socket.
+      - run: npm run test:e2e:cov
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-e2e
+          path: coverage-e2e/
+          if-no-files-found: warn
       - name: The traces of a failed run
         if: failure()
         uses: actions/upload-artifact@v7
@@ -93,6 +102,39 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  coverage:
+    # D-12: one report out of the two runs that produce coverage, with the per-package targets shown
+    # and **never** enforced. Its own job because the two runs are two jobs; `if: always()` because
+    # a red test job is exactly when the number is interesting; and no `npm ci`, because the merge
+    # script uses nothing but Node's own modules.
+    name: Coverage report
+    runs-on: ubuntu-latest
+    needs: [test, e2e]
+    if: always()
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@v7
+        continue-on-error: true
+        with:
+          name: coverage-node-24
+          path: coverage
+      - uses: actions/download-artifact@v7
+        continue-on-error: true
+        with:
+          name: coverage-e2e
+          path: coverage-e2e
+      # Prints the table and writes it to the job summary. Exits 0 whatever it finds, including
+      # nothing at all - the point is that a human reads it, not that a bot blocks on it.
+      - run: npm run coverage:report
+      - uses: actions/upload-artifact@v7
+        with:
+          name: coverage-merged
+          path: coverage/merged.lcov
+          if-no-files-found: warn
 
   npm-package:
     # D-24: `apps/web` is published to npm as its own deliverable, and what goes into that tarball

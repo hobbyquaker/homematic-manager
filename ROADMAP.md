@@ -10,9 +10,10 @@ reused. This file holds open items; a finished task moves to `roadmap-archive/ta
 was done, measured and found, and its line in the contents gets a ✅ marker. Decisions are **D-n**,
 open questions **OQ-n**; when the maintainer changes a decision, record it here with the date.
 
-Status 2026-09-05: tasks 2 (foundation), 3 (core), 5 (hm-simulator 1.0, branch `1.0-dev` in its own
-repository, not yet pushed or published) and 9 (data pipeline) are done, version `3.0.0-dev.0` on
-branch `3.0-dev` (pushed, D-21); task 7 (UI foundation) is in progress, task 4 (backend) starts next. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+Status 2026-09-05: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 1.0, branch
+`1.0-dev` in its own repository, not yet pushed or published) and 9 (data pipeline) are done,
+version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); task 7 (UI foundation) is in progress,
+task 6 (write-safety lab study) runs next, then 11 and 12. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
@@ -48,7 +49,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - 1. Legacy stopgap release 2.8 ❌ dropped (D-7), number not reused
 - 2. Project foundation ✅ [archived](roadmap-archive/task-2.md)
 - 3. Core package ✅ [archived](roadmap-archive/task-3.md)
-- [4. Backend package](#4-backend-package)
+- 4. Backend package ✅ [archived](roadmap-archive/task-4.md)
 - 5. hm-simulator 1.0 ✅ [archived](roadmap-archive/task-5.md) (branch `1.0-dev` in its own repository, release by the maintainer)
 - [6. Paramset write safety and the CONFIG_PENDING study](#6-paramset-write-safety-and-the-config_pending-study)
 - [7. UI foundation](#7-ui-foundation)
@@ -214,7 +215,10 @@ The fix for #98 and the reason the write path is rebuilt before any UI exists:
 5a. Link paramset writes send `UI_HINT` = `LinkProfile.id` (and, as 2.x did, `UI_TEMPLATE`)
    next to the profile's parameters; the data of task 9 does not carry them, and a link written
    without `UI_HINT` shows as "expert" in the WebUI.
-6. Lab study on the Charly (HmIPW-DRS8/DRI16, wired) and the OpenCCU box (HmIP-PDT, HmIP-WRC2):
+6. Lab study on the Charly (HmIPW-DRS8/DRI16, wired) and the OpenCCU box (HmIP-PDT, HmIP-WRC2,
+   BidCos-RF HM-CC-TC and HM-Sec-SC); also checks the core assumptions A-1 and A-5, whether a
+   LINK description depends on the peer (task 4), and how an umlaut in a link name survives
+   XML-RPC vs. BIN-RPC:
    provoke `CONFIG_PENDING` with a deliberately invalid `putParamset` (unknown parameter, out of
    range, wrong type, enum name vs index), record hmipserver's reaction (`getServiceMessages`,
    events, `getParamset MASTER` afterwards, `/var/log/messages`), find the recovery that works
@@ -240,6 +244,8 @@ The fix for #98 and the reason the write path is rebuilt before any UI exists:
 Everything in section 2.1 of the analysis, tab by tab, with e2e tests per workflow, each view
 checked in the light and the dark theme (D-22):
 
+- hmipserver deletes and re-sends every HmIP device on each `init` (eq-3/occu#45): an empty device
+  list right after connecting is transient, never "no devices" (found in task 4).
 - Devices: grid, channel sub-grid, images (OQ-4), flags, `AVAILABLE_FIRMWARE`/update buttons with
   live refresh (#95, #113), context menu (rename, delete with flags, replace, restore, clear
   config cache, reportValueUsage incl. multi-select #18/PR #138, paramsets).
@@ -354,6 +360,9 @@ Devices tab (#25), link profile templates (#21), ReGa inbox auto-confirm (#54, o
 ReGa service-message ack (#94, optional ReGa), smoke-detector teams (#97), per-device event
 counters (#129), user-defined extra interfaces for CCU-Jack (#135, verify its RPC surface first).
 HVL (#123) is not supported: the project is dead (D-19). No Homegear-specific features (D-20).
+Upstream one-liners found in task 4: latin1 decoding in `binrpc` (`decodeString` uses UTF-8) and a
+`responseEncoding` option on `homematic-xmlrpc`'s `Server`; until then a `°` from rfd/CUxD over
+BIN-RPC arrives as U+FFFD.
 
 ## 16. Documentation
 

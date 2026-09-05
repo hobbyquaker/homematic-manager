@@ -84,6 +84,9 @@ win:
       arch: [x64, arm64]
 
 nsis:
+  # D-26: the installer shows the AGPLv3 of the repository root, not a copy that can drift. The
+  # path is resolved against this directory, so `../../LICENSE` is the one at the top of the tree.
+  license: ../../LICENSE
   # Per user, so no UAC prompt and no administrator: the app writes nothing outside the profile.
   oneClick: false
   perMachine: false

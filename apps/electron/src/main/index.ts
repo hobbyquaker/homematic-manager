@@ -310,7 +310,7 @@ async function start(): Promise<void> {
         applicationName: 'Homematic Manager',
         applicationVersion: version,
         version: `Electron ${process.versions.electron}`,
-        copyright: 'GPL-3.0-or-later - Sebastian Raff and contributors',
+        copyright: 'AGPL-3.0-or-later - Sebastian Raff and contributors',
     });
     buildMenu();
     registerHostCommands();

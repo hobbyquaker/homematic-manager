@@ -8,6 +8,8 @@
   "productName": "Homematic Manager",
   "license": "AGPL-3.0-or-later",
   "author": "Sebastian 'hobbyquaker' Raff <hobbyquaker@gmail.com>",
+  "//homepage": "Not decoration: the deb target refuses to build without a project homepage, and the About panel of a packaged app links it.",
+  "homepage": "https://github.com/hobbyquaker/homematic-manager",
   "main": "./out/main/index.js",
   "//desktopName": "Read by electron-builder, not by node: it becomes the Linux .desktop file name and, with linux.syncDesktopName, the WM_CLASS Electron reports - which is what links a running window to its launcher icon.",
   "desktopName": "homematic-manager.desktop",

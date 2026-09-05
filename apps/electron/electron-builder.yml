@@ -121,6 +121,11 @@ linux:
       arch: [x64, arm64]
 
 deb:
+  # Both of these default to the npm package name, which is `@homematic-manager/electron` - not a
+  # Debian package name, and a file name with a `/` in it that electron-builder happily turns into
+  # a subdirectory of the output.
+  packageName: homematic-manager
+  artifactName: homematic-manager_${version}_${arch}.${ext}
   # D-16: glibc 2.31 and newer, which is Debian 11 / Ubuntu 20.04 upwards.
   depends:
     - libgtk-3-0

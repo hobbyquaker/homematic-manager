@@ -40,6 +40,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 | D-19 | No support for the HVL addon (#123): the project is dead. The issue is closed with that note. |
 | D-20 | No Homegear-specific work. Checked 2026-09-05: the Homegear repository still receives build-system commits (last 2026-05) but its last release is 0.7.40 from 2019-07, three issues were opened since 2025, 127 stars; the user base is small and the project barely maintained. Homegear keeps working through the generic XML-RPC path where it behaves like a CCU; the `setName` special case (#41) is dropped and #41, #59, #60, #100, #106 are closed with that note. |
 | D-21 | (2026-09-05) The branch `3.0-dev` may be pushed to GitHub by the agent so that GitHub Actions builds the Windows/macOS/Linux artifacts (task 11) and runs CI; the maintainer downloads dev builds from the workflow artifacts. Tags, releases and pushes to `master` stay with the maintainer. |
+| D-22 | (2026-09-05) Dark mode is a requirement, not a nicety: a light and a dark theme, following the OS setting by default with a manual switch that is persisted; every tab, dialog, table state, RSSI colour and notice must be legible in both, and component tests cover both themes where colours carry meaning (RSSI classes, service-message severity, connection marks). |
 
 ## Contents
 
@@ -230,12 +231,14 @@ The fix for #98 and the reason the write path is rebuilt before any UI exists:
 - Reusable pieces: a virtualised, sortable, filterable data table with sub-rows (replaces
   jqGrid), native `<dialog>` based dialogs (replaces jQuery UI), multi-select with filter,
   context menus, progress and RPC log panel (replaces the modal RPC dialog), i18n with a
-  language switch (de/en), theme (light/dark).
+  language switch (de/en), light and dark theme per D-22 (CSS custom properties, `prefers-color-scheme`
+  default, persisted manual switch).
 - Component tests with vitest browser mode and `@testing-library/svelte`.
 
 ## 8. UI feature parity
 
-Everything in section 2.1 of the analysis, tab by tab, with e2e tests per workflow:
+Everything in section 2.1 of the analysis, tab by tab, with e2e tests per workflow, each view
+checked in the light and the dark theme (D-22):
 
 - Devices: grid, channel sub-grid, images (OQ-4), flags, `AVAILABLE_FIRMWARE`/update buttons with
   live refresh (#95, #113), context menu (rename, delete with flags, replace, restore, clear

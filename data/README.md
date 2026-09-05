@@ -111,6 +111,13 @@ The three `cross_validation.*` error messages are the only hand-written strings 
 `/config/img/devices/<size>/`. Ten of the 535 entries live in the CCU's `coupling/` subdirectory;
 the contract asks for a bare name, so `scripts/icons-from-ccu.mjs` retries that path.
 
+**Which `<size>` directory, measured on two CCUs in task 13**: the plain names live in `250/` (267
+files, plus 11 in `250/coupling/`), while `50/` holds the WebUI's list thumbnails and suffixes every
+name with `_thumb` (254 files). The union of the four candidates `250/<file>`,
+`250/coupling/<file>`, `50/<base>_thumb<ext>` and `50/<file>` resolves 278 of 278 mapped types.
+`scripts/icons-from-ccu.mjs` still defaults to `--size 50` with plain names, which finds nothing at
+all on a real CCU; run it with `--size 250` until that default is corrected.
+
 `dist/icons/` is the fallback for installations without a CCU (Homegear, bare rfd/hmipserver): the
 BidCos-RF and BidCos-Wired images of the 2.x tree at 50 px height as webp, 121 files for 201 device
 types, 79 KB. They are named after the entry in `device-icons.json`, so both sources resolve the same

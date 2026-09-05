@@ -82,10 +82,18 @@ fresh read from the CCU takes seconds. The import happens once and says so with 
 
 ## Device images (D-10)
 
-The pictures in the device grid come from the CCU's own web server
-(`/config/img/devices/50/<file>`, with the `coupling/` subdirectory as a second candidate) and are
-cached under `userData/images`. A small webp subset ships inside the app for people running
-Homegear or a bare rfd, who have no CCU to ask.
+The pictures in the device grid come from the CCU's own web server and are cached under
+`userData/images`. A small webp subset ships inside the app for people running Homegear or a bare
+rfd, who have no CCU to ask.
+
+**Where they really are, measured on hardware in task 13**: the plain file names of
+`device-icons.json` live in `/config/img/devices/250/` (and `250/coupling/` for ten of them); the
+`50/` directory holds the WebUI's list thumbnails, whose names carry a `_thumb` suffix. On both lab
+firmwares the four candidates `250/<file>`, `250/coupling/<file>`, `50/<base>_thumb<ext>` and
+`50/<file>` resolved 278 of 278 mapped types, while the single `50/<file>` this module still asks
+for resolved **none**. `apps/web` walks the four candidates since `405f108`; this copy has not been
+corrected, so an Electron user gets the bundled webp subset instead of the CCU's own pictures. The
+fix is the reason `images.ts` should move into `packages/backend` rather than stay a second copy.
 
 The renderer never sees the bytes over the API. Main registers an `hmm-image://` protocol, and the
 UI puts `hmm-image://device/<DEVICE-TYPE>` straight into an `<img src>`:
@@ -94,10 +102,10 @@ UI puts `hmm-image://device/<DEVICE-TYPE>` straight into an `<img src>`:
 const url = window.__HMM_HOST__.deviceImageUrl('HmIP-BSM');
 ```
 
-**For task 8:** the UI has no hook for this yet. `window.__HMM_HOST__` also carries `info()`,
-`setTheme()`, `onSystemTheme()`, `onMenuAction()` and the five `update.*` commands; its shape is
-`HostBridge` in `src/shared/ipc.ts`. `apps/web` has no such host, so anything the UI uses from it
-has to degrade to "no picture" when the global is absent.
+`window.__HMM_HOST__` also carries `info()`, `setTheme()`, `onSystemTheme()`, `onMenuAction()` and
+the five `update.*` commands; its shape is `HostBridge` in `src/shared/ipc.ts`. `apps/web` has no
+such host, so everything the UI uses from it degrades when the global is absent - a labelled
+placeholder instead of a picture, the version without the host information in the About dialog.
 
 ## Updates (D-16)
 

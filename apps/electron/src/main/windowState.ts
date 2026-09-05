@@ -168,10 +168,13 @@ export function isVisible(state: WindowState, displays: Rectangle[]): boolean {
 }
 
 /** The options `new BrowserWindow()` wants; the position is left out when it is not remembered. */
-export function browserWindowBounds(state: WindowState, options: WindowStateOptions): Partial<Rectangle> {
+export function browserWindowBounds(
+    state: WindowState,
+    defaults: Pick<WindowStateOptions, 'defaultWidth' | 'defaultHeight'>,
+): Partial<Rectangle> {
     const size = {
-        width: Number.isNaN(state.width) ? options.defaultWidth : state.width,
-        height: Number.isNaN(state.height) ? options.defaultHeight : state.height,
+        width: Number.isNaN(state.width) ? defaults.defaultWidth : state.width,
+        height: Number.isNaN(state.height) ? defaults.defaultHeight : state.height,
     };
     if (Number.isNaN(state.x) || Number.isNaN(state.y)) {
         return size;

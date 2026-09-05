@@ -100,7 +100,17 @@ jobs:
       # rather than packing a second, possibly different one. `--provenance` adds npm's own
       # provenance statement on top of the GitHub attestations.
       - name: Publish
-        run: npm publish "${{ steps.pack.outputs.tarball }}" --provenance --access public
+        # A pre-release (3.0.0-dev.n, -alpha.n, -beta.n) goes out under the `next` dist-tag so
+        # that `npm install -g` keeps giving users the last stable version; a plain version moves
+        # `latest`.
+        run: |
+          VERSION="$(node -p "require('./apps/web/package.json').version")"
+          case "$VERSION" in
+            *-*) TAG=next ;;
+            *) TAG=latest ;;
+          esac
+          echo "publishing $VERSION as $TAG"
+          npm publish "${{ steps.pack.outputs.tarball }}" --provenance --access public --tag "$TAG"
 
       - name: Attach the tarball and its SBOM to the draft release
         uses: softprops/action-gh-release@v2

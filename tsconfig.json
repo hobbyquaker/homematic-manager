@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    {"path": "packages/core"},
+    {"path": "packages/backend"},
+    {"path": "apps/electron"},
+    {"path": "apps/web"},
+    {"path": "apps/ccu-addon"}
+  ]
+}

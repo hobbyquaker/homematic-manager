@@ -1,0 +1,9 @@
+legacy/
+docs/
+coverage/
+dist/
+out/
+.vite/
+package-lock.json
+ROADMAP.md
+Readme.md

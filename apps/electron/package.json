@@ -1,0 +1,22 @@
+{
+  "name": "@homematic-manager/electron",
+  "version": "3.0.0-dev.0",
+  "private": true,
+  "type": "module",
+  "description": "Electron host of the Homematic Manager: main process, preload, renderer",
+  "license": "GPL-3.0-or-later",
+  "main": "./out/main/index.js",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "electron-vite build",
+    "dev": "electron-vite dev"
+  },
+  "devDependencies": {
+    "electron": "^44.2.0",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "vite": "^7.3.6"
+  }
+}

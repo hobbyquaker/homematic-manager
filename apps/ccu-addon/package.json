@@ -1,0 +1,16 @@
+{
+  "name": "@homematic-manager/ccu-addon",
+  "version": "3.0.0-dev.0",
+  "private": true,
+  "type": "module",
+  "description": "CCU3 / OpenCCU addon package of the Homematic Manager",
+  "license": "GPL-3.0-or-later",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "tsc -b"
+  }
+}

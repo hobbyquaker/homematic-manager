@@ -1,6 +1,11 @@
-*.pid
 node_modules/
+dist/
+out/
+coverage/
+.vite/
+*.tsbuildinfo
+
+*.pid
 .idea
 .DS_Store
-dist
 occu

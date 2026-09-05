@@ -1,0 +1,16 @@
+{
+  "name": "@homematic-manager/web",
+  "version": "3.0.0-dev.0",
+  "private": true,
+  "type": "module",
+  "description": "Homematic Manager backend as a local HTTP/WebSocket server serving the built UI",
+  "license": "GPL-3.0-or-later",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "tsc -b"
+  }
+}

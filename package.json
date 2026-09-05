@@ -1,0 +1,52 @@
+{
+  "name": "homematic-manager",
+  "version": "3.0.0-dev.0",
+  "private": true,
+  "type": "module",
+  "description": "Homematic device configuration and administration",
+  "license": "GPL-3.0-or-later",
+  "author": "Sebastian 'hobbyquaker' Raff <hobbyquaker@gmail.com>",
+  "contributors": [
+    "André 'Anli' Litfin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hobbyquaker/homematic-manager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hobbyquaker/homematic-manager/issues"
+  },
+  "homepage": "https://github.com/hobbyquaker/homematic-manager",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "lint": "eslint . && prettier --check .",
+    "lint:fix": "eslint . --fix && prettier --write .",
+    "format": "prettier --write .",
+    "typecheck": "tsc -b && npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "test:cov": "vitest run --coverage",
+    "build": "npm run build --workspaces --if-present",
+    "version:dev": "node scripts/version-dev.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.4.1",
+    "@vitest/coverage-v8": "^5.0.0",
+    "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-svelte": "^3.23.0",
+    "globals": "^17.12.0",
+    "jsdom": "^30.0.1",
+    "prettier": "^3.9.6",
+    "prettier-plugin-svelte": "^4.1.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.69.0",
+    "vitest": "^5.0.0"
+  }
+}

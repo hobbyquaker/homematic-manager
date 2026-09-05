@@ -11,6 +11,10 @@
     "node": ">=22.12"
   },
   "scripts": {
-    "build": "tsc -b"
+    "build": "tsc -b",
+    "package": "./build.sh",
+    "test:cgi": "./test/cgi-test.sh",
+    "test:package": "./test/package-test.sh",
+    "test:container": "./test/container-test.sh"
   }
 }

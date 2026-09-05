@@ -10,10 +10,10 @@ reused. This file holds open items; a finished task moves to `roadmap-archive/ta
 was done, measured and found, and its line in the contents gets a ✅ marker. Decisions are **D-n**,
 open questions **OQ-n**; when the maintainer changes a decision, record it here with the date.
 
-Status 2026-09-05: task 2 (project foundation) is done, version `3.0.0-dev.0` on branch `3.0-dev`;
-tasks 3 (core), 5 (hm-simulator 1.0, in its own repository) and 9 (data pipeline) are in
-progress. The data contract between tasks 3 and 9 is `packages/core/src/data/types.ts`. Last
-release 2.7.1 (2023-01-28).
+Status 2026-09-05: tasks 2 (project foundation) and 9 (data pipeline) are done, version
+`3.0.0-dev.0` on branch `3.0-dev`; tasks 3 (core) and 5 (hm-simulator 1.0, in its own repository)
+are in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
 
@@ -51,7 +51,7 @@ release 2.7.1 (2023-01-28).
 - [6. Paramset write safety and the CONFIG_PENDING study](#6-paramset-write-safety-and-the-config_pending-study)
 - [7. UI foundation](#7-ui-foundation)
 - [8. UI feature parity](#8-ui-feature-parity)
-- [9. Device metadata pipeline](#9-device-metadata-pipeline)
+- 9. Device metadata pipeline ✅ [archived](roadmap-archive/task-9.md)
 - [10. Device-specific editors](#10-device-specific-editors)
 - [11. Electron host, builds, releases](#11-electron-host-builds-releases)
 - [12. Web host for development and e2e](#12-web-host-for-development-and-e2e)
@@ -209,6 +209,9 @@ The fix for #98 and the reason the write path is rebuilt before any UI exists:
 4. Preview before write: per channel the exact parameters, values and RPC call; bulk operations
    show progress and can be cancelled; pacing per interface (HmIP slower).
 5. Session write log with export (task 4).
+5a. Link paramset writes send `UI_HINT` = `LinkProfile.id` (and, as 2.x did, `UI_TEMPLATE`)
+   next to the profile's parameters; the data of task 9 does not carry them, and a link written
+   without `UI_HINT` shows as "expert" in the WebUI.
 6. Lab study on the Charly (HmIPW-DRS8/DRI16, wired) and the OpenCCU box (HmIP-PDT, HmIP-WRC2):
    provoke `CONFIG_PENDING` with a deliberately invalid `putParamset` (unknown parameter, out of
    range, wrong type, enum name vs index), record hmipserver's reaction (`getServiceMessages`,
@@ -239,7 +242,10 @@ Everything in section 2.1 of the analysis, tab by tab, with e2e tests per workfl
 - Paramset editor: generic description-driven form with the metadata layer (task 9), help texts,
   `setValue` per datapoint, multi-apply (task 6), preview and write log.
 - Links: grid, add (role matrix), remove (multi, #80), edit name/description, play short/long,
-  defective links (#79), link paramset editor with profiles and expert view (#96, #105).
+  defective links (#79), link paramset editor with profiles and expert view (#96, #105). The
+  easy-mode dialog shows the sender's full option list from `senderMetadata` (task 9 flattened
+  the 2.x per-profile `options`) and greys out what the chosen profile fixes; editors derive from
+  the description (`TYPE`, `UNIT`, `MIN`, `MAX`), not from the dropped 2.x `input` hints.
 - RPC console: method catalogue with generated argument forms including structs for `putParamset`
   (#27, #136), history, raw response.
 - Radio: interfaces grid, RSSI matrix with colours, `setBidcosInterface`/roaming with correct
@@ -365,6 +371,7 @@ devices from his own stock) and OQ-9 (the Turkish translations stay as a fallbac
 | | Question | Recommendation |
 | --- | --- | --- |
 | OQ-12 | When to move to TypeScript 7 (native) and vite 8? Blocked today by typescript-eslint 8, svelte-check 4 and electron-vite 5 peer ranges. | Recurring "toolchain bump" check next to the quarterly Electron bump of task 11; bump when all three peers allow it. |
+| OQ-13 | `data/dist/` is 9.2 MB of pretty-printed JSON (65 profile files). Ship it gzipped or minified in the CCU addon and the Electron bundle? | Task 13 measures it on the CCU3 (inodes and flash); the apps load profiles lazily per receiver type either way. Decide there. |
 
 ## Lab and hardware
 

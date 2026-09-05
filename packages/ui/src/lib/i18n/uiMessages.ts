@@ -196,6 +196,10 @@ export const UI_MESSAGES: MessageCatalogue = {
     // The events tab.
     Pause: {de: 'Anhalten', en: 'Pause'},
     'Events per device': {de: 'Ereignisse je Gerät', en: 'Events per device'},
+
+    // The radio tab.
+    Peer: {de: 'Gegenstelle', en: 'Peer'},
+    'Heard best by {address}': {de: 'Am besten empfangen von {address}', en: 'Heard best by {address}'},
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

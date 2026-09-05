@@ -45,6 +45,13 @@
     --hmm-error: #cc2222;
     --hmm-focus: #4d90fe;
 
+    /* The RSSI scale of the radio tab. The 2.x gradient was computed per cell and looked the same
+       in both themes; these are the three classes core's `rssiClass()` produces, as tokens. */
+    --hmm-rssi-good: #b7e2b7;
+    --hmm-rssi-medium: #f4e0a3;
+    --hmm-rssi-bad: #f0b4b4;
+    --hmm-rssi-text: #1a1a1a;
+
     /* Metrics - the 2.x grid density */
     --hmm-font: -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
     --hmm-font-mono: 'Lucida Console', Consolas, Menlo, Monaco, monospace;
@@ -89,6 +96,11 @@
         --hmm-warn: #e0a740;
         --hmm-error: #f06a6a;
         --hmm-focus: #6db3e8;
+
+        --hmm-rssi-good: #2f6b3a;
+        --hmm-rssi-medium: #7a6220;
+        --hmm-rssi-bad: #7a2f2f;
+        --hmm-rssi-text: #f0f3f6;
     }
 }
 
@@ -124,6 +136,11 @@
     --hmm-warn: #e0a740;
     --hmm-error: #f06a6a;
     --hmm-focus: #6db3e8;
+
+    --hmm-rssi-good: #2f6b3a;
+    --hmm-rssi-medium: #7a6220;
+    --hmm-rssi-bad: #7a2f2f;
+    --hmm-rssi-text: #f0f3f6;
 }
 
 html,

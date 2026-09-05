@@ -44,6 +44,10 @@ const MEANINGFUL_TOKENS = [
     '--hmm-backdrop',
     '--hmm-shadow-menu',
     '--hmm-shadow-toast',
+    '--hmm-rssi-good',
+    '--hmm-rssi-medium',
+    '--hmm-rssi-bad',
+    '--hmm-rssi-text',
 ];
 
 function block(css: string, selector: string): string {

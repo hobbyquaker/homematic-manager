@@ -15,6 +15,7 @@ import {LinksStore} from './LinksStore.svelte.js';
 import {NamesStore} from './NamesStore.svelte.js';
 import {NoticesStore} from './NoticesStore.svelte.js';
 import {ParamsetStore} from './ParamsetStore.svelte.js';
+import {RadioStore} from './RadioStore.svelte.js';
 import {ServiceMessagesStore} from './ServiceMessagesStore.svelte.js';
 import {tabsForInterface, type TabId} from './routing.js';
 import {WriteLogStore} from './WriteLogStore.svelte.js';
@@ -52,6 +53,7 @@ export class Stores {
     readonly host: HostStore;
     readonly meta: MetaStore;
     readonly paramsets: ParamsetStore;
+    readonly radio: RadioStore;
 
     constructor(transport: Transport, options: StoresOptions = {}) {
         this.transport = transport;
@@ -73,6 +75,7 @@ export class Stores {
             ...(options.dataSource === undefined ? {} : {source: options.dataSource}),
         });
         this.paramsets = new ParamsetStore(transport, this.notices);
+        this.radio = new RadioStore(transport, this.notices);
         this.host = new HostStore({
             ...(options.hostBridge === undefined ? {} : {bridge: options.hostBridge}),
             ...(options.hostScope === undefined ? {} : {scope: options.hostScope}),
@@ -138,6 +141,7 @@ export class Stores {
     }
 
     dispose(): void {
+        this.radio.dispose();
         this.host.dispose();
         this.writeLog.dispose();
         this.events.dispose();

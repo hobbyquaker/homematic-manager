@@ -52,6 +52,12 @@ export interface FlatRow<T> {
     readonly rootId: string;
     /** `header` is the sub-grid's label row; everything else is a real row. */
     readonly kind: 'row' | 'header';
+    /**
+     * Unique per rendered line, which `id` is not: the RSSI sub-grid lists a device's peers, and a
+     * peer can be a device that has its own top-level row. Selection still works on `id`; this is
+     * only what the keyed `{#each}` uses.
+     */
+    readonly key: string;
 }
 
 export function cellValue<T>(row: T, column: DataTableColumn<T>): CellValue {
@@ -183,6 +189,7 @@ export function buildRows<T>(options: BuildRowsOptions<T>): FlatRow<T>[] {
         const isExpanded = expanded.has(id);
         flat.push({
             id,
+            key: id,
             row,
             depth: 0,
             hasChildren: subRows.length > 0,
@@ -196,6 +203,7 @@ export function buildRows<T>(options: BuildRowsOptions<T>): FlatRow<T>[] {
         if (options.subHeader === true && subRows.length > 0) {
             flat.push({
                 id: `${id}::header`,
+                key: `${id}::header`,
                 row,
                 depth: 1,
                 hasChildren: false,
@@ -207,6 +215,7 @@ export function buildRows<T>(options: BuildRowsOptions<T>): FlatRow<T>[] {
         for (const child of subRows) {
             flat.push({
                 id: getId(child),
+                key: `${id}/${getId(child)}`,
                 row: child,
                 depth: 1,
                 hasChildren: false,

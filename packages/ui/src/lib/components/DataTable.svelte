@@ -335,7 +335,7 @@
             {:else}
                 <div class="hmm-table-spacer" style:height={`${flat.length * rowHeight}px`}>
                     <div class="hmm-table-rows" style:transform={`translateY(${window_.start * rowHeight}px)`}>
-                        {#each windowRows as flatRow, index (flatRow.id)}
+                        {#each windowRows as flatRow, index (flatRow.key)}
                             <!-- The grid itself carries the keyboard handling; a row is a plain
                                  target for the pointer, which is what every 2.x grid row was. -->
                             <!-- svelte-ignore a11y_click_events_have_key_events -->

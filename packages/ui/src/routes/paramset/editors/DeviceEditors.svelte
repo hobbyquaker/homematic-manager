@@ -3,6 +3,7 @@
 
     import BlindCalibrationEditor from './BlindCalibrationEditor.svelte';
     import DurationPairsEditor from './DurationPairsEditor.svelte';
+    import EnumOptionsEditor from './EnumOptionsEditor.svelte';
 
     /**
      * Draws the device-specific editors the registry recognised, above the generic rows.
@@ -26,5 +27,7 @@
         <BlindCalibrationEditor {spec} {values} {channelType} {onchange} />
     {:else if spec.kind === 'duration-pairs'}
         <DurationPairsEditor {spec} {values} {channelType} {onchange} />
+    {:else if spec.kind === 'enum-options'}
+        <EnumOptionsEditor {spec} {values} {channelType} {onchange} />
     {/if}
 {/each}

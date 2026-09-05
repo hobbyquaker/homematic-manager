@@ -1,4 +1,4 @@
-import type {ParamsetDescription, ParamsetValue} from '@homematic-manager/core';
+import type {OptionPreset, ParamsetDescription, ParamsetValue} from '@homematic-manager/core';
 
 /**
  * The plug-in point of the device-specific editors (task 10).
@@ -48,3 +48,30 @@ export type EditorValues = Readonly<Record<string, ParamsetValue | undefined>>;
 
 /** How an editor hands a change back: the same shape the generic rows use. */
 export type EditorChange = (values: Readonly<Record<string, ParamsetValue>>) => void;
+
+/**
+ * What an editor may know beyond the description: the CCU string table and the metadata of task 9.
+ *
+ * It is injected rather than read from a store so the detectors stay pure functions the tests can
+ * call without a DOM - and so a detector cannot quietly start depending on data that may not have
+ * loaded yet. Every method answers `undefined` when nothing is known, and {@link EMPTY_CONTEXT} is
+ * the "no data at all" case, which every editor has to survive.
+ */
+export interface EditorContext {
+    /** The label of one enum value by its `VALUE_LIST` name, or `undefined` when untranslated. */
+    optionByName(param: string, name: string): string | undefined;
+    /** The label of one enum value by its index - how 586 of the value translations are keyed. */
+    optionByIndex(param: string, index: number): string | undefined;
+    /** The option preset the MASTER metadata assigns to a parameter, if any. */
+    preset(param: string): OptionPreset | undefined;
+    /** A WebUI label by its own key, what `OptionPresetEntry.labelKey` points at. */
+    uiLabel(key: string): string;
+}
+
+/** No string table and no metadata: what a detector sees before the data has loaded. */
+export const EMPTY_CONTEXT: EditorContext = {
+    optionByName: () => undefined,
+    optionByIndex: () => undefined,
+    preset: () => undefined,
+    uiLabel: (key) => key,
+};

@@ -108,6 +108,19 @@ export class MetaStore {
         return this.lookup.parameterValue(param, value, channelType);
     }
 
+    /**
+     * The label of one enum value, or `undefined` when no language has one.
+     *
+     * `valueLabel` falls back to the value itself, which is right for a row that has to show
+     * something and useless for the device editors of task 10: they have to tell "the string table
+     * names this" from "the string table does not", because 586 of the value translations are keyed
+     * by the index (`DISPLAY_INFORMATION|0`) rather than by the `VALUE_LIST` name (`TIME`).
+     */
+    valueLabelIfKnown(param: string, value: string, channelType?: string): string | undefined {
+        const found = this.lookup.parameterValue(param, value, channelType);
+        return found === value ? undefined : found;
+    }
+
     channelTypeLabel(channelType: string): string {
         return this.lookup.channelType(channelType);
     }

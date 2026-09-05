@@ -6,7 +6,7 @@
     import MultiSelect from '../../lib/components/MultiSelect.svelte';
     import type {MultiSelectOption} from '../../lib/components/multiSelect.js';
     import {getStores} from '../../lib/stores/context.js';
-    import {coveredParameters, detectDeviceEditors} from '../../lib/util/editors/index.js';
+    import {coveredParameters, detectDeviceEditors, type EditorContext} from '../../lib/util/editors/index.js';
     import {
         buildPreview,
         formFields,
@@ -56,8 +56,16 @@
      * rest of the paramset is untouched, so a firmware with one parameter more still shows it.
      * `showCovered` puts the raw rows back, because nothing may ever become unreachable.
      */
+    const editorContext = $derived<EditorContext>({
+        optionByName: (param, name) => stores.meta.valueLabelIfKnown(param, name, channelType),
+        optionByIndex: (param, index) => stores.meta.valueLabelIfKnown(param, String(index), channelType),
+        preset: (param) => view?.parameters.find((entry) => entry.name === param)?.preset,
+        uiLabel: (key) => stores.meta.uiLabel(key),
+    });
     const editors = $derived(
-        description ? detectDeviceEditors({interfaceName, address, channelType, paramset, description}) : [],
+        description
+            ? detectDeviceEditors({interfaceName, address, channelType, paramset, description}, editorContext)
+            : [],
     );
     const covered = $derived(showCovered ? new Set<string>() : coveredParameters(editors));
     const shownFields = $derived(fields.filter((field) => (showHidden || field.visible) && !covered.has(field.name)));

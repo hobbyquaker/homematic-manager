@@ -14,7 +14,7 @@
 
 import {deviceTypeFromImageUrl, IMAGE_SCHEME} from '../shared/ipc.js';
 
-import type {DeviceImageCache} from './images.js';
+import type {DeviceImageService} from './images.js';
 
 /** What `protocol.registerSchemesAsPrivileged()` is given, before `app.whenReady()`. */
 export const PRIVILEGED_SCHEMES = [
@@ -28,7 +28,7 @@ export const PRIVILEGED_SCHEMES = [
  * The handler for {@link IMAGE_SCHEME}. Answers with the image, a 404 when no device type has one,
  * or a 400 for a URL that is not `hmm-image://device/<type>`.
  */
-export function createImageProtocolHandler(images: DeviceImageCache): (request: Request) => Promise<Response> {
+export function createImageProtocolHandler(images: DeviceImageService): (request: Request) => Promise<Response> {
     return async (request: Request): Promise<Response> => {
         const deviceType = deviceTypeFromImageUrl(request.url);
         if (deviceType === undefined) {

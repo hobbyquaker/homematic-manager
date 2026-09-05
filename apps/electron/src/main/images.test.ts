@@ -1,52 +1,35 @@
+/**
+ * The image chain itself is tested once, in `packages/backend/src/images/deviceImages.test.ts`.
+ * What belongs to this host is the `hmm-image://` protocol handler, the CSP the renderer is served
+ * under, and the bridge from the service's log to the error log panel.
+ */
+
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
+import {DeviceImageService as fromBackend} from '@homematic-manager/backend';
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 
 import {deviceImageUrl} from '../shared/ipc.js';
 
-import {
-    ccuOrigin,
-    DeviceImageCache,
-    isSafeIconName,
-    mimeOf,
-    type DeviceImageCacheOptions,
-    type ImageConnection,
-} from './images.js';
+import {ccuImagePaths, DeviceImageService, imageLog, type DeviceImageServiceOptions} from './images.js';
 import {createImageProtocolHandler, PRIVILEGED_SCHEMES, RENDERER_CSP} from './protocol.js';
 
 const PNG = Buffer.from('89504e470d0a1a0a', 'hex');
-const WEBP = Buffer.from('524946460000000057454250', 'hex');
 
 let root: string;
 let cacheDir: string;
 let bundledDir: string;
-let calls: Array<[string, RequestInit | undefined]>;
-let answers: Map<string, {status: number; body: Buffer}>;
-let errors: string[];
-let connection: ImageConnection | undefined;
 
 const iconMap = {'HmIP-BSM': '141_hmip-bsm.png', 'HM-LC-SW1-PL': '4_hm-lc-sw1-fm.png'};
 
-const fakeFetch = ((url: string | URL | Request, init?: RequestInit) => {
-    const key = String(url);
-    calls.push([key, init]);
-    const answer = answers.get(key);
-    if (!answer) {
-        return Promise.resolve(new Response('nope', {status: 404}));
-    }
-    return Promise.resolve(new Response(new Uint8Array(answer.body), {status: answer.status}));
-}) as typeof globalThis.fetch;
-
-const options = (overrides: Partial<DeviceImageCacheOptions> = {}): DeviceImageCacheOptions => ({
+const options = (overrides: Partial<DeviceImageServiceOptions> = {}): DeviceImageServiceOptions => ({
     cacheDir,
-    bundledDir,
-    iconMap: () => Promise.resolve(iconMap),
-    connection: () => connection,
-    fetch: fakeFetch,
-    onError: (m) => errors.push(m),
+    fallbackDir: bundledDir,
+    icons: () => Promise.resolve(iconMap),
+    upstream: () => undefined,
     ...overrides,
 });
 
@@ -55,161 +38,46 @@ beforeEach(() => {
     cacheDir = path.join(root, 'images');
     bundledDir = path.join(root, 'icons');
     fs.mkdirSync(bundledDir, {recursive: true});
-    calls = [];
-    errors = [];
-    answers = new Map();
-    connection = {host: 'ccu.invalid'};
 });
 
 afterEach(() => {
     fs.rmSync(root, {recursive: true, force: true});
 });
 
-describe('DeviceImageCache', () => {
-    it('fetches from the CCU and stores the result in the cache', async () => {
-        answers.set('http://ccu.invalid/config/img/devices/50/141_hmip-bsm.png', {status: 200, body: PNG});
-        const cache = new DeviceImageCache(options());
-        await expect(cache.get('HmIP-BSM')).resolves.toEqual({mime: 'image/png', body: PNG, source: 'ccu'});
-        expect(fs.readFileSync(path.join(cacheDir, '141_hmip-bsm.png'))).toEqual(PNG);
-    });
-
-    it('serves the cache without asking the CCU again', async () => {
-        fs.mkdirSync(cacheDir, {recursive: true});
-        fs.writeFileSync(path.join(cacheDir, '141_hmip-bsm.png'), PNG);
-        const cache = new DeviceImageCache(options());
-        await expect(cache.get('HmIP-BSM')).resolves.toMatchObject({source: 'cache'});
-        expect(calls).toEqual([]);
-    });
-
-    it('tries the coupling subdirectory the CCU keeps ten of them in', async () => {
-        answers.set('http://ccu.invalid/config/img/devices/50/141_hmip-bsm.png', {status: 404, body: PNG});
-        answers.set('http://ccu.invalid/config/img/devices/50/coupling/141_hmip-bsm.png', {status: 200, body: PNG});
-        const cache = new DeviceImageCache(options());
-        await expect(cache.get('HmIP-BSM')).resolves.toMatchObject({source: 'ccu'});
-        expect(calls.map(([url]) => url)).toEqual([
-            'http://ccu.invalid/config/img/devices/50/141_hmip-bsm.png',
-            'http://ccu.invalid/config/img/devices/50/coupling/141_hmip-bsm.png',
-        ]);
-    });
-
-    it('falls back to the bundled webp subset when the CCU has nothing', async () => {
-        fs.writeFileSync(path.join(bundledDir, '141_hmip-bsm.webp'), WEBP);
-        const cache = new DeviceImageCache(options());
-        await expect(cache.get('HmIP-BSM')).resolves.toEqual({mime: 'image/webp', body: WEBP, source: 'bundled'});
-    });
-
-    it('falls back to the bundled subset when no CCU is configured at all', async () => {
-        connection = undefined;
-        fs.writeFileSync(path.join(bundledDir, '141_hmip-bsm.webp'), WEBP);
-        const cache = new DeviceImageCache(options());
-        await expect(cache.get('HmIP-BSM')).resolves.toMatchObject({source: 'bundled'});
-        expect(calls).toEqual([]);
-    });
-
-    it('gives up quietly when nothing has the image', async () => {
-        await expect(new DeviceImageCache(options()).get('HmIP-BSM')).resolves.toBeUndefined();
-    });
-
-    it('knows nothing about a device type that is not in the map', async () => {
-        const cache = new DeviceImageCache(options());
-        await expect(cache.get('HB-UNI-SENSOR')).resolves.toBeUndefined();
-        expect(calls).toEqual([]);
-    });
-
-    it('matches an upper-case device type against the map', async () => {
-        answers.set('http://ccu.invalid/config/img/devices/50/4_hm-lc-sw1-fm.png', {status: 200, body: PNG});
-        await expect(new DeviceImageCache(options()).get('hm-lc-sw1-pl')).resolves.toMatchObject({source: 'ccu'});
-    });
-
-    it('sends basic auth when the connection has credentials', async () => {
-        connection = {host: 'ccu.invalid', tls: true, auth: {user: 'admin', password: 'secret'}};
-        answers.set('https://ccu.invalid/config/img/devices/50/141_hmip-bsm.png', {status: 200, body: PNG});
-        await expect(new DeviceImageCache(options()).get('HmIP-BSM')).resolves.toMatchObject({source: 'ccu'});
-        expect((calls[0]?.[1]?.headers as Record<string, string>)['authorization']).toBe(
-            `Basic ${Buffer.from('admin:secret').toString('base64')}`,
-        );
-    });
-
-    it('reports a network failure and does not throw at the caller', async () => {
-        const cache = new DeviceImageCache(
-            options({
-                fetch: (() => Promise.reject(new Error('ECONNREFUSED'))) as typeof globalThis.fetch,
-            }),
-        );
-        await expect(cache.get('HmIP-BSM')).resolves.toBeUndefined();
-        expect(errors[0]).toContain('ECONNREFUSED');
-    });
-
-    it('reports a cache directory it cannot write to, and still serves the image', async () => {
-        fs.writeFileSync(path.join(root, 'blocked'), 'not a directory');
-        answers.set('http://ccu.invalid/config/img/devices/50/141_hmip-bsm.png', {status: 200, body: PNG});
-        const cache = new DeviceImageCache(options({cacheDir: path.join(root, 'blocked', 'images')}));
-        await expect(cache.get('HmIP-BSM')).resolves.toMatchObject({source: 'ccu'});
-        expect(errors.join(' ')).toContain('could not be written');
-    });
-
-    it('asks the CCU once when a hundred rows want the same type', async () => {
-        answers.set('http://ccu.invalid/config/img/devices/50/141_hmip-bsm.png', {status: 200, body: PNG});
-        const cache = new DeviceImageCache(options());
-        const all = await Promise.all(Array.from({length: 100}, () => cache.get('HmIP-BSM')));
-        expect(calls).toHaveLength(1);
-        expect(all.every((image) => image?.source === 'ccu')).toBe(true);
-    });
-
-    it('reads the icon map once and survives one that cannot be read', async () => {
-        let reads = 0;
-        const cache = new DeviceImageCache(
-            options({
-                iconMap: () => {
-                    reads += 1;
-                    return Promise.resolve(iconMap);
-                },
-            }),
-        );
-        await cache.get('HmIP-BSM');
-        await cache.get('HM-LC-SW1-PL');
-        expect(reads).toBe(1);
-
-        const broken = new DeviceImageCache(options({iconMap: () => Promise.reject(new Error('ENOENT'))}));
-        await expect(broken.get('HmIP-BSM')).resolves.toBeUndefined();
-        expect(errors.join(' ')).toContain('device-icons.json could not be read');
-    });
-
-    it('refuses a file name from the map that would leave the cache directory', async () => {
-        const cache = new DeviceImageCache(options({iconMap: () => Promise.resolve({EVIL: '../../etc/passwd.png'})}));
-        await expect(cache.get('EVIL')).resolves.toBeUndefined();
+describe('the device image service this host uses', () => {
+    it('is the backend implementation, with the candidates task 13 measured', () => {
+        expect(DeviceImageService).toBe(fromBackend);
+        // the copy this host used to carry asked for `50/<file>` and nothing else, which exists
+        // for none of the 278 file names of device-icons.json
+        expect(ccuImagePaths('141_hmip-bsm.png')[0]).toBe('/config/img/devices/250/141_hmip-bsm.png');
     });
 });
 
-describe('the small helpers', () => {
-    it('maps the extensions the CCU and the subset use', () => {
-        expect(mimeOf('a.png')).toBe('image/png');
-        expect(mimeOf('a.WEBP')).toBe('image/webp');
-        expect(mimeOf('a.exe')).toBeUndefined();
+describe('imageLog', () => {
+    it('forwards a warning to the error log and drops debug lines', () => {
+        const lines: string[] = [];
+        const log = imageLog((message) => lines.push(message));
+        log.warn('http://ccu/x failed:', new Error('ECONNREFUSED'));
+        log.debug('no image for device type X');
+        expect(lines).toEqual(['http://ccu/x failed: ECONNREFUSED']);
     });
 
-    it('accepts the real file names and refuses paths', () => {
-        expect(isSafeIconName('107_hm-es-pmsw1-pl-R2.png')).toBe(true);
-        expect(isSafeIconName('hm_resc-win-pcb-sc.png')).toBe(true);
-        expect(isSafeIconName('../x.png')).toBe(false);
-        expect(isSafeIconName('sub/dir.png')).toBe(false);
-        expect(isSafeIconName('x.sh')).toBe(false);
-        expect(isSafeIconName('')).toBe(false);
-    });
-
-    it('builds the CCU origin from host and tls', () => {
-        expect(ccuOrigin({host: 'ccu'})).toBe('http://ccu');
-        expect(ccuOrigin({host: 'ccu', tls: true})).toBe('https://ccu');
-        expect(ccuOrigin({host: ''})).toBeUndefined();
-        expect(ccuOrigin(undefined)).toBeUndefined();
+    it('formats what is neither a string nor an Error', () => {
+        const lines: string[] = [];
+        const log = imageLog((message) => lines.push(message));
+        const circular: Record<string, unknown> = {};
+        circular['self'] = circular;
+        log.warn({code: 'ENOENT'}, circular);
+        expect(lines[0]).toContain('{"code":"ENOENT"}');
+        expect(lines[0]).toContain('[object Object]');
     });
 });
 
 describe('the hmm-image protocol handler', () => {
     it('answers with the image bytes and a content type', async () => {
         fs.mkdirSync(cacheDir, {recursive: true});
-        fs.writeFileSync(path.join(cacheDir, '141_hmip-bsm.png'), PNG);
-        const handle = createImageProtocolHandler(new DeviceImageCache(options()));
+        fs.writeFileSync(path.join(cacheDir, 'HmIP-BSM.png'), PNG);
+        const handle = createImageProtocolHandler(new DeviceImageService(options()));
         const response = await handle(new Request(deviceImageUrl('HmIP-BSM')));
         expect(response.status).toBe(200);
         expect(response.headers.get('content-type')).toBe('image/png');
@@ -217,20 +85,21 @@ describe('the hmm-image protocol handler', () => {
     });
 
     it('answers 404 for a device type without an image', async () => {
-        const handle = createImageProtocolHandler(new DeviceImageCache(options()));
+        const handle = createImageProtocolHandler(new DeviceImageService(options()));
         expect((await handle(new Request(deviceImageUrl('HB-UNI-SENSOR')))).status).toBe(404);
     });
 
     it('answers 400 for a URL that is not a device image', async () => {
-        const handle = createImageProtocolHandler(new DeviceImageCache(options()));
+        const handle = createImageProtocolHandler(new DeviceImageService(options()));
         expect((await handle(new Request('hmm-image://other/thing'))).status).toBe(400);
     });
 
     it('round-trips a device type with characters that need escaping', async () => {
         fs.mkdirSync(cacheDir, {recursive: true});
-        await fsp.writeFile(path.join(cacheDir, 'x.png'), PNG);
+        // the cache file name is the sanitised device type, so the slash never reaches the disk
+        await fsp.writeFile(path.join(cacheDir, '263_149___263_150.png'), PNG);
         const handle = createImageProtocolHandler(
-            new DeviceImageCache(options({iconMap: () => Promise.resolve({'263_149_/_263_150': 'x.png'})})),
+            new DeviceImageService(options({icons: () => Promise.resolve({'263_149_/_263_150': 'x.png'})})),
         );
         const response = await handle(new Request(deviceImageUrl('263_149_/_263_150')));
         expect(response.status).toBe(200);

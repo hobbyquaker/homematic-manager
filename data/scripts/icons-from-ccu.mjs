@@ -5,20 +5,23 @@
  * This is a tool, not part of `npm run update`: it is never run by the pipeline, no CCU address is
  * committed anywhere, and the result is not part of `dist/`.
  *
- * Usage: node scripts/icons-from-ccu.mjs http://ccu <target directory> [--size 50]
+ * The candidate URLs are `lib/ccu-images.mjs` - the same four the backend's image service walks.
+ * Until task 15 this script asked the thumbnail directory `50/` for the plain file names, which
+ * exist only in `250/`, so it saved nothing from a real CCU.
+ *
+ * Usage: node scripts/icons-from-ccu.mjs http://ccu <target directory>
  */
 import {mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import path from 'node:path';
 
+import {ccuImageUrls} from './lib/ccu-images.mjs';
 import {distDir} from './lib/paths.mjs';
 
 const [, , base, targetDirectory] = process.argv;
 if (!base || !targetDirectory) {
-    console.error('usage: node scripts/icons-from-ccu.mjs http://ccu <target directory> [--size 50]');
+    console.error('usage: node scripts/icons-from-ccu.mjs http://ccu <target directory>');
     process.exit(2);
 }
-const sizeIndex = process.argv.indexOf('--size');
-const size = sizeIndex === -1 ? 50 : Number(process.argv[sizeIndex + 1]);
 
 const deviceIcons = JSON.parse(readFileSync(path.join(distDir, 'device-icons.json'), 'utf8'));
 const files = [...new Set(Object.values(deviceIcons))].sort();
@@ -28,15 +31,9 @@ const root = base.replace(/\/+$/u, '');
 let saved = 0;
 const failed = [];
 
-/** Ten upstream entries live in the CCU's `coupling/` subdirectory; device-icons.json has no path. */
-const candidates = (file) => [
-    `${root}/config/img/devices/${size}/${file}`,
-    `${root}/config/img/devices/${size}/coupling/${file}`,
-];
-
 for (const file of files) {
     let stored = false;
-    for (const url of candidates(file)) {
+    for (const url of ccuImageUrls(root, file)) {
         let response;
         try {
             response = await fetch(url);

@@ -32,7 +32,7 @@ import type {AppConfig} from '@homematic-manager/core';
 import {ApiWebSocketServer, Backend, type BackendOptions} from '@homematic-manager/backend';
 
 import {applyCookieToken, createToken, isLoopbackHost, tokenCookie} from './auth.js';
-import {ImageService, type ImageUpstream} from './images.js';
+import {DeviceImageService, readIconMapFile, type ImageUpstream} from './images.js';
 import {createLogger, silentLogger, type Logger, type LogLevel} from './log.js';
 import {defaultDataDir, defaultMetadataDir, defaultUiDir, packageVersion} from './paths.js';
 import {proxyRequest, proxyUpgrade} from './proxy.js';
@@ -106,7 +106,7 @@ export interface WebHost {
     /** `undefined` in demo mode - there is nothing to talk to. */
     readonly backend: Backend | undefined;
     readonly api: ApiWebSocketServer | undefined;
-    readonly images: ImageService;
+    readonly images: DeviceImageService;
     /** The URL a browser should open, base path included. */
     readonly url: string;
     readonly port: number;
@@ -172,8 +172,8 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
         await backend.start();
     }
 
-    const images = new ImageService({
-        iconMapFile: path.join(metadataDir, 'device-icons.json'),
+    const images = new DeviceImageService({
+        icons: () => readIconMapFile(path.join(metadataDir, 'device-icons.json'), log),
         fallbackDir: path.join(metadataDir, 'icons'),
         cacheDir: imageCacheDir,
         upstream: () => upstreamOf(connection),

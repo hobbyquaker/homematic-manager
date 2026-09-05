@@ -8,7 +8,14 @@ describe('@homematic-manager/web', () => {
     });
 
     it('exports what a host, the CLI and the e2e suites need', () => {
-        for (const name of ['createWebHost', 'runCli', 'parseOptions', 'helpText', 'startForTest', 'ImageService']) {
+        for (const name of [
+            'createWebHost',
+            'runCli',
+            'parseOptions',
+            'helpText',
+            'startForTest',
+            'DeviceImageService',
+        ]) {
             expect(web, name).toHaveProperty(name);
         }
     });

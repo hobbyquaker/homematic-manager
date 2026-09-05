@@ -45,6 +45,7 @@ export * from './write/paramset.js';
 export * from './rega/client.js';
 export * from './discovery/discover.js';
 export * from './devices/installMode.js';
+export * from './images/deviceImages.js';
 export * from './data/files.js';
 
 // errors and small helpers a host needs

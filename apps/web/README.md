@@ -76,7 +76,9 @@ interface processes want - with a five second bound, so a `systemctl restart` ca
 | `<base>data/...` | `data/dist` as plain files: metadata, profiles, translations, icons |
 | `<base>...` | the built UI |
 
-**Device images** (D-10) resolve memory → disk → CCU → bundled → 404. `data/dist/device-icons.json`
+**Device images** (D-10) are the backend's `DeviceImageService` (`packages/backend/src/images/`),
+which every host shares since task 15; this one wraps it in an HTTP route, the Electron host in an
+`hmm-image://` protocol handler. They resolve memory → disk → CCU → bundled → 404. `data/dist/device-icons.json`
 maps the (upper-cased) device type to a file name; the CCU serves it as
 `/config/img/devices/250/<file>` (or `250/coupling/<file>`, or as `50/<base>_thumb<ext>` - the `50`
 directory holds the WebUI's list thumbnails and suffixes every name, which is why the single

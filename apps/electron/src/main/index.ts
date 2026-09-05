@@ -38,7 +38,7 @@ import {
 
 import {ErrorLog, installErrorHandlers} from './errorLog.js';
 import {readHostSettings} from './hostSettings.js';
-import {DeviceImageCache, type ImageConnection} from './images.js';
+import {DeviceImageService, imageLog, type ImageConnection} from './images.js';
 import {IpcBridge} from './ipcBridge.js';
 import {buildMenuTemplate, isAllowedExternalUrl, ISSUES_URL} from './menu.js';
 import {fileRoots, resolvePaths} from './paths.js';
@@ -94,7 +94,7 @@ const errors = installErrorHandlers({
 let backend: Backend | undefined;
 let transport: InProcessTransport | undefined;
 let bridge: IpcBridge | undefined;
-let images: DeviceImageCache | undefined;
+let images: DeviceImageService | undefined;
 let updates: UpdateFlow | undefined;
 let mainWindow: BrowserWindow | undefined;
 let windowState: WindowStateKeeper | undefined;
@@ -276,14 +276,14 @@ async function start(): Promise<void> {
         onProtocolError: (message) => errorLog.append('ipc', message),
     });
 
-    images = new DeviceImageCache({
+    images = new DeviceImageService({
         cacheDir: paths.images,
-        bundledDir: paths.icons,
-        iconMap: readIconMap,
+        fallbackDir: paths.icons,
+        icons: readIconMap,
         // The image server is the CCU's own web server, so it follows whatever the backend is
         // connected to - including its TLS setting and its credentials.
-        connection: () => ccuConnection,
-        onError: (message) => errorLog.append('images', message),
+        upstream: () => ccuConnection,
+        log: imageLog((message) => errorLog.append('images', message)),
     });
     protocol.handle(IMAGE_SCHEME, createImageProtocolHandler(images));
 

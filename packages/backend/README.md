@@ -52,6 +52,7 @@ a WebSocket, and the CCU addon (task 13) runs the same process on the CCU.
 | `write/repair.ts` | `devices.repairConfig`: the recovery task 6 measured, per channel |
 | `devices/installMode.ts` | install mode in all its variants, incl. the HmIP key conversion |
 | `data/files.ts` | `data.file`: reads from injected roots and nothing else |
+| `images/deviceImages.ts` | device pictures (D-10): memory, disk, the CCU's four candidate URLs, the bundled webp subset |
 | `util/*` | the typed event emitter, atomic and debounced JSON files, net helpers |
 | `errors.ts` | `ApiError` as a throwable, and the classification of anything thrown |
 

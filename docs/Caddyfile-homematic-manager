@@ -1,4 +1,4 @@
-# Caddy in front of the Homematic Manager server (@homematic-manager/web).
+# Caddy in front of the Homematic Manager server (the `homematic-manager` npm package).
 #
 # The shortest of the three: Caddy passes a WebSocket upgrade through on its own, needs no map for
 # the Connection header, and gets a certificate by itself. Include this in /etc/caddy/Caddyfile or

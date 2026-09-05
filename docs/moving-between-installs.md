@@ -16,7 +16,7 @@ only in where that directory is:
 | Desktop app, Windows | `%APPDATA%\Homematic Manager\` | Electron's `userData` |
 | Desktop app, macOS | `~/Library/Application Support/Homematic Manager/` | Electron's `userData` |
 | Desktop app, Linux | `~/.config/Homematic Manager/` (or `$XDG_CONFIG_HOME/…`) | Electron's `userData` |
-| npm with `--install` | `/var/lib/homematic-manager/` | systemd `StateDirectory=` |
+| npm (`homematic-manager`) with `--install` | `/var/lib/homematic-manager/` | systemd `StateDirectory=` |
 | npm run by hand | `~/.config/homematic-manager/` | `--data-dir` / `HMM_DATA_DIR` default |
 | Docker | `/data/` in the container (a volume or bind mount) | `HMM_DATA_DIR=/data` in the image |
 

@@ -34,8 +34,10 @@ release workflows exist and none has ever run. What a 2.x user should read first
 **32-bit ARM desktop builds are gone**: Electron 44 publishes no `linux-armv7l` binary. Such a
 machine runs the CCU addon or the npm package, both of which are plain Node [#115, #139].
 
-The **npm package name is not decided yet** (OQ-14): the workspace calls it
-`@homematic-manager/web`, and the recommendation is to reuse the 2.x name `homematic-manager`.
+The **npm package is `homematic-manager`** (D-33) — the name 2.x had on npm. `npm install -g
+homematic-manager` used to give the 2.x desktop app and now gives the server; the desktop app is an
+installer from the release. The 1.x versions under that name stay deprecated, and until 3.0.0 moves
+the `latest` tag a pre-release has to be asked for by name: `npm install -g homematic-manager@next`.
 
 ### Safety: the paramset write path
 

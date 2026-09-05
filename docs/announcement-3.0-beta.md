@@ -3,9 +3,9 @@
 Entwurf für den Beitrag im [Homematic-Forum](https://homematic-forum.de/forum/viewtopic.php?f=18&t=45134),
 Unterforum _Software / Sonstige_ bzw. als Antwort im bestehenden Thread zum Homematic Manager.
 
-**Vor dem Posten anzupassen:** die Versionsnummer (`3.0.0-beta.N`), der Link auf das Release, der
-npm-Paketname (OQ-14) und die Zeile zum Docker-Cookie (OQ-15), falls dann entschieden. Alles
-darunter ist der Text, so wie er gepostet werden kann.
+**Vor dem Posten anzupassen:** die Versionsnummer (`3.0.0-beta.N`), der Link auf das Release und die
+Zeile zum Docker-Cookie (OQ-15), falls dann entschieden. Der npm-Paketname steht fest (D-33):
+`homematic-manager`. Alles darunter ist der Text, so wie er gepostet werden kann.
 
 ---
 
@@ -52,8 +52,12 @@ Alle vier Varianten führen **dasselbe Backend und dieselbe Oberfläche** aus un
 | --- | --- | --- |
 | **CCU-Addon** | CCU3, Charly, OpenCCU (`armv7l`, `aarch64`, `x86_64`) | `hmm-ccu-<arch>-<version>.tar.gz`, hochgeladen unter _Systemsteuerung → Zusatzsoftware_ |
 | **Desktop-App** | Windows 10+, macOS 12+, Linux (glibc 2.31+) | Installer / AppImage / dmg aus dem Release |
-| **Server** | Proxmox-LXC, Debian, jeder Linux-Host mit Node ≥ 22.12 | `npm install -g <paketname>` und `homematic-manager-web --install` |
+| **Server** | Proxmox-LXC, Debian, jeder Linux-Host mit Node ≥ 22.12 | `npm install -g homematic-manager@next` und `homematic-manager-web --install` |
 | **Docker** | amd64, arm64, arm/v7 | `ghcr.io/hobbyquaker/homematic-manager` |
+
+Das npm-Paket heißt wieder `homematic-manager`, wie zu 2.x-Zeiten — dahinter steckt jetzt aber der
+**Server**, nicht die Desktop-App; die gibt es als Installer im Release. Solange 3.0 Beta ist, zeigt
+`latest` auf npm noch auf das alte 1.0.14, deshalb das `@next`.
 
 Das richtige Addon-Paket sagt `uname -m` auf der CCU. Anleitungen für jede Variante liegen im
 Repository unter [docs/](https://github.com/hobbyquaker/homematic-manager/tree/master/docs).

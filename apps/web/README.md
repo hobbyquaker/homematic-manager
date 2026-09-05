@@ -1,4 +1,4 @@
-# @homematic-manager/web
+# homematic-manager
 
 The Homematic Manager as a server: the backend of `packages/backend` behind a local HTTP +
 WebSocket host that also serves the built UI of `packages/ui`. One process, one port, no Electron.
@@ -10,14 +10,21 @@ It has three jobs, and they are the same program:
 - **the e2e target** of task 14 - `startForTest()` starts the whole stack on a free port with a
   temporary profile directory, optionally against hm-simulator, and Playwright drives a browser
   against it in a fraction of the time an Electron run takes;
-- **the third deliverable** (D-24) - published to npm, so `npm install -g` gives a Homematic
-  Manager server on a Raspberry Pi next to the CCU, on a NAS or in a container; and the exact same
-  process is what the CCU addon of task 13 runs behind the CCU's lighttpd.
+- **the third deliverable** (D-24) - published to npm as `homematic-manager` (D-33: the name the
+  2.x desktop app had there), so `npm install -g` gives a Homematic Manager server on a Raspberry Pi
+  next to the CCU, on a NAS or in a container; and the exact same process is what the CCU addon of
+  task 13 runs behind the CCU's lighttpd.
+
+The directory is `apps/web` and the package is `homematic-manager`, which is also the name of the
+workspace root - so address this package by path, `-w apps/web`, in anything that has to keep
+working. The bin is `homematic-manager`, with `homematic-manager-web` as a second name for the same
+file: the addon's `settings.cgi`, the reverse-proxy examples and the install pages all use that
+spelling.
 
 ## Install and run
 
 ```sh
-npm install -g @homematic-manager/web        # the npm name is OQ-14 and may change before 3.0
+npm install -g homematic-manager@next        # `latest` is still the deprecated 1.0.14 until 3.0.0
 homematic-manager-web --ccu ccu3.local
 ```
 
@@ -29,7 +36,7 @@ From a checkout:
 
 ```sh
 npm run build -w @homematic-manager/ui       # the host serves packages/ui/dist
-npm run build -w @homematic-manager/web
+npm run build -w apps/web
 node apps/web/dist/cli.js --ccu ccu3.local
 ```
 
@@ -205,7 +212,7 @@ CCU configuration and the caches live there; `--uninstall --purge` deletes those
 ## Development
 
 ```sh
-npm run dev -w @homematic-manager/web
+npm run dev -w apps/web
 ```
 
 starts a vite dev server for `packages/ui` on a free port and this host in front of it. Everything
@@ -221,7 +228,7 @@ at the app without a CCU.
 ## For the e2e suites (task 14)
 
 ```ts
-import {startForTest, simulatorAvailable} from '@homematic-manager/web';
+import {startForTest, simulatorAvailable} from 'homematic-manager';
 
 const host = await startForTest({simulator: true});
 await page.goto(host.url); // the cookie is set by the page load, the socket connects
@@ -236,7 +243,8 @@ on, the same `describe.skipIf` arrangement `packages/backend/test/simulator` use
 
 ## The npm package
 
-`npm pack -w apps/web` produces a self-contained tarball, about 0.9 MB compressed:
+`npm pack -w apps/web` produces `homematic-manager-<version>.tgz`, self-contained, about 1.2 MB
+compressed:
 
 - `dist/` - this host;
 - `ui/` and `data/` - the built UI and the generated metadata, copied in by `scripts/prepack.mjs`
@@ -264,7 +272,7 @@ broken `files` list is found before a tag.
 
 ```sh
 npx vitest run --project web      # from the repository root, or:
-npm test -w @homematic-manager/web
+npm test -w apps/web
 ```
 
 The suites cover static serving (MIME types, immutable caching, 304, traversal, no listing), the

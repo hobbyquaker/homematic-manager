@@ -164,6 +164,23 @@ programme of #100 is one of the five device-specific editors, and the `TIMEOUT`/
 with 24 slots that a Max! thermostat answers through Homegear is one of the four naming shapes that
 editor recognises — recognised from the paramset description, not from who is answering.
 
+### `npm install -g homematic-manager` gives the server now (D-33)
+
+`homematic-manager` on npm was the 2.x desktop app, installed globally and started from a shell.
+3.0 keeps that name for the **npm deliverable of D-25** — which is the headless server, not the
+desktop app: it starts an HTTP host on port 8090 and you open the UI in a browser. `--install` turns
+it into a systemd service ([install-lxc.md](install-lxc.md)).
+
+The desktop app is now an installer, AppImage, `.deb` or `.dmg` from the
+[release](https://github.com/hobbyquaker/homematic-manager/releases/latest), and is not on npm at
+all — see [install-electron.md](install-electron.md). Electron in a global npm install was never a
+sensible way to ship a desktop application, and the `npm i -g` audience of 2.x mostly wanted a
+headless install to begin with.
+
+The old 1.x versions under that name are deprecated on npm. Until 3.0.0 is released, `latest` still
+points at 1.0.14 from 2022, so a pre-release has to be asked for explicitly:
+`npm install -g homematic-manager@next`.
+
 ### Smaller behavioural changes
 
 - **A configuration change no longer restarts the app.** 2.x saved the file, called `app.relaunch()`

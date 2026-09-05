@@ -24,12 +24,16 @@ These are one-time, and nothing below works until they are done.
 - [ ] **Let workflows write releases**: Settings → Actions → General → Workflow permissions →
       "Read and write permissions" (the four release workflows need `contents: write`;
       `id-token: write` and `attestations: write` are requested per workflow and need no setting).
-- [ ] **Decide OQ-14, the npm package name** and put it into `apps/web/package.json` before the
-      first tag that runs `release-npm.yml`. Recommendation in ROADMAP.md: reuse `homematic-manager`.
-      Every install page names the package as `<paketname>` until this is decided.
-- [ ] **Configure npm trusted publishing** for that package on npmjs.com: repository
-      `hobbyquaker/homematic-manager`, workflow `release-npm.yml`. Until then the publish step
-      fails with `ENEEDAUTH` — which is the intended failure, not a reason to add a token secret.
+- [x] **Done (D-33): the npm package is `homematic-manager`**, the 2.x name, and it is in
+      `apps/web/package.json`. Its 1.x versions stay deprecated on npm, which does not block a new
+      version. Note for the announcement: `npm install -g homematic-manager` gives the **deprecated
+      1.0.14 from 2022** until 3.0.0 moves `latest`, so every pre-release instruction has to say
+      `npm install -g homematic-manager@next`.
+- [x] **Done: npm trusted publishing is configured** for `homematic-manager` on npmjs.com:
+      repository `hobbyquaker/homematic-manager`, workflow **`release-npm.yml`**. The publisher
+      names the workflow *file*, so that file cannot be renamed without updating the publisher on
+      npmjs.com first. A publish step failing with `ENEEDAUTH` means the two no longer match — which
+      is the intended failure, not a reason to add a token secret.
 - [ ] **Decide OQ-15**, the Docker cookie default, before the first image is published.
 - [ ] Optional, both still missing: Apple notarisation secrets (`APPLE_ID`, `APPLE_TEAM_ID`,
       `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_CERTIFICATE_P12`, `APPLE_CERTIFICATE_PASSWORD`) and
@@ -110,11 +114,11 @@ gh run list --limit 8
 gh run watch <run-id>
 ```
 
-- [ ] **npm dist-tag.** `release-npm.yml` runs a plain `npm publish`, which sets `latest` — also
-      for a prerelease. Before the first beta either add `--tag beta` to that step or move the tag
-      right after the run: `npm dist-tag add <paketname>@3.0.0-beta.0 beta` and
-      `npm dist-tag add <paketname>@2.7.1 latest`. The Docker workflow already leaves `latest`
-      alone for a version containing `-`; npm does not.
+- [ ] **npm dist-tag.** Nothing to do by hand: `release-npm.yml` publishes any version containing
+      a `-` under `next` and only a plain one under `latest`, the way the Docker workflow does.
+      Check it though — `npm view homematic-manager dist-tags` must still show `latest` on the old
+      1.0.14 after a beta, and `next` on the version just published. Testers install
+      `npm install -g homematic-manager@next`.
 
 ### 4. Verify, then publish
 
@@ -136,8 +140,7 @@ gh release edit v3.0.0-beta.0 --prerelease --draft=false
 ### 5. Announce
 
 - [ ] Post [`announcement-3.0-beta.md`](announcement-3.0-beta.md) in the Homematic forum — the
-      placeholders at the top of that file first (version, release link, npm name, the Docker
-      cookie line).
+      placeholders at the top of that file first (version, release link, the Docker cookie line).
 - [ ] Do **not** close issues on a beta. Issues are closed when 3.0.0 is out; the beta thread is
       where they get retested.
 

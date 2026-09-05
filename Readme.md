@@ -45,14 +45,16 @@ Kopiervorgang — siehe [docs/moving-between-installs.md](docs/moving-between-in
 | --- | --- | --- | --- |
 | **CCU-Addon** ([Anleitung](docs/install-addon.md)) | CCU3, ELV-Charly, OpenCCU — `armv7l`, `aarch64`, `x86_64` | `hmm-ccu-<arch>-<version>.tar.gz` aus dem [Release](https://github.com/hobbyquaker/homematic-manager/releases/latest), hochgeladen unter _Systemsteuerung → Zusatzsoftware_ | `/usr/local/hmm/config.json` |
 | **Desktop-App** ([Anleitung](docs/install-electron.md)) | Windows 10+ (x64, arm64), macOS 12+ (universal), Linux glibc 2.31+ (x64, arm64) | Installer bzw. AppImage/deb/dmg aus dem [Release](https://github.com/hobbyquaker/homematic-manager/releases/latest) | `%APPDATA%\Homematic Manager\config.json`, `~/Library/Application Support/Homematic Manager/config.json`, `~/.config/Homematic Manager/config.json` |
-| **Server im LXC** ([Anleitung](docs/install-lxc.md)) — die empfohlene Serverinstallation | Proxmox-Container, Debian 12/13, oder jeder Linux-Host mit Node ≥ 22.12 | `npm install -g <paketname>` + `homematic-manager-web --install` | `/var/lib/homematic-manager/config.json`, Dienstoptionen in `/etc/homematic-manager/config.env` |
+| **Server im LXC** ([Anleitung](docs/install-lxc.md)) — die empfohlene Serverinstallation | Proxmox-Container, Debian 12/13, oder jeder Linux-Host mit Node ≥ 22.12 | `npm install -g homematic-manager` + `homematic-manager-web --install` | `/var/lib/homematic-manager/config.json`, Dienstoptionen in `/etc/homematic-manager/config.env` |
 | **Docker** ([Anleitung](docs/install-docker.md)) | `linux/amd64`, `linux/arm64`, `linux/arm/v7` | `docker run … ghcr.io/hobbyquaker/homematic-manager:latest` | `/data/config.json` im Volume |
 
-**Offen (OQ-14): der npm-Paketname steht noch nicht fest.** Im Repository heißt das Paket heute
-`@homematic-manager/web`; die Empfehlung der Roadmap ist, den 2.x-Namen `homematic-manager` auf npm
-weiterzuverwenden, weil dessen `npm i -g`-Publikum ohnehin eine Serverinstallation wollte. Entschieden
-wird das vor dem ersten Alpha-Tag; bis dahin ist der Name in allen Anleitungen als
-`<paketname>` bzw. `@homematic-manager/web` markiert.
+**Das npm-Paket heißt `homematic-manager`** (D-33) — derselbe Name, unter dem 2.x auf npm lag. Wer
+dort einmal `npm install -g homematic-manager` gemacht hat, bekommt damit jetzt also **den Server und
+nicht mehr die Desktop-App**; die gibt es als Installer im
+[Release](https://github.com/hobbyquaker/homematic-manager/releases/latest). Solange 3.0.0 nicht
+erschienen ist, zeigt `latest` noch auf das veraltete 1.0.14 von 2022 — Vorabversionen installiert
+man deshalb mit `npm install -g homematic-manager@next`. Das Kommando heißt `homematic-manager`,
+`homematic-manager-web` ist ein zweiter Name dafür.
 
 **Nicht mehr dabei:** 32-Bit-ARM-Desktop-Builds (`linux-armv7l`). Electron 44 veröffentlicht dafür
 kein Binary mehr (#115, #139). Auf solchen Maschinen laufen das CCU-Addon und das npm-Paket, beides
@@ -198,12 +200,13 @@ moving between them is a copy (D-25):
 | --- | --- | --- | --- |
 | [CCU addon](docs/install-addon.md) | CCU3, ELV-Charly, OpenCCU — `armv7l`, `aarch64`, `x86_64` | `hmm-ccu-<arch>-<version>.tar.gz`, uploaded in _Systemsteuerung → Zusatzsoftware_ | `/usr/local/hmm/config.json` |
 | [Desktop app](docs/install-electron.md) | Windows 10+, macOS 12+, Linux glibc 2.31+ | installer / AppImage / deb / dmg from the release | `%APPDATA%\Homematic Manager`, `~/Library/Application Support/Homematic Manager`, `~/.config/Homematic Manager` |
-| [Server in an LXC](docs/install-lxc.md) (recommended) | Proxmox / Debian 12+ / any Linux with Node ≥ 22.12 | `npm install -g <package>` then `homematic-manager-web --install` | `/var/lib/homematic-manager/config.json` |
+| [Server in an LXC](docs/install-lxc.md) (recommended) | Proxmox / Debian 12+ / any Linux with Node ≥ 22.12 | `npm install -g homematic-manager` then `homematic-manager-web --install` | `/var/lib/homematic-manager/config.json` |
 | [Docker](docs/install-docker.md) | `amd64`, `arm64`, `arm/v7` | `docker run … ghcr.io/hobbyquaker/homematic-manager:latest` | `/data/config.json` |
 
-The **npm package name is still open (OQ-14)**: the workspace calls it `@homematic-manager/web`
-today and the roadmap recommends reusing the 2.x name `homematic-manager`. It is decided before the
-first alpha tag.
+The npm package is **`homematic-manager`** (D-33), the name 2.x had on npm — so anyone who once ran
+`npm install -g homematic-manager` gets the server now, not the desktop app; that one is an installer
+from the release. Until 3.0.0 moves the `latest` tag a plain install still gives the deprecated
+1.0.14 from 2022, so pre-releases are installed as `npm install -g homematic-manager@next`.
 
 Documentation: [docs/README.md](docs/README.md) is the index;
 [docs/migration-from-2.x.md](docs/migration-from-2.x.md) is what a 2.x user should read first;

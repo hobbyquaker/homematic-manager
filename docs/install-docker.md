@@ -1,7 +1,7 @@
 # Homematic Manager in Docker
 
 The image is `ghcr.io/hobbyquaker/homematic-manager`, built for `linux/amd64`, `linux/arm64` and
-`linux/arm/v7`. It contains the same program the npm package does: the backend of
+`linux/arm/v7`. It contains the same program the `homematic-manager` npm package does: the backend of
 `packages/backend` behind an HTTP/WebSocket host serving the built UI, running as the unprivileged
 `node` user with `/data` as its state directory. Base image `node:22-alpine`, two build stages, about
 59 MB on amd64 and arm64 and 55 MB on arm/v7.

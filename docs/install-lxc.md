@@ -19,10 +19,12 @@ Contents: [The container](#1-the-container) · [Node](#2-node-22) ·
 > on a `v*` tag and has never run, so the package is not on the registry. Until then the same tarball
 > comes out of a checkout with `npm pack -w apps/web` — see [BUILD.md](../BUILD.md).
 >
-> **The npm package name is still open (OQ-14).** In the workspace it is `@homematic-manager/web`;
-> the roadmap recommends reusing the 2.x name `homematic-manager`, whose `npm i -g` audience wanted a
-> headless install anyway. It is decided before the first alpha tag. The binary is
-> `homematic-manager-web` either way.
+> **The package is `homematic-manager`** (D-33), the name the 2.x desktop app had on npm — its
+> `npm i -g` audience wanted a headless install anyway. The 1.x versions under that name are
+> deprecated and `latest` still points at 1.0.14 from 2022, so until 3.0.0 is released a pre-release
+> has to be asked for by name: `npm install -g homematic-manager@next`. The binary is
+> `homematic-manager`; `homematic-manager-web` is a second name for the same file, and this page
+> uses it throughout because the CCU addon and the proxy examples do.
 
 ## 1. The container
 
@@ -68,7 +70,7 @@ apt install -y nodejs
 ## 3. Install and register the service
 
 ```sh
-npm install -g @homematic-manager/web        # the npm name is OQ-14 and may still change
+npm install -g homematic-manager@next        # `latest` is still the deprecated 1.0.14 until 3.0.0
 homematic-manager-web --install --ccu ccu3.local --host 0.0.0.0
 ```
 
@@ -181,7 +183,7 @@ of the installation is to watch events around the clock.
 ## Update, backup, uninstall
 
 ```sh
-npm update -g @homematic-manager/web
+npm install -g homematic-manager@next     # `@latest` once 3.0.0 is out
 homematic-manager-web --install             # rewrites the unit, keeps the configuration
 systemctl restart homematic-manager
 ```
@@ -192,7 +194,7 @@ container backup covers both; `vzdump 210` on the host is the one-liner.
 ```sh
 homematic-manager-web --uninstall           # stops and removes the service, keeps /var/lib
 homematic-manager-web --uninstall --purge   # and deletes /var/lib as well
-npm uninstall -g @homematic-manager/web
+npm uninstall -g homematic-manager
 ```
 
 ### Verifying what you installed (D-27)
@@ -202,8 +204,8 @@ tarball is unpacked into a temporary directory first, so the bundled workspace p
 SBOM, which a plain scan of the repository would never show — is attached to the release and attested:
 
 ```sh
-npm view @homematic-manager/web dist.attestations
-gh attestation verify homematic-manager-web-<version>.tgz --repo hobbyquaker/homematic-manager
+npm view homematic-manager dist.attestations
+gh attestation verify homematic-manager-<version>.tgz --repo hobbyquaker/homematic-manager
 ```
 
 The tarball is self-contained on purpose: `@homematic-manager/backend` and `core` are **bundled**

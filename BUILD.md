@@ -34,7 +34,7 @@ npm workspaces, one lockfile at the root, every package at the same version:
 | `packages/backend` | `@homematic-manager/backend`   | Node: XML-RPC and BIN-RPC clients and callback servers, init/ping/re-init, the persisted caches, optional ReGa, UDP discovery, the paced write queue, and one transport-agnostic API                                                                                                                                      |
 | `packages/ui`      | `@homematic-manager/ui`        | Svelte 5 components and stores; talks to a `Transport` (Electron IPC or WebSocket) and never to Node                                                                                                                                                                                                                      |
 | `apps/electron`    | `@homematic-manager/electron`  | the desktop app: backend in the main process, UI in the renderer, typed IPC between them, electron-builder targets                                                                                                                                                                                                        |
-| `apps/web`         | `@homematic-manager/web`       | the same backend behind an HTTP/WebSocket host serving the built UI: development mode, the e2e target, the npm deliverable, and the process the CCU addon runs                                                                                                                                                            |
+| `apps/web`         | `homematic-manager`            | the same backend behind an HTTP/WebSocket host serving the built UI: development mode, the e2e target, the npm deliverable, and the process the CCU addon runs. Unscoped and published under the 2.x npm name (D-33), so address it as `-w apps/web` — the workspace root has the same name                               |
 | `apps/ccu-addon`   | `@homematic-manager/ccu-addon` | the addon package: bundled musl Node, `rc.d`, monit, Tcl CGIs with the WebUI session check, the lighttpd rule                                                                                                                                                                                                             |
 | `data`             | `@homematic-manager/data`      | pinned openccu-data artifacts, the converter, and the committed result under `data/dist/` — **not** AGPL, see [data/NOTICE.md](data/NOTICE.md)                                                                                                                                                                            |
 | `legacy/`          | —                              | the 2.7.1 code, reference only. Never built, never linted, deleted when 3.0 ships                                                                                                                                                                                                                                         |
@@ -77,14 +77,14 @@ At the root:
 
 Per workspace (`npm run <script> -w <package>`):
 
-| Package                        | Scripts                                                                                           |
-| ------------------------------ | ------------------------------------------------------------------------------------------------- |
-| `@homematic-manager/ui`        | `dev` (the UI on its demo fixture), `build`, `preview`, `typecheck`, `test:browser`, `test:jsdom` |
-| `@homematic-manager/electron`  | `dev`, `build`, `start`, `typecheck`, `dist`, `dist:linux`, `dist:mac`, `dist:win`, `sbom`        |
-| `@homematic-manager/web`       | `build`, `dev` (vite dev server behind the real host), `start`, `prepack`/`postpack`, `sbom`      |
-| `@homematic-manager/backend`   | `build`, `test:sim` (the hm-simulator suites alone)                                               |
-| `@homematic-manager/ccu-addon` | `build`, `package`, `test:cgi`, `test:package`, `test:container`                                  |
-| `@homematic-manager/data`      | `fetch`, `convert`, `update`, `compare-legacy`, `icons-subset`, `test`                            |
+| Package                          | Scripts                                                                                           |
+| -------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `@homematic-manager/ui`          | `dev` (the UI on its demo fixture), `build`, `preview`, `typecheck`, `test:browser`, `test:jsdom` |
+| `@homematic-manager/electron`    | `dev`, `build`, `start`, `typecheck`, `dist`, `dist:linux`, `dist:mac`, `dist:win`, `sbom`        |
+| `homematic-manager` (`apps/web`) | `build`, `dev` (vite dev server behind the real host), `start`, `prepack`/`postpack`, `sbom`      |
+| `@homematic-manager/backend`     | `build`, `test:sim` (the hm-simulator suites alone)                                               |
+| `@homematic-manager/ccu-addon`   | `build`, `package`, `test:cgi`, `test:package`, `test:container`                                  |
+| `@homematic-manager/data`        | `fetch`, `convert`, `update`, `compare-legacy`, `icons-subset`, `test`                            |
 
 ## Building each deliverable
 
@@ -108,19 +108,19 @@ installers are built on Windows.
 
 ```sh
 npm run build -w @homematic-manager/ui
-npm run build -w @homematic-manager/web
+npm run build -w apps/web
 node apps/web/dist/cli.js --ccu ccu3.local
-npm pack -w apps/web                           # the tarball, ~0.9 MB
-npm run sbom -w @homematic-manager/web
+npm pack -w apps/web                           # homematic-manager-<version>.tgz, ~1.2 MB
+npm run sbom -w apps/web
 ```
 
 `prepack.mjs` copies the built UI and `data/dist` into the package and materialises the bundled
 workspace packages as real directories (in a workspace they are symlinks that npm would pack
 nothing for); `postpack.mjs` puts the symlinks back.
 
-`npm run dev -w @homematic-manager/web` is the development mode: a vite dev server for `packages/ui`
-behind the real host, so there is one origin, the UI's relative `api` path reaches the real backend,
-and editing a `.svelte` file updates the page while the WebSocket stays up.
+`npm run dev -w apps/web` is the development mode: a vite dev server for `packages/ui` behind the
+real host, so there is one origin, the UI's relative `api` path reaches the real backend, and editing
+a `.svelte` file updates the page while the WebSocket stays up.
 
 ### The Docker image
 

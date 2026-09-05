@@ -12,8 +12,8 @@ open questions **OQ-n**; when the maintainer changes a decision, record it here 
 
 Status 2026-09-05: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 1.0, branch
 `1.0-dev` in its own repository, not yet pushed or published) and 9 (data pipeline) are done,
-version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); task 7 (UI foundation) is in progress,
-task 6 (write-safety lab study) runs next, then 11 and 12. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); task 7 (UI foundation) is done too; task 6
+(write-safety lab study), 11 (Electron host) and 12 (web host) are in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
@@ -42,6 +42,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 | D-20 | No Homegear-specific work. Checked 2026-09-05: the Homegear repository still receives build-system commits (last 2026-05) but its last release is 0.7.40 from 2019-07, three issues were opened since 2025, 127 stars; the user base is small and the project barely maintained. Homegear keeps working through the generic XML-RPC path where it behaves like a CCU; the `setName` special case (#41) is dropped and #41, #59, #60, #100, #106 are closed with that note. |
 | D-21 | (2026-09-05) The branch `3.0-dev` may be pushed to GitHub by the agent so that GitHub Actions builds the Windows/macOS/Linux artifacts (task 11) and runs CI; the maintainer downloads dev builds from the workflow artifacts. Tags, releases and pushes to `master` stay with the maintainer. |
 | D-22 | (2026-09-05) Dark mode is a requirement, not a nicety: a light and a dark theme, following the OS setting by default with a manual switch that is persisted; every tab, dialog, table state, RSSI colour and notice must be legible in both, and component tests cover both themes where colours carry meaning (RSSI classes, service-message severity, connection marks). |
+| D-23 | (2026-09-05) Component tests run in jsdom by default; vitest browser mode (Chromium via Playwright) is available as `npm run test:browser -w @homematic-manager/ui` and becomes the default in task 14, which adds the `playwright install chromium` step to CI (the e2e suites need it anyway). |
 
 ## Contents
 
@@ -52,7 +53,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - 4. Backend package ✅ [archived](roadmap-archive/task-4.md)
 - 5. hm-simulator 1.0 ✅ [archived](roadmap-archive/task-5.md) (branch `1.0-dev` in its own repository, release by the maintainer)
 - [6. Paramset write safety and the CONFIG_PENDING study](#6-paramset-write-safety-and-the-config_pending-study)
-- [7. UI foundation](#7-ui-foundation)
+- 7. UI foundation ✅ [archived](roadmap-archive/task-7.md)
 - [8. UI feature parity](#8-ui-feature-parity)
 - 9. Device metadata pipeline ✅ [archived](roadmap-archive/task-9.md)
 - [10. Device-specific editors](#10-device-specific-editors)
@@ -237,7 +238,7 @@ The fix for #98 and the reason the write path is rebuilt before any UI exists:
   context menus, progress and RPC log panel (replaces the modal RPC dialog), i18n with a
   language switch (de/en), light and dark theme per D-22 (CSS custom properties, `prefers-color-scheme`
   default, persisted manual switch).
-- Component tests with vitest browser mode and `@testing-library/svelte`.
+- Component tests with `@testing-library/svelte`; jsdom by default, browser mode opt-in (D-23).
 
 ## 8. UI feature parity
 
@@ -341,6 +342,8 @@ Copied from hm2mqtt.js's `addon/` and the ccu-addon-howto, adapted:
 
 ## 14. Test infrastructure and coverage gates
 
+- `npx playwright install --with-deps chromium` in CI, then vitest browser mode becomes the default
+  for the component tests (D-23).
 - e2e suites with Playwright against the web host + simulator for every workflow in the analysis'
   feature inventory; Electron smoke per OS; v8 coverage from e2e merged with unit/component
   coverage.

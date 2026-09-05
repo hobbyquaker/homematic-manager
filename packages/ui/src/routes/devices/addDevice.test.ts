@@ -276,3 +276,38 @@ describe('the add-device dialog', () => {
         });
     });
 });
+
+describe('the ReGa inbox (#54)', () => {
+    let transport: MockTransport;
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+    });
+
+    it('offers to confirm the inbox and says what it confirmed', async () => {
+        transport.result('rega.confirmInbox', ['MEQ0123456']);
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await fireEvent.click(screen.getByTestId('devices-add'));
+
+        await fireEvent.click(screen.getByTestId('add-device-confirm-inbox'));
+        await waitFor(() => {
+            expect(screen.getByTestId('add-device-inbox-result').textContent).toContain('MEQ0123456');
+        });
+    });
+
+    it('says the inbox is empty rather than nothing at all', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await fireEvent.click(screen.getByTestId('devices-add'));
+        await fireEvent.click(screen.getByTestId('add-device-confirm-inbox'));
+        await waitFor(() => {
+            expect(screen.getByTestId('add-device-inbox-result').textContent).toContain('leer');
+        });
+    });
+
+    it('is not offered at all without ReGa (D-2)', async () => {
+        transport.result('rega.state', {enabled: false, reachable: false, names: 0});
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await fireEvent.click(screen.getByTestId('devices-add'));
+        expect(screen.queryByTestId('add-device-confirm-inbox')).toBeNull();
+    });
+});

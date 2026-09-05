@@ -271,4 +271,38 @@ describe.skipIf(!simulatorAvailable)('connecting to hm-simulator', () => {
             ),
         );
     });
+
+    it('confirms the ReGa inbox and acknowledges an alarm in ReGa (#54, #94)', async () => {
+        const {sim, harness} = await bothRunning();
+
+        // #54: the mock has no inbox of its own, so what is asserted is that the script the CCU's
+        // own hm_autoconf uses really went out and came back without an error
+        await expect(harness.backend.request('rega.confirmInbox')).resolves.toEqual([]);
+        const scripts = sim.regaSim.scripts as string[];
+        expect(scripts.some((script) => script.includes('root.Devices().EnumUsedIDs()'))).toBe(true);
+        expect(scripts.some((script) => script.includes('ReadyConfig(true)'))).toBe(true);
+
+        // #94: acknowledging writes the datapoint through the interface *and* clears the CCU alarm
+        sim.setServiceMessage('rfd', 'LEQ0000001:0', 'STICKY_UNREACH', true);
+        await harness.backend.request('serviceMessages.ack', 'BidCos-RF', 'LEQ0000001:0', 'STICKY_UNREACH');
+        await waitFor(() =>
+            (sim.regaSim.scripts as string[]).some((script) =>
+                script.includes('dom.GetObject("BidCos-RF.LEQ0000001:0.STICKY_UNREACH")'),
+            ),
+        );
+        expect((sim.regaSim.scripts as string[]).some((script) => script.includes('AlReceipt()'))).toBe(true);
+    });
+
+    it('does all of that silently when there is no ReGa (D-2)', async () => {
+        const sim = await startSimulator({rega: false});
+        running.push({close: () => sim.close()});
+        const harness = await startBackend(sim, {connection: {rega: false}});
+        running.unshift({close: () => harness.close()});
+
+        // no ReGa, no inbox, no alarm: an empty answer and not one error notice
+        await expect(harness.backend.request('rega.confirmInbox')).resolves.toEqual([]);
+        sim.setServiceMessage('rfd', 'LEQ0000001:0', 'STICKY_UNREACH', true);
+        await harness.backend.request('serviceMessages.ack', 'BidCos-RF', 'LEQ0000001:0', 'STICKY_UNREACH');
+        expect(harness.notices.filter((notice) => notice.level === 'error')).toEqual([]);
+    });
 });

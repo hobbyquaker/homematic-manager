@@ -13,10 +13,8 @@
  * The rename script addresses ReGa objects by their numeric id, which is why `NameStore` keeps the
  * id `getChannels` reported; an address ReGa has never reported can only be renamed locally.
  *
- * It is written as one `dom.GetObject(<id>).Name("<name>");` statement per line rather than in the
- * `var hmm_o; hmm_o = dom.GetObject(<id>); hmm_o.Name(...)` form of 2.x. The two are the same thing
- * for ReGa, and the single-statement form is the one hm-simulator's ReGa mock recognises - which is
- * the only way the rename can be tested without a CCU.
+ * Every script this module sends lives in `scripts.ts` - one file, reviewable in one go, because a
+ * ReGa script is code sent to someone else's interpreter.
  */
 
 import {Rega, type RegaChannel} from 'homematic-rega';
@@ -25,6 +23,16 @@ import {regaPort, type Language, type RegaState} from '@homematic-manager/core';
 
 import {errorMessage} from '../errors.js';
 import type {NameEntry, NameStore} from '../cache/names.js';
+import {
+    acknowledgeAlarmScript,
+    CONFIRM_INBOX_SCRIPT,
+    escapeRegaString,
+    parseConfirmedDevices,
+    renameObjectsScript,
+    type ConfirmedDevice,
+} from './scripts.js';
+
+export {escapeRegaString};
 
 /** The part of `homematic-rega` this module uses; a test passes its own. */
 export interface RegaLike {
@@ -49,14 +57,6 @@ export interface RegaServiceOptions {
     readonly createClient?: (options: RegaServiceOptions) => RegaLike;
 }
 
-/** Escapes a name for the ReGa string literal it is written into. */
-export function escapeRegaString(value: string): string {
-    return value
-        .replace(/\\/g, '\\\\')
-        .replace(/"/g, '\\"')
-        .replace(/[\r\n]+/g, ' ');
-}
-
 /**
  * The script that renames a set of objects, or `undefined` when none of the addresses has a ReGa
  * id - in which case there is nothing to send and the local store has already done the work.
@@ -65,14 +65,10 @@ export function renameScript(
     entries: readonly NameEntry[],
     idOf: (address: string) => number | undefined,
 ): string | undefined {
-    const lines: string[] = [];
-    for (const entry of entries) {
-        const id = idOf(entry.address);
-        if (id !== undefined) {
-            lines.push(`dom.GetObject(${String(id)}).Name("${escapeRegaString(entry.name)}");`);
-        }
-    }
-    return lines.length === 0 ? undefined : `${lines.join('\n')}\n`;
+    const renames = entries
+        .map((entry) => ({id: idOf(entry.address), name: entry.name}))
+        .filter((entry): entry is {id: number; name: string} => entry.id !== undefined);
+    return renameObjectsScript(renames);
 }
 
 function createClient(options: RegaServiceOptions): RegaLike {
@@ -163,6 +159,63 @@ export class RegaService {
             }
         } catch (error) {
             this.#fail(`renaming through ReGa failed: ${errorMessage(error)}`);
+        }
+    }
+
+    /**
+     * Issue #54: confirm every device that is still in the CCU's inbox, and say which ones.
+     *
+     * D-2: without ReGa there is no inbox, so this answers with an empty list and nothing else
+     * happens. A failure is a notice, never an exception - a device that could not be confirmed on
+     * the CCU is still perfectly usable from here.
+     */
+    async confirmInbox(): Promise<ConfirmedDevice[]> {
+        if (!this.#client) {
+            return [];
+        }
+        try {
+            const answer = await this.#client.exec(CONFIRM_INBOX_SCRIPT);
+            const confirmed = parseConfirmedDevices(answer.output);
+            if (confirmed.length > 0) {
+                this.#options.onNotice(
+                    'info',
+                    `confirmed ${String(confirmed.length)} device(s) in the ReGa inbox: ${confirmed
+                        .map((entry) => entry.address)
+                        .join(', ')}`,
+                );
+            }
+            return confirmed;
+        } catch (error) {
+            this.#fail(`confirming the ReGa inbox failed: ${errorMessage(error)}`);
+            return [];
+        }
+    }
+
+    /**
+     * Issue #94: acknowledge a service message in ReGa as well.
+     *
+     * The datapoint write through the interface process is the acknowledgement that matters and has
+     * already happened; this clears the CCU's own alarm so the WebUI stops showing a message the
+     * user has dealt with here. Returns false when there is no ReGa, when the name is not one that
+     * may go into a script, or when the CCU refused - none of which is worth an error.
+     */
+    async acknowledgeAlarm(interfaceName: string, address: string, datapoint: string): Promise<boolean> {
+        if (!this.#client) {
+            return false;
+        }
+        const script = acknowledgeAlarmScript(interfaceName, address, datapoint);
+        if (script === undefined) {
+            return false;
+        }
+        try {
+            await this.#client.exec(script);
+            return true;
+        } catch (error) {
+            this.#options.onNotice(
+                'info',
+                `${address}: the service message was acknowledged on the interface but not in ReGa: ${errorMessage(error)}`,
+            );
+            return false;
         }
     }
 

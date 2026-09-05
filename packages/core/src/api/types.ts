@@ -55,6 +55,19 @@ export interface ConnectionConfig {
      * same call the acknowledge button makes.
      */
     autoAckStickyUnreach?: boolean;
+    /**
+     * Issue #54: confirm a newly paired device out of the CCU's inbox by itself.
+     *
+     * A device that has just been paired sits in the WebUI's Posteingang with `ReadyConfig()` false
+     * until somebody presses "fertig" there, and until then the CCU's own lists ignore it - which is
+     * confusing when the device is plainly there in this application, which talks to the interface
+     * process and never looked at the inbox.
+     *
+     * Requires ReGa (D-2): without it there is no inbox and this does nothing at all. Off by
+     * default, because confirming is what a user may want to do in the WebUI, with its device
+     * configuration dialog, rather than have happen behind their back.
+     */
+    autoConfirmRegaInbox?: boolean;
 }
 
 export interface AppConfig {
@@ -344,6 +357,11 @@ export interface ApiMethods {
     'interfaces.list': {params: []; result: InterfaceState[]};
     'interfaces.reconnect': {params: [interfaceName?: string]; result: null};
     'rega.state': {params: []; result: RegaState};
+    /**
+     * Issue #54: confirm every device that is still in the CCU's inbox, and answer with the
+     * addresses. Without ReGa (D-2) the answer is an empty list and nothing happened.
+     */
+    'rega.confirmInbox': {params: []; result: string[]};
 
     'devices.list': {params: [interfaceName: string, options?: {refresh?: boolean}]; result: DeviceDescription[]};
     'devices.description': {params: [interfaceName: string, address: string]; result: DeviceDescription};

@@ -76,6 +76,20 @@ export class DevicesStore {
         }
     }
 
+    /**
+     * Issue #54: confirm every device that is still in the CCU's inbox. Answers with the addresses,
+     * and with nothing at all when ReGa is off (D-2) - which is not an error, just a system that
+     * has no inbox.
+     */
+    async confirmRegaInbox(): Promise<string[]> {
+        try {
+            return await this.#transport.request('rega.confirmInbox');
+        } catch (error) {
+            this.#notices.fromError(error, 'rega.confirmInbox');
+            return [];
+        }
+    }
+
     /** Ensures an interface is loaded once; a second call while it is present does nothing. */
     async ensure(interfaceName: string): Promise<void> {
         if (interfaceName === '' || this.indexes[interfaceName] || this.isLoading(interfaceName)) {

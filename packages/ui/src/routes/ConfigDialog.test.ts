@@ -163,6 +163,29 @@ describe('ConfigDialog', () => {
         expect(screen.getByTestId<HTMLButtonElement>('config-discover').disabled).toBe(false);
     });
 
+    it('offers the ReGa inbox auto-confirm, and greys it out without ReGa (#54, D-2)', async () => {
+        await open(transport);
+        const box = screen.getByTestId<HTMLInputElement>('config-auto-confirm-inbox');
+        expect(box.checked).toBe(false);
+        expect(box.disabled).toBe(false);
+
+        // it only means anything while ReGa is on, and the dialog says so rather than hiding it
+        const rega = screen
+            .getByText('ReGa verwenden')
+            .parentElement!.querySelector('input[type=checkbox]') as HTMLInputElement;
+        await fireEvent.click(rega);
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLInputElement>('config-auto-confirm-inbox').disabled).toBe(true);
+        });
+
+        await fireEvent.click(rega);
+        await fireEvent.click(screen.getByTestId('config-auto-confirm-inbox'));
+        await fireEvent.click(screen.getByTestId('config-save'));
+        await waitFor(() => {
+            expect(transport.lastCall('config.set')?.[0]?.autoConfirmRegaInbox).toBe(true);
+        });
+    });
+
     it('offers the STICKY_UNREACH auto-acknowledge, off, and saves it when it is ticked (#26)', async () => {
         await open(transport);
         const box = screen.getByTestId<HTMLInputElement>('config-auto-ack-unreach');

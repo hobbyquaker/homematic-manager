@@ -406,6 +406,9 @@ export class Backend {
                 await this.#write(p[0], 'setBidcosInterface', [p[1], p[2], p[3]]);
                 return null;
 
+            case 'rega.confirmInbox':
+                return (await (this.#rega?.confirmInbox() ?? Promise.resolve([]))).map((entry) => entry.address);
+
             case 'linkTemplates.list':
                 return this.#linkTemplates.list(p[0]);
             case 'linkTemplates.save':
@@ -589,6 +592,12 @@ export class Backend {
                 this.events.emit('devices.changed', {interfaceName, kind: 'new', addresses});
                 if (interfaceName === 'HmIP-RF') {
                     this.#scheduleHmipSweep();
+                }
+                // Issue #54: a device that has just been paired sits in the CCU's inbox until
+                // somebody confirms it in the WebUI. Opt-in and ReGa-only (D-2): without ReGa the
+                // call answers with an empty list and nothing happened.
+                if (addresses.length > 0 && this.#config.connection.autoConfirmRegaInbox === true) {
+                    void this.#rega?.confirmInbox();
                 }
             },
             deleteDevices: (interfaceName, addresses) => {
@@ -1023,6 +1032,10 @@ export class Backend {
         if (this.#caches.serviceMessages.clear(interfaceName, address, datapoint)) {
             this.events.emit('serviceMessages.changed', this.#caches.listServiceMessages());
         }
+        // Issue #94: the datapoint write above is the acknowledgement that matters, and it happened
+        // whether ReGa exists or not. This clears the CCU's own alarm on top, so the WebUI stops
+        // showing a message the user has already dealt with here. D-2: silent when ReGa is off.
+        void this.#rega?.acknowledgeAlarm(interfaceName, address, datapoint);
         return null;
     }
 
@@ -1234,6 +1247,7 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'rssi.get',
     'bidcos.interfaces',
     'bidcos.setInterface',
+    'rega.confirmInbox',
     'linkTemplates.list',
     'linkTemplates.save',
     'linkTemplates.remove',

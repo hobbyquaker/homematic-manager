@@ -47,6 +47,7 @@ a WebSocket, and the CCU addon (task 13) runs the same process on the CCU.
 | `cache/unreach.ts` | how often each device went unreachable (#26), edge-counted and persisted |
 | `cache/store.ts` | all caches of one connection, and what of them is persisted |
 | `rega/client.ts` | names and renames through ReGa; every failure is a state, never an exception |
+| `rega/scripts.ts` | every ReGa script in one file: rename, the inbox confirm of #54, the alarm acknowledge of #94 |
 | `discovery/discover.ts` | the eQ-3 UDP broadcast probe on 43439 (ported from hm2mqtt.js) |
 | `write/queue.ts` | one paced queue per interface, cancellable |
 | `write/log.ts` | the session write log and the 2.x `rpcLogFolder` dumps |

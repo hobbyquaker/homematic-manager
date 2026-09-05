@@ -57,6 +57,8 @@ export function defaultConnection(): ConnectionConfig {
         // #26: off unless the user asks. Acknowledging is a write, and the list of what was
         // unreachable is exactly what a user watching it would lose.
         autoAckStickyUnreach: false,
+        // #54: needs ReGa, and confirming is something a user may want to do in the WebUI
+        autoConfirmRegaInbox: false,
     };
 }
 
@@ -115,6 +117,10 @@ export function normaliseConnection(input: unknown): ConnectionConfig {
             typeof raw.autoAckStickyUnreach === 'boolean'
                 ? raw.autoAckStickyUnreach
                 : defaults.autoAckStickyUnreach === true,
+        autoConfirmRegaInbox:
+            typeof raw.autoConfirmRegaInbox === 'boolean'
+                ? raw.autoConfirmRegaInbox
+                : defaults.autoConfirmRegaInbox === true,
     };
 
     const auth = normaliseAuth(raw.auth);

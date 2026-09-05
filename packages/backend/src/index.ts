@@ -45,6 +45,7 @@ export * from './write/paramset.js';
 
 // the optional and the peripheral
 export * from './rega/client.js';
+export * from './rega/scripts.js';
 export * from './discovery/discover.js';
 export * from './devices/installMode.js';
 export * from './images/deviceImages.js';

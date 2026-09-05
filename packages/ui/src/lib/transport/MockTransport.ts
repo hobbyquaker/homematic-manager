@@ -202,6 +202,7 @@ export class MockTransport implements Transport {
                 : DEMO_SERVICE_MESSAGES.filter((message) => message.interfaceName === interfaceName),
         );
         this.result('serviceMessages.ack', null);
+        this.result('rega.confirmInbox', []);
         this.respond('unreach.list', (interfaceName) =>
             interfaceName === undefined
                 ? DEMO_UNREACH

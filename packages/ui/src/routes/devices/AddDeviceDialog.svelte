@@ -36,6 +36,8 @@
     /** Devices that arrived while this dialog was open - the ones #24 wants named straight away. */
     let paired = $state<string[]>([]);
     let names = $state<Record<string, string>>({});
+    /** #54: what the last inbox confirmation did, as one line under the button. */
+    let inboxConfirmed = $state('');
 
     const interfaceName = $derived(stores.app.selectedInterface);
     const interfaceType = $derived(stores.interfaces.typeOf(interfaceName));
@@ -51,6 +53,7 @@
         remaining = 0;
         paired = [];
         names = {};
+        inboxConfirmed = '';
     });
 
     /** New devices while the dialog is open: #24 asks for them by name before they are forgotten. */
@@ -128,6 +131,15 @@
             deviceKey = parsed.key;
         }
         scanning = false;
+    }
+
+    /** #54: confirm the CCU's inbox by hand, and say what it confirmed. */
+    async function confirmInbox(): Promise<void> {
+        busy = true;
+        const confirmed = await stores.devices.confirmRegaInbox();
+        busy = false;
+        inboxConfirmed =
+            confirmed.length === 0 ? t('The ReGa inbox is empty') : `${t('Confirmed')}: ${confirmed.join(', ')}`;
     }
 
     async function saveNames(): Promise<void> {
@@ -290,6 +302,25 @@
                 <button type="button" class="hmm-button" data-testid="add-device-stop" onclick={() => void stop()}
                     >{t('Stop')}</button
                 >
+            {/if}
+        </div>
+    {/if}
+
+    <!--
+        Issue #54: a device that has just been paired stays in the CCU's inbox until somebody
+        confirms it there. Shown only where there is an inbox at all (D-2).
+    -->
+    {#if stores.interfaces.rega?.enabled === true}
+        <div class="hmm-add-actions">
+            <button
+                type="button"
+                class="hmm-button"
+                disabled={busy}
+                data-testid="add-device-confirm-inbox"
+                onclick={() => void confirmInbox()}>{t('Confirm the ReGa inbox')}</button
+            >
+            {#if inboxConfirmed !== ''}
+                <span data-testid="add-device-inbox-result">{inboxConfirmed}</span>
             {/if}
         </div>
     {/if}

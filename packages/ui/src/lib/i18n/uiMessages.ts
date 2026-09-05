@@ -26,6 +26,13 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Not present': {de: 'Nicht vorhanden', en: 'Not present'},
     Subscribing: {de: 'Anmeldung läuft', en: 'Subscribing'},
     'Pending changes': {de: 'Offene Änderungen', en: 'Pending changes'},
+    'Confirm the ReGa inbox': {de: 'ReGa-Posteingang bestätigen', en: 'Confirm the ReGa inbox'},
+    'Confirm the ReGa inbox automatically': {
+        de: 'ReGa-Posteingang automatisch bestätigen',
+        en: 'Confirm the ReGa inbox automatically',
+    },
+    'The ReGa inbox is empty': {de: 'Der ReGa-Posteingang ist leer', en: 'The ReGa inbox is empty'},
+    Confirmed: {de: 'Bestätigt', en: 'Confirmed'},
     Template: {de: 'Vorlage', en: 'Template'},
     'Save as template': {de: 'Als Vorlage speichern', en: 'Save as template'},
     'Apply template': {de: 'Vorlage anwenden', en: 'Apply template'},

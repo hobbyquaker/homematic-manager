@@ -111,6 +111,13 @@
         }
     }
 
+    /** #54: the same for the ReGa inbox, which only means anything while ReGa is on (D-2). */
+    function setAutoConfirmInbox(value: boolean): void {
+        if (draft) {
+            draft.autoConfirmRegaInbox = value;
+        }
+    }
+
     function setAuthField(field: 'user' | 'password', value: string): void {
         if (!draft) {
             return;
@@ -260,6 +267,21 @@
                     checked={draft.autoAckStickyUnreach === true}
                     data-testid="config-auto-ack-unreach"
                     onchange={(event) => setAutoAck(event.currentTarget.checked)}
+                />
+            </label>
+
+            <!--
+                Issue #54. Greyed out without ReGa rather than hidden: a user who wonders where the
+                option went should see that it is the ReGa switch above that turns it off (D-2).
+            -->
+            <label class="hmm-config-row">
+                <span>{t('Confirm the ReGa inbox automatically')}</span>
+                <input
+                    type="checkbox"
+                    disabled={!draft.rega}
+                    checked={draft.autoConfirmRegaInbox === true}
+                    data-testid="config-auto-confirm-inbox"
+                    onchange={(event) => setAutoConfirmInbox(event.currentTarget.checked)}
                 />
             </label>
 

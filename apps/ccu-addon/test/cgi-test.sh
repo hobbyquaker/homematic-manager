@@ -220,6 +220,79 @@ case "$out" in
     *) fail "refuses an unknown command" "$out" ;;
 esac
 
+echo "the addon settings page (D-32)"
+out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config')"
+case "$out" in
+    *'Anmeldung / Login'*) pass "settings.cgi?cmd=config shows the settings page" ;;
+    *) fail "settings.cgi?cmd=config shows the settings page" "$out" ;;
+esac
+case "$out" in
+    *'Status: 302'*) fail "the settings page is not the hand-over" "$out" ;;
+    *) pass "the settings page is not the hand-over" ;;
+esac
+case "$out" in
+    *'current: <b>token</b>'*) pass "and reports the default mode, token" ;;
+    *) fail "and reports the default mode, token" "$out" ;;
+esac
+# the hand-over is what the Systemsteuerung button uses and must be untouched by any of this
+out="$(cgi settings.cgi 'sid=@1234567890@')"
+case "$out" in
+    *'Status: 302 Found'*) pass "and the hand-over still redirects into the UI" ;;
+    *) fail "and the hand-over still redirects into the UI" "$out" ;;
+esac
+out="$(HMM_TEST_SESSION=invalid cgi settings.cgi 'sid=@1234567890@&cmd=config')"
+case "$out" in
+    *'Sitzung ungültig'*) pass "an expired session gets no settings page either" ;;
+    *) fail "an expired session gets no settings page either" "$out" ;;
+esac
+# a browser that already holds the token cookie has passed the same session check, which is what
+# makes the page reachable from the Systemsteuerung entry's link, where there is no sid
+out="$(cd "$TREE/www" && QUERY_STRING='cmd=config' HTTP_COOKIE='a=1; hmm_token=deadbeefcafebabe0123456789abcdef' HMM_TEST_SESSION=invalid tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'Anmeldung / Login'*) pass "the token cookie opens the settings page without a sid" ;;
+    *) fail "the token cookie opens the settings page without a sid" "$out" ;;
+esac
+out="$(cd "$TREE/www" && QUERY_STRING='cmd=config' HTTP_COOKIE='hmm_token=wrong' HMM_TEST_SESSION=invalid tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'Sitzung ungültig'*) pass "a wrong token cookie does not" ;;
+    *) fail "a wrong token cookie does not" "$out" ;;
+esac
+
+out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&auth_mode=rega')"
+case "$out" in
+    *'current: <b>rega</b>'*) pass "switching to rega is saved" ;;
+    *) fail "switching to rega is saved" "$out" ;;
+esac
+case "$(grep '^HMM_AUTH_MODE' "$TREE/etc/hmm.env")" in
+    'HMM_AUTH_MODE=rega') pass "and written into etc/hmm.env, replacing the commented-out line" ;;
+    *) fail "and written into etc/hmm.env, replacing the commented-out line" "$(grep -c '^#*HMM_AUTH_MODE' "$TREE/etc/hmm.env") lines" ;;
+esac
+# the commented-out line of default.env is replaced, not left next to the new one - a second
+# assignment further down the file would win when the rc.d script sources it
+if [ "$(grep -cE '^ *#? *HMM_AUTH_MODE=' "$TREE/etc/hmm.env")" = 1 ]; then
+    pass "exactly one HMM_AUTH_MODE line is left"
+else
+    fail "exactly one HMM_AUTH_MODE line is left" "$(grep -nE '^ *#? *HMM_AUTH_MODE=' "$TREE/etc/hmm.env")"
+fi
+case "$(grep -c '^HMM_PORT=8090' "$TREE/etc/hmm.env")" in
+    1) pass "and everything else in the file survived the write" ;;
+    *) fail "and everything else in the file survived the write" "$(cat "$TREE/etc/hmm.env")" ;;
+esac
+out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&auth_mode=token')"
+case "$out" in
+    *'current: <b>token</b>'*) pass "and switching back works" ;;
+    *) fail "and switching back works" "$out" ;;
+esac
+out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&auth_mode=oauth')"
+case "$out" in
+    *'Unbekannter Wert'*) pass "a mode that does not exist is refused" ;;
+    *) fail "a mode that does not exist is refused" "$out" ;;
+esac
+case "$(grep '^HMM_AUTH_MODE' "$TREE/etc/hmm.env")" in
+    'HMM_AUTH_MODE=token') pass "and nothing was written for it" ;;
+    *) fail "and nothing was written for it" "$(grep 'HMM_AUTH_MODE' "$TREE/etc/hmm.env")" ;;
+esac
+
 echo "update_check.cgi"
 out="$(cgi update_check.cgi 'cmd=download')"
 case "$out" in

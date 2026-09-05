@@ -82,6 +82,57 @@ proc read_port {} {
     return $port
 }
 
+# One value out of etc/hmm.env, or the default when the file has none. The same file the rc.d
+# script sources, so what is read here is what the host process will be started with.
+proc read_env {name default} {
+    global ADDON_DIR
+    set value $default
+    if {![file exists $ADDON_DIR/etc/hmm.env]} {
+        return $value
+    }
+    set fd [open $ADDON_DIR/etc/hmm.env r]
+    set content [read $fd]
+    close $fd
+    foreach line [split $content "\n"] {
+        if {[regexp "^$name=(.*)\$" [string trim $line] dummy found]} {
+            set value [string trim [string trim $found] "\""]
+        }
+    }
+    return $value
+}
+
+# Writes one value into etc/hmm.env: replaces the line that sets it - commented out or not - and
+# appends it when there is none. Everything else in the file is kept byte for byte, because a user
+# may have put their own HMM_* lines there and an update never overwrites the file either.
+proc write_env {name value} {
+    global ADDON_DIR
+    set file $ADDON_DIR/etc/hmm.env
+    set lines [list]
+    set replaced 0
+    if {[file exists $file]} {
+        set fd [open $file r]
+        set content [read $fd]
+        close $fd
+        foreach line [split $content "\n"] {
+            if {[regexp "^ *#? *$name=" $line]} {
+                if {$replaced == 0} {
+                    lappend lines "$name=$value"
+                    set replaced 1
+                }
+            } else {
+                lappend lines $line
+            }
+        }
+    }
+    if {$replaced == 0} {
+        lappend lines "$name=$value"
+        lappend lines ""
+    }
+    set fd [open $file w]
+    puts -nonewline $fd [join $lines "\n"]
+    close $fd
+}
+
 # The token the backend expects on its API socket. Written by update_script (and by the rc.d script
 # when it is missing) with mode 600 into the profile directory, so it is readable by root only -
 # which is what a CGI is.
@@ -107,6 +158,46 @@ proc request_is_https {} {
         return 1
     }
     return 0
+}
+
+# Does the browser hold the addon's own token cookie?
+#
+# The cookie is only ever handed out by settings.cgi after a session check, so holding it is a
+# second proof of the same thing. It is what makes the settings page reachable from a plain link
+# that carries no `sid` - the entry in Systemsteuerung, or a bookmark - for a browser that has the
+# app open. Everything the page then offers is a WebUI operation anyway.
+proc has_token_cookie {} {
+    global env
+    set token [read_token]
+    if {[string equal $token ""]} {
+        return 0
+    }
+    if {![info exists env(HTTP_COOKIE)]} {
+        return 0
+    }
+    foreach part [split $env(HTTP_COOKIE) ";"] {
+        set part [string trim $part]
+        set index [string first "=" $part]
+        if {$index < 0} {
+            continue
+        }
+        if {[string equal [string range $part 0 [expr {$index - 1}]] "hmm_token"]} {
+            if {[string equal [string range $part [expr {$index + 1}] end] $token]} {
+                return 1
+            }
+        }
+    }
+    return 0
+}
+
+# HTML-escapes a value that goes into a page. Nothing here is user input today, but the settings
+# page prints what is in etc/hmm.env, and that file is edited by hand.
+proc html_escape {value} {
+    regsub -all {&} $value {\&amp;} value
+    regsub -all {<} $value {\&lt;} value
+    regsub -all {>} $value {\&gt;} value
+    regsub -all {"} $value {\&quot;} value
+    return $value
 }
 
 # Answers with a JSON error and exits unless the request carries a valid WebUI session. Returns the

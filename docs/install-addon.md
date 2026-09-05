@@ -124,6 +124,50 @@ What that means in practice:
 - `SameSite=Strict` means a foreign page cannot make the browser send the cookie, which is what
   makes the deliberately missing Origin check on the socket harmless.
 
+## Optional: a login with a CCU user
+
+By default the WebUI session is the only way in, and a browser that opens `http://<ccu>/addons/hmm/`
+directly — a bookmark, a second tab, a phone — gets a page that never connects, because it has no
+cookie. Switching the addon to `HMM_AUTH_MODE=rega` puts a small login page in front of the UI
+instead:
+
+```
+GET /addons/hmm/            no session   ->  the login page (German/English)
+POST /addons/hmm/login      user + password
+      ├─ dom.GetObject(ID_USERS).Get("<user>")   ReGa on 127.0.0.1:8183, and its UserLevel()
+      ├─ "<user>:<password>"                     udp 1998, the CCU's authentication daemon, answers 1
+      └─ both yes  ->  302 to /addons/hmm/ with Set-Cookie: hmm_session=…
+GET /addons/hmm/logout      ends the session and clears the cookie
+```
+
+Those are the same two services the CCU's own WebUI uses; there is no JSON-API involved (D-1) and no
+second password anywhere — **the users are the CCU's users**, and changing one on the CCU changes it
+here. Both services listen on the CCU's loopback only, which is why this exists for the addon and
+nowhere else: an npm or Docker install that asks for `--auth-mode rega` refuses to start and says
+so.
+
+What it does and does not change:
+
+- the `settings.cgi` hand-over is **untouched**. The button in Systemsteuerung still opens the app
+  directly, and a browser carrying the token cookie never sees the login page;
+- the session cookie is `HttpOnly; SameSite=Strict` (`Secure` over https), lasts 24 hours of
+  inactivity (`HMM_SESSION_TTL`) and slides — a tab in use never expires, one left over the weekend
+  does. Sessions live in the process, so restarting the addon logs everybody out;
+- the header of the app then shows the user name and a **Abmelden / Log out** link;
+- five failed attempts from one address per minute and the login stops answering for a minute. A
+  wrong password and a user the CCU does not have get exactly the same message, so the form cannot
+  be used to find out which user names exist;
+- the user's ReGa level (8 admin, 2 user, 1 guest) is shown but does not restrict anything yet:
+  everyone who may log in may write, exactly as in the WebUI.
+
+Switch it on from the **Addon-Einstellungen** link on the Zusatzsoftware page
+(`/addons/hmm/settings.cgi?cmd=config`, which writes the file and restarts the service), or by hand:
+
+```sh
+echo 'HMM_AUTH_MODE=rega' >> /usr/local/addons/hmm/etc/hmm.env
+/usr/local/etc/config/rc.d/hmm restart
+```
+
 ## The lighttpd rule
 
 `/usr/local/etc/config/lighttpd/hmm.conf` is written at install time with the port from
@@ -211,7 +255,13 @@ on the first install and never overwritten again:
 ```sh
 HMM_PORT=8090        # loopback only; change hmm.conf with it, or re-run the update
 HMM_LOG_LEVEL=info   # error, warn, info, debug
+HMM_AUTH_MODE=token  # token (default) or rega - see "Optional: a login with a CCU user"
+HMM_SESSION_TTL=24h  # with rega: how long a login lasts without being used
 ```
+
+`HMM_AUTH_MODE` is also settable from the addon's own settings page,
+`/addons/hmm/settings.cgi?cmd=config`, which is linked from the addon's entry on the Zusatzsoftware
+page; it writes the same file and restarts the service.
 
 Every option of the host has an `HMM_*` environment mirror, so anything else can be added here too.
 What the rc.d script passes on the command line — `--local --ccu 127.0.0.1 --base /addons/hmm --host

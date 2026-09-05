@@ -127,6 +127,52 @@ GET /addons/hmm/api   (upgrade)  ->  no cookie            ->  401
 - `SameSite=Strict` means a foreign page cannot make the browser send it, which is what makes the
   missing Origin check on the socket harmless.
 
+## The optional login (D-32)
+
+`HMM_AUTH_MODE=rega` in `etc/hmm.env` puts a login page in front of the UI for everybody who does
+_not_ arrive through `settings.cgi` — a bookmark straight to `http://<ccu>/addons/hmm/`, a second
+tab, a phone — instead of a page that silently never connects. Off by default; the hand-over stays
+the primary path.
+
+```
+GET  /addons/hmm/       no session  ->  the login page, framework-free, German/English
+POST /addons/hmm/login  user + password
+       ├─ dom.GetObject(ID_USERS).Get("<user>") + UserLevel()   ReGa, 127.0.0.1:8183
+       ├─ "<user>:<password>"                                   udp 1998, answers "1"
+       └─ both yes  ->  302 /addons/hmm/  + Set-Cookie: hmm_session=…; HttpOnly; SameSite=Strict
+GET  /addons/hmm/api    Cookie: hmm_session=…  ->  101, exactly like the token cookie
+GET  /addons/hmm/logout ends the session, clears the cookie
+```
+
+- the two services are the CCU's own — no JSON-API (D-1), no second password, no user list of our
+  own. Both are loopback-only, so `--auth-mode rega` is refused with a clear message unless the
+  host runs with `--local`, which is what the rc.d script does and no npm or Docker install does;
+- **`settings.cgi` is untouched**: a browser with the token cookie is let in without ever seeing
+  the form, so the Systemsteuerung button behaves exactly as before;
+- sessions slide, 24 h by default (`HMM_SESSION_TTL`), live in the process and are re-sent as
+  `Max-Age` on every page load. Restarting the addon logs everybody out;
+- five failures per source per minute, counted per source and never per user name; a wrong password
+  and an unknown user get the same answer, so the form cannot enumerate the CCU's users. Behind
+  lighttpd the source is the **last** `X-Forwarded-For` entry, the one lighttpd itself added;
+- the UI header then shows the user and a logout link (`session.info` on the API contract). The
+  ReGa level (8/2/1) is carried and shown but gates nothing: everyone who may log in may write, as
+  in the WebUI;
+- ReGa runs one script at a time, so looked-up users are cached for 15 minutes, parallel lookups of
+  one name share a single script run, and a user we already know stays logged in while ReGa is busy
+  or down. That is the RedMatic 9.2.0 lesson and the reason the cache exists at all.
+
+Switched on from the addon's settings page, `/addons/hmm/settings.cgi?cmd=config` (linked from the
+addon's entry in Systemsteuerung; it writes `etc/hmm.env` and restarts the service), or by hand:
+
+```sh
+echo 'HMM_AUTH_MODE=rega' >> /usr/local/addons/hmm/etc/hmm.env
+/usr/local/etc/config/rc.d/hmm restart
+```
+
+The settings page takes a WebUI `sid` or the addon's own token cookie — both are proof of the same
+ReGaHSS session check — so the link works from Systemsteuerung and from a browser that has the app
+open.
+
 ## The lighttpd rule
 
 `/usr/local/etc/config/lighttpd/hmm.conf`, written at install time with the port from
@@ -187,6 +233,8 @@ overwritten again:
 ```sh
 HMM_PORT=8090        # loopback only; change hmm.conf with it, or re-run update_script
 HMM_LOG_LEVEL=info   # error, warn, info, debug
+HMM_AUTH_MODE=token  # token (default) or rega - see "The optional login (D-32)"
+HMM_SESSION_TTL=24h  # with rega: how long a login lasts without being used
 ```
 
 Every option of the host has an `HMM_*` environment mirror
@@ -278,6 +326,50 @@ check with a right and a wrong session id, the UI and its assets through the pro
 WebSocket upgrade and an ApiFrame round trip, a socket left idle for ten minutes, `service.cgi`
 restart, and the device list filling from `rfd` and `HmIPServer` on the loopback. The lookahead in
 the proxy rule works on lighttpd 1.4.50 (CCU3 firmware) and 1.4.82 (OpenCCU) alike.
+
+### Still to check on hardware: the optional login (D-32, task 18)
+
+Everything below was exercised in the container replay with a stub ReGa and a stub UDP 1998, never
+against a real ReGaHSS. One OpenCCU box with a real CCU user is what is missing; run this in task
+17's next hardware pass and record the result here:
+
+```sh
+# 1. switch the addon over and restart it
+ssh root@<box> "echo 'HMM_AUTH_MODE=rega' >> /usr/local/addons/hmm/etc/hmm.env; \
+    /usr/local/etc/config/rc.d/hmm restart; sleep 3; grep -c 'login:' /usr/local/addons/hmm/var/hmm.log"
+
+# 2. the login page instead of the UI, and the form against the real ReGa + udp 1998
+curl -s  http://<box>/addons/hmm/ | grep -c 'name="password"'          # 1
+curl -si -X POST http://<box>/addons/hmm/login \
+    -d 'user=<ccu-user>&password=<wrong>'   | head -1                   # 401
+curl -si -X POST http://<box>/addons/hmm/login \
+    -d 'user=<ccu-user>&password=<right>'   | grep -i set-cookie        # hmm_session=…
+curl -s -b 'hmm_session=<id>' http://<box>/addons/hmm/ | grep -c 'id="app"'   # 1
+
+# 3. the level ReGa really reports for that user, in the log and in session.info
+ssh root@<box> "grep 'login:' /usr/local/addons/hmm/var/hmm.log | tail -2"   # level 8 for an admin
+
+# 4. the hand-over still bypasses the login: open the button in Systemsteuerung, expect the UI
+#    with no login page, then check the header shows no user for that path and does for the other
+
+# 5. the rate limit, from one machine, and that the CCU is not asked a sixth time
+for i in 1 2 3 4 5 6; do curl -so /dev/null -w '%{http_code} ' -X POST \
+    http://<box>/addons/hmm/login -d 'user=<ccu-user>&password=<wrong>'; done   # 401×5 then 429
+
+# 6. logout, and that the api socket refuses the cookie afterwards
+curl -si -b 'hmm_session=<id>' http://<box>/addons/hmm/logout | head -1         # 302
+
+# 7. ReGa restarting under a live session: the known user must stay logged in
+ssh root@<box> "/etc/init.d/S70ReGaHss restart"                                  # page keeps working
+
+# 8. put it back
+ssh root@<box> "sed -i 's/^HMM_AUTH_MODE=rega/HMM_AUTH_MODE=token/' \
+    /usr/local/addons/hmm/etc/hmm.env; /usr/local/etc/config/rc.d/hmm restart"
+```
+
+Also worth one look on the CCU3 firmware box (Tcl 8.2.3): the settings page,
+`/addons/hmm/settings.cgi?cmd=config`, and that switching the mode from it really rewrites
+`etc/hmm.env` and restarts the service.
 
 ## Rules for anything added here
 

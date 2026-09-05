@@ -52,6 +52,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 | D-28 | (2026-09-05, maintainer correction) BIN-RPC exists on a CCU's loopback only: rfd and hs485d take it on 32001/32000, the public ports 2001/2000 (and 42001/42000) are lighttpd's XML-RPC proxies, and no CCU listens for BIN-RPC on the LAN. Off the CCU (Electron, npm, Docker) every built-in interface is XML-RPC; BIN-RPC is used by the addon in local mode (D-5) and for CUxD, which is its own daemon with its own BIN-RPC listener on 8701 (2.x did the same). The "prefer BIN-RPC" option that tasks 4 and 7 had added to the contract, the config store and the settings dialog is removed; a user-defined interface (D-13) may still declare `binrpc` for a non-CCU peer. The simulator's rfd BIN-RPC port stands for the CCU-local case in tests (the backend harness runs in local mode); an XML-RPC listener for rfd in hm-simulator, the lighttpd view, is a task 14 follow-up so the remote path is tested as well. |
 | D-29 | (2026-09-05) The npm deliverable bundles the workspace packages (`bundleDependencies` materialised at `prepack`, removed at `postpack`); `@homematic-manager/core`, `backend`, `ui` and `data` are not published separately. Their APIs are internal and one version-locked tarball cannot produce a mismatched tree. If a second consumer of the core ever appears (D-11, shared cast library), that is the moment to publish `core` on its own. |
 | D-30 | (2026-09-05, answers OQ-13) `data/dist` ships minified, not pre-gzipped, in the addon, the npm tarball and the Docker image: pretty-printed 9.6 MB, minified 7.4 MB, gzipped 0.6 MB, but all three cost the same 199 inodes on the CCU3 (the scarce resource), the download differs by 50 KB, and pre-gzip would need a `Content-Encoding` branch in the shared static server. Measured by task 13. |
+| D-31 | (2026-09-05, maintainer) Idle unsubscribe for the server install types: when no UI session is connected to the web host for a grace period, the backend sends `init('')` to every interface (drops the event subscriptions and the ping watchdog, keeps caches and config), and subscribes again on the next WebSocket connect. Default on for every server install type: the CCU addon, npm and Docker (grace 5 minutes; no interface process should push events to a page nobody is looking at), `--idle-unsubscribe <duration>` / `HMM_IDLE_UNSUBSCRIBE` changes the grace and `0` disables it; off in Electron (the window is the session). The UI shows "subscribing" until the first `listDevices`/service-message sweep after a resubscribe is through, because hmipserver re-sends every device on `init` (occu#45) and events and service messages from the idle period are not replayed. Implemented in task 15. |
 
 ## Contents
 
@@ -390,6 +391,12 @@ Server install types (D-25), all on top of that package:
   `--callback-ip` set to the Docker host's address, and a `compose.yml` example.
 
 ## 13. CCU addon
+
+Idle unsubscribe (D-31, maintainer suggestion 2026-09-05): the addon runs with
+`--idle-unsubscribe 5m` so the interface processes stop pushing events when no web UI has been
+open for five minutes; the subscription comes back on the next page load. Measured on the lab
+boxes in task 17: the `init('')`/`init(url)` round trip, the resubscribe time with 100+ HmIP
+devices, and that no service message is lost across it.
 
 Done 2026-09-05, report in `roadmap-archive/task-13.md`: packages for the three architectures,
 container replay of `install_addon`, installed and checked on the two OpenCCU boxes and the

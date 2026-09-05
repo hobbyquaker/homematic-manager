@@ -337,6 +337,48 @@ describe('ApiWebSocketServer', () => {
     });
 });
 
+describe('session.info (D-32)', () => {
+    it('is null on a transport whose host has no login', async () => {
+        const {url} = await serve();
+        const socket = await connect(url);
+        socket.send(encodeFrame({t: 'req', id: 1, m: 'session.info', p: []}));
+        const frame = await nextFrame(socket, (candidate) => candidate.t === 'res');
+        expect(frame).toEqual({t: 'res', id: 1, r: null});
+    });
+
+    it('answers each socket with the session it was opened with', async () => {
+        // the host reads its own cookie here; the backend never sees one
+        const server = new ApiWebSocketServer({
+            backend,
+            port: 0,
+            sessionInfo: (request) =>
+                (request.headers['cookie'] ?? '').includes('hmm_session=one') ? {user: 'Admin', level: 8} : null,
+        });
+        servers.push(server);
+        const port = await server.start();
+        const url = `ws://127.0.0.1:${String(port)}${server.path}`;
+
+        const withSession = new WebSocket(url, {headers: {Cookie: 'hmm_session=one'}});
+        sockets.push(withSession);
+        await new Promise<void>((resolve, reject) => {
+            withSession.once('open', () => {
+                resolve();
+            });
+            withSession.once('error', reject);
+        });
+        const without = await connect(url);
+
+        withSession.send(encodeFrame({t: 'req', id: 1, m: 'session.info', p: []}));
+        without.send(encodeFrame({t: 'req', id: 1, m: 'session.info', p: []}));
+        const [a, b] = await Promise.all([
+            nextFrame(withSession, (frame) => frame.t === 'res'),
+            nextFrame(without, (frame) => frame.t === 'res'),
+        ]);
+        expect(a).toEqual({t: 'res', id: 1, r: {user: 'Admin', level: 8}});
+        expect(b).toEqual({t: 'res', id: 1, r: null});
+    });
+});
+
 describe('session counting (D-31)', () => {
     it('reports the number of open sockets to the backend, and 0 when the last one goes', async () => {
         const counts: number[] = [];

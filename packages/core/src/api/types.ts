@@ -343,6 +343,22 @@ export interface RpcMethodInfo {
 }
 
 /**
+ * D-32: who the host thinks is asking, when the host has a login at all.
+ *
+ * Read-only and additive. Only the CCU addon in `--auth-mode rega` ever fills it in - Electron, the
+ * npm install, Docker and the demo have no session concept and answer `null`, which the UI shows as
+ * nothing at all. `level` is ReGa's `UserLevel()`: 8 admin, 2 user, 1 guest. It is *shown*, not
+ * enforced: everyone who may log in may write, exactly as in the CCU's own WebUI. Gating writes to
+ * admins is a later decision, and this field is what it would be built on.
+ */
+export interface SessionInfo {
+    /** The CCU user name the session was opened with. */
+    user: string;
+    /** ReGa `UserLevel()`; `0` when ReGa reported none. */
+    level: number;
+}
+
+/**
  * Request methods: `params` is the positional tuple the UI sends, `result` what it receives.
  * Every method rejects with `ApiError` on failure; RPC faults keep their `faultCode`. Methods
  * without a result value resolve with `null`, which both transports carry verbatim.
@@ -497,6 +513,15 @@ export interface ApiMethods {
     'writeLog.clear': {params: []; result: null};
 
     'data.file': {params: [path: string]; result: unknown};
+
+    /**
+     * D-32: the session this transport belongs to, or `null` where the host has no login.
+     *
+     * Answered by the *transport*, not by the backend: a session belongs to one WebSocket, and the
+     * backend knows nothing about sockets. Read-only - there is no `session.set`, and logging out
+     * is an HTTP route of the host, not a method here.
+     */
+    'session.info': {params: []; result: SessionInfo | null};
 }
 
 export type ApiMethodName = keyof ApiMethods;

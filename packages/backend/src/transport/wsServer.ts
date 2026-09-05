@@ -19,7 +19,7 @@ import type {Duplex} from 'node:stream';
 
 import {WebSocketServer, type WebSocket} from 'ws';
 
-import type {ApiEventName, ApiMethodName, ApiParams} from '@homematic-manager/core';
+import type {ApiEventName, ApiMethodName, ApiParams, SessionInfo} from '@homematic-manager/core';
 
 import type {Backend} from '../api/backend.js';
 import {toApiError} from '../errors.js';
@@ -61,6 +61,19 @@ export interface ApiWebSocketServerOptions {
      * request is written into it. Browsers answer a ping on their own, so no client needs to know.
      */
     readonly keepAliveMs?: number;
+    /**
+     * D-32: who this upgrade belongs to, asked once per socket.
+     *
+     * A session is a property of the *connection*, not of the backend - the backend serves every
+     * socket the same way and knows nothing about cookies. The host that has a login (`apps/web`
+     * with `--auth-mode rega`) reads its session cookie here, and the answer is what `session.info`
+     * returns on that socket and nothing else. Without this option every socket answers `null`,
+     * which is the desktop, npm and Docker case.
+     */
+    readonly sessionInfo?: (request: {
+        url?: string | undefined;
+        headers: IncomingMessage['headers'];
+    }) => SessionInfo | null;
     readonly onError?: (error: unknown) => void;
 }
 
@@ -70,6 +83,8 @@ export class ApiWebSocketServer {
 
     readonly #options: ApiWebSocketServerOptions;
     readonly #sockets = new Set<WebSocket>();
+    /** D-32: the session each socket was opened with, for `session.info`. */
+    readonly #sessions = new WeakMap<WebSocket, SessionInfo>();
     readonly #unsubscribe: () => void;
     #server: WebSocketServer | undefined;
 
@@ -206,6 +221,10 @@ export class ApiWebSocketServer {
             socket.close(UNAUTHORIZED_CLOSE_CODE, 'unauthorized');
             return;
         }
+        const session = this.#options.sessionInfo?.({url: request.url, headers: request.headers}) ?? undefined;
+        if (session) {
+            this.#sessions.set(socket, session);
+        }
         this.#sockets.add(socket);
         // D-31: the backend counts sessions, not sockets it knows nothing about. This is the only
         // transport that has any - `InProcessTransport` never reports one, which is why Electron
@@ -268,7 +287,12 @@ export class ApiWebSocketServer {
             return;
         }
         try {
-            const result = await this.#options.backend.request(frame.m, ...(frame.p as ApiParams<ApiMethodName>));
+            // D-32: the one method the transport answers itself. It is a property of this socket -
+            // the backend would have to be told about cookies to answer it, and it must not be.
+            const result =
+                frame.m === 'session.info'
+                    ? (this.#sessions.get(socket) ?? null)
+                    : await this.#options.backend.request(frame.m, ...(frame.p as ApiParams<ApiMethodName>));
             this.#send(socket, encodeFrame(responseFrame(frame.id, result)));
         } catch (error) {
             this.#send(socket, encodeFrame(errorFrame(frame.id, toApiError(error))));

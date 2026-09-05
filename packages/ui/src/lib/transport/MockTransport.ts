@@ -330,6 +330,10 @@ export class MockTransport implements Transport {
             }
             return file;
         });
+        // D-32: the demo runs in a browser with no host and therefore no login. `null` is the
+        // answer every install type but the CCU addon in `--auth-mode rega` gives, and it is what
+        // makes the header show no user and no logout link.
+        this.result('session.info', null);
         return this;
     }
 }

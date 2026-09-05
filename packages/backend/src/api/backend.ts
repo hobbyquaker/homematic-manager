@@ -454,6 +454,12 @@ export class Backend {
 
             case 'data.file':
                 return this.#files.read(p[0]);
+
+            case 'session.info':
+                // D-32: a session belongs to a transport, not to the backend. Every transport that
+                // has no login - Electron's in-process one, a web host in token mode - leaves this
+                // answer alone, and the UI shows no user and no logout link for it.
+                return null;
             default:
                 throw configError(`unknown API method "${String(method)}"`);
         }
@@ -1273,4 +1279,5 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'writeLog.list',
     'writeLog.clear',
     'data.file',
+    'session.info',
 ] satisfies readonly (keyof ApiMethods)[];

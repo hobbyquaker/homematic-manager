@@ -42,6 +42,14 @@ its tooltip.
 - **Add device**: BidCos install mode with mode, serial and temporary key (#20), HmIP with SGTIN and
   key or key server, a QR scanner (`@zxing/browser`, loaded lazily, #112) and naming right after
   pairing (#24).
+- **Pending changes** (#124): a paramset write, a link paramset write, a set of links to create and
+  a set to remove can all be *staged* instead of sent. `ChangeSetStore` keeps them, the header shows
+  how many there are, and one Apply runs the lot through the same paced write queue - so three
+  direct links cost one wait instead of three. What is staged is the payload the preview printed,
+  unchanged; the review shows the same calls again, an entry can be dropped, and one that fails
+  stays in the set with its reason while the rest are applied. Nothing survives a reload: a staged
+  write is a plan, and a plan that outlives the page would be applied against a device state nobody
+  has looked at since.
 
 ## Device-specific editors (task 10)
 

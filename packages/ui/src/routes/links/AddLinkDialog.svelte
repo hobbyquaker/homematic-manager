@@ -71,6 +71,35 @@
         };
     }
 
+    /** Every sender/receiver combination, in the order 2.x created them. */
+    function pairs(): Array<{sender: string; receiver: string}> {
+        return senders.flatMap((sender) => receivers.map((receiver) => ({sender, receiver})));
+    }
+
+    /**
+     * Issue #124, in the words of the report: "ich erstelle 3 Direktverknüpfungen, und erst mit
+     * einem Button Apply wird dann alles wirklich auf die Komponenten verteilt". The links are
+     * remembered here and created when the change set is applied - so a user can plan a whole
+     * evening's worth of links and wait for the radio once.
+     */
+    function stage(): void {
+        const combinations = pairs();
+        if (combinations.length === 0) {
+            return;
+        }
+        stores.changeSet.stage({
+            kind: 'linkAdd',
+            interfaceName,
+            title: t('{count} links', {}, combinations.length),
+            pairs: combinations,
+            calls: combinations.map((pair) => `addLink(${pair.sender}, ${pair.receiver})`),
+            lines: combinations.map((pair) => ({
+                label: `${stores.nameOf(pair.sender)} → ${stores.nameOf(pair.receiver)}`,
+            })),
+        });
+        open = false;
+    }
+
     async function create(thenEdit: boolean): Promise<void> {
         busy = true;
         const created = await stores.links.add(interfaceName, senders, receivers);
@@ -129,6 +158,13 @@
 
     {#snippet buttons()}
         <button type="button" class="hmm-button" onclick={() => (open = false)}>{t('Cancel')}</button>
+        <button
+            type="button"
+            class="hmm-button"
+            disabled={busy || receivers.length === 0}
+            data-testid="add-link-stage"
+            onclick={stage}>{t('Add to pending changes')}</button
+        >
         <button
             type="button"
             class="hmm-button"

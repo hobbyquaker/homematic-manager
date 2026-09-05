@@ -14,6 +14,20 @@
 
     let busy = $state(false);
 
+    /** Issue #124: remove them with the rest of the change set rather than one by one now. */
+    function stage(): void {
+        const pairs = links.map((link) => ({...link}));
+        stores.changeSet.stage({
+            kind: 'linkRemove',
+            interfaceName: stores.app.selectedInterface,
+            title: t('{count} links', {}, pairs.length),
+            pairs,
+            calls: pairs.map((pair) => `removeLink(${pair.sender}, ${pair.receiver})`),
+            lines: [],
+        });
+        open = false;
+    }
+
     async function remove(): Promise<void> {
         busy = true;
         const removed = await stores.links.remove(stores.app.selectedInterface, links);
@@ -45,6 +59,13 @@
 
     {#snippet buttons()}
         <button type="button" class="hmm-button" onclick={() => (open = false)}>{t('Cancel')}</button>
+        <button
+            type="button"
+            class="hmm-button"
+            disabled={busy || links.length === 0}
+            data-testid="remove-link-stage"
+            onclick={stage}>{t('Add to pending changes')}</button
+        >
         <button
             type="button"
             class="hmm-button hmm-danger"

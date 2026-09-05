@@ -242,6 +242,33 @@
         }
     }
 
+    /**
+     * Issue #124: the same payload the Write button would send, put into the change set instead.
+     * The dialog is closed afterwards, because the values it shows are now a plan and not the
+     * device's state any more - leaving it open would invite a second, contradictory stage.
+     */
+    function stage(): void {
+        const payload = preview;
+        if (!payload || payload.entries.length === 0) {
+            return;
+        }
+        stores.changeSet.stage({
+            kind: 'paramset',
+            interfaceName,
+            title: `${paramset} — ${stores.nameOf(address)} (${address})`,
+            targets: [...payload.targets],
+            paramset,
+            values: payload.values,
+            writeAll,
+            calls: payload.targets.map(
+                (target) => `putParamset(${target}, ${paramset}, ${JSON.stringify(payload.values)})`,
+            ),
+            lines: payload.entries.map((entry) => ({label: entry.param, from: entry.from, to: entry.to})),
+        });
+        previewOpen = false;
+        open = false;
+    }
+
     /** The per-datapoint `setValue` of the VALUES paramset. */
     async function setOne(field: FormField): Promise<void> {
         const value = castValue(valueOf(field), field.description, {enumAs: enumEncodingFor(interfaceName)});
@@ -347,6 +374,7 @@
     {results}
     {readBack}
     writing={stores.paramsets.writing}
+    onstage={stage}
     onconfirm={() => void write()}
 />
 

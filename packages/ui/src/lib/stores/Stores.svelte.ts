@@ -6,6 +6,7 @@ import type {HostBridge} from '../host/types.js';
 import {I18n} from '../i18n/i18n.svelte.js';
 
 import {AppStore, type AppStoreOptions} from './AppStore.svelte.js';
+import {ChangeSetStore} from './ChangeSetStore.svelte.js';
 import {ConsoleStore} from './ConsoleStore.svelte.js';
 import {DevicesStore} from './DevicesStore.svelte.js';
 import {EventsStore} from './EventsStore.svelte.js';
@@ -56,6 +57,8 @@ export class Stores {
     readonly paramsets: ParamsetStore;
     readonly radio: RadioStore;
     readonly console: ConsoleStore;
+    /** Issue #124: what is staged and not written yet. */
+    readonly changeSet: ChangeSetStore;
 
     constructor(transport: Transport, options: StoresOptions = {}) {
         this.transport = transport;
@@ -79,6 +82,7 @@ export class Stores {
         this.paramsets = new ParamsetStore(transport, this.notices);
         this.radio = new RadioStore(transport, this.notices);
         this.console = new ConsoleStore(transport, this.notices);
+        this.changeSet = new ChangeSetStore(transport, this.notices, this.writeLog);
         this.host = new HostStore({
             ...(options.hostBridge === undefined ? {} : {bridge: options.hostBridge}),
             ...(options.hostScope === undefined ? {} : {scope: options.hostScope}),

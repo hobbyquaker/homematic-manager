@@ -210,6 +210,42 @@
         previewOpen = true;
     }
 
+    /**
+     * Issue #124 for a link paramset. The user's complaint was about links specifically - three
+     * direct links meant three waits - so this is the entry point that matters most: the payload
+     * of both directions goes into the change set and nothing is sent.
+     */
+    function stage(): void {
+        const payload = preview;
+        if (!payload) {
+            return;
+        }
+        const senderPayload = senderDescription
+            ? buildPreview(senderValues, senderEdited, senderDescription, {interfaceName, targets: [sender]}).values
+            : {};
+        const values = {
+            receiverToSender: payload.values,
+            ...(Object.keys(senderPayload).length > 0 ? {senderToReceiver: senderPayload} : {}),
+        };
+        if (Object.keys(payload.values).length === 0 && Object.keys(senderPayload).length === 0) {
+            return;
+        }
+        const pairs = links();
+        stores.changeSet.stage({
+            kind: 'linkParamset',
+            interfaceName,
+            title: `LINK — ${stores.nameOf(sender)} → ${stores.nameOf(receiver)}`,
+            links: pairs,
+            values,
+            calls: pairs.map(
+                (pair) => `putParamset(${pair.receiver}, ${pair.sender}, ${JSON.stringify(values.receiverToSender)})`,
+            ),
+            lines: payload.entries.map((entry) => ({label: entry.param, from: entry.from, to: entry.to})),
+        });
+        previewOpen = false;
+        open = false;
+    }
+
     async function write(): Promise<void> {
         const payload = preview;
         if (!payload) {
@@ -374,6 +410,7 @@
     {results}
     {readBack}
     writing={stores.paramsets.writing}
+    onstage={stage}
     onconfirm={() => void write()}
 />
 

@@ -19,6 +19,7 @@
     import type {TabId} from './lib/stores/routing.js';
     import type {Stores} from './lib/stores/Stores.svelte.js';
     import AboutDialog from './routes/AboutDialog.svelte';
+    import ChangeSetDialog from './routes/ChangeSetDialog.svelte';
     import ConfigDialog from './routes/ConfigDialog.svelte';
     import ConsolePage from './routes/ConsolePage.svelte';
     import DevicesPage from './routes/DevicesPage.svelte';
@@ -37,6 +38,7 @@
     setStores(untrack(() => stores));
 
     let aboutOpen = $state(false);
+    let changeSetOpen = $state(false);
 
     const t = $derived(stores.i18n.t);
     const app = $derived(stores.app);
@@ -120,6 +122,18 @@
         />
 
         <div class="hmm-header-actions">
+            {#if stores.changeSet.count > 0}
+                <!--
+                    Issue #124: the staged changes are only useful if it is impossible to forget
+                    them, so the button only exists while something is staged and says how much.
+                -->
+                <button
+                    type="button"
+                    class="hmm-button hmm-header-changes"
+                    data-testid="change-set-open"
+                    onclick={() => (changeSetOpen = true)}>{t('Pending changes')} ({stores.changeSet.count})</button
+                >
+            {/if}
             <ToolbarButton
                 title={t('RPC log')}
                 icon="≣"
@@ -210,6 +224,7 @@
     />
     <ConfigDialog bind:open={app.configDialogOpen} />
     <AboutDialog bind:open={aboutOpen} />
+    <ChangeSetDialog bind:open={changeSetOpen} />
     <Loader visible={app.loading} text={t('Loading Homematic Manager...')} testId="loader" />
 </div>
 

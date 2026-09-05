@@ -25,6 +25,14 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Not connected': {de: 'Nicht verbunden', en: 'Not connected'},
     'Not present': {de: 'Nicht vorhanden', en: 'Not present'},
     Subscribing: {de: 'Anmeldung läuft', en: 'Subscribing'},
+    'Pending changes': {de: 'Offene Änderungen', en: 'Pending changes'},
+    'Nothing is staged': {de: 'Nichts vorgemerkt', en: 'Nothing is staged'},
+    'Add to pending changes': {de: 'Zu den offenen Änderungen', en: 'Add to pending changes'},
+    'Discard all': {de: 'Alle verwerfen', en: 'Discard all'},
+    '{count} changes staged': {
+        de: {one: 'Eine Änderung vorgemerkt', other: '{count} Änderungen vorgemerkt'},
+        en: {one: 'One change staged', other: '{count} changes staged'},
+    },
     'The camera is only available over https or on localhost. Open the page with its https address (the CCU serves it on its https port too, with a certificate warning) or type the key in by hand.':
         {
             de:

@@ -16,6 +16,8 @@
         /** What the interface really stored, read back after the write (task 6, item 7). */
         readBack?: readonly ReadBackEntry[];
         onconfirm: () => void;
+        /** Issue #124: put this write into the change set instead of sending it now. */
+        onstage?: (() => void) | undefined;
     }
 
     let {
@@ -27,6 +29,7 @@
         results = [],
         readBack = [],
         onconfirm,
+        onstage = undefined,
     }: Props = $props();
 
     const stores = getStores();
@@ -128,6 +131,19 @@
 
     {#snippet buttons()}
         <button type="button" class="hmm-button" onclick={() => (open = false)}>{t('Close')}</button>
+        {#if onstage}
+            <!--
+                Issue #124: the same payload, not sent but remembered. Everything the user has read
+                here goes into the change set unchanged, so the review there is this preview again.
+            -->
+            <button
+                type="button"
+                class="hmm-button"
+                disabled={writing || nothing}
+                data-testid="write-stage"
+                onclick={() => onstage()}>{t('Add to pending changes')}</button
+            >
+        {/if}
         <button
             type="button"
             class="hmm-button"

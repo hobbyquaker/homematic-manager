@@ -149,12 +149,13 @@ describe('WriteQueue', () => {
         const {queue} = harness({a: 0, b: 0});
         const a = deferred();
         const b = deferred();
-        void queue.enqueue('a', a.task);
-        void queue.enqueue('a', () => Promise.resolve(1));
-        void queue.enqueue('b', b.task);
-        void queue.enqueue('b', () => Promise.resolve(1));
+        const ignore = (): void => undefined;
+        queue.enqueue('a', a.task).catch(ignore);
+        queue.enqueue('a', () => Promise.resolve(1)).catch(ignore);
+        queue.enqueue('b', b.task).catch(ignore);
+        queue.enqueue('b', () => Promise.resolve(1)).catch(ignore);
         expect(queue.pending).toBe(2);
-        queue.cancel();
+        expect(queue.cancel()).toBe(2);
         a.resolve('');
         b.resolve('');
     });

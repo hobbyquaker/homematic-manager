@@ -287,6 +287,14 @@ export interface ApiMethods {
     'rpc.call': {params: [interfaceName: string, method: string, params: RpcValue[]]; result: RpcValue};
     'rpc.methods': {params: [interfaceName: string]; result: RpcMethodInfo[]};
 
+    /**
+     * Cancels the writes of a bulk operation that have not started yet, on one interface or on all
+     * of them; the result is how many were dropped. A call that is already on the wire is not
+     * taken back - it cannot be - so the `WriteResult[]` of the running operation ends early with
+     * the cancelled target as its last entry. Added in task 4 for the "cancel" button of task 6.4.
+     */
+    'write.cancel': {params: [interfaceName?: string]; result: number};
+
     'writeLog.list': {params: [limit?: number]; result: WriteLogEntry[]};
     'writeLog.clear': {params: []; result: null};
 

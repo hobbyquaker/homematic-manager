@@ -7,7 +7,7 @@
   "license": "AGPL-3.0-or-later",
   "author": "Sebastian 'hobbyquaker' Raff <hobbyquaker@gmail.com>",
   "contributors": [
-    "Andr\u00e9 'Anli' Litfin"
+    "André 'Anli' Litfin"
   ],
   "repository": {
     "type": "git",
@@ -52,6 +52,7 @@
     "jsdom": "^30.0.1",
     "prettier": "^3.9.6",
     "prettier-plugin-svelte": "^4.1.1",
+    "svelte-eslint-parser": "^1.8.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.69.0",
     "vitest": "^5.0.0"

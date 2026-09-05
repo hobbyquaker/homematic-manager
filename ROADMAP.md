@@ -74,7 +74,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [14. Test infrastructure and coverage gates](#14-test-infrastructure-and-coverage-gates) ✅
 - [15. Backlog features from the triage](#15-backlog-features-from-the-triage) ✅
 - [16. Documentation](#16-documentation) ✅
-- [17. Beta cycle and 3.0 release](#17-beta-cycle-and-30-release)
+- [17. Beta cycle and 3.0 release](#17-beta-cycle-and-30-release) ✅ agent side (release waits on the maintainer)
 - [18. Addon login against ReGa](#18-addon-login-against-rega) ✅ (lab check pending)
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
@@ -508,6 +508,12 @@ from release notes, forum announcement text. Close the triaged issues with the r
 analysis when 3.0 ships.
 
 ## 17. Beta cycle and 3.0 release
+
+Agent-side part done 2026-09-05, report in `roadmap-archive/task-17.md` (screenshots, announcement
+draft, release checklist, hardware checklist on the three boxes, OQ-16 = A-17, version
+`3.0.0-dev.1`). What remains needs the maintainer: enable GitHub Actions and get one green
+`build.yml`, decide OQ-14 and OQ-15, click through the Electron artifact, tag, publish the draft
+releases, install every type from the published artefacts (D-25), post, close the issues.
 
 Alpha from M2 to the forum, beta with the addon, bug-fix buffer, hardware checklist on the three
 lab boxes, release 3.0.0 (Electron, npm package, Docker image) and 3.1.0 (addon) through the four

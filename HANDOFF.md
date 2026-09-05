@@ -25,7 +25,9 @@ about every half hour while the agent works; the timestamp above is the last ref
   every push to `3.0-dev` once Actions is enabled), 12 (web host, npm package with `--install`,
   `release-npm.yml`, Docker image, compose, proxy docs, `release-docker.yml`), 8 (UI feature
   parity: every 2.7 tab in `packages/ui`, 445 component tests, browser mode green), 18 (optional
-  addon login against ReGa, D-32: implemented and container-tested, lab check pending), 14 (test
+  addon login against ReGa, D-32: implemented, container-tested, and checked on the x86_64 box
+  with the admin user), 17 agent side (screenshots, announcement, release checklist, hardware
+  checklist with D-31 timings, OQ-16 = A-17, version `3.0.0-dev.1`), 14 (test
   infrastructure: browser mode default, 20 Playwright e2e specs, merged coverage, strict UI lint,
   shellcheck), 15 (backlog: #124 change set, #87, #26, #25, #21, #54, #94, #97 BidCos, D-31 idle
   unsubscribe, image chain in the backend, hm-simulator 1.0.0 from npm; 1820 tests in the
@@ -39,9 +41,9 @@ about every half hour while the agent works; the timestamp above is the last ref
   1082 tests, `npm run lint`, `npm run typecheck`.
 - In progress by background subagents (Opus), committing distinct commits on
   `3.0-dev` in the shared working tree (each stages only its own files):
-  - **Task 17** agent-side part: screenshots from demo mode, announcement draft, release
-    checklist, hardware checklist on the three lab boxes with the current build (D-31 timing,
-    OQ-16, https/QR, images, and the task 18 login steps), then the first dev bump.
+  - **Loose ends before the beta** (small agent): `VirtualDevices` `getServiceMessages` noise,
+    the BIN-RPC "write after destroyed" line on resubscribe, the pid file for a live
+    `install_addon` in the CCU3 chroot.
 - If a session ends with those agents mid-flight: uncommitted files in the working tree are
   theirs. Look at `git status`, `git diff`, run `npm test -w <workspace>`; either finish the
   piece and commit it with an explanatory message, or `git stash` it with a note here. Do not
@@ -64,10 +66,9 @@ about every half hour while the agent works; the timestamp above is the last ref
    with the simulator installed), write `roadmap-archive/task-{6,11,12}.md`, tick them in the
    ROADMAP Contents, update the status line at the top of ROADMAP.md, commit, push `3.0-dev`
    (task 11 is archived and pushed already: `69cab48`).
-2. Task 17 (beta cycle): first Actions run (maintainer enables Actions), first dev bump
-   (`npm run version:dev`), screenshots from the demo mode, forum text, issue closing with the
-   changelog references, OQ-16 lab check, D-31 measurement on the lab boxes, hardware checklist
-   on the three boxes with the current build, hm-simulator 1.0.1 release on request. Was: tasks 15 (backlog features), 16 (docs), 17 (beta). The first Electron
+2. The beta itself: follow `docs/release-checklist.md` once the maintainer has enabled Actions
+   and decided OQ-14/OQ-15; the agent side of task 17 is done. hm-simulator 1.0.1 release on
+   request. Was: tasks 15 (backlog features), 16 (docs), 17 (beta). The first Electron
    click-through and the first dev bump (`npm run version:dev`, D-18) happen as soon as the
    maintainer enables Actions and a `build.yml` run has produced the Windows artifact.
 3. Task 13 is done; task 14 (test infra, Playwright in

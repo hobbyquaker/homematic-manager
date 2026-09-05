@@ -255,12 +255,13 @@
         color: var(--hmm-fg);
     }
 
+    /* D-34: one flat bar with a hairline under it, not a gradient with a blue frame. */
     .hmm-header {
         display: flex;
         align-items: center;
         gap: 8px;
         height: var(--hmm-header-height);
-        padding: 0 6px;
+        padding: 0 10px;
         background: var(--hmm-header-bg);
         border-bottom: 1px solid var(--hmm-border);
         flex: 0 0 auto;
@@ -289,7 +290,7 @@
     .hmm-main {
         flex: 1 1 auto;
         min-height: 0;
-        padding: 8px;
+        padding: 10px;
         overflow: hidden;
     }
 

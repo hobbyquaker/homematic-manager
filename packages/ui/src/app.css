@@ -1,11 +1,20 @@
 /*
- * The theme. 2.7 used jQuery UI "smoothness" plus jqGrid's stylesheet; D-3 keeps that look, so the
- * tokens below are the smoothness greys and blues, the 12 px grid font and the monospace address
- * column, expressed as custom properties instead of four megabytes of theme CSS.
+ * The theme - one file for both, light and dark (D-22, D-34).
+ *
+ * Until the first look at a dev build these tokens were the jQuery UI "smoothness" greys and blues
+ * of 2.7: vertical gradients on every bar, pale blue borders everywhere, a bold active tab. The
+ * maintainer's verdict was that it imitates 2.x and looks weird, so D-34 replaced the visual
+ * language with Svelte's own defaults and the one of `she` (github.com/hobbyquaker/she): flat
+ * surfaces, neutral greys, one accent, hairline separators, no gradient anywhere, and a control
+ * that marks its state with colour rather than with a weight that changes its width.
+ *
+ * The structure of 2.7 stays exactly where it was (D-3): the same tabs, the same grids with the
+ * same columns, the same dialogs, the same workflows. Only the paint is different.
  *
  * Light is the default and is defined on bare `:root`. Dark is defined twice - once under
  * `prefers-color-scheme` (guarded so an explicit light choice wins) and once under
- * `[data-theme='dark']` - so the manual switch works in both directions.
+ * `[data-theme='dark']` - so the manual switch works in both directions. Every colour in the app
+ * comes from a token here; `theme.test.ts` fails the build if a component spells one out.
  */
 
 :root {
@@ -13,53 +22,64 @@
 
     /* Surfaces */
     --hmm-bg: #ffffff;
-    --hmm-bg-sunken: #f2f5f7;
-    --hmm-header-bg: linear-gradient(to bottom, #f6f6f6 0%, #dfdfdf 100%);
-    --hmm-header-solid: #eaeaea;
+    --hmm-bg-sunken: #f8f8f8;
+    /* Bars: the header, the toolbars, the table head, a dialog's title bar. Flat, not a gradient. */
+    --hmm-header-bg: #f3f3f3;
+    --hmm-header-solid: #ececec;
+    /* Controls: a button's face, and the field an input is typed into. */
+    --hmm-control-bg: #f0f0f0;
+    --hmm-control-bg-hover: #e4e4e4;
+    --hmm-input-bg: #ffffff;
     --hmm-row-odd: #ffffff;
-    --hmm-row-even: #f7f9fb;
-    --hmm-row-hover: #eef4fb;
-    --hmm-row-selected: #d0e5f5;
-    --hmm-row-selected-text: #0b3d68;
+    /* `she` gives a table no zebra at all - the row separator does the work. Kept as a token so
+       the two row states stay addressable; both are the plain surface. */
+    --hmm-row-even: #ffffff;
+    --hmm-row-hover: #f0f4f8;
+    --hmm-row-selected: #cfe4f7;
+    --hmm-row-selected-text: #12314d;
     --hmm-overlay: rgba(255, 255, 255, 0.72);
     --hmm-backdrop: rgba(0, 0, 0, 0.35);
-    --hmm-shadow-menu: 0 4px 10px rgb(0 0 0 / 25%);
-    --hmm-shadow-toast: 0 2px 8px rgb(0 0 0 / 20%);
+    --hmm-shadow-menu: 0 4px 12px rgb(0 0 0 / 18%);
+    --hmm-shadow-toast: 0 2px 10px rgb(0 0 0 / 16%);
 
     /* Lines */
-    --hmm-border: #c5dbec;
-    --hmm-border-muted: #dddddd;
-    --hmm-border-strong: #a6c9e2;
+    --hmm-border: #cecece;
+    --hmm-border-muted: #e6e6e6;
+    --hmm-border-strong: #b0b0b0;
 
     /* Text */
-    --hmm-fg: #222222;
-    --hmm-fg-muted: #666666;
-    --hmm-fg-faint: #8a8a8a;
-    --hmm-link: #2779aa;
+    --hmm-fg: #3b3b3b;
+    --hmm-fg-muted: #6d6d6d;
+    --hmm-fg-faint: #9a9a9a;
+    --hmm-link: #0070c1;
 
     /* Accents */
-    --hmm-accent: #2779aa;
-    --hmm-accent-bg: #d0e5f5;
-    --hmm-ok: #2e8b2e;
-    --hmm-warn: #cc8a00;
-    --hmm-error: #cc2222;
-    --hmm-focus: #4d90fe;
+    --hmm-accent: #0070c1;
+    --hmm-accent-bg: #e2eefa;
+    --hmm-ok: #008000;
+    --hmm-warn: #a06800;
+    --hmm-error: #cd3131;
+    --hmm-focus: #0070c1;
 
     /* The RSSI scale of the radio tab. The 2.x gradient was computed per cell and looked the same
        in both themes; these are the three classes core's `rssiClass()` produces, as tokens. */
-    --hmm-rssi-good: #b7e2b7;
-    --hmm-rssi-medium: #f4e0a3;
-    --hmm-rssi-bad: #f0b4b4;
-    --hmm-rssi-text: #1a1a1a;
+    --hmm-rssi-good: #c9e6c9;
+    --hmm-rssi-medium: #f3e2ad;
+    --hmm-rssi-bad: #f0c0c0;
+    --hmm-rssi-text: #262626;
 
-    /* Metrics - the 2.x grid density */
-    --hmm-font: -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-    --hmm-font-mono: 'Lucida Console', Consolas, Menlo, Monaco, monospace;
-    --hmm-font-size: 12px;
-    --hmm-font-size-small: 10px;
-    --hmm-font-size-tiny: 8px;
-    --hmm-row-height: 23px;
-    --hmm-header-height: 29px;
+    /* Metrics. 13 px is `she`'s reading size; the grids were 12 px and one line taller than they
+       needed to be at that size. */
+    --hmm-font: system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    --hmm-font-mono: ui-monospace, 'Cascadia Mono', Consolas, Menlo, Monaco, monospace;
+    --hmm-font-size: 13px;
+    /* The grids stay a size below the chrome, as they do in `she`: 13 px in the bars and dialogs,
+       12 px in a table that has ten columns of addresses and flags. */
+    --hmm-font-size-grid: 12px;
+    --hmm-font-size-small: 11px;
+    --hmm-font-size-tiny: 9px;
+    --hmm-row-height: 26px;
+    --hmm-header-height: 36px;
     --hmm-radius: 3px;
 }
 
@@ -67,80 +87,86 @@
     :root:not([data-theme='light']) {
         color-scheme: dark;
 
-        --hmm-bg: #1e2126;
-        --hmm-bg-sunken: #191c20;
-        --hmm-header-bg: linear-gradient(to bottom, #33383f 0%, #262a30 100%);
-        --hmm-header-solid: #2c3037;
-        --hmm-row-odd: #1e2126;
-        --hmm-row-even: #22262c;
-        --hmm-row-hover: #2a323c;
-        --hmm-row-selected: #234b6e;
+        --hmm-bg: #1e1e1e;
+        --hmm-bg-sunken: #191919;
+        --hmm-header-bg: #252526;
+        --hmm-header-solid: #2d2d2d;
+        --hmm-control-bg: #333333;
+        --hmm-control-bg-hover: #3f3f3f;
+        --hmm-input-bg: #3c3c3c;
+        --hmm-row-odd: #1e1e1e;
+        --hmm-row-even: #1e1e1e;
+        --hmm-row-hover: #2a2d2e;
+        --hmm-row-selected: #264f78;
         --hmm-row-selected-text: #e8f2fb;
-        --hmm-overlay: rgba(24, 27, 31, 0.72);
+        --hmm-overlay: rgba(24, 24, 24, 0.72);
         --hmm-backdrop: rgba(0, 0, 0, 0.6);
         --hmm-shadow-menu: 0 4px 14px rgb(0 0 0 / 60%);
-        --hmm-shadow-toast: 0 2px 10px rgb(0 0 0 / 55%);
+        --hmm-shadow-toast: 0 2px 12px rgb(0 0 0 / 55%);
 
-        --hmm-border: #3b444f;
-        --hmm-border-muted: #333a42;
-        --hmm-border-strong: #4a5563;
+        --hmm-border: #3c3c3c;
+        --hmm-border-muted: #303030;
+        --hmm-border-strong: #565656;
 
-        --hmm-fg: #e3e6ea;
-        --hmm-fg-muted: #a4abb4;
-        --hmm-fg-faint: #7b838d;
-        --hmm-link: #6db3e8;
+        --hmm-fg: #cccccc;
+        --hmm-fg-muted: #8a8a8a;
+        --hmm-fg-faint: #6a6a6a;
+        --hmm-link: #569cd6;
 
-        --hmm-accent: #6db3e8;
-        --hmm-accent-bg: #234b6e;
-        --hmm-ok: #5cc25c;
-        --hmm-warn: #e0a740;
-        --hmm-error: #f06a6a;
-        --hmm-focus: #6db3e8;
+        --hmm-accent: #569cd6;
+        --hmm-accent-bg: #253b52;
+        --hmm-ok: #4ec9b0;
+        --hmm-warn: #cca700;
+        --hmm-error: #f48771;
+        --hmm-focus: #569cd6;
 
-        --hmm-rssi-good: #2f6b3a;
-        --hmm-rssi-medium: #7a6220;
-        --hmm-rssi-bad: #7a2f2f;
-        --hmm-rssi-text: #f0f3f6;
+        --hmm-rssi-good: #2f5d3a;
+        --hmm-rssi-medium: #6d5a1c;
+        --hmm-rssi-bad: #6f2f2f;
+        --hmm-rssi-text: #f0f0f0;
     }
 }
 
 :root[data-theme='dark'] {
     color-scheme: dark;
 
-    --hmm-bg: #1e2126;
-    --hmm-bg-sunken: #191c20;
-    --hmm-header-bg: linear-gradient(to bottom, #33383f 0%, #262a30 100%);
-    --hmm-header-solid: #2c3037;
-    --hmm-row-odd: #1e2126;
-    --hmm-row-even: #22262c;
-    --hmm-row-hover: #2a323c;
-    --hmm-row-selected: #234b6e;
+    --hmm-bg: #1e1e1e;
+    --hmm-bg-sunken: #191919;
+    --hmm-header-bg: #252526;
+    --hmm-header-solid: #2d2d2d;
+    --hmm-control-bg: #333333;
+    --hmm-control-bg-hover: #3f3f3f;
+    --hmm-input-bg: #3c3c3c;
+    --hmm-row-odd: #1e1e1e;
+    --hmm-row-even: #1e1e1e;
+    --hmm-row-hover: #2a2d2e;
+    --hmm-row-selected: #264f78;
     --hmm-row-selected-text: #e8f2fb;
-    --hmm-overlay: rgba(24, 27, 31, 0.72);
+    --hmm-overlay: rgba(24, 24, 24, 0.72);
     --hmm-backdrop: rgba(0, 0, 0, 0.6);
     --hmm-shadow-menu: 0 4px 14px rgb(0 0 0 / 60%);
-    --hmm-shadow-toast: 0 2px 10px rgb(0 0 0 / 55%);
+    --hmm-shadow-toast: 0 2px 12px rgb(0 0 0 / 55%);
 
-    --hmm-border: #3b444f;
-    --hmm-border-muted: #333a42;
-    --hmm-border-strong: #4a5563;
+    --hmm-border: #3c3c3c;
+    --hmm-border-muted: #303030;
+    --hmm-border-strong: #565656;
 
-    --hmm-fg: #e3e6ea;
-    --hmm-fg-muted: #a4abb4;
-    --hmm-fg-faint: #7b838d;
-    --hmm-link: #6db3e8;
+    --hmm-fg: #cccccc;
+    --hmm-fg-muted: #8a8a8a;
+    --hmm-fg-faint: #6a6a6a;
+    --hmm-link: #569cd6;
 
-    --hmm-accent: #6db3e8;
-    --hmm-accent-bg: #234b6e;
-    --hmm-ok: #5cc25c;
-    --hmm-warn: #e0a740;
-    --hmm-error: #f06a6a;
-    --hmm-focus: #6db3e8;
+    --hmm-accent: #569cd6;
+    --hmm-accent-bg: #253b52;
+    --hmm-ok: #4ec9b0;
+    --hmm-warn: #cca700;
+    --hmm-error: #f48771;
+    --hmm-focus: #569cd6;
 
-    --hmm-rssi-good: #2f6b3a;
-    --hmm-rssi-medium: #7a6220;
-    --hmm-rssi-bad: #7a2f2f;
-    --hmm-rssi-text: #f0f3f6;
+    --hmm-rssi-good: #2f5d3a;
+    --hmm-rssi-medium: #6d5a1c;
+    --hmm-rssi-bad: #6f2f2f;
+    --hmm-rssi-text: #f0f0f0;
 }
 
 html,
@@ -166,6 +192,13 @@ body {
     box-sizing: border-box;
 }
 
+/* `she`'s thin scrollbars: a data grid has a lot of them, and the fat default ones were most of
+   what made the window look busy. */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--hmm-border-strong) transparent;
+}
+
 :focus-visible {
     outline: 2px solid var(--hmm-focus);
     outline-offset: -1px;
@@ -184,28 +217,32 @@ textarea {
     color: inherit;
 }
 
-/* The plain form controls of the toolbars and dialogs, in the smoothness idiom. */
+/* The plain form controls of the toolbars and dialogs. */
 .hmm-input,
 .hmm-select {
-    height: 22px;
-    padding: 1px 4px;
+    height: 24px;
+    padding: 2px 6px;
     border: 1px solid var(--hmm-border);
     border-radius: var(--hmm-radius);
-    background: var(--hmm-bg);
+    background: var(--hmm-input-bg);
+}
+
+.hmm-input:focus-visible,
+.hmm-select:focus-visible {
+    border-color: var(--hmm-accent);
 }
 
 .hmm-button {
-    min-height: 22px;
-    padding: 2px 10px;
+    min-height: 24px;
+    padding: 3px 10px;
     border: 1px solid var(--hmm-border);
     border-radius: var(--hmm-radius);
-    background: var(--hmm-header-bg);
+    background: var(--hmm-control-bg);
     cursor: pointer;
 }
 
 .hmm-button:hover:not(:disabled) {
-    border-color: var(--hmm-border-strong);
-    background: var(--hmm-accent-bg);
+    background: var(--hmm-control-bg-hover);
 }
 
 .hmm-button:disabled {

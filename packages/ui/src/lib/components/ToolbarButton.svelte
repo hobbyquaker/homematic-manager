@@ -38,20 +38,22 @@
 </button>
 
 <style>
+    /* The icon buttons of the she UI: no frame until the pointer is on them. */
     .hmm-toolbar-button {
-        width: 24px;
-        height: 22px;
+        width: 26px;
+        height: 26px;
         padding: 0;
-        border: 1px solid var(--hmm-border);
+        border: 1px solid transparent;
         border-radius: var(--hmm-radius);
-        background: var(--hmm-bg);
+        background: none;
+        color: var(--hmm-fg-muted);
         cursor: pointer;
         line-height: 1;
     }
 
     .hmm-toolbar-button:hover:not(:disabled) {
-        border-color: var(--hmm-border-strong);
-        background: var(--hmm-accent-bg);
+        background: var(--hmm-control-bg-hover);
+        color: var(--hmm-fg);
     }
 
     .hmm-toolbar-button:disabled {
@@ -61,6 +63,7 @@
 
     .hmm-toolbar-button-pressed {
         background: var(--hmm-accent-bg);
-        border-color: var(--hmm-border-strong);
+        border-color: var(--hmm-accent);
+        color: var(--hmm-fg);
     }
 </style>

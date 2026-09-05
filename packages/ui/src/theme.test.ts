@@ -40,6 +40,11 @@ const MEANINGFUL_TOKENS = [
     '--hmm-fg',
     '--hmm-bg',
     '--hmm-border',
+    // D-34: the flat surfaces that replaced the 2.x gradients. A bar, a button face and an input
+    // field have to be legible in both themes exactly like the text on them.
+    '--hmm-header-bg',
+    '--hmm-control-bg',
+    '--hmm-input-bg',
     '--hmm-overlay',
     '--hmm-backdrop',
     '--hmm-shadow-menu',
@@ -91,6 +96,15 @@ describe('the theme tokens', () => {
         expect(lightBlock).toContain('color-scheme: light');
         expect(mediaBlock).toContain('color-scheme: dark');
         expect(darkBlock).toContain('color-scheme: dark');
+    });
+
+    /**
+     * D-34: the look no longer imitates 2.x. The jQuery UI "smoothness" idiom was one vertical
+     * gradient per bar and per button; `she` and Svelte's own defaults are flat surfaces, so a
+     * gradient coming back anywhere in the theme is a regression, not a decision.
+     */
+    it('has no gradient left anywhere', () => {
+        expect(appCss).not.toContain('gradient(');
     });
 
     it('paints the body explicitly rather than inheriting the host background', () => {

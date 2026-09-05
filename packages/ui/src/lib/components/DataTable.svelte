@@ -59,7 +59,7 @@
         getId,
         subRows = undefined,
         subColumns = undefined,
-        rowHeight = 23,
+        rowHeight = 26,
         height = undefined,
         overscan = 6,
         filterBox = true,
@@ -427,6 +427,7 @@
     .hmm-table {
         display: flex;
         flex-direction: column;
+        font-size: var(--hmm-font-size-grid);
         min-height: 0;
         height: 100%;
         border: 1px solid var(--hmm-border);
@@ -439,7 +440,7 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 3px 6px;
+        padding: 5px 8px;
         background: var(--hmm-header-bg);
         border-bottom: 1px solid var(--hmm-border);
     }
@@ -450,7 +451,7 @@
 
     .hmm-table-filter {
         margin-left: auto;
-        width: 220px;
+        width: 240px;
     }
 
     .hmm-table-count {
@@ -473,10 +474,14 @@
         border-bottom: 1px solid var(--hmm-border);
     }
 
+    /* D-34: a column label the way the she UI writes one - small, semibold, muted, and with no vertical
+       rule between the columns. The 2.x grid drew a full lattice; the header line alone is enough. */
     .hmm-th {
-        padding: 3px 4px;
-        font-weight: bold;
-        border-right: 1px solid var(--hmm-border-muted);
+        padding: 6px 6px;
+        font-size: var(--hmm-font-size-small);
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: var(--hmm-fg-muted);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -491,9 +496,13 @@
         border: none;
         background: none;
         font: inherit;
-        font-weight: bold;
+        color: inherit;
         cursor: pointer;
         justify-content: inherit;
+    }
+
+    .hmm-th-button:hover {
+        color: var(--hmm-fg);
     }
 
     .hmm-th-sort {
@@ -501,14 +510,13 @@
     }
 
     .hmm-tf {
-        padding: 2px 3px;
-        border-right: 1px solid var(--hmm-border-muted);
+        padding: 3px 4px;
         min-width: 0;
     }
 
     .hmm-tf-input {
         width: 100%;
-        height: 18px;
+        height: 20px;
     }
 
     .hmm-table-body {
@@ -541,8 +549,8 @@
         cursor: default;
     }
 
-    /* Striping follows the absolute row index, not the rendered window, so it does not
-       flicker while the virtualiser scrolls. */
+    /* The she UI gives its tables no zebra; the row separator carries the eye instead. The class stays
+       and follows the absolute row index, so bringing the stripes back is one token. */
     .hmm-tr-even {
         background: var(--hmm-row-even);
     }
@@ -570,7 +578,7 @@
     }
 
     .hmm-td {
-        padding: 0 4px;
+        padding: 0 6px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -583,14 +591,20 @@
     }
 
     .hmm-expander {
-        width: 16px;
-        height: 16px;
+        width: 18px;
+        height: 18px;
         padding: 0;
         line-height: 1;
         border: 1px solid var(--hmm-border);
         border-radius: 2px;
-        background: var(--hmm-bg);
+        background: none;
+        color: var(--hmm-fg-muted);
         cursor: pointer;
+    }
+
+    .hmm-expander:hover {
+        background: var(--hmm-control-bg-hover);
+        color: var(--hmm-fg);
     }
 
     .hmm-table-empty {

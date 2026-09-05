@@ -22,14 +22,13 @@
 </div>
 
 <style>
+    /* D-34: no framed grey box around the buttons any more - the toolbar is a row of controls on
+       the page, and the grid below it brings its own frame. */
     .hmm-toolbar {
         display: flex;
         align-items: center;
         gap: 4px;
-        padding: 3px 6px;
-        background: var(--hmm-header-bg);
-        border: 1px solid var(--hmm-border);
-        border-radius: var(--hmm-radius);
+        padding: 0 0 6px;
     }
 
     .hmm-toolbar-group {

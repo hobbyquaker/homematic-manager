@@ -227,6 +227,41 @@ describe('Tabs', () => {
         await fireEvent.keyDown(screen.getByRole('tab', {name: 'Geräte'}), {key: 'Enter'});
         expect(onselect).toHaveBeenCalledTimes(3);
     });
+
+    /**
+     * D-34, the maintainer's addition: nothing may change size when its state changes. A tab that
+     * turns bold when it is selected is a tab bar that jumps every time the user switches, so the
+     * active tab is marked by colour and an inset underline and by nothing that has a width.
+     */
+    it.skipIf(document.body.getBoundingClientRect().width === 0)(
+        'gives a tab the same width whether it is active or not',
+        async () => {
+            const six = [
+                {id: 'devices', label: 'Geräte'},
+                {id: 'links', label: 'Verknüpfungen'},
+                {id: 'rssi', label: 'Funk'},
+                {id: 'console', label: 'RPC Konsole'},
+                {id: 'messages', label: 'Servicemeldungen', badge: 2},
+                {id: 'events', label: 'Ereignisse'},
+            ];
+            const {rerender} = render(Tabs, {props: {tabs: six, active: 'devices'}});
+
+            const widthsOf = (): number[] =>
+                screen.getAllByRole('tab').map((tab) => Math.round(tab.getBoundingClientRect().width));
+            const lefts = (): number[] =>
+                screen.getAllByRole('tab').map((tab) => Math.round(tab.getBoundingClientRect().left));
+
+            const widths = widthsOf();
+            const positions = lefts();
+            expect(widths).toHaveLength(6);
+
+            for (const tab of six) {
+                await rerender({tabs: six, active: tab.id});
+                expect(widthsOf(), `activating ${tab.id} changed a tab's width`).toEqual(widths);
+                expect(lefts(), `activating ${tab.id} moved the tab bar`).toEqual(positions);
+            }
+        },
+    );
 });
 
 describe('Toolbar and ToolbarButton', () => {

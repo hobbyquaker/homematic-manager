@@ -154,13 +154,13 @@
         {
             key: 'FIRMWARE',
             label: 'FIRMWARE',
-            width: 160,
+            width: 170,
             value: (device) => `${device.FIRMWARE ?? ''} ${device.AVAILABLE_FIRMWARE ?? ''}`.trim(),
         },
         {
             key: 'PARAMSETS',
             label: 'PARAMSETS',
-            width: 140,
+            width: 150,
             sortable: false,
             value: (device) => (device.PARAMSETS ?? []).join(' '),
         },
@@ -674,12 +674,13 @@
     }
 
     .hmm-inline-button {
-        height: 17px;
-        padding: 0 5px;
-        margin-left: 4px;
+        height: 18px;
+        padding: 0 4px;
+        margin-left: 3px;
         border: 1px solid var(--hmm-border);
         border-radius: var(--hmm-radius);
-        background: var(--hmm-header-bg);
+        background: var(--hmm-control-bg);
+        color: var(--hmm-fg-muted);
         cursor: pointer;
         font-size: var(--hmm-font-size-small);
         line-height: 1;
@@ -687,7 +688,7 @@
     }
 
     .hmm-inline-button:hover {
-        border-color: var(--hmm-border-strong);
-        background: var(--hmm-accent-bg);
+        background: var(--hmm-control-bg-hover);
+        color: var(--hmm-fg);
     }
 </style>

@@ -56,31 +56,47 @@
 </div>
 
 <style>
+    /*
+        D-34: flat tab buttons in the `she` idiom, and - the maintainer's addition - a tab that is
+        exactly as wide when it is active as when it is not, so the bar never moves when the user
+        switches. That rules out the bold-on-active of the 2.x look: the active tab is marked by a
+        background, the text colour and an inset underline, none of which changes a layout box.
+    */
     .hmm-tabs {
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         gap: 2px;
         height: var(--hmm-header-height);
     }
 
     .hmm-tab {
-        padding: 4px 12px;
-        border: 1px solid var(--hmm-border);
-        border-bottom: none;
-        border-radius: var(--hmm-radius) var(--hmm-radius) 0 0;
-        background: var(--hmm-header-bg);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        height: 26px;
+        padding: 0 12px;
+        border: none;
+        border-radius: var(--hmm-radius);
+        background: none;
         color: var(--hmm-fg-muted);
+        font-weight: 500;
         cursor: pointer;
         white-space: nowrap;
     }
 
-    .hmm-tab-active {
-        background: var(--hmm-bg);
+    .hmm-tab:hover:not(.hmm-tab-active) {
+        background: var(--hmm-control-bg-hover);
         color: var(--hmm-fg);
-        font-weight: bold;
+    }
+
+    .hmm-tab-active {
+        background: var(--hmm-accent-bg);
+        color: var(--hmm-fg);
+        /* An inset shadow, not a border: a border would make the active tab a pixel taller. */
+        box-shadow: inset 0 -2px 0 var(--hmm-accent);
     }
 
     .hmm-tab-badge {
-        margin-left: 4px;
+        color: var(--hmm-fg-muted);
     }
 </style>

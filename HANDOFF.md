@@ -17,15 +17,15 @@ about every half hour while the agent works; the timestamp above is the last ref
 
 ## State of the branch
 
-- Branch `3.0-dev`, version `3.0.0-dev.0`, 16 commits ahead of `origin/3.0-dev` at the time of
-  writing (last pushed commit `037a637`). Push with `git push origin 3.0-dev` from WSL once the
-  running agents have landed; nothing on the branch is secret.
+- Branch `3.0-dev`, version `3.0.0-dev.0`, pushed up to `69cab48` (task 11 archive). Push again
+  with `git push origin 3.0-dev` from WSL after each archived task; nothing on the branch is
+  secret.
 - Done and archived: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 1.0), 7 (UI
   foundation), 9 (data pipeline), 11 (Electron host; `build.yml` builds the desktop artifacts on
   every push to `3.0-dev` once Actions is enabled). Workspace was green at the last full run: 73 test files,
   1082 tests, `npm run lint`, `npm run typecheck`.
-- In progress by two background subagents (Opus), each committing distinct commits on
-  `3.0-dev`:
+- In progress by three background subagents (Opus), each committing distinct commits on
+  `3.0-dev` in the shared working tree (each stages only its own files):
   - **Task 6** write-safety lab study: lab boxes only, never a production CCU, no deletes, no
     install mode. Deliverables: `docs/config-pending.md`, calibrated hm-simulator faults,
     `devices.repairConfig`, fix for two unhandled rejections in
@@ -35,6 +35,9 @@ about every half hour while the agent works; the timestamp above is the last ref
     for the addon proxy, D-24/D-25 (npm package, `--install`, Dockerfile, proxy examples) and
     D-27 (SBOMs), with permission to stop after host + base path + npm packaging + `--install`
     and report the rest.
+  - **Task 8** UI feature parity (started after task 11 was archived): tab by tab in
+    `packages/ui`, additive API changes in core/backend, `API_EVENT_NAMES` export from core,
+    host bridge consumers (update notice, About, device images). Expected to take the longest.
 - If a session ends with those agents mid-flight: uncommitted files in the working tree are
   theirs. Look at `git status`, `git diff`, run `npm test -w <workspace>`; either finish the
   piece and commit it with an explanatory message, or `git stash` it with a note here. Do not
@@ -52,13 +55,11 @@ about every half hour while the agent works; the timestamp above is the last ref
 
 ## Next steps, in order
 
-1. When task 6, 11, 12 finish: verify (`npm run lint && npm run typecheck && npm test` in WSL,
+1. When task 6, 12 (and later 8) finish: verify (`npm run lint && npm run typecheck && npm test` in WSL,
    with the simulator installed), write `roadmap-archive/task-{6,11,12}.md`, tick them in the
-   ROADMAP Contents, update the status line at the top of ROADMAP.md, commit, push `3.0-dev`.
-2. Launch task 8 (UI feature parity, the biggest task: 18–25 PD) — depends on 4, 7, 9, all done.
-   Notes waiting for it: hmipserver empties the device cache on every `init` (occu#45) so an
-   empty list is not "no devices"; RSSI colour tokens go under the theme test; per-depth
-   `DataTable` columns if the 2.x channel sub-grid columns come back.
+   ROADMAP Contents, update the status line at the top of ROADMAP.md, commit, push `3.0-dev`
+   (task 11 is archived and pushed already: `69cab48`).
+2. Task 8 is running (see above); when it finishes, verify and archive it the same way.
 3. Task 13 (CCU addon) can start once task 12 has landed; task 14 (test infra, Playwright in
    CI, browser mode default) after 8/11/12; then 10, 15, 16, 17.
 4. Bump `npm run version:dev` when a dev build is cut for the maintainer (D-18).

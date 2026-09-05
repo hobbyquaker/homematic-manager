@@ -23,15 +23,16 @@ about every half hour while the agent works; the timestamp above is the last ref
 - Done and archived: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 1.0), 7 (UI
   foundation), 9 (data pipeline), 11 (Electron host; `build.yml` builds the desktop artifacts on
   every push to `3.0-dev` once Actions is enabled), 12 (web host, npm package with `--install`,
-  `release-npm.yml`; Docker part as a follow-up), 6 (lab study: `docs/config-pending.md`,
+  `release-npm.yml`, Docker image, compose, proxy docs, `release-docker.yml`), 6 (lab study: `docs/config-pending.md`,
   `devices.repairConfig`, hm-simulator calibrated; M1 complete). Lab state after the study is in
   the private lab note (one DRS8 channel poisoned on purpose, needs re-pairing). Workspace was green at the last full run: 73 test files,
   1082 tests, `npm run lint`, `npm run typecheck`.
 - In progress by two background subagents (Opus), each committing distinct commits on
   `3.0-dev` in the shared working tree (each stages only its own files):
-  - **Task 12 follow-up** (Docker image, `compose.yml`, `release-docker.yml` with image SBOM,
-    CI image build, proxy snippets moved to `docs/`, two small `ApiWebSocketServer` options in
-    the backend: `noServer`/`onUpgrade` and `keepAliveMs`, then `apps/web` uses them).
+  - **Task 13** CCU addon (started after task 6 landed): packages per architecture with the
+    bundled musl Node, tclsh CGIs, lighttpd WebSocket proxy rule, container tests, `addon.yml`
+    and `release-addon.yml`; then lab installs on the two OpenCCU boxes and, after messaging the
+    main session, one install on the Charly (CCU3 firmware, reboot).
   - **Task 8** UI feature parity (started after task 11 was archived): tab by tab in
     `packages/ui`, additive API changes in core/backend, `API_EVENT_NAMES` export from core,
     host bridge consumers (update notice, About, device images). Expected to take the longest.
@@ -52,12 +53,12 @@ about every half hour while the agent works; the timestamp above is the last ref
 
 ## Next steps, in order
 
-1. When the task 12 follow-up and task 8 finish: verify (`npm run lint && npm run typecheck && npm test` in WSL,
+1. When task 8 and task 13 finish: verify (`npm run lint && npm run typecheck && npm test` in WSL,
    with the simulator installed), write `roadmap-archive/task-{6,11,12}.md`, tick them in the
    ROADMAP Contents, update the status line at the top of ROADMAP.md, commit, push `3.0-dev`
    (task 11 is archived and pushed already: `69cab48`).
 2. Task 8 is running (see above); when it finishes, verify and archive it the same way.
-3. Task 13 (CCU addon) can start now (task 12 landed; see its archive for the CGI/cookie/base-path recipe); task 14 (test infra, Playwright in
+3. Task 13 is running; task 14 (test infra, Playwright in
    CI, browser mode default) after 8/11/12; then 10, 15, 16, 17.
 4. Bump `npm run version:dev` when a dev build is cut for the maintainer (D-18).
 

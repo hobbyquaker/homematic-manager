@@ -1,4 +1,4 @@
-# Task 12: Web host and npm package (done 2026-09-05, Docker follow-up open)
+# Task 12: Web host, npm package, Docker (done 2026-09-05)
 
 Eight commits on `3.0-dev` from `0e380ad` (the building blocks) to `d3af709` (the installer's
 root guard), plus `.github/workflows/release-npm.yml` and a job in `ci.yml`.
@@ -40,12 +40,37 @@ install of the packed tarball (bin runs, UI, data, bundled image, auth, graceful
   published separately (D-29).
 - With `tls` the CCU image fetch cannot accept the self-signed certificate and falls through to
   the bundled picture.
-- Not done, scheduled as the task 12 follow-up: `Dockerfile`, `compose.yml`,
-  `release-docker.yml` with the image SBOM and provenance, the CI image build, and moving the
-  lighttpd/nginx/Caddy snippets from `apps/web/README.md` to `docs/`.
 - For task 13: start the host with `--base /addons/hmm --host 127.0.0.1 --no-issue-cookie
 --token "$TOKEN" --local --data-dir <addon dir>`; `settings.cgi` sets `hmm_token` with
   `Path=/addons/hmm/; HttpOnly; SameSite=Strict; Secure` after the `tclrega.so` check and
   redirects to the UI; `--config-schema` gives the CGI the option list.
 - For task 14: `startForTest({simulator: true})` returns `url`, `token`, `close()`; the cookie
   makes the socket connect with no Playwright setup; CI must `npm run build` before the web e2e.
+
+## Follow-up (same day): Docker, proxy docs, backend socket options
+
+Seven commits from `81fadee` (backend `noServer`/`handleUpgrade` and `keepAliveMs` on
+`ApiWebSocketServer`, six tests) to `4104d8d` (docs). `apps/web` dropped its surrogate emitter
+and hand-built ping frame. `--callback-ip` and the two callback port options were added because a
+bridge-networked container announces its internal address in `init` and never gets an event
+without them. Root `Dockerfile` (two stages, `node:22-alpine`, the packed tarball installed
+globally, non-root, `/data`, `HMM_*`, OCI labels with the AGPL licence, `EXPOSE 8090/2126/2127`),
+`compose.yml` with the host-network and the published-ports variants, `.dockerignore` (no bare
+`dist` rule, which would drop the committed `data/dist`), `release-docker.yml` (tag or dispatch,
+no `needs:`, amd64/arm64/arm/v7 to ghcr.io, `sbom: true`, `provenance: mode=max`, CycloneDX file
+from `anchore/sbom-action` attested and attached to the draft release, `latest` not moved by a
+pre-release), a `docker-image` job in `ci.yml` (build amd64, `--version`, `--demo` answers 200,
+SBOM), and `docs/lighttpd-homematic-manager.conf`, `nginx-homematic-manager.conf`,
+`Caddyfile-homematic-manager`, `install-lxc.md`, `install-docker.md`.
+
+Measured: backend + web 532 passed, 35 skipped; images built locally with qemu: amd64 59.3 MB,
+arm64 59.7 MB, arm/v7 55.2 MB; a real amd64 run issues the cookie, refuses an upgrade without the
+token (401), accepts one with it (101), writes into `/data` as uid 1000 and stops on SIGTERM.
+
+Found: `npm install -g` of the task 12 tarball was broken (`6746180`): the bundled workspace
+manifests repeated their registry dependencies, npm treated those as part of the bundle and
+created five empty directories, and the bin died on `ws`; a local `npm install` hoists and hides
+it, which is why the manual check of task 12 passed. Fixed by leaving the field out. The image
+sets `HMM_ISSUE_COOKIE=true` because a container never binds loopback (OQ-15). Callback ports
+2126/2127 collide with hm2mqtt.js on a host-networked box; one has to move. The release
+workflows have never run.

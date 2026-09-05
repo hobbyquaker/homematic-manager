@@ -14,9 +14,8 @@ Status 2026-09-05: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 
 `1.0-dev` in its own repository, not yet pushed or published) and 9 (data pipeline) are done,
 version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); tasks 7 (UI foundation) and 11 (Electron
 host with the build and release workflows) and 12 (web host and npm package; its Docker part runs
-as a follow-up) are done too, and so is task 6 (write-safety lab study, `docs/config-pending.md`):
-milestone M1 is complete. Task 8 (UI feature parity) and the Docker follow-up of task 12 are in
-progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+as a follow-up, also done) are done too, and so is task 6 (write-safety lab study, `docs/config-pending.md`):
+milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon) are in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
@@ -67,7 +66,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - 9. Device metadata pipeline ✅ [archived](roadmap-archive/task-9.md)
 - [10. Device-specific editors](#10-device-specific-editors)
 - [11. Electron host, builds, releases](#11-electron-host-builds-releases) ✅
-- [12. Web host for development and e2e](#12-web-host-for-development-and-e2e) ✅ (Docker follow-up open)
+- [12. Web host for development and e2e](#12-web-host-for-development-and-e2e) ✅
 - [13. CCU addon](#13-ccu-addon)
 - [14. Test infrastructure and coverage gates](#14-test-infrastructure-and-coverage-gates)
 - [15. Backlog features from the triage](#15-backlog-features-from-the-triage)
@@ -496,7 +495,7 @@ Docker releases of the same tag, and vice versa; the failed one is re-run alone 
 `workflow_dispatch`). Before the beta every install type of D-25 is installed once from the
 published artefacts, not from the checkout: the three addon packages on the lab boxes, the image
 with `docker run`, the npm package with `--install` in a fresh Proxmox LXC, the three Electron
-apps. Task 12 done 2026-09-05 except the Docker part; report in `roadmap-archive/task-12.md`. The release checklist verifies every asset has its `.cdx.json` and that
+apps. Task 12 including the Docker part done 2026-09-05; report in `roadmap-archive/task-12.md`. The release checklist verifies every asset has its `.cdx.json` and that
 `gh attestation verify <asset> --repo hobbyquaker/homematic-manager` passes for each (D-27); a
 release with a missing SBOM is not published.
 The maintainer cuts releases; the agent never tags or pushes to `master` on its own (pushing
@@ -514,6 +513,7 @@ devices from his own stock) and OQ-9 (the Turkish translations stay as a fallbac
 | OQ-12 | When to move to TypeScript 7 (native) and vite 8? Blocked today by typescript-eslint 8, svelte-check 4 and electron-vite 5 peer ranges. | Recurring "toolchain bump" check next to the quarterly Electron bump of task 11; bump when all three peers allow it. |
 | OQ-13 | `data/dist/` is 9.2 MB of pretty-printed JSON (65 profile files). Ship it gzipped or minified in the CCU addon and the Electron bundle? | Task 13 measures it on the CCU3 (inodes and flash); the apps load profiles lazily per receiver type either way. Decide there. |
 | OQ-14 | npm name for the web host package (D-24): reuse `homematic-manager` (the 2.x name on npm, which installed the Electron app through `npm i -g`; its users would get the server instead) or a new `homematic-manager-web` / `@homematic-manager/web` (the workspace scope is free on npm to check). The tarball is otherwise ready (task 12). | Reuse `homematic-manager`: the `npm i -g` audience of 2.x wanted a headless install anyway, and the Electron app was never a sensible npm install. Announce in the 3.0 changelog. Decide before the first alpha is tagged. |
+| OQ-15 | The Docker image sets `HMM_ISSUE_COOKIE=true` because a container never binds loopback and the UI's socket would otherwise be refused on every load; the consequence is that whoever reaches the published port is in. Keep that default (UI works out of the box, `docs/install-docker.md` names three ways to lock it down), or ship an image whose UI refuses until the user has read the page? | Keep it, and print a one-line warning at start when the cookie is issued on a non-loopback bind without TLS or a proxy in front. Decide before the first image is published. |
 
 ## Lab and hardware
 

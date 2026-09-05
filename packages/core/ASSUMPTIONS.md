@@ -5,24 +5,55 @@ specification of the old behaviour that exists, D-3), the eQ-3 XML-RPC specifica
 `rpcMethods.json` carries it, and 962 real paramset descriptions from
 [node-red-contrib-ccu](https://github.com/rdmtc/node-red-contrib-ccu)'s `paramsets.json`.
 
-None of it has been run against hardware. The list below is what
-[roadmap task 6](../../ROADMAP.md#6-paramset-write-safety-and-the-config_pending-study) has to
-verify in the lab, in the order in which getting it wrong hurts. Each entry says what the code
-does today, where it says so, and what would prove or disprove it.
+The list below is what [roadmap task 6](../../ROADMAP.md#6-paramset-write-safety-and-the-config_pending-study)
+had to verify in the lab, in the order in which getting it wrong hurts. Each entry says what the
+code does today, where it says so, and what would prove or disprove it.
 
-## A-1 HmIP wants enum names, BidCos wants enum indexes
+**Status 2026-09-05.** Task 6 ran the study on two lab CCUs on firmware 3.89.8 (an HmIPW-DRS8 and
+an HmIPW-DRI16 on a wired access point, an HmIP-PDT and an HmIP-WRC2 on radio, a BidCos-RF HM-CC-TC
+and HM-Sec-SC). The write-up is [docs/config-pending.md](../../docs/config-pending.md), the script
+is `tools/lab/config-pending-study.mjs`. Each entry below now starts with what came of it:
 
-`enumEncodingFor(interfaceName)` in `src/paramset/cast.ts` returns `name` for `HmIP-RF` and `index`
-for everything else, so a `putParamset` to hmipserver sends `"BASE_1_H"` and one to rfd sends `7`.
+|      |                                                              | 2026-09-05                                                            |
+| ---- | ------------------------------------------------------------ | --------------------------------------------------------------------- |
+| A-1  | enum names on HmIP, indexes elsewhere                        | **refuted** - both take both; the code sends the index everywhere now |
+| A-2  | `STRING` at most 255 characters                              | untested - no writable `STRING` without a link on the lab devices     |
+| A-3  | link `FLAGS` bits                                            | untested                                                              |
+| A-4  | which service messages can be acknowledged                   | untested                                                              |
+| A-5  | a `SPECIAL` value passes although it is outside `MIN`..`MAX` | **verified**                                                          |
+| A-6  | "not used" is the parameter's own `SPECIAL`                  | untested - the lab has no `*_TIME` parameter with one                 |
+| A-7  | `encodeTime` picks the base the device would pick            | untested                                                              |
+| A-8  | equal identity means the same description                    | **verified**, and the key is conservative                             |
+| A-9  | the link roles in the fixtures                               | partly - real `listDevices` dumps exist now                           |
+| A-10 | the HmIP RSSI mapping                                        | untested                                                              |
+| A-11 | `DUTY_CYCLE` as a boolean                                    | untested                                                              |
+| A-12 | `hmm_<name>` as the init identity                            | untested                                                              |
+| A-13 | a `100%` unit means a fraction                               | untested - no such parameter on the lab devices                       |
+| A-14 | `writeAll` may fall back to `DEFAULT`                        | **verified as a real case** - the repair reports it                   |
+| A-15 | the HmIP-WRC6 stands in for the WRC2                         | **fixed** - the WRC2's own descriptions were dumped                   |
 
-This is what 2.x does (`homematic-manager.js:1782`, `daemon === 'HmIP' ? VALUE_LIST[i] : i`) and it
-has worked in production for years, but nobody has checked whether hmipserver **also** accepts the
-index, or whether rfd **also** accepts the name. If both accept both, the option can go away; if
-hmipserver rejects an index with a fault rather than with silence, that fault is worth showing.
+Two things the study found that were not on this list at all, and that matter more than most of
+it: hmipserver **stores what it rejects**, so a parameter a channel does not have is kept for ever
+and makes every later `putParamset` on that channel fault; and **neither interface process checks
+`MIN`..`MAX`** - hmipserver stores an out-of-range value, rfd clamps it silently. Both are in
+`docs/config-pending.md`.
 
-**Verify:** `putParamset` an `ENUM` parameter on the HmIP-PDT once as a name and once as an index,
-and on a BidCos-RF actor the other way round. Record the fault, the `getParamset` afterwards and
-whether `CONFIG_PENDING` appears.
+## A-1 HmIP wants enum names, BidCos wants enum indexes - **REFUTED 2026-09-05**
+
+`enumEncodingFor(interfaceName)` used to return `name` for `HmIP-RF` and `index` for everything
+else, copying 2.x (`homematic-manager.js:1782`, `daemon === 'HmIP' ? VALUE_LIST[i] : i`).
+
+Measured on both lab CCUs: **both interface processes accept both forms.**
+`putParamset(<channel>, 'MASTER', {POWERUP_ONDELAY_UNIT: "100MS"})` and the same with `0` are both
+answered `ok` by hmipserver and stored identically; rfd takes `"0s"` and `0` for
+`DISPLAY_BACKLIGHT_TIME` and converts the name to its index. **`getParamset` answers with the index
+on both**, which decides the question: sending the name would make a changed-only diff see every
+`ENUM` as changed on every write and send parameters the user never touched.
+
+`enumEncodingFor()` therefore returns `index` for every interface. What is dangerous is a value
+that is in neither form - an unknown name, or an index outside the `VALUE_LIST`: hmipserver answers
+`-5 Invalid parameter or value` **and keeps the bad value**, leaving `CONFIG_PENDING` set until a
+valid full `MASTER` write; rfd ignores it in silence. `validate.ts` refuses both before the wire.
 
 ## A-2 A `STRING` parameter accepts at most 255 characters
 
@@ -53,14 +84,20 @@ where the CCU WebUI offers a "confirm" button. 2.x had no acknowledgement at all
 **Verify:** acknowledge each kind in the WebUI and watch what the datapoint does; then reproduce it
 through ReGa from the backend (task 4) and check that the same datapoint clears.
 
-## A-5 A `SPECIAL` value must pass validation although it is outside `MIN`..`MAX`
+## A-5 A `SPECIAL` value must pass validation although it is outside `MIN`..`MAX` - **VERIFIED 2026-09-05**
 
 `validateNumber()` in `src/paramset/validate.ts` lets a value through when it equals one of the
-parameter's `SPECIAL` entries. This is not a guess about the data - the descriptions say so, e.g.
-BidCos-RF `LONG_OFF_TIME` has `MAX 108000` and `SPECIAL [{NOT_USED, 111600}]` - but it is a guess
-about the _device_: that writing 111600 is accepted rather than faulted.
+parameter's `SPECIAL` entries.
 
-**Verify:** write the `NOT_USED` value of a `*_TIME` parameter of a link paramset and read it back.
+Measured on the BidCos-RF HM-CC-TC: `SETPOINT` of its `CLIMATECONTROL_REGULATOR` channel is
+`FLOAT`, `MIN` 6, `MAX` 30, with `SPECIAL` `VENT_CLOSED` = 0 and `VENT_OPEN` = 100. Both were
+written with `setValue` and read back unchanged, and the device's own resting value was already one
+of them. Clamping to `MIN`/`MAX` would break the device's semantics.
+
+Still untested (A-6): the BidCos `NOT_USED` = 111600 s value of a `*_TIME` parameter. No device in
+the lab has a link paramset with one - the HM-CC-TC's only link parameter is
+`TEMPERATUR_WINDOW_OPEN_VALUE`, and the HmIP link paramsets use `*_TIME_BASE`/`*_TIME_FACTOR` pairs
+and carry no `SPECIAL` at all. It needs a BidCos-RF actor or a BidCos-Wired device.
 
 ## A-6 "Not used / infinite" is the parameter's own `SPECIAL` value, not a constant
 
@@ -92,9 +129,21 @@ the identity of a description. It is the key 2.x already used for its descriptio
 key node-red-contrib-ccu's `paramsets.json` is keyed by, so a collision would already have shown up
 there - but "no collision seen" is not "no collision possible".
 
-**Verify:** during the task 6 lab session, fetch `getParamsetDescription` for every channel of the
-test devices and check that two channels with the same identity really return the same description
-(node-red-contrib-ccu's `tools/paramsets-fetch.js` does exactly this fetch).
+**Measured 2026-09-05:** all 24 `SWITCH_VIRTUAL_RECEIVER` channels of the HmIPW-DRS8 return
+byte-identical `MASTER` descriptions, and the `KEY_TRANSCEIVER` `MASTER` descriptions of the
+HmIP-PDT and the HmIP-WRC2 are identical across two device types. No case was found where equal
+identity meant a different description.
+
+Worth knowing next to it: **`getParamsetId`**, which both interface processes implement, is the
+CCU's own identity for a description. It is per channel **type** on BidCos (`cc_tc_ch_master`,
+`sc_ch_master`) and per channel **index** on HmIP (`hmipw-drs8_2_master`, `hmipw-drs8_3_master`,
+`hmip-pdt_1_master`). Ours is coarser than the HmIP one and finer than the BidCos one - it refuses
+some multi-applies that would have been safe, which is the right direction, and it costs no RPC
+call. Using `getParamsetId` instead is one call per channel and a possible follow-up.
+
+The counter-example that matters for #98 is a different one: `MAINTENANCE` `MASTER` has 23
+parameters on the HmIPW-DRS8, 21 on the HmIP-PDT and 9 on the HmIP-WRC2 - same channel `TYPE`,
+three different paramsets. 2.x offered exactly that as one multi-apply.
 
 ## A-9 The link roles in the device fixtures are plausible, not measured
 
@@ -150,8 +199,12 @@ from the device, and the description's `DEFAULT`. The fallback only happens when
 not return the parameter at all, which should not occur - but if it does, writing `DEFAULT` is a
 change the user did not ask for.
 
-**Verify:** compare `getParamset MASTER` with `getParamsetDescription MASTER` on every lab device
-and check that the value set is complete.
+**Measured 2026-09-05:** on an undamaged channel the two agree. On a channel a bad write reached
+they do **not**, and in both directions: `getParamset` returns parameters the description does not
+have (everything hmipserver stored and rejected), and after a `clearConfigCache` on BidCos it can
+return fewer than the description has. So the fallback is a real case, not a theoretical one -
+`devices.repairConfig` reports every parameter it had to fill in from the `DEFAULT` as a
+correction, because writing one is a change the user did not ask for.
 
 ## A-16 (settled) BIN-RPC is loopback-only on a CCU
 
@@ -166,4 +219,8 @@ the BIN-RPC side of that only matters for the addon.
 `test/fixtures/paramset-descriptions.json` has no HmIP-WRC2 - the source set does not contain one -
 so the WRC6 is used instead. Both expose `KEY_TRANSCEIVER`, which is what the tests exercise.
 
-**Verify:** fetch the WRC2's descriptions in the lab and add them to the fixture.
+**Measured 2026-09-05:** the WRC2's own descriptions were dumped in the lab. Its
+`KEY_TRANSCEIVER` `MASTER` is byte-identical to the HmIP-PDT's, so the stand-in was harmless for
+what the tests exercise - but its `MAINTENANCE` `MASTER` has 9 parameters where the PDT has 21 and
+the DRS8 23, which is exactly the difference that makes a multi-apply across device types dangerous.
+The anonymised `listDevices` dumps are in hm-simulator's `data/fixtures/lab-devices.json`.

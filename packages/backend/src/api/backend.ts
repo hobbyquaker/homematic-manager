@@ -216,9 +216,16 @@ export class Backend {
     }
 
     async #dispatch(method: ApiMethodName, params: unknown[]): Promise<unknown> {
+        // `JSON.stringify(['x', undefined])` is `["x",null]`: an omitted optional parameter reaches
+        // us as `null` over the WebSocket and as `undefined` over Electron IPC, which uses the
+        // structured clone algorithm. No method of the contract takes `null` as a meaningful
+        // argument, so the two mean the same thing here. Without this, `serviceMessages.list()`
+        // from the web UI asked for the interface *named* `null` and got an empty list - the
+        // refresh button emptied a list the backend still had (found by the e2e suite of task 14).
+        const normalised = params.map((value) => (value === null ? undefined : value));
         // the positional tuple of the contract; `never` fits every parameter type of every method,
         // and the tuple form keeps `noUncheckedIndexedAccess` from adding `undefined` to each slot
-        const p = params as [never, never, never, never, never];
+        const p = normalised as [never, never, never, never, never];
         switch (method) {
             case 'config.get':
                 return this.#configWithDetected();

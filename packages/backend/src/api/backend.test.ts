@@ -629,6 +629,20 @@ describe('radio and service messages', () => {
         await h.backend.stop();
     });
 
+    it('reads an omitted optional parameter that arrived as JSON null (task 14 e2e)', async () => {
+        const h = await harness();
+        h.handler.event('HmIP-RF', 'ABC1:0', 'STICKY_UNREACH', true);
+        const all = await h.backend.request('serviceMessages.list');
+        expect(all.length).toBeGreaterThan(0);
+
+        // `JSON.stringify([undefined])` is `[null]`, so this is exactly what the WebSocket
+        // transport delivers for `serviceMessages.list()` with no interface name. It has to mean
+        // "every interface", not "the interface called null" - which answered with nothing and
+        // made the refresh button of the service-message tab empty the grid.
+        expect(await h.backend.request('serviceMessages.list', null as unknown as string)).toEqual(all);
+        await h.backend.stop();
+    });
+
     it('refuses to acknowledge a datapoint that cannot be acknowledged', async () => {
         const h = await harness();
         await expect(h.backend.request('serviceMessages.ack', 'HmIP-RF', 'ABC1:0', 'LOWBAT')).rejects.toThrow(

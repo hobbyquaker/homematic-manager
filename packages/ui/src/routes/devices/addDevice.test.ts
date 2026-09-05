@@ -52,14 +52,38 @@ describe('the add-device dialog', () => {
         transport = new MockTransport({demo: true});
     });
 
-    it('starts the BidCos install mode with the mode, the serial and the temporary key (#20)', async () => {
+    it('starts the BidCos install mode with the mode and the temporary key (#20)', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         await fireEvent.click(screen.getByTestId('devices-add'));
 
         await fireEvent.change(screen.getByTestId('add-device-mode'), {target: {value: '2'}});
-        await fireEvent.input(screen.getByTestId('add-device-serial'), {target: {value: 'MEQ0000009'}});
         await fireEvent.input(screen.getByTestId('add-device-temp-key'), {target: {value: 'SECRET'}});
         await fireEvent.click(screen.getByTestId('add-device-start'));
+
+        await waitFor(() => {
+            expect(transport.lastCall('devices.installMode.set')).toEqual([
+                'BidCos-RF',
+                true,
+                {seconds: 60, mode: 2, tempKey: 'SECRET'},
+            ]);
+        });
+        expect(screen.getByTestId('add-device-countdown')).toBeTruthy();
+    });
+
+    it('adds a device by its serial number without opening an install mode, as 2.7 did', async () => {
+        // homematic-manager.js:1215 had its own button for this: `addDevice(serial, mode)` alone,
+        // no `setInstallMode`, so nothing counts down and the duration is not part of it
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await fireEvent.click(screen.getByTestId('devices-add'));
+
+        expect(screen.getByTestId<HTMLButtonElement>('add-device-serial-start').disabled).toBe(true);
+        await fireEvent.change(screen.getByTestId('add-device-mode'), {target: {value: '2'}});
+        await fireEvent.input(screen.getByTestId('add-device-serial'), {target: {value: ' MEQ0000009 '}});
+        await fireEvent.input(screen.getByTestId('add-device-temp-key'), {target: {value: 'SECRET'}});
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLButtonElement>('add-device-serial-start').disabled).toBe(false);
+        });
+        await fireEvent.click(screen.getByTestId('add-device-serial-start'));
 
         await waitFor(() => {
             expect(transport.lastCall('devices.installMode.set')).toEqual([
@@ -68,7 +92,19 @@ describe('the add-device dialog', () => {
                 {seconds: 60, mode: 2, address: 'MEQ0000009', tempKey: 'SECRET'},
             ]);
         });
-        expect(screen.getByTestId('add-device-countdown')).toBeTruthy();
+        expect(screen.queryByTestId('add-device-countdown')).toBeNull();
+        expect(screen.queryByTestId('add-device-stop')).toBeNull();
+    });
+
+    it('does not send the serial with the timed install mode', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await fireEvent.click(screen.getByTestId('devices-add'));
+        await fireEvent.input(screen.getByTestId('add-device-serial'), {target: {value: 'MEQ0000009'}});
+        await fireEvent.click(screen.getByTestId('add-device-start'));
+
+        await waitFor(() => {
+            expect(transport.lastCall('devices.installMode.set')).toEqual(['BidCos-RF', true, {seconds: 60, mode: 1}]);
+        });
     });
 
     it('leaves the optional BidCos fields out when they are empty', async () => {

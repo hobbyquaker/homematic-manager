@@ -84,11 +84,21 @@
         };
     });
 
+    /**
+     * The two BidCos actions of 2.7, kept apart on purpose.
+     *
+     * `homematic-manager.js:1215` had two buttons: one next to the serial field, which sent
+     * `addDevice(serial, mode)` and nothing else, and one next to the duration, which sent
+     * `setInstallMode(true, time, mode)` and opened the countdown. `addDevice` pairs one known
+     * device straight away - no install mode is opened, so there is no countdown to show and the
+     * duration means nothing. One button that did both would have to lie about one of them.
+     */
     async function start(options: InstallModeOptions): Promise<void> {
         busy = true;
         const ok = await stores.devices.setInstallMode(interfaceName, true, {seconds, ...options});
         busy = false;
-        if (ok) {
+        // `addDevice` opens no install mode, so nothing counts down (checked against 2.7)
+        if (ok && options.address === undefined) {
             remaining = seconds;
         }
     }
@@ -212,9 +222,27 @@
             </select>
         </label>
 
+        <!--
+            `addDevice` is not the install mode: it tells the interface to fetch one device it
+            already knows the serial of. 2.7 had its own button for it, and so does this.
+        -->
         <label class="hmm-add-row">
             <span>{t('Serial number')}</span>
-            <input class="hmm-input hmm-mono" bind:value={serial} data-testid="add-device-serial" />
+            <span class="hmm-add-inline">
+                <input class="hmm-input hmm-mono" bind:value={serial} data-testid="add-device-serial" />
+                <button
+                    type="button"
+                    class="hmm-button"
+                    disabled={busy || serial.trim() === ''}
+                    data-testid="add-device-serial-start"
+                    onclick={() =>
+                        void start({
+                            mode: bidcosMode,
+                            address: serial.trim(),
+                            ...(tempKey.trim() === '' ? {} : {tempKey: tempKey.trim()}),
+                        })}>{t('Add by serial number')}</button
+                >
+            </span>
         </label>
 
         <!--
@@ -250,7 +278,6 @@
                               }
                             : {
                                   mode: bidcosMode,
-                                  ...(serial.trim() === '' ? {} : {address: serial.trim()}),
                                   ...(tempKey.trim() === '' ? {} : {tempKey: tempKey.trim()}),
                               },
                     )}>{t('Start install mode')}</button
@@ -305,6 +332,12 @@
 
     .hmm-add-seconds {
         width: 80px;
+    }
+
+    .hmm-add-inline {
+        display: flex;
+        gap: 8px;
+        align-items: center;
     }
 
     .hmm-add-actions {

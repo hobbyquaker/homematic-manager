@@ -54,6 +54,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 | D-30 | (2026-09-05, answers OQ-13) `data/dist` ships minified, not pre-gzipped, in the addon, the npm tarball and the Docker image: pretty-printed 9.6 MB, minified 7.4 MB, gzipped 0.6 MB, but all three cost the same 199 inodes on the CCU3 (the scarce resource), the download differs by 50 KB, and pre-gzip would need a `Content-Encoding` branch in the shared static server. Measured by task 13. |
 | D-31 | (2026-09-05, maintainer) Idle unsubscribe for the server install types: when no UI session is connected to the web host for a grace period, the backend sends `init('')` to every interface (drops the event subscriptions and the ping watchdog, keeps caches and config), and subscribes again on the next WebSocket connect. Default on for every server install type: the CCU addon, npm and Docker (grace 5 minutes; no interface process should push events to a page nobody is looking at), `--idle-unsubscribe <duration>` / `HMM_IDLE_UNSUBSCRIBE` changes the grace and `0` disables it; off in Electron (the window is the session). The UI shows "subscribing" until the first `listDevices`/service-message sweep after a resubscribe is through, because hmipserver re-sends every device on `init` (occu#45) and events and service messages from the idle period are not replayed. Implemented in task 15. |
 | D-32 | (2026-09-05, maintainer) Optional login for the addon path: with `--auth-mode rega` the web host asks for CCU credentials before it serves the UI on `/addons/hmm/`, and verifies them the way RedMatic does (`addon_files/redmatic/lib/rega-auth.js`): the user must exist in ReGa (`dom.GetObject(ID_USERS).Get(name)` and its `UserLevel()` through the existing ReGa client on 8183) and the password is checked against the CCU's authentication daemon on UDP 1998 (`user:password`, answer `1`), both loopback-only and therefore addon-only; no JSON-API (D-1). Off by default: the WebUI hand-over through `settings.cgi` (session check, token cookie) stays the primary path and keeps working when the login is on. Lesson from RedMatic 9.2.0: ReGa runs scripts one at a time, so user lookups are cached (15 minutes), parallel lookups of one user share one script, and a known user stays logged in while ReGa is busy or down; otherwise parallel requests fail with random 401s. Task 18. |
+| D-33 | (2026-09-06, maintainer, answers OQ-14) The npm deliverable is published as `homematic-manager`, the 2.x name: its `npm i -g` audience wanted a headless install anyway, the Electron app was never a sensible npm install, and the name already belongs to the maintainer, so npm **trusted publishing is configured on npmjs.com** for `hobbyquaker/homematic-manager` and the workflow file `release-npm.yml` - a scoped `@homematic-manager/web` would have needed an npm organisation plus one manual publish from a laptop before OIDC works. The old 1.x versions under the name stay deprecated, which does not block a new version. Pre-releases go out under the `next` dist-tag, so until 3.0.0 moves `latest` a tester installs `homematic-manager@next` and a plain `npm install -g homematic-manager` still gives the deprecated 1.0.14 from 2022. The bin is `homematic-manager` with `homematic-manager-web` kept as a second name (the addon CGI, the proxy examples and the install pages use it); workspace references use the path form `-w apps/web`, because the package name is now also the workspace root's. |
 
 ## Contents
 
@@ -351,12 +352,13 @@ Also the third deliverable (D-24): the package is published to npm so that `npm 
 a Homematic Manager server with the built UI on any machine with Node 22+ (Raspberry Pi next to
 a CCU, a Docker host, a NAS). `release-npm.yml` publishes on the `v*` tag with npm trusted
 publishing (OIDC, no token secret; hm-simulator's `release.yml` is the template) and provenance,
-independent of the Electron, Docker and addon workflows. The package name is OQ-14; the bin is
-`homematic-manager-web` with `--host`, `--port`, `--token`, `--profile`, `--base`. CI builds it
-with `npm pack --dry-run` on every push so a broken `files` list is caught before a tag.
+independent of the Electron, Docker and addon workflows. The package is `homematic-manager` (D-33);
+the bin is `homematic-manager`, with `homematic-manager-web` as a second name, and takes `--host`,
+`--port`, `--token`, `--profile`, `--base`. CI builds it with `npm pack --dry-run` on every push so
+a broken `files` list is caught before a tag.
 SBOMs (D-27): `@cyclonedx/cyclonedx-npm` for the package (the tarball's real dependency tree,
 including the workspace packages it bundles), attached to the GitHub release as
-`homematic-manager-web-<version>.tgz.cdx.json` and attested; the Docker image gets `sbom: true`
+`homematic-manager-<version>.tgz.cdx.json` and attested; the Docker image gets `sbom: true`
 and `provenance: mode=max` in `docker/build-push-action` (syft-based image SBOM including the
 Alpine base packages and Node) plus the same CycloneDX file as a release asset, so the image and
 the npm package of one version can be compared.
@@ -512,7 +514,7 @@ analysis when 3.0 ships.
 Agent-side part done 2026-09-05, report in `roadmap-archive/task-17.md` (screenshots, announcement
 draft, release checklist, hardware checklist on the three boxes, OQ-16 = A-17, version
 `3.0.0-dev.1`). What remains needs the maintainer: enable GitHub Actions and get one green
-`build.yml`, decide OQ-14 and OQ-15, click through the Electron artifact, tag, publish the draft
+`build.yml`, decide OQ-15, click through the Electron artifact, tag, publish the draft
 releases, install every type from the published artefacts (D-25), post, close the issues.
 
 Alpha from M2 to the forum, beta with the addon, bug-fix buffer, hardware checklist on the three
@@ -535,9 +537,9 @@ The maintainer cuts releases; the agent never tags or pushes to `master` on its 
 hardware pass on all three lab boxes with D-31, OQ-16 and the D-32 login of task 18 written up in
 [`docs/hardware-checklist.md`](docs/hardware-checklist.md), and one dev bump. **Still open, and all
 of it needs the maintainer:** Actions is not enabled, so no workflow has ever run and no artefact
-exists; OQ-14 and OQ-15 are undecided; the install-from-the-published-artefacts round of D-25
-cannot start before there is a release to install from; and no issue has been closed - the agent
-never touches one.
+exists; OQ-14 is decided (D-33) but OQ-15 is not; the install-from-the-published-artefacts round of
+D-25 cannot start before there is a release to install from; and no issue has been closed - the
+agent never touches one.
 
 ## 18. Addon login against ReGa
 
@@ -570,14 +572,14 @@ that `rega` is refused with a clear message when the CCU is not local.
 ## Open questions
 
 OQ-1 to OQ-11 were answered on 2026-09-05 and are recorded as D-7 to D-17 in the Decisions
-table. The answers that differ from the recommendation: OQ-1 (no stopgap release, reversed the
-same day), OQ-6 (coverage is reported, not enforced), OQ-8 (the maintainer supplies BidCos-RF
-devices from his own stock) and OQ-9 (the Turkish translations stay as a fallback).
+table; OQ-13 is D-30 and OQ-14 is D-33. The answers that differ from the recommendation: OQ-1 (no
+stopgap release, reversed the same day), OQ-6 (coverage is reported, not enforced), OQ-8 (the
+maintainer supplies BidCos-RF devices from his own stock) and OQ-9 (the Turkish translations stay
+as a fallback).
 
 | | Question | Recommendation |
 | --- | --- | --- |
 | OQ-12 | When to move to TypeScript 7 (native) and vite 8? Blocked today by typescript-eslint 8, svelte-check 4 and electron-vite 5 peer ranges. | Recurring "toolchain bump" check next to the quarterly Electron bump of task 11; bump when all three peers allow it. |
-| OQ-14 | npm name for the web host package (D-24): reuse `homematic-manager` (the 2.x name on npm, which installed the Electron app through `npm i -g`; its users would get the server instead) or a new `homematic-manager-web` / `@homematic-manager/web` (the workspace scope is free on npm to check). The tarball is otherwise ready (task 12). Checked 2026-09-05: `homematic-manager` exists on npm (1.0.14, 2022, maintainer hobbyquaker), so npm trusted publishing can be configured on it right away; `@homematic-manager/web` and the `@homematic-manager` scope do not exist, so a new name needs an npm organisation for the scope plus one manual initial publish from the command line before OIDC can be set up (the maintainer's point). `release-npm.yml` publishes pre-releases under the `next` dist-tag since `86adff4`+1. | Reuse `homematic-manager`: the `npm i -g` audience of 2.x wanted a headless install anyway, and the Electron app was never a sensible npm install. Announce in the 3.0 changelog. Decide before the first alpha is tagged. |
 | OQ-15 | The Docker image sets `HMM_ISSUE_COOKIE=true` because a container never binds loopback and the UI's socket would otherwise be refused on every load; the consequence is that whoever reaches the published port is in. Keep that default (UI works out of the box, `docs/install-docker.md` names three ways to lock it down), or ship an image whose UI refuses until the user has read the page? | Keep it, and print a one-line warning at start when the cookie is issued on a non-loopback bind without TLS or a proxy in front. Decide before the first image is published. |
 | OQ-16 **answered 2026-09-05** | The HmIP switching programme's `NN_WP_WEEKDAY` bit mask: nothing in the descriptions or `data/dist` says which bit is which weekday. Task 10 took bit 0 = Sunday from the documented HmIP weekday enums (BidCos enums start at Saturday) and always prints the raw mask beside the checkboxes. | **Bit 0 is Sunday; the editor was right.** Measured in task 17's lab pass against the CCU's own weekly-programme dialog, which is byte-identical on both firmwares and gives every weekday checkbox its bit value: Sun 1, Mon 2, Tue 4, Wed 8, Thu 16, Fri 32, Sat 64, all seven 127. Recorded as **A-17** in `packages/core/ASSUMPTIONS.md`, in the editor's comment and in a test; the run is in `docs/hardware-checklist.md`. No device was written to. |
 

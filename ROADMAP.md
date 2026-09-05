@@ -80,6 +80,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [17. Beta cycle and 3.0 release](#17-beta-cycle-and-30-release) ✅ agent side (release waits on the maintainer)
 - [18. Addon login against ReGa](#18-addon-login-against-rega) ✅ (lab check pending)
 - [19. UI polish after the first look](#19-ui-polish-after-the-first-look) ✅
+- [20. UI second look](#20-ui-second-look)
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
 
@@ -128,6 +129,7 @@ Per task:
 | 17 Beta cycle and 3.0 release | 5-8 | all of M2/M3 |
 | 18 Addon login against ReGa (D-32) | 2-3 | 12, 13 |
 | 19 UI polish after the first look (D-34) | 4-6 | 8, 10 |
+| 20 UI second look | 2-3 | 19 |
 
 ## 1. Legacy stopgap release 2.8 (dropped)
 
@@ -605,6 +607,23 @@ console round trip (ping → pong event) works, and five things to change:
   grows.
 
 Screenshots in `docs/` are retaken at the end; the README's images follow.
+
+## 20. UI second look
+
+The maintainer's second look at the dev build on the x86_64 lab box (2026-09-06, `3.0.0-dev.3`):
+
+- The per-column filter fields in the table header of the Devices, Radio and Links tabs are
+  superfluous: remove them (the toolbar's single filter box stays where a tab has one).
+- The toolbars that currently take space above the table header move into the table header row
+  itself, and so does the count on the right ("4 Geräte"): one header band per table with the
+  actions on the left, the count on the right, the column labels in the row beneath, no separate
+  toolbar strip.
+- Dialogs are movable (drag by the title bar) and resizable (drag the corner or edges) by the
+  user; the size still never changes on its own (task 19), a resized or moved dialog keeps its
+  geometry while open, and the position and size per dialog class are remembered for the session.
+  Minimum sizes keep the content usable, the viewport bounds the maximum.
+
+Tests in browser mode for the three points; screenshots retaken.
 
 ## Open questions
 

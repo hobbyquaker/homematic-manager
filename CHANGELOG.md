@@ -247,12 +247,6 @@ This is the change with the largest consequence, and it comes out of a measureme
   so whoever reaches the published port is in. This is still an open question (OQ-15) and
   [docs/install-docker.md](docs/install-docker.md) names three ways to lock it down; the warning line
   the recommendation asks for is not implemented yet.
-- **`VirtualDevices` fills the log.** On every lab CCU it answers `getServiceMessages` with
-  something that is not valid XML-RPC, and the service-message poll says so once a minute. Nothing
-  breaks — it is an `INFO` line — but on an idle CCU addon it is the only thing in the log.
-- **One `BidCos-Wired: init failed: Cannot call write after a stream was destroyed`** can appear
-  when the backend resubscribes after an idle unsubscribe (D-31) on an interface that is not
-  present. The back-off catches it a second later; the BIN-RPC client should reconnect instead.
 - **Nothing has ever been released and no workflow has ever run.** GitHub Actions is not enabled on
   the repository, so there is no CI run, no build artefact and no release to verify.
 - The **packaged desktop app has not been click-tested yet**: `app.whenReady()` never fires under

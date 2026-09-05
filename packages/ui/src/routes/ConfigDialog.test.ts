@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, waitFor} from '@testing-library/svelte';
+import {fireEvent, render, screen, waitFor, within} from '@testing-library/svelte';
 import {beforeEach, describe, expect, it} from 'vitest';
 
 import App from '../App.svelte';
@@ -131,7 +131,8 @@ describe('ConfigDialog', () => {
     it('keeps the backend untouched when it is cancelled', async () => {
         await open(transport);
         await fireEvent.input(screen.getByTestId('config-host'), {target: {value: 'somewhere-else'}});
-        await fireEvent.click(screen.getByText('Abbrechen'));
+        // RpcProgress carries a cancel button of its own, so the query is scoped to the dialog.
+        await fireEvent.click(within(screen.getByTestId('config-dialog')).getByText('Abbrechen'));
 
         await waitFor(() => expect(screen.queryByTestId('config-dialog')?.getAttribute('open')).toBeNull());
         expect(transport.countOf('config.set')).toBe(0);

@@ -169,7 +169,13 @@
         ondismiss={(id) => stores.notices.dismiss(id)}
     />
 
-    <RpcProgress progress={stores.writeLog.progress} title={t('RPC execution')} testId="rpc-progress" />
+    <RpcProgress
+        progress={stores.writeLog.progress}
+        title={t('RPC execution')}
+        cancelLabel={t('Cancel')}
+        testId="rpc-progress"
+        oncancel={() => void stores.writeLog.cancel()}
+    />
     <ConfigDialog bind:open={app.configDialogOpen} />
     <AboutDialog bind:open={aboutOpen} />
     <Loader visible={app.loading} text={t('Loading Homematic Manager...')} testId="loader" />

@@ -165,6 +165,18 @@
                 <input type="checkbox" bind:checked={draft.tls} />
             </label>
 
+            <!--
+                BIN-RPC is the faster of the two protocols where rfd and hs485d offer both, and it
+                cannot carry TLS - so the box is off the table as soon as TLS is on. `local`, the
+                other new flag of the contract, is deliberately not here: the addon sets it for its
+                own environment and a desktop user toggling it would just break their connection.
+            -->
+            <label class="hmm-config-row">
+                <span>{t('Prefer BIN-RPC')}</span>
+                <input type="checkbox" bind:checked={draft.binrpc} disabled={draft.tls} />
+                <small>{t('Faster; not available with TLS')}</small>
+            </label>
+
             <label class="hmm-config-row">
                 <span>{t('Use Auth')}</span>
                 <input type="checkbox" bind:checked={useAuth} />

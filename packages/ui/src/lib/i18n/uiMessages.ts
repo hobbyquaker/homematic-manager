@@ -52,6 +52,11 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Callback XML-RPC port': {de: 'Callback-Port XML-RPC', en: 'Callback XML-RPC port'},
     'Callback BIN-RPC port': {de: 'Callback-Port BIN-RPC', en: 'Callback BIN-RPC port'},
     'Use TLS': {de: 'TLS verwenden', en: 'Use TLS'},
+    'Prefer BIN-RPC': {de: 'BIN-RPC bevorzugen', en: 'Prefer BIN-RPC'},
+    'Faster; not available with TLS': {
+        de: 'Schneller; mit TLS nicht möglich',
+        en: 'Faster; not available with TLS',
+    },
     'Use Auth': {de: 'Authentifizierung verwenden', en: 'Use Auth'},
     'Auth User': {de: 'Benutzer', en: 'Auth User'},
     'Auth Pass': {de: 'Passwort', en: 'Auth Pass'},

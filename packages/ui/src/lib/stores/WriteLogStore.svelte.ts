@@ -93,6 +93,20 @@ export class WriteLogStore {
         }
     }
 
+    /**
+     * Cancels the running bulk write. Task 6 item 4 wants a bulk operation to be stoppable; the
+     * backend answers with how many targets it dropped, and the progress event that follows closes
+     * the modal.
+     */
+    async cancel(interfaceName?: string): Promise<number> {
+        try {
+            return await this.#transport.request('write.cancel', interfaceName);
+        } catch (error) {
+            this.#notices.fromError(error, 'write.cancel');
+            return 0;
+        }
+    }
+
     async clear(): Promise<void> {
         this.entries = [];
         try {

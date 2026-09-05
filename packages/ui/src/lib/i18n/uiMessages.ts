@@ -26,6 +26,9 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Not present': {de: 'Nicht vorhanden', en: 'Not present'},
     Subscribing: {de: 'Anmeldung läuft', en: 'Subscribing'},
     'Pending changes': {de: 'Offene Änderungen', en: 'Pending changes'},
+    // D-32: shown only where the host has a login at all - the CCU addon in --auth-mode rega
+    'Logged in as {user}': {de: 'Angemeldet als {user}', en: 'Logged in as {user}'},
+    'Log out': {de: 'Abmelden', en: 'Log out'},
     Team: {de: 'Team', en: 'Team'},
     'Own team': {de: 'Eigenes Team', en: 'Own team'},
     Members: {de: 'Mitglieder', en: 'Members'},

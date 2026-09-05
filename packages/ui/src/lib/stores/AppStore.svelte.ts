@@ -1,4 +1,4 @@
-import type {AppConfig, ConnectionConfig, Language, Transport} from '@homematic-manager/core';
+import type {AppConfig, ConnectionConfig, Language, SessionInfo, Transport} from '@homematic-manager/core';
 
 import type {NoticesStore} from './NoticesStore.svelte.js';
 import {DEFAULT_TAB, formatHash, parseHash, type TabId} from './routing.js';
@@ -76,6 +76,15 @@ export class AppStore {
     linksFilter = $state('');
     language = $state<Language>('de');
     theme = $state<ThemeChoice>('system');
+    /**
+     * D-32: who is logged in, where the host has a login at all.
+     *
+     * `null` everywhere else - Electron, the npm install, Docker, the demo and the CCU addon in
+     * its default token mode - and the header then shows neither a user nor a logout link. Read
+     * once at start-up: a session cannot change while the page is open, only end, and the socket
+     * closing is what shows that.
+     */
+    session = $state<SessionInfo | null>(null);
     /** Open state of the settings dialog; opened automatically when no host is configured. */
     configDialogOpen = $state(false);
     /** Open state of the RPC log drawer that replaces the modal `dialog-rpc` of 2.x. */
@@ -179,6 +188,21 @@ export class AppStore {
             this.#notices.fromError(error, 'config.get');
         } finally {
             this.loading = false;
+        }
+        await this.loadSession();
+    }
+
+    /**
+     * D-32: asks the transport who is logged in.
+     *
+     * Its own try/catch and no notice: a host that does not know the method is simply one without
+     * a login, and an error toast about a feature the user has not switched on would be noise.
+     */
+    async loadSession(): Promise<void> {
+        try {
+            this.session = await this.#transport.request('session.info');
+        } catch {
+            this.session = null;
         }
     }
 

@@ -122,6 +122,20 @@
         />
 
         <div class="hmm-header-actions">
+            {#if app.session}
+                <!--
+                    D-32: only the CCU addon with `--auth-mode rega` ever has a session, and only
+                    then are these two here at all. The link is relative to the page's own
+                    directory, exactly like the API socket, so it works at `/` and under
+                    `/addons/hmm/` without knowing either.
+                -->
+                <span
+                    class="hmm-header-user"
+                    data-testid="session-user"
+                    title={t('Logged in as {user}', {user: app.session.user})}>{app.session.user}</span
+                >
+                <a class="hmm-header-logout" href="logout" data-testid="session-logout">{t('Log out')}</a>
+            {/if}
             {#if stores.changeSet.count > 0}
                 <!--
                     Issue #124: the staged changes are only useful if it is impossible to forget
@@ -255,6 +269,19 @@
         align-items: center;
         gap: 4px;
         margin-left: auto;
+    }
+
+    .hmm-header-user {
+        color: var(--hmm-fg-muted);
+        max-width: 12em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .hmm-header-logout {
+        color: var(--hmm-link);
+        margin-right: 4px;
     }
 
     .hmm-main {

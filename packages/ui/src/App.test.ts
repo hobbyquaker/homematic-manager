@@ -256,4 +256,30 @@ describe('App shell', () => {
         await fireEvent.click(screen.getByTestId('devices-refresh'));
         await waitFor(() => expect(transport.lastCall('devices.list')).toEqual(['BidCos-RF', {refresh: true}]));
     });
+
+    it('shows neither a user nor a logout link where the host has no login (D-32)', async () => {
+        const {stores} = await mountApp(transport);
+        expect(stores.app.session).toBeNull();
+        expect(screen.queryByTestId('session-user')).toBeNull();
+        expect(screen.queryByTestId('session-logout')).toBeNull();
+    });
+
+    it('shows the user and a logout link when there is a session (D-32)', async () => {
+        transport.result('session.info', {user: 'Admin', level: 8});
+        const {stores} = await mountApp(transport);
+        expect(stores.app.session).toEqual({user: 'Admin', level: 8});
+        expect(screen.getByTestId('session-user').textContent).toBe('Admin');
+        const logout = screen.getByTestId('session-logout');
+        expect(logout.textContent).toBe('Abmelden');
+        // relative to the page's own directory, like the api socket - so it is right at `/` and
+        // under `/addons/hmm/` alike
+        expect(logout.getAttribute('href')).toBe('logout');
+    });
+
+    it('degrades to no session when the host does not know the method at all', async () => {
+        transport.fail('session.info', {message: 'unknown API method', kind: 'config'});
+        const {stores} = await mountApp(transport);
+        expect(stores.app.session).toBeNull();
+        expect(stores.notices.items).toHaveLength(0);
+    });
 });

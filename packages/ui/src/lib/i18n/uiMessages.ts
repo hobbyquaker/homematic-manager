@@ -200,6 +200,10 @@ export const UI_MESSAGES: MessageCatalogue = {
     // The radio tab.
     Peer: {de: 'Gegenstelle', en: 'Peer'},
     'Heard best by {address}': {de: 'Am besten empfangen von {address}', en: 'Heard best by {address}'},
+
+    // The RPC console.
+    History: {de: 'Verlauf', en: 'History'},
+    optional: {de: 'optional', en: 'optional'},
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

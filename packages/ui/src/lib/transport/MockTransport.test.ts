@@ -157,7 +157,7 @@ describe('MockTransport', () => {
             await expect(transport.request('events.clear')).resolves.toBeNull();
             await expect(transport.request('writeLog.list')).resolves.toHaveLength(2);
             await expect(transport.request('writeLog.clear')).resolves.toBeNull();
-            await expect(transport.request('rpc.methods', 'BidCos-RF')).resolves.toHaveLength(4);
+            await expect(transport.request('rpc.methods', 'BidCos-RF')).resolves.toHaveLength(7);
         });
     });
 });

@@ -20,6 +20,10 @@ export * from './lib/stores/index.js';
 export * from './lib/i18n/index.js';
 export * from './lib/components/index.js';
 export * from './lib/util/format.js';
+export * from './lib/util/deviceGrid.js';
+export * from './lib/util/paramsetForm.js';
+export * from './lib/util/linkForm.js';
+export * from './lib/util/rpcForm.js';
 
 export {default as AboutDialog} from './routes/AboutDialog.svelte';
 export {default as ConfigDialog} from './routes/ConfigDialog.svelte';

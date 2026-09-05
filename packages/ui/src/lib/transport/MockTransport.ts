@@ -206,6 +206,7 @@ export class MockTransport implements Transport {
         this.result('writeLog.list', DEMO_WRITE_LOG);
         this.result('writeLog.clear', null);
         this.result('rpc.methods', DEMO_RPC_METHODS);
+        this.respond('rpc.call', (_interfaceName, method, params) => ({method, params}));
         this.respond('paramset.description', (_interfaceName, address, paramset) => demoDescription(address, paramset));
         this.respond('paramset.get', (_interfaceName, address, paramset) => demoParamset(address, paramset));
         this.respond('paramset.put', (interfaceName, addresses, paramset, values) =>

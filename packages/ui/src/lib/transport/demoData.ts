@@ -728,6 +728,24 @@ export const DEMO_RPC_METHODS: RpcMethodInfo[] = [
         ],
     },
     {name: 'rssiInfo', help: 'Returns the RSSI matrix.', params: []},
+    {
+        name: 'putParamset',
+        help: 'Writes a paramset of a device or channel.',
+        params: [
+            {name: 'address', type: 'String'},
+            {name: 'paramsetKey', type: 'String', values: ['MASTER', 'VALUES']},
+            {name: 'set', type: 'Struct'},
+        ],
+    },
+    {
+        name: 'deleteDevice',
+        help: 'Removes a device from the interface process.',
+        params: [
+            {name: 'address', type: 'String'},
+            {name: 'flags', type: 'Integer'},
+        ],
+    },
+    {name: 'listBidcosInterfaces', help: 'Returns the BidCos interfaces.', params: []},
 ];
 
 /** Events the demo mode fires on a timer so the events tab moves without a CCU. */

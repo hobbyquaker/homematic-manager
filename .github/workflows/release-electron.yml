@@ -24,6 +24,10 @@ on:
 
 permissions:
   contents: write
+  # D-27: `actions/attest-sbom` and `actions/attest-build-provenance` sign through Sigstore with
+  # the job's OIDC token and store the result as a repository attestation.
+  id-token: write
+  attestations: write
 
 concurrency:
   # Per tag, not per branch: two runs for the same tag would race on the same assets.
@@ -43,24 +47,35 @@ jobs:
           - name: macOS (universal)
             os: macos-latest
             target: --mac
+            installers: |
+              apps/electron/dist-electron/*.dmg
+              apps/electron/dist-electron/*.zip
             assets: |
               apps/electron/dist-electron/*.dmg
               apps/electron/dist-electron/*.zip
               apps/electron/dist-electron/*.blockmap
+              apps/electron/dist-electron/*.cdx.json
               apps/electron/dist-electron/latest-mac.yml
           - name: Windows (x64, arm64)
             os: windows-latest
             target: --win
+            installers: |
+              apps/electron/dist-electron/*.exe
             assets: |
               apps/electron/dist-electron/*.exe
               apps/electron/dist-electron/*.blockmap
+              apps/electron/dist-electron/*.cdx.json
               apps/electron/dist-electron/latest.yml
           - name: Linux (x64, arm64)
             os: ubuntu-latest
             target: --linux
+            installers: |
+              apps/electron/dist-electron/*.AppImage
+              apps/electron/dist-electron/*.deb
             assets: |
               apps/electron/dist-electron/*.AppImage
               apps/electron/dist-electron/*.deb
+              apps/electron/dist-electron/*.cdx.json
               apps/electron/dist-electron/latest-linux*.yml
 
     env:
@@ -115,6 +130,10 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: false
         run: npx electron-builder ${{ matrix.target }} --publish never
 
+      - name: SBOM per installer (D-27)
+        working-directory: apps/electron
+        run: npm run sbom
+
       # TODO (D-9): Windows signing through SignPath, once the OSS project application is
       # accepted. Until then the Windows assets are unsigned and SmartScreen warns on first run;
       # apps/electron/README.md documents the "More info -> Run anyway" workaround.
@@ -131,6 +150,25 @@ jobs:
       #     github-artifact-id: ${{ steps.stage.outputs.artifact-id }}
       #     wait-for-completion: true
       #     output-artifact-directory: apps/electron/dist-electron
+
+      # D-27: both attestations are made before the assets are attached, so that a release never
+      # carries an installer whose provenance could not be signed. `gh attestation verify <file>
+      # --repo hobbyquaker/homematic-manager` checks either of them, offline, against a downloaded
+      # installer.
+      - name: Attest the build provenance
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: ${{ matrix.installers }}
+
+      - name: Attest the SBOM
+        uses: actions/attest-sbom@v3
+        with:
+          subject-path: ${{ matrix.installers }}
+          # The shared SBOM, not a per-installer one: the action takes many subjects and a single
+          # SBOM file, and attaching one whose `metadata.component` names a different installer to
+          # every artefact would be a false statement. This one names the application, which is
+          # true of all of them; the per-installer files go along as release assets.
+          sbom-path: apps/electron/dist-electron/sbom.cdx.json
 
       # Idempotent by design: the action creates the draft release when it is not there yet and
       # only adds the files when it is, so all three OS jobs - and all three workflows of D-24 -

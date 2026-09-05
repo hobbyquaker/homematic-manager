@@ -40,12 +40,14 @@ jobs:
             artifacts: |
               apps/electron/dist-electron/*.dmg
               apps/electron/dist-electron/*.zip
+              apps/electron/dist-electron/*.cdx.json
               apps/electron/dist-electron/latest-mac.yml
           - name: Windows (x64, arm64)
             os: windows-latest
             target: --win
             artifacts: |
               apps/electron/dist-electron/*.exe
+              apps/electron/dist-electron/*.cdx.json
               apps/electron/dist-electron/latest.yml
           - name: Linux (x64, arm64)
             os: ubuntu-latest
@@ -53,6 +55,7 @@ jobs:
             artifacts: |
               apps/electron/dist-electron/*.AppImage
               apps/electron/dist-electron/*.deb
+              apps/electron/dist-electron/*.cdx.json
               apps/electron/dist-electron/latest-linux*.yml
 
     env:
@@ -115,6 +118,13 @@ jobs:
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
         run: npx electron-builder ${{ matrix.target }} --publish never
+
+      # D-27. The script fails when the SBOM has too few components or no Electron in it, which is
+      # why it runs on every push build and not only on a tag: a broken SBOM step has to be found
+      # before someone cuts a release with it.
+      - name: SBOM per installer
+        working-directory: apps/electron
+        run: npm run sbom
 
       # TODO (D-9): Windows signing through SignPath, once the OSS project application is
       # accepted. The step is left here rather than in a note because the shape of it decides

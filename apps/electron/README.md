@@ -149,6 +149,42 @@ lists them, but Electron 44 publishes `linux-x64` and `linux-arm64` only - there
 binary to package. A 32-bit ARM machine can run the CCU addon (task 13) or the npm package
 (`apps/web`, D-24) instead; both are plain Node.
 
+## SBOMs (D-27)
+
+Every installer gets a CycloneDX 1.6 SBOM next to it, `<installer>.cdx.json`:
+
+```sh
+npm run dist -w @homematic-manager/electron
+npm run sbom -w @homematic-manager/electron
+```
+
+`@cyclonedx/cyclonedx-npm` describes the npm half - the production dependency tree of this
+workspace, from the lock file, roughly twenty components. That is a fifth of what is actually
+shipped, so `scripts/sbom.mjs` adds what is not an npm dependency:
+
+- **electron**, **chromium**, **node** and **v8**, as four separate components with the versions
+  the target Electron reports about itself (it is started with `ELECTRON_RUN_AS_NODE=1`, which
+  needs no display). Separate on purpose: a CVE feed is searched for "chromium 152", not for
+  "electron 44".
+- **the packaging tools electron-builder downloaded** for this build - the AppImage runtime, the
+  NSIS toolchain, 7za - read out of its own cache, because whatever is in there is what went in.
+- **the installer itself** as `metadata.component`, with its SHA-512, so the file is about one
+  artefact rather than about "the project".
+
+The script fails when the SBOM has fewer components than a floor or no Electron runtime in it, and
+it runs on every push build, so a broken SBOM is found before a tag rather than during a release.
+
+On a release the assets are attested with `actions/attest-build-provenance` and
+`actions/attest-sbom`, which anyone can check offline against a downloaded file:
+
+```sh
+gh attestation verify 'Homematic Manager-3.0.0.AppImage' --repo hobbyquaker/homematic-manager
+```
+
+The attestation uses `sbom.cdx.json`, a copy without the per-installer `metadata.component`: the
+action takes many subjects but one SBOM file, and attaching one that names a *different* installer
+to every artefact would be a false statement.
+
 ## Signing (D-9)
 
 - **macOS**: the release and build workflows sign and notarise when `APPLE_ID`,

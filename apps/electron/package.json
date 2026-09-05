@@ -19,12 +19,14 @@
     "dev": "electron-vite dev",
     "start": "electron-vite preview",
     "typecheck": "svelte-check --tsconfig ./tsconfig.renderer.json",
+    "sbom": "node scripts/sbom.mjs",
     "dist": "electron-builder --publish never",
     "dist:linux": "electron-builder --linux --publish never",
     "dist:mac": "electron-builder --mac --publish never",
     "dist:win": "electron-builder --win --publish never"
   },
   "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "^4.2.1",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "electron": "44.2.0",
     "electron-builder": "^26.15.3",

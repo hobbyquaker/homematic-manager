@@ -67,6 +67,11 @@ Measured: backend + web 532 passed, 35 skipped; images built locally with qemu: 
 arm64 59.7 MB, arm/v7 55.2 MB; a real amd64 run issues the cookie, refuses an upgrade without the
 token (401), accepts one with it (101), writes into `/data` as uid 1000 and stops on SIGTERM.
 
+Erratum (task 13, on hardware): the image chain asked the CCU's `50/` directory for plain file
+names; that directory holds the WebUI thumbnails with a `_thumb` suffix and the plain names live
+in `250/`, so no picture ever came from the CCU until `405f108` walked `250/<file>`,
+`250/coupling/<file>`, `50/<base>_thumb<ext>`, `50/<file>`.
+
 Found: `npm install -g` of the task 12 tarball was broken (`6746180`): the bundled workspace
 manifests repeated their registry dependencies, npm treated those as part of the bundle and
 created five empty directories, and the bin died on `ws`; a local `npm install` hoists and hides

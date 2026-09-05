@@ -24,16 +24,14 @@ about every half hour while the agent works; the timestamp above is the last ref
   foundation), 9 (data pipeline), 11 (Electron host; `build.yml` builds the desktop artifacts on
   every push to `3.0-dev` once Actions is enabled), 12 (web host, npm package with `--install`,
   `release-npm.yml`, Docker image, compose, proxy docs, `release-docker.yml`), 8 (UI feature
-  parity: every 2.7 tab in `packages/ui`, 445 component tests, browser mode green), 6 (lab study: `docs/config-pending.md`,
+  parity: every 2.7 tab in `packages/ui`, 445 component tests, browser mode green), 13 (CCU
+  addon: three packages, container replay, all three lab boxes checked; the Charly runs the
+  addon now, pre-image-fix build), 6 (lab study: `docs/config-pending.md`,
   `devices.repairConfig`, hm-simulator calibrated; M1 complete). Lab state after the study is in
   the private lab note (one DRS8 channel poisoned on purpose, needs re-pairing). Workspace was green at the last full run: 73 test files,
   1082 tests, `npm run lint`, `npm run typecheck`.
 - In progress by two background subagents (Opus), each committing distinct commits on
   `3.0-dev` in the shared working tree (each stages only its own files):
-  - **Task 13** CCU addon (started after task 6 landed): packages per architecture with the
-    bundled musl Node, tclsh CGIs, lighttpd WebSocket proxy rule, container tests, `addon.yml`
-    and `release-addon.yml`; then lab installs on the two OpenCCU boxes and, after messaging the
-    main session, one install on the Charly (CCU3 firmware, reboot).
   - **Task 14** test infrastructure (started after task 8 landed): Playwright in CI, browser
     mode as the default for component tests (D-23), e2e suites against the web host + simulator,
     Electron smoke per OS, coverage merge and report, `strictTypeChecked` lint for `packages/ui`,
@@ -58,14 +56,14 @@ about every half hour while the agent works; the timestamp above is the last ref
 
 ## Next steps, in order
 
-1. When tasks 13, 14 and 10 finish: verify (`npm run lint && npm run typecheck && npm test` in WSL,
+1. When tasks 14 and 10 finish: verify (`npm run lint && npm run typecheck && npm test` in WSL,
    with the simulator installed), write `roadmap-archive/task-{6,11,12}.md`, tick them in the
    ROADMAP Contents, update the status line at the top of ROADMAP.md, commit, push `3.0-dev`
    (task 11 is archived and pushed already: `69cab48`).
-2. After 13/14/10: tasks 15 (backlog features), 16 (docs), 17 (beta). The first Electron
+2. After 14/10: tasks 15 (backlog features), 16 (docs), 17 (beta). The first Electron
    click-through and the first dev bump (`npm run version:dev`, D-18) happen as soon as the
    maintainer enables Actions and a `build.yml` run has produced the Windows artifact.
-3. Task 13 is running (see above); task 14 (test infra, Playwright in
+3. Task 13 is done; task 14 (test infra, Playwright in
    CI, browser mode default) after 8/11/12; then 10, 15, 16, 17.
 4. Bump `npm run version:dev` when a dev build is cut for the maintainer (D-18).
 

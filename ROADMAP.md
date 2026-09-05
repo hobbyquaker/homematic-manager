@@ -15,7 +15,7 @@ Status 2026-09-05: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 
 version `3.0.0-dev.0` on branch `3.0-dev` (pushed, D-21); tasks 7 (UI foundation) and 11 (Electron
 host with the build and release workflows) and 12 (web host and npm package; its Docker part runs
 as a follow-up, also done) are done too, and so is task 6 (write-safety lab study, `docs/config-pending.md`):
-milestone M1 is complete. Task 8 (UI feature parity) is done as well; task 13 (CCU addon) is in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
+milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon, installed and checked on all three lab boxes) are done as well: milestones M2 and M4 are reached in the code. Tasks 14 (test infrastructure) and 10 (device-specific editors) are in progress. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
 
 ## Decisions
@@ -51,6 +51,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 | D-27 | (2026-09-05) Every release artefact ships with an SBOM: CycloneDX 1.6 JSON named `<artefact>.cdx.json` next to the artefact (GitHub release asset for the Electron installers and the addon packages, `sbom` attestation on the ghcr.io image, npm provenance plus the SBOM attached to the release for the npm package), and each one is signed as a GitHub artifact attestation (`actions/attest-sbom`, `actions/attest-build-provenance`) so `gh attestation verify` works offline against the repository. The SBOM lists what is really inside the artefact, including the runtime that is not an npm dependency (Electron and its Chromium, the bundled Node and the Alpine packages of the addon, the base image of the Docker build), so a CVE in one of them is searchable per release. Generated on every push build too, so a broken SBOM step fails before a tag. |
 | D-28 | (2026-09-05, maintainer correction) BIN-RPC exists on a CCU's loopback only: rfd and hs485d take it on 32001/32000, the public ports 2001/2000 (and 42001/42000) are lighttpd's XML-RPC proxies, and no CCU listens for BIN-RPC on the LAN. Off the CCU (Electron, npm, Docker) every built-in interface is XML-RPC; BIN-RPC is used by the addon in local mode (D-5) and for CUxD, which is its own daemon with its own BIN-RPC listener on 8701 (2.x did the same). The "prefer BIN-RPC" option that tasks 4 and 7 had added to the contract, the config store and the settings dialog is removed; a user-defined interface (D-13) may still declare `binrpc` for a non-CCU peer. The simulator's rfd BIN-RPC port stands for the CCU-local case in tests (the backend harness runs in local mode); an XML-RPC listener for rfd in hm-simulator, the lighttpd view, is a task 14 follow-up so the remote path is tested as well. |
 | D-29 | (2026-09-05) The npm deliverable bundles the workspace packages (`bundleDependencies` materialised at `prepack`, removed at `postpack`); `@homematic-manager/core`, `backend`, `ui` and `data` are not published separately. Their APIs are internal and one version-locked tarball cannot produce a mismatched tree. If a second consumer of the core ever appears (D-11, shared cast library), that is the moment to publish `core` on its own. |
+| D-30 | (2026-09-05, answers OQ-13) `data/dist` ships minified, not pre-gzipped, in the addon, the npm tarball and the Docker image: pretty-printed 9.6 MB, minified 7.4 MB, gzipped 0.6 MB, but all three cost the same 199 inodes on the CCU3 (the scarce resource), the download differs by 50 KB, and pre-gzip would need a `Content-Encoding` branch in the shared static server. Measured by task 13. |
 
 ## Contents
 
@@ -67,7 +68,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [10. Device-specific editors](#10-device-specific-editors)
 - [11. Electron host, builds, releases](#11-electron-host-builds-releases) ✅
 - [12. Web host for development and e2e](#12-web-host-for-development-and-e2e) ✅
-- [13. CCU addon](#13-ccu-addon)
+- [13. CCU addon](#13-ccu-addon) ✅
 - [14. Test infrastructure and coverage gates](#14-test-infrastructure-and-coverage-gates)
 - [15. Backlog features from the triage](#15-backlog-features-from-the-triage)
 - [16. Documentation](#16-documentation)
@@ -385,6 +386,10 @@ Server install types (D-25), all on top of that package:
 
 ## 13. CCU addon
 
+Done 2026-09-05, report in `roadmap-archive/task-13.md`: packages for the three architectures,
+container replay of `install_addon`, installed and checked on the two OpenCCU boxes and the
+CCU3-firmware box (single reboot install). OQ-13 answered (D-30).
+
 Copied from hm2mqtt.js's `addon/` and the ccu-addon-howto, adapted:
 
 - Package per architecture (armv7l, aarch64, x86_64): bundled musl Node 24 (`build-runtime.sh`,
@@ -445,6 +450,13 @@ Copied from hm2mqtt.js's `addon/` and the ccu-addon-howto, adapted:
 
 ## 15. Backlog features from the triage
 
+Found by task 13 on hardware, for this task: `data/scripts/icons-from-ccu.mjs` still asks the
+CCU's thumbnail directory (`50/<file>`) for plain names that live in `250/`; BidCos-Wired in the
+default interface list retries `init` every 15 s with an error line on a CCU without a wired
+gateway (probe once, then back off, or drop it from the default list when the port refuses);
+`apps/web` logs a supplied token at `info` (should be `debug`); the addon's Node binaries are not
+stripped (14 % on x86_64, needs cross binutils for arm).
+
 From section 10 of the analysis, after parity: staged changes with one Apply (#124), multi-delete
 links (#80), per-pair names in multi-links (#87), defective-link display (#79), best-interface
 auto-assignment (#69), `STICKY_UNREACH` auto-ack and unreach counters (#26), links from the
@@ -491,7 +503,6 @@ devices from his own stock) and OQ-9 (the Turkish translations stay as a fallbac
 | | Question | Recommendation |
 | --- | --- | --- |
 | OQ-12 | When to move to TypeScript 7 (native) and vite 8? Blocked today by typescript-eslint 8, svelte-check 4 and electron-vite 5 peer ranges. | Recurring "toolchain bump" check next to the quarterly Electron bump of task 11; bump when all three peers allow it. |
-| OQ-13 | `data/dist/` is 9.2 MB of pretty-printed JSON (65 profile files). Ship it gzipped or minified in the CCU addon and the Electron bundle? | Task 13 measures it on the CCU3 (inodes and flash); the apps load profiles lazily per receiver type either way. Decide there. |
 | OQ-14 | npm name for the web host package (D-24): reuse `homematic-manager` (the 2.x name on npm, which installed the Electron app through `npm i -g`; its users would get the server instead) or a new `homematic-manager-web` / `@homematic-manager/web` (the workspace scope is free on npm to check). The tarball is otherwise ready (task 12). | Reuse `homematic-manager`: the `npm i -g` audience of 2.x wanted a headless install anyway, and the Electron app was never a sensible npm install. Announce in the 3.0 changelog. Decide before the first alpha is tagged. |
 | OQ-15 | The Docker image sets `HMM_ISSUE_COOKIE=true` because a container never binds loopback and the UI's socket would otherwise be refused on every load; the consequence is that whoever reaches the published port is in. Keep that default (UI works out of the box, `docs/install-docker.md` names three ways to lock it down), or ship an image whose UI refuses until the user has read the page? | Keep it, and print a one-line warning at start when the cookie is issued on a non-loopback bind without TLS or a proxy in front. Decide before the first image is published. |
 

@@ -97,6 +97,31 @@ jobs:
 
       - run: npm run build
 
+      # The nine assertions of apps/electron/test/e2e/README.md against a real Electron, per OS.
+      # This is the only place they can run: Electron does not start under WSL (`app.whenReady()`
+      # never fires there), so the development machine cannot execute them at all, and a headless
+      # Linux runner needs a display server. They run against the freshly built `out/`, before
+      # packaging, so a broken preload or a dead IPC bridge fails here and not in an installer
+      # somebody downloaded. `_electron` brings its own Electron - no `playwright install` needed.
+      - name: Electron smoke test (Linux, under Xvfb)
+        if: matrix.os == 'ubuntu-latest'
+        run: xvfb-run -a npx playwright test --project=electron
+
+      - name: Electron smoke test
+        if: matrix.os != 'ubuntu-latest'
+        run: npx playwright test --project=electron
+
+      - name: The traces of a failed smoke test
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: electron-smoke-${{ runner.os }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
       # Apple code signing and notarisation (D-9). Without the secrets the build is unsigned and
       # says so in the artifact name of nothing at all - it simply is not signed, which is what a
       # fork or a pull request gets. CSC_IDENTITY_AUTO_DISCOVERY=false stops electron-builder from

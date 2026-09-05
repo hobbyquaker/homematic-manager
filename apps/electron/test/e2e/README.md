@@ -1,8 +1,13 @@
-# End-to-end tests of the Electron app (task 14)
+# End-to-end tests of the Electron app
 
-Nothing runs here yet. Task 11 built the host and its unit tests; task 14 owns the test
-infrastructure, and this directory is where its Playwright `_electron` suites go, per OS. This file
-describes what they have to cover so that whoever writes them does not have to rediscover it.
+`smoke.spec.ts` implements the nine assertions below. It is run by `npm run test:e2e:electron`
+(`playwright.config.ts`, project `electron`) and in `build.yml`, on each OS of the build matrix,
+right after the app is built and before it is packaged.
+
+**It has never run on the development machine.** Electron does not start under WSL - `app.whenReady()`
+never fires there, which the agent for task 11 measured - so the file is written from the host's
+sources and from this document, and CI is where it is first executed. A failure on the first run is
+therefore a failure of the test, not necessarily of the app; read it that way.
 
 ## Why Playwright and not vitest
 
@@ -59,6 +64,17 @@ Two things it must set, or the tests will be flaky in ways that are hard to read
    window comes back the same size.
 9. **Quitting is clean**: the app exits by itself within the stop timeout, and the exit code is 0 -
    the regression test for 2.x's `process.exit(1)` on a second `stop()`.
+
+## Deviations of the implementation from this list
+
+- Assertion 6 uses `HM-CC-RT-DN` rather than `HmIP-BSM`. The bundled webp subset of D-10 is 121
+  files and every one of them is a BidCos type; an HmIP picture only ever comes from a connected
+  CCU, so `hmm-image://device/HmIP-BSM` is a 404 on a machine that has never talked to one.
+- Assertion 3 uses `interfaces.reconnect`, which throws `configError('not connected to a CCU')` on
+  a profile that has never connected. It is the cheapest deterministic refusal the backend has.
+- Assertion 4 triggers its notice by pointing the configuration at `127.0.0.1`, where nothing
+  listens on 2001: the connection fails at once with ECONNREFUSED, and a connection that cannot be
+  made is a notice and never a throw (D-2).
 
 ## What cannot be tested here
 

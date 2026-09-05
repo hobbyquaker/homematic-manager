@@ -441,7 +441,7 @@
       },
       {
         "id": 3,
-        "key": "profile_3",
+        "key": "switch_on_off",
         "name": {"de": "Zeige - ein / aus", "en": "Show - on / off"},
         "description": {},
         "params": {
@@ -484,8 +484,8 @@
       },
       {
         "id": 4,
-        "key": "profile_4",
-        "name": {"de": "Treppenhauslicht", "en": "Staircase light"},
+        "key": "light_stairway",
+        "name": {"de": "Treppenhauslicht", "en": "Staircase light", "tr": "Merdiven boslugu isigi"},
         "description": {},
         "params": {
           "LONG_ACTION_TYPE": {"kind": "fixed", "value": 1},

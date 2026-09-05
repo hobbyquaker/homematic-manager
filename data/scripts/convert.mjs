@@ -24,7 +24,7 @@ import {existsSync, readFileSync, readdirSync} from 'node:fs';
 import path from 'node:path';
 
 import {toConstraint} from './lib/constraints.mjs';
-import {hasLegacy, legacyEasymodesDir, legacyLocalization, legacyReceiverTypes} from './lib/legacy.mjs';
+import {hasLegacy, legacyEasymodesDir, legacyLocalization, legacyProfiles, legacyReceiverTypes} from './lib/legacy.mjs';
 import {distDir, readSources, readUpstreamJson, removeDir, sha256, sortKeys, upstreamDir} from './lib/paths.mjs';
 import {CROSS_VALIDATION_MESSAGES, identifierKey, labelKey, mergeMap, valueKey} from './lib/translations.mjs';
 import {writeJson} from './lib/write-json.mjs';
@@ -124,6 +124,21 @@ if (hasLegacy()) {
 /** Turkish profile names: the 2.x code looked the profile's name key up in GENERIC.json. */
 const legacyGeneric = Object.fromEntries(LANGUAGES.map((l) => [l, legacyLocalization(l, 'GENERIC') ?? {}]));
 
+/** The 2.x profile files, the fallback for the name key of profiles `easymode_extract` does not have. */
+const legacyKeys = new Map();
+if (hasLegacy()) {
+    for (const receiverType of legacyReceiverTypes()) {
+        for (const [senderType, byId] of Object.entries(legacyProfiles(receiverType))) {
+            for (const [id, profile] of Object.entries(byId)) {
+                // A few 2.x keys are unevaluated Tcl (`dimmer_on} / \${light_stairway`); ignore those.
+                if (typeof profile.name === 'string' && /^[a-z][\w]*$/iu.test(profile.name)) {
+                    legacyKeys.set(`${receiverType}/${senderType}#${id}`, profile.name);
+                }
+            }
+        }
+    }
+}
+
 /** @param {Record<string, string|undefined>} candidates */
 function localized(candidates) {
     /** @type {Record<string, string>} */
@@ -183,7 +198,7 @@ for (const receiverType of receiverTypes) {
         for (const id of [...byId.keys()].sort((a, b) => a - b)) {
             const {easymode: e, profiles: p} = byId.get(id);
             const where = `${receiverType}/${senderType}#${id}`;
-            const key = e?.name_key ?? `profile_${id}`;
+            const key = e?.name_key ?? legacyKeys.get(where) ?? `profile_${id}`;
             if (!p) profilesFromEasymodeOnly += 1;
 
             const name = localized({

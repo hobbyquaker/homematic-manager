@@ -274,29 +274,17 @@ that `gh attestation verify` passes for each; a release with a missing SBOM is n
 
 ## Lab scripts
 
-`tools/lab/` holds scripts that talk to **real hardware**. They are run by hand from a shell, never
-from CI, and they are written so that nothing about the lab ends up in the repository:
+`tools/lab/` holds the scripts that talk to **real hardware**. They are run by hand from a shell,
+never from CI, and they are written so that nothing about the lab ends up in the repository: every
+host, alias, device address and credential comes from the command line or the environment, no script
+contains one, and the private lab note lives outside the repository. A script that grows a default
+host has a bug.
 
-- every host, alias, device address and credential comes from the **command line or the
-  environment**. No script contains one, and none may ever be committed — not in code, not in a
-  fixture, not in a commit message, not in an issue;
-- the private lab note lives **outside** the repository;
-- the scripts that write to devices have hard rails. `config-pending-study.mjs`, the repeatable
-  version of the task 6 study, refuses to run any provoking step before a `baseline` dump exists
-  (the dump is what `restore` writes back), writes only to the one `--device` it was given, refuses
-  the CCU's own central `HM-RCV-50` / `HmIP-RCV-50` channels outright, and has a `--dry-run` that
-  prints every call it would make and makes none. There is also a `--yes` gate.
-
-```sh
-node tools/lab/config-pending-study.mjs --host <ccu> --interface HmIP-RF \
-    --device ABC0000001 --channel 1 --out <dir> --ssh <ssh-alias> baseline
-```
-
-What that study measured, and what it did **not**, is in
-[docs/config-pending.md](docs/config-pending.md) and in
-[roadmap-archive/task-6.md](roadmap-archive/task-6.md). Read both before pointing any of this at a
-device you care about: one lab channel was poisoned on purpose and can only be recovered by
-re-pairing the device.
+What is there and how to run it is [tools/lab/README.md](tools/lab/README.md). Read
+[docs/config-pending.md](docs/config-pending.md) and
+[roadmap-archive/task-6.md](roadmap-archive/task-6.md) before pointing the write-path study at a
+device you care about: it provokes bad writes on purpose, and one lab channel was poisoned to the
+point where only re-pairing the device recovers it.
 
 ## Where the plan lives
 

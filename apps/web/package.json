@@ -1,16 +1,76 @@
 {
   "name": "@homematic-manager/web",
   "version": "3.0.0-dev.0",
-  "private": true,
   "type": "module",
-  "description": "Homematic Manager backend as a local HTTP/WebSocket server serving the built UI",
-  "license": "GPL-3.0-or-later",
+  "description": "Homematic Manager server: the backend as a local HTTP/WebSocket server serving the built web UI",
+  "keywords": [
+    "homematic",
+    "homematicip",
+    "ccu",
+    "ccu3",
+    "openccu",
+    "raspberrymatic",
+    "homegear",
+    "xmlrpc",
+    "smarthome"
+  ],
+  "license": "AGPL-3.0-or-later",
+  "author": "Sebastian 'hobbyquaker' Raff <hobbyquaker@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hobbyquaker/homematic-manager.git",
+    "directory": "apps/web"
+  },
+  "bugs": {
+    "url": "https://github.com/hobbyquaker/homematic-manager/issues"
+  },
+  "homepage": "https://github.com/hobbyquaker/homematic-manager",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "homematic-manager-web": "./dist/cli.js"
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "!dist/**/*.test.js",
+    "!dist/**/*.test.d.ts",
+    "ui",
+    "!ui/**/*.map",
+    "data",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=22.12"
   },
   "scripts": {
-    "build": "tsc -b"
-  }
+    "build": "tsc -b",
+    "dev": "npm run build && node dist/dev.js",
+    "start": "npm run build && node dist/cli.js",
+    "prepack": "node scripts/prepack.mjs",
+    "postpack": "node scripts/postpack.mjs",
+    "sbom": "node scripts/sbom.mjs"
+  },
+  "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "^4.2.1"
+  },
+  "dependencies": {
+    "@homematic-manager/backend": "3.0.0-dev.0",
+    "@homematic-manager/core": "3.0.0-dev.0",
+    "binrpc": "^4.2.0",
+    "homematic-rega": "^2.0.0",
+    "homematic-xmlrpc": "^2.0.0",
+    "ws": "^8.21.3"
+  },
+  "bundleDependencies": [
+    "@homematic-manager/backend",
+    "@homematic-manager/core"
+  ]
 }

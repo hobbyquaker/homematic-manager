@@ -44,3 +44,27 @@ jobs:
           name: coverage-node-${{ matrix.node }}
           path: coverage/
           if-no-files-found: error
+
+  npm-package:
+    # D-24: `apps/web` is published to npm as its own deliverable, and what goes into that tarball
+    # is decided by its `files` list plus `scripts/prepack.mjs` - neither of which any test touches.
+    # So the package is really packed on every push: a `files` entry that stopped matching, a
+    # missing built UI, or an SBOM step (D-27) that broke are found here and not at a tag.
+    name: npm package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm pack --dry-run -w apps/web
+      - name: SBOM of the tarball (D-27)
+        run: node apps/web/scripts/sbom.mjs --out /tmp/web.cdx.json
+      - uses: actions/upload-artifact@v7
+        with:
+          name: web-sbom
+          path: /tmp/web.cdx.json
+          if-no-files-found: error

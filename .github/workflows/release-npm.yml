@@ -1,0 +1,114 @@
+name: Release (npm package)
+
+# One of the three independent release pipelines of D-24. This one publishes `apps/web` - the
+# Homematic Manager server: the backend as an HTTP/WebSocket host with the built UI inside the
+# tarball - to npm, and attaches the tarball and its SBOM to the GitHub release for a `v*` tag.
+#
+# It has no `needs:` on anything. The Electron app (`release-electron.yml`, task 11) and the CCU
+# addon (`release-addon.yml`, task 13) run for the same tag in parallel, and a failure in either
+# must never hold this one back or roll it back; re-running one alone is `workflow_dispatch` with
+# the tag as its input.
+#
+# Publishing uses npm **trusted publishing**: the `id-token: write` permission plus npm >= 11.5.1
+# means the registry accepts an OIDC token from this workflow and no `NODE_AUTH_TOKEN` secret
+# exists to be leaked. The trusted publisher has to be configured once on npmjs.com for the package
+# (repository `hobbyquaker/homematic-manager`, workflow `release-npm.yml`); until that is done the
+# publish step fails with `ENEEDAUTH`, which is the intended failure - it is not a reason to add a
+# token secret.
+#
+# The GitHub release is created as a draft by whichever of the three workflows gets there first and
+# published by the maintainer (see `release-electron.yml` for why).
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The existing tag to publish, e.g. v3.0.0-beta.1
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  # trusted publishing (npm OIDC) and the two attestations of D-27
+  id-token: write
+  attestations: write
+
+concurrency:
+  # Per tag, not per branch: two runs for the same tag would race on the same version.
+  group: release-npm-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      # trusted publishing needs npm >= 11.5.1; the one that ships with Node 24 is older
+      - run: npm install -g npm@latest
+
+      - run: npm ci
+
+      # The tarball carries the built UI and the generated metadata (`scripts/prepack.mjs`), so
+      # everything has to be built before anything is packed.
+      - run: npm run build
+
+      - run: npm test
+
+      - name: Pack
+        id: pack
+        run: |
+          mkdir -p dist-npm
+          file=$(npm pack -w apps/web --pack-destination dist-npm | tail -1)
+          echo "tarball=dist-npm/$file" >> "$GITHUB_OUTPUT"
+
+      # D-27: the SBOM describes the tree the tarball really installs, bundled workspace packages
+      # included - see apps/web/scripts/sbom.mjs. It runs against the tarball that is about to be
+      # published, not against the repository.
+      - name: SBOM (CycloneDX 1.6)
+        run: node apps/web/scripts/sbom.mjs --tarball "${{ steps.pack.outputs.tarball }}"
+
+      # Both attestations are made before anything is published or attached, so that a release
+      # never carries a tarball whose provenance could not be signed. `gh attestation verify
+      # <tarball> --repo hobbyquaker/homematic-manager` checks either of them offline.
+      - name: Attest the build provenance
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: ${{ steps.pack.outputs.tarball }}
+
+      - name: Attest the SBOM
+        uses: actions/attest-sbom@v3
+        with:
+          subject-path: ${{ steps.pack.outputs.tarball }}
+          sbom-path: ${{ steps.pack.outputs.tarball }}.cdx.json
+
+      # `npm publish <tarball>` publishes exactly the artefact that was attested and packed above,
+      # rather than packing a second, possibly different one. `--provenance` adds npm's own
+      # provenance statement on top of the GitHub attestations.
+      - name: Publish
+        run: npm publish "${{ steps.pack.outputs.tarball }}" --provenance --access public
+
+      - name: Attach the tarball and its SBOM to the draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          draft: true
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            ${{ steps.pack.outputs.tarball }}
+            ${{ steps.pack.outputs.tarball }}.cdx.json

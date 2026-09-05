@@ -1,0 +1,5 @@
+# written by scripts/prepack.mjs so that npm can pack them; build output, never sources
+/ui/
+/data/
+/LICENSE
+/*.tgz

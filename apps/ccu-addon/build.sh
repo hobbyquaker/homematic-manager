@@ -121,7 +121,7 @@ rm -rf "$TREE/app/node_modules/.package-lock.json" "$TREE/app/node_modules/.bin"
 #    inodes, not the 2 GB of /usr/local, and those do not change. Pre-gzipping would save another
 #    6.8 MB but needs a Content-Encoding branch in the shared static server of apps/web, and the
 #    compressed package is the same size either way (gzip does that work anyway). So: minify, do not
-#    pre-compress. The numbers are in roadmap-archive/task-13.md.
+#    pre-compress. The full table is in README.md.
 echo "minifying the generated metadata..."
 node -e '
 const fs = require("node:fs");

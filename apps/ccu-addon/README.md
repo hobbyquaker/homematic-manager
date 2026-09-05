@@ -68,7 +68,34 @@ ssh root@ccu /bin/install_addon        # OpenCCU: the exact path the WebUI takes
 Nothing outside these is written, patched or linked. The bundled Node.js runtime resolves its
 libraries inside `/usr/local/addons/hmm` only, so another addon's Node (RedMatic ships one) is
 neither used nor disturbed. `bin/`, `lib/`, `share/`, `app/` and `www/` carry a `.nobackup` file, so
-a CCU backup keeps the configuration and not the 130 MB of runtime.
+a CCU backup keeps the configuration and not the runtime.
+
+### Size, measured on the lab boxes
+
+| | package | installed | inodes |
+| --- | --- | --- | --- |
+| armv7l (musl Node 24.18.1) | 27 MB | 71.7 MB | 503 |
+| aarch64 (Node 24.20.0) | 44 MB | 127 MB | 461 |
+| x86_64 (Node 24.20.0) | 44 MB | 131 MB | 461 |
+
+Almost all of it is the Node binary; the app, the UI and the metadata together are 9.7 MB. The
+armv7l package is the small one because Alpine's musl build is stripped and the nodejs.org binaries
+are not. Inodes are what a CCU3 is short of - it has 96k on `/usr/local` and a stock box with a few
+addons already uses half of them - and 500 of those is what this costs.
+
+**OQ-13** was decided here: the generated metadata (`data/dist`, 74 JSON files and 121 webp icons)
+ships **minified, not pre-gzipped**. Measured on the tree this package is built from:
+
+| | bytes | on disk | inodes |
+| --- | --- | --- | --- |
+| pretty-printed, as generated | 9.62 MB | 9.96 MB | 199 |
+| minified | 7.45 MB | 7.84 MB | 199 |
+| minified and gzipped | 0.64 MB | 1.22 MB | 199 |
+
+All three cost the same inodes, which is the resource that is actually scarce; gzipping would need a
+`Content-Encoding` branch in the shared static server of `apps/web` and would not even shrink the
+download, because the package is a `.tar.gz` and gzip does that work anyway (692 KB against 638 KB
+for the metadata part of it).
 
 ## The token and the cookie
 
@@ -177,6 +204,7 @@ but the definition of "we are the addon".
 | The UI loads but stays disconnected | The WebSocket did not get through. `grep hmm /var/log/messages`, and check that `/usr/local/etc/config/lighttpd/hmm.conf` exists and lighttpd was restarted after the install (`/etc/init.d/S50lighttpd restart`). CCU3 firmware older than 3.61.5 does not read that directory at all. |
 | No devices, interfaces marked red | The interface processes answer on the CCU's loopback only (D-28). `netstat -tlnp` should show 32001 / 32010; a CCU in safe mode or with `HM_MODE` other than `NORMAL` starts neither them nor addons. |
 | Device pictures are missing | They come from the CCU's own `/config/img/devices/`; the app falls back to the pictures that ship in `app/data/icons/`. |
+| `BidCos-Wired ... init failed` every 15 seconds in the log | `hs485d` only runs on a CCU that has a BidCos-Wired gateway. Untick BidCos-Wired in the app's settings dialog and the retries stop. |
 | `Error (13)` when installing | Wrong architecture. Compare `uname -m` with the package name. |
 | Everything is slow on a CCU3 | It is a 1 GB armv7 board. The addon raises its own `oom_score_adj` to 800 so the kernel takes it before it takes rfd or ReGaHSS. |
 
@@ -232,6 +260,14 @@ docker run --rm -v "$PWD:/repo" -w /repo hmm-addon-test bash apps/ccu-addon/test
 
 `.github/workflows/addon.yml` runs all of it for the three architectures on every push,
 `release-addon.yml` for a `v*` tag (D-24: no `needs:` on any other workflow).
+
+Beyond that there is only hardware. All three packages were installed on real boxes for 3.0.0-dev.0
+— CCU3 firmware 3.89.8 on armv7l (the reboot install, Tcl 8.2.3, lighttpd 1.4.50), OpenCCU 3.89.8 on
+x86_64 and on aarch64 (the live install) — and on each one: the Zusatzsoftware entry, the session
+check with a right and a wrong session id, the UI and its assets through the proxy rule, the
+WebSocket upgrade and an ApiFrame round trip, a socket left idle for ten minutes, `service.cgi`
+restart, and the device list filling from `rfd` and `HmIPServer` on the loopback. The lookahead in
+the proxy rule works on lighttpd 1.4.50 (CCU3 firmware) and 1.4.82 (OpenCCU) alike.
 
 ## Rules for anything added here
 

@@ -14,6 +14,8 @@
  * main process with it, issue #127).
  */
 
+import path from 'node:path';
+
 import {
     RPC_METHOD_NAMES,
     RSSI_UNKNOWN,
@@ -49,6 +51,7 @@ import {
 
 import {CacheStore} from '../cache/store.js';
 import {ConfigStore, type ConfigStoreOptions} from '../config/store.js';
+import {LinkTemplateStore} from '../config/linkTemplates.js';
 import {validateConnection, writePaceFor} from '../config/defaults.js';
 import {DataFileServer} from '../data/files.js';
 import {installModeCalls} from '../devices/installMode.js';
@@ -112,6 +115,8 @@ export class Backend {
     readonly #writer: ParamsetWriter;
     readonly #repair: ConfigRepair;
     readonly #files: DataFileServer;
+    /** Issue #21: the saved link templates of this profile directory. */
+    readonly #linkTemplates: LinkTemplateStore;
     readonly #now: () => number;
     readonly #methodCache = new Map<string, RpcMethodInfo[]>();
 
@@ -130,6 +135,10 @@ export class Backend {
         this.#config = config;
         this.#caches = caches;
         this.#now = options.now ?? (() => Date.now());
+        this.#linkTemplates = new LinkTemplateStore({
+            file: path.join(options.dataDir, 'link-templates.json'),
+            ...(options.now === undefined ? {} : {now: options.now}),
+        });
         this.events = new ApiEventEmitter((event, error) => {
             // an event handler of the UI must not be able to break the backend
             process.emitWarning(`handler of ${event} threw: ${errorMessage(error)}`);
@@ -180,6 +189,7 @@ export class Backend {
         await caches.load();
         const backend = new Backend(options, config, caches);
         await backend.#writeLog.load();
+        await backend.#linkTemplates.load();
         return backend;
     }
 
@@ -395,6 +405,13 @@ export class Backend {
             case 'bidcos.setInterface':
                 await this.#write(p[0], 'setBidcosInterface', [p[1], p[2], p[3]]);
                 return null;
+
+            case 'linkTemplates.list':
+                return this.#linkTemplates.list(p[0]);
+            case 'linkTemplates.save':
+                return this.#linkTemplates.save(p[0]);
+            case 'linkTemplates.remove':
+                return this.#linkTemplates.remove(p[0]);
 
             case 'unreach.list':
                 return this.#caches.unreach.list(p[0]);
@@ -1217,6 +1234,9 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'rssi.get',
     'bidcos.interfaces',
     'bidcos.setInterface',
+    'linkTemplates.list',
+    'linkTemplates.save',
+    'linkTemplates.remove',
     'unreach.list',
     'unreach.reset',
     'serviceMessages.list',

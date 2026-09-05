@@ -24,6 +24,7 @@ export * from './transport/wsServer.js';
 export * from './config/defaults.js';
 export * from './config/legacyImport.js';
 export * from './config/store.js';
+export * from './config/linkTemplates.js';
 
 // the protocol layer
 export * from './rpc/client.js';

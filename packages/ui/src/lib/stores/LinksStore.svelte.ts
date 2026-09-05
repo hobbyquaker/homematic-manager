@@ -1,4 +1,4 @@
-import type {LinkRecord, Transport} from '@homematic-manager/core';
+import type {LinkRecord, LinkTemplate, Transport} from '@homematic-manager/core';
 import {decodeLinkFlags} from '@homematic-manager/core';
 
 import type {NoticesStore} from './NoticesStore.svelte.js';
@@ -157,6 +157,46 @@ export class LinksStore {
             return true;
         } catch (error) {
             this.#notices.fromError(error, `activateLinkParamset ${receiver} ${sender}`);
+            return false;
+        }
+    }
+
+    /*
+     * Issue #21: link profile templates. The templates themselves live in the backend's profile
+     * directory; this only asks for them and keeps the last answer for the dialog to render.
+     */
+
+    templates = $state<LinkTemplate[]>([]);
+
+    /** The templates that fit one link identity, or all of them when none is given. */
+    async loadTemplates(identity?: string): Promise<LinkTemplate[]> {
+        try {
+            this.templates = await this.#transport.request('linkTemplates.list', identity);
+        } catch (error) {
+            this.#notices.fromError(error, 'linkTemplates.list');
+            this.templates = [];
+        }
+        return this.templates;
+    }
+
+    async saveTemplate(template: LinkTemplate): Promise<boolean> {
+        try {
+            await this.#transport.request('linkTemplates.save', template);
+            await this.loadTemplates(template.identity);
+            return true;
+        } catch (error) {
+            this.#notices.fromError(error, 'linkTemplates.save');
+            return false;
+        }
+    }
+
+    async removeTemplate(name: string, identity?: string): Promise<boolean> {
+        try {
+            await this.#transport.request('linkTemplates.remove', name);
+            await this.loadTemplates(identity);
+            return true;
+        } catch (error) {
+            this.#notices.fromError(error, 'linkTemplates.remove');
             return false;
         }
     }

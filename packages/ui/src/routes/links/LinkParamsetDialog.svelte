@@ -2,12 +2,13 @@
     import type {
         LinkProfile,
         LinkSenderMetadata,
+        LinkTemplate,
         Paramset,
         ParamsetDescription,
         ParamsetValue,
         WriteResult,
     } from '@homematic-manager/core';
-    import {EXPERT_PROFILE_ID} from '@homematic-manager/core';
+    import {EXPERT_PROFILE_ID, paramsetIdentity} from '@homematic-manager/core';
 
     import Dialog from '../../lib/components/Dialog.svelte';
     import MultiSelect from '../../lib/components/MultiSelect.svelte';
@@ -54,6 +55,9 @@
     let readBack = $state<ReadBackEntry[]>([]);
     let loading = $state(false);
     let loadToken = 0;
+    /** Issue #21: the name the current values would be saved under, and the chosen template. */
+    let templateName = $state('');
+    let templateChoice = $state('');
 
     const interfaceName = $derived(stores.app.selectedInterface);
     const index = $derived(stores.devices.index(interfaceName));
@@ -61,6 +65,34 @@
     const receiverType = $derived(index?.get(receiver)?.TYPE ?? '');
     const title = $derived(`${stores.nameOf(sender)} → ${stores.nameOf(receiver)} (${sender} ${receiver})`);
     const profile = $derived(profiles.find((entry) => entry.id === profileId));
+
+    /**
+     * Issue #21: what makes two links interchangeable.
+     *
+     * Both `LINK` paramset identities, joined - device type, firmware, version and channel type on
+     * each side. A template may only be applied where this matches, for the same reason multi-apply
+     * is limited that way (task 6, item 3): the same parameter can mean something else on another
+     * firmware, and `putParamset` takes both without a word.
+     */
+    const templateIdentity = $derived.by(() => {
+        const current = index;
+        const receiverChannel = current?.get(receiver);
+        const senderChannel = current?.get(sender);
+        if (!current || !receiverChannel || !senderChannel) {
+            return '';
+        }
+        const receiverDevice = current.get(receiverChannel.PARENT ?? '');
+        const senderDevice = current.get(senderChannel.PARENT ?? '');
+        if (!receiverDevice || !senderDevice) {
+            return '';
+        }
+        return [
+            paramsetIdentity(interfaceName, receiverChannel, 'LINK', receiverDevice),
+            paramsetIdentity(interfaceName, senderChannel, 'LINK', senderDevice),
+        ].join('|');
+    });
+
+    const templates = $derived(stores.links.templates.filter((entry) => entry.identity === templateIdentity));
 
     const fields = $derived<LinkField[]>(
         receiverDescription
@@ -152,6 +184,73 @@
         profileId = detected?.id ?? EXPERT_PROFILE_ID;
         expert = profileId === EXPERT_PROFILE_ID;
     });
+
+    /** #21: the templates that fit this link, re-read whenever the link changes. */
+    $effect(() => {
+        const identity = templateIdentity;
+        if (open && identity !== '') {
+            void stores.links.loadTemplates(identity);
+        }
+    });
+
+    /**
+     * Saves the profile and the values as they stand right now - what is on screen, which is the
+     * receiver's stored values with the edits on top, plus the sender's where it has any. The
+     * profile id goes along so the dialog can show which easy mode a template belongs to.
+     */
+    async function saveTemplate(): Promise<void> {
+        const name = templateName.trim();
+        if (name === '' || templateIdentity === '' || !receiverDescription) {
+            return;
+        }
+        const receiverPayload = buildPreview(receiverValues, edited, receiverDescription, {
+            interfaceName,
+            targets: [receiver],
+            writeAll: true,
+        }).values;
+        const senderPayload = senderDescription
+            ? buildPreview(senderValues, senderEdited, senderDescription, {
+                  interfaceName,
+                  targets: [sender],
+                  writeAll: true,
+              }).values
+            : {};
+        const template: LinkTemplate = {
+            name,
+            identity: templateIdentity,
+            ...(profile === undefined
+                ? {}
+                : {profileId: profile.id, profileName: profileLabel(profile, stores.i18n.language)}),
+            receiver: receiverPayload,
+            ...(Object.keys(senderPayload).length > 0 ? {sender: senderPayload} : {}),
+            createdAt: Date.now(),
+        };
+        if (await stores.links.saveTemplate(template)) {
+            templateName = '';
+            templateChoice = name;
+            stores.notices.push('info', `${t('Save as template')}: ${name}`);
+        }
+    }
+
+    /**
+     * Applies a template: its values become edits, exactly as if they had been typed in. Nothing is
+     * written - the preview and the Write button are still what sends anything, and the change set
+     * of #124 can take it instead.
+     */
+    function applyTemplate(name: string): void {
+        const chosen = templates.find((entry) => entry.name === name);
+        if (!chosen) {
+            return;
+        }
+        if (chosen.profileId !== undefined && profiles.some((entry) => entry.id === chosen.profileId)) {
+            profileId = chosen.profileId;
+            expert = profileId === EXPERT_PROFILE_ID;
+        }
+        edited = {...edited, ...chosen.receiver};
+        if (chosen.sender) {
+            senderEdited = {...senderEdited, ...chosen.sender};
+        }
+    }
 
     function chooseProfile(id: number): void {
         profileId = id;
@@ -358,6 +457,58 @@
                     <input type="checkbox" bind:checked={expert} data-testid="link-expert" />
                     <span>{t('Expert view')}</span>
                 </label>
+
+                <!--
+                    Issue #21: the profile of the metadata plus the values it was tuned to, under a
+                    name. Only templates of the same description identity are offered; applying one
+                    fills the form and writes nothing.
+                -->
+                <label>
+                    <span>{t('Template')}</span>
+                    <select
+                        class="hmm-select"
+                        data-testid="link-template"
+                        disabled={templates.length === 0}
+                        value={templateChoice}
+                        onchange={(event) => {
+                            templateChoice = event.currentTarget.value;
+                            applyTemplate(templateChoice);
+                        }}
+                    >
+                        <option value=""
+                            >{templates.length === 0
+                                ? t('No template for this pair of channel types')
+                                : t('Apply template')}</option
+                        >
+                        {#each templates as entry (entry.name)}
+                            <option value={entry.name}
+                                >{entry.name}{entry.profileName === undefined ? '' : ` — ${entry.profileName}`}</option
+                            >
+                        {/each}
+                    </select>
+                </label>
+                <label>
+                    <span>{t('Template name')}</span>
+                    <input class="hmm-input" bind:value={templateName} data-testid="link-template-name" />
+                </label>
+                <button
+                    type="button"
+                    class="hmm-button"
+                    disabled={templateName.trim() === '' || templateIdentity === ''}
+                    data-testid="link-template-save"
+                    onclick={() => void saveTemplate()}>{t('Save as template')}</button
+                >
+                <button
+                    type="button"
+                    class="hmm-button"
+                    disabled={templateChoice === ''}
+                    data-testid="link-template-delete"
+                    onclick={() => {
+                        const name = templateChoice;
+                        templateChoice = '';
+                        void stores.links.removeTemplate(name, templateIdentity);
+                    }}>{t('Delete template')}</button
+                >
                 {#if profile && !expert}
                     <span class="hmm-link-profile-text">{profileDescription(profile, stores.i18n.language)}</span>
                 {/if}

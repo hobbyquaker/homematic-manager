@@ -5,6 +5,7 @@ import type {
     ApiMethodName,
     ApiParams,
     ApiResult,
+    LinkTemplate,
     Transport,
 } from '@homematic-manager/core';
 
@@ -207,6 +208,28 @@ export class MockTransport implements Transport {
                 : DEMO_UNREACH.filter((entry) => entry.interfaceName === interfaceName),
         );
         this.result('unreach.reset', null);
+        // Issue #21: the demo keeps its link templates in memory, so saving and applying one
+        // works in the browser demo exactly as it does against a backend.
+        const templates: LinkTemplate[] = [];
+        this.respond('linkTemplates.list', (identity) =>
+            identity === undefined ? templates : templates.filter((entry) => entry.identity === identity),
+        );
+        this.respond('linkTemplates.save', (template) => {
+            const index = templates.findIndex((entry) => entry.name === template.name);
+            if (index === -1) {
+                templates.push(template);
+            } else {
+                templates[index] = template;
+            }
+            return templates;
+        });
+        this.respond('linkTemplates.remove', (name) => {
+            const index = templates.findIndex((entry) => entry.name === name);
+            if (index !== -1) {
+                templates.splice(index, 1);
+            }
+            return templates;
+        });
         this.respond('events.recent', (interfaceName) =>
             interfaceName === undefined
                 ? DEMO_EVENTS

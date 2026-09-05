@@ -127,6 +127,32 @@ export interface UnreachCounter {
     unreach?: boolean;
 }
 
+/**
+ * Issue #21: a tuned link profile, saved under a name and applied to another link.
+ *
+ * What is kept is the easy-mode profile *and* the values it was tuned to - the profile alone is
+ * already in the metadata, and it is the tuning that is worth saving. Templates live in the profile
+ * directory, not in a per-CCU cache: they are the user's own work and they move with the profile.
+ */
+export interface LinkTemplate {
+    name: string;
+    /**
+     * The receiver's and the sender's `LINK` paramset identity, joined - device type, firmware,
+     * version and channel type on both sides. A template may only be applied where this matches,
+     * for the same reason multi-apply is limited that way (task 6, item 3).
+     */
+    identity: string;
+    /** The easy-mode profile the values follow, when they follow one. */
+    profileId?: number;
+    profileName?: string;
+    /** The receiver-side `LINK` values. */
+    receiver: ParamsetWrite;
+    /** The sender-side ones, where the sender has any. */
+    sender?: ParamsetWrite;
+    /** Milliseconds since epoch. */
+    createdAt: number;
+}
+
 export interface RegaState {
     enabled: boolean;
     reachable: boolean;
@@ -397,6 +423,11 @@ export interface ApiMethods {
     };
     'links.activate': {params: [interfaceName: string, receiver: string, sender: string, long: boolean]; result: null};
     'links.peers': {params: [interfaceName: string, address: string]; result: string[]};
+    /** Issue #21: the saved link templates, all of them or those that fit one identity. */
+    'linkTemplates.list': {params: [identity?: string]; result: LinkTemplate[]};
+    /** Saves one; a name that exists is replaced. Returns the whole list. */
+    'linkTemplates.save': {params: [template: LinkTemplate]; result: LinkTemplate[]};
+    'linkTemplates.remove': {params: [name: string]; result: LinkTemplate[]};
 
     'rssi.get': {params: [interfaceName: string]; result: RssiInfo};
     'bidcos.interfaces': {params: [interfaceName: string]; result: BidcosInterfaceInfo[]};

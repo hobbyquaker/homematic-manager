@@ -37,6 +37,7 @@ a WebSocket, and the CCU addon (task 13) runs the same process on the CCU.
 | `config/defaults.ts` | defaults, normalisation, validation, interface resolution (D-13) |
 | `config/legacyImport.ts` | the one-time import of the 2.x configuration (D-17) |
 | `config/store.ts` | `config.json`, the profile directory, the per-host cache directory |
+| `config/linkTemplates.ts` | `link-templates.json`: the tuned link profiles of #21, in the profile directory |
 | `rpc/client.ts` | one promise-shaped RPC client per interface: timeout, faults, call log |
 | `rpc/server.ts` | the xmlrpc and binrpc callback servers and the `listDevices` answer |
 | `interfaces/manager.ts` | `init`, the ping watchdog, re-init, `init('')`, the background port probe |

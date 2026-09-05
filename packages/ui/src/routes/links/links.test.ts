@@ -424,3 +424,75 @@ describe('the link paramset dialog', () => {
         });
     });
 });
+
+describe('link profile templates (#21)', () => {
+    let transport: MockTransport;
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+    });
+
+    /** Opens the link paramset dialog on the first link of the demo. */
+    async function openEditor(): Promise<void> {
+        await mountApp({transport, hash: '#/HmIP-RF/links'});
+        await waitFor(() => {
+            expect(document.querySelector('[data-row-id]')).toBeTruthy();
+        });
+        await fireEvent.dblClick(document.querySelector('[data-row-id]')!);
+        await waitFor(() => {
+            expect(screen.getByTestId('link-profile')).toBeTruthy();
+        });
+    }
+
+    it('saves the profile and its values under a name, and offers it again', async () => {
+        await openEditor();
+        // nothing saved yet: the dropdown says so and is disabled
+        const select = screen.getByTestId<HTMLSelectElement>('link-template');
+        expect(select.disabled).toBe(true);
+        expect(select.textContent).toContain('Keine Vorlage');
+
+        await fireEvent.input(screen.getByTestId('link-template-name'), {target: {value: 'Flur kurz'}});
+        await fireEvent.click(screen.getByTestId('link-template-save'));
+
+        await waitFor(() => {
+            expect(transport.countOf('linkTemplates.save')).toBe(1);
+        });
+        const saved = transport.lastCall('linkTemplates.save')?.[0];
+        expect(saved?.name).toBe('Flur kurz');
+        // the identity carries both sides, so it cannot be applied to a different pair of types
+        expect(saved?.identity).toContain('|');
+        expect(Object.keys(saved?.receiver ?? {}).length).toBeGreaterThan(0);
+
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLSelectElement>('link-template').disabled).toBe(false);
+        });
+        expect(screen.getByTestId('link-template').textContent).toContain('Flur kurz');
+    });
+
+    it('applies a template into the form and writes nothing on its own', async () => {
+        await openEditor();
+        await fireEvent.input(screen.getByTestId('link-template-name'), {target: {value: 'Vorlage'}});
+        await fireEvent.click(screen.getByTestId('link-template-save'));
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLSelectElement>('link-template').disabled).toBe(false);
+        });
+
+        const before = transport.countOf('paramset.putLink');
+        await fireEvent.change(screen.getByTestId('link-template'), {target: {value: 'Vorlage'}});
+        // applying fills the form; the preview and the Write button are still what sends anything
+        expect(transport.countOf('paramset.putLink')).toBe(before);
+
+        await fireEvent.click(screen.getByTestId('link-template-delete'));
+        await waitFor(() => {
+            expect(transport.lastCall('linkTemplates.remove')?.[0]).toBe('Vorlage');
+        });
+    });
+
+    it('only asks for the templates of this link identity', async () => {
+        await openEditor();
+        await waitFor(() => {
+            expect(transport.countOf('linkTemplates.list')).toBeGreaterThan(0);
+        });
+        expect(transport.lastCall('linkTemplates.list')?.[0]).toContain('HmIP-RF/');
+    });
+});

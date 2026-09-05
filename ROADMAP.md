@@ -522,6 +522,17 @@ release with a missing SBOM is not published.
 The maintainer cuts releases; the agent never tags or pushes to `master` on its own (pushing
 `3.0-dev` for CI builds is D-21).
 
+**Done of this so far (2026-09-05):** the 3.0 screenshots from the demo mode
+(`npm run screenshots`, light and dark), the forum announcement draft
+[`docs/announcement-3.0-beta.md`](docs/announcement-3.0-beta.md), the maintainer's
+[`docs/release-checklist.md`](docs/release-checklist.md) (including the issue list to close), the
+hardware pass on all three lab boxes with D-31, OQ-16 and the D-32 login of task 18 written up in
+[`docs/hardware-checklist.md`](docs/hardware-checklist.md), and one dev bump. **Still open, and all
+of it needs the maintainer:** Actions is not enabled, so no workflow has ever run and no artefact
+exists; OQ-14 and OQ-15 are undecided; the install-from-the-published-artefacts round of D-25
+cannot start before there is a release to install from; and no issue has been closed - the agent
+never touches one.
+
 ## 18. Addon login against ReGa
 
 Implemented 2026-09-05, report in `roadmap-archive/task-18.md`; the hardware pass (eight steps in
@@ -562,7 +573,7 @@ devices from his own stock) and OQ-9 (the Turkish translations stay as a fallbac
 | OQ-12 | When to move to TypeScript 7 (native) and vite 8? Blocked today by typescript-eslint 8, svelte-check 4 and electron-vite 5 peer ranges. | Recurring "toolchain bump" check next to the quarterly Electron bump of task 11; bump when all three peers allow it. |
 | OQ-14 | npm name for the web host package (D-24): reuse `homematic-manager` (the 2.x name on npm, which installed the Electron app through `npm i -g`; its users would get the server instead) or a new `homematic-manager-web` / `@homematic-manager/web` (the workspace scope is free on npm to check). The tarball is otherwise ready (task 12). Checked 2026-09-05: `homematic-manager` exists on npm (1.0.14, 2022, maintainer hobbyquaker), so npm trusted publishing can be configured on it right away; `@homematic-manager/web` and the `@homematic-manager` scope do not exist, so a new name needs an npm organisation for the scope plus one manual initial publish from the command line before OIDC can be set up (the maintainer's point). `release-npm.yml` publishes pre-releases under the `next` dist-tag since `86adff4`+1. | Reuse `homematic-manager`: the `npm i -g` audience of 2.x wanted a headless install anyway, and the Electron app was never a sensible npm install. Announce in the 3.0 changelog. Decide before the first alpha is tagged. |
 | OQ-15 | The Docker image sets `HMM_ISSUE_COOKIE=true` because a container never binds loopback and the UI's socket would otherwise be refused on every load; the consequence is that whoever reaches the published port is in. Keep that default (UI works out of the box, `docs/install-docker.md` names three ways to lock it down), or ship an image whose UI refuses until the user has read the page? | Keep it, and print a one-line warning at start when the cookie is issued on a non-loopback bind without TLS or a proxy in front. Decide before the first image is published. |
-| OQ-16 | The HmIP switching programme's `NN_WP_WEEKDAY` bit mask: nothing in the descriptions or `data/dist` says which bit is which weekday. Task 10 took bit 0 = Sunday from the documented HmIP weekday enums (BidCos enums start at Saturday) and always prints the raw mask beside the checkboxes. | A five-minute lab check: set one weekday in the WebUI's switching programme on the HmIP-PDT or DRS8, read the `NN_WP_WEEKDAY` value back through `getParamset`, record the order in `ASSUMPTIONS.md`. Do it in the task 17 hardware checklist. |
+| OQ-16 **answered 2026-09-05** | The HmIP switching programme's `NN_WP_WEEKDAY` bit mask: nothing in the descriptions or `data/dist` says which bit is which weekday. Task 10 took bit 0 = Sunday from the documented HmIP weekday enums (BidCos enums start at Saturday) and always prints the raw mask beside the checkboxes. | **Bit 0 is Sunday; the editor was right.** Measured in task 17's lab pass against the CCU's own weekly-programme dialog, which is byte-identical on both firmwares and gives every weekday checkbox its bit value: Sun 1, Mon 2, Tue 4, Wed 8, Thu 16, Fri 32, Sat 64, all seven 127. Recorded as **A-17** in `packages/core/ASSUMPTIONS.md`, in the editor's comment and in a test; the run is in `docs/hardware-checklist.md`. No device was written to. |
 
 ## Lab and hardware
 

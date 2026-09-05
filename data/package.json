@@ -1,0 +1,24 @@
+{
+  "name": "@homematic-manager/data",
+  "version": "3.0.0-dev.0",
+  "private": true,
+  "type": "module",
+  "description": "Pinned openccu-data artifacts and the converter to the runtime data format",
+  "license": "SEE LICENSE IN NOTICE.md",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "fetch": "node scripts/fetch.mjs",
+    "convert": "node scripts/convert.mjs",
+    "update": "npm run fetch && npm run convert",
+    "compare-legacy": "node scripts/compare-legacy.mjs",
+    "icons-subset": "node scripts/icons-subset.mjs",
+    "build": "node -e \"console.log('@homematic-manager/data: dist/ is committed, run `npm run update` to regenerate it')\"",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6",
+    "sharp": "^0.34.5"
+  }
+}

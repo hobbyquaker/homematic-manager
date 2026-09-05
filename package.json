@@ -22,7 +22,8 @@
   },
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "data"
   ],
   "scripts": {
     "lint": "eslint . && prettier --check .",

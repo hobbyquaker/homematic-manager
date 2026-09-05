@@ -1,0 +1,7 @@
+# The pinned upstream artifacts are downloaded by `npm run fetch`, never committed: they are large,
+# binary (gzip) and reproducible from sources.json.
+/upstream/
+
+# The root .gitignore ignores `dist/` everywhere (build output). data/dist/ is the opposite: it is
+# the reviewable, committed result of the converter, so it is explicitly un-ignored here.
+!/dist/

@@ -80,9 +80,9 @@ every write is read back, because rfd answers `ok` to writes it silently drops o
 
 ## Measured
 
-- 445 tests in 31 files in `packages/ui` (was 225 in 17), all green in jsdom **and** unchanged in
-  headless Chromium (`npm run test:browser -w @homematic-manager/ui`, 419 at the time of that run
-  plus the 26 store tests added afterwards).
+- 445 tests in 31 files in `packages/ui` (was 225 in 17), all green in jsdom **and** all 445 green
+  unchanged in headless Chromium (`npm run test:browser -w @homematic-manager/ui`, after
+  `npx playwright install chromium`).
 - Workspace: 1584 tests in 103 files pass, 35 skipped (hm-simulator not installed);
   `npm run lint`, `npm run typecheck` and `npm run build` are green.
 - Coverage `packages/ui`: 94.1 % statements, 81.7 % branches, 93.6 % functions, 93.9 % lines

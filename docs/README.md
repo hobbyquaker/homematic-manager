@@ -52,11 +52,11 @@ through and why the token is still required behind it:
   2.x code, the feature inventory to preserve, the write-path problem, and the issue triage.
 - [../data/README.md](../data/README.md) and [../data/NOTICE.md](../data/NOTICE.md) — where the
   device metadata comes from, how it is renewed, and under which terms it may be used.
+- [upstream/](upstream/) — the two library bugs found while building 3.0, as patches for `binrpc`
+  and `homematic-xmlrpc`: what each one is, what was measured, and which repository and file it
+  belongs in.
 
 ## Screenshots
 
 `hmm1.png`, `hmm2.png` and `hmm3.png` in this directory are the ones the README shows. They are
 still from 2.7; the layout is unchanged in 3.0 by design (D-3), and new ones come with the beta.
-
-- [upstream/](upstream/) — the two library bugs found while building 3.0, as patches for
-  `binrpc` and `homematic-xmlrpc`, with what each one is and where it goes

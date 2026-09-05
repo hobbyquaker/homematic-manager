@@ -53,6 +53,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 | D-29 | (2026-09-05) The npm deliverable bundles the workspace packages (`bundleDependencies` materialised at `prepack`, removed at `postpack`); `@homematic-manager/core`, `backend`, `ui` and `data` are not published separately. Their APIs are internal and one version-locked tarball cannot produce a mismatched tree. If a second consumer of the core ever appears (D-11, shared cast library), that is the moment to publish `core` on its own. |
 | D-30 | (2026-09-05, answers OQ-13) `data/dist` ships minified, not pre-gzipped, in the addon, the npm tarball and the Docker image: pretty-printed 9.6 MB, minified 7.4 MB, gzipped 0.6 MB, but all three cost the same 199 inodes on the CCU3 (the scarce resource), the download differs by 50 KB, and pre-gzip would need a `Content-Encoding` branch in the shared static server. Measured by task 13. |
 | D-31 | (2026-09-05, maintainer) Idle unsubscribe for the server install types: when no UI session is connected to the web host for a grace period, the backend sends `init('')` to every interface (drops the event subscriptions and the ping watchdog, keeps caches and config), and subscribes again on the next WebSocket connect. Default on for every server install type: the CCU addon, npm and Docker (grace 5 minutes; no interface process should push events to a page nobody is looking at), `--idle-unsubscribe <duration>` / `HMM_IDLE_UNSUBSCRIBE` changes the grace and `0` disables it; off in Electron (the window is the session). The UI shows "subscribing" until the first `listDevices`/service-message sweep after a resubscribe is through, because hmipserver re-sends every device on `init` (occu#45) and events and service messages from the idle period are not replayed. Implemented in task 15. |
+| D-32 | (2026-09-05, maintainer) Optional login for the addon path: with `--auth-mode rega` the web host asks for CCU credentials before it serves the UI on `/addons/hmm/`, and verifies them the way RedMatic does (`addon_files/redmatic/lib/rega-auth.js`): the user must exist in ReGa (`dom.GetObject(ID_USERS).Get(name)` and its `UserLevel()` through the existing ReGa client on 8183) and the password is checked against the CCU's authentication daemon on UDP 1998 (`user:password`, answer `1`), both loopback-only and therefore addon-only; no JSON-API (D-1). Off by default: the WebUI hand-over through `settings.cgi` (session check, token cookie) stays the primary path and keeps working when the login is on. Lesson from RedMatic 9.2.0: ReGa runs scripts one at a time, so user lookups are cached (15 minutes), parallel lookups of one user share one script, and a known user stays logged in while ReGa is busy or down; otherwise parallel requests fail with random 401s. Task 18. |
 
 ## Contents
 
@@ -74,6 +75,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [15. Backlog features from the triage](#15-backlog-features-from-the-triage) ✅
 - [16. Documentation](#16-documentation) ✅
 - [17. Beta cycle and 3.0 release](#17-beta-cycle-and-30-release)
+- [18. Addon login against ReGa](#18-addon-login-against-rega)
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
 
@@ -120,6 +122,7 @@ Per task:
 | 15 Backlog features | 6-10 | 8 |
 | 16 Documentation (one page per install type, D-25) | 3-5 | 8 |
 | 17 Beta cycle and 3.0 release | 5-8 | all of M2/M3 |
+| 18 Addon login against ReGa (D-32) | 2-3 | 12, 13 |
 
 ## 1. Legacy stopgap release 2.8 (dropped)
 
@@ -518,6 +521,31 @@ apps. Task 12 including the Docker part done 2026-09-05; report in `roadmap-arch
 release with a missing SBOM is not published.
 The maintainer cuts releases; the agent never tags or pushes to `master` on its own (pushing
 `3.0-dev` for CI builds is D-21).
+
+## 18. Addon login against ReGa
+
+D-32. In `apps/web`: `--auth-mode token|rega` (`HMM_AUTH_MODE`), default `token`, the current
+behaviour. With `rega`, a request without a valid session gets a small login page (German/English,
+same theme tokens as the UI, no framework) instead of the UI; the host verifies the credentials in
+`packages/backend` (`rega/auth.ts`: user lookup and `UserLevel()` through the ReGa client on the
+local port, password check on UDP 1998 with RedMatic's colon escaping, both against 127.0.0.1
+only; a user cache with a 15-minute TTL, in-flight de-duplication per user, and "known user stays
+logged in while ReGa is unreachable"), then issues its own session cookie (`hmm_session`,
+`HttpOnly; SameSite=Strict; Secure` over https, expiry configurable, default 24 h, sliding) that
+the WebSocket upgrade accepts like the token cookie. The `settings.cgi` hand-over keeps working:
+a WebUI session that passed the `tclrega.so` check still gets the token cookie and is let in
+without the login page. `UserLevel` is stored in the session and exposed on the API as a
+read-only `session.info` so that the UI can show the user and, later, gate writes to admins (not
+in this task: everyone who logs in may write, as in the WebUI). Logout link in the header when a
+session exists. Rate limit on the login endpoint (five failures per source per minute) and no
+username enumeration (same answer for unknown user and wrong password). Tests: backend unit tests
+with a fake ReGa and a fake UDP responder (cache, de-duplication, ReGa down, escaping), web host
+tests for the login page, cookie, logout, rate limit and the `settings.cgi` hand-over; the
+container replay of task 13 exercises the login through lighttpd; a lab check on one OpenCCU box
+with a real CCU user (task 17's next hardware run). The addon README, `docs/install-addon.md` and
+`hmm.cfg`/`etc/default.env` gain the option; the setting is also reachable from the addon's
+settings page. npm and Docker installs keep `token` (UDP 1998 is loopback on the CCU); document
+that `rega` is refused with a clear message when the CCU is not local.
 
 ## Open questions
 

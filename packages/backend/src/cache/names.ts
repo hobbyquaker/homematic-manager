@@ -107,6 +107,28 @@ export class NameStore {
         return changed;
     }
 
+    /**
+     * D-40: applies the names of a metadata store - openccu-lite's, or this profile's own.
+     *
+     * The same shape as {@link applyRega} and for the same reason: whichever store owns the names
+     * wins over the local copy, because it is what the user sees everywhere else. There is no id to
+     * remember - the metadata store's identity is the ref, which the caller has already resolved to
+     * an address here.
+     */
+    applyMeta(entries: readonly NameEntry[]): boolean {
+        let changed = false;
+        for (const entry of entries) {
+            if (entry.address === '' || entry.name === '') {
+                continue;
+            }
+            if (this.#names.get(entry.address) !== entry.name) {
+                this.#names.set(entry.address, entry.name);
+                changed = true;
+            }
+        }
+        return changed;
+    }
+
     clear(): void {
         this.#names.clear();
         this.#regaIds.clear();

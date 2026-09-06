@@ -37,6 +37,11 @@ import {
     type InstallModeOptions,
     type Language,
     type LinkRecord,
+    type MetaEnum,
+    type MetaImportMode,
+    type MetaNodePatch,
+    type MetaSnapshot,
+    type MetaState,
     type NameMap,
     type Paramset,
     type ParamsetDescription,
@@ -67,6 +72,7 @@ import {
     validationError,
 } from '../errors.js';
 import {InterfaceManager, firstBidcosInterfaceAddress, type InterfaceManagerOptions} from '../interfaces/manager.js';
+import {MetaService, type MetaServiceOptions} from '../meta/service.js';
 import {RegaService, type RegaServiceOptions} from '../rega/client.js';
 import type {RpcCallRecord, RpcOutValue} from '../rpc/client.js';
 import {listDevicesAnswer, type CallbackHandler} from '../rpc/server.js';
@@ -108,6 +114,8 @@ export interface BackendOptions extends Omit<ConfigStoreOptions, 'version'> {
     /** Injected by the tests in place of the real world. */
     readonly createInterfaceManager?: (options: InterfaceManagerOptions) => InterfaceManager;
     readonly createRega?: (options: RegaServiceOptions) => RegaService;
+    /** D-40: injected by the tests, and by the integration test that runs a real occulited. */
+    readonly metaOptions?: Partial<MetaServiceOptions>;
     readonly discover?: (options: DiscoverOptions) => Promise<AppConfig['discovered']>;
     readonly interfaceManagerOptions?: Partial<InterfaceManagerOptions>;
     readonly regaOptions?: Partial<RegaServiceOptions>;
@@ -133,6 +141,19 @@ export class Backend {
     #caches: CacheStore;
     #manager: InterfaceManager | undefined;
     #rega: RegaService | undefined;
+    /** D-40: the metadata store of this connection - this profile's own, or an openccu-lite box. */
+    #meta: MetaService | undefined;
+    /** D-40: the session a host with a login knows about; writes to the box go out as this one. */
+    #metaSession: string | undefined;
+    /**
+     * D-40: the detection, in flight.
+     *
+     * The probe is **not** awaited by `#connect`: a host that swallows packets on port 80 - a
+     * firewall, a CCU that is off, a WSL loopback - would otherwise hold the whole connection up
+     * for the detection timeout while the interfaces are already there. Everything that needs the
+     * store waits for this promise instead, and the UI hears about it through `meta.changed`.
+     */
+    #metaReady: Promise<void> | undefined;
     #serviceMessageTimer: ReturnType<typeof setInterval> | undefined;
     #hmipSweepTimer: ReturnType<typeof setTimeout> | undefined;
     #hmipSweepRunning = false;
@@ -376,6 +397,51 @@ export class Backend {
             case 'names.set':
                 return this.#setNames(p[0]);
 
+            case 'meta.state':
+                return this.#metaState();
+            case 'meta.get':
+                return this.#metaSnapshot();
+            case 'meta.enums':
+                return (await this.#requireMeta()).enums();
+            case 'meta.objects':
+                return (await this.#requireMeta()).objects();
+            case 'meta.setMembership':
+                await (await this.#requireMeta()).setMembership(p[0]);
+                return null;
+            case 'meta.assign':
+                await (await this.#requireMeta()).assign(p[0], p[1], p[2]);
+                return null;
+            case 'meta.enum.create':
+                await (await this.#requireMeta()).createEnum(p[0], p[1]);
+                return null;
+            case 'meta.enum.update':
+                await (await this.#requireMeta()).updateEnum(p[0], p[1]);
+                return null;
+            case 'meta.enum.delete':
+                await (await this.#requireMeta()).deleteEnum(p[0], p[1] === true);
+                return null;
+            case 'meta.node.create':
+                return (await this.#requireMeta()).createNode(
+                    p[0],
+                    // absent means "at the root"; see the contract for why it is not `null` here.
+                    // Read from `params` and not from `p`, whose slots are `never`: this is the one
+                    // place that has to tell "absent" from a value, and `never` cannot.
+                    (params[1] as string | undefined) ?? null,
+                    p[2],
+                    (params[3] as {icon?: string; position?: number} | undefined) ?? {},
+                );
+            case 'meta.node.update':
+                await (await this.#requireMeta()).updateNode(p[0], params[1] as MetaNodePatch);
+                return null;
+            case 'meta.node.delete':
+                await (await this.#requireMeta()).deleteNode(p[0], p[1] === true);
+                return null;
+            case 'meta.export':
+                return (await this.#requireMeta()).document();
+            case 'meta.import':
+                await (await this.#requireMeta()).import(p[0], (params[1] as MetaImportMode | undefined) ?? 'replace');
+                return null;
+
             case 'paramset.get':
                 return this.#getParamset(p[0], p[1], p[2]);
             case 'paramset.description':
@@ -552,6 +618,7 @@ export class Backend {
             this.#caches.saveNames();
             this.events.emit('names.changed', this.#caches.names.all());
         }
+        this.#metaReady = this.#startMeta(connection);
         this.#startServiceMessagePolling();
     }
 
@@ -561,7 +628,87 @@ export class Backend {
         await this.#manager?.stop();
         this.#manager = undefined;
         this.#rega = undefined;
+        // the detection may still be in flight; stopping a provider that is not there yet would
+        // leave its event stream running behind the disconnect
+        await this.#metaReady?.catch(() => undefined);
+        this.#metaReady = undefined;
+        await this.#meta?.stop();
+        this.#meta = undefined;
         this.#methodCache.clear();
+    }
+
+    /**
+     * D-40: picks the metadata provider for this connection and starts it.
+     *
+     * After the interfaces, because the ref of an address (`<interface>.<address>`) is resolved
+     * from the device caches and those are filled by the `listDevices` sweep the interfaces do on
+     * connect. Before that the store's names are still applied - they are keyed by ref, and the
+     * address half of a ref never needs an interface to be readable.
+     */
+    async #startMeta(connection: AppConfig['connection']): Promise<void> {
+        try {
+            const meta = await MetaService.create({
+                connection,
+                dataDir: this.#options.dataDir,
+                cacheDir: this.#config.cacheDir,
+                names: this.#caches.names,
+                interfaceOf: (address) => this.#interfaceOf(address),
+                onChanged: () => {
+                    this.#onMetaChanged();
+                },
+                onStateChanged: (state) => {
+                    this.events.emit('meta.changed', state);
+                },
+                onNotice: (level, message) => {
+                    this.#notice(level, message);
+                },
+                ...this.#options.metaOptions,
+            });
+            meta.setSessionCredential(this.#metaSession);
+            this.#meta = meta;
+            await meta.start();
+            this.#onMetaChanged();
+        } catch (error) {
+            // D-2 in its metadata shape: a store that cannot be opened costs the taxonomy, never
+            // the application
+            this.#notice('warn', `the metadata store could not be opened: ${errorMessage(error)}`);
+        }
+    }
+
+    /** The store changed - locally, or on the box because somebody else edited it. */
+    #onMetaChanged(): void {
+        const meta = this.#meta;
+        if (!meta) {
+            return;
+        }
+        this.#caches.saveNames();
+        this.events.emit('names.changed', this.#caches.names.all());
+        this.events.emit('meta.enums.changed', meta.enums());
+        this.events.emit('meta.objects.changed', meta.objects());
+    }
+
+    /** Which interface reports an address; the ref of the metadata store is built from it. */
+    #interfaceOf(address: string): string | undefined {
+        const device = address.split(':')[0] ?? address;
+        for (const interfaceName of this.#caches.devices.interfaces()) {
+            if (this.#caches.devices.get(interfaceName, address) ?? this.#caches.devices.get(interfaceName, device)) {
+                return interfaceName;
+            }
+        }
+        return undefined;
+    }
+
+    /**
+     * D-40: the session of the person looking at the page, for the writes to an openccu-lite box.
+     *
+     * The shell of the box hands an addon page the user's session as `?sid=@xxxxxxxxxx@`, and that
+     * session is a valid credential for the metadata API. The addon reads with the box's local
+     * token, which is read-only by design, and writes as the user - so nothing renames a device
+     * unless a person asked for it. Hosts without a login never call this.
+     */
+    noteMetaSession(sid: string | undefined): void {
+        this.#metaSession = sid;
+        this.#meta?.setSessionCredential(sid);
     }
 
     #clearTimers(): void {
@@ -867,9 +1014,54 @@ export class Backend {
         const written = this.#caches.names.set(entries);
         this.#caches.saveNames();
         await this.#rega?.rename(written);
+        // D-40: and into the metadata store, which on an openccu-lite box is the box's own. The
+        // local cache is written first either way, so a store that refuses the write still leaves
+        // the name where the user typed it - and the refusal is reported rather than swallowed.
+        await this.#meta?.setNames(written);
         const names = this.#caches.names.all();
         this.events.emit('names.changed', names);
         return names;
+    }
+
+    /*
+     * the metadata store (D-40)
+     */
+
+    /** The state, even before a connection exists - the settings dialog asks for it either way. */
+    #metaState(): MetaState {
+        return (
+            this.#meta?.state() ?? {
+                provider: this.#config.connection.metaProvider === 'occulite' ? 'occulite' : 'local',
+                reachable: false,
+                writable: false,
+                revision: 0,
+                objects: 0,
+            }
+        );
+    }
+
+    #metaSnapshot(): MetaSnapshot {
+        const meta = this.#meta;
+        return {
+            state: this.#metaState(),
+            enums: (meta?.enums() as Record<string, MetaEnum> | undefined) ?? {},
+            objects: meta?.objects() ?? {},
+        };
+    }
+
+    /**
+     * The store, or a typed refusal.
+     *
+     * There is no connection without one - `#connect` always builds a provider, the `local` one
+     * when there is no box - so this only fires before the first connect, which is exactly when a
+     * UI should be told "not connected" rather than shown an empty taxonomy.
+     */
+    async #requireMeta(): Promise<MetaService> {
+        await this.#metaReady?.catch(() => undefined);
+        if (!this.#meta) {
+            throw configError('the metadata store is not open yet: connect to a system first');
+        }
+        return this.#meta;
     }
 
     /*
@@ -1307,6 +1499,20 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'devices.replaceable',
     'names.get',
     'names.set',
+    'meta.state',
+    'meta.get',
+    'meta.enums',
+    'meta.objects',
+    'meta.setMembership',
+    'meta.assign',
+    'meta.enum.create',
+    'meta.enum.update',
+    'meta.enum.delete',
+    'meta.node.create',
+    'meta.node.update',
+    'meta.node.delete',
+    'meta.export',
+    'meta.import',
     'paramset.get',
     'paramset.description',
     'paramset.put',

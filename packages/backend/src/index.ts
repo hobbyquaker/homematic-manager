@@ -38,6 +38,9 @@ export * from './cache/names.js';
 export * from './cache/unreach.js';
 export * from './cache/store.js';
 
+// the metadata store: names, rooms and functions, local or from an openccu-lite box (task 24)
+export * from './meta/index.js';
+
 // the write path (task 6)
 export * from './write/queue.js';
 export * from './write/log.js';

@@ -145,8 +145,15 @@ describe('CallbackServer.dispatch', () => {
 
     it('answers an unknown method harmlessly and reports it', () => {
         const handler = recordingHandler();
+        expect(server(handler).dispatch('foo.bar', ['hmm_HmIP-RF'])).toBe('');
+        expect(handler.calls[0]).toEqual(['unknown', 'foo.bar', ['hmm_HmIP-RF']]);
+    });
+
+    it('knows setReadyConfig, the documented callback the interfaces send after init', () => {
+        const handler = recordingHandler();
         expect(server(handler).dispatch('setReadyConfig', ['hmm_HmIP-RF'])).toBe('');
-        expect(handler.calls[0]).toEqual(['unknown', 'setReadyConfig', ['hmm_HmIP-RF']]);
+        expect(handler.calls.some((call) => call[0] === 'unknown')).toBe(false);
+        expect(server(handler).dispatch('system.listMethods', [])).toContain('setReadyConfig');
     });
 
     it('runs a multicall and answers one entry per call', () => {

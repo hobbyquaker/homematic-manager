@@ -728,12 +728,15 @@ describe('the callbacks', () => {
         const h = await harness();
         h.handler.readdedDevice('HmIP-RF', ['ABC1']);
         h.handler.updateDevice('HmIP-RF', 'ABC1', 1);
-        h.handler.unknownMethod?.('setReadyConfig', []);
+        h.handler.readyConfig?.('HmIP-RF');
+        h.handler.unknownMethod?.('foo.bar', []);
+        h.handler.unknownMethod?.('foo.bar', []);
         const refreshed = h.events.filter(
             (event) => event.name === 'devices.changed' && (event.payload as {kind: string}).kind === 'refreshed',
         );
         expect(refreshed.length).toBeGreaterThanOrEqual(2);
-        expect(h.events.some((event) => event.name === 'notice')).toBe(true);
+        // one notice for the unknown method, none for the second call, none for setReadyConfig
+        expect(h.events.filter((event) => event.name === 'notice').length).toBe(1);
         await h.backend.stop();
     });
 });

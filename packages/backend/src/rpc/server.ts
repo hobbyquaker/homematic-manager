@@ -34,6 +34,12 @@ export interface CallbackHandler {
     /** The answer to `listDevices`, from the device cache. */
     listDevices(interfaceName: string): RpcValue[];
     /** A method we do not implement; answered with an empty string anyway. */
+    /**
+     * `setReadyConfig(interface_id)`: the interface process tells its client that the
+     * configuration it announced with `init` is in place. Nothing to do with it, but it is a
+     * documented callback and not an unknown method (the first beta toasted it on every start).
+     */
+    readyConfig?(interfaceName: string): void;
     unknownMethod?(method: string, params: RpcValue[]): void;
 }
 
@@ -48,6 +54,7 @@ export const CALLBACK_METHODS: readonly string[] = [
     'readdedDevice',
     'updateDevice',
     'listDevices',
+    'setReadyConfig',
 ];
 
 /**
@@ -206,6 +213,9 @@ export class CallbackServer {
                     asString(params[1]),
                     typeof params[2] === 'number' ? params[2] : 0,
                 );
+                return '';
+            case 'setReadyConfig':
+                this.#handler.readyConfig?.(this.#interfaceOf(params));
                 return '';
             default:
                 this.#handler.unknownMethod?.(method, [...params]);

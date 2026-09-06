@@ -121,6 +121,7 @@ export class Backend {
     readonly #config: ConfigStore;
     readonly #queue: WriteQueue;
     readonly #writeLog: WriteLog;
+    readonly #unknownMethodsSeen = new Set<string>();
     readonly #writer: ParamsetWriter;
     readonly #repair: ConfigRepair;
     readonly #files: DataFileServer;
@@ -657,8 +658,17 @@ export class Backend {
                 this.events.emit('devices.changed', {interfaceName, kind: 'refreshed', addresses: [address]});
             },
             listDevices: (interfaceName) => listDevicesAnswer(interfaceName, this.#caches.devices.list(interfaceName)),
+            readyConfig: () => {
+                // documented, harmless, and not worth a toast
+            },
             unknownMethod: (methodName) => {
-                this.#notice('info', `an interface called the unknown method ${methodName}`);
+                // once per method and session: the CCU repeats such calls on every init, and a
+                // toast per repeat was the first thing a beta tester saw
+                if (this.#unknownMethodsSeen.has(methodName)) {
+                    return;
+                }
+                this.#unknownMethodsSeen.add(methodName);
+                this.#notice('info', `an interface called ${methodName}, which this program does not use`);
             },
         };
     }

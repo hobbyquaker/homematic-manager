@@ -78,9 +78,29 @@
     --hmm-font-size-grid: 12px;
     --hmm-font-size-small: 11px;
     --hmm-font-size-tiny: 9px;
-    --hmm-row-height: 26px;
+    /* Task 22, the third look: 26 px rows with a 16 px picture in them made the CCU's device
+       drawings unreadable, so both grew by four - 30 px rows, 20 px pictures. The grid cell clips
+       (`overflow: hidden`), so the icon column is the picture plus the cell's 6 px of padding on
+       each side; `ICON_COLUMN_WIDTH` in `lib/components/metrics.ts` is that sum. */
+    --hmm-row-height: 30px;
+    --hmm-device-image-size: 20px;
     --hmm-header-height: 36px;
     --hmm-radius: 3px;
+
+    /*
+     * The CCU draws its device pictures as black line art on white paper, so on a dark surface
+     * every row carried a glaring white stamp (the maintainer's third look). Light mode leaves
+     * them alone; dark mode inverts them.
+     *
+     * A plain `invert(1)` is not enough: white paper becomes #000000, which is *darker* than the
+     * dark surface, and the picture reads as a black rectangle. The contrast and brightness behind
+     * the inversion pull the two ends back onto the palette - measured on the lab CCU's own
+     * pictures, white paper lands on #1d1d1d against the --hmm-bg of #1e1e1e and the black lines on
+     * #c9c9c9 against the --hmm-fg of #cccccc, so the paper disappears and the drawing reads like
+     * text. The hue rotation is what keeps a coloured picture recognisable: inverting alone turns
+     * a red device cyan, and the 180° rotation puts the hue back (#cd3131 -> #c97b7b, still red).
+     */
+    --hmm-device-image-filter: none;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -124,6 +144,8 @@
         --hmm-rssi-medium: #6d5a1c;
         --hmm-rssi-bad: #6f2f2f;
         --hmm-rssi-text: #f0f0f0;
+
+        --hmm-device-image-filter: invert(1) hue-rotate(180deg) contrast(0.75) brightness(0.9);
     }
 }
 
@@ -167,6 +189,8 @@
     --hmm-rssi-medium: #6d5a1c;
     --hmm-rssi-bad: #6f2f2f;
     --hmm-rssi-text: #f0f0f0;
+
+    --hmm-device-image-filter: invert(1) hue-rotate(180deg) contrast(0.75) brightness(0.9);
 }
 
 html,

@@ -1,4 +1,6 @@
 <script lang="ts">
+    import {DEVICE_IMAGE_SIZE} from './metrics.js';
+
     interface Props {
         /** `HmIP-BSM`, `HM-LC-Sw1-Pl-CT-R1`, ... - empty for a channel row. */
         deviceType?: string;
@@ -9,7 +11,13 @@
         testId?: string | undefined;
     }
 
-    let {deviceType = '', src = undefined, size = 16, title = undefined, testId = undefined}: Props = $props();
+    let {
+        deviceType = '',
+        src = undefined,
+        size = DEVICE_IMAGE_SIZE,
+        title = undefined,
+        testId = undefined,
+    }: Props = $props();
 
     /** The image failed to load - a type the CCU has no picture for, or no cache yet (D-10). */
     let broken = $state(false);
@@ -63,10 +71,20 @@
 {/if}
 
 <style>
+    /*
+        The filter is `none` in light and the inversion in dark (D-22, task 22); the theme owns it,
+        the component only applies it. The placeholder carries the class too but is drawn from
+        tokens that already follow the theme, so its filter has to be `none` in both - hence the
+        rule on the image alone.
+    */
     .hmm-device-image {
         display: inline-block;
         vertical-align: middle;
         object-fit: contain;
+    }
+
+    img.hmm-device-image {
+        filter: var(--hmm-device-image-filter);
     }
 
     .hmm-device-image-fallback {

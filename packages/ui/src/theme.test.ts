@@ -4,7 +4,11 @@ import type {Component} from 'svelte';
 import {afterEach, describe, expect, it} from 'vitest';
 
 import appCss from './app.css?raw';
+// Applied, not only read: the picture filter below is the one theme decision that has to be
+// measured as a computed style, because a token nothing reaches is a token that does nothing.
+import './app.css';
 import ConnectionIndicator from './lib/components/ConnectionIndicator.svelte';
+import DeviceImage from './lib/components/DeviceImage.svelte';
 import InterfacePopup from './lib/components/InterfacePopup.svelte';
 import DataTableComponent from './lib/components/DataTable.svelte';
 import Notices from './lib/components/Notices.svelte';
@@ -29,6 +33,15 @@ import type {Notice} from './lib/stores/NoticesStore.svelte.js';
 
 /** A generic component resolves its type parameter to `unknown` when `render()` gets it. */
 const DataTable = DataTableComponent as unknown as Component<Record<string, unknown>>;
+
+/**
+ * jsdom resolves neither `var()` nor a cascade, so a computed style is only meaningful in browser
+ * mode; the assertions that need one skip themselves there, as everywhere else in this suite.
+ */
+const hasLayout = document.body.getBoundingClientRect().width > 0;
+
+/** One transparent pixel - enough for an `<img>` that loads and can be measured. */
+const PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 /** The tokens where the colour means something rather than just decorating. */
 const MEANINGFUL_TOKENS = [
@@ -111,6 +124,35 @@ describe('the theme tokens', () => {
     it('paints the body explicitly rather than inheriting the host background', () => {
         expect(appCss).toMatch(/\nbody \{[^}]*background: var\(--hmm-bg\)/);
         expect(appCss).toMatch(/\nbody \{[^}]*color: var\(--hmm-fg\)/);
+    });
+
+    /**
+     * Task 22, the maintainer's third look: the CCU's device pictures are black line art on white
+     * paper and stood in the dark window as white stamps. The inversion is a token like every
+     * other theme decision - `none` in light, the filter in both dark blocks - so the component
+     * only applies it and nothing has to know which theme is on.
+     *
+     * The hue rotation is the half that keeps a coloured picture recognisable, and the contrast
+     * and brightness are the half that stops white paper from turning into a black rectangle that
+     * is darker than the surface it sits on: measured, white lands on #1d1d1d against a #1e1e1e
+     * surface and black on #c9c9c9 against a #cccccc text colour.
+     */
+    it('inverts the device pictures in dark and leaves them alone in light', () => {
+        expect(tokenValue(lightBlock, '--hmm-device-image-filter')).toBe('none');
+        for (const [name, source] of [
+            ['prefers-color-scheme: dark', mediaBlock],
+            ["[data-theme='dark']", darkBlock],
+        ] as const) {
+            const filter = tokenValue(source, '--hmm-device-image-filter');
+            expect(filter, `${name} does not invert the device pictures`).toBeDefined();
+            expect(filter).toContain('invert(1)');
+            expect(filter).toContain('hue-rotate(180deg)');
+            expect(filter).toContain('contrast(');
+            expect(filter).toContain('brightness(');
+        }
+        expect(tokenValue(mediaBlock, '--hmm-device-image-filter')).toBe(
+            tokenValue(darkBlock, '--hmm-device-image-filter'),
+        );
     });
 });
 
@@ -242,4 +284,31 @@ describe('colours that carry meaning', () => {
             expect(screen.getByRole<HTMLButtonElement>('button', {name: 'Delete device'}).disabled).toBe(true);
         });
     }
+
+    /**
+     * Task 22: the picture really carries the filter, and only in dark. The token test above says
+     * the theme declares it; this says it arrives at the element - a rule that stopped matching
+     * (a renamed class, a `<style>` block Svelte scoped away) would pass the first and fail here.
+     */
+    it.skipIf(!hasLayout)('filters the device picture in dark and leaves it alone in light', () => {
+        const {container} = render(DeviceImage, {props: {deviceType: 'HmIP-PDT', src: PIXEL}});
+        const image = container.querySelector('img')!;
+
+        document.documentElement.setAttribute('data-theme', 'light');
+        expect(getComputedStyle(image).filter).toBe('none');
+
+        document.documentElement.setAttribute('data-theme', 'dark');
+        const filter = getComputedStyle(image).filter;
+        expect(filter).toContain('invert(1)');
+        expect(filter).toContain('hue-rotate(180deg)');
+    });
+
+    /** The placeholder is drawn from tokens that already follow the theme; inverting it twice. */
+    it.skipIf(!hasLayout)('never filters the placeholder that stands in for a missing picture', () => {
+        const {container} = render(DeviceImage, {props: {deviceType: 'HmIP-PDT'}});
+        const placeholder = container.querySelector('span.hmm-device-image')!;
+
+        document.documentElement.setAttribute('data-theme', 'dark');
+        expect(getComputedStyle(placeholder).filter).toBe('none');
+    });
 });

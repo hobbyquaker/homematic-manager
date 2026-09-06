@@ -1,6 +1,7 @@
 <script lang="ts" generics="T">
     import type {Snippet} from 'svelte';
 
+    import {ROW_HEIGHT} from './metrics.js';
     import {
         buildRows,
         cellText,
@@ -27,7 +28,7 @@
          * these columns under their own label row; absent, a channel shares the device columns.
          */
         subColumns?: DataTableColumn<T>[] | undefined;
-        /** Row height in pixels; the virtualiser needs it to be uniform. */
+        /** Row height in pixels; the virtualiser needs it to be uniform. `--hmm-row-height`. */
         rowHeight?: number;
         /** Fixed body height. Without one the body fills its parent and is measured. */
         height?: number | undefined;
@@ -75,7 +76,7 @@
         getId,
         subRows = undefined,
         subColumns = undefined,
-        rowHeight = 26,
+        rowHeight = ROW_HEIGHT,
         height = undefined,
         overscan = 6,
         columnFilterRow = true,

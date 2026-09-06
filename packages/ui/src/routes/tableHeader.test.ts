@@ -16,6 +16,7 @@
 import {screen} from '@testing-library/svelte';
 import {describe, expect, it} from 'vitest';
 
+import {DEVICE_IMAGE_SIZE, ROW_HEIGHT} from '../lib/components/metrics.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
 import {mountApp} from '../testHarness.js';
 
@@ -134,5 +135,43 @@ describe('the toolbar is the table header band', () => {
 
         expect(grid.querySelector<HTMLElement>('.hmm-table-band')!.getBoundingClientRect().top).toBe(bandTop);
         expect(grid.querySelector<HTMLElement>('.hmm-table-head')!.getBoundingClientRect().top).toBe(headTop);
+    });
+});
+
+/**
+ * Task 22, the maintainer's third look: the rows grew from 26 to 30 px and the picture in them
+ * from 16 to 20, so the numbers task 20 measured are re-measured here and pinned.
+ *
+ * The three rows of the header are what did *not* change - they are chrome, not data - and that is
+ * worth an assertion of its own: growing a data row must not push the band, the column labels or
+ * the filter fields around.
+ */
+describe.skipIf(!hasLayout)('the grid metrics of the third look', () => {
+    it('draws 30 px rows with a 20 px picture inside the picture column', async () => {
+        await mountApp({transport: new MockTransport({demo: true}), hash: '#/BidCos-RF/devices'});
+        const row = screen.getByTestId('devices-table').querySelector<HTMLElement>('.hmm-tr')!;
+        expect(Math.round(row.getBoundingClientRect().height)).toBe(ROW_HEIGHT);
+
+        const picture = row.querySelector<HTMLElement>('.hmm-device-image')!.getBoundingClientRect();
+        expect(Math.round(picture.width)).toBe(DEVICE_IMAGE_SIZE);
+        expect(Math.round(picture.height)).toBe(DEVICE_IMAGE_SIZE);
+
+        // The cell clips (`overflow: hidden`), so a track too narrow for the picture would cut it
+        // off silently - which is what the 24 px column of the 16 px picture did.
+        const cell = row.querySelector<HTMLElement>('[role="gridcell"]')!.getBoundingClientRect();
+        expect(Math.round(picture.left)).toBeGreaterThanOrEqual(Math.round(cell.left));
+        expect(Math.round(picture.right)).toBeLessThanOrEqual(Math.round(cell.right));
+    });
+
+    it.each(BANDS)('%s keeps its header band, label row and filter row', async (_name, hash, table) => {
+        await mountApp({transport: new MockTransport({demo: true}), hash});
+        const grid = screen.getByTestId(table);
+        const heightOf = (selector: string): number =>
+            Math.round(grid.querySelector<HTMLElement>(selector)!.getBoundingClientRect().height);
+
+        // Task 20's numbers, unchanged: the header is chrome and does not follow the row height.
+        expect(heightOf('.hmm-table-band')).toBe(33);
+        expect(heightOf('.hmm-table-head')).toBe(26);
+        expect(heightOf('.hmm-table-filters')).toBe(27);
     });
 });

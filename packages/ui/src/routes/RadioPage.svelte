@@ -3,6 +3,7 @@
 
     import DataTable from '../lib/components/DataTable.svelte';
     import DeviceImage from '../lib/components/DeviceImage.svelte';
+    import {ICON_COLUMN_WIDTH} from '../lib/components/metrics.js';
     import RssiCell from '../lib/components/RssiCell.svelte';
     import ToolbarButton from '../lib/components/ToolbarButton.svelte';
     import type {DataTableColumn} from '../lib/components/tableModel.js';
@@ -64,7 +65,7 @@
         {
             key: 'icon',
             label: '',
-            width: 24,
+            width: ICON_COLUMN_WIDTH,
             fixed: true,
             sortable: false,
             filterable: false,

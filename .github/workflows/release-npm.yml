@@ -118,13 +118,15 @@ jobs:
         # notice. Pre-release testers install `homematic-manager@next`. A plain version moves
         # `latest` and ends that.
         run: |
+          # D-39 (maintainer, 2026-09-06): the 1.x versions under this name are dead, so a pre-release
+          # is what `npm install -g homematic-manager` should give; it is published as `latest` and
+          # additionally tagged `next`, so both spellings in the docs keep working.
           VERSION="$(node -p "require('./apps/web/package.json').version")"
+          echo "publishing $VERSION as latest"
+          npm publish "./${{ steps.pack.outputs.tarball }}" --provenance --access public --tag latest
           case "$VERSION" in
-            *-*) TAG=next ;;
-            *) TAG=latest ;;
+            *-*) npm dist-tag add "homematic-manager@$VERSION" next ;;
           esac
-          echo "publishing $VERSION as $TAG"
-          npm publish "./${{ steps.pack.outputs.tarball }}" --provenance --access public --tag "$TAG"
 
       - name: Attach the tarball and its SBOM to the draft release
         uses: softprops/action-gh-release@v2

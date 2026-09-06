@@ -83,6 +83,20 @@ export interface QuitSequence {
  * case where `quit()` is called and nothing happens, which is the one failure the code inside this
  * function cannot see.
  *
+ * **The shutdown starts on the next turn, never inside the `will-quit` handler.** Electron's
+ * `Browser::Quit()` returns at once while `is_quitting_` is set, and `is_quitting_` is only
+ * cleared *after* the `will-quit` handler has returned to C++ and the prevention has been read.
+ * A shutdown that finishes inside that same turn - which it does whenever `stop()` resolves in
+ * microtasks, and `windowState.save()` is a synchronous write - therefore calls `quit()` into a
+ * flag that is still set, the call does nothing at all, and nobody ever asks again. The app then
+ * sits there with its window closed until something kills it.
+ *
+ * That is what the trace of build.yml 34001069697 shows, eight launches out of nine on three
+ * operating systems: `quit: quitting`, then silence, then the watchdog fifteen seconds later. The
+ * ninth is the proof: there `backend.stop()` took eight milliseconds of real I/O, the final
+ * `quit()` landed in a later turn, and `before-quit` and `will-quit` followed it immediately and
+ * the process exited. For a user this is a zombie process after every quit.
+ *
  * Every step is caught. 2.x's bug was `process.exit(1)` on a second `stop()`; the shape here is the
  * same mistake waiting to happen, because an exception between the backend going down and the
  * final `quit()` becomes an unhandled rejection, and an unhandled rejection puts a modal error box
@@ -150,7 +164,11 @@ export function createQuitSequence(options: QuitOptions): QuitSequence {
             if (typeof (watchdog as {unref?: () => void}).unref === 'function') {
                 (watchdog as {unref: () => void}).unref();
             }
-            void run();
+            // The next turn, not this one: see the note above. `quit()` reached from here would
+            // land inside Electron's own quit and be dropped.
+            setTimer(() => {
+                void run();
+            }, 0);
             return true;
         },
     };

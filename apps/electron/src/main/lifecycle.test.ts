@@ -71,6 +71,21 @@ function quitHarness(overrides: Partial<QuitOptions> = {}): {
 }
 
 describe('createQuitSequence', () => {
+    it('touches nothing in the turn that will-quit is still in', async () => {
+        // Electron clears `is_quitting_` only after the will-quit handler has returned to C++, and
+        // `Browser::Quit()` does nothing at all while it is set. A shutdown that finishes inside
+        // this turn - `stop()` resolving in microtasks, `windowState.save()` being a synchronous
+        // write - would therefore call `quit()` into a flag that is still set, and nobody would
+        // ever ask again: the app sits there with its window closed. Eight of the nine launches in
+        // build.yml 34001069697 died that way, on all three operating systems.
+        const {sequence, calls} = quitHarness();
+        expect(sequence.willQuit()).toBe(true);
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(calls).toEqual([]);
+        await vi.waitFor(() => expect(calls).toContain('quit'));
+    });
+
     it('defers the first quit, runs the shutdown and quits again', async () => {
         const {sequence, calls} = quitHarness();
         expect(sequence.willQuit()).toBe(true);
@@ -82,17 +97,28 @@ describe('createQuitSequence', () => {
 
     it('defers every further will-quit while the shutdown is still running', async () => {
         let release: () => void = () => undefined;
-        const {sequence, calls} = quitHarness({
-            stop: async () =>
-                new Promise<void>((resolve) => {
+        const calls: string[] = [];
+        const {sequence} = quitHarness({
+            stop: async () => {
+                calls.push('stop');
+                return new Promise<void>((resolve) => {
                     release = resolve;
-                }),
+                });
+            },
+            quit: () => {
+                calls.push('quit');
+            },
         });
         expect(sequence.willQuit()).toBe(true);
         expect(sequence.willQuit()).toBe(true);
-        expect(calls).toEqual([]);
+        await vi.waitFor(() => expect(calls).toContain('stop'));
+        expect(calls).not.toContain('quit');
+        // A will-quit that arrives while the shutdown is running is deferred as well, and does not
+        // start a second one.
+        expect(sequence.willQuit()).toBe(true);
         release();
         await vi.waitFor(() => expect(calls).toContain('quit'));
+        expect(calls.filter((call) => call === 'stop')).toHaveLength(1);
     });
 
     it('goes on when the backend does not stop within the timeout', async () => {

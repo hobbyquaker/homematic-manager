@@ -25,7 +25,7 @@
  * nobody can attach a debugger to.
  */
 
-import {mkdtemp, rm} from 'node:fs/promises';
+import {mkdtemp, readFile, rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -380,13 +380,28 @@ test('7: the CSP blocks a script from anywhere but the bundle', async () => {
 
 test('8: the window size round-trips through the profile', async () => {
     const first = await launch();
-    const size = {width: 1100, height: 700};
+    let resized: {width: number; height: number} | undefined;
     try {
-        await first.app.evaluate(({BrowserWindow}, bounds) => {
+        // Not a fixed 1100 x 700. The CI runners have a 1024x768-class display: a window wider
+        // than the screen is clamped by the window manager, and the host then clamps back up to
+        // its own minimum, so the size that gets remembered is never the size that was asked for.
+        // That is assertion 8 failing on macOS and Windows in build.yml 34002704935 with "expected
+        // 1100, received 1024", and it reproduces exactly under
+        // `xvfb-run -s "-screen 0 1024x768x24"`. The clamp is right; the assertion was wrong.
+        //
+        // So the size comes from the display, and what is asserted is the size the window really
+        // took - which is the only thing the profile can be expected to give back.
+        await first.app.evaluate(({BrowserWindow, screen}) => {
             const window = BrowserWindow.getAllWindows()[0];
+            const {width, height} = screen.getPrimaryDisplay().workAreaSize;
             window?.unmaximize();
-            window?.setBounds(bounds);
-        }, size);
+            window?.setBounds({width: Math.max(640, width - 200), height: Math.max(480, height - 200)});
+        });
+        // A second round trip, so the window manager has settled on what it will allow.
+        resized = await first.app.evaluate(({BrowserWindow}) => {
+            const bounds = BrowserWindow.getAllWindows()[0]?.getNormalBounds();
+            return bounds === undefined ? undefined : {width: bounds.width, height: bounds.height};
+        });
         // The keeper writes on `close`, and `will-quit` saves again; both need the app to go down
         // normally rather than be killed.
         await closeApp(first.app);
@@ -394,12 +409,20 @@ test('8: the window size round-trips through the profile', async () => {
         await closeApp(first.app);
         throw error;
     }
+    expect(resized).toBeDefined();
+
+    // The profile is what carries it across, so the file has to say so too. Without this the
+    // assertion below would also pass if both runs were clamped to the same size by the display.
+    const stored = JSON.parse(await readFile(path.join(first.userData, 'window-state.json'), 'utf8')) as {
+        width: number;
+        height: number;
+    };
+    expect({width: stored.width, height: stored.height}).toEqual(resized);
 
     const second = await launch(first.userData);
     try {
         const bounds = await second.app.evaluate(({BrowserWindow}) => BrowserWindow.getAllWindows()[0]?.getBounds());
-        expect(bounds?.width).toBe(size.width);
-        expect(bounds?.height).toBe(size.height);
+        expect({width: bounds?.width, height: bounds?.height}).toEqual(resized);
     } finally {
         await closeApp(second.app);
         await rm(first.userData, {recursive: true, force: true});

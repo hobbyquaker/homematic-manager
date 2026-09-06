@@ -39,6 +39,52 @@ describe('resolvePaths', () => {
         expect(paths.icons).toBe(path.join('/repo', 'data', 'dist', 'icons'));
     });
 
+    it('finds data/dist above the main bundle when Electron was started with the bundle', () => {
+        // `electron out/main/index.js` - which is how the smoke test and `npm run preview` start it
+        // - makes `app.getAppPath()` the bundle's own directory, not `apps/electron`. Two levels up
+        // from there is `apps/electron/data/dist`, which does not exist, and nothing says so: the
+        // device pictures simply stop appearing. Assertion 6 of the smoke test came back 404 for a
+        // type the bundled subset has, and that was the reason.
+        const present = path.join('/repo', 'data', 'dist');
+        const paths = resolvePaths({
+            packaged: false,
+            resourcesPath: '/ignored',
+            appPath: path.join('/repo', 'apps', 'electron', 'out', 'main'),
+            userData: path.join('/profile', 'Homematic Manager'),
+            mainDir: path.join('/repo', 'apps', 'electron', 'out', 'main'),
+            exists: (candidate) => candidate === present,
+        });
+        expect(paths.data).toBe(present);
+        expect(paths.icons).toBe(path.join(present, 'icons'));
+    });
+
+    it('finds the same directory when Electron was started with the package directory', () => {
+        const present = path.join('/repo', 'data', 'dist');
+        const paths = resolvePaths({
+            packaged: false,
+            resourcesPath: '/ignored',
+            appPath: path.join('/repo', 'apps', 'electron'),
+            userData: path.join('/profile', 'Homematic Manager'),
+            mainDir: path.join('/repo', 'apps', 'electron', 'out', 'main'),
+            exists: (candidate) => candidate === present,
+        });
+        expect(paths.data).toBe(present);
+    });
+
+    it('falls back to the old formula when no data/dist is anywhere above', () => {
+        // A wrong path that was looked for beats no path at all: the backend reports a file it
+        // cannot read, and the app still starts.
+        const paths = resolvePaths({
+            packaged: false,
+            resourcesPath: '/ignored',
+            appPath: path.join('/repo', 'apps', 'electron'),
+            userData: path.join('/profile', 'Homematic Manager'),
+            mainDir: path.join('/repo', 'apps', 'electron', 'out', 'main'),
+            exists: () => false,
+        });
+        expect(paths.data).toBe(path.join('/repo', 'data', 'dist'));
+    });
+
     it('finds it in the app resources when packaged', () => {
         const paths = resolvePaths({
             packaged: true,

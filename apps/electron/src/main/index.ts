@@ -18,6 +18,7 @@
  *   the backend is gone before any of it starts.
  */
 
+import fs from 'node:fs';
 import {createRequire} from 'node:module';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -104,6 +105,8 @@ const paths = resolvePaths({
     resourcesPath: process.resourcesPath,
     appPath: app.getAppPath(),
     userData: app.getPath('userData'),
+    mainDir: here,
+    exists: (candidate) => fs.existsSync(candidate),
 });
 const errorLog = new ErrorLog({dir: paths.logs});
 const errors = installErrorHandlers({
@@ -135,7 +138,7 @@ let updates: UpdateFlow | undefined;
 let mainWindow: BrowserWindow | undefined;
 let windowState: WindowStateKeeper | undefined;
 const version = app.getVersion();
-trace('module: paths and error log ready', paths.userData);
+trace('module: paths and error log ready', `userData=${paths.userData} data=${paths.data}`);
 
 function broadcast<E extends HostEventName>(name: E, payload: HostEvents[E]): void {
     for (const window of BrowserWindow.getAllWindows()) {

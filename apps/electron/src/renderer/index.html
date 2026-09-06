@@ -8,11 +8,13 @@
             src/main/images.test.ts fails when the two drift apart. Nothing may load or run code
             from anywhere but this bundle: the UI talks to the backend over IPC, which no CSP
             covers, and to nothing else at all. `img-src` carries `hmm-image:` for the device
-            pictures (D-10) and `style-src 'unsafe-inline'` is what Svelte's transitions need.
+            pictures (D-10), `connect-src` carries it too because the scheme is answered in this
+            process and never leaves it, and `style-src 'unsafe-inline'` is what Svelte's
+            transitions need.
         -->
         <meta
             http-equiv="Content-Security-Policy"
-            content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: hmm-image:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+            content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: hmm-image:; font-src 'self' data:; connect-src 'self' hmm-image:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
         />
         <title>Homematic Manager</title>
     </head>

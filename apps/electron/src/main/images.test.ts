@@ -116,6 +116,19 @@ describe('the renderer CSP', () => {
         expect(RENDERER_CSP).toContain("default-src 'self'");
         expect(RENDERER_CSP).toContain('img-src ');
         expect(RENDERER_CSP).toContain('hmm-image:');
+        // `fetch()` of the scheme is governed by `connect-src`, not by `img-src`. Without this the
+        // scheme's own `supportFetchAPI` privilege is a lie, and the browser says no more than
+        // "Failed to fetch" about it - which cost assertion 6 of the smoke test three runners.
+        expect(RENDERER_CSP).toContain("connect-src 'self' hmm-image:");
+    });
+
+    it('is the policy the renderer page actually carries', () => {
+        // The page has the policy inline, because it is loaded from a `file:` URL and there are no
+        // response headers to put it in. Its own comment says this test fails when the two drift
+        // apart, so here is the test that does.
+        const html = fs.readFileSync(new URL('../renderer/index.html', import.meta.url), 'utf8');
+        const policy = /http-equiv="Content-Security-Policy"\s+content="([^"]+)"/.exec(html)?.[1];
+        expect(policy).toBe(RENDERER_CSP);
         expect(RENDERER_CSP).toContain("object-src 'none'");
         expect(RENDERER_CSP).toContain("frame-ancestors 'none'");
     });

@@ -59,8 +59,14 @@ export function createImageProtocolHandler(images: DeviceImageService): (request
  * `default-src 'self'` and no `unsafe-eval`: nothing may load or run code from anywhere but the
  * bundle. `style-src` needs `'unsafe-inline'` because Svelte writes inline styles for its
  * transitions, `img-src` needs the image scheme and `data:` for the inline SVG icons, and
- * `connect-src 'self'` is there so that a mistake in the UI cannot phone home - everything it
- * needs comes over IPC, which no CSP covers.
+ * `connect-src` is there so that a mistake in the UI cannot phone home - everything it needs comes
+ * over IPC, which no CSP covers.
+ *
+ * `connect-src` carries the image scheme as well. It is served by `protocol.handle` in this
+ * process, it is declared `supportFetchAPI` two blocks up, and `'self'` alone made that
+ * declaration a lie: `fetch('hmm-image://device/...')` failed with a bare "Failed to fetch", which
+ * is what assertion 6 of the smoke test hit on all three runners. A request that never leaves the
+ * process is not the kind of connection this directive exists to stop.
  */
 export const RENDERER_CSP = [
     "default-src 'self'",
@@ -68,7 +74,7 @@ export const RENDERER_CSP = [
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: ${IMAGE_SCHEME}:`,
     "font-src 'self' data:",
-    "connect-src 'self'",
+    `connect-src 'self' ${IMAGE_SCHEME}:`,
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'none'",

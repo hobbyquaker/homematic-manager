@@ -37,9 +37,10 @@ import {
 } from '../shared/ipc.js';
 
 import {ErrorLog, installErrorHandlers} from './errorLog.js';
-import {readHostSettings} from './hostSettings.js';
+import {errorDialogsDisabled, readHostSettings} from './hostSettings.js';
 import {DeviceImageService, imageLog, type ImageConnection} from './images.js';
 import {IpcBridge} from './ipcBridge.js';
+import {createQuitSequence, withDeadline} from './lifecycle.js';
 import {buildMenuTemplate, isAllowedExternalUrl, ISSUES_URL} from './menu.js';
 import {fileRoots, resolvePaths} from './paths.js';
 import {createImageProtocolHandler, PRIVILEGED_SCHEMES} from './protocol.js';
@@ -50,8 +51,11 @@ import {browserWindowBounds, WindowStateKeeper} from './windowState.js';
 const APP_ID = 'de.hobbyquaker.homematic-manager';
 const MIN_WIDTH = 1024;
 const MIN_HEIGHT = 620;
-/** How long `backend.stop()` may take before the app quits anyway. */
-const STOP_TIMEOUT_MS = 8000;
+/**
+ * How long one awaited start-up step may take before it is called out. It is not a cancellation -
+ * a half-open `Backend` cannot be walked away from - but a hang that says which step it is in.
+ */
+const STEP_TIMEOUT_MS = 20_000;
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -76,13 +80,22 @@ trace('module: electron-updater required');
 protocol.registerSchemesAsPrivileged([...PRIVILEGED_SCHEMES]);
 trace('module: schemes registered');
 
-if (!app.requestSingleInstanceLock()) {
-    // A second copy would open a second callback server and fight the first one for the CCU's
-    // `init` registration. The first instance gets the focus instead.
+/**
+ * A second copy would open a second callback server and fight the first one for the CCU's `init`
+ * registration. The first instance gets the focus instead.
+ *
+ * The flag is what makes that true. `app.quit()` alone does not stop this file: the module goes on
+ * running, `whenReady` still fires, and `start()` would open the second backend the lock exists to
+ * prevent - on the profile the first instance already has open - while the quit it raced is still
+ * in flight.
+ */
+const secondInstance = !app.requestSingleInstanceLock();
+if (secondInstance) {
     trace('module: single-instance lock refused, quitting');
     app.quit();
+} else {
+    trace('module: single-instance lock held');
 }
-trace('module: single-instance lock held');
 
 app.setAppUserModelId(APP_ID);
 
@@ -96,6 +109,16 @@ const errorLog = new ErrorLog({dir: paths.logs});
 const errors = installErrorHandlers({
     log: errorLog,
     showDialog: (message, logFile) => {
+        // Always to stderr as well: in a terminal, on CI and under the smoke test this is the only
+        // place anyone sees it, and it costs nothing.
+        try {
+            process.stderr.write(`Homematic Manager: ${message}\nSee ${logFile}\n`);
+        } catch {
+            // A packaged Windows app has no stderr; the log file has the message either way.
+        }
+        if (errorDialogsDisabled()) {
+            return;
+        }
         dialog.showErrorBox(
             'Homematic Manager',
             `${message}\n\nFurther errors are only written to\n${logFile}\n\n` +
@@ -111,9 +134,6 @@ let images: DeviceImageService | undefined;
 let updates: UpdateFlow | undefined;
 let mainWindow: BrowserWindow | undefined;
 let windowState: WindowStateKeeper | undefined;
-let stopping = false;
-let stopped = false;
-
 const version = app.getVersion();
 trace('module: paths and error log ready', paths.userData);
 
@@ -281,11 +301,18 @@ function registerHostCommands(): void {
 
 async function start(): Promise<void> {
     trace('start: entered');
-    backend = await Backend.open({
-        dataDir: paths.userData,
-        version,
-        fileRoots: fileRoots(paths),
-    });
+    backend = await withDeadline(
+        Backend.open({
+            dataDir: paths.userData,
+            version,
+            fileRoots: fileRoots(paths),
+        }),
+        STEP_TIMEOUT_MS,
+        () => {
+            trace('start: Backend.open is still running');
+            errorLog.append('startup', `Backend.open has not finished after ${String(STEP_TIMEOUT_MS)}ms`);
+        },
+    );
     trace('start: backend opened');
     transport = new InProcessTransport(backend);
     bridge = new IpcBridge({
@@ -346,7 +373,10 @@ async function start(): Promise<void> {
     mainWindow.on('closed', () => {
         mainWindow = undefined;
     });
-    await loadRenderer(mainWindow);
+    await withDeadline(loadRenderer(mainWindow), STEP_TIMEOUT_MS, () => {
+        trace('start: the renderer is still loading');
+        errorLog.append('startup', `the renderer has not loaded after ${String(STEP_TIMEOUT_MS)}ms`);
+    });
     trace('start: renderer loaded');
     await trackConfig();
     trace('start: config tracked');
@@ -418,41 +448,52 @@ app.on('before-quit', () => {
     updates?.stop();
 });
 
-app.on('will-quit', (event) => {
-    trace('app: will-quit', stopped ? 'already stopped' : stopping ? 'stopping' : 'first');
-    if (stopped) {
-        return;
-    }
-    event.preventDefault();
-    if (stopping) {
-        return;
-    }
-    stopping = true;
-    void (async () => {
-        try {
-            await Promise.race([
-                backend?.stop() ?? Promise.resolve(),
-                new Promise((resolve) => setTimeout(resolve, STOP_TIMEOUT_MS)),
-            ]);
-        } catch (error) {
-            errorLog.append('stop', error);
-        }
-        trace('quit: backend stopped');
+/**
+ * The quit, with its two bounds in `lifecycle.ts` rather than here: `backend.stop()` may take
+ * eight seconds, the whole shutdown twenty, and after that the process ends with `app.exit()`.
+ *
+ * The bound that was missing is the second one. Playwright's `electronApplication.close()` asks
+ * the app to quit and then waits for the process to exit with no timeout of its own, so an app
+ * that defers its quit and never comes back costs the full test timeout and the worker teardown
+ * after it - which is what every smoke test of the first `build.yml` run paid, twice.
+ */
+const quitSequence = createQuitSequence({
+    stop: async () => {
+        await (backend?.stop() ?? Promise.resolve());
+    },
+    finish: () => {
         bridge?.dispose();
         windowState?.save();
-        stopped = true;
-        if (updates?.installIfArmed() === true) {
-            // `quitAndInstall()` quits the app itself; anything after it would race the installer.
-            return;
-        }
+    },
+    installIfArmed: () => updates?.installIfArmed() === true,
+    quit: () => {
         app.quit();
-    })();
+    },
+    exit: (code) => {
+        app.exit(code);
+    },
+    onError: (scope, error) => {
+        errorLog.append(scope, error);
+    },
+    trace,
+});
+
+app.on('will-quit', (event) => {
+    if (quitSequence.willQuit()) {
+        event.preventDefault();
+    }
 });
 
 trace('module: awaiting whenReady');
 app.whenReady()
     .then(() => {
         trace('app: ready');
+        if (secondInstance) {
+            // The lock belongs to the copy that was already running; this one has opened nothing.
+            trace('app: second instance, exiting');
+            app.exit(0);
+            return;
+        }
         return start();
     })
     .then(() => {

@@ -61,6 +61,8 @@ const profiles: string[] = [];
 let output: string[] = [];
 /** The apps this test started, so that one left behind by a failure is still killed. */
 let running: ElectronApplication[] = [];
+/** The ones already on their way out, so nothing closes an app twice. */
+const closing = new WeakSet<ElectronApplication>();
 
 /**
  * Starts the built app on a throw-away profile.
@@ -136,7 +138,19 @@ function collect(app: ElectronApplication): void {
  * worker teardown after it another one.
  */
 async function closeApp(app: ElectronApplication): Promise<void> {
-    const child = app.process();
+    if (closing.has(app)) {
+        return;
+    }
+    closing.add(app);
+    let child;
+    try {
+        child = app.process();
+    } catch {
+        // Assertion 9 watches the app exit by itself, and asking a closed ElectronApplication for
+        // its process throws. There is nothing left to close.
+        running = running.filter((other) => other !== app);
+        return;
+    }
     let timer: NodeJS.Timeout | undefined;
     const killed = new Promise<void>((resolve) => {
         timer = setTimeout(() => {

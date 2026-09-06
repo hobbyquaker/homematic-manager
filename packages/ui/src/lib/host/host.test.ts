@@ -172,11 +172,13 @@ describe('HostStore with a host', () => {
 });
 
 describe('HostStore without a host', () => {
-    it('is inert: every call resolves, nothing throws, no image URL', async () => {
+    it('is inert: every call resolves, nothing throws; images come from the web host route', async () => {
         const store = new HostStore({scope: {}});
 
         expect(store.available).toBe(false);
-        expect(store.deviceImageUrl('HmIP-BSM')).toBeUndefined();
+        expect(store.deviceImageUrl('HmIP-BSM')).toBe('images/HmIP-BSM');
+        expect(store.deviceImageUrl('HM-LC-Sw1-Pl CT')).toBe('images/HM-LC-Sw1-Pl%20CT');
+        expect(store.deviceImageUrl('')).toBeUndefined();
         expect(store.updateNotice).toBeUndefined();
 
         await store.load();

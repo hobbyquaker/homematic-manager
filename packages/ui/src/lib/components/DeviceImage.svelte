@@ -31,11 +31,12 @@
 </script>
 
 <!--
-    D-10: the picture comes from the connected CCU through the host's `hmm-image://` protocol, which
-    caches on disk and falls back to the bundled webp subset. A page without a host - `apps/web`,
-    the CCU addon, demo mode - has no such protocol, and 2.x's answer (a bundled 20 000-line
-    `deviceImages.json`) is not coming back, so the cell degrades to a labelled placeholder instead
-    of a broken-image icon.
+    D-10: the picture comes from the connected CCU through the host's `hmm-image://` protocol in
+    Electron, or through the web host's `images/<type>` route on the addon and the server
+    installs; both cache on disk and fall back to the bundled webp subset. Where neither answers
+    (demo mode, a type the CCU has no picture for) the cell degrades to a labelled placeholder
+    instead of a broken-image icon; 2.x's bundled 20 000-line `deviceImages.json` is not coming
+    back.
 -->
 {#if showImage}
     <img

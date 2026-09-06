@@ -58,10 +58,17 @@ export class HostStore {
         return ['available', 'downloading', 'downloaded', 'installOnQuit'].includes(state.phase) ? state : undefined;
     }
 
-    /** The `<img src>` of a device image, or `undefined` when no host serves one (D-10). */
+    /**
+     * The `<img src>` of a device image (D-10): the host bridge's `hmm-image://` URL in Electron,
+     * otherwise the web host's `images/<type>` route relative to the page (the addon and every
+     * server install serve it; demo mode answers 404 and the component shows its placeholder).
+     */
     deviceImageUrl(deviceType: string): string | undefined {
-        if (deviceType === '' || !this.#bridge) {
+        if (deviceType === '') {
             return undefined;
+        }
+        if (!this.#bridge) {
+            return `images/${encodeURIComponent(deviceType)}`;
         }
         return this.#bridge.deviceImageUrl(deviceType);
     }

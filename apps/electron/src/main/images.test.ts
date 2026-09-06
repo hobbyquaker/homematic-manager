@@ -107,7 +107,14 @@ describe('the hmm-image protocol handler', () => {
 
     it('declares the scheme privileged, which has to happen before the app is ready', () => {
         expect(PRIVILEGED_SCHEMES[0].scheme).toBe('hmm-image');
-        expect(PRIVILEGED_SCHEMES[0].privileges).toMatchObject({standard: true, secure: true});
+        expect(PRIVILEGED_SCHEMES[0].privileges).toMatchObject({
+            standard: true,
+            secure: true,
+            supportFetchAPI: true,
+            // The page is `file:` and the picture is `hmm-image://device`: a `fetch()` between the
+            // two is cross-origin, and without this Chromium refuses it as "Failed to fetch".
+            corsEnabled: true,
+        });
     });
 });
 

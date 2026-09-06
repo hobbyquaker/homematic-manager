@@ -8,8 +8,13 @@
  * handler is a plain function and the test calls it with a URL.
  *
  * The scheme has to be declared privileged *before* the app is ready - `standard` so relative
- * resolution and the origin behave, `secure` so a page under a strict CSP may load it, and
- * `supportFetchAPI` so the UI could also `fetch()` one later.
+ * resolution and the origin behave, `secure` so a page under a strict CSP may load it,
+ * `supportFetchAPI` so the UI can also `fetch()` one, and `corsEnabled` because that fetch is a
+ * cross-origin one however local it looks: the page is served from `file:` and the picture from
+ * `hmm-image://device`, which are two origins, and Chromium refuses a cross-origin fetch of a
+ * scheme that is not CORS-enabled with the same bare "Failed to fetch" it gives a blocked network
+ * request. The handler answers with `access-control-allow-origin: *`, which is as wide as this
+ * scheme goes: it exists only inside this app's session, and nothing outside it can ask.
  */
 
 import {deviceTypeFromImageUrl, IMAGE_SCHEME} from '../shared/ipc.js';
@@ -20,7 +25,7 @@ import type {DeviceImageService} from './images.js';
 export const PRIVILEGED_SCHEMES = [
     {
         scheme: IMAGE_SCHEME,
-        privileges: {standard: true, secure: true, supportFetchAPI: true, corsEnabled: false, stream: false},
+        privileges: {standard: true, secure: true, supportFetchAPI: true, corsEnabled: true, stream: false},
     },
 ] as const;
 
@@ -32,19 +37,25 @@ export function createImageProtocolHandler(images: DeviceImageService): (request
     return async (request: Request): Promise<Response> => {
         const deviceType = deviceTypeFromImageUrl(request.url);
         if (deviceType === undefined) {
-            return new Response('not an image URL', {status: 400, headers: {'content-type': 'text/plain'}});
+            return new Response('not an image URL', {
+                status: 400,
+                headers: {'content-type': 'text/plain', 'access-control-allow-origin': '*'},
+            });
         }
         const image = await images.get(deviceType);
         if (image === undefined) {
             return new Response('no image for this device type', {
                 status: 404,
-                headers: {'content-type': 'text/plain'},
+                headers: {'content-type': 'text/plain', 'access-control-allow-origin': '*'},
             });
         }
         return new Response(new Uint8Array(image.body), {
             status: 200,
             headers: {
                 'content-type': image.mime,
+                // See `PRIVILEGED_SCHEMES`: `hmm-image://device` is a different origin from the
+                // `file:` page, so a `fetch()` of it needs this even though nothing leaves the app.
+                'access-control-allow-origin': '*',
                 // The picture of a device type does not change while the app runs, and a fetched
                 // one is on disk anyway; letting the renderer keep it saves the round trip.
                 'cache-control': 'private, max-age=86400',

@@ -81,7 +81,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [18. Addon login against ReGa](#18-addon-login-against-rega) ✅ (lab check pending)
 - [19. UI polish after the first look](#19-ui-polish-after-the-first-look) ✅
 - [20. UI second look](#20-ui-second-look) ✅
-- [21. Interface popup](#21-interface-popup)
+- [21. Interface popup](#21-interface-popup) ✅
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
 
@@ -637,6 +637,10 @@ The maintainer's second look at the dev build on the x86_64 lab box (2026-09-06,
 Tests in browser mode for the three points; screenshots retaken.
 
 ## 21. Interface popup
+
+Done 2026-09-06, report in `roadmap-archive/task-21.md`. The popup has no filter box (maintainer,
+the same day); five configured interfaces in the demo found a horizontal overflow in the settings
+dialog that any CCU with more than two would have hit.
 
 Maintainer, 2026-09-06: the interface selector in the header becomes a popup instead of a
 standard dropdown, and the per-interface status marks leave the top bar and move into it.

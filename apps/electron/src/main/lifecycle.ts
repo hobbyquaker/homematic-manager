@@ -16,7 +16,7 @@
 /** How long `backend.stop()` may take before the quit goes on without it. */
 export const DEFAULT_STOP_TIMEOUT_MS = 8000;
 /** How long the whole quit may take before the process is ended the hard way. */
-export const DEFAULT_EXIT_TIMEOUT_MS = 20_000;
+export const DEFAULT_EXIT_TIMEOUT_MS = 15_000;
 
 export interface TimerFunctions {
     readonly setTimer?: (callback: () => void, ms: number) => unknown;

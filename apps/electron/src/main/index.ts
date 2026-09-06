@@ -450,7 +450,7 @@ app.on('before-quit', () => {
 
 /**
  * The quit, with its two bounds in `lifecycle.ts` rather than here: `backend.stop()` may take
- * eight seconds, the whole shutdown twenty, and after that the process ends with `app.exit()`.
+ * eight seconds, the whole shutdown fifteen, and after that the process ends with `app.exit()`.
  *
  * The bound that was missing is the second one. Playwright's `electronApplication.close()` asks
  * the app to quit and then waits for the process to exit with no timeout of its own, so an app

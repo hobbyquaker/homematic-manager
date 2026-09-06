@@ -142,9 +142,9 @@ describe('createQuitSequence', () => {
                 },
             });
             expect(sequence.willQuit()).toBe(true);
-            await vi.advanceTimersByTimeAsync(20_000);
+            await vi.advanceTimersByTimeAsync(15_000);
             expect(calls).toContain('exit 0');
-            expect(errors.at(-1)?.message).toContain('did not quit within 20000ms');
+            expect(errors.at(-1)?.message).toContain('did not quit within 15000ms');
         } finally {
             vi.useRealTimers();
         }

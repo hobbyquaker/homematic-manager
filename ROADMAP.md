@@ -85,6 +85,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [20. UI second look](#20-ui-second-look) ✅
 - [21. Interface popup](#21-interface-popup) ✅
 - [22. UI third look and the beta](#22-ui-third-look-and-the-beta) ✅ UI part; beta cut 2026-09-06
+- [23. Settings dialog and the help menu](#23-settings-dialog-and-the-help-menu)
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
 
@@ -136,6 +137,7 @@ Per task:
 | 20 UI second look | 2-3 | 19 |
 | 21 Interface popup | 1-2 | 20 |
 | 22 UI third look and the beta | 1-2 | 21 |
+| 23 Settings dialog and the help menu | 1-2 | 22 |
 
 ## 1. Legacy stopgap release 2.8 (dropped)
 
@@ -683,6 +685,23 @@ Maintainer, 2026-09-06, after the third look at `3.0.0-dev.6` on the lab box:
 - Then the beta (D-37): archive, `3.0.0-beta.0`, fast-forward merge to `master`, tag, the four
   release workflows, `docs/release-checklist.md` followed step by step; the maintainer publishes
   the drafts and posts the announcement.
+
+## 23. Settings dialog and the help menu
+
+Maintainer, 2026-09-06, on `3.0.0-beta.1`:
+
+- The settings dialog reads badly: regroup it into titled sections (connection: host, discovery, TLS,
+  auth; interfaces: the configured list and user-defined extras; callback: address and ports;
+  ReGa: on/off, inbox auto-confirm; behaviour: language, write pace, sticky-unreach
+  acknowledge, RPC log folder, cache reset), with labels aligned in a two-column form grid,
+  help text under a field rather than beside it, sensible widths per field type, and a dialog
+  size that fits the content (it may be bigger; task 20's user resize stays). Both themes.
+- The "?" menu with the About dialog and its copyright text goes; in its place a GitHub icon in
+  the header that opens the project page (https://github.com/hobbyquaker/homematic-manager) in
+  the system browser (Electron: `shell.openExternal` via the host bridge; web: `target=_blank`
+  with `rel=noopener`). Version, data manifest and licence move to the bottom of the settings
+  dialog as a small info line; the update notice (Electron) keeps working without the About
+  dialog.
 
 ## Open questions
 

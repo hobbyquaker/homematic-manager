@@ -157,13 +157,17 @@
     .hmm-multiselect {
         position: relative;
         display: inline-block;
+        max-width: 100%;
     }
 
+    /* The summary can be arbitrarily long (it is a list of names); the button ellipsises it
+       instead of widening the row it sits in. */
     .hmm-multiselect-button {
         display: inline-flex;
         align-items: center;
         gap: 6px;
         min-width: 120px;
+        max-width: 100%;
         justify-content: space-between;
     }
 

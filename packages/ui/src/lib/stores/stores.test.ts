@@ -253,7 +253,9 @@ describe('AppStore', () => {
         expect(app.host).toBe('demo.local');
         expect(app.language).toBe('de');
         expect(app.selectedInterface).toBe('BidCos-RF');
-        expect(app.configuredInterfaces).toEqual(['BidCos-RF', 'HmIP-RF']);
+        // The demo CCU has five configured interfaces, one per state the popup draws; the two with
+        // devices come first, which is why the route lands on BidCos-RF.
+        expect(app.configuredInterfaces).toEqual(['BidCos-RF', 'HmIP-RF', 'BidCos-Wired', 'CUxD', 'VirtualDevices']);
         expect(router.location.hash).toBe('#/BidCos-RF/devices');
         expect(app.configDialogOpen).toBe(false);
     });
@@ -367,12 +369,14 @@ describe('InterfacesStore', () => {
 
         expect(store.states).toEqual(DEMO_INTERFACE_STATES);
         expect(store.typeOf('BidCos-RF')).toBe('BidCos-RF');
-        expect(store.typeOf('CUxD')).toBe('');
+        expect(store.typeOf('Homegear')).toBe('');
         expect(store.isConnected('BidCos-RF')).toBe(true);
-        expect(store.isConnected('CUxD')).toBe(false);
+        expect(store.isConnected('Homegear')).toBe(false);
         // the demo has a BidCos-Wired that is not there; an absent interface is not a fault
         expect(store.isConnected('BidCos-Wired')).toBe(false);
-        expect(store.allConnected).toBe(true);
+        // ... but its VirtualDevices is configured, present and unsubscribed, and that is one
+        expect(store.isConnected('VirtualDevices')).toBe(false);
+        expect(store.allConnected).toBe(false);
         expect(store.rega?.reachable).toBe(true);
         expect(store.loading).toBe(false);
     });

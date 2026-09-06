@@ -669,6 +669,16 @@ export const DEMO_BIDCOS_INTERFACES: BidcosInterfaceInfo[] = [
     },
 ];
 
+/**
+ * One interface per state the popup of task 21 draws, so the whole thing can be judged in demo
+ * mode: two that are connected, one that is not there, one that is re-subscribing and one that is
+ * configured but does not answer.
+ *
+ * Only the first two carry devices (`DEMO_INTERFACE_NAMES`), which is what the real thing looks
+ * like too - an interface that is not connected has nothing to list. The names are real CCU
+ * interfaces rather than invented ones: `CUxD` is binrpc on 8701, so the second line of the popup
+ * shows a protocol other than xmlrpc somewhere, and `VirtualDevices` is the group process.
+ */
 export const DEMO_INTERFACE_STATES: InterfaceState[] = [
     {
         name: 'BidCos-RF',
@@ -700,6 +710,29 @@ export const DEMO_INTERFACE_STATES: InterfaceState[] = [
         connected: false,
         absent: true,
         error: 'connect ECONNREFUSED demo.local:2000',
+    },
+    {
+        // D-31: `init` is through, the interface is re-sending its devices and the grids are not
+        // complete yet - neither the tick nor the cross would be honest.
+        name: 'CUxD',
+        type: 'CUxD',
+        protocol: 'binrpc',
+        host: 'demo.local',
+        port: 8701,
+        connected: true,
+        subscribing: true,
+        lastEvent: Date.parse('2026-09-05T09:59:58Z'),
+    },
+    {
+        // configured, listening, but the subscription failed: the one state that is really a fault
+        // and the only one the popup paints red. The error text is what its title carries.
+        name: 'VirtualDevices',
+        type: 'VirtualDevices',
+        protocol: 'xmlrpc',
+        host: 'demo.local',
+        port: 9292,
+        connected: false,
+        error: 'VirtualDevices: init timed out after 10000 ms',
     },
 ];
 
@@ -758,7 +791,11 @@ export const DEMO_REGA_STATE: RegaState = {
 
 export const DEMO_CONNECTION: ConnectionConfig = {
     host: 'demo.local',
-    interfaces: [...DEMO_INTERFACE_NAMES],
+    // The backend answers `interfaces.list` with the state of every *configured* interface, in
+    // configuration order, so the fixture's configuration is the list of its states - not only the
+    // two that carry devices. Without that the popup would show interfaces the settings dialog
+    // does not know about.
+    interfaces: DEMO_INTERFACE_STATES.map((state) => state.name),
     autoDetect: true,
     extraInterfaces: [],
     tls: false,

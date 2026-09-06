@@ -389,9 +389,15 @@
         gap: 4px;
     }
 
+    /*
+        `minmax(0, 1fr)`, not `1fr`: a plain `1fr` track is `minmax(auto, 1fr)` and grows to the
+        widest thing in it, so the interface picker's summary - every configured interface, comma
+        separated - pushed the dialog into a horizontal scrollbar as soon as a CCU had more than
+        two of them (task 19's rule; found with the five-interface demo of task 21).
+    */
     .hmm-config-row {
         display: grid;
-        grid-template-columns: 210px 1fr auto;
+        grid-template-columns: 210px minmax(0, 1fr) auto;
         gap: 8px;
         align-items: center;
     }

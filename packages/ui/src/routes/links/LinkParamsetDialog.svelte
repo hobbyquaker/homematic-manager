@@ -372,7 +372,15 @@
     }
 </script>
 
-<Dialog bind:open {title} width="960px" height="min(640px, calc(100vh - 32px))" testId="link-paramset-dialog">
+<Dialog
+    bind:open
+    {title}
+    width="960px"
+    height="min(640px, calc(100vh - 32px))"
+    minWidth={560}
+    minHeight={320}
+    testId="link-paramset-dialog"
+>
     {#if loading && !receiverDescription}
         <p>{t('Loading Homematic Manager...')}</p>
     {:else if !receiverDescription}

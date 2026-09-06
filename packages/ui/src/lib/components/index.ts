@@ -1,4 +1,5 @@
 export * from './tableModel.js';
+export * from './dialogGeometry.js';
 export * from './multiSelect.js';
 export * from './contextMenu.js';
 

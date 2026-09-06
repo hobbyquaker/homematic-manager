@@ -314,7 +314,15 @@
     list. It used to be as tall as its content with three nested scrolling boxes - the dialog, its
     body and the list - which is what the maintainer saw at 1280x800.
 -->
-<Dialog bind:open {title} width="900px" height="min(640px, calc(100vh - 32px))" testId="paramset-dialog">
+<Dialog
+    bind:open
+    {title}
+    width="900px"
+    height="min(640px, calc(100vh - 32px))"
+    minWidth={520}
+    minHeight={320}
+    testId="paramset-dialog"
+>
     {#if stores.paramsets.loading && !description}
         <p>{t('Loading Homematic Manager...')}</p>
     {:else if !description}

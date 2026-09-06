@@ -8,6 +8,10 @@
  * - keep its box while it is open. Loading its content, switching an easy-mode profile or turning
  *   the expert view on changes what is inside; it must not change the size of the frame around it.
  *
+ * Task 20 adds the other half of that rule: the *user* may change the box, by dragging the title
+ * bar or an edge, and what the user chose is then what the dialog keeps - while it is open, and for
+ * the rest of the session when the same dialog class is opened again.
+ *
  * These are pixel assertions, so they belong to browser mode. jsdom has no layout and reports every
  * box as zero, so the file skips them there rather than passing on nothing.
  */
@@ -15,6 +19,7 @@
 import {fireEvent, screen, waitFor, within} from '@testing-library/svelte';
 import {beforeEach, describe, expect, it} from 'vitest';
 
+import {forgetDialogGeometry} from '../lib/components/dialogGeometry.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
 import {mountApp} from '../testHarness.js';
 
@@ -48,6 +53,37 @@ function box(dialog: HTMLElement): {width: number; height: number} {
     return {width: Math.round(rect.width), height: Math.round(rect.height)};
 }
 
+function frame(dialog: HTMLElement): {left: number; top: number; width: number; height: number} {
+    const rect = dialog.getBoundingClientRect();
+    return {
+        left: Math.round(rect.left),
+        top: Math.round(rect.top),
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+    };
+}
+
+/**
+ * One pointer drag on a handle: down on the handle, move and up on the window, which is where the
+ * component listens once a gesture has started.
+ */
+async function drag(handle: HTMLElement, dx: number, dy: number): Promise<void> {
+    const rect = handle.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const options = {bubbles: true, pointerId: 1, button: 0, buttons: 1};
+    handle.dispatchEvent(new PointerEvent('pointerdown', {...options, clientX: x, clientY: y}));
+    window.dispatchEvent(new PointerEvent('pointermove', {...options, clientX: x + dx, clientY: y + dy}));
+    window.dispatchEvent(new PointerEvent('pointerup', {...options, clientX: x + dx, clientY: y + dy}));
+    await waitFor(() => {
+        expect(handle.isConnected).toBe(true);
+    });
+}
+
+const titleBarOf = (dialog: HTMLElement): HTMLElement => dialog.querySelector<HTMLElement>('.hmm-dialog-titlebar')!;
+const handleOf = (dialog: HTMLElement, edge: string): HTMLElement =>
+    dialog.querySelector<HTMLElement>(`[data-resize="${edge}"]`)!;
+
 async function openParamset(): Promise<HTMLElement> {
     await mountApp({transport: new MockTransport({demo: true}), hash: '#/BidCos-RF/devices'});
     const parent = document.querySelector<HTMLElement>(`[data-row-id="${SWITCH}"]`)!;
@@ -75,6 +111,7 @@ async function openLinkParamset(): Promise<HTMLElement> {
 describe.skipIf(!hasLayout)('dialogs at 1280x800', () => {
     beforeEach(() => {
         expect(window.innerWidth).toBe(1280);
+        forgetDialogGeometry();
     });
 
     it('the settings dialog fits', async () => {
@@ -212,5 +249,190 @@ describe.skipIf(!hasLayout)('dialogs at 1280x800', () => {
         await fireEvent.click(screen.getByTestId('radio-set-interface'));
         const dialog = await waitFor(() => screen.getByTestId('set-interface-dialog'));
         expectNoOverflow(dialog);
+    });
+});
+
+/**
+ * Task 20, the third point: the user moves and resizes a dialog, and nothing else does.
+ *
+ * The paramset editor is the one measured here because it is the dialog with the most inside it -
+ * a fixed 900x640 box, a scrolling parameter list, and the one whose size the maintainer looked at
+ * first.
+ */
+describe.skipIf(!hasLayout)('a dialog the user has moved or resized', () => {
+    beforeEach(() => {
+        expect(window.innerWidth).toBe(1280);
+        forgetDialogGeometry();
+    });
+
+    it('follows the title bar and keeps its size', async () => {
+        const dialog = await openParamset();
+        const before = frame(dialog);
+
+        await drag(titleBarOf(dialog), 100, 50);
+
+        expect(frame(dialog)).toEqual({
+            left: before.left + 100,
+            top: before.top + 50,
+            width: before.width,
+            height: before.height,
+        });
+        expectNoOverflow(dialog);
+    });
+
+    it('reports the new box after a drag on the bottom-right corner', async () => {
+        const dialog = await openParamset();
+        const before = frame(dialog);
+
+        await drag(handleOf(dialog, 'se'), 120, 80);
+
+        const after = frame(dialog);
+        expect(after.left).toBe(before.left);
+        expect(after.top).toBe(before.top);
+        expect(after.width).toBe(before.width + 120);
+        expect(after.height).toBe(before.height + 80);
+    });
+
+    it('resizes from an edge and leaves the opposite one where it was', async () => {
+        const dialog = await openParamset();
+        const before = frame(dialog);
+
+        await drag(handleOf(dialog, 'w'), -80, 0);
+
+        const after = frame(dialog);
+        expect(after.width).toBe(before.width + 80);
+        expect(after.left).toBe(before.left - 80);
+        expect(after.left + after.width).toBe(before.left + before.width);
+        expect(after.height).toBe(before.height);
+    });
+
+    /** 520x320 is what the paramset editor asks for; below that its rows stop being readable. */
+    it('stops at the minimum of its dialog class, however far the pointer goes', async () => {
+        const dialog = await openParamset();
+
+        await drag(handleOf(dialog, 'se'), -2000, -2000);
+
+        expect(box(dialog)).toEqual({width: 520, height: 320});
+        expectNoOverflow(dialog);
+    });
+
+    it('is bounded by the viewport, however far the pointer goes the other way', async () => {
+        const dialog = await openParamset();
+
+        await drag(handleOf(dialog, 'se'), 2000, 2000);
+
+        const after = frame(dialog);
+        expect(after.left + after.width).toBeLessThanOrEqual(window.innerWidth);
+        expect(after.top + after.height).toBeLessThanOrEqual(window.innerHeight);
+        expectNoOverflow(dialog);
+    });
+
+    it('keeps the box the user chose when the content grows', async () => {
+        const dialog = await openParamset();
+        await drag(handleOf(dialog, 'se'), 120, 80);
+        const chosen = frame(dialog);
+
+        await fireEvent.click(screen.getByTestId('paramset-write-all'));
+        const hidden = screen.queryByTestId('paramset-show-hidden');
+        if (hidden) {
+            await fireEvent.click(hidden);
+            await waitFor(() => {
+                expect(screen.getAllByTestId(/^param-/).length).toBeGreaterThan(0);
+            });
+        }
+        expect(frame(dialog)).toEqual(chosen);
+    });
+
+    /** Task 19's rule survives the resize: down the content area, never across it. */
+    it('never scrolls horizontally after a resize, whatever the user squeezed it to', async () => {
+        const dialog = await openParamset();
+        await drag(handleOf(dialog, 'se'), -2000, -2000);
+
+        const body = dialog.querySelector<HTMLElement>('.hmm-dialog-body')!;
+        const list = dialog.querySelector<HTMLElement>('.hmm-paramset-list')!;
+        expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth);
+        expect(body.scrollWidth).toBeLessThanOrEqual(body.clientWidth);
+        expect(list.scrollWidth).toBeLessThanOrEqual(list.clientWidth);
+        expect(getComputedStyle(list).overflowX).toBe('hidden');
+        expect(getComputedStyle(list).overflowY).toBe('auto');
+    });
+
+    /**
+     * And the vertical half of it: the settings dialog squeezed to the default minimum is far
+     * shorter than what is in it, and the content area is what takes the scrollbar.
+     */
+    it('scrolls its content vertically after a resize', async () => {
+        await mountApp({transport: new MockTransport({demo: true})});
+        await fireEvent.click(screen.getByTestId('settings-button'));
+        const dialog = await waitFor(() => screen.getByTestId('config-dialog'));
+
+        await drag(handleOf(dialog, 'se'), -2000, -2000);
+        // 560 px is the width the settings form was laid out for, and its minimum for that reason.
+        expect(box(dialog)).toEqual({width: 560, height: 160});
+
+        const body = dialog.querySelector<HTMLElement>('.hmm-dialog-body')!;
+        expect(body.scrollHeight).toBeGreaterThan(body.clientHeight);
+        expect(body.scrollWidth).toBeLessThanOrEqual(body.clientWidth);
+        expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth);
+    });
+
+    it('opens again where it was left, for the rest of the session', async () => {
+        const dialog = await openParamset();
+        await drag(titleBarOf(dialog), 100, 50);
+        await drag(handleOf(dialog, 'se'), 120, 80);
+        const chosen = frame(dialog);
+
+        await fireEvent.click(within(dialog).getByRole('button', {name: 'Close'}));
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLDialogElement>('paramset-dialog').open).toBe(false);
+        });
+
+        await fireEvent.click(screen.getByTestId(`paramset-${SWITCH_CHANNEL}-MASTER`));
+        const again = await waitFor(() => {
+            const reopened = screen.getByTestId<HTMLDialogElement>('paramset-dialog');
+            expect(reopened.open).toBe(true);
+            return reopened;
+        });
+        expect(frame(again)).toEqual(chosen);
+    });
+
+    /**
+     * The native `<dialog>` still does the modality, and the handles are `aria-hidden` divs with no
+     * tab stop and no accessible name, so nothing a keyboard or a screen reader sees has changed:
+     * the focus is trapped inside the open dialog, a drag does not take it out, and ESC closes.
+     */
+    it('keeps the focus trap and ESC of the native dialog', async () => {
+        const first = (await openParamset()) as HTMLDialogElement;
+        for (const handle of first.querySelectorAll('[data-resize]')) {
+            expect(handle.getAttribute('aria-hidden')).toBe('true');
+            expect(handle.getAttribute('tabindex')).toBeNull();
+            expect(handle.textContent).toBe('');
+        }
+        // ESC on a modal dialog is the platform's, and it arrives as `cancel`.
+        first.dispatchEvent(new Event('cancel', {cancelable: true}));
+        await waitFor(() => {
+            expect(first.open).toBe(false);
+        });
+
+        // Again, this time opened from a focused button, the way a keyboard user opens it.
+        const opener = screen.getByTestId(`paramset-${SWITCH_CHANNEL}-MASTER`);
+        opener.focus();
+        await fireEvent.click(opener);
+        const dialog = await waitFor(() => {
+            const reopened = screen.getByTestId<HTMLDialogElement>('paramset-dialog');
+            expect(reopened.open).toBe(true);
+            return reopened;
+        });
+        expect(dialog.contains(document.activeElement)).toBe(true);
+
+        await drag(titleBarOf(dialog), 100, 50);
+        expect(dialog.contains(document.activeElement)).toBe(true);
+        expect(dialog.open).toBe(true);
+
+        dialog.dispatchEvent(new Event('cancel', {cancelable: true}));
+        await waitFor(() => {
+            expect(dialog.open).toBe(false);
+        });
+        expect(document.activeElement).toBe(opener);
     });
 });

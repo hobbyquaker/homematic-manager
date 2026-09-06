@@ -6,6 +6,20 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [3.0.0-beta.2] — 2026-09-06
+
+The second public pre-release, cut from `master` (D-38). Everything of beta.0 plus:
+
+- No "unknown method setReadyConfig" notices at start: the callback every interface process sends
+  after `init` is known now, and a genuinely unknown method is reported once per session.
+- The RPC log drawer takes half the window and can be dragged; the page itself never scrolls any
+  more, only the grid inside a tab, and the header stays put (the app shell bounds itself to the
+  viewport instead of trusting its mount element).
+- The settings dialog is grouped into titled sections (connection, callback, interfaces, ReGa,
+  behaviour) in a two-column form; version, device data and licence sit at its foot.
+- A GitHub icon in the header opens the project page; the "?" menu and the About dialog are gone.
+- beta.1 (not released): the two fixes above for the start-up notices and the drawer.
+
 ## [3.0.0-beta.0] — 2026-09-06
 
 The first public pre-release of the rebuild, for testers: install with
@@ -265,5 +279,6 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
-[unreleased]: https://github.com/hobbyquaker/homematic-manager/compare/v3.0.0-beta.0...master
+[unreleased]: https://github.com/hobbyquaker/homematic-manager/compare/v3.0.0-beta.2...master
+[3.0.0-beta.2]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.2
 [3.0.0-beta.0]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.0

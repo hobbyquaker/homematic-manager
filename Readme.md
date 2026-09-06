@@ -20,7 +20,7 @@ Eine ausführliche Beschreibung der 2.x-Oberfläche steht im
 > 3.0 ist ein Neubau auf aktuellem Electron, Svelte 5 und einem getesteten TypeScript-Kern und
 > läuft zusätzlich als Server und als CCU-Addon. Die Entwicklung findet auf `master` statt, der
 > 2.7.1-Stand liegt unverändert unter `legacy/`.
-> **3.0 gibt es als Beta**: [3.0.0-beta.0](https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.0) ist als Pre-Release veröffentlicht, mit Installern
+> **3.0 gibt es als Beta**: die aktuelle Beta ([Releases](https://github.com/hobbyquaker/homematic-manager/releases), zurzeit 3.0.0-beta.4) ist als Pre-Release veröffentlicht, mit Installern
 > für Windows, macOS und Linux, den drei CCU-Addon-Paketen, dem Docker-Image und dem npm-Paket
 > (`npm install -g homematic-manager@next`). Bekannte Probleme und was zu testen ist, stehen in den Release-Notes; der Plan in
 > [ROADMAP.md](ROADMAP.md).
@@ -199,7 +199,7 @@ the live event stream and call any RPC method by hand. The user interface is Ger
 release and is a desktop app only; 3.0 is a rebuild on current Electron, Svelte 5 and a tested
 TypeScript core that additionally runs as a server and as a CCU addon. Work happens on `master`;
 the 2.7.1 sources sit unchanged under `legacy/`. **3.0 is available as a beta**:
-[3.0.0-beta.0](https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.0) is a published pre-release with the Windows, macOS and Linux installers, the
+the current beta ([releases](https://github.com/hobbyquaker/homematic-manager/releases), 3.0.0-beta.4 at the time of writing) is a published pre-release with the Windows, macOS and Linux installers, the
 three CCU addon packages, the Docker image and the npm package (`npm install -g homematic-manager@next`). The plan is
 [ROADMAP.md](ROADMAP.md).
 

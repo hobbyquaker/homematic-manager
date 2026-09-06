@@ -31,7 +31,7 @@ Contents: [Requirements](#requirements) · [Which package](#which-package) ·
 - About **130 MB** free on `/usr/local` (72 MB on armv7l) and 500 free inodes. See
   [Size and flash budget](#size-and-flash-budget).
 
-> **3.0 is available as a beta.** The three packages of [3.0.0-beta.0](https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.0) are on the release
+> **3.0 is available as a beta.** The three packages of the current beta ([releases](https://github.com/hobbyquaker/homematic-manager/releases)) are on the release
 > page as a pre-release, each with its `.sha256` and `.cdx.json`; `addon.yml` builds the same
 > packages on every push to `master` as workflow artifacts, and a checkout builds them too
 > ([BUILD.md](../BUILD.md)).

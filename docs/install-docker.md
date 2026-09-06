@@ -14,9 +14,9 @@ Contents: [The callback](#the-one-thing-to-get-right-the-callback) ·
 [Verifying what you pulled](#verifying-what-you-pulled-d-27) · [Troubleshooting](#troubleshooting) ·
 [When Docker is the wrong answer](#when-docker-is-the-wrong-answer)
 
-> **3.0 is available as a beta.** `ghcr.io/hobbyquaker/homematic-manager:3.0.0-beta.0` is
+> **3.0 is available as a beta.** `ghcr.io/hobbyquaker/homematic-manager:3.0.0-beta.4` is
 > published (multi-arch); `latest` still points nowhere useful until 3.0.0, so name the tag. The
-> image's SBOM is an asset of [the release](https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.0). CI builds the amd64 image on every push and
+> image's SBOM is an asset of [the current beta's release](https://github.com/hobbyquaker/homematic-manager/releases). CI builds the amd64 image on every push and
 > checks `--version`, `--demo` and the SBOM; a checkout builds it with `docker build .`
 > ([BUILD.md](../BUILD.md)).
 

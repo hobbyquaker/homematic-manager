@@ -23,7 +23,7 @@ publishes `linux-x64` and `linux-arm64` only — there is no `armv7l` binary to 
 32-bit ARM machine runs the [CCU addon](install-addon.md) or the
 [npm package](install-lxc.md) instead; both are plain Node.
 
-> **3.0 is available as a beta.** The installers of [3.0.0-beta.0](https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.0) are on the release page
+> **3.0 is available as a beta.** The installers of the current beta ([releases](https://github.com/hobbyquaker/homematic-manager/releases)) are on the release page
 > as a pre-release: Windows setup and portable exe (x64, arm64), macOS universal dmg and zip, Linux
 > AppImage and deb (x64, arm64), each with its `.cdx.json`. `build.yml` packages the same on every
 > push to `master` and keeps the artifacts for 14 days. The packaged app passes its nine-assertion

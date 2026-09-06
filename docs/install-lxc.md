@@ -15,7 +15,7 @@ Contents: [The container](#1-the-container) · [Node](#2-node-22) ·
 [Checking that events arrive](#5-checking-that-events-actually-arrive) ·
 [Update, backup, uninstall](#update-backup-uninstall) · [Troubleshooting](#troubleshooting)
 
-> **3.0 is available as a beta.** [3.0.0-beta.0](https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.0) is published and its npm package is on the
+> **3.0 is available as a beta.** The current beta ([releases](https://github.com/hobbyquaker/homematic-manager/releases)) is published and its npm package is on the
 > registry under the `next` dist-tag: `npm install -g homematic-manager@next`. A checkout produces
 > the same tarball with `npm pack -w apps/web` — see [BUILD.md](../BUILD.md).
 >

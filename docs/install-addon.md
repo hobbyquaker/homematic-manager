@@ -31,10 +31,10 @@ Contents: [Requirements](#requirements) · [Which package](#which-package) ·
 - About **130 MB** free on `/usr/local` (72 MB on armv7l) and 500 free inodes. See
   [Size and flash budget](#size-and-flash-budget).
 
-> **There is no release of 3.0 yet.** The packages described here are built by
-> `.github/workflows/addon.yml` on every push and by `release-addon.yml` on a tag; neither workflow
-> has ever run on GitHub. Until the maintainer cuts the first tag, the only packages that exist are
-> the ones built from a checkout ([BUILD.md](../BUILD.md)).
+> **3.0 is available as a beta.** The three packages of [3.0.0-beta.0](https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.0) are on the release
+> page as a pre-release, each with its `.sha256` and `.cdx.json`; `addon.yml` builds the same
+> packages on every push to `master` as workflow artifacts, and a checkout builds them too
+> ([BUILD.md](../BUILD.md)).
 
 ## Which package
 

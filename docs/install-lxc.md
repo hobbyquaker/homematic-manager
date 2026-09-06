@@ -15,9 +15,10 @@ Contents: [The container](#1-the-container) · [Node](#2-node-22) ·
 [Checking that events arrive](#5-checking-that-events-actually-arrive) ·
 [Update, backup, uninstall](#update-backup-uninstall) · [Troubleshooting](#troubleshooting)
 
-> **There is no release of 3.0 yet.** `release-npm.yml` publishes with npm trusted publishing (OIDC)
-> on a `v*` tag and has never run, so the package is not on the registry. Until then the same tarball
-> comes out of a checkout with `npm pack -w apps/web` — see [BUILD.md](../BUILD.md).
+> **3.0 is available as a beta, the npm package follows.** [3.0.0-beta.0](https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.0) is published; its
+> npm package is not on the registry yet (the trusted publisher on npmjs.com has to name
+> `release-npm.yml` before the publish step can run). Until it is, the same tarball comes out of a
+> checkout with `npm pack -w apps/web` — see [BUILD.md](../BUILD.md).
 >
 > **The package is `homematic-manager`** (D-33), the name the 2.x desktop app had on npm — its
 > `npm i -g` audience wanted a headless install anyway. The 1.x versions under that name are

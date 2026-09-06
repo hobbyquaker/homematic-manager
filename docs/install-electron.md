@@ -23,12 +23,13 @@ publishes `linux-x64` and `linux-arm64` only — there is no `armv7l` binary to 
 32-bit ARM machine runs the [CCU addon](install-addon.md) or the
 [npm package](install-lxc.md) instead; both are plain Node.
 
-> **There is no release of 3.0 yet.** `.github/workflows/build.yml` packages all three platforms on
-> every push to `3.0-dev` and keeps the artifacts for 14 days; `release-electron.yml` attaches the
-> same build to a draft release on a `v*` tag. Neither has run on GitHub yet, so until the
-> maintainer cuts the first tag there is nothing to download. The runtime smoke test of the packaged
-> app is still outstanding for the same reason — the Electron host was built and unit-tested, but
-> `app.whenReady()` never fires under WSL, so the first click-through happens on a CI artifact.
+> **3.0 is available as a beta.** The installers of [3.0.0-beta.0](https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.0) are on the release page
+> as a pre-release: Windows setup and portable exe (x64, arm64), macOS universal dmg and zip, Linux
+> AppImage and deb (x64, arm64), each with its `.cdx.json`. `build.yml` packages the same on every
+> push to `master` and keeps the artifacts for 14 days. The packaged app passes its nine-assertion
+> smoke test on all three platforms in CI; the beta.0 build still shows two startup findings that
+> beta.1 fixed (harmless "unknown method setReadyConfig" notices, and an RPC log drawer that
+> lengthens the page).
 
 ## Download
 

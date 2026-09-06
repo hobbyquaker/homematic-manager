@@ -14,11 +14,11 @@ Contents: [The callback](#the-one-thing-to-get-right-the-callback) ·
 [Verifying what you pulled](#verifying-what-you-pulled-d-27) · [Troubleshooting](#troubleshooting) ·
 [When Docker is the wrong answer](#when-docker-is-the-wrong-answer)
 
-> **There is no release of 3.0 yet.** `release-docker.yml` pushes the multi-arch image to ghcr.io on
-> a `v*` tag (or by dispatch) and has never run, so nothing is published under that name. The image
-> builds from a checkout with `docker build .` — see [BUILD.md](../BUILD.md). CI builds the amd64
-> image on every push and checks `--version`, `--demo` and the SBOM, so the recipe below is known to
-> work; the sizes above were measured locally with qemu.
+> **3.0 is available as a beta.** `ghcr.io/hobbyquaker/homematic-manager:3.0.0-beta.0` is
+> published (multi-arch); `latest` still points nowhere useful until 3.0.0, so name the tag. The
+> image's SBOM is an asset of [the release](https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.0). CI builds the amd64 image on every push and
+> checks `--version`, `--demo` and the SBOM; a checkout builds it with `docker build .`
+> ([BUILD.md](../BUILD.md)).
 
 ## The one thing to get right: the callback
 

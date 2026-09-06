@@ -6,6 +6,31 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [3.0.0-beta.3] — 2026-09-06
+
+Rooms and functions, and openccu-lite (D-40, task 24).
+
+- **Rooms, functions, floors — and any other taxonomy you make.** The Homematic Manager now keeps a
+  taxonomy of its own in the profile (`meta.json`), so a user on Homegear, on a bare `rfd` or on
+  the desktop has one for the first time. It is reachable through the API today; the grid column,
+  the "assign to room" of a multi-selection and the tree dialog are task 25.
+- **[openccu-lite](docs/openccu-lite.md) support.** On that CCU firmware without ReGaHSS, names,
+  rooms and functions come from the box's metadata store and are **written back** to it: a rename
+  in the grid, a new room, a channel moved into one. A change made anywhere else on the box is in
+  the grid within a second, over the box's change stream. Which store is used is decided at
+  runtime by one call (`GET /api/meta/v1/version`) on the host that is configured — a profile that
+  moves between a CCU and a box needs no edit, and on a CCU nothing about ReGa changes (D-2).
+- **The addon's login on openccu-lite** (`--auth-mode occulite`, the default there): the box's
+  shell hands the addon the user's session, the addon checks it against the box and takes it from
+  there; there is no second login page, because the users are the box's. Reads use the box's
+  read-only local token, writes use that user's session — so a rename is attributed to a person.
+  The ReGa login of D-32 on a CCU is untouched.
+- Off the box (desktop, npm, Docker) the store needs an API token from the box's _Users_ page,
+  pasted into the connection settings; without one the app runs on its own names and says so.
+- New connection options: `metaProvider` (`auto`, `local`, `occulite`), `metaToken`, `metaUrl`.
+- **Fixed:** a connection option added by a newer version was silently dropped when the profile was
+  loaded or saved, because the connection is rebuilt field by field. Found while testing this.
+
 ## [3.0.0-beta.2] — 2026-09-06
 
 The second public pre-release, cut from `master` (D-38). Everything of beta.0 plus:

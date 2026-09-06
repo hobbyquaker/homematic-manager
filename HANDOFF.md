@@ -1,4 +1,4 @@
-# Handoff — 2026-09-05
+# Handoff — 2026-09-06
 
 Where the 3.0 rebuild stands, so that a new session (after a usage-limit pause, on another
 machine, with no conversation history) can continue without re-deriving anything. Refreshed
@@ -20,7 +20,20 @@ about every half hour while the agent works; the timestamp above is the last ref
 - Branch `master` since the beta (D-38, 2026-09-06): the full history, no squashing; `3.0-dev` is
   left behind at the same commits. Push `master` from WSL after each archived task or feature
   batch; nothing on it is secret. The public release `v3.0.0-beta.0` exists; the version on
-  `master` is `3.0.0-beta.1`.
+  `master` is `3.0.0-beta.3`, tagged `v3.0.0-beta.3` (task 24).
+- **Task 24 (D-40, 2026-09-06) is in and archived**: the metadata store. Rooms, functions and
+  floors as data in the profile, and on openccu-lite (the CCU firmware without ReGaHSS) names and
+  taxonomy from the box, written back through its API, with the addon's login taking the session
+  the box's shell hands over. `roadmap-archive/task-24.md` has what was measured and what it found;
+  `docs/openccu-lite.md` is the user-facing page. The model is `packages/core/src/meta/`, the
+  providers `packages/backend/src/meta/`, the login `apps/web/src/occulite.ts`.
+  **Task 25 is the UI for it** and is deliberately not started: a rooms column, "assign to room"
+  for a multi-selection, a tree dialog, a filter and the provider indicator. Every method and event
+  it needs exists and is tested.
+  Two test paths need something the repository does not ship: `OCCULITED_BINARY=<a build of
+openccu-lite's cmd/occulited>` runs the integration suite in `packages/backend/test/occulite/`
+  (skipped without it), and `OPENCCU_LITE_FIXTURES=<checkout>/fixtures` runs the conformance corpus
+  against the upstream copy instead of the vendored one.
 - Done and archived: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 1.0), 7 (UI
   foundation), 9 (data pipeline), 11 (Electron host; `build.yml` builds the desktop artifacts on
   every push to `3.0-dev` once Actions is enabled), 12 (web host, npm package with `--install`,

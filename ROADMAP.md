@@ -17,6 +17,10 @@ host with the build and release workflows) and 12 (web host and npm package; its
 as a follow-up, also done) are done too, and so is task 6 (write-safety lab study, `docs/config-pending.md`):
 milestone M1 is complete. Task 8 (UI feature parity) and task 13 (CCU addon, installed and checked on all three lab boxes) are done as well: milestones M2 and M4 are reached in the code. Tasks 10 (device-specific editors, initial set) and 16 (documentation: README with the install matrix, one page per install type, migration notes, BUILD.md, changelog) are done, and so is task 14 (test infrastructure: browser mode default, Playwright e2e, merged coverage, strict UI lint, shellcheck): milestone M3 lacks only task 17, and task 15 (backlog features: #124, #87, #26, #25, #21, #54, #94, #97 BidCos, D-31 idle unsubscribe, the hardware findings) is done, so M5's backlog half is in as well. Task 17 (beta cycle) is running its agent-side part and waits on the maintainer for GitHub Actions; task 18 (optional login against ReGa) is implemented and tested against stubs, its lab check rides with task 17's hardware run. The data contract between core and pipeline is `packages/core/src/data/types.ts`,
 the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-28).
+Task 24 (2026-09-06) adds the metadata store of D-40: rooms, functions and floors as data in the
+profile, and on [openccu-lite](https://github.com/hobbyquaker/openccu-lite) - the CCU firmware
+without ReGaHSS - names and taxonomy from the box, written back to it, with the addon's login
+taking the session that box's shell hands over.
 
 ## Decisions
 
@@ -60,6 +64,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 | D-36 | (2026-09-06, maintainer) Language: the UI starts in the browser's language (`navigator.languages`, first supported one) with English as the fallback, not German first; the switch lives in the settings dialog, not in the header, and a choice made there is stored in the profile and wins over the browser. The 2.x German-first default and the addon's "German first" are gone. |
 | D-37 | (2026-09-06, maintainer) The beta ships from `master`: `3.0-dev` is merged fast-forward so the full commit history is on `master`, the version becomes `3.0.0-beta.0` (D-18 sequence dev → beta), the tag `v3.0.0-beta.0` triggers the four release workflows (D-24), and the agent may do the merge, the tag and the push at the maintainer's explicit request (this one); the drafts on GitHub are published by the maintainer. |
 | D-38 | (2026-09-06, maintainer) No development branch any more: after the beta the work continues on `master` with the full commit history (`3.0-dev` was fast-forwarded into `master`, never rebased or squashed, and is left as it is). The main session pushes `master`; `build.yml` and `addon.yml` build on every push to it; tags and releases stay as in D-37. |
+| D-40 | **(2026-09-06) The metadata store: `provider: local \| occulite`, detected at runtime.** The Homematic Manager gains rooms, functions, floors and any further taxonomy a user makes, as a store of its own in the profile (`meta.json`) - a standalone feature for everyone on Homegear, on a bare `rfd` or on the desktop, who never had one. On [openccu-lite](https://github.com/hobbyquaker/openccu-lite), the CCU firmware without ReGaHSS, the same surface is served by the **box's** metadata API and this application is that store's **editor**: it reads the snapshot, follows the change stream and writes renames, room assignments and the taxonomy itself back through the API. Which of the two is in charge is decided at runtime by one call, `GET /api/meta/v1/version` on the configured host - openccu-lite's own rule (their invariant 2), so a profile that is moved between a CCU and a box needs no edit. `connection.metaProvider` (`auto`, `local`, `occulite`) overrides the probe; `metaToken` is the API token an installation off the box needs; `metaUrl` names the box when it is not `http(s)://<host>`. **The ReGa path is untouched** (D-2): ReGa still supplies names on a CCU and still takes a rename, and a box either has ReGa or the metadata API, never both - which is why there is no `rega` value in `metaProvider`. openccu-lite's format and API are normative (their D-16) and their conformance corpus runs in this repository's CI. Task 24. |
 | D-39 | (2026-09-06, maintainer) The npm pre-releases are published as `latest` (and tagged `next` as well): the 1.x versions under the name are dead, so a plain `npm install -g homematic-manager` should give the current beta rather than the deprecated 1.0.14. `latest` for 3.0.0-beta.2 is set by hand by the maintainer (`npm dist-tag add`), later versions by `release-npm.yml`. |
 
 ## Contents
@@ -88,6 +93,8 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [21. Interface popup](#21-interface-popup) ✅
 - [22. UI third look and the beta](#22-ui-third-look-and-the-beta) ✅ UI part; beta cut 2026-09-06
 - [23. Settings dialog and the help menu](#23-settings-dialog-and-the-help-menu) ✅
+- [24. The metadata store: rooms, functions and openccu-lite](#24-the-metadata-store-rooms-functions-and-openccu-lite) ✅ [archived](roadmap-archive/task-24.md)
+- [25. The editing UI for rooms and functions](#25-the-editing-ui-for-rooms-and-functions)
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
 
@@ -707,6 +714,31 @@ Maintainer, 2026-09-06, on `3.0.0-beta.1`:
   with `rel=noopener`). Version, data manifest and licence move to the bottom of the settings
   dialog as a small info line; the update notice (Electron) keeps working without the About
   dialog.
+
+## 24. The metadata store: rooms, functions and openccu-lite
+
+Done 2026-09-06, archived in [roadmap-archive/task-24.md](roadmap-archive/task-24.md). D-40: the
+model, both providers, the detection, the credentials, the addon's `occulite` login, the
+conformance corpus in CI and an integration test against a real `occulited`. User-facing
+documentation is [docs/openccu-lite.md](docs/openccu-lite.md).
+
+## 25. The editing UI for rooms and functions
+
+Task 24 built the store and the whole write surface of the contract; what it deliberately did not
+build is the user interface for it, which is a UI task and not a protocol one. What is missing:
+
+- a **rooms / functions column** in the device and channel grids, filled from `meta.objects`
+  (`rooms` and `functions` are already arrays of names there, in tree order);
+- the interaction that matters: **select rows, assign to a room** - a multi-select in the grid and
+  one menu entry, which is `meta.assign` with the selected refs;
+- a small **tree dialog**: add, rename, move, delete, with the members listed before a node that
+  has any is removed (`meta.node.*`, `meta.enum.*`, and `detach` for the delete);
+- **a filter** by room and by function above the grid, which is what the taxonomy is *for*;
+- the **state** beside the ReGa indicator: which provider, whether the box is reachable and whether
+  it takes writes (`meta.state`, `meta.changed`), and a settings section for `metaProvider` and
+  `metaToken`.
+
+Nothing here needs a backend change: every method and every event it uses exists and is tested.
 
 ## Open questions
 

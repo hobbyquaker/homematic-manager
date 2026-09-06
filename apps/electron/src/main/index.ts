@@ -43,6 +43,7 @@ import {IpcBridge} from './ipcBridge.js';
 import {buildMenuTemplate, isAllowedExternalUrl, ISSUES_URL} from './menu.js';
 import {fileRoots, resolvePaths} from './paths.js';
 import {createImageProtocolHandler, PRIVILEGED_SCHEMES} from './protocol.js';
+import {createStartupTrace} from './startupTrace.js';
 import {UpdateFlow, updaterDisabledReason, type AutoUpdaterLike} from './updater.js';
 import {browserWindowBounds, WindowStateKeeper} from './windowState.js';
 
@@ -55,21 +56,33 @@ const STOP_TIMEOUT_MS = 8000;
 const here = path.dirname(fileURLToPath(import.meta.url));
 
 /**
+ * `HMM_STARTUP_TRACE=1` prints one stderr line per start-up phase. Off by default and a no-op
+ * then; the smoke test turns it on and prints what it collected when an assertion fails, so a
+ * main process that hangs or dies before the window exists still says where it stopped.
+ */
+const trace = createStartupTrace();
+trace('module: entered');
+
+/**
  * `electron-updater` is CommonJS and exports `autoUpdater` as a lazy getter, which Node's ESM
  * loader cannot see - `import {autoUpdater} from 'electron-updater'` throws "Named export not
  * found" the moment the packaged app starts, and only there, because the main bundle is ESM.
  * `createRequire` is the one import form that gets the real object.
  */
 const {autoUpdater} = createRequire(import.meta.url)('electron-updater') as typeof import('electron-updater');
+trace('module: electron-updater required');
 
 // Has to happen before the app is ready, and therefore before anything else in this file.
 protocol.registerSchemesAsPrivileged([...PRIVILEGED_SCHEMES]);
+trace('module: schemes registered');
 
 if (!app.requestSingleInstanceLock()) {
     // A second copy would open a second callback server and fight the first one for the CCU's
     // `init` registration. The first instance gets the focus instead.
+    trace('module: single-instance lock refused, quitting');
     app.quit();
 }
+trace('module: single-instance lock held');
 
 app.setAppUserModelId(APP_ID);
 
@@ -102,6 +115,7 @@ let stopping = false;
 let stopped = false;
 
 const version = app.getVersion();
+trace('module: paths and error log ready', paths.userData);
 
 function broadcast<E extends HostEventName>(name: E, payload: HostEvents[E]): void {
     for (const window of BrowserWindow.getAllWindows()) {
@@ -170,7 +184,9 @@ function createWindow(): BrowserWindow {
     });
 
     window.once('ready-to-show', () => {
+        trace('window: ready-to-show');
         window.show();
+        trace('window: shown');
     });
 
     // Nothing in this app navigates, and nothing opens a second window. A link the UI cannot
@@ -264,11 +280,13 @@ function registerHostCommands(): void {
 }
 
 async function start(): Promise<void> {
+    trace('start: entered');
     backend = await Backend.open({
         dataDir: paths.userData,
         version,
         fileRoots: fileRoots(paths),
     });
+    trace('start: backend opened');
     transport = new InProcessTransport(backend);
     bridge = new IpcBridge({
         ipcMain,
@@ -286,6 +304,7 @@ async function start(): Promise<void> {
         log: imageLog((message) => errorLog.append('images', message)),
     });
     protocol.handle(IMAGE_SCHEME, createImageProtocolHandler(images));
+    trace('start: image protocol handled');
 
     const settings = readHostSettings(paths.hostSettingsFile);
     const disabledReason = updaterDisabledReason({
@@ -305,6 +324,7 @@ async function start(): Promise<void> {
         },
     });
     updates.start();
+    trace('start: update flow started', disabledReason ?? 'enabled');
 
     app.setAboutPanelOptions({
         applicationName: 'Homematic Manager',
@@ -314,22 +334,27 @@ async function start(): Promise<void> {
     });
     buildMenu();
     registerHostCommands();
+    trace('start: menu and host commands ready');
 
     nativeTheme.on('updated', () => {
         broadcast('theme.system', {dark: nativeTheme.shouldUseDarkColors});
     });
 
     mainWindow = createWindow();
+    trace('start: window created');
     bridge.attach(mainWindow.webContents);
     mainWindow.on('closed', () => {
         mainWindow = undefined;
     });
     await loadRenderer(mainWindow);
+    trace('start: renderer loaded');
     await trackConfig();
+    trace('start: config tracked');
 
     // Connecting happens after the window exists, so its notices land in the UI rather than in a
     // buffer nobody reads.
     await backend.start();
+    trace('start: backend started');
 }
 
 /**
@@ -380,18 +405,21 @@ app.on('second-instance', () => {
 });
 
 app.on('window-all-closed', () => {
+    trace('app: window-all-closed');
     // Same as 2.x on every platform: this is a tool, not a document editor, and a menu bar with no
     // window behind it is not what anyone came for.
     app.quit();
 });
 
 app.on('before-quit', () => {
+    trace('app: before-quit');
     // The renderer greys itself out immediately rather than waiting for answers that will not come.
     transport?.setConnected(false);
     updates?.stop();
 });
 
 app.on('will-quit', (event) => {
+    trace('app: will-quit', stopped ? 'already stopped' : stopping ? 'stopping' : 'first');
     if (stopped) {
         return;
     }
@@ -409,6 +437,7 @@ app.on('will-quit', (event) => {
         } catch (error) {
             errorLog.append('stop', error);
         }
+        trace('quit: backend stopped');
         bridge?.dispose();
         windowState?.save();
         stopped = true;
@@ -420,9 +449,17 @@ app.on('will-quit', (event) => {
     })();
 });
 
+trace('module: awaiting whenReady');
 app.whenReady()
-    .then(start)
+    .then(() => {
+        trace('app: ready');
+        return start();
+    })
+    .then(() => {
+        trace('app: start resolved');
+    })
     .catch((error: unknown) => {
+        trace('app: start failed', String(error));
         errors.report('startup', error);
         app.quit();
     });

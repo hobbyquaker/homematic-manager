@@ -9,6 +9,7 @@ import {ErrorLog, installErrorHandlers} from './errorLog.js';
 import {DISABLE_AUTO_UPDATE_ENV, readHostSettings, writeHostSettings} from './hostSettings.js';
 import {buildMenuTemplate, isAllowedExternalUrl, ISSUES_URL, type MenuTemplateItem} from './menu.js';
 import {fileRoots, resolvePaths} from './paths.js';
+import {createStartupTrace, STARTUP_TRACE_ENV, startupTraceEnabled} from './startupTrace.js';
 
 let dir: string;
 
@@ -278,5 +279,49 @@ describe('isAllowedExternalUrl', () => {
         expect(isAllowedExternalUrl('https://evil.example/github.com')).toBe(false);
         expect(isAllowedExternalUrl('smb://share/x')).toBe(false);
         expect(isAllowedExternalUrl('not a url')).toBe(false);
+    });
+});
+
+describe('startup trace', () => {
+    it('is off unless the environment says otherwise', () => {
+        expect(startupTraceEnabled({})).toBe(false);
+        expect(startupTraceEnabled({[STARTUP_TRACE_ENV]: ''})).toBe(false);
+        expect(startupTraceEnabled({[STARTUP_TRACE_ENV]: '0'})).toBe(false);
+        expect(startupTraceEnabled({[STARTUP_TRACE_ENV]: 'false'})).toBe(false);
+        expect(startupTraceEnabled({[STARTUP_TRACE_ENV]: 'FALSE'})).toBe(false);
+        expect(startupTraceEnabled({[STARTUP_TRACE_ENV]: '1'})).toBe(true);
+        expect(startupTraceEnabled({[STARTUP_TRACE_ENV]: 'yes'})).toBe(true);
+    });
+
+    it('writes nothing at all when it is off', () => {
+        const lines: string[] = [];
+        const trace = createStartupTrace({enabled: false, write: (line) => lines.push(line)});
+        trace('anything');
+        expect(lines).toEqual([]);
+    });
+
+    it('writes one prefixed line per phase, with the elapsed milliseconds', () => {
+        const lines: string[] = [];
+        let now = 12;
+        const trace = createStartupTrace({enabled: true, elapsed: () => now, write: (line) => lines.push(line)});
+        trace('module: entered');
+        now = 345;
+        trace('start: backend opened', '/tmp/profile');
+        expect(lines).toEqual([
+            '[hmm-startup +12ms] module: entered\n',
+            '[hmm-startup +345ms] start: backend opened /tmp/profile\n',
+        ]);
+    });
+
+    it('never throws when the stream it writes to does', () => {
+        // A diagnostic that breaks the start-up it diagnoses is worse than none: a packaged app on
+        // Windows has no stderr at all, and writing to a closed one throws EPIPE.
+        const trace = createStartupTrace({
+            enabled: true,
+            write: () => {
+                throw new Error('EPIPE');
+            },
+        });
+        expect(() => trace('module: entered')).not.toThrow();
     });
 });

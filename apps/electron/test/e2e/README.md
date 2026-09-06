@@ -4,18 +4,31 @@
 (`playwright.config.ts`, project `electron`) and in `build.yml`, on each OS of the build matrix,
 right after the app is built and before it is packaged.
 
-**It has never passed anywhere.** The first CI run of `build.yml` (33997950050) timed out on all
-three runners, and it cost the whole thirty-minute job to say so; the suite is bounded now, see
-"Failing fast" below.
-
-It does not run under WSL either, but not for the reason task 11 recorded. Traced with
+It does not run under WSL, but not for the reason task 11 recorded. Traced with
 `HMM_STARTUP_TRACE=1` (below), an Electron main process in WSL blocks in the platform's own
 start-up - before any JavaScript timer fires, so `app.whenReady()` is a symptom and not the cause -
 and a five-line control app blocks in exactly the same place. With
 `--ozone-platform=headless --no-sandbox` it gets further: the app then reaches `new BrowserWindow()`
 in 84 ms, backend and image protocol and all, and segfaults in the window itself - and so does the
-control app. That is enough to trace the start-up of the real host on the development machine, and
-not enough to run this suite.
+control app.
+
+## Running it on the development machine
+
+In a container with a real Xvfb, which is what CI has and WSL has not:
+
+```sh
+npm run build -w @homematic-manager/electron
+docker run --rm -v "$PWD:/w" -w /w -e HOME=/tmp -e CI=1 \
+    --user "$(id -u):$(id -g)" --ipc=host \
+    mcr.microsoft.com/playwright:v1.63.0-noble \
+    bash -c 'xvfb-run -a npx playwright test --project=electron'
+```
+
+The image carries the browser dependencies Electron needs and `xvfb-run`; `--ipc=host` keeps
+Chromium out of the default 64 MB `/dev/shm`, and `--user` keeps the files it writes out of root's
+hands. The whole suite takes about five seconds. Every finding of the first three CI runs was
+reproduced and then fixed here rather than in a twelve-minute round trip, which is what the 2 GB
+image buys.
 
 ## Why Playwright and not vitest
 
@@ -75,6 +88,8 @@ A smoke test that hangs must cost minutes, not a job. Every wait has a bound:
 | the test | 60 s | project timeout, and Playwright's bound on the worker teardown too |
 | the run | 3 failures | `--max-failures=3` in `npm run test:e2e:electron` |
 
+A healthy run uses none of them: nine assertions in about five seconds.
+
 and the project has `retries: 0`: a broken app must not be paid for twice, and a flaky window is
 worth knowing about rather than papering over. The host bounds itself as well - `backend.stop()`
 gets 8 s and the whole quit 15 s, after which it calls `app.exit()` (`src/main/lifecycle.ts`),
@@ -113,9 +128,11 @@ because `electronApplication.close()` waits for the process to exit with no time
 - Assertion 4 triggers its notice by pointing the configuration at `127.0.0.1`, where nothing
   listens on 2001: the connection fails at once with ECONNREFUSED, and a connection that cannot be
   made is a notice and never a throw (D-2).
-- Assertion 4 is also the only one that passed in the first CI run - in 579 ms on Linux and 1.0 s
-  on macOS, while 1, 2, 3 and 5 each spent the full two minutes. Whatever the cause turns out to
-  be, it is one that a single `config.set` steps around; that is the sharpest clue the run left.
+- Assertion 4 was the only one that passed in the first CI run, in 579 ms on Linux and 1.0 s on
+  macOS, while 1, 2, 3 and 5 each spent the full two minutes. The reason turned out to be the quit:
+  `app.quit()` called from inside the `will-quit` handler is dropped, so `close()` waited for a
+  process that would never end - unless `backend.stop()` happened to take a turn of real I/O first,
+  which is what assertion 4's `config.set` arranges and no other assertion does.
 
 ## What cannot be tested here
 

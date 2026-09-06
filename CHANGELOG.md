@@ -252,9 +252,6 @@ This is the change with the largest consequence, and it comes out of a measureme
   so whoever reaches the published port is in. This is still an open question (OQ-15) and
   [docs/install-docker.md](docs/install-docker.md) names three ways to lock it down; the warning line
   the recommendation asks for is not implemented yet.
-- The **npm package of the beta is not on the registry yet**: the trusted publisher on npmjs.com
-  has to name `release-npm.yml` before the publish step can run; the other three release
-  pipelines of `3.0.0-beta.0` succeeded.
 - The **beta.0 desktop build** shows harmless "unknown method setReadyConfig" notices at start and
   an RPC log drawer that lengthens the page; both are fixed on `master` (beta.1) and ship with the
   next tag.

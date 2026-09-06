@@ -539,8 +539,7 @@
                 <p>
                     Homematic Manager {version}
                     {#if dataLine !== ''}&middot; {t('Device data')}: {dataLine}{/if}
-                    &middot; AGPL-3.0-or-later &middot; &copy; 2014-2026 Sebastian "Hobbyquaker" Raff, Andr&eacute; "Anli"
-                    Litfin
+                    &middot; AGPL-3.0-or-later &middot; &copy; 2014-2026 Sebastian "Hobbyquaker" Raff
                 </p>
                 {#if hostLine !== ''}
                     <p data-testid="config-host-info">

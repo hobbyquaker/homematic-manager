@@ -152,7 +152,7 @@ beitragen will, findet den Einstieg in [BUILD.md](BUILD.md): Monorepo mit npm-Wo
 
 ## Lizenz
 
-Copyright (c) 2014-2026 Sebastian "Hobbyquaker" Raff, André "Anli" Litfin
+Copyright (c) 2014-2026 Sebastian "Hobbyquaker" Raff
 
 Der 3.0-Code steht unter [AGPL-3.0-or-later](https://www.gnu.org/licenses/agpl-3.0.html), siehe
 [LICENSE](LICENSE). Bis einschließlich 2.7.1 war das Projekt GPL-3.0.

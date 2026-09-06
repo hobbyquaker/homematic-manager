@@ -124,7 +124,7 @@ jobs:
             *) TAG=latest ;;
           esac
           echo "publishing $VERSION as $TAG"
-          npm publish "${{ steps.pack.outputs.tarball }}" --provenance --access public --tag "$TAG"
+          npm publish "./${{ steps.pack.outputs.tarball }}" --provenance --access public --tag "$TAG"
 
       - name: Attach the tarball and its SBOM to the draft release
         uses: softprops/action-gh-release@v2

@@ -257,6 +257,15 @@ export class Backend {
         await this.#manager?.stop();
         this.#manager = undefined;
         this.#rega = undefined;
+        // D-40: before the caches are flushed, and awaited even when it is only the detection that
+        // is still in flight. A store that finishes loading after this would apply its names, ask
+        // for a cache write and put a file back into a directory the caller has already taken
+        // apart - which is how CI found this, as an ENOTEMPTY in a suite that has nothing to do
+        // with metadata.
+        await this.#metaReady?.catch(() => undefined);
+        this.#metaReady = undefined;
+        await this.#meta?.stop();
+        this.#meta = undefined;
         await this.#caches.flush();
         await this.#writeLog.flush();
         this.events.clear();
@@ -664,6 +673,11 @@ export class Backend {
                 },
                 ...this.#options.metaOptions,
             });
+            if (this.#stopped) {
+                // stopped while the box was being probed; starting the provider now would open an
+                // event stream nobody will ever close
+                return;
+            }
             meta.setSessionCredential(this.#metaSession);
             this.#meta = meta;
             await meta.start();
@@ -678,7 +692,7 @@ export class Backend {
     /** The store changed - locally, or on the box because somebody else edited it. */
     #onMetaChanged(): void {
         const meta = this.#meta;
-        if (!meta) {
+        if (!meta || this.#stopped) {
             return;
         }
         this.#caches.saveNames();

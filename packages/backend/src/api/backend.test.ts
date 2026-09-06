@@ -464,6 +464,40 @@ describe('config', () => {
         await backend.stop();
     });
 
+    it('waits for the metadata detection before it stops, so nothing is written afterwards', async () => {
+        // D-40: the detection is deliberately not awaited by the connect - a host that swallows
+        // packets would hold the interfaces up for its timeout - so `stop()` has to wait for it
+        // instead. Without that, a store that finished loading after the caller had already taken
+        // its directory apart asked for a cache write and put a file back into it: CI found this
+        // as an ENOTEMPTY in the simulator suite, which has nothing to do with metadata at all.
+        const order: string[] = [];
+        const h = await harness({
+            backend: {
+                metaOptions: {
+                    // a box that takes its time - a LAN, a busy lighttpd, or the host that swallows
+                    // the packet altogether and is answered by the detection timeout
+                    fetch: async () => {
+                        await new Promise((resolve) => setTimeout(resolve, 150));
+                        order.push('detected');
+                        // a CCU: no metadata API here
+                        return new Response('not found', {status: 404});
+                    },
+                },
+            },
+        });
+        expect(order).toEqual([]);
+        await h.backend.stop();
+        order.push('stopped');
+        // and not the other way round, which is what leaves a store loading into a profile
+        // directory its owner has already deleted
+        expect(order).toEqual(['detected', 'stopped']);
+
+        // the profile directory stays gone once it is removed, however late anything finishes
+        await fs.rm(dir, {recursive: true, force: true});
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        await expect(fs.readdir(dir)).rejects.toThrow();
+    });
+
     it('does not connect without a host and says so', async () => {
         const notices: string[] = [];
         const backend = await Backend.open({dataDir: dir, importLegacy: false});

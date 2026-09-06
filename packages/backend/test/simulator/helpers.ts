@@ -332,6 +332,10 @@ export async function startBackend(
         callbackHost: '127.0.0.1',
         // without a ReGa mock the port must be one that refuses at once, not one that hangs
         regaOptions: {port: (sim.regaSim?.port as number | undefined) ?? 1, timeoutMs: 1000},
+        // D-40: the simulator is not an openccu-lite box, so the metadata detection has nothing to
+        // find here - and `http://127.0.0.1/` is a host that may well hang rather than refuse. A
+        // short timeout keeps these suites about the RPC path, which is what they are for.
+        metaOptions: {detectTimeoutMs: 100},
         interfaceManagerOptions: {
             portOverride: (name) => ports[name],
             watchdogIntervalMs: 0,

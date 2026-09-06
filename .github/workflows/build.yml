@@ -168,13 +168,13 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         timeout-minutes: 12
         continue-on-error: true
-        run: xvfb-run -a npx playwright test --project=electron
+        run: xvfb-run -a npm run test:e2e:electron
 
       - name: Electron smoke test
         if: matrix.os != 'ubuntu-latest'
         timeout-minutes: 12
         continue-on-error: true
-        run: npx playwright test --project=electron
+        run: npm run test:e2e:electron
 
       - name: The traces of a failed smoke test
         if: always()

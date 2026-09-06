@@ -57,6 +57,8 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 | D-33 | (2026-09-06, maintainer, answers OQ-14) The npm deliverable is published as `homematic-manager`, the 2.x name: its `npm i -g` audience wanted a headless install anyway, the Electron app was never a sensible npm install, and the name already belongs to the maintainer, so npm **trusted publishing is configured on npmjs.com** for `hobbyquaker/homematic-manager` and the workflow file `release-npm.yml` - a scoped `@homematic-manager/web` would have needed an npm organisation plus one manual publish from a laptop before OIDC works. The old 1.x versions under the name stay deprecated, which does not block a new version. Pre-releases go out under the `next` dist-tag, so until 3.0.0 moves `latest` a tester installs `homematic-manager@next` and a plain `npm install -g homematic-manager` still gives the deprecated 1.0.14 from 2022. The bin is `homematic-manager` with `homematic-manager-web` kept as a second name (the addon CGI, the proxy examples and the install pages use it); workspace references use the path form `-w apps/web`, because the package name is now also the workspace root's. |
 | D-34 | (2026-09-06, maintainer, after the first look at a dev build) The UI stops imitating the 2.x jQuery look. Structure and workflows stay (D-3: tabs, grids, dialogs), but the visual language follows Svelte defaults and the maintainer's `she` UI (github.com/hobbyquaker/she, checked out at `~/repos/she`): tab bar and header backgrounds and borders, table decorations, font sizes, spacing, control styling. Concretely from the first look: table columns must keep a regular width when the channel sub-grid expands; the paramset dialog must not grow scrollbars at 1280×800; the easy-mode description belongs underneath the selector, not beside it; toasts cap at a handful, the oldest disappears when the stack is full, informational ones expire on their own, errors stay until dismissed. Task 19. |
 | D-35 | (2026-09-06, maintainer) Refines D-18: every significant change bumps the number behind `-dev` (`npm run version:dev`), not only a cut build. The main session bumps at the end of each archived task or feature batch, in its own commit before pushing; subagents never bump (the bump touches every package.json and the lockfile, which collides with parallel work). |
+| D-36 | (2026-09-06, maintainer) Language: the UI starts in the browser's language (`navigator.languages`, first supported one) with English as the fallback, not German first; the switch lives in the settings dialog, not in the header, and a choice made there is stored in the profile and wins over the browser. The 2.x German-first default and the addon's "German first" are gone. |
+| D-37 | (2026-09-06, maintainer) The beta ships from `master`: `3.0-dev` is merged fast-forward so the full commit history is on `master`, the version becomes `3.0.0-beta.0` (D-18 sequence dev → beta), the tag `v3.0.0-beta.0` triggers the four release workflows (D-24), and the agent may do the merge, the tag and the push at the maintainer's explicit request (this one); the drafts on GitHub are published by the maintainer. |
 
 ## Contents
 
@@ -82,6 +84,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [19. UI polish after the first look](#19-ui-polish-after-the-first-look) ✅
 - [20. UI second look](#20-ui-second-look) ✅
 - [21. Interface popup](#21-interface-popup) ✅
+- [22. UI third look and the beta](#22-ui-third-look-and-the-beta)
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
 
@@ -132,6 +135,7 @@ Per task:
 | 19 UI polish after the first look (D-34) | 4-6 | 8, 10 |
 | 20 UI second look | 2-3 | 19 |
 | 21 Interface popup | 1-2 | 20 |
+| 22 UI third look and the beta | 1-2 | 21 |
 
 ## 1. Legacy stopgap release 2.8 (dropped)
 
@@ -659,6 +663,23 @@ standard dropdown, and the per-interface status marks leave the top bar and move
   changes width or position when the state changes (task 19's rule).
 - Tests in browser mode: open/close/keyboard, the marks per state, the second line's content,
   both themes for the colours (D-22); the demo data gets one interface in each state.
+
+## 22. UI third look and the beta
+
+Maintainer, 2026-09-06, after the third look at `3.0.0-dev.6` on the lab box:
+
+- Device pictures are inverted in the dark theme (a CSS filter on the image in dark mode only,
+  keeping colours recognisable: invert plus a hue rotation, judged on the real CCU pictures), and
+  the table rows grow by 2 to 4 px with the picture size growing accordingly (26 → 28 or 30 px
+  rows, 16 → 18 or 20 px pictures; task 19's column and layout tests are re-measured).
+- The language switch leaves the header and goes into the settings dialog; the default is the
+  browser language with English as the fallback (D-36); a choice is stored in the profile.
+- The RPC log panel (the drawer of the RPC console / the write log) always opens at 50 % of the
+  viewport height and has a drag handle to resize it; the size is remembered for the session;
+  it never overflows horizontally (task 19's dialog rules apply to it).
+- Then the beta (D-37): archive, `3.0.0-beta.0`, fast-forward merge to `master`, tag, the four
+  release workflows, `docs/release-checklist.md` followed step by step; the maintainer publishes
+  the drafts and posts the announcement.
 
 ## Open questions
 

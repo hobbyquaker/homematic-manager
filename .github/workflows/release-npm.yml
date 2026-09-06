@@ -72,6 +72,10 @@ jobs:
       # everything has to be built before anything is packed.
       - run: npm run build
 
+      # the UI component tests run in Chromium (D-23); ci.yml has this step, this workflow lacked it
+      # and the first beta publish failed on it
+      - run: npx playwright install --with-deps chromium
+
       - run: npm test
 
       # `npm pack` writes its file list and the tarball details to stderr and only the file name to

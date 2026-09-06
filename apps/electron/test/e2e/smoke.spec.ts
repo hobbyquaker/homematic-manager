@@ -8,13 +8,21 @@
  *
  * Run it with `npm run test:e2e:electron`, after `npx install-electron` and
  * `npm run build -w @homematic-manager/electron`. It runs in `build.yml`, on each OS of the build
- * matrix, and **not** in WSL: `app.whenReady()` never fires there (the agent for task 11 measured
- * that), so this file has never been executed on the development machine. It is written from the
- * host's sources and the README; the first CI run on the three runners is its first real run.
+ * matrix, and **not** in WSL, where Electron blocks in the platform's own start-up: a five-line
+ * control app never reaches `new BrowserWindow()` there either, so it is the environment and not
+ * the host. (`--ozone-platform=headless` gets a WSL Electron as far as window creation and then
+ * segfaults in it, which is enough to trace the start-up but not to run this suite.)
  *
  * Everything here launches the app itself rather than sharing one instance, because assertion 8
- * relaunches it and assertion 9 watches it exit. That is slow (a cold Electron start is seconds),
- * which is why the project's timeout in `playwright.config.ts` is 120 s and its workers are 1.
+ * relaunches it and assertion 9 watches it exit.
+ *
+ * **Every wait in this file is bounded, and every failure prints the app's stderr.** The first CI
+ * run of `build.yml` spent thirty minutes on this suite and produced not one line about the app:
+ * `_electron.launch()` and `electronApplication.close()` both wait on the process with no timeout
+ * of their own, so a hang cost the full test timeout and the worker teardown after it cost another.
+ * `HMM_STARTUP_TRACE=1` makes the host name the phase it is in, this file collects that stderr,
+ * and a failing test prints it - which is the only thing that will say what happened on a runner
+ * nobody can attach a debugger to.
  */
 
 import {mkdtemp, rm} from 'node:fs/promises';
@@ -28,6 +36,20 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 /** The built main bundle - the suite launches the build, never the sources. */
 const mainEntry = path.join(here, '..', '..', 'out', 'main', 'index.js');
 
+/** How long the app gets to start before the failure is reported as a failure to start. */
+const LAUNCH_TIMEOUT_MS = 20_000;
+/** How long it gets to show its first window after that. */
+const WINDOW_TIMEOUT_MS = 20_000;
+/**
+ * How long a polite `close()` gets before the process is killed.
+ *
+ * The host bounds its own quit at fifteen seconds (`lifecycle.ts`), so anything past that is the
+ * app failing to die rather than taking its time - and Playwright's `close()` would wait for it
+ * for as long as the test timeout allows. Twenty leaves the host's own watchdog room to act and
+ * say so in the trace before this one takes the process away.
+ */
+const CLOSE_TIMEOUT_MS = 20_000;
+
 interface Launched {
     readonly app: ElectronApplication;
     readonly page: Page;
@@ -35,6 +57,10 @@ interface Launched {
 }
 
 const profiles: string[] = [];
+/** Everything the launched apps wrote to stderr during the current test. */
+let output: string[] = [];
+/** The apps this test started, so that one left behind by a failure is still killed. */
+let running: ElectronApplication[] = [];
 
 /**
  * Starts the built app on a throw-away profile.
@@ -51,12 +77,86 @@ async function launch(userDataDir?: string): Promise<Launched> {
     }
     const app = await electron.launch({
         args: [mainEntry, `--user-data-dir=${userData}`],
-        env: {...process.env, HMM_DISABLE_AUTO_UPDATE: '1'},
+        env: {
+            ...process.env,
+            HMM_DISABLE_AUTO_UPDATE: '1',
+            // One stderr line per start-up phase, so a launch that does not finish still says
+            // which step it stopped in.
+            HMM_STARTUP_TRACE: '1',
+            // `dialog.showErrorBox` is modal, and there is nobody here to click it away: an
+            // unhandled error would otherwise stop the main process for good.
+            HMM_NO_ERROR_DIALOG: '1',
+        },
+        timeout: LAUNCH_TIMEOUT_MS,
     });
-    const page = await app.firstWindow();
+    running.push(app);
+    collect(app);
+    const page = await app.firstWindow({timeout: WINDOW_TIMEOUT_MS});
     await page.waitForLoadState('domcontentloaded');
     return {app, page, userData};
 }
+
+/** Keeps everything the app writes to stderr, so a failing test can print it. */
+function collect(app: ElectronApplication): void {
+    app.process().stderr?.on('data', (chunk: Buffer | string) => {
+        output.push(typeof chunk === 'string' ? chunk : chunk.toString('utf8'));
+    });
+}
+
+/**
+ * Closes the app, and kills it when it will not go.
+ *
+ * `electronApplication.close()` calls `app.quit()` and then waits for the process to exit with no
+ * bound of its own; without this, an app that never quits costs the test its whole timeout and the
+ * worker teardown after it another one.
+ */
+async function closeApp(app: ElectronApplication): Promise<void> {
+    running = running.filter((other) => other !== app);
+    const child = app.process();
+    let timer: NodeJS.Timeout | undefined;
+    const killed = new Promise<void>((resolve) => {
+        timer = setTimeout(() => {
+            output.push(`[smoke] the app did not exit within ${String(CLOSE_TIMEOUT_MS)}ms; killing it\n`);
+            child.kill('SIGKILL');
+            resolve();
+        }, CLOSE_TIMEOUT_MS);
+    });
+    try {
+        await Promise.race([app.close().catch(() => undefined), killed]);
+    } finally {
+        if (timer !== undefined) {
+            clearTimeout(timer);
+        }
+    }
+}
+
+test.beforeEach(() => {
+    output = [];
+    running = [];
+});
+
+test.afterEach(async () => {
+    // `test.info()` rather than the hook's first argument: destructuring the fixtures is
+    // mandatory there, and this project has no browser fixtures to destructure.
+    const testInfo = test.info();
+    // Nothing may be left running: Playwright kills the worker after this, and an Electron that
+    // outlives it becomes an orphan the job cleanup has to reap.
+    for (const app of running.splice(0)) {
+        await closeApp(app);
+    }
+    if (testInfo.status === testInfo.expectedStatus) {
+        return;
+    }
+    const captured = output.join('');
+    if (captured === '') {
+        // The CI log is the only report a cancelled job leaves behind.
+        console.log('--- the app wrote nothing to stderr ---');
+        return;
+    }
+    await testInfo.attach('electron-stderr.txt', {body: captured, contentType: 'text/plain'});
+    // Likewise: the html report is not uploaded when the job is cancelled on its timeout.
+    console.log(`--- electron stderr ---\n${captured}--- end ---`);
+});
 
 test.afterAll(async () => {
     for (const dir of profiles.splice(0)) {
@@ -72,7 +172,7 @@ test('1: the window opens and is shown', async () => {
         expect(await app.evaluate(({BrowserWindow}) => BrowserWindow.getAllWindows()[0]?.isVisible())).toBe(true);
         expect(await page.title()).toBe('Homematic Manager');
     } finally {
-        await app.close();
+        await closeApp(app);
     }
 });
 
@@ -88,7 +188,7 @@ test('2: the transport answers from the real in-process backend', async () => {
         // bridge answers. `AppConfig` always has a `connection` and a `version`.
         expect(config).toMatchObject({connection: expect.objectContaining({interfaces: expect.any(Array)})});
     } finally {
-        await app.close();
+        await closeApp(app);
     }
 });
 
@@ -117,7 +217,7 @@ test('3: a rejection keeps its shape across the context bridge', async () => {
         expect(typeof rejection.message).toBe('string');
         expect(rejection.kind).toBe('config');
     } finally {
-        await app.close();
+        await closeApp(app);
     }
 });
 
@@ -158,7 +258,7 @@ test('4: events arrive in the renderer', async () => {
         });
         expect(notice).toMatchObject({level: expect.any(String), message: expect.any(String)});
     } finally {
-        await app.close();
+        await closeApp(app);
     }
 });
 
@@ -181,7 +281,7 @@ test('5: exactly two globals of ours reach the page, and no Node', async () => {
         expect(globals.ipcRenderer).toBe('undefined');
         expect(globals.ours.sort()).toEqual(['__HMM_HOST__', '__HMM_TRANSPORT__']);
     } finally {
-        await app.close();
+        await closeApp(app);
     }
 });
 
@@ -204,7 +304,7 @@ test('6: the image protocol answers 200 for a bundled type and 404 for an unknow
         });
         expect(missing).toBe(404);
     } finally {
-        await app.close();
+        await closeApp(app);
     }
 });
 
@@ -226,7 +326,7 @@ test('7: the CSP blocks a script from anywhere but the bundle', async () => {
         });
         expect(violation).toContain('script-src');
     } finally {
-        await app.close();
+        await closeApp(app);
     }
 });
 
@@ -241,9 +341,9 @@ test('8: the window size round-trips through the profile', async () => {
         }, size);
         // The keeper writes on `close`, and `will-quit` saves again; both need the app to go down
         // normally rather than be killed.
-        await first.app.close();
+        await closeApp(first.app);
     } catch (error) {
-        await first.app.close();
+        await closeApp(first.app);
         throw error;
     }
 
@@ -253,7 +353,7 @@ test('8: the window size round-trips through the profile', async () => {
         expect(bounds?.width).toBe(size.width);
         expect(bounds?.height).toBe(size.height);
     } finally {
-        await second.app.close();
+        await closeApp(second.app);
         await rm(first.userData, {recursive: true, force: true});
     }
 });
@@ -267,6 +367,8 @@ test('9: closing the last window quits the app cleanly', async () => {
     await app.evaluate(({BrowserWindow}) => {
         BrowserWindow.getAllWindows()[0]?.close();
     });
-    await app.waitForEvent('close', {timeout: 30_000});
+    // The host bounds its own shutdown at fifteen seconds, so this is the bound plus room for a
+    // slow runner rather than a guess. `afterEach` kills the app if it is still here after it.
+    await app.waitForEvent('close', {timeout: 25_000});
     expect(child.exitCode).toBe(0);
 });

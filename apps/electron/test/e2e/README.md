@@ -4,10 +4,18 @@
 (`playwright.config.ts`, project `electron`) and in `build.yml`, on each OS of the build matrix,
 right after the app is built and before it is packaged.
 
-**It has never run on the development machine.** Electron does not start under WSL - `app.whenReady()`
-never fires there, which the agent for task 11 measured - so the file is written from the host's
-sources and from this document, and CI is where it is first executed. A failure on the first run is
-therefore a failure of the test, not necessarily of the app; read it that way.
+**It has never passed anywhere.** The first CI run of `build.yml` (33997950050) timed out on all
+three runners, and it cost the whole thirty-minute job to say so; the suite is bounded now, see
+"Failing fast" below.
+
+It does not run under WSL either, but not for the reason task 11 recorded. Traced with
+`HMM_STARTUP_TRACE=1` (below), an Electron main process in WSL blocks in the platform's own
+start-up - before any JavaScript timer fires, so `app.whenReady()` is a symptom and not the cause -
+and a five-line control app blocks in exactly the same place. With
+`--ozone-platform=headless --no-sandbox` it gets further: the app then reaches `new BrowserWindow()`
+in 84 ms, backend and image protocol and all, and segfaults in the window itself - and so does the
+control app. That is enough to trace the start-up of the real host on the development machine, and
+not enough to run this suite.
 
 ## Why Playwright and not vitest
 
@@ -29,18 +37,48 @@ The suite launches the built app, not the sources:
 
 ```ts
 const app = await _electron.launch({
-    args: [path.join(__dirname, '../../out/main/index.js')],
-    env: {...process.env, HMM_DISABLE_AUTO_UPDATE: '1'},
+    args: [mainEntry, `--user-data-dir=${userData}`],
+    env: {
+        ...process.env,
+        HMM_DISABLE_AUTO_UPDATE: '1',
+        HMM_STARTUP_TRACE: '1',
+        HMM_NO_ERROR_DIALOG: '1',
+    },
+    timeout: 20_000,
 });
 ```
 
-Two things it must set, or the tests will be flaky in ways that are hard to read:
+Four things it must set, or a failure will be unreadable:
 
 - `HMM_DISABLE_AUTO_UPDATE=1`, so no run reaches out to GitHub. (`app.isPackaged` is false for a
   launched build, so the updater is off anyway - but the flag says so on purpose.)
 - a temporary `userData` directory per test, through the `--user-data-dir` switch. Otherwise the
   suite writes into the developer's real profile and a stale `window-state.json` decides where the
   window opens.
+- `HMM_STARTUP_TRACE=1`, which makes the host print one stderr line per start-up phase with the
+  milliseconds since the process started. The suite collects that stderr and prints it when a test
+  fails, and Playwright's own call log carries it too when the launch is what timed out. Without it
+  a hung main process says nothing at all, which is what the first CI run produced: thirty minutes
+  and not one line about the app.
+- `HMM_NO_ERROR_DIALOG=1`. `dialog.showErrorBox` is modal, and there is nobody here to click it
+  away: an unhandled error would otherwise stop the main process for good.
+
+## Failing fast
+
+A smoke test that hangs must cost minutes, not a job. Every wait has a bound:
+
+| wait | bound | what happens after |
+| --- | --- | --- |
+| `_electron.launch()` | 20 s | the test fails with Playwright's call log, trace lines included |
+| `app.firstWindow()` | 20 s | the test fails and `afterEach` prints the collected stderr |
+| `app.close()` | 20 s | the process is killed with `SIGKILL` |
+| the test | 60 s | project timeout, and Playwright's bound on the worker teardown too |
+| the run | 3 failures | `--max-failures=3` in `npm run test:e2e:electron` |
+
+and the project has `retries: 0`: a broken app must not be paid for twice, and a flaky window is
+worth knowing about rather than papering over. The host bounds itself as well - `backend.stop()`
+gets 8 s and the whole quit 15 s, after which it calls `app.exit()` (`src/main/lifecycle.ts`),
+because `electronApplication.close()` waits for the process to exit with no timeout of its own.
 
 ## What the suites have to cover
 
@@ -75,6 +113,9 @@ Two things it must set, or the tests will be flaky in ways that are hard to read
 - Assertion 4 triggers its notice by pointing the configuration at `127.0.0.1`, where nothing
   listens on 2001: the connection fails at once with ECONNREFUSED, and a connection that cannot be
   made is a notice and never a throw (D-2).
+- Assertion 4 is also the only one that passed in the first CI run - in 579 ms on Linux and 1.0 s
+  on macOS, while 1, 2, 3 and 5 each spent the full two minutes. Whatever the cause turns out to
+  be, it is one that a single `config.set` steps around; that is the sharpest clue the run left.
 
 ## What cannot be tested here
 

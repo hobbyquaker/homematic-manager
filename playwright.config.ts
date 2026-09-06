@@ -48,9 +48,19 @@ export default defineConfig({
         {
             name: 'electron',
             testDir: './apps/electron/test/e2e',
-            // No browser: `_electron.launch()` brings its own. Electron start-up on a cold CI
-            // runner is slow, and assertion 8 relaunches the app inside one test.
-            timeout: 120_000,
+            // No browser: `_electron.launch()` brings its own. Sixty seconds is generous for a
+            // cold Electron start plus the relaunch inside assertion 8, and it bounds the worker
+            // teardown as well - Playwright uses the test timeout for that too.
+            //
+            // It was 120 s with one retry, and the first CI run showed what that costs when the
+            // app is the thing that is broken: every test paid two minutes, its retry another two,
+            // and the teardown after each of them two more, so five assertions used up the whole
+            // thirty-minute job and no artifact was ever built. A smoke test exists to fail fast;
+            // every wait inside it is bounded in `smoke.spec.ts` for the same reason.
+            timeout: 60_000,
+            // No retries. A flaky window is worth knowing about rather than papering over, and a
+            // broken app must not cost twice.
+            retries: 0,
             fullyParallel: false,
             workers: 1,
         },

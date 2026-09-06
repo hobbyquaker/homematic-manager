@@ -612,8 +612,9 @@ Screenshots in `docs/` are retaken at the end; the README's images follow.
 
 The maintainer's second look at the dev build on the x86_64 lab box (2026-09-06, `3.0.0-dev.3`):
 
-- The per-column filter fields in the table header of the Devices, Radio and Links tabs are
-  superfluous: remove them (the toolbar's single filter box stays where a tab has one).
+- The tab-wide filter box (the single "filter everything" input above the Devices, Radio and Links
+  tables) is superfluous: remove it; the per-column filter fields in the table header stay.
+  (First written the other way round on 2026-09-06 and corrected by the maintainer the same day.)
 - The toolbars that currently take space above the table header move into the table header row
   itself, and so does the count on the right ("4 Geräte"): one header band per table with the
   actions on the left, the count on the right, the column labels in the row beneath, no separate

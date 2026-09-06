@@ -17,6 +17,8 @@ export const UI_MESSAGES: MessageCatalogue = {
     Language: {de: 'Sprache', en: 'Language'},
     // D-36: the first entry of the language setting, and the default.
     'Browser language': {de: 'Sprache des Browsers', en: 'Browser language'},
+    // Task 22: the drag handle on the RPC drawer's upper edge.
+    'Resize the RPC log': {de: 'Größe des RPC-Protokolls ändern', en: 'Resize the RPC log'},
     Theme: {de: 'Design', en: 'Theme'},
     'Theme: light': {de: 'Design: hell', en: 'Theme: light'},
     'Theme: dark': {de: 'Design: dunkel', en: 'Theme: dark'},

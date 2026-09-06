@@ -101,6 +101,62 @@ export function resizeDialog(
     );
 }
 
+/*
+ * The bottom drawer - the RPC log panel (task 22, the maintainer's third look).
+ *
+ * A drawer is not a dialog: it is glued to the bottom edge, it has one dimension the user can
+ * change and one handle to change it with. The clamping is the same problem, though, so it is the
+ * same arithmetic here rather than a second set of rules in the component: a minimum that keeps
+ * the drawer usable, a maximum that leaves the application visible, and no DOM.
+ */
+
+/** Half the window is what the drawer opens at - the maintainer asked for exactly that. */
+export const PANEL_DEFAULT_FRACTION = 0.5;
+
+/** Below this the drawer is a title bar with one row under it. */
+export const PANEL_MIN_HEIGHT = 120;
+
+/**
+ * How tall the drawer may be.
+ *
+ * The maximum is the viewport minus whatever stays above it - the header - so the drawer can never
+ * push the tab bar and the interface picker off the screen. On a window too short for even the
+ * minimum the minimum wins: a drawer squeezed to nothing is a drawer that cannot be closed again,
+ * because its close button is in the part that was squeezed away.
+ */
+export function panelLimits(viewportHeight: number, reservedHeight: number): {min: number; max: number} {
+    return {min: PANEL_MIN_HEIGHT, max: Math.max(PANEL_MIN_HEIGHT, viewportHeight - reservedHeight)};
+}
+
+/** What the drawer opens at: half the viewport, inside the limits. */
+export function defaultPanelHeight(viewportHeight: number, reservedHeight: number): number {
+    const {min, max} = panelLimits(viewportHeight, reservedHeight);
+    return Math.round(clamp(viewportHeight * PANEL_DEFAULT_FRACTION, min, max));
+}
+
+/**
+ * Dragged by the top edge.
+ *
+ * The drawer's bottom is the window's bottom, so the top edge moving up by `dy` makes the drawer
+ * `dy` taller - hence the minus. A drag that would take it past a limit stops at the limit rather
+ * than being ignored, which is what makes the edge feel like it hits a wall instead of sticking.
+ */
+export function resizePanel(height: number, dy: number, viewportHeight: number, reservedHeight: number): number {
+    const {min, max} = panelLimits(viewportHeight, reservedHeight);
+    return Math.round(clamp(height - dy, min, max));
+}
+
+/** What the drawer was left at, for as long as the page lives - same rule as a dialog's box. */
+const rememberedPanels = new Map<string, number>();
+
+export function rememberPanelHeight(key: string, height: number): void {
+    rememberedPanels.set(key, height);
+}
+
+export function recallPanelHeight(key: string): number | undefined {
+    return rememberedPanels.get(key);
+}
+
 /**
  * What each dialog class was left at, for as long as the page lives.
  *
@@ -118,7 +174,8 @@ export function recallDialog(key: string): DialogBox | undefined {
     return remembered.get(key);
 }
 
-/** Only for tests: one test's dragged dialog is not the next one's starting point. */
+/** Only for tests: one test's dragged dialog - or drawer - is not the next one's starting point. */
 export function forgetDialogGeometry(): void {
     remembered.clear();
+    rememberedPanels.clear();
 }

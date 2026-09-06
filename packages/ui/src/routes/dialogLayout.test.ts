@@ -19,7 +19,8 @@
 import {fireEvent, screen, waitFor, within} from '@testing-library/svelte';
 import {beforeEach, describe, expect, it} from 'vitest';
 
-import {forgetDialogGeometry} from '../lib/components/dialogGeometry.js';
+import {forgetDialogGeometry, recallPanelHeight} from '../lib/components/dialogGeometry.js';
+import type {Stores} from '../lib/stores/Stores.svelte.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
 import {mountApp} from '../testHarness.js';
 
@@ -259,6 +260,117 @@ describe.skipIf(!hasLayout)('dialogs at 1280x800', () => {
  * a fixed 900x640 box, a scrolling parameter list, and the one whose size the maintainer looked at
  * first.
  */
+/**
+ * The RPC log drawer (task 22, the maintainer's third look at `3.0.0-dev.6`).
+ *
+ * It used to be a 240 px box that nothing could change, which is two rows of a real log. It opens
+ * at half the window now, is dragged by its upper edge, remembers what the user left it at for the
+ * session, and - task 19's rule, which the maintainer asked to apply here as well - never grows a
+ * horizontal scrollbar whatever is in it.
+ */
+describe.skipIf(!hasLayout)('the RPC log drawer', () => {
+    /** The `--hmm-header-height` of the theme: what stays above the drawer and bounds it. */
+    const HEADER = 36;
+    const MINIMUM = 120;
+
+    beforeEach(() => {
+        forgetDialogGeometry();
+        expect(window.innerHeight).toBe(800);
+    });
+
+    async function openDrawer(): Promise<{panel: HTMLElement; handle: HTMLElement; stores: Stores}> {
+        const {stores} = await mountApp({transport: new MockTransport({demo: true}), hash: '#/BidCos-RF/devices'});
+        await fireEvent.click(screen.getByTestId('rpclog-toggle'));
+        const panel = await waitFor(() => {
+            const found = screen.getByTestId('rpclog');
+            expect(found.getBoundingClientRect().height).toBeGreaterThan(0);
+            return found;
+        });
+        return {panel, handle: screen.getByTestId('rpclog-resize'), stores};
+    }
+
+    const heightOf = (panel: HTMLElement): number => Math.round(panel.getBoundingClientRect().height);
+
+    it('opens at half the viewport', async () => {
+        const {panel} = await openDrawer();
+        expect(heightOf(panel)).toBe(Math.round(window.innerHeight / 2));
+        expect(heightOf(panel)).toBe(400);
+    });
+
+    it('changes its height by exactly what the handle was dragged', async () => {
+        const {panel, handle} = await openDrawer();
+
+        // Up is taller: the drawer is glued to the bottom edge.
+        await drag(handle, 0, -100);
+        expect(heightOf(panel)).toBe(500);
+
+        await drag(handle, 0, 100);
+        expect(heightOf(panel)).toBe(400);
+    });
+
+    it('stops at the window minus the header, and at its minimum', async () => {
+        const {panel, handle} = await openDrawer();
+
+        await drag(handle, 0, -5000);
+        expect(heightOf(panel)).toBe(window.innerHeight - HEADER);
+
+        await drag(handle, 0, 5000);
+        expect(heightOf(panel)).toBe(MINIMUM);
+    });
+
+    it('remembers the height for the session, and opens at it again', async () => {
+        const {panel, handle} = await openDrawer();
+        await drag(handle, 0, -150);
+        expect(heightOf(panel)).toBe(550);
+        expect(recallPanelHeight('rpclog')).toBe(550);
+
+        await fireEvent.click(screen.getByTestId('rpclog-toggle'));
+        await waitFor(() => expect(screen.queryByTestId('rpclog')).toBeNull());
+
+        await fireEvent.click(screen.getByTestId('rpclog-toggle'));
+        const reopened = await waitFor(() => screen.getByTestId('rpclog'));
+        expect(heightOf(reopened)).toBe(550);
+    });
+
+    it('never scrolls sideways, whatever is in it', async () => {
+        const {panel, stores} = await openDrawer();
+        stores.writeLog.entries = [
+            {
+                id: 1,
+                timestamp: Date.parse('2026-09-06T10:00:00Z'),
+                interfaceName: 'BidCos-RF',
+                method: 'putParamset',
+                // The case that pushed the old drawer sideways: one `putParamset` with a paramset
+                // in it, on a `1fr` track that grew to its content instead of ellipsising it.
+                params: ['MEQ0123456:1', 'MASTER', {['LONG_PARAMETER_NAME_'.repeat(40)]: 'x'.repeat(400)}],
+                ok: true,
+                result: '',
+                durationMs: 12,
+            },
+        ];
+
+        await waitFor(() => expect(panel.querySelectorAll('.hmm-rpclog-entry')).toHaveLength(1));
+        expect(panel.scrollWidth).toBeLessThanOrEqual(panel.clientWidth);
+
+        const list = panel.querySelector<HTMLElement>('.hmm-rpclog-list')!;
+        expect(list.scrollWidth).toBeLessThanOrEqual(list.clientWidth);
+        // and the page behind it does not scroll sideways either
+        expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(document.documentElement.clientWidth);
+    });
+
+    /** The one control a pointer-less user has: the handle is a separator, not a decoration. */
+    it('resizes with the arrow keys as well', async () => {
+        const {panel, handle} = await openDrawer();
+        await fireEvent.keyDown(handle, {key: 'ArrowUp'});
+        expect(heightOf(panel)).toBe(420);
+        await fireEvent.keyDown(handle, {key: 'ArrowDown'});
+        expect(heightOf(panel)).toBe(400);
+        // anything else is not a resize
+        await fireEvent.keyDown(handle, {key: 'Enter'});
+        expect(heightOf(panel)).toBe(400);
+    });
+});
+
 describe.skipIf(!hasLayout)('a dialog the user has moved or resized', () => {
     beforeEach(() => {
         expect(window.innerWidth).toBe(1280);

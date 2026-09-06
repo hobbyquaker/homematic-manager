@@ -2,11 +2,17 @@ import {beforeEach, describe, expect, it} from 'vitest';
 
 import {
     DEFAULT_LIMITS,
+    PANEL_MIN_HEIGHT,
+    defaultPanelHeight,
     forgetDialogGeometry,
     moveDialog,
+    panelLimits,
     recallDialog,
+    recallPanelHeight,
     rememberDialog,
+    rememberPanelHeight,
     resizeDialog,
+    resizePanel,
     type DialogBox,
 } from './dialogGeometry.js';
 
@@ -97,5 +103,55 @@ describe('what a dialog class is remembered by', () => {
         rememberDialog('paramset-dialog', box);
         rememberDialog('paramset-dialog', {...box, left: 0});
         expect(recallDialog('paramset-dialog')).toMatchObject({left: 0});
+    });
+
+    it('forgets the drawer as well as the dialogs', () => {
+        rememberPanelHeight('rpclog', 400);
+        forgetDialogGeometry();
+        expect(recallPanelHeight('rpclog')).toBeUndefined();
+    });
+});
+
+/**
+ * The bottom drawer of task 22 (the RPC log). Half the window when it opens, dragged by its upper
+ * edge, never taller than the window minus the header and never shorter than a title bar with a
+ * row under it.
+ */
+describe('the drawer', () => {
+    const HEADER = 36;
+
+    it('opens at half the window', () => {
+        expect(defaultPanelHeight(800, HEADER)).toBe(400);
+        expect(defaultPanelHeight(1000, HEADER)).toBe(500);
+        // an odd viewport rounds rather than producing a fractional pixel
+        expect(defaultPanelHeight(801, HEADER)).toBe(401);
+    });
+
+    it('opens at its minimum on a window too short for half of it to be usable', () => {
+        expect(defaultPanelHeight(200, HEADER)).toBe(PANEL_MIN_HEIGHT);
+        expect(defaultPanelHeight(120, HEADER)).toBe(PANEL_MIN_HEIGHT);
+    });
+
+    it('grows when the top edge is dragged up and shrinks when it is dragged down', () => {
+        expect(resizePanel(400, -100, 800, HEADER)).toBe(500);
+        expect(resizePanel(400, 100, 800, HEADER)).toBe(300);
+    });
+
+    it('stops at the window minus the header, and at the minimum', () => {
+        expect(resizePanel(400, -5000, 800, HEADER)).toBe(800 - HEADER);
+        expect(resizePanel(400, 5000, 800, HEADER)).toBe(PANEL_MIN_HEIGHT);
+        expect(panelLimits(800, HEADER)).toEqual({min: PANEL_MIN_HEIGHT, max: 764});
+    });
+
+    /** A drawer squeezed to nothing cannot be closed again: its close button went with it. */
+    it('keeps the minimum even when the header alone is taller than the window', () => {
+        expect(panelLimits(100, 200)).toEqual({min: PANEL_MIN_HEIGHT, max: PANEL_MIN_HEIGHT});
+        expect(resizePanel(120, -50, 100, 200)).toBe(PANEL_MIN_HEIGHT);
+    });
+
+    it('remembers a height per drawer for the session', () => {
+        rememberPanelHeight('rpclog', 512);
+        expect(recallPanelHeight('rpclog')).toBe(512);
+        expect(recallPanelHeight('something-else')).toBeUndefined();
     });
 });

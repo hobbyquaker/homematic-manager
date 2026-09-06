@@ -241,6 +241,7 @@
         pendingText={t('in progress')}
         clearLabel={t('Clear')}
         closeLabel={t('Close')}
+        resizeLabel={t('Resize the RPC log')}
         testId="rpclog"
         onclear={() => void stores.writeLog.clear()}
     />

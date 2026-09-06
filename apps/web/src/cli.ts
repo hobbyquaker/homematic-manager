@@ -130,6 +130,14 @@ export async function runCli(options: RunCliOptions = {}): Promise<CliRun> {
             )} h of inactivity; the token cookie of settings.cgi is still accepted`,
         );
     }
+    if (parsed.authMode === 'occulite') {
+        // D-40: no form, no CCU users - the box decides who may in, and this host only checks that
+        // the session it was handed is one the box still knows
+        log.info(
+            `login: the session openccu-lite hands over is checked against ${parsed.occuliteUrl ?? 'http://127.0.0.1'};` +
+                ' the token cookie of settings.cgi is still accepted',
+        );
+    }
     if (parsed.uiDevServer !== undefined) {
         log.info(`development mode: everything but the api is proxied to ${parsed.uiDevServer}`);
     }
@@ -184,6 +192,7 @@ function startHost(values: WebOptions, log: Logger, version: string): Promise<We
         ...(values.issueCookie === undefined ? {} : {issueCookie: values.issueCookie}),
         authMode: values.authMode,
         sessionTtlMs: values.sessionTtlMs,
+        ...(values.occuliteUrl === undefined ? {} : {occuliteUrl: values.occuliteUrl}),
         ...(values.ccu === undefined ? {} : {ccu: values.ccu}),
         ...(values.local === undefined ? {} : {local: values.local}),
         ...(values.callbackIp === undefined ? {} : {callbackIp: values.callbackIp}),

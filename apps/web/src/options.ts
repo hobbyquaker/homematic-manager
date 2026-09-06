@@ -24,11 +24,15 @@ export const ENV_PREFIX = 'HMM';
 export const DEFAULT_IDLE_UNSUBSCRIBE = '5m';
 
 /**
- * D-32: how a browser is let in. `token` is what every install type but the CCU addon uses, and
+ * D-32/D-40: how a browser is let in. `token` is what every install type but the CCU addon uses, and
  * stays the default there too - the addon's `settings.cgi` hand-over is the primary path and the
  * login is switched on by hand in `etc/hmm.env` or from the addon's settings page.
+ *
+ * `occulite` is the openccu-lite form of the same idea: no form of our own, the box's shell hands
+ * the session over on the URL and the host checks it against the box. The addon's `update_script`
+ * sets it by itself when it is installed on a box (`VARIANT=lite` in `/VERSION`).
  */
-export const AUTH_MODES = ['token', 'rega'] as const;
+export const AUTH_MODES = ['token', 'rega', 'occulite'] as const;
 
 /** D-32: a login lasts a day of not being used. Sliding, so a tab in use never expires. */
 export const DEFAULT_SESSION_TTL = '24h';
@@ -50,9 +54,9 @@ export function parseDuration(value: string, option: string): number {
     return amount * factor;
 }
 
-/** Is this one of the two modes? `parseRaw` has already refused everything else. */
+/** Is this one of the three modes? `parseRaw` has already refused everything else. */
 export function isAuthMode(value: string | undefined): value is AuthMode {
-    return value === 'token' || value === 'rega';
+    return value === 'token' || value === 'rega' || value === 'occulite';
 }
 
 export type OptionType = 'string' | 'number' | 'boolean';
@@ -123,13 +127,20 @@ export const OPTIONS = {
     },
     'auth-mode': {
         type: 'string',
-        describe: 'token: the token guards the api. rega: ask for a CCU login first (addon only, needs --local)',
+        describe:
+            'token: the token guards the api. rega: ask for a CCU login first (addon only, needs --local). ' +
+            'occulite: take the session openccu-lite hands over',
         choices: AUTH_MODES,
         default: 'token',
     },
+    'occulite-url': {
+        type: 'string',
+        describe: 'with --auth-mode occulite: the box that issued the session',
+        defaultDescription: 'http://127.0.0.1',
+    },
     'session-ttl': {
         type: 'string',
-        describe: 'with --auth-mode rega: how long a login lasts without being used (24h, 90m, ...)',
+        describe: 'with --auth-mode rega or occulite: how long a login lasts without being used (24h, 90m, ...)',
         default: DEFAULT_SESSION_TTL,
     },
     ccu: {
@@ -213,6 +224,8 @@ export interface WebOptions {
     readonly issueCookie: boolean | undefined;
     /** D-32: `token` or `rega`. */
     readonly authMode: AuthMode;
+    /** D-40: the box `--auth-mode occulite` checks a handed-over session against. */
+    readonly occuliteUrl: string | undefined;
     /** D-32, in milliseconds. */
     readonly sessionTtlMs: number;
     readonly ccu: string | undefined;
@@ -362,6 +375,7 @@ export function parseOptions(argv: readonly string[], env: NodeJS.ProcessEnv = p
         auth: boolean('auth') as boolean,
         issueCookie: boolean('issue-cookie'),
         authMode: isAuthMode(string('auth-mode')) ? (string('auth-mode') as AuthMode) : 'token',
+        occuliteUrl: string('occulite-url'),
         sessionTtlMs: parseDuration(string('session-ttl') as string, '--session-ttl'),
         ccu: string('ccu'),
         local: boolean('local'),

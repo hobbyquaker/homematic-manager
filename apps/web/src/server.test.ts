@@ -63,6 +63,9 @@ async function start(options: WebHostOptions = {}): Promise<WebHost> {
             discover: () => Promise.resolve([]),
             // port 1 refuses at once, so a test that configures a CCU never waits for a timeout
             regaOptions: {port: 1, timeoutMs: 200},
+            // D-40: the metadata detection is a probe against the configured host; no test wants
+            // to wait three seconds for a host that drops packets
+            metaOptions: {detectTimeoutMs: 50},
             interfaceManagerOptions: {portOverride: () => 1, watchdogIntervalMs: 0},
             ...options.backendOptions,
         },
@@ -799,5 +802,102 @@ describe('shutdown', () => {
         vi.spyOn(backendOf(host), 'stop').mockReturnValue(new Promise(() => undefined));
         await host.close();
         expect(warnings.join(' ')).toContain('did not stop');
+    });
+});
+
+describe('the openccu-lite hand-over (D-40)', () => {
+    /** A box that knows one session. The real one asks the box's metadata API. */
+    const fakeBox = {
+        offered: [] as (string | null | undefined)[],
+        check(sid: string | null | undefined): Promise<{name: string; level: number; sid: string} | undefined> {
+            fakeBox.offered.push(sid);
+            return Promise.resolve(
+                sid === '@abcdefghij@' || sid === 'abcdefghij'
+                    ? {name: 'admin', level: 8, sid: 'abcdefghij'}
+                    : undefined,
+            );
+        },
+    };
+
+    beforeEach(() => {
+        fakeBox.offered.length = 0;
+    });
+
+    function box(options: WebHostOptions = {}): Promise<WebHost> {
+        return start({authMode: 'occulite', sessionChecker: fakeBox, ...options});
+    }
+
+    function sessionCookieOf(answer: Response): string {
+        const header = answer.headers.get('set-cookie') ?? '';
+        const value = /hmm_session=([^;]+)/.exec(header)?.[1];
+        expect(value, `no session cookie in ${header}`).toBeTruthy();
+        return `hmm_session=${value ?? ''}`;
+    }
+
+    it("turns the shell's ?sid=@…@ into a session of its own and takes it off the URL", async () => {
+        const host = await box();
+        const answer = await fetch(`${host.url}?sid=%40abcdefghij%40`, {redirect: 'manual'});
+        expect(answer.status).toBe(302);
+        expect(answer.headers.get('location')).toBe(host.base);
+        expect(fakeBox.offered).toEqual(['@abcdefghij@']);
+
+        const ui = await fetch(host.url, {headers: {Cookie: sessionCookieOf(answer)}});
+        expect(await ui.text()).toContain('<div id="app">');
+    });
+
+    it('keeps the rest of the query string', async () => {
+        const host = await box();
+        const answer = await fetch(`${host.url}?sid=abcdefghij&lang=de`, {redirect: 'manual'});
+        expect(answer.headers.get('location')).toBe(`${host.base}?lang=de`);
+    });
+
+    it('sends a session the box does not know back to the box, not to a form', async () => {
+        const host = await box();
+        const answer = await fetch(`${host.url}?sid=zzzzzzzzzz`, {redirect: 'manual'});
+        expect(answer.status).toBe(302);
+        expect(answer.headers.get('location')).toBe('/');
+        expect(answer.headers.get('set-cookie')).toBeNull();
+    });
+
+    it('sends a browser without a session to the box, and answers 401 for everything else', async () => {
+        const host = await box();
+        const page = await fetch(host.url, {redirect: 'manual'});
+        expect(page.status).toBe(302);
+        expect(page.headers.get('location')).toBe('/');
+        expect((await fetch(`${host.url}data/manifest.json`)).status).toBe(401);
+        // nothing was asked of the box: there was no session to check
+        expect(fakeBox.offered).toEqual([]);
+    });
+
+    it("still accepts the token cookie of settings.cgi, which is the addon's other door", async () => {
+        const host = await box();
+        const ui = await fetch(host.url, {headers: {Cookie: 'hmm_token=secret'}});
+        expect(ui.status).toBe(200);
+        expect(await ui.text()).toContain('<div id="app">');
+    });
+
+    it('hands the session to the backend, so a write to the box is attributed to the user', async () => {
+        const host = await box();
+        const seen: (string | undefined)[] = [];
+        vi.spyOn(backendOf(host), 'noteMetaSession').mockImplementation((sid) => seen.push(sid));
+        const answer = await fetch(`${host.url}?sid=abcdefghij`, {redirect: 'manual'});
+        await fetch(host.url, {headers: {Cookie: sessionCookieOf(answer)}});
+        expect(seen).toContain('abcdefghij');
+    });
+
+    it("logs out to the box, because the login is the box's", async () => {
+        const host = await box();
+        const answer = await fetch(`${host.url}?sid=abcdefghij`, {redirect: 'manual'});
+        const out = await fetch(`${host.url}logout`, {
+            redirect: 'manual',
+            headers: {Cookie: sessionCookieOf(answer)},
+        });
+        expect(out.status).toBe(302);
+        expect(out.headers.get('location')).toBe('/');
+        expect(out.headers.get('set-cookie')).toContain('Max-Age=0');
+    });
+
+    it('refuses --no-auth, which would leave the api open whatever the session says', async () => {
+        await expect(start({authMode: 'occulite', auth: false})).rejects.toThrow('--no-auth');
     });
 });

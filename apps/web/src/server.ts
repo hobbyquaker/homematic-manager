@@ -54,6 +54,7 @@ import {
     type LoginLanguage,
 } from './login.js';
 import {createLogger, silentLogger, type Logger, type LogLevel} from './log.js';
+import {OcculiteAuthenticator, parseSid} from './occulite.js';
 import {defaultDataDir, defaultMetadataDir, defaultUiDir, packageVersion} from './paths.js';
 import {proxyRequest, proxyUpgrade} from './proxy.js';
 import {RateLimiter, SessionStore, type Session} from './sessions.js';
@@ -82,12 +83,23 @@ export const KEEPALIVE_INTERVAL_MS = 25_000;
  * command line, the environment or the addon's session-checked `settings.cgi`. `rega` puts a login
  * page in front of the UI and checks the credentials against the CCU itself - which only works
  * *on* the CCU, because both services it asks are loopback-only.
+ *
+ * D-40 adds `occulite`, for the addon on an openccu-lite box. There is no login page in that mode:
+ * the box's shell has already authenticated the user and opens the addon with the session on the
+ * URL (`?sid=@xxxxxxxxxx@`), and the host checks that session against the box's metadata API. A
+ * request without one is sent to the box's own login rather than shown a form this application
+ * could not answer - openccu-lite's users are the box's, not the CCU's.
  */
-export type AuthMode = 'token' | 'rega';
+export type AuthMode = 'token' | 'rega' | 'occulite';
 
 /** What the login endpoint asks. `RegaAuthenticator` is the real one; a test passes a fake. */
 export interface CredentialChecker {
     authenticate(user: string, password: string): Promise<{name: string; level: number} | undefined>;
+}
+
+/** D-40: what the `occulite` hand-over asks. `OcculiteAuthenticator` is the real one. */
+export interface SessionChecker {
+    check(sid: string | null | undefined): Promise<{name: string; level: number; sid: string} | undefined>;
 }
 
 export interface WebHostOptions {
@@ -120,6 +132,10 @@ export interface WebHostOptions {
     readonly sessionTtlMs?: number | undefined;
     /** D-32: injected by the tests in place of the real ReGa and UDP check. */
     readonly authenticator?: CredentialChecker | undefined;
+    /** D-40: the box the `occulite` mode checks sessions against. `http://127.0.0.1` by default. */
+    readonly occuliteUrl?: string | undefined;
+    /** D-40: injected by the tests in place of the real box. */
+    readonly sessionChecker?: SessionChecker | undefined;
     /** Serve the UI in demo mode and start no backend at all. */
     readonly demo?: boolean;
     /** Written to `ConnectionConfig.host` when it differs from what is configured. */
@@ -162,7 +178,7 @@ export interface WebHost {
     readonly token: string | undefined;
     /** D-32: how a browser is let in. */
     readonly authMode: AuthMode;
-    /** D-32: the login sessions; `undefined` in `token` mode, where there are none. */
+    /** D-32/D-40: the login sessions; `undefined` in `token` mode, where there are none. */
     readonly sessions: SessionStore | undefined;
     close(): Promise<void>;
 }
@@ -202,13 +218,23 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
     const authMode = options.authMode ?? 'token';
     requireLocalForRega(authMode, options, auth);
 
-    // D-32: everything the login needs, and nothing at all in `token` mode
-    const sessions = authMode === 'rega' ? new SessionStore(sessionStoreOptions(options)) : undefined;
+    // D-32/D-40: everything a login needs, and nothing at all in `token` mode
+    const sessions = authMode === 'token' ? undefined : new SessionStore(sessionStoreOptions(options));
     const loginLimit = authMode === 'rega' ? new RateLimiter() : undefined;
     const credentials =
         authMode === 'rega'
             ? (options.authenticator ??
               new RegaAuthenticator({
+                  onNotice: (level, message) => log[level](`login: ${message}`),
+              }))
+            : undefined;
+    // D-40: the box that issued the session the shell hands over
+    const occuliteUrl = (options.occuliteUrl ?? 'http://127.0.0.1').replace(/\/$/, '');
+    const boxSessions: SessionChecker | undefined =
+        authMode === 'occulite'
+            ? (options.sessionChecker ??
+              new OcculiteAuthenticator({
+                  baseUrl: occuliteUrl,
                   onNotice: (level, message) => log[level](`login: ${message}`),
               }))
             : undefined;
@@ -278,6 +304,18 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
         }
         const rest = pathname.slice(base.length);
 
+        // D-40: the hand-over from openccu-lite's shell. It opens an addon page with the user's
+        // session on the URL (`?sid=@xxxxxxxxxx@`), the same convention the CCU's WebUI uses; the
+        // session is checked against the box, turned into one of ours, and taken off the URL again
+        // so that it does not sit in the address bar, in a bookmark and in every referrer.
+        if (boxSessions && sessions && (method === 'GET' || method === 'HEAD')) {
+            const offered = url.searchParams.get('sid');
+            if (parseSid(offered) !== undefined) {
+                await handleHandover(request, response, offered, url, rest);
+                return;
+            }
+        }
+
         // D-32: the login is the one route that takes a POST, and the one route that is reachable
         // without a session - it is what hands one out
         if (sessions && rest === 'login') {
@@ -302,7 +340,9 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
             if (rest === 'logout') {
                 sessions.remove(readCookie(request.headers.cookie, SESSION_COOKIE));
                 response.writeHead(302, {
-                    Location: `${base}login`,
+                    // D-40: on openccu-lite the login is the box's, not ours, so this is where a
+                    // logout goes; the box's own session stays valid until it is ended there
+                    Location: authMode === 'occulite' ? '/' : `${base}login`,
                     'Set-Cookie': clearedSessionCookie(base, isHttps(request)),
                     'Cache-Control': 'no-store',
                 });
@@ -310,13 +350,26 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
                 return;
             }
             session = sessions.get(readCookie(request.headers.cookie, SESSION_COOKIE));
+            if (session?.credential !== undefined) {
+                // D-40: writes to the box go out as the session of whoever is looking at the page
+                backend?.noteMetaSession(session.credential);
+            }
             if (!session && !hasValidToken(request)) {
                 // the page itself becomes the login form; anything else - assets, metadata, images -
                 // is answered with a plain 401, because a login page in place of a stylesheet only
                 // confuses a browser. The `settings.cgi` hand-over of task 13 never lands here: its
                 // token cookie is accepted above, and the WebUI session it checked is why.
                 if (rest === '' || rest === 'index.html') {
-                    sendLoginPage(request, response, 200);
+                    if (authMode === 'occulite') {
+                        // D-40: there is no form to show - openccu-lite's users are the box's, and
+                        // lighttpd's own gate sends an unauthenticated request to the box's login
+                        // long before it reaches this process. Landing there is the honest answer
+                        // to a bookmark that was opened without a session.
+                        response.writeHead(302, {Location: '/', 'Cache-Control': 'no-store'});
+                        response.end();
+                    } else {
+                        sendLoginPage(request, response, 200);
+                    }
                 } else {
                     unauthorised(response);
                 }
@@ -427,6 +480,44 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
         response.writeHead(302, {
             Location: base,
             'Set-Cookie': sessionCookie(session.id, base, (sessions as SessionStore).ttlMs / 1000, isHttps(request)),
+            'Cache-Control': 'no-store',
+        });
+        response.end();
+    }
+
+    /**
+     * D-40: `?sid=@…@` from openccu-lite's shell into a session of this host.
+     *
+     * One check against the box and one redirect. A session that the box does not know goes back to
+     * the box's login rather than to a form here, and the failure is not counted or rate-limited:
+     * the id was not guessed at, it was handed over, and the only way to get a wrong one is for it
+     * to have expired.
+     */
+    async function handleHandover(
+        request: IncomingMessage,
+        response: ServerResponse,
+        offered: string | null,
+        url: URL,
+        rest: string,
+    ): Promise<void> {
+        const checked = await boxSessions?.check(offered);
+        if (!checked) {
+            log.warn(`login: openccu-lite refused the session offered from ${clientAddress(request)}`);
+            response.writeHead(302, {Location: '/', 'Cache-Control': 'no-store'});
+            response.end();
+            return;
+        }
+        const store = sessions as SessionStore;
+        const session = store.create(checked.name, checked.level, checked.sid);
+        backend?.noteMetaSession(checked.sid);
+        log.info(`login: ${checked.name} (level ${String(checked.level)}) through the openccu-lite shell`);
+        // the same page, without the session in the URL
+        const query = new URLSearchParams(url.searchParams);
+        query.delete('sid');
+        const search = query.size === 0 ? '' : `?${query.toString()}`;
+        response.writeHead(302, {
+            Location: `${base}${rest}${search}`,
+            'Set-Cookie': sessionCookie(session.id, base, store.ttlMs / 1000, isHttps(request)),
             'Cache-Control': 'no-store',
         });
         response.end();
@@ -591,6 +682,18 @@ export async function ensureDataDir(dataDir: string): Promise<void> {
  * says why is the only useful answer.
  */
 export function requireLocalForRega(authMode: AuthMode, options: WebHostOptions, auth: boolean): void {
+    if (authMode === 'occulite') {
+        // D-40: no `--local` requirement - the box is reached over HTTP and may be named with
+        // `--occulite-url` - but the same rule about the token holds: without one the socket lets
+        // everybody in and checking the session would guard nothing.
+        if (!auth) {
+            throw new Error(
+                '--auth-mode occulite cannot be combined with --no-auth: without a token the api socket lets ' +
+                    'everyone in anyway, and the session check would guard nothing.',
+            );
+        }
+        return;
+    }
     if (authMode !== 'rega') {
         return;
     }

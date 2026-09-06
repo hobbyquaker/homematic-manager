@@ -28,6 +28,14 @@ export interface Session {
     readonly user: string;
     /** ReGa `UserLevel()`: 8 admin, 2 user, 1 guest. */
     readonly level: number;
+    /**
+     * D-40: the credential the box gave this user - their `?sid=@…@`.
+     *
+     * Kept because on openccu-lite it is not only proof of a login: it is what a write to the box's
+     * metadata store goes out with, so that a rename is attributed to the person who asked for it
+     * rather than to the addon. Absent in every other mode, where nothing downstream needs one.
+     */
+    readonly credential?: string;
     /** Epoch milliseconds; pushed out by every request that uses the session. */
     expiresAt: number;
 }
@@ -63,9 +71,15 @@ export class SessionStore {
     }
 
     /** A new session for a user who has just proved who they are. */
-    create(user: string, level: number): Session {
+    create(user: string, level: number, credential?: string): Session {
         this.sweep();
-        const session: Session = {id: this.#createId(), user, level, expiresAt: this.#now() + this.ttlMs};
+        const session: Session = {
+            id: this.#createId(),
+            user,
+            level,
+            ...(credential === undefined ? {} : {credential}),
+            expiresAt: this.#now() + this.ttlMs,
+        };
         this.#sessions.set(session.id, session);
         return session;
     }

@@ -88,6 +88,21 @@
     --hmm-radius: 3px;
 
     /*
+     * Form metrics, so a dialog's spacing is a decision made once (task 23: the settings dialog
+     * read badly because every row had brought its own gap). The label column is as wide as the
+     * longest German switch label needs at 13 px before it wraps to a second line, and the two
+     * field widths are the ones a *type* asks for: a port is four digits, everything else fills
+     * the row it is in.
+     */
+    --hmm-form-label-width: 210px;
+    --hmm-form-column-gap: 10px;
+    --hmm-form-row-gap: 6px;
+    --hmm-form-section-gap: 14px;
+    --hmm-form-help-gap: 2px;
+    --hmm-field-narrow: 90px;
+    --hmm-field-medium: 150px;
+
+    /*
      * The CCU draws its device pictures as black line art on white paper, so on a dark surface
      * every row carried a glaring white stamp (the maintainer's third look). Light mode leaves
      * them alone; dark mode inverts them.

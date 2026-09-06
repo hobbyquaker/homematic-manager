@@ -122,6 +122,51 @@ describe.skipIf(!hasLayout)('dialogs at 1280x800', () => {
         expectNoOverflow(dialog);
     });
 
+    /**
+     * Task 23: and it fits *without scrolling*. The maintainer's complaint about the old dialog
+     * was that it read badly, and a settings dialog whose content is longer than its own box reads
+     * worst of all - the five sections stand in two columns exactly so that they do not.
+     */
+    it('the settings dialog shows all five sections without a scrollbar', async () => {
+        await mountApp({transport: new MockTransport({demo: true})});
+        await fireEvent.click(screen.getByTestId('settings-button'));
+        const dialog = await waitFor(() => screen.getByTestId('config-dialog'));
+
+        const body = dialog.querySelector<HTMLElement>('.hmm-dialog-body')!;
+        expect(body.scrollHeight).toBeLessThanOrEqual(body.clientHeight);
+        expect(Math.round(dialog.getBoundingClientRect().height)).toBeLessThanOrEqual(window.innerHeight);
+    });
+
+    /**
+     * The other half of task 23's brief: the label is right-aligned against its field, and the help
+     * text is *under* the field rather than beside it - which is where the 2.x dialog put it and
+     * why a row with an explanation was twice as wide as one without.
+     */
+    it('right-aligns the settings labels and puts the help under the field', async () => {
+        await mountApp({transport: new MockTransport({demo: true})});
+        await fireEvent.click(screen.getByTestId('settings-button'));
+        await waitFor(() => screen.getByTestId('config-dialog'));
+
+        const input = screen.getByTestId('config-host');
+        const row = input.closest('.hmm-config-row')!;
+        const label = row.querySelector<HTMLElement>('.hmm-config-label')!;
+        const help = row.querySelector<HTMLElement>('.hmm-config-help')!;
+
+        const labelBox = label.getBoundingClientRect();
+        const fieldBox = input.getBoundingClientRect();
+        const helpBox = help.getBoundingClientRect();
+
+        expect(getComputedStyle(label).textAlign).toBe('right');
+        expect(Math.round(labelBox.right)).toBeLessThanOrEqual(Math.round(fieldBox.left));
+        expect(Math.round(helpBox.top)).toBeGreaterThanOrEqual(Math.round(fieldBox.bottom) - 1);
+        expect(Math.round(helpBox.left)).toBe(Math.round(fieldBox.left));
+
+        // A port is narrow, a host fills its row: the widths follow the type of the field.
+        const port = screen.getByText('Callback-Port XML-RPC').closest('.hmm-config-row')!;
+        const portInput = port.querySelector<HTMLInputElement>('input')!;
+        expect(portInput.getBoundingClientRect().width).toBeLessThan(fieldBox.width / 2);
+    });
+
     it('the about dialog fits', async () => {
         await mountApp({transport: new MockTransport({demo: true})});
         await fireEvent.click(screen.getByTestId('about-button'));
@@ -479,8 +524,9 @@ describe.skipIf(!hasLayout)('a dialog the user has moved or resized', () => {
         const dialog = await waitFor(() => screen.getByTestId('config-dialog'));
 
         await drag(handleOf(dialog, 'se'), -2000, -2000);
-        // 560 px is the width the settings form was laid out for, and its minimum for that reason.
-        expect(box(dialog)).toEqual({width: 560, height: 160});
+        // 960 px is the width the settings form was laid out for (task 23: five titled sections in
+        // two columns), and its minimum for that reason.
+        expect(box(dialog)).toEqual({width: 960, height: 160});
 
         const body = dialog.querySelector<HTMLElement>('.hmm-dialog-body')!;
         expect(body.scrollHeight).toBeGreaterThan(body.clientHeight);

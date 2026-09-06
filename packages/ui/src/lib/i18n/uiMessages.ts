@@ -336,7 +336,47 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Check for updates': {de: 'Nach Aktualisierungen suchen', en: 'Check for updates'},
     'Device data': {de: 'Gerätedaten', en: 'Device data'},
 
-    // The settings dialog.
+    // The settings dialog. Task 23 groups it into five titled sections and puts a help line under
+    // the fields that need one - the 2.x dialog was one list of eighteen unexplained rows.
+    Connection: {de: 'Verbindung', en: 'Connection'},
+    Callback: {de: 'Rückruf', en: 'Callback'},
+    Behaviour: {de: 'Verhalten', en: 'Behaviour'},
+    'Configured interfaces': {de: 'Konfigurierte Schnittstellen', en: 'Configured interfaces'},
+    'Host name or address of the CCU': {
+        de: 'Hostname oder Adresse der CCU',
+        en: 'Host name or address of the CCU',
+    },
+    'Searches the network for CCUs over UDP': {
+        de: 'Sucht per UDP im Netz nach CCUs',
+        en: 'Searches the network for CCUs over UDP',
+    },
+    'The encrypted ports of the CCU': {de: 'Die verschlüsselten Ports der CCU', en: 'The encrypted ports of the CCU'},
+    'The address the interface processes call back to': {
+        de: 'Die Adresse, an die die Schnittstellenprozesse zurückrufen',
+        en: 'The address the interface processes call back to',
+    },
+    'Probes the known ports in the background': {
+        de: 'Prüft die bekannten Ports im Hintergrund',
+        en: 'Probes the known ports in the background',
+    },
+    'ReGa supplies the friendly names': {
+        de: 'ReGa liefert die Anzeigenamen',
+        en: 'ReGa supplies the friendly names',
+    },
+    'Only possible with ReGa': {de: 'Nur mit ReGa möglich', en: 'Only possible with ReGa'},
+    'Shortest pause between two writes': {
+        de: 'Kürzeste Pause zwischen zwei Schreibzugriffen',
+        en: 'Shortest pause between two writes',
+    },
+    'Acknowledging is a write to the device': {
+        de: 'Das Bestätigen schreibt in das Gerät',
+        en: 'Acknowledging is a write to the device',
+    },
+    'Empty switches the dumps off': {de: 'Leer schaltet die Mitschrift ab', en: 'Empty switches the dumps off'},
+    'Discards the caches when this is saved': {
+        de: 'Verwirft die Caches beim Speichern',
+        en: 'Discards the caches when this is saved',
+    },
     'Extra interfaces': {de: 'Zusätzliche Schnittstellen', en: 'Extra interfaces'},
     'Add interface': {de: 'Schnittstelle hinzufügen', en: 'Add interface'},
     Remove: {de: 'Entfernen', en: 'Remove'},

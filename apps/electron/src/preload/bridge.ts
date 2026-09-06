@@ -256,6 +256,9 @@ export function createHostBridge(ipc: IpcRendererLike): HostBridge {
             menuListeners.add(handler);
             return () => menuListeners.delete(handler);
         },
+        openExternal: async (url: string): Promise<void> => {
+            await invoke('shell.openExternal', url);
+        },
         update: {
             state: (): Promise<UpdateState> => invoke('update.state'),
             check: (): Promise<UpdateState> => invoke('update.check'),

@@ -25,7 +25,6 @@ export * from './lib/util/paramsetForm.js';
 export * from './lib/util/linkForm.js';
 export * from './lib/util/rpcForm.js';
 
-export {default as AboutDialog} from './routes/AboutDialog.svelte';
 export {default as ConfigDialog} from './routes/ConfigDialog.svelte';
 export {default as ConsolePage} from './routes/ConsolePage.svelte';
 export {default as DevicesPage} from './routes/DevicesPage.svelte';

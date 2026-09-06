@@ -20,3 +20,4 @@ export {default as ConnectionIndicator} from './ConnectionIndicator.svelte';
 export {default as UpdateNotice} from './UpdateNotice.svelte';
 export {default as LanguageSwitch} from './LanguageSwitch.svelte';
 export {default as ThemeSwitch} from './ThemeSwitch.svelte';
+export {default as GithubLink} from './GithubLink.svelte';

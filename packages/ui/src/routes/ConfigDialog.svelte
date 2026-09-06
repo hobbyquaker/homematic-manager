@@ -55,6 +55,27 @@
     const addressOptions = $derived(stores.app.config?.localAddresses ?? []);
     const discovered = $derived(stores.app.config?.discovered ?? []);
 
+    /**
+     * Task 23: what the About dialog used to say, as the foot of the one dialog that is about this
+     * installation. The version is the API's, which is the only one every host has; the data set is
+     * what `data/` was generated from (D-10), and the licence is the project's (D-26). The host's
+     * own numbers are there only where there is a host - `apps/web`, the addon and demo mode have
+     * no `window.__HMM_HOST__` - and they are what a bug report needs.
+     */
+    const version = $derived(stores.app.config?.version ?? '');
+    const manifest = $derived(stores.meta.manifest);
+    const hostInfo = $derived(stores.host.info);
+    const dataLine = $derived(
+        manifest === undefined
+            ? ''
+            : `${manifest.sources.map((source) => `${source.name} ${source.version}`).join(', ')} (${manifest.generatedAt.slice(0, 10)})`,
+    );
+    const hostLine = $derived(
+        hostInfo === undefined
+            ? ''
+            : `Electron ${hostInfo.electron} \u00b7 Chromium ${hostInfo.chrome} \u00b7 Node ${hostInfo.node} \u00b7 ${hostInfo.platform} ${hostInfo.arch}`,
+    );
+
     async function save(): Promise<void> {
         if (!draft) {
             return;
@@ -509,6 +530,25 @@
                     >{t('Add interface')}</button
                 >
             </fieldset>
+
+            <!--
+                The About dialog is gone (task 23). Version, device data and licence are one small
+                line here, where a user who wants to know what is running already is.
+            -->
+            <div class="hmm-config-info" data-testid="config-info">
+                <p>
+                    Homematic Manager {version}
+                    {#if dataLine !== ''}&middot; {t('Device data')}: {dataLine}{/if}
+                    &middot; AGPL-3.0-or-later &middot; &copy; 2014-2026 Sebastian "Hobbyquaker" Raff, Andr&eacute; "Anli"
+                    Litfin
+                </p>
+                {#if hostLine !== ''}
+                    <p data-testid="config-host-info">
+                        {hostLine} &middot; <span class="hmm-mono">{hostInfo?.logFile ?? ''}</span>
+                    </p>
+                {/if}
+                <p>HomeMatic und BidCoS sind eingetragene Warenzeichen der eQ-3 AG.</p>
+            </div>
         </div>
     {/if}
 
@@ -642,5 +682,16 @@
         grid-column: 1 / -1;
         color: var(--hmm-error);
         font-size: var(--hmm-font-size-small);
+    }
+
+    .hmm-config-info {
+        border-top: 1px solid var(--hmm-border-muted);
+        padding-top: 6px;
+        color: var(--hmm-fg-muted);
+        font-size: var(--hmm-font-size-small);
+    }
+
+    .hmm-config-info p {
+        margin: 0;
     }
 </style>

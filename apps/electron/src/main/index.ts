@@ -42,7 +42,7 @@ import {errorDialogsDisabled, readHostSettings} from './hostSettings.js';
 import {DeviceImageService, imageLog, type ImageConnection} from './images.js';
 import {IpcBridge} from './ipcBridge.js';
 import {createQuitSequence, withDeadline} from './lifecycle.js';
-import {buildMenuTemplate, isAllowedExternalUrl, ISSUES_URL} from './menu.js';
+import {buildMenuTemplate, externalUrlFromRenderer, isAllowedExternalUrl, ISSUES_URL} from './menu.js';
 import {fileRoots, resolvePaths} from './paths.js';
 import {createImageProtocolHandler, PRIVILEGED_SCHEMES} from './protocol.js';
 import {createStartupTrace} from './startupTrace.js';
@@ -283,6 +283,15 @@ function registerHostCommands(): void {
                 const source = args[0];
                 if (source === 'system' || source === 'light' || source === 'dark') {
                     nativeTheme.themeSource = source satisfies ThemeSource;
+                }
+                return null;
+            }
+            case 'shell.openExternal': {
+                // The allow-list is here and not in the renderer: a page that can be made to ask
+                // for a URL must not be able to choose which one (task 23).
+                const url = externalUrlFromRenderer(args[0]);
+                if (url !== undefined) {
+                    void shell.openExternal(url);
                 }
                 return null;
             }

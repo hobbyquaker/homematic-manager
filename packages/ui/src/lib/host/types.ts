@@ -28,7 +28,7 @@ export interface HostUpdateState {
     readonly dismissed: boolean;
 }
 
-/** What the About dialog shows about the process the UI runs in. */
+/** What the settings dialog's info line shows about the process the UI runs in. */
 export interface HostInfo {
     readonly version: string;
     readonly electron: string;
@@ -53,6 +53,16 @@ export interface HostBridge {
     /** The OS theme, for `system`; fires whenever the OS switches. */
     onSystemTheme(handler: (dark: boolean) => void): () => void;
     onMenuAction(handler: (action: HostMenuAction) => void): () => void;
+    /**
+     * Opens a URL in the user's own browser (task 23: the GitHub icon in the header).
+     *
+     * Optional, because {@link isHostBridge} must keep accepting the preload of an older build -
+     * both sides of this contract only ever gain optional members. Where it is missing the UI
+     * falls back to what the browser does with a `target="_blank"` link, which is what `apps/web`
+     * and the CCU addon do anyway. Main decides what may be opened, not the page: it has an
+     * allow-list of exactly the project URL.
+     */
+    openExternal?(url: string): Promise<void>;
     update: {
         state(): Promise<HostUpdateState>;
         check(): Promise<HostUpdateState>;

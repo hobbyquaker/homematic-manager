@@ -248,10 +248,11 @@ describe('App shell', () => {
         await waitFor(() => expect(transport.lastCall('config.set')?.[0]?.host).toBe('ccu3'));
     });
 
-    it('opens the about dialog', async () => {
+    it('links to the project instead of the old help menu', async () => {
         await mountApp(transport);
-        await fireEvent.click(screen.getByTestId('about-button'));
-        expect(screen.getByText(/Homematic Manager 3\.0\.0-dev\.0/)).toBeTruthy();
+        expect(screen.getByTestId('github-link').getAttribute('href')).toBe(
+            'https://github.com/hobbyquaker/homematic-manager',
+        );
     });
 
     it('shows a notice the backend pushed and lets it be dismissed', async () => {

@@ -319,8 +319,8 @@ export const UI_MESSAGES: MessageCatalogue = {
         en: 'BidCos-Wired has no install mode; the interface searches its bus for new devices.',
     },
 
-    // The update notice and the About dialog (D-16); all of it is silent without a host bridge.
-    Update: {de: 'Aktualisierung', en: 'Update'},
+    // The update notice (D-16); silent without a host bridge. The About dialog that carried the
+    // other half of these strings is gone (task 23), and so are its keys.
     'A new version is available': {de: 'Eine neue Version ist verfügbar', en: 'A new version is available'},
     Downloading: {de: 'Wird geladen', en: 'Downloading'},
     'The update is ready and will be installed when you quit': {
@@ -333,8 +333,12 @@ export const UI_MESSAGES: MessageCatalogue = {
     },
     Download: {de: 'Herunterladen', en: 'Download'},
     'Install on quit': {de: 'Beim Beenden installieren', en: 'Install on quit'},
-    'Check for updates': {de: 'Nach Aktualisierungen suchen', en: 'Check for updates'},
     'Device data': {de: 'Gerätedaten', en: 'Device data'},
+    // Task 23: the accessible name of the GitHub icon that replaced the "?" menu.
+    'Homematic Manager on GitHub': {
+        de: 'Homematic Manager auf GitHub',
+        en: 'Homematic Manager on GitHub',
+    },
 
     // The settings dialog. Task 23 groups it into five titled sections and puts a help line under
     // the fields that need one - the 2.x dialog was one list of eighteen unexplained rows.

@@ -186,6 +186,14 @@ describe('the host bridge', () => {
         expect(createHostBridge(new FakeIpc()).deviceImageUrl('HmIP-BSM')).toBe('hmm-image://device/HmIP-BSM');
     });
 
+    it('asks main to open a URL, and never opens one itself', async () => {
+        const ipc = new FakeIpc();
+        const host = createHostBridge(ipc);
+        ipc.invokeResult = null;
+        await host.openExternal('https://github.com/hobbyquaker/homematic-manager');
+        expect(ipc.invoked).toEqual([['shell.openExternal', ['https://github.com/hobbyquaker/homematic-manager']]]);
+    });
+
     it('drives the five updater commands', async () => {
         const ipc = new FakeIpc();
         const host = createHostBridge(ipc);

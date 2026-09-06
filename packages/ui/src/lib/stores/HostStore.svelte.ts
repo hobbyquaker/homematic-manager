@@ -12,7 +12,7 @@ export interface HostStoreOptions {
  * Everything the UI can only get from an Electron host - and nothing the UI needs it for.
  *
  * `available` is false in `apps/web`, in the CCU addon and in demo mode, and every method below is
- * then a no-op that resolves: the About dialog shows the API's version instead of Electron's, the
+ * then a no-op that resolves: the settings dialog shows the API's version instead of Electron's, the
  * update notice never appears, and a device image falls back to its placeholder. That is the point
  * of the store: the components ask it, never `window`, so "no host" is one branch in one file.
  */
@@ -73,7 +73,7 @@ export class HostStore {
         return this.#bridge.deviceImageUrl(deviceType);
     }
 
-    /** Loads what the About dialog shows. Does nothing without a host. */
+    /** Loads what the settings dialog's info line shows. Does nothing without a host. */
     async load(): Promise<void> {
         if (!this.#bridge) {
             return;
@@ -91,6 +91,23 @@ export class HostStore {
     /** Subscribes to the menu items the page has to carry out; returns the unsubscribe function. */
     onMenuAction(handler: (action: HostMenuAction) => void): () => void {
         return this.#bridge?.onMenuAction(handler) ?? (() => {});
+    }
+
+    /**
+     * Hands a URL to the host so it opens in the user's own browser, and says whether it did.
+     *
+     * `false` means there is nobody to ask - `apps/web`, the addon, demo mode, or a preload from a
+     * build that predates this command - and the caller then lets the browser follow the link
+     * itself. Nothing is validated here: main has the allow-list, because a check in the renderer
+     * is a check an XSS bug can walk around.
+     */
+    async openExternal(url: string): Promise<boolean> {
+        const bridge = this.#bridge;
+        if (!bridge?.openExternal) {
+            return false;
+        }
+        await bridge.openExternal(url);
+        return true;
     }
 
     async checkForUpdate(): Promise<void> {

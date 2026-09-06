@@ -37,7 +37,7 @@ export function isHostBridge(value: unknown): value is HostBridge {
 /**
  * The host bridge, or `undefined` in a plain browser.
  *
- * Everything that uses it degrades silently: the About dialog shows what the API knows instead of
+ * Everything that uses it degrades silently: the settings dialog shows what the API knows instead of
  * the Electron versions, the update notice never appears, and a device image falls back to the
  * placeholder. `apps/web` and the CCU addon run through that path (D-24, D-5), so "no host" is the
  * normal case, not an error.

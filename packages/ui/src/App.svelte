@@ -3,6 +3,7 @@
 
     import './app.css';
 
+    import GithubLink from './lib/components/GithubLink.svelte';
     import InterfacePopup from './lib/components/InterfacePopup.svelte';
     import Loader from './lib/components/Loader.svelte';
     import Notices from './lib/components/Notices.svelte';
@@ -15,7 +16,6 @@
     import {setStores} from './lib/stores/context.js';
     import type {TabId} from './lib/stores/routing.js';
     import type {Stores} from './lib/stores/Stores.svelte.js';
-    import AboutDialog from './routes/AboutDialog.svelte';
     import ChangeSetDialog from './routes/ChangeSetDialog.svelte';
     import ConfigDialog from './routes/ConfigDialog.svelte';
     import ConsolePage from './routes/ConsolePage.svelte';
@@ -24,6 +24,9 @@
     import LinksPage from './routes/LinksPage.svelte';
     import RadioPage from './routes/RadioPage.svelte';
     import ServiceMessagesPage from './routes/ServiceMessagesPage.svelte';
+
+    /** The project page, opened by the header's GitHub icon (task 23). */
+    const PROJECT_URL = 'https://github.com/hobbyquaker/homematic-manager';
 
     interface Props {
         stores: Stores;
@@ -34,7 +37,6 @@
     // is exactly what `untrack` says here.
     setStores(untrack(() => stores));
 
-    let aboutOpen = $state(false);
     let changeSetOpen = $state(false);
 
     const t = $derived(stores.i18n.t);
@@ -191,7 +193,20 @@
                 testId="settings-button"
                 onclick={() => (app.configDialogOpen = true)}
             />
-            <ToolbarButton title={t('Help')} icon="?" testId="about-button" onclick={() => (aboutOpen = true)} />
+            <!--
+                Task 23: the "?" menu and its About dialog are gone. What the dialog was consulted
+                for - version, device data, licence - is the info line at the foot of the settings
+                dialog; what is left is the way to the project, and that is one link. In Electron
+                the click goes through the host bridge to `shell.openExternal` in main, which has
+                an allow-list of exactly this URL; everywhere else it is the link the browser
+                already knows what to do with.
+            -->
+            <GithubLink
+                href={PROJECT_URL}
+                label={t('Homematic Manager on GitHub')}
+                openExternal={(url) => stores.host.openExternal(url)}
+                testId="github-link"
+            />
         </div>
     </header>
 
@@ -263,7 +278,6 @@
         oncancel={() => void stores.writeLog.cancel()}
     />
     <ConfigDialog bind:open={app.configDialogOpen} />
-    <AboutDialog bind:open={aboutOpen} />
     <ChangeSetDialog bind:open={changeSetOpen} />
     <Loader visible={app.loading} text={t('Loading Homematic Manager...')} testId="loader" />
 </div>

@@ -13,7 +13,14 @@ import {
     readHostSettings,
     writeHostSettings,
 } from './hostSettings.js';
-import {buildMenuTemplate, isAllowedExternalUrl, ISSUES_URL, type MenuTemplateItem} from './menu.js';
+import {
+    buildMenuTemplate,
+    externalUrlFromRenderer,
+    isAllowedExternalUrl,
+    ISSUES_URL,
+    PROJECT_URL,
+    type MenuTemplateItem,
+} from './menu.js';
 import {fileRoots, resolvePaths} from './paths.js';
 import {createStartupTrace, STARTUP_TRACE_ENV, startupTraceEnabled} from './startupTrace.js';
 
@@ -331,6 +338,32 @@ describe('isAllowedExternalUrl', () => {
         expect(isAllowedExternalUrl('https://evil.example/github.com')).toBe(false);
         expect(isAllowedExternalUrl('smb://share/x')).toBe(false);
         expect(isAllowedExternalUrl('not a url')).toBe(false);
+    });
+});
+
+/**
+ * Task 23: the renderer's GitHub icon asks main to open the project page. What main will open on
+ * that request is a list of one, not a rule - the renderer is the side an XSS bug would speak from.
+ */
+describe('externalUrlFromRenderer', () => {
+    it('allows the project page, and answers with the URL main will open', () => {
+        expect(externalUrlFromRenderer(PROJECT_URL)).toBe(PROJECT_URL);
+    });
+
+    it('refuses every other URL, including the ones the menu itself may open', () => {
+        expect(externalUrlFromRenderer(ISSUES_URL)).toBeUndefined();
+        expect(externalUrlFromRenderer('https://github.com/hobbyquaker/homematic-manager/')).toBeUndefined();
+        expect(externalUrlFromRenderer('https://github.com/someone-else/homematic-manager')).toBeUndefined();
+        expect(externalUrlFromRenderer('https://homematic-forum.de/forum/')).toBeUndefined();
+        expect(externalUrlFromRenderer('file:///etc/passwd')).toBeUndefined();
+        expect(externalUrlFromRenderer('javascript:alert(1)')).toBeUndefined();
+        expect(externalUrlFromRenderer(undefined)).toBeUndefined();
+        expect(externalUrlFromRenderer(42)).toBeUndefined();
+        expect(externalUrlFromRenderer({toString: () => PROJECT_URL})).toBeUndefined();
+    });
+
+    it('is the URL the renderer asks with', () => {
+        expect(PROJECT_URL).toBe('https://github.com/hobbyquaker/homematic-manager');
     });
 });
 

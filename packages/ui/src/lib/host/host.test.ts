@@ -164,6 +164,27 @@ describe('HostStore with a host', () => {
         expect(seen).toEqual(['settings']);
     });
 
+    /**
+     * Task 23. The store says whether the host took the URL, because the component's fallback is
+     * the browser's own link - and a preload from a build without the command must land there too,
+     * which is why `openExternal` is optional on the bridge.
+     */
+    it('hands a URL to the host, and says so when the host has no such command', async () => {
+        const opened: string[] = [];
+        const bridge = fakeBridge({
+            openExternal: (url: string) => {
+                opened.push(url);
+                return Promise.resolve();
+            },
+        });
+        await expect(new HostStore({bridge}).openExternal('https://example.invalid/x')).resolves.toBe(true);
+        expect(opened).toEqual(['https://example.invalid/x']);
+
+        const older = fakeBridge();
+        delete (older as {openExternal?: unknown}).openExternal;
+        await expect(new HostStore({bridge: older}).openExternal('https://example.invalid/x')).resolves.toBe(false);
+    });
+
     it('builds the device image URL of D-10', () => {
         const store = new HostStore({bridge: fakeBridge()});
         expect(store.deviceImageUrl('HmIP-BSM')).toBe('hmm-image://device/HmIP-BSM');
@@ -189,6 +210,8 @@ describe('HostStore without a host', () => {
         await store.dismissUpdate();
         expect(store.info).toBeUndefined();
         expect(store.update).toBeUndefined();
+
+        expect(await store.openExternal('https://github.com/hobbyquaker/homematic-manager')).toBe(false);
 
         const off = store.onMenuAction(vi.fn());
         off();

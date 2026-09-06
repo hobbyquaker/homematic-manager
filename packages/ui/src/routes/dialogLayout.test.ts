@@ -167,13 +167,6 @@ describe.skipIf(!hasLayout)('dialogs at 1280x800', () => {
         expect(portInput.getBoundingClientRect().width).toBeLessThan(fieldBox.width / 2);
     });
 
-    it('the about dialog fits', async () => {
-        await mountApp({transport: new MockTransport({demo: true})});
-        await fireEvent.click(screen.getByTestId('about-button'));
-        const dialog = await waitFor(() => screen.getByTestId('about-dialog'));
-        expectNoOverflow(dialog);
-    });
-
     it('the paramset editor and its write preview fit', async () => {
         const dialog = await openParamset();
         expectNoOverflow(dialog);

@@ -98,8 +98,9 @@ descriptions they are tested against.
 
 `window.__HMM_HOST__` (Electron, task 11) is read through `HostStore` and nowhere else. Without it -
 `apps/web`, the CCU addon, demo mode - `available` is false, every method is a no-op that resolves,
-the update notice never appears, the About dialog shows the API's version instead of Electron's, and
-a device image falls back to a labelled placeholder.
+the update notice never appears, the GitHub icon in the header is a plain `target="_blank"` link
+instead of a `shell.openExternal` through the bridge, the settings dialog's info line shows the
+API's version instead of Electron's, and a device image falls back to a labelled placeholder.
 
 ## Demo mode
 
@@ -157,7 +158,7 @@ src/
   main.ts               browser entry (apps/web, the CCU addon, demo mode)
   index.ts              library entry for the Electron renderer
   app.css               the theme tokens, light and dark (D-22)
-  routes/               one component per tab, plus the settings and about dialogs
+  routes/               one component per tab, plus the settings dialog
   routes/devices/       rename, delete, replace, repair, add device and the QR scanner
   routes/paramset/      the generic paramset editor, one parameter row, the write preview
   routes/paramset/editors/  the device-specific editors of task 10 and their dispatch

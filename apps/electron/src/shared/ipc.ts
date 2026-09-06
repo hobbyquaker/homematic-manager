@@ -84,7 +84,7 @@ export interface UpdateState {
     dismissed: boolean;
 }
 
-/** What the About dialog and the window title want to know about their host. */
+/** What the settings dialog's info line and the window title want to know about their host. */
 export interface HostInfo {
     version: string;
     electron: string;
@@ -102,6 +102,14 @@ export interface HostInfo {
 export interface HostCommands {
     'app.info': {params: []; result: HostInfo};
     'theme.set': {params: [source: ThemeSource]; result: null};
+    /**
+     * Open a URL in the user's own browser (task 23: the GitHub icon in the header).
+     *
+     * Main answers this with an allow-list of exactly the project page - see
+     * `externalUrlFromRenderer()` in src/main/menu.ts. The parameter is a string rather than
+     * nothing so that the two sides name the same URL and a mismatch is visible.
+     */
+    'shell.openExternal': {params: [url: string]; result: null};
     'update.state': {params: []; result: UpdateState};
     'update.check': {params: []; result: UpdateState};
     'update.download': {params: []; result: UpdateState};
@@ -137,6 +145,8 @@ export interface HostBridge {
     onSystemTheme(handler: (dark: boolean) => void): () => void;
     /** Menu items that only the page can carry out, such as opening the settings dialog. */
     onMenuAction(handler: (action: MenuAction) => void): () => void;
+    /** Opens a URL in the user's browser; main refuses anything but the project page. */
+    openExternal(url: string): Promise<void>;
     update: {
         state(): Promise<UpdateState>;
         check(): Promise<UpdateState>;

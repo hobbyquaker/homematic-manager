@@ -23,6 +23,7 @@ interface Fake extends HostBridge {
     fireMenu(action: HostMenuAction): void;
     themes(): string[];
     calls(): string[];
+    opened(): string[];
 }
 
 function fakeHost(initial: HostUpdateState = {phase: 'idle', dismissed: false}): Fake {
@@ -30,6 +31,7 @@ function fakeHost(initial: HostUpdateState = {phase: 'idle', dismissed: false}):
     const menuHandlers = new Set<(action: HostMenuAction) => void>();
     const themes: string[] = [];
     const calls: string[] = [];
+    const opened: string[] = [];
     let state = initial;
     const record = (name: string, next: HostUpdateState): Promise<HostUpdateState> => {
         calls.push(name);
@@ -47,6 +49,10 @@ function fakeHost(initial: HostUpdateState = {phase: 'idle', dismissed: false}):
             return Promise.resolve();
         },
         onSystemTheme: () => () => {},
+        openExternal: (url: string) => {
+            opened.push(url);
+            return Promise.resolve();
+        },
         onMenuAction(handler: (action: HostMenuAction) => void) {
             menuHandlers.add(handler);
             return () => menuHandlers.delete(handler);
@@ -77,52 +83,38 @@ function fakeHost(initial: HostUpdateState = {phase: 'idle', dismissed: false}):
         },
         themes: () => themes,
         calls: () => calls,
+        opened: () => opened,
     }) as Fake;
 }
 
-describe('the About dialog', () => {
-    it('shows the version and the data set without a host, and nothing about Electron', async () => {
+describe("the settings dialog's info line", () => {
+    /**
+     * Task 23: the About dialog is gone and this is where what it said now lives - the version, the
+     * device data set it was built with and the licence. Without a host that is all there is, which
+     * is `apps/web`, the CCU addon and demo mode.
+     */
+    it('shows the version, the data set and the licence, and nothing about Electron', async () => {
         await mountApp();
-        await fireEvent.click(screen.getByTestId('about-button'));
+        await fireEvent.click(screen.getByTestId('settings-button'));
 
-        const dialog = await waitFor(() => screen.getByTestId('about-dialog'));
-        expect(dialog.textContent).toContain('3.0.0-dev.0');
-        expect(dialog.textContent).toContain('AGPLv3');
-        expect(screen.queryByTestId('about-host')).toBeNull();
+        const info = await waitFor(() => screen.getByTestId('config-info'));
+        expect(info.textContent).toContain('3.0.0-dev.0');
+        expect(info.textContent).toContain('AGPL-3.0-or-later');
+        expect(screen.queryByTestId('config-host-info')).toBeNull();
         await waitFor(() => {
-            expect(screen.getByTestId('about-data').textContent).toContain('openccu-data 2026.7.2');
+            expect(screen.getByTestId('config-info').textContent).toContain('openccu-data 2026.7.2');
         });
     });
 
-    it('shows what the host bridge reports when there is one', async () => {
+    it('adds what the host bridge reports when there is one', async () => {
         await mountApp({hostBridge: fakeHost()});
-        await fireEvent.click(screen.getByTestId('about-button'));
+        await fireEvent.click(screen.getByTestId('settings-button'));
 
-        const host = await waitFor(() => screen.getByTestId('about-host'));
+        const host = await waitFor(() => screen.getByTestId('config-host-info'));
         expect(host.textContent).toContain('44.2.0');
         expect(host.textContent).toContain('140.0.0');
         expect(host.textContent).toContain('linux x64');
         expect(host.textContent).toContain('/home/u/.config/homematic-manager/error.log');
-    });
-
-    it('lets the user check for an update from the About dialog', async () => {
-        const bridge = fakeHost();
-        await mountApp({hostBridge: bridge});
-        await fireEvent.click(screen.getByTestId('about-button'));
-
-        await fireEvent.click(await waitFor(() => screen.getByTestId('about-check-update')));
-        await waitFor(() => {
-            expect(bridge.calls()).toContain('check');
-        });
-    });
-
-    it('says nothing about updates when the host has the updater switched off', async () => {
-        await mountApp({hostBridge: fakeHost({phase: 'disabled', message: 'not packaged', dismissed: false})});
-        await fireEvent.click(screen.getByTestId('about-button'));
-        await waitFor(() => {
-            expect(screen.getByTestId('about-dialog')).toBeTruthy();
-        });
-        expect(screen.queryByTestId('about-update')).toBeNull();
     });
 });
 
@@ -165,6 +157,39 @@ describe('the update notice', () => {
         await waitFor(() => {
             expect(screen.queryByTestId('update-notice')).toBeNull();
         });
+    });
+});
+
+describe('the GitHub icon in the header', () => {
+    /**
+     * Task 23: a link, not a menu. In a browser it is the browser's own - a new tab with
+     * `rel="noopener noreferrer"` - and there is no host to ask, so nothing prevents the default.
+     */
+    it('is a plain link to the project without a host', async () => {
+        await mountApp();
+        const link = screen.getByTestId<HTMLAnchorElement>('github-link');
+
+        expect(link.getAttribute('href')).toBe('https://github.com/hobbyquaker/homematic-manager');
+        expect(link.getAttribute('target')).toBe('_blank');
+        expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+        expect(link.getAttribute('aria-label')).toBe('Homematic Manager auf GitHub');
+        // and the "?" it replaced is gone
+        expect(screen.queryByTestId('about-button')).toBeNull();
+    });
+
+    it('hands the URL to the host instead of opening a window, when there is a host', async () => {
+        const bridge = fakeHost();
+        await mountApp({hostBridge: bridge});
+
+        const link = screen.getByTestId('github-link');
+        const click = new MouseEvent('click', {bubbles: true, cancelable: true, button: 0});
+        link.dispatchEvent(click);
+
+        await waitFor(() => {
+            expect(bridge.opened()).toEqual(['https://github.com/hobbyquaker/homematic-manager']);
+        });
+        // the renderer does not navigate anywhere itself
+        expect(click.defaultPrevented).toBe(true);
     });
 });
 

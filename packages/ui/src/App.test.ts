@@ -4,7 +4,7 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import App from './App.svelte';
 import type {StorageLike} from './lib/stores/AppStore.svelte.js';
 import {createStores, type Stores} from './lib/stores/Stores.svelte.js';
-import {DEMO_CONFIG} from './lib/transport/demoData.js';
+import {DEMO_CONFIG, DEMO_INTERFACE_STATES} from './lib/transport/demoData.js';
 import {MockTransport} from './lib/transport/MockTransport.js';
 
 class MemoryStorage implements StorageLike {
@@ -75,13 +75,47 @@ describe('App shell', () => {
         ]);
     });
 
-    it('shows the host and the per-interface connection marks', async () => {
+    /**
+     * Task 21: the header carries the selected interface and one mark; the CCU, the backend state
+     * and the per-interface marks are in the popup, with what the UI knows under every name.
+     */
+    it('shows the selected interface with one summary mark, and the CCU inside the popup', async () => {
         await mountApp(transport);
-        const indicator = screen.getByTestId('connection-indicator');
-        expect(indicator.textContent).toContain('demo.local');
-        expect(indicator.textContent).toContain('BidCos-RF');
-        expect(indicator.textContent).toContain('HmIP-RF');
-        expect(indicator.querySelectorAll('.hmm-connection-ok')).toHaveLength(2);
+        const trigger = screen.getByTestId('interface-select-trigger');
+        expect(trigger.textContent).toContain('BidCos-RF');
+        // the demo has an interface that does not answer, so the summary is the red one
+        expect(screen.getByTestId('interface-select-summary').getAttribute('data-mark')).toBe('bad');
+
+        await fireEvent.click(trigger);
+        expect(screen.getByTestId('interface-host').textContent).toBe('demo.local');
+        expect(screen.getByTestId('interface-backend').textContent).toBe('Verbunden');
+        const options = [...screen.getByTestId('interface-select').querySelectorAll('[role="option"]')];
+        expect(options.map((option) => option.getAttribute('data-testid'))).toEqual([
+            'interface-item-BidCos-RF',
+            'interface-item-HmIP-RF',
+            'interface-item-BidCos-Wired',
+            'interface-item-CUxD',
+            'interface-item-VirtualDevices',
+        ]);
+
+        // the devices of the selected interface are loaded, so its line has the count as well
+        const line = screen
+            .getByTestId('interface-item-BidCos-RF')
+            .querySelector('.hmm-interface-item-line')!.textContent;
+        expect(line).toBe('xmlrpc · Port 2001 · 8 Geräte');
+        expect(screen.getByTestId('interface-item-CUxD').querySelector('.hmm-interface-item-line')!.textContent).toBe(
+            'binrpc · Port 8701',
+        );
+    });
+
+    it('switches the interface from the popup and writes the 2.x hash', async () => {
+        const {stores} = await mountApp(transport);
+        await fireEvent.click(screen.getByTestId('interface-select-trigger'));
+        await fireEvent.click(screen.getByTestId('interface-item-HmIP-RF'));
+
+        await waitFor(() => expect(stores.app.selectedInterface).toBe('HmIP-RF'));
+        expect(screen.queryByRole('listbox')).toBeNull();
+        expect(screen.getByRole('columnheader', {name: 'SUBTYPE'})).toBeTruthy();
     });
 
     it('lists the devices of the selected interface with the 2.7 columns', async () => {
@@ -221,12 +255,16 @@ describe('App shell', () => {
         await waitFor(() => expect(screen.queryByText(/ReGa antwortet nicht/)).toBeNull());
     });
 
-    it('greys the connection block out when the backend goes away', async () => {
+    it('greys the summary mark out when the backend goes away', async () => {
         await mountApp(transport);
         transport.setConnected(false);
         await waitFor(() =>
-            expect(screen.getByTestId('connection-indicator').classList.contains('hmm-connection-offline')).toBe(true),
+            expect(screen.getByTestId('interface-select-summary').classList.contains('hmm-connection-offline')).toBe(
+                true,
+            ),
         );
+        await fireEvent.click(screen.getByTestId('interface-select-trigger'));
+        expect(screen.getByTestId('interface-backend').textContent).toBe('Nicht verbunden');
     });
 
     it('opens the settings dialog by itself when no CCU is configured', async () => {
@@ -241,13 +279,18 @@ describe('App shell', () => {
         expect(screen.getByText('Schnittstelle auswählen')).toBeTruthy();
     });
 
-    it('hides the interface picker when there is only one interface', async () => {
+    /**
+     * 2.7 hid its picker when there was nothing to pick, and so did this shell until task 21. The
+     * popup stays: it is not only the picker any more but the one place that says what the CCU and
+     * its interfaces are doing, and a Homegear with a single interface needs that as much as a CCU.
+     */
+    it('keeps the interface popup when there is only one interface', async () => {
         transport.result('config.get', {
             ...DEMO_CONFIG,
             connection: {...DEMO_CONFIG.connection, interfaces: ['BidCos-RF']},
         });
         await mountApp(transport);
-        expect(screen.queryByTestId('interface-select')).toBeNull();
+        expect(screen.getByTestId('interface-select-trigger').textContent).toContain('BidCos-RF');
     });
 
     it('refreshes the devices from the toolbar', async () => {
@@ -281,5 +324,68 @@ describe('App shell', () => {
         const {stores} = await mountApp(transport);
         expect(stores.app.session).toBeNull();
         expect(stores.notices.items).toHaveLength(0);
+    });
+});
+
+/**
+ * Task 19's rule for the one bar the user looks at all day, extended in task 21: the header held a
+ * connection block that grew a line per interface and shrank again, and it stood between the tabs
+ * and the actions. What is there now is a trigger of a fixed width with a mark in a fixed box, so
+ * an interface that reconnects, one that is re-subscribing and a switch to a longer interface name
+ * all leave the header exactly where it was.
+ */
+describe.skipIf(document.body.getBoundingClientRect().width === 0)('the header stands still', () => {
+    const tabLefts = (): number[] =>
+        screen.getAllByRole('tab').map((tab) => Math.round(tab.getBoundingClientRect().left));
+
+    const frame = (selector: string): string => {
+        const box = document.querySelector(selector)!.getBoundingClientRect();
+        return [box.left, box.top, box.width, box.height].map((value) => Math.round(value)).join('/');
+    };
+
+    it('does not move when the interface states change', async () => {
+        const transport = new MockTransport({demo: true});
+        await mountApp(transport);
+        const tabs = tabLefts();
+        const trigger = frame('.hmm-interface-trigger');
+        const tablist = frame('[role="tablist"]');
+        expect(tabs).toHaveLength(6);
+
+        for (const change of [
+            DEMO_INTERFACE_STATES.map((state) => ({...state, connected: true, absent: false, subscribing: false})),
+            DEMO_INTERFACE_STATES.map((state) => ({...state, connected: false, absent: false, subscribing: true})),
+            DEMO_INTERFACE_STATES.map((state) => ({...state, connected: false, absent: false, subscribing: false})),
+        ]) {
+            transport.emit('interfaces.changed', change);
+            await waitFor(() => expect(screen.getByTestId('interface-select-summary')).toBeTruthy());
+            expect(frame('.hmm-interface-trigger'), 'the trigger changed size').toBe(trigger);
+            expect(frame('[role="tablist"]'), 'the tab bar moved').toBe(tablist);
+            expect(tabLefts(), 'a tab moved').toEqual(tabs);
+        }
+
+        // and a backend that has lost every interface leaves the trigger where it was as well; the
+        // tab bar itself is shorter then, because the tabs follow the interface type (`initDaemon`)
+        transport.emit('interfaces.changed', []);
+        await waitFor(() =>
+            expect(screen.getByTestId('interface-select-summary').getAttribute('data-mark')).toBe('absent'),
+        );
+        expect(frame('.hmm-interface-trigger')).toBe(trigger);
+        expect(frame('[role="tablist"]').split('/').slice(0, 2)).toEqual(tablist.split('/').slice(0, 2));
+    });
+
+    it('does not move when a longer interface name is selected', async () => {
+        const transport = new MockTransport({demo: true});
+        const {stores} = await mountApp(transport);
+        const trigger = frame('.hmm-interface-trigger');
+        const tabsLeft = frame('[role="tablist"]').split('/').slice(0, 2).join('/');
+
+        await fireEvent.click(screen.getByTestId('interface-select-trigger'));
+        await fireEvent.click(screen.getByTestId('interface-item-VirtualDevices'));
+        await waitFor(() => expect(stores.app.selectedInterface).toBe('VirtualDevices'));
+
+        expect(frame('.hmm-interface-trigger'), 'a longer name made the trigger wider').toBe(trigger);
+        // The bar itself is narrower - VirtualDevices offers fewer tabs than BidCos-RF - but it
+        // still starts where it started, which is what the trigger is responsible for.
+        expect(frame('[role="tablist"]').split('/').slice(0, 2).join('/')).toBe(tabsLeft);
     });
 });

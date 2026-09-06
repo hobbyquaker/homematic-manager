@@ -4,10 +4,9 @@
 
     import './app.css';
 
-    import ConnectionIndicator from './lib/components/ConnectionIndicator.svelte';
+    import InterfacePopup from './lib/components/InterfacePopup.svelte';
     import LanguageSwitch from './lib/components/LanguageSwitch.svelte';
     import Loader from './lib/components/Loader.svelte';
-    import MultiSelect from './lib/components/MultiSelect.svelte';
     import Notices from './lib/components/Notices.svelte';
     import RpcLogPanel from './lib/components/RpcLogPanel.svelte';
     import RpcProgress from './lib/components/RpcProgress.svelte';
@@ -61,7 +60,32 @@
         })),
     );
 
-    const interfaceOptions = $derived(app.configuredInterfaces.map((name) => ({value: name, label: name})));
+    /**
+     * What the popup puts under an interface name beyond its own state (task 21).
+     *
+     * Both halves are only there once something has read them: the device count as soon as the
+     * Devices tab of that interface has been open, the duty cycle once the Radio tab has read the
+     * gateways. Neither is fetched for the popup - an interface list that starts five sweeps when
+     * it is opened would be a worse popup than one that says a little less.
+     */
+    const interfaceDetails = $derived(
+        Object.fromEntries(
+            stores.interfaces.states.map((state) => {
+                const index = stores.devices.index(state.name);
+                const cycles = stores.radio
+                    .gateways(state.name)
+                    .map((gateway) => gateway.DUTY_CYCLE)
+                    .filter((value): value is number => typeof value === 'number');
+                return [
+                    state.name,
+                    {
+                        ...(index === undefined ? {} : {devices: index.devices().length}),
+                        ...(cycles.length === 0 ? {} : {dutyCycle: Math.max(...cycles)}),
+                    },
+                ];
+            }),
+        ),
+    );
 
     $effect(() => {
         document.documentElement.lang = stores.i18n.language;
@@ -96,30 +120,32 @@
 
 <div class="hmm-app" data-testid="app">
     <header class="hmm-header">
-        {#if interfaceOptions.length > 1}
-            <MultiSelect
-                options={interfaceOptions}
-                selected={app.selectedInterface === '' ? [] : [app.selectedInterface]}
-                multiple={false}
-                label={t('Select an interface')}
-                placeholder={t('Select an interface')}
-                filterLabel={t('Filter')}
-                testId="interface-select"
-                onchange={(next) => void stores.selectInterface(next[0] ?? '')}
-            />
-        {/if}
-
-        <Tabs {tabs} active={app.tab} label={t('Devices')} onselect={(id) => app.setTab(id as TabId)} />
-
-        <ConnectionIndicator
-            host={app.host}
+        <!--
+            Task 21: one control for the interface and for the state of the CCU. It is here even
+            when a system has a single interface - it is what says whether that interface answers.
+        -->
+        <InterfacePopup
             interfaces={stores.interfaces.states}
+            selected={app.selectedInterface}
+            host={app.host}
             backendConnected={app.connected}
+            details={interfaceDetails}
+            label={t('Select an interface')}
+            listLabel={t('Interfaces')}
+            connectedText={t('Connected')}
             notConnectedText={t('Not connected')}
             notPresentText={t('Not present')}
             subscribingText={t('Subscribing')}
-            testId="connection-indicator"
+            allConnectedText={t('All interfaces are connected')}
+            someNotConnectedText={t('Not every interface is connected')}
+            portLabel={t('Port')}
+            devicesLabel={(count) => t('{count} devices', {count}, count)}
+            dutyCycleLabel={(value) => t('Duty cycle {value} %', {value})}
+            testId="interface-select"
+            onselect={(name) => void stores.selectInterface(name)}
         />
+
+        <Tabs {tabs} active={app.tab} label={t('Devices')} onselect={(id) => app.setTab(id as TabId)} />
 
         <div class="hmm-header-actions">
             {#if app.session}

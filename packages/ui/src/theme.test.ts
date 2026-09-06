@@ -5,6 +5,7 @@ import {afterEach, describe, expect, it} from 'vitest';
 
 import appCss from './app.css?raw';
 import ConnectionIndicator from './lib/components/ConnectionIndicator.svelte';
+import InterfacePopup from './lib/components/InterfacePopup.svelte';
 import DataTableComponent from './lib/components/DataTable.svelte';
 import Notices from './lib/components/Notices.svelte';
 import ToolbarButton from './lib/components/ToolbarButton.svelte';
@@ -151,6 +152,21 @@ describe('colours that carry meaning', () => {
         {name: 'HmIP-RF', type: 'HmIP-RF', protocol: 'xmlrpc', host: 'ccu', port: 2010, connected: false},
     ];
 
+    /** Task 21: one interface per mark, which is what the popup has to keep apart in both themes. */
+    const allStates: InterfaceState[] = [
+        ...interfaces,
+        {
+            name: 'BidCos-Wired',
+            type: 'BidCos-Wired',
+            protocol: 'xmlrpc',
+            host: 'ccu',
+            port: 2000,
+            connected: false,
+            absent: true,
+        },
+        {name: 'CUxD', type: 'CUxD', protocol: 'binrpc', host: 'ccu', port: 8701, connected: true, subscribing: true},
+    ];
+
     const notices: Notice[] = [
         {id: 1, level: 'info', message: 'info', timestamp: 0},
         {id: 2, level: 'warn', message: 'warn', timestamp: 0},
@@ -158,15 +174,38 @@ describe('colours that carry meaning', () => {
     ];
 
     for (const theme of ['light', 'dark'] as const) {
-        it(`keeps the connection marks distinguishable in the ${theme} theme`, () => {
+        it(`keeps the header's summary mark distinguishable in the ${theme} theme`, () => {
             document.documentElement.setAttribute('data-theme', theme);
-            const {container} = render(ConnectionIndicator, {props: {host: 'ccu', interfaces}});
-
-            // ✔ uses --hmm-ok, ✕ uses --hmm-error; both are redefined for dark above.
-            expect(container.querySelectorAll('.hmm-connection-ok')).toHaveLength(1);
-            expect(container.querySelectorAll('.hmm-connection-bad')).toHaveLength(1);
-            expect(screen.getByText('✔')).toBeTruthy();
+            // ✕ uses --hmm-error, ✔ uses --hmm-ok; both are redefined for dark above.
+            const bad = render(ConnectionIndicator, {props: {interfaces}});
+            expect(bad.container.querySelectorAll('.hmm-connection-bad')).toHaveLength(1);
             expect(screen.getByText('✕')).toBeTruthy();
+
+            const ok = render(ConnectionIndicator, {props: {interfaces: [interfaces[0]!]}});
+            expect(ok.container.querySelectorAll('.hmm-connection-ok')).toHaveLength(1);
+            expect(screen.getByText('✔')).toBeTruthy();
+        });
+
+        /**
+         * Task 21: the popup carries four marks at once, and "not there" (muted) has to stay
+         * apart from "broken" (red) and from "subscribing" (warn) in a dark window too. The
+         * colours are tokens - what is asserted is that each state keeps its own class, which is
+         * what makes the token switch reach it.
+         */
+        it(`gives every interface of the popup its own mark in the ${theme} theme`, async () => {
+            document.documentElement.setAttribute('data-theme', theme);
+            const {container} = render(InterfacePopup, {props: {interfaces: allStates, selected: 'BidCos-RF'}});
+            await fireEvent.click(container.querySelector('.hmm-interface-trigger')!);
+
+            const marks = [...container.querySelectorAll('.hmm-interface-mark')].map((mark) =>
+                mark.getAttribute('data-mark'),
+            );
+            expect(marks).toEqual(['ok', 'bad', 'absent', 'busy']);
+            for (const mark of marks) {
+                expect(container.querySelectorAll(`.hmm-interface-mark-${String(mark)}`)).toHaveLength(1);
+            }
+            // and the selection is marked by a class, in both themes, not by a colour in the markup
+            expect(container.querySelectorAll('.hmm-interface-item-current')).toHaveLength(1);
         });
 
         it(`marks the service-message severities in the ${theme} theme`, () => {

@@ -110,6 +110,17 @@ export const UI_MESSAGES: MessageCatalogue = {
         en: 'This function arrives with task 8.',
     },
     'Select an interface': {de: 'Schnittstelle auswählen', en: 'Select an interface'},
+    // Task 21: the header's summary mark, and the second line under an interface in the popup.
+    'All interfaces are connected': {
+        de: 'Alle Schnittstellen verbunden',
+        en: 'All interfaces are connected',
+    },
+    'Not every interface is connected': {
+        de: 'Nicht jede Schnittstelle ist verbunden',
+        en: 'Not every interface is connected',
+    },
+    // `{count} devices` is core's own plural key and is used as it is.
+    'Duty cycle {value} %': {de: 'Duty Cycle {value} %', en: 'Duty cycle {value} %'},
     'Use ReGa': {de: 'ReGa verwenden', en: 'Use ReGa'},
     'Detect interfaces': {de: 'Schnittstellen erkennen', en: 'Detect interfaces'},
     Interfaces: {de: 'Schnittstellen', en: 'Interfaces'},

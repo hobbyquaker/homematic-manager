@@ -467,78 +467,69 @@ describe('RpcProgress', () => {
     });
 });
 
+/**
+ * Task 21: the block of 2.7 - the CCU address and one ✔/✕ per interface - moved into the interface
+ * popup, and what is left in the header is a single mark for the whole CCU. Its rules are
+ * `summaryMark`'s (tested in `interfacePopup.test.ts`); what is tested here is that the component
+ * paints them and keeps the header still.
+ */
 describe('ConnectionIndicator', () => {
-    const interfaces: InterfaceState[] = [
-        {name: 'BidCos-RF', type: 'BidCos-RF', protocol: 'xmlrpc', host: 'ccu', port: 2001, connected: true},
-        {name: 'HmIP-RF', type: 'HmIP-RF', protocol: 'xmlrpc', host: 'ccu', port: 2010, connected: false},
-    ];
+    const state = (name: string, extra: Partial<InterfaceState> = {}): InterfaceState => ({
+        name,
+        type: name,
+        protocol: 'xmlrpc',
+        host: 'ccu',
+        port: 2001,
+        connected: true,
+        ...extra,
+    });
 
-    it('shows the host and a ✔/✕ per interface, exactly as 2.x did', () => {
-        const {container} = render(ConnectionIndicator, {props: {host: 'homematic', interfaces}});
-        expect(screen.getByText('homematic')).toBeTruthy();
-        expect(screen.getByText('✔')).toBeTruthy();
-        expect(screen.getByText('✕')).toBeTruthy();
+    it('is green with a title when every interface answers', () => {
+        const {container} = render(ConnectionIndicator, {
+            props: {interfaces: [state('BidCos-RF'), state('HmIP-RF')], allConnectedText: 'Alle verbunden'},
+        });
+        const mark = container.querySelector('.hmm-connection');
+        expect(mark?.classList.contains('hmm-connection-ok')).toBe(true);
+        expect(mark?.textContent).toBe('✔');
+        expect(mark?.getAttribute('title')).toBe('Alle verbunden');
         expect(container.querySelector('.hmm-connection-offline')).toBeNull();
     });
 
-    it('greys itself out when the backend is gone and shows a placeholder without a host', () => {
+    it('is red as soon as one interface does not answer', () => {
         const {container} = render(ConnectionIndicator, {
-            props: {host: '', interfaces: [], backendConnected: false, notConnectedText: 'Nicht verbunden'},
+            props: {
+                interfaces: [state('BidCos-RF'), state('HmIP-RF', {connected: false})],
+                someNotConnectedText: 'Nicht jede Schnittstelle ist verbunden',
+            },
         });
-        expect(screen.getByText('Nicht verbunden')).toBeTruthy();
+        const mark = container.querySelector('.hmm-connection');
+        expect(mark?.classList.contains('hmm-connection-bad')).toBe(true);
+        expect(mark?.getAttribute('title')).toBe('Nicht jede Schnittstelle ist verbunden');
+    });
+
+    it('greys itself out and says so when the backend is gone', () => {
+        const {container} = render(ConnectionIndicator, {
+            props: {interfaces: [], backendConnected: false, someNotConnectedText: 'Nicht verbunden'},
+        });
         expect(container.querySelector('.hmm-connection-offline')).toBeTruthy();
+        expect(container.querySelector('.hmm-connection')?.getAttribute('title')).toBe('Nicht verbunden');
     });
 
-    it('shows an interface whose port refuses as "not present", not as an error', () => {
-        // BidCos-Wired on a CCU without a wired gateway: it is in the default list, nothing is
-        // listening, and a red x made every such CCU look broken (task 13, task 15)
-        const {container} = render(ConnectionIndicator, {
-            props: {
-                host: 'ccu',
-                interfaces: [
-                    {
-                        name: 'BidCos-Wired',
-                        type: 'BidCos-Wired',
-                        protocol: 'xmlrpc',
-                        host: 'ccu',
-                        port: 2000,
-                        connected: false,
-                        absent: true,
-                        error: 'connect ECONNREFUSED',
-                    },
-                ],
-                notPresentText: 'Nicht vorhanden',
-            },
-        });
-        expect(container.querySelector('.hmm-connection-absent')?.textContent).toBe('\u2013');
-        expect(container.querySelector('.hmm-connection-bad')).toBeNull();
-        expect(container.querySelector('.hmm-connection-interface')?.getAttribute('title')).toBe('Nicht vorhanden');
-    });
+    /** Task 19's rule: four glyphs of four widths must not move what stands behind them. */
+    it.skipIf(document.body.getBoundingClientRect().width === 0)(
+        'keeps the same box whatever the state is',
+        async () => {
+            const {container, rerender} = render(ConnectionIndicator, {props: {interfaces: [state('BidCos-RF')]}});
+            const width = (): number => container.querySelector('.hmm-connection')!.getBoundingClientRect().width;
+            const first = width();
+            expect(first).toBeGreaterThan(0);
 
-    it('shows an interface that is re-subscribing as busy, not as connected (D-31)', () => {
-        // after an idle unsubscribe the interface is back but hmipserver is still re-sending every
-        // device (occu#45): the grids are incomplete, so neither a tick nor a cross is honest
-        const {container} = render(ConnectionIndicator, {
-            props: {
-                host: 'ccu',
-                interfaces: [
-                    {
-                        name: 'HmIP-RF',
-                        type: 'HmIP-RF',
-                        protocol: 'xmlrpc',
-                        host: 'ccu',
-                        port: 2010,
-                        connected: true,
-                        subscribing: true,
-                    },
-                ],
-                subscribingText: 'Anmeldung läuft',
-            },
-        });
-        expect(container.querySelector('.hmm-connection-busy')).toBeTruthy();
-        expect(container.querySelector('.hmm-connection-ok')).toBeNull();
-        expect(container.querySelector('.hmm-connection-interface')?.getAttribute('title')).toBe('Anmeldung läuft');
-    });
+            for (const extra of [{connected: false}, {connected: false, absent: true}, {subscribing: true}]) {
+                await rerender({interfaces: [state('BidCos-RF', extra)]});
+                expect(width(), `the ${JSON.stringify(extra)} mark has another width`).toBe(first);
+            }
+        },
+    );
 });
 
 describe('LanguageSwitch and ThemeSwitch', () => {

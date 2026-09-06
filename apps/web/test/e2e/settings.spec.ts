@@ -26,7 +26,7 @@ test('the settings dialog shows the live configuration and saves it', async ({pa
     await page.getByTestId('config-save').click();
     await expect(dialog).not.toHaveAttribute('open');
     await expect(page.getByTestId('devices-table')).toBeVisible();
-    await expect(page.getByTestId('connection-indicator')).not.toContainText('Not connected');
+    await expect(page.getByTestId('interface-select-summary')).toHaveAttribute('data-mark', 'ok');
 });
 
 test('the theme switch cycles system, light and dark and remembers the choice', async ({page, host}) => {

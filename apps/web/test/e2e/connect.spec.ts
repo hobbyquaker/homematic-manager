@@ -15,14 +15,16 @@ test('the app connects and lists the devices of both interfaces', async ({page, 
 
     await expect(page.getByTestId('app')).toBeVisible();
     await expect(page.getByTestId('loader')).toBeHidden();
-    // The indicator is the one thing that says the backend really reached the interface processes.
-    await expect(page.getByTestId('connection-indicator')).not.toContainText('Not connected');
+    // The summary mark is the one thing that says the backend really reached the interface
+    // processes: `ok` means every interface that exists here answered (task 21).
+    await expect(page.getByTestId('interface-select-summary')).toHaveAttribute('data-mark', 'ok');
 
-    // The interface picker is a MultiSelect (a button plus a listbox), not a native <select>, and
-    // it only exists because two interfaces are configured.
+    // The interface picker is the popup of task 21 (a trigger plus a listbox), not a <select>.
     const picker = page.getByTestId('interface-select');
-    await picker.getByRole('button').first().click();
-    await picker.getByRole('option', {name: 'BidCos-RF'}).click();
+    await picker.getByTestId('interface-select-trigger').click();
+    // Both interfaces answer here, and each item names its protocol and port under the name.
+    await expect(picker.getByTestId('interface-item-HmIP-RF')).toContainText('xmlrpc · Port');
+    await picker.getByTestId('interface-item-BidCos-RF').click();
 
     await expect(page.getByTestId('devices-table')).toBeVisible();
     await expect(page.locator(`[data-row-id="${BIDCOS_SWITCH}"]`)).toBeVisible();
@@ -30,8 +32,8 @@ test('the app connects and lists the devices of both interfaces', async ({page, 
     await expect(page.locator(`[data-row-id="${BIDCOS_SWITCH}"]`)).toContainText('Steckdose');
     await expect(page.locator(`[data-row-id="${BIDCOS_SWITCH}"]`)).toContainText('HM-LC-Sw1-Pl');
 
-    await picker.getByRole('button').first().click();
-    await picker.getByRole('option', {name: 'HmIP-RF'}).click();
+    await picker.getByTestId('interface-select-trigger').click();
+    await picker.getByTestId('interface-item-HmIP-RF').click();
     await expect(page.locator(`[data-row-id="${HMIP_DIMMER}"]`)).toBeVisible();
     await expect(page.locator(`[data-row-id="${HMIP_BUTTON}"]`)).toBeVisible();
     // and the BidCos device is gone with its interface

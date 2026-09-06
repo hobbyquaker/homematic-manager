@@ -75,7 +75,14 @@ export interface MountedApp {
     readonly storage: MemoryStorage;
 }
 
-/** Renders `App`, runs the start-up sequence and waits for the loader to be gone. */
+/**
+ * Renders `App`, runs the start-up sequence and waits for the loader to be gone.
+ *
+ * Into a `<div id="app">`, which is what `src/main.ts` and the Electron renderer mount into:
+ * testing-library otherwise appends a plain `<div>` of its own, and a plain div has no height, so
+ * every layout test would have measured the app in a box the real hosts never give it. That is
+ * exactly the difference the page-scroll defect lived in (`routes/pageScroll.test.ts`).
+ */
 export async function mountApp(options: MountOptions = {}): Promise<MountedApp> {
     const transport = options.transport ?? new MockTransport({demo: true});
     const router = fakeRouter(options.hash ?? '');
@@ -86,7 +93,10 @@ export async function mountApp(options: MountOptions = {}): Promise<MountedApp> 
         storage,
         ...(options.hostBridge === undefined ? {hostScope: {}} : {hostBridge: options.hostBridge}),
     });
-    render(App, {props: {stores}});
+    const target = document.createElement('div');
+    target.id = 'app';
+    document.body.append(target);
+    render(App, {props: {stores}, target});
     await stores.start();
     await waitFor(() => {
         expect(stores.app.loading).toBe(false);

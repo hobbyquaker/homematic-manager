@@ -269,11 +269,23 @@
 </div>
 
 <style>
+    /*
+        The shell is the window, and it says so itself.
+
+        `height: 100%` was a promise the mount element had to keep, and when it did not - a host
+        that mounts somewhere else, a stylesheet that loads late - the height fell back to `auto`,
+        the tables stopped being bounded and grew with their rows: the page scrolled and the header
+        scrolled off the top of it (maintainer, 2026-09-06, on the Events and Devices tabs). `dvh`
+        depends on nothing above this element, so there is no ancestor left to get it wrong; `#app`
+        in app.css keeps its own height as well, and the two agree.
+    */
     .hmm-app {
         display: flex;
         flex-direction: column;
-        height: 100%;
+        height: 100dvh;
+        max-height: 100dvh;
         min-height: 0;
+        overflow: hidden;
         position: relative;
         background: var(--hmm-bg);
         color: var(--hmm-fg);

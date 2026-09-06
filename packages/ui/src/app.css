@@ -198,6 +198,18 @@ body {
     height: 100%;
 }
 
+/*
+    The mount element: without a height of its own, `.hmm-app`'s 100 % is auto and the page grows
+    with its content - the RPC drawer then lengthened the document instead of taking half the
+    window (maintainer, 2026-09-06). Header, main and drawer share the viewport; main and drawer
+    scroll inside themselves.
+*/
+#app {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
 body {
     margin: 0;
     padding: 0;

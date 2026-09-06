@@ -13,7 +13,6 @@
     import type {ContextMenuItem} from '../lib/components/contextMenu.js';
     import DataTable from '../lib/components/DataTable.svelte';
     import DeviceImage from '../lib/components/DeviceImage.svelte';
-    import Toolbar from '../lib/components/Toolbar.svelte';
     import ToolbarButton from '../lib/components/ToolbarButton.svelte';
     import type {DataTableColumn} from '../lib/components/tableModel.js';
     import {getStores} from '../lib/stores/context.js';
@@ -454,83 +453,6 @@
 </script>
 
 <div class="hmm-page">
-    <Toolbar label={t('Devices')}>
-        <ToolbarButton title={t('Add device')} icon="+" testId="devices-add" onclick={() => (addOpen = true)} />
-        <ToolbarButton
-            title={t('Rename device')}
-            icon="✎"
-            disabled={!canRename}
-            reason={reasonFor('device')}
-            testId="devices-rename"
-            onclick={() => openRename(one)}
-        />
-        <ToolbarButton
-            title="reportValueUsage 1"
-            icon="⇩"
-            disabled={channelSelection.length === 0}
-            reason={reasonFor('channel')}
-            testId="devices-usage-1"
-            onclick={() => void reportValueUsage(1)}
-        />
-        <ToolbarButton
-            title="reportValueUsage 0"
-            icon="⇧"
-            disabled={channelSelection.length === 0}
-            reason={reasonFor('channel')}
-            testId="devices-usage-0"
-            onclick={() => void reportValueUsage(0)}
-        />
-        <ToolbarButton
-            title={t('restoreConfigToDevice')}
-            icon="⟲"
-            disabled={oneDevice === '' || !isBidcos}
-            reason={isBidcos ? reasonFor('device') : reasonFor('bidcos')}
-            testId="devices-restore"
-            onclick={() => void stores.devices.restoreConfig(interfaceName, oneDevice)}
-        />
-        <ToolbarButton
-            title={t('clearConfigCache')}
-            icon="⌫"
-            disabled={oneDevice === '' || !isBidcos}
-            reason={isBidcos ? reasonFor('device') : reasonFor('bidcos')}
-            testId="devices-clear"
-            onclick={() => void stores.devices.clearConfigCache(interfaceName, oneDevice)}
-        />
-        <ToolbarButton
-            title={t('Repair configuration')}
-            icon="⚒"
-            disabled={oneDevice === ''}
-            reason={reasonFor('device')}
-            testId="devices-repair"
-            onclick={() => openRepair(oneDevice)}
-        />
-        <ToolbarButton
-            title={t('Replace device')}
-            icon="⇄"
-            disabled={!canDelete}
-            reason={reasonFor('delete')}
-            testId="devices-replace"
-            onclick={() => openReplace(oneDevice)}
-        />
-        <ToolbarButton
-            title={t('Delete device')}
-            icon="🗑"
-            disabled={!canDelete}
-            reason={reasonFor('delete')}
-            testId="devices-delete"
-            onclick={() => openDelete(oneDevice)}
-        />
-        <ToolbarButton
-            title={t('Refresh')}
-            icon="⟳"
-            testId="devices-refresh"
-            onclick={() => void stores.devices.load(interfaceName, {refresh: true})}
-        />
-        {#snippet trailing()}
-            <span>{t('{count} devices', {}, devices.length)}</span>
-        {/snippet}
-    </Toolbar>
-
     <div class="hmm-page-grid">
         <DataTable
             rows={devices}
@@ -544,8 +466,84 @@
             filterLabel={t('Filter')}
             {emptyText}
             onrowcontextmenu={openMenu}
+            toolbarLabel={t('Devices')}
+            countText={t('{count} devices', {}, devices.length)}
             testId="devices-table"
         >
+            {#snippet toolbar()}
+                <ToolbarButton title={t('Add device')} icon="+" testId="devices-add" onclick={() => (addOpen = true)} />
+                <ToolbarButton
+                    title={t('Rename device')}
+                    icon="✎"
+                    disabled={!canRename}
+                    reason={reasonFor('device')}
+                    testId="devices-rename"
+                    onclick={() => openRename(one)}
+                />
+                <ToolbarButton
+                    title="reportValueUsage 1"
+                    icon="⇩"
+                    disabled={channelSelection.length === 0}
+                    reason={reasonFor('channel')}
+                    testId="devices-usage-1"
+                    onclick={() => void reportValueUsage(1)}
+                />
+                <ToolbarButton
+                    title="reportValueUsage 0"
+                    icon="⇧"
+                    disabled={channelSelection.length === 0}
+                    reason={reasonFor('channel')}
+                    testId="devices-usage-0"
+                    onclick={() => void reportValueUsage(0)}
+                />
+                <ToolbarButton
+                    title={t('restoreConfigToDevice')}
+                    icon="⟲"
+                    disabled={oneDevice === '' || !isBidcos}
+                    reason={isBidcos ? reasonFor('device') : reasonFor('bidcos')}
+                    testId="devices-restore"
+                    onclick={() => void stores.devices.restoreConfig(interfaceName, oneDevice)}
+                />
+                <ToolbarButton
+                    title={t('clearConfigCache')}
+                    icon="⌫"
+                    disabled={oneDevice === '' || !isBidcos}
+                    reason={isBidcos ? reasonFor('device') : reasonFor('bidcos')}
+                    testId="devices-clear"
+                    onclick={() => void stores.devices.clearConfigCache(interfaceName, oneDevice)}
+                />
+                <ToolbarButton
+                    title={t('Repair configuration')}
+                    icon="⚒"
+                    disabled={oneDevice === ''}
+                    reason={reasonFor('device')}
+                    testId="devices-repair"
+                    onclick={() => openRepair(oneDevice)}
+                />
+                <ToolbarButton
+                    title={t('Replace device')}
+                    icon="⇄"
+                    disabled={!canDelete}
+                    reason={reasonFor('delete')}
+                    testId="devices-replace"
+                    onclick={() => openReplace(oneDevice)}
+                />
+                <ToolbarButton
+                    title={t('Delete device')}
+                    icon="🗑"
+                    disabled={!canDelete}
+                    reason={reasonFor('delete')}
+                    testId="devices-delete"
+                    onclick={() => openDelete(oneDevice)}
+                />
+                <ToolbarButton
+                    title={t('Refresh')}
+                    icon="⟳"
+                    testId="devices-refresh"
+                    onclick={() => void stores.devices.load(interfaceName, {refresh: true})}
+                />
+            {/snippet}
+
             {#snippet cell(row, column, flatRow)}
                 {#if column.key === 'icon'}
                     <DeviceImage

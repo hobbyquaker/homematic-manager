@@ -6,7 +6,6 @@
     import type {ContextMenuItem} from '../lib/components/contextMenu.js';
     import DataTable from '../lib/components/DataTable.svelte';
     import DeviceImage from '../lib/components/DeviceImage.svelte';
-    import Toolbar from '../lib/components/Toolbar.svelte';
     import ToolbarButton from '../lib/components/ToolbarButton.svelte';
     import type {DataTableColumn} from '../lib/components/tableModel.js';
     import {getStores} from '../lib/stores/context.js';
@@ -170,58 +169,6 @@
 </script>
 
 <div class="hmm-page">
-    <Toolbar label={t('Links')}>
-        <ToolbarButton title={t('Create link')} icon="+" testId="links-add" onclick={() => (addOpen = true)} />
-        <ToolbarButton
-            title={t('Edit link')}
-            icon="⚙"
-            disabled={one === undefined}
-            reason={t('Select one link')}
-            testId="links-edit"
-            onclick={() => one && openEdit(one)}
-        />
-        {#if canActivate}
-            <ToolbarButton
-                title={t('Activate short')}
-                icon="▸"
-                disabled={one === undefined}
-                reason={t('Select one link')}
-                testId="links-play-short"
-                onclick={() => one && void stores.links.activate(interfaceName, one.receiver, one.sender, false)}
-            />
-            <ToolbarButton
-                title={t('Activate long')}
-                icon="▸▸"
-                disabled={one === undefined}
-                reason={t('Select one link')}
-                testId="links-play-long"
-                onclick={() => one && void stores.links.activate(interfaceName, one.receiver, one.sender, true)}
-            />
-        {/if}
-        <ToolbarButton
-            title={t('Delete link')}
-            icon="🗑"
-            disabled={selectedLinks.length === 0}
-            reason={t('Please choose one or more links')}
-            testId="links-delete"
-            onclick={() => (removeOpen = true)}
-        />
-        <ToolbarButton
-            title={t('Refresh')}
-            icon="⟳"
-            testId="links-refresh"
-            onclick={() => void stores.links.load(interfaceName)}
-        />
-        {#snippet trailing()}
-            {#if defective > 0}
-                <span class="hmm-links-defective" data-testid="links-defective"
-                    >{t('{count} defective links', {}, defective)}</span
-                >
-            {/if}
-            <span>{t('{count} links', {}, links.length)}</span>
-        {/snippet}
-    </Toolbar>
-
     <div class="hmm-page-grid">
         <DataTable
             rows={links}
@@ -234,8 +181,63 @@
             emptyText={t('No data')}
             onactivate={(link) => openEdit({sender: link.SENDER, receiver: link.RECEIVER})}
             onrowcontextmenu={openMenu}
+            toolbarLabel={t('Links')}
+            countText={t('{count} links', {}, links.length)}
             testId="links-table"
         >
+            {#snippet toolbar()}
+                <ToolbarButton title={t('Create link')} icon="+" testId="links-add" onclick={() => (addOpen = true)} />
+                <ToolbarButton
+                    title={t('Edit link')}
+                    icon="⚙"
+                    disabled={one === undefined}
+                    reason={t('Select one link')}
+                    testId="links-edit"
+                    onclick={() => one && openEdit(one)}
+                />
+                {#if canActivate}
+                    <ToolbarButton
+                        title={t('Activate short')}
+                        icon="▸"
+                        disabled={one === undefined}
+                        reason={t('Select one link')}
+                        testId="links-play-short"
+                        onclick={() =>
+                            one && void stores.links.activate(interfaceName, one.receiver, one.sender, false)}
+                    />
+                    <ToolbarButton
+                        title={t('Activate long')}
+                        icon="▸▸"
+                        disabled={one === undefined}
+                        reason={t('Select one link')}
+                        testId="links-play-long"
+                        onclick={() => one && void stores.links.activate(interfaceName, one.receiver, one.sender, true)}
+                    />
+                {/if}
+                <ToolbarButton
+                    title={t('Delete link')}
+                    icon="🗑"
+                    disabled={selectedLinks.length === 0}
+                    reason={t('Please choose one or more links')}
+                    testId="links-delete"
+                    onclick={() => (removeOpen = true)}
+                />
+                <ToolbarButton
+                    title={t('Refresh')}
+                    icon="⟳"
+                    testId="links-refresh"
+                    onclick={() => void stores.links.load(interfaceName)}
+                />
+            {/snippet}
+
+            {#snippet status()}
+                {#if defective > 0}
+                    <span class="hmm-links-defective" data-testid="links-defective"
+                        >{t('{count} defective links', {}, defective)}</span
+                    >
+                {/if}
+            {/snippet}
+
             {#snippet cell(row, column)}
                 {#if column.key === 'senderIcon'}
                     <DeviceImage

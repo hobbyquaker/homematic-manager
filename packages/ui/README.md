@@ -11,6 +11,11 @@ matrix, the service messages, the events and the pairing dialog. Task 10 added t
 editors that plug into the paramset dialog. A toolbar button that is disabled always says why in
 its tooltip.
 
+A tab with a grid has no toolbar strip of its own (task 20). Its actions, its filter box and its row
+count are the `DataTable`'s **header band**: the actions on the left, "4 Geräte" on the right, the
+column labels in the row underneath, the whole block above the one part that scrolls. `Toolbar` is
+still the component for a tab without a grid - the RPC console.
+
 ## What the tabs do
 
 - **Devices**: the 2.7 columns with the channel sub-grid of `subGridChannels`, device images (D-10),

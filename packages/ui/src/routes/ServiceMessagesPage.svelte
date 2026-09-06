@@ -4,7 +4,6 @@
 
     import DataTable from '../lib/components/DataTable.svelte';
     import DeviceImage from '../lib/components/DeviceImage.svelte';
-    import Toolbar from '../lib/components/Toolbar.svelte';
     import ToolbarButton from '../lib/components/ToolbarButton.svelte';
     import type {DataTableColumn} from '../lib/components/tableModel.js';
     import {getStores} from '../lib/stores/context.js';
@@ -75,44 +74,6 @@
 </script>
 
 <div class="hmm-page">
-    <Toolbar label={t('Service messages')}>
-        <ToolbarButton
-            title={t('Refresh')}
-            icon="⟳"
-            testId="messages-refresh"
-            onclick={() => void stores.serviceMessages.load()}
-        />
-        <ToolbarButton
-            title={t('Acknowledge service messages')}
-            icon="✔"
-            disabled={busy || selectedAckable.length === 0}
-            reason={t('Only STICKY_UNREACH and SABOTAGE can be acknowledged')}
-            testId="messages-ack"
-            onclick={() => void acknowledge(selectedAckable)}
-        />
-        <ToolbarButton
-            title={t('Acknowledge all service messages')}
-            icon="✔✔"
-            disabled={busy || acknowledgeable.length === 0}
-            reason={t('Only STICKY_UNREACH and SABOTAGE can be acknowledged')}
-            testId="messages-ack-all"
-            onclick={() => void acknowledge(acknowledgeable)}
-        />
-        <ToolbarButton
-            title={t('Quiet mode')}
-            icon="🔕"
-            pressed={stores.serviceMessages.quiet}
-            testId="messages-quiet"
-            onclick={() => stores.serviceMessages.setQuiet(!stores.serviceMessages.quiet)}
-        />
-        {#snippet trailing()}
-            {#if stores.serviceMessages.quiet}
-                <span data-testid="messages-quiet-hint">{t('Quiet mode')}</span>
-            {/if}
-            <span>{t('{count} service messages', {}, messages.length)}</span>
-        {/snippet}
-    </Toolbar>
-
     <div class="hmm-page-grid">
         <DataTable
             rows={messages}
@@ -122,8 +83,48 @@
             caption={t('Service messages')}
             filterLabel={t('Filter')}
             emptyText={t('No data')}
+            toolbarLabel={t('Service messages')}
+            countText={t('{count} service messages', {}, messages.length)}
             testId="messages-table"
         >
+            {#snippet toolbar()}
+                <ToolbarButton
+                    title={t('Refresh')}
+                    icon="⟳"
+                    testId="messages-refresh"
+                    onclick={() => void stores.serviceMessages.load()}
+                />
+                <ToolbarButton
+                    title={t('Acknowledge service messages')}
+                    icon="✔"
+                    disabled={busy || selectedAckable.length === 0}
+                    reason={t('Only STICKY_UNREACH and SABOTAGE can be acknowledged')}
+                    testId="messages-ack"
+                    onclick={() => void acknowledge(selectedAckable)}
+                />
+                <ToolbarButton
+                    title={t('Acknowledge all service messages')}
+                    icon="✔✔"
+                    disabled={busy || acknowledgeable.length === 0}
+                    reason={t('Only STICKY_UNREACH and SABOTAGE can be acknowledged')}
+                    testId="messages-ack-all"
+                    onclick={() => void acknowledge(acknowledgeable)}
+                />
+                <ToolbarButton
+                    title={t('Quiet mode')}
+                    icon="🔕"
+                    pressed={stores.serviceMessages.quiet}
+                    testId="messages-quiet"
+                    onclick={() => stores.serviceMessages.setQuiet(!stores.serviceMessages.quiet)}
+                />
+            {/snippet}
+
+            {#snippet status()}
+                {#if stores.serviceMessages.quiet}
+                    <span data-testid="messages-quiet-hint">{t('Quiet mode')}</span>
+                {/if}
+            {/snippet}
+
             {#snippet cell(row, column)}
                 {#if column.key === 'icon'}
                     <DeviceImage

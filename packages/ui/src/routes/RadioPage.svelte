@@ -4,7 +4,6 @@
     import DataTable from '../lib/components/DataTable.svelte';
     import DeviceImage from '../lib/components/DeviceImage.svelte';
     import RssiCell from '../lib/components/RssiCell.svelte';
-    import Toolbar from '../lib/components/Toolbar.svelte';
     import ToolbarButton from '../lib/components/ToolbarButton.svelte';
     import type {DataTableColumn} from '../lib/components/tableModel.js';
     import {getStores} from '../lib/stores/context.js';
@@ -171,32 +170,6 @@
 </script>
 
 <div class="hmm-page">
-    <Toolbar label={t('RSSI')}>
-        <ToolbarButton title={t('Refresh')} icon="⟳" testId="radio-refresh" onclick={() => void refresh()} />
-        <ToolbarButton
-            title="setBidcosInterface"
-            icon="⇄"
-            disabled={one === ''}
-            reason={t('Select a device')}
-            testId="radio-set-interface"
-            onclick={() => {
-                setInterfaceAddress = one;
-                setInterfaceOpen = true;
-            }}
-        />
-        <ToolbarButton
-            title={t('Reset the unreach counters')}
-            icon="⟲"
-            disabled={stores.unreach.of(interfaceName).length === 0}
-            reason={t('No data')}
-            testId="radio-reset-unreach"
-            onclick={() => void stores.unreach.reset(interfaceName)}
-        />
-        {#snippet trailing()}
-            <span>{t('{count} devices', {}, devices.length)}</span>
-        {/snippet}
-    </Toolbar>
-
     <div class="hmm-radio-gateways">
         <DataTable
             rows={gateways}
@@ -227,8 +200,33 @@
                 setInterfaceAddress = device.ADDRESS;
                 setInterfaceOpen = true;
             }}
+            toolbarLabel={t('RSSI')}
+            countText={t('{count} devices', {}, devices.length)}
             testId="radio-table"
         >
+            {#snippet toolbar()}
+                <ToolbarButton title={t('Refresh')} icon="⟳" testId="radio-refresh" onclick={() => void refresh()} />
+                <ToolbarButton
+                    title="setBidcosInterface"
+                    icon="⇄"
+                    disabled={one === ''}
+                    reason={t('Select a device')}
+                    testId="radio-set-interface"
+                    onclick={() => {
+                        setInterfaceAddress = one;
+                        setInterfaceOpen = true;
+                    }}
+                />
+                <ToolbarButton
+                    title={t('Reset the unreach counters')}
+                    icon="⟲"
+                    disabled={stores.unreach.of(interfaceName).length === 0}
+                    reason={t('No data')}
+                    testId="radio-reset-unreach"
+                    onclick={() => void stores.unreach.reset(interfaceName)}
+                />
+            {/snippet}
+
             {#snippet cell(row, column, flatRow)}
                 {#if column.key === 'icon'}
                     <DeviceImage deviceType={row.TYPE} src={stores.host.deviceImageUrl(row.TYPE)} />

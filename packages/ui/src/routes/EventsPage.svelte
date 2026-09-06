@@ -2,7 +2,6 @@
     import type {EventFilter} from '@homematic-manager/core';
 
     import DataTable from '../lib/components/DataTable.svelte';
-    import Toolbar from '../lib/components/Toolbar.svelte';
     import ToolbarButton from '../lib/components/ToolbarButton.svelte';
     import type {DataTableColumn} from '../lib/components/tableModel.js';
     import {getStores} from '../lib/stores/context.js';
@@ -65,37 +64,6 @@
 </script>
 
 <div class="hmm-page">
-    <Toolbar label={t('Events')}>
-        <ToolbarButton
-            title={t('Pause')}
-            icon="⏸"
-            pressed={paused}
-            testId="events-pause"
-            onclick={() => togglePause()}
-        />
-        <ToolbarButton title={t('Clear')} icon="⌫" testId="events-clear" onclick={() => void stores.events.clear()} />
-        <input
-            class="hmm-input hmm-events-filter"
-            type="search"
-            bind:value={addressFilter}
-            placeholder="ADDRESS"
-            aria-label={`${t('Filter')} ADDRESS`}
-            data-testid="events-filter-address"
-        />
-        <input
-            class="hmm-input hmm-events-filter"
-            type="search"
-            bind:value={datapointFilter}
-            placeholder="PARAM"
-            aria-label={`${t('Filter')} PARAM`}
-            data-testid="events-filter-datapoint"
-        />
-        {#snippet trailing()}
-            {#if paused}<span data-testid="events-paused">{t('Pause')}</span>{/if}
-            <span>{t('{count} events', {}, events.length)}</span>
-        {/snippet}
-    </Toolbar>
-
     <div class="hmm-page-grid">
         <DataTable
             rows={events}
@@ -105,8 +73,46 @@
             caption={t('Events')}
             filterLabel={t('Filter')}
             emptyText={t('No data')}
+            toolbarLabel={t('Events')}
+            countText={t('{count} events', {}, events.length)}
             testId="events-table"
-        />
+        >
+            {#snippet toolbar()}
+                <ToolbarButton
+                    title={t('Pause')}
+                    icon="⏸"
+                    pressed={paused}
+                    testId="events-pause"
+                    onclick={() => togglePause()}
+                />
+                <ToolbarButton
+                    title={t('Clear')}
+                    icon="⌫"
+                    testId="events-clear"
+                    onclick={() => void stores.events.clear()}
+                />
+                <input
+                    class="hmm-input hmm-events-filter"
+                    type="search"
+                    bind:value={addressFilter}
+                    placeholder="ADDRESS"
+                    aria-label={`${t('Filter')} ADDRESS`}
+                    data-testid="events-filter-address"
+                />
+                <input
+                    class="hmm-input hmm-events-filter"
+                    type="search"
+                    bind:value={datapointFilter}
+                    placeholder="PARAM"
+                    aria-label={`${t('Filter')} PARAM`}
+                    data-testid="events-filter-datapoint"
+                />
+            {/snippet}
+
+            {#snippet status()}
+                {#if paused}<span data-testid="events-paused">{t('Pause')}</span>{/if}
+            {/snippet}
+        </DataTable>
     </div>
 </div>
 

@@ -36,6 +36,16 @@
         caption?: string | undefined;
         emptyText?: string;
         filterLabel?: string;
+        /**
+         * The tab's actions - buttons, selection controls - drawn at the left of the header band.
+         * Task 20: a tab has no toolbar strip of its own above the grid any more.
+         */
+        toolbar?: Snippet | undefined;
+        /** Accessible name of that group of actions; the caption when none is given. */
+        toolbarLabel?: string | undefined;
+        /** Right of the band, before the count: what a tab has to say about its own state. */
+        status?: Snippet | undefined;
+        /** Right of the band: "4 Geräte". */
         countText?: string | undefined;
         selected?: string[];
         expanded?: string[];
@@ -63,6 +73,9 @@
         caption = undefined,
         emptyText = '',
         filterLabel = 'Filter',
+        toolbar = undefined,
+        toolbarLabel = undefined,
+        status = undefined,
         countText = undefined,
         selected = $bindable([]),
         expanded = $bindable([]),
@@ -97,6 +110,14 @@
     const layout = $derived(tableLayout(columns, subColumns, hasExpander));
     const template = $derived(layout.template);
     const expandedSet = $derived(new Set(expanded));
+    /**
+     * One header band per table (task 20, the maintainer's second look): the actions and the filter
+     * box on the left, what the tab has to say and the row count on the right, the column labels in
+     * the row underneath. It is part of the head, so it stays put while the body scrolls.
+     */
+    const hasBand = $derived(
+        caption !== undefined || filterBox || toolbar !== undefined || status !== undefined || countText !== undefined,
+    );
     const selectedSet = $derived(new Set(selected));
 
     const flat = $derived(
@@ -256,9 +277,14 @@
 </script>
 
 <div class="hmm-table" data-testid={testId}>
-    {#if caption !== undefined || filterBox}
-        <div class="hmm-table-toolbar">
+    {#if hasBand}
+        <div class="hmm-table-band">
             {#if caption !== undefined}<span class="hmm-table-caption">{caption}</span>{/if}
+            {#if toolbar}
+                <div class="hmm-table-actions" role="toolbar" aria-label={toolbarLabel ?? caption ?? filterLabel}>
+                    {@render toolbar()}
+                </div>
+            {/if}
             {#if filterBox}
                 <input
                     class="hmm-input hmm-table-filter"
@@ -268,7 +294,14 @@
                     aria-label={filterLabel}
                 />
             {/if}
-            {#if countText !== undefined}<span class="hmm-table-count">{countText}</span>{/if}
+            <div class="hmm-table-trailing">
+                {#if status}{@render status()}{/if}
+                {#if countText !== undefined}
+                    <span class="hmm-table-count" data-testid={testId === undefined ? undefined : `${testId}-count`}
+                        >{countText}</span
+                    >
+                {/if}
+            </div>
         </div>
     {/if}
 
@@ -406,26 +439,44 @@
         overflow: hidden;
     }
 
-    .hmm-table-toolbar {
+    /* The header band and the column labels under it are one block on the same ground, so the
+       grid reads as a table with a head rather than as a strip with a table under it. */
+    .hmm-table-band {
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 5px 8px;
+        padding: 3px 6px;
         background: var(--hmm-header-bg);
-        border-bottom: 1px solid var(--hmm-border);
+        border-bottom: 1px solid var(--hmm-border-muted);
     }
 
     .hmm-table-caption {
         font-weight: bold;
     }
 
+    .hmm-table-actions {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+    }
+
     .hmm-table-filter {
+        width: 220px;
+    }
+
+    /* `margin-left: auto` rather than a spacer: the count sits on the right edge of the band
+       whatever the actions on the left add up to. */
+    .hmm-table-trailing {
+        display: flex;
+        align-items: center;
+        gap: 8px;
         margin-left: auto;
-        width: 240px;
+        padding-left: 8px;
+        color: var(--hmm-fg-muted);
+        white-space: nowrap;
     }
 
     .hmm-table-count {
-        color: var(--hmm-fg-muted);
         white-space: nowrap;
     }
 

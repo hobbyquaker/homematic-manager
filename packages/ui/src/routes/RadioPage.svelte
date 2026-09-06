@@ -204,7 +204,6 @@
             getId={(gateway) => gateway.ADDRESS}
             bind:selected={selectedGateway}
             height={110}
-            columnFilterRow={false}
             caption={t('Interfaces')}
             filterLabel={t('Filter')}
             emptyText={t('No data')}

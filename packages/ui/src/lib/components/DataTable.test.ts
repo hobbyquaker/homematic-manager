@@ -85,12 +85,6 @@ describe('DataTable', () => {
         expect(screen.getByText('Device 7')).toBeTruthy();
     });
 
-    it('filters per column, as the 2.x filter toolbar did', async () => {
-        render(DataTable, {props: {...base, rows: makeRows(20)}});
-        await fireEvent.input(screen.getByLabelText('Filter: TYPE'), {target: {value: 'Dim'}});
-        expect(rowsInDom()).toHaveLength(10);
-    });
-
     it('sorts ascending, descending and back to unsorted', async () => {
         render(DataTable, {props: {...base, rows: makeRows(5)}});
         const header = screen.getByRole('columnheader', {name: /Name/});
@@ -214,20 +208,33 @@ describe('DataTable', () => {
         expect(rowsInDom()).toHaveLength(0);
     });
 
-    it('can hide the filter boxes and a column', () => {
+    it('can hide the filter box and a column', () => {
         render(DataTable, {
             props: {
                 ...base,
                 columns: [...columns, {key: 'secret', label: 'Secret', hidden: true}],
                 rows: makeRows(2),
                 filterBox: false,
-                columnFilterRow: false,
                 caption: undefined,
             },
         });
         expect(screen.queryByLabelText('Filter')).toBeNull();
-        expect(screen.queryByLabelText('Filter: TYPE')).toBeNull();
         expect(screen.queryByRole('columnheader', {name: 'Secret'})).toBeNull();
+    });
+
+    /**
+     * Task 20, the maintainer's second look: "the per-column filter fields in the table header of
+     * the Devices, Radio and Links tabs are superfluous". There is one filter box per table now,
+     * and the header carries nothing but the column labels.
+     */
+    it('has no per-column filter input in its header', () => {
+        const {container} = render(DataTable, {props: {...base, rows: makeRows(5)}});
+        expect(screen.queryByLabelText('Filter: TYPE')).toBeNull();
+        expect(container.querySelectorAll('[role="columnheader"] input')).toHaveLength(0);
+        expect(container.querySelector('.hmm-table-filters')).toBeNull();
+        // The one box the table does have, and nothing else.
+        expect(container.querySelectorAll('input')).toHaveLength(1);
+        expect(screen.getByLabelText('Filter')).toBeTruthy();
     });
 
     it('measures its body when no height is given', () => {

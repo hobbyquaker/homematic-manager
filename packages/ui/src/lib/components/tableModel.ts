@@ -105,19 +105,15 @@ export function matchesText(haystack: string, needle: string): boolean {
     return haystack.toLowerCase().includes(needle.toLowerCase());
 }
 
-/** Does a row match the global filter box and every per-column filter? */
-export function matchesFilters<T>(
-    row: T,
-    columns: readonly DataTableColumn<T>[],
-    globalFilter: string,
-    columnFilters: Readonly<Record<string, string>>,
-): boolean {
-    for (const column of columns) {
-        const needle = columnFilters[column.key];
-        if (needle !== undefined && needle !== '' && !matchesText(cellText(row, column), needle)) {
-            return false;
-        }
-    }
+/**
+ * Does a row match the filter box?
+ *
+ * There is one filter per table, not one per column: the per-column inputs 2.x drew into the grid
+ * header came back in task 7 and went out again in task 20, because nobody used them and they cost
+ * a row of the header on every tab (the maintainer's second look). A filterable column is still a
+ * column the box searches - `isFilterable` decides that.
+ */
+export function matchesFilters<T>(row: T, columns: readonly DataTableColumn<T>[], globalFilter: string): boolean {
     if (globalFilter.trim() === '') {
         return true;
     }
@@ -153,7 +149,6 @@ export interface BuildRowsOptions<T> {
     readonly children?: ((row: T) => readonly T[]) | undefined;
     readonly expanded: ReadonlySet<string>;
     readonly globalFilter?: string;
-    readonly columnFilters?: Readonly<Record<string, string>>;
     readonly sort?: SortState | undefined;
     /**
      * The columns the sub-rows have of their own. Without them a channel is drawn with the device
@@ -172,17 +167,14 @@ export interface BuildRowsOptions<T> {
 export function buildRows<T>(options: BuildRowsOptions<T>): FlatRow<T>[] {
     const {rows, columns, getId, children, expanded} = options;
     const globalFilter = options.globalFilter ?? '';
-    const columnFilters = options.columnFilters ?? {};
     const childColumns = options.subColumns ?? columns;
-    const hasFilter = globalFilter.trim() !== '' || Object.values(columnFilters).some((value) => value !== '');
+    const hasFilter = globalFilter.trim() !== '';
 
     const kept = hasFilter
         ? rows.filter(
               (row) =>
-                  matchesFilters(row, columns, globalFilter, columnFilters) ||
-                  (children?.(row) ?? []).some((child) =>
-                      matchesFilters(child, childColumns, globalFilter, columnFilters),
-                  ),
+                  matchesFilters(row, columns, globalFilter) ||
+                  (children?.(row) ?? []).some((child) => matchesFilters(child, childColumns, globalFilter)),
           )
         : [...rows];
 

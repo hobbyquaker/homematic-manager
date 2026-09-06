@@ -196,3 +196,37 @@ describe('interfaceTargets', () => {
         expect(interfaceTargets(connection)).toEqual([]);
     });
 });
+
+describe('the metadata store in the profile (D-40)', () => {
+    it('keeps the three options a profile may carry', () => {
+        const connection = normaliseConnection({
+            host: 'ccu',
+            metaProvider: 'occulite',
+            metaToken: '  olt_4eb74a1a653b860a23ae976f72c286ba ',
+            metaUrl: 'http://box:2133',
+        });
+        expect(connection.metaProvider).toBe('occulite');
+        expect(connection.metaToken).toBe('olt_4eb74a1a653b860a23ae976f72c286ba');
+        expect(connection.metaUrl).toBe('http://box:2133');
+    });
+
+    it('leaves them out when they are not there, which is what every existing profile means', () => {
+        const connection = normaliseConnection({host: 'ccu'});
+        expect(connection.metaProvider).toBeUndefined();
+        expect(connection.metaToken).toBeUndefined();
+        expect(connection.metaUrl).toBeUndefined();
+    });
+
+    it('drops a provider that does not exist rather than carrying it into the backend', () => {
+        expect(normaliseConnection({host: 'ccu', metaProvider: 'rega'}).metaProvider).toBeUndefined();
+        expect(normaliseConnection({host: 'ccu', metaProvider: 7}).metaProvider).toBeUndefined();
+        expect(normaliseConnection({host: 'ccu', metaToken: 42}).metaToken).toBeUndefined();
+    });
+
+    it('survives a round trip through the store, which is where the first version lost it', () => {
+        // the settings dialog sends the whole connection back on every save, and a field that
+        // `normaliseConnection` does not know is a field the next save deletes
+        const once = normaliseConnection({host: 'ccu', metaProvider: 'local', metaUrl: 'http://box'});
+        expect(normaliseConnection(once)).toEqual(once);
+    });
+});

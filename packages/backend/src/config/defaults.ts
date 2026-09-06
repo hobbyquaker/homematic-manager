@@ -10,6 +10,7 @@
 import {
     DEFAULT_INTERFACES,
     INTERFACE_NAMES,
+    META_PROVIDERS,
     isKnownInterface,
     resolveInterface,
     resolveUserDefinedInterface,
@@ -17,6 +18,7 @@ import {
     type ConnectionConfig,
     type Language,
     type LanguageChoice,
+    type MetaProviderChoice,
     type ResolvedInterface,
     type UserDefinedInterface,
 } from '@homematic-manager/core';
@@ -106,6 +108,15 @@ export function normaliseConnection(input: unknown): ConnectionConfig {
     const language: LanguageChoice | undefined =
         raw.language === 'auto' ? 'auto' : LANGUAGES.find((candidate) => candidate === raw.language);
 
+    // D-40: the metadata store. All three are optional and all three are dropped when they are not
+    // one of the values the contract names - a profile written by a newer version, or edited by
+    // hand, must not be able to put a provider that does not exist into the connection.
+    const metaProvider: MetaProviderChoice | undefined = META_PROVIDERS.find(
+        (candidate) => candidate === raw.metaProvider,
+    );
+    const metaToken = stringOr(raw.metaToken, '').trim();
+    const metaUrl = stringOr(raw.metaUrl, '').trim();
+
     const connection: ConnectionConfig = {
         host: stringOr(raw.host, defaults.host).trim(),
         interfaces: interfaces.length > 0 ? [...new Set(interfaces)] : defaults.interfaces,
@@ -133,6 +144,9 @@ export function normaliseConnection(input: unknown): ConnectionConfig {
             typeof raw.autoConfirmRegaInbox === 'boolean'
                 ? raw.autoConfirmRegaInbox
                 : defaults.autoConfirmRegaInbox === true,
+        ...(metaProvider === undefined ? {} : {metaProvider}),
+        ...(metaToken === '' ? {} : {metaToken}),
+        ...(metaUrl === '' ? {} : {metaUrl}),
     };
 
     const auth = normaliseAuth(raw.auth);

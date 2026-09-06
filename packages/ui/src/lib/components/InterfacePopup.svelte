@@ -219,7 +219,10 @@
         onclick={() => (open ? close(false) : openList())}
         onkeydown={onTriggerKeyDown}
     >
-        <span class="hmm-interface-trigger-name">{selected}</span>
+        <!--
+            The mark leads, the arrow closes: a red ✕ sitting next to the arrow of a picker looks
+            like a button that clears the selection, and it is the opposite - a status light.
+        -->
         <ConnectionIndicator
             {interfaces}
             {backendConnected}
@@ -229,6 +232,7 @@
             {subscribingText}
             testId={testId === undefined ? undefined : `${testId}-summary`}
         />
+        <span class="hmm-interface-trigger-name">{selected}</span>
         <span class="hmm-interface-arrow" aria-hidden="true">▾</span>
     </button>
 

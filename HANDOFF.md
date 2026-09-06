@@ -41,9 +41,9 @@ about every half hour while the agent works; the timestamp above is the last ref
   1082 tests, `npm run lint`, `npm run typecheck`.
 - In progress by background subagents (Opus), committing distinct commits on
   `3.0-dev` in the shared working tree (each stages only its own files):
-  - **Electron quit and load investigation** (agent): the app opens its window (trace run
-    34001069697), but the process never exits after app.quit() (15 s watchdog fires) and some
-    launches abort the renderer load right after a quit arrives; being fixed.
+  - none; the Electron investigation is archived (`roadmap-archive/task-11-electron-startup.md`):
+    the quit no-op, the early smoke wait, the image scheme and the unpackaged data path are fixed
+    at `3.0.0-dev.5`.
   - Tasks 19 and 20 (UI after the maintainer.s first and second look) are archived; version
     `3.0.0-dev.4` is deployed to the x86_64 lab box.
     Next lab run: a live `install_addon` update on the CCU3 box (the `/proc/1/root` start path

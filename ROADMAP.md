@@ -342,7 +342,12 @@ editor, each with its own tests:
   Electron 44 has no `postinstall` download any more: the build jobs run `install-electron` (or let
   electron-builder fetch the binary) explicitly.
 - Playwright `_electron` smoke tests per OS (task 14).
-- Done 2026-09-05, report in `roadmap-archive/task-11.md`. Left for others: the device-image
+- Done 2026-09-05, report in `roadmap-archive/task-11.md`. Addendum 2026-09-06 in
+  `roadmap-archive/task-11-electron-startup.md`: the first CI run showed no window ever opened in
+  the smoke suite; the cause was a quit that was a no-op inside the will-quit turn (a zombie
+  process after every quit, for users too), plus the smoke launch waiting too early, the image
+  scheme blocked by CSP and CORS, and the unpackaged data path; all fixed, nine of nine assertions
+  in 4.6 s, and the suite runs on the development machine in the Playwright container. Left for others: the device-image
   chain (`src/main/images.ts`) belongs in `packages/backend` so `apps/web` does not copy it
   (task 12); `API_EVENT_NAMES` exported from core replaces the hand-kept list in `ipcBridge.ts`
   (task 8 or 12, whoever touches it first); the UI consumers of `window.__HMM_HOST__` (update

@@ -18,8 +18,9 @@ replaced by a tested TypeScript core, a Svelte 5 user interface and a Node backe
 dialogs and workflows are deliberately the same as 2.7 — the implementation changed, not the design.
 The 2.7.1 sources stay under `legacy/` for reference until 3.0 ships.
 
-Development runs at `3.0.0-dev.n` on the branch `3.0-dev`. **Nothing is released yet**: the four
-release workflows exist and none has ever run. What a 2.x user should read first is
+Development runs on `master` (D-38) with the `3.0.0-beta.n` counter. **3.0.0-beta.0 is a
+published pre-release** (2026-09-06) with the desktop installers, the CCU addon packages and the
+Docker image; the beta's npm package follows. What a 2.x user should read first is
 [docs/migration-from-2.x.md](docs/migration-from-2.x.md).
 
 ### Delivery: four install types instead of one
@@ -251,11 +252,12 @@ This is the change with the largest consequence, and it comes out of a measureme
   so whoever reaches the published port is in. This is still an open question (OQ-15) and
   [docs/install-docker.md](docs/install-docker.md) names three ways to lock it down; the warning line
   the recommendation asks for is not implemented yet.
-- **Nothing has ever been released and no workflow has ever run.** GitHub Actions is not enabled on
-  the repository, so there is no CI run, no build artefact and no release to verify.
-- The **packaged desktop app has not been click-tested yet**: `app.whenReady()` never fires under
-  WSL, so the first run happens on a CI artifact, and GitHub Actions is not enabled on the repository
-  yet.
+- The **npm package of the beta is not on the registry yet**: the trusted publisher on npmjs.com
+  has to name `release-npm.yml` before the publish step can run; the other three release
+  pipelines of `3.0.0-beta.0` succeeded.
+- The **beta.0 desktop build** shows harmless "unknown method setReadyConfig" notices at start and
+  an RPC log drawer that lengthens the page; both are fixed on `master` (beta.1) and ship with the
+  next tag.
 
 ### Not in this rebuild yet
 
@@ -266,4 +268,5 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
-[unreleased]: https://github.com/hobbyquaker/homematic-manager/compare/v2.7.1...3.0-dev
+[unreleased]: https://github.com/hobbyquaker/homematic-manager/compare/v3.0.0-beta.0...master
+[3.0.0-beta.0]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.0

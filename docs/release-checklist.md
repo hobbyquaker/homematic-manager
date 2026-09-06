@@ -229,8 +229,11 @@ idempotent.
 
 ## Issues to close
 
-Only when **3.0.0** is published, never on a beta, and by the maintainer. The comment should say
-what fixed it and point at the changelog section; the triage that produced this table is
+**Done for the beta on 2026-09-06, at the maintainer's request:** every open issue and both PRs
+were commented on by the maintainer's agent (with a footer saying so), 51 closed, three kept open
+(#135 CCU-Jack until someone tests it, #69 automatic best-interface assignment, #68 Windows
+signing). The rule for the future stays: the comment says what fixed it and points at the
+changelog section; the triage that produced this table is
 [analysis-2026-09.md](analysis-2026-09.md) §10, and every number below appears in
 [../CHANGELOG.md](../CHANGELOG.md) or [migration-from-2.x.md](migration-from-2.x.md).
 

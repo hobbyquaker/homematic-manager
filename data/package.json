@@ -1,6 +1,6 @@
 {
   "name": "@homematic-manager/data",
-  "version": "3.0.0-beta.2",
+  "version": "3.0.0-beta.3",
   "private": true,
   "type": "module",
   "description": "Pinned openccu-data artifacts and the converter to the runtime data format",

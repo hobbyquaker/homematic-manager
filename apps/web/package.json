@@ -1,6 +1,6 @@
 {
   "name": "homematic-manager",
-  "version": "3.0.0-dev.3",
+  "version": "3.0.0-dev.4",
   "type": "module",
   "description": "Configure and administer Homematic and HomematicIP devices - devices and channels, direct links, paramsets, RSSI, service messages, events and an RPC console - from a local HTTP/WebSocket server that also serves the web UI",
   "keywords": [
@@ -67,8 +67,8 @@
     "hm-simulator": "^1.0.0"
   },
   "dependencies": {
-    "@homematic-manager/backend": "3.0.0-dev.3",
-    "@homematic-manager/core": "3.0.0-dev.3",
+    "@homematic-manager/backend": "3.0.0-dev.4",
+    "@homematic-manager/core": "3.0.0-dev.4",
     "binrpc": "^4.2.0",
     "homematic-rega": "^2.0.0",
     "homematic-xmlrpc": "^2.0.0",

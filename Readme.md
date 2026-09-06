@@ -120,6 +120,12 @@ das Wichtigste in drei Zeilen:
   damit dauerhaft unbrauchbar gemacht.
 - **ReGa ist optional** (D-2): ohne die Logikschicht arbeitet die App vollständig weiter und
   benutzt lokal gespeicherte Namen.
+- **Räume und Gewerke** (D-40, neu in 3.0.0-beta.3): die App kennt jetzt eine eigene Taxonomie —
+  Räume, Gewerke, Etagen und was ein Benutzer sonst anlegt — und speichert sie im Profil. Auf
+  [openccu-lite](docs/openccu-lite.md), der CCU-Firmware ohne ReGaHSS, kommen Namen und Taxonomie
+  stattdessen aus dem Metadatenspeicher der Box, und die App ist dort deren Editor: Umbenennen und
+  Zuordnen schreibt in die Box, jede Änderung dort ist hier sofort sichtbar. Erkannt wird das zur
+  Laufzeit, es gibt nichts einzustellen.
 - Außerhalb der CCU wird ausschließlich **XML-RPC** gesprochen (D-28). BIN-RPC gibt es auf einer CCU
   nur auf dem Loopback; die öffentlichen Ports 2001/2000 sind lighttpd-XML-RPC-Proxys.
 
@@ -134,6 +140,7 @@ das Wichtigste in drei Zeilen:
 | [docs/install-docker.md](docs/install-docker.md) | Docker-Image, und was der Callback dabei bedeutet |
 | [docs/moving-between-installs.md](docs/moving-between-installs.md) | Von einer Installationsart in eine andere umziehen |
 | [docs/migration-from-2.x.md](docs/migration-from-2.x.md) | Umstieg von 2.x: wo die alte Konfiguration liegt, was sich verhält wie vorher und was nicht |
+| [docs/openccu-lite.md](docs/openccu-lite.md) | openccu-lite: die CCU-Firmware ohne ReGaHSS — Namen, Räume und Gewerke aus dem Metadatenspeicher der Box, die Anmeldung des Addons dort, und was es dort nicht gibt |
 | [docs/config-pending.md](docs/config-pending.md) | Die Laborstudie zu `CONFIG_PENDING` und dem Schreibpfad |
 | [BUILD.md](BUILD.md) | Selbst bauen, Monorepo-Aufbau, Tests, Release-Workflows |
 | [ROADMAP.md](ROADMAP.md) | Der Plan für 3.0, alle Entscheidungen D-1..D-30 und die offenen Fragen |

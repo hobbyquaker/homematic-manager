@@ -23,6 +23,12 @@ through and why the token is still required behind it:
 - [nginx-homematic-manager.conf](nginx-homematic-manager.conf)
 - [Caddyfile-homematic-manager](Caddyfile-homematic-manager)
 
+## openccu-lite
+
+- [openccu-lite.md](openccu-lite.md) — the CCU firmware without ReGaHSS: what the Homematic
+  Manager does there, where names, rooms and functions come from and go to, how the addon's login
+  works on it, what has no replacement, and what to configure off the box.
+
 ## Coming from 2.x
 
 - [migration-from-2.x.md](migration-from-2.x.md) — where 2.x kept its configuration, what the

@@ -84,7 +84,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [19. UI polish after the first look](#19-ui-polish-after-the-first-look) ✅
 - [20. UI second look](#20-ui-second-look) ✅
 - [21. Interface popup](#21-interface-popup) ✅
-- [22. UI third look and the beta](#22-ui-third-look-and-the-beta)
+- [22. UI third look and the beta](#22-ui-third-look-and-the-beta) ✅ UI part; beta cut 2026-09-06
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
 
@@ -665,6 +665,9 @@ standard dropdown, and the per-interface status marks leave the top bar and move
   both themes for the colours (D-22); the demo data gets one interface in each state.
 
 ## 22. UI third look and the beta
+
+UI part done 2026-09-06, report in `roadmap-archive/task-22.md`; the beta `3.0.0-beta.0` was cut the
+same day from `master` (D-37).
 
 Maintainer, 2026-09-06, after the third look at `3.0.0-dev.6` on the lab box:
 

@@ -41,7 +41,8 @@ about every half hour while the agent works; the timestamp above is the last ref
   1082 tests, `npm run lint`, `npm run typecheck`.
 - In progress by background subagents (Opus), committing distinct commits on
   `3.0-dev` in the shared working tree (each stages only its own files):
-  - none; task 21 (interface popup) is archived at `3.0.0-dev.6` and deployed to the x86_64 box.
+  - none; tasks 21 and 22 are archived; the beta `3.0.0-beta.0` is cut from `master` (D-37): tag
+    `v3.0.0-beta.0`, four release workflows, draft release for the maintainer to publish.
     The Electron investigation is archived (`roadmap-archive/task-11-electron-startup.md`):
     the quit no-op, the early smoke wait, the image scheme and the unpackaged data path are fixed
     at `3.0.0-dev.5`.

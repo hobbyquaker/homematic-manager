@@ -6,7 +6,12 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
-## [Unreleased] — 3.0.0
+## [3.0.0-beta.0] — 2026-09-06
+
+The first public pre-release of the rebuild, for testers: install with
+`npm install -g homematic-manager@next`, the addon packages and the desktop installers from the
+GitHub release, `ghcr.io/hobbyquaker/homematic-manager:3.0.0-beta.0`. Everything below is what
+3.0.0 will contain; "Known issues" is what is still open at the beta.
 
 **A complete rebuild.** The 2.7.1 code (Electron 4 from 2019, jQuery, free-jqgrid, no tests) was
 replaced by a tested TypeScript core, a Svelte 5 user interface and a Node backend. The tabs, grids,

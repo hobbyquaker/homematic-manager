@@ -52,14 +52,33 @@ if {![check_session $sid] && ![has_token_cookie]} {
 # ---------------------------------------------------------------------------------------------
 if {[string equal $cmd "config"]} {
     set message ""
-    set mode [read_env HMM_AUTH_MODE token]
-    if {![string equal $mode "rega"]} {
+    # D-40: on openccu-lite the second mode is not `rega` - there is no ReGaHSS and the users are
+    # the box's own - it is `occulite`, where the session the box's shell hands over is checked
+    # against the box's own API. Which of the two is offered is decided at runtime, so the same
+    # package behaves correctly on either firmware.
+    set lite [is_openccu_lite]
+    if {$lite} {
+        set other "occulite"
+    } else {
+        set other "rega"
+    }
+    set mode [read_env HMM_AUTH_MODE ""]
+    if {[string equal $mode ""]} {
+        # unset means "whatever fits this firmware": the rc.d script picks `occulite` on a lite box
+        # and `token` everywhere else
+        if {$lite} {
+            set mode "occulite"
+        } else {
+            set mode "token"
+        }
+    }
+    if {![string equal $mode $other]} {
         set mode "token"
     }
 
     if {[info exists params(auth_mode)]} {
         set wanted $params(auth_mode)
-        if {[string equal $wanted "token"] || [string equal $wanted "rega"]} {
+        if {[string equal $wanted "token"] || [string equal $wanted $other]} {
             if {![string equal $wanted $mode]} {
                 write_env HMM_AUTH_MODE $wanted
                 set mode $wanted
@@ -92,20 +111,29 @@ if {[string equal $cmd "config"]} {
     puts "<table><tr><td><b>token</b></td><td>"
     puts "Die WebUI-Sitzung entscheidet: der Knopf in der Systemsteuerung öffnet die App direkt."
     puts "<br>The WebUI session decides: the button in Systemsteuerung opens the app directly."
-    puts "</td></tr><tr><td><b>rega</b></td><td>"
-    puts "Zusätzlich eine eigene Anmeldung mit einem CCU-Benutzer, wenn die App ohne WebUI-Sitzung"
-    puts "geöffnet wird (z.B. als Lesezeichen). Der Weg über die Systemsteuerung funktioniert"
-    puts "unverändert weiter."
-    puts "<br>Additionally asks for a CCU user when the app is opened without a WebUI session (a"
-    puts "bookmark, say). The way through Systemsteuerung keeps working unchanged."
+    puts "</td></tr><tr><td><b>[html_escape $other]</b></td><td>"
+    if {$lite} {
+        puts "Zusätzlich: die Sitzung, die openccu-lite der Addon-Seite übergibt (?sid=@...@), wird"
+        puts "gegen die Metadaten-API der Box geprüft. Ohne gültige Sitzung landet der Browser auf"
+        puts "der Anmeldung der Box. Das ist die Voreinstellung auf openccu-lite."
+        puts "<br>Additionally: the session openccu-lite hands the addon page (?sid=@...@) is checked"
+        puts "against the box's metadata API. Without a valid one the browser is sent to the box's"
+        puts "own login. This is the default on openccu-lite."
+    } else {
+        puts "Zusätzlich eine eigene Anmeldung mit einem CCU-Benutzer, wenn die App ohne WebUI-Sitzung"
+        puts "geöffnet wird (z.B. als Lesezeichen). Der Weg über die Systemsteuerung funktioniert"
+        puts "unverändert weiter."
+        puts "<br>Additionally asks for a CCU user when the app is opened without a WebUI session (a"
+        puts "bookmark, say). The way through Systemsteuerung keeps working unchanged."
+    }
     puts "</td></tr></table>"
     puts "<p>Aktuell / current: <b>[html_escape $mode]</b></p>"
-    if {[string equal $mode "rega"]} {
+    if {[string equal $mode $other]} {
         puts "<p><a href=\"settings.cgi?cmd=config&amp;auth_mode=token$query\">Auf <b>token</b>"
         puts "umstellen / switch to <b>token</b></a></p>"
     } else {
-        puts "<p><a href=\"settings.cgi?cmd=config&amp;auth_mode=rega$query\">Auf <b>rega</b>"
-        puts "umstellen / switch to <b>rega</b></a></p>"
+        puts "<p><a href=\"settings.cgi?cmd=config&amp;auth_mode=[html_escape $other]$query\">Auf"
+        puts "<b>[html_escape $other]</b> umstellen / switch to <b>[html_escape $other]</b></a></p>"
     }
     puts "<p class=\"note\">Das schreibt HMM_AUTH_MODE nach"
     puts "/usr/local/addons/hmm/etc/hmm.env und startet den Dienst neu. Dieselbe Datei nimmt jede"

@@ -191,6 +191,33 @@ proc has_token_cookie {} {
     return 0
 }
 
+# D-40: is this firmware openccu-lite?
+#
+# `/VERSION` keeps upstream's PRODUCT and PLATFORM and carries an extra `VARIANT=lite` line (their
+# D-17), so that update packages stay interchangeable in both directions and the variant is still
+# recognisable. That extra line is the only thing to look at - and it is read at *runtime*, never
+# written into a configuration file, because a user may move the same `/usr/local` from openccu-lite
+# to OpenCCU and back, and an addon that remembered the answer would then be wrong.
+proc is_openccu_lite {} {
+    global env
+    set file /VERSION
+    if {[info exists env(HMM_VERSION_FILE)]} {
+        set file $env(HMM_VERSION_FILE)
+    }
+    if {![file exists $file]} {
+        return 0
+    }
+    set fd [open $file r]
+    set content [read $fd]
+    close $fd
+    foreach line [split $content "\n"] {
+        if {[regexp {^VARIANT=lite$} [string trim $line]]} {
+            return 1
+        }
+    }
+    return 0
+}
+
 # HTML-escapes a value that goes into a page. Nothing here is user input today, but the settings
 # page prints what is in etc/hmm.env, and that file is edited by hand.
 proc html_escape {value} {

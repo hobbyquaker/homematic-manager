@@ -94,6 +94,18 @@ Start() {
         . $ENV_FILE
         set +a
     fi
+    # D-40: openccu-lite has no ReGaHSS and its own users, so `rega` cannot work there and the
+    # box's own hand-over can: its shell opens an addon page with the user's session on the URL and
+    # this host checks that session against the box. Decided **at every start** from the firmware's
+    # own `/VERSION` (their D-17 keeps PRODUCT and PLATFORM and adds `VARIANT=lite`), never written
+    # into hmm.env - the same /usr/local may be moved from openccu-lite to OpenCCU and back, and a
+    # remembered answer would be wrong on the other side. A mode the user set by hand always wins.
+    if [ -z "$HMM_AUTH_MODE" ] && grep -q '^VARIANT=lite$' /VERSION 2>/dev/null; then
+        HMM_AUTH_MODE=occulite
+        logger -t $ADDON -p daemon.info "openccu-lite detected (VARIANT=lite): --auth-mode occulite"
+    fi
+    [ -n "$HMM_AUTH_MODE" ] && export HMM_AUTH_MODE
+
     export HMM_PORT HMM_LOG_LEVEL
 
     # not on the command line: an argument is world-readable in `ps`, the environment is not

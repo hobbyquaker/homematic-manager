@@ -293,6 +293,76 @@ case "$(grep '^HMM_AUTH_MODE' "$TREE/etc/hmm.env")" in
     *) fail "and nothing was written for it" "$(grep 'HMM_AUTH_MODE' "$TREE/etc/hmm.env")" ;;
 esac
 
+echo "the addon settings page on openccu-lite (D-40)"
+# The firmware's own file, with the extra line openccu-lite identifies itself by (their D-17). The
+# CGI reads it at every request, so the same package shows the mode that fits the box it is on.
+LITE_VERSION="$TMP/VERSION-lite"
+printf 'VERSION=3.89.8.20260719\nPRODUCT=ova\nPLATFORM=ova\nVARIANT=lite\n' > "$LITE_VERSION"
+CCU_VERSION="$TMP/VERSION-ccu"
+printf 'VERSION=3.83.5.20250401\nPRODUCT=HM-RASPBERRYMATIC\nPLATFORM=oci\n' > "$CCU_VERSION"
+
+# start from a file with no HMM_AUTH_MODE at all, which is what "unset" means on both firmwares
+cp -a "$ADDON_SRC/files/hmm/etc/default.env" "$TREE/etc/hmm.env"
+out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$LITE_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'current: <b>occulite</b>'*) pass "unset means occulite on a box with VARIANT=lite" ;;
+    *) fail "unset means occulite on a box with VARIANT=lite" "$out" ;;
+esac
+case "$out" in
+    *'?sid=@...@'*) pass "and the page explains the hand-over instead of the ReGa login" ;;
+    *) fail "and the page explains the hand-over instead of the ReGa login" "$out" ;;
+esac
+case "$out" in
+    *'auth_mode=rega'*) fail "and rega is not offered there" "$out" ;;
+    *) pass "and rega is not offered there" ;;
+esac
+out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$CCU_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'current: <b>token</b>'*) pass "unset means token on a CCU, exactly as before" ;;
+    *) fail "unset means token on a CCU, exactly as before" "$out" ;;
+esac
+case "$out" in
+    *'auth_mode=rega'*) pass "and rega is what is offered there" ;;
+    *) fail "and rega is what is offered there" "$out" ;;
+esac
+# a mode that belongs to the other firmware is refused rather than written into hmm.env
+out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config&auth_mode=rega' HMM_VERSION_FILE="$LITE_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'Unbekannter Wert'*) pass "rega is refused on a lite box" ;;
+    *) fail "rega is refused on a lite box" "$out" ;;
+esac
+if grep -q '^HMM_AUTH_MODE' "$TREE/etc/hmm.env"; then
+    fail "and nothing was written for it" "$(grep '^HMM_AUTH_MODE' "$TREE/etc/hmm.env")"
+else
+    pass "and nothing was written for it"
+fi
+# choosing what is already the effective mode writes nothing: unset is the better state, because it
+# is the one that still fits after the same /usr/local has been moved to the other firmware
+out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config&auth_mode=occulite' HMM_VERSION_FILE="$LITE_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
+if grep -q '^HMM_AUTH_MODE' "$TREE/etc/hmm.env"; then
+    fail "choosing the mode that is already effective writes nothing" "$(grep '^HMM_AUTH_MODE' "$TREE/etc/hmm.env")"
+else
+    pass "choosing the mode that is already effective writes nothing"
+fi
+out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config&auth_mode=token' HMM_VERSION_FILE="$LITE_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'current: <b>token</b>'*) pass "switching a lite box to token works" ;;
+    *) fail "switching a lite box to token works" "$out" ;;
+esac
+case "$(grep '^HMM_AUTH_MODE' "$TREE/etc/hmm.env")" in
+    'HMM_AUTH_MODE=token') pass "and is written into etc/hmm.env" ;;
+    *) fail "and is written into etc/hmm.env" "$(grep 'HMM_AUTH_MODE' "$TREE/etc/hmm.env")" ;;
+esac
+out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config&auth_mode=occulite' HMM_VERSION_FILE="$LITE_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
+case "$(grep '^HMM_AUTH_MODE' "$TREE/etc/hmm.env")" in
+    'HMM_AUTH_MODE=occulite') pass "and back to occulite, which is written this time" ;;
+    *) fail "and back to occulite, which is written this time" "$(grep 'HMM_AUTH_MODE' "$TREE/etc/hmm.env")" ;;
+esac
+case "$out" in
+    *'current: <b>occulite</b>'*) pass "and the page says so" ;;
+    *) fail "and the page says so" "$out" ;;
+esac
+
 echo "update_check.cgi"
 out="$(cgi update_check.cgi 'cmd=download')"
 case "$out" in

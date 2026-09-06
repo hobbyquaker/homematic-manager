@@ -11,7 +11,7 @@ name: CCU addon
 
 on:
   push:
-    branches: [master, main, 3.0-dev]
+    branches: [master]
   pull_request:
   workflow_dispatch:
     inputs:

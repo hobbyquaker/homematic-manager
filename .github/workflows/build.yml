@@ -9,7 +9,7 @@ name: Build
 
 on:
   push:
-    branches: [3.0-dev]
+    branches: [master]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'

@@ -17,9 +17,10 @@ about every half hour while the agent works; the timestamp above is the last ref
 
 ## State of the branch
 
-- Branch `3.0-dev`, version `3.0.0-dev.0`, pushed up to `69cab48` (task 11 archive). Push again
-  with `git push origin 3.0-dev` from WSL after each archived task; nothing on the branch is
-  secret.
+- Branch `master` since the beta (D-38, 2026-09-06): the full history, no squashing; `3.0-dev` is
+  left behind at the same commits. Push `master` from WSL after each archived task or feature
+  batch; nothing on it is secret. The public release `v3.0.0-beta.0` exists; the version on
+  `master` is `3.0.0-beta.1`.
 - Done and archived: tasks 2 (foundation), 3 (core), 4 (backend), 5 (hm-simulator 1.0), 7 (UI
   foundation), 9 (data pipeline), 11 (Electron host; `build.yml` builds the desktop artifacts on
   every push to `3.0-dev` once Actions is enabled), 12 (web host, npm package with `--install`,
@@ -40,7 +41,7 @@ about every half hour while the agent works; the timestamp above is the last ref
   the private lab note (one DRS8 channel poisoned on purpose, needs re-pairing). Workspace was green at the last full run: 73 test files,
   1082 tests, `npm run lint`, `npm run typecheck`.
 - In progress by background subagents (Opus), committing distinct commits on
-  `3.0-dev` in the shared working tree (each stages only its own files):
+  `master` in the shared working tree (each stages only its own files):
   - none; tasks 21 and 22 are archived; the beta `3.0.0-beta.0` is cut from `master` (D-37): tag
     `v3.0.0-beta.0`, four release workflows, draft release for the maintainer to publish.
     The Electron investigation is archived (`roadmap-archive/task-11-electron-startup.md`):
@@ -72,7 +73,7 @@ about every half hour while the agent works; the timestamp above is the last ref
 
 1. When a task finishes: verify (`npm run lint && npm run typecheck && npm test` in WSL,
    with the simulator installed), write `roadmap-archive/task-{6,11,12}.md`, tick them in the
-   ROADMAP Contents, update the status line at the top of ROADMAP.md, commit, push `3.0-dev`
+   ROADMAP Contents, update the status line at the top of ROADMAP.md, commit, push `master`
    (task 11 is archived and pushed already: `69cab48`).
 2. The beta itself: follow `docs/release-checklist.md` once the maintainer has enabled Actions
    and decided OQ-15; the agent side of task 17 is done. hm-simulator 1.0.1 release on

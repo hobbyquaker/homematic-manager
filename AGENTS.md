@@ -41,7 +41,9 @@ the plan is built on is [docs/analysis-2026-09.md](docs/analysis-2026-09.md).
   counter with `npm run version:dev` (then `3.0.0-alpha.n`, `3.0.0-beta.n`, `3.0.0`). One commit
   per significant change, with a message that explains _why_; no squashed "WIP" commits. **Never
   tag, release, publish or push to `master`** without the maintainer - releases are cut by the
-  maintainer and the workflows. Pushing the `3.0-dev` branch for CI and artifact builds is allowed
+  maintainer and the workflows. Since 2026-09-06 (D-38) the work happens on `master` directly, with
+  the full commit history and no squashing; the main session pushes `master` for CI and artifact
+  builds (formerly the `3.0-dev` branch). Pushing for CI and artifact builds is allowed
   (D-21); only the main session pushes, subagents never do.
 - **D-1 protocols**: the app talks XML-RPC / BIN-RPC to the interface processes, plus optional ReGa
   scripts. The CCU JSON-API is out; do not reintroduce it.

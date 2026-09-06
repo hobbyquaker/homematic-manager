@@ -22,7 +22,8 @@ Contents: [The container](#1-the-container) · [Node](#2-node-22) ·
 > **The package is `homematic-manager`** (D-33), the name the 2.x desktop app had on npm — its
 > `npm i -g` audience wanted a headless install anyway. The 1.x versions under that name are
 > deprecated and `latest` still points at 1.0.14 from 2022, so until 3.0.0 is released a pre-release
-> has to be asked for by name: `npm install -g homematic-manager@next`. The binary is
+> was asked for by name as `homematic-manager@next`; since the beta the current pre-release is also
+> `latest` (D-39), so a plain `npm install -g homematic-manager` gives it. The binary is
 > `homematic-manager`; `homematic-manager-web` is a second name for the same file, and this page
 > uses it throughout because the CCU addon and the proxy examples do.
 
@@ -70,7 +71,7 @@ apt install -y nodejs
 ## 3. Install and register the service
 
 ```sh
-npm install -g homematic-manager@next        # `latest` is still the deprecated 1.0.14 until 3.0.0
+npm install -g homematic-manager             # the current beta; `@next` names the same version
 homematic-manager-web --install --ccu ccu3.local --host 0.0.0.0
 ```
 
@@ -183,7 +184,7 @@ of the installation is to watch events around the clock.
 ## Update, backup, uninstall
 
 ```sh
-npm install -g homematic-manager@next     # `@latest` once 3.0.0 is out
+npm install -g homematic-manager          # or @next, the same version
 homematic-manager-web --install             # rewrites the unit, keeps the configuration
 systemctl restart homematic-manager
 ```

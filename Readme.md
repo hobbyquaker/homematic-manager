@@ -209,7 +209,7 @@ moving between them is a copy (D-25):
 The npm package is **`homematic-manager`** (D-33), the name 2.x had on npm — so anyone who once ran
 `npm install -g homematic-manager` gets the server now, not the desktop app; that one is an installer
 from the release. Until 3.0.0 moves the `latest` tag a plain install still gives the deprecated
-1.0.14 from 2022, so pre-releases are installed as `npm install -g homematic-manager@next`.
+1.0.14 from 2022; since the beta the current pre-release is `latest` (D-39), so `npm install -g homematic-manager` gives it, and `@next` names the same version.
 
 Documentation: [docs/README.md](docs/README.md) is the index;
 [docs/migration-from-2.x.md](docs/migration-from-2.x.md) is what a 2.x user should read first;

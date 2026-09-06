@@ -39,6 +39,9 @@ export * from './serviceMessages/index.js';
 export * from './rssi/index.js';
 export * from './events/ringBuffer.js';
 
+// The openccu-lite metadata store (task 24): names, rooms and functions as data
+export * from './meta/index.js';
+
 // Texts
 export * from './i18n/messages.js';
 export * from './i18n/translate.js';

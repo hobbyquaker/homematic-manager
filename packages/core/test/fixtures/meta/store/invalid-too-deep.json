@@ -1,0 +1,67 @@
+{
+  "_reason": "too-deep",
+  "format": 1,
+  "revision": 1,
+  "objects": {},
+  "enums": {
+    "room": {
+      "name": {
+        "en": "Rooms"
+      },
+      "tree": [
+        {
+          "id": "a",
+          "name": "a",
+          "children": [
+            {
+              "id": "b",
+              "name": "b",
+              "children": [
+                {
+                  "id": "c",
+                  "name": "c",
+                  "children": [
+                    {
+                      "id": "d",
+                      "name": "d",
+                      "children": [
+                        {
+                          "id": "e",
+                          "name": "e",
+                          "children": [
+                            {
+                              "id": "f",
+                              "name": "f",
+                              "children": [
+                                {
+                                  "id": "g",
+                                  "name": "g",
+                                  "children": [
+                                    {
+                                      "id": "h",
+                                      "name": "h",
+                                      "children": [
+                                        {
+                                          "id": "i",
+                                          "name": "i"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

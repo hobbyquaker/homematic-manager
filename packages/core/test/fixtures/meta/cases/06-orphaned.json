@@ -1,0 +1,171 @@
+{
+  "title": "orphaned is owner-set, keeps assignments, filters queries, and is a mutation",
+  "start": {
+    "format": 1,
+    "revision": 12,
+    "objects": {
+      "BidCos-RF.JEQ0230153": {
+        "name": "Thermostat Bad"
+      },
+      "BidCos-RF.JEQ0230153:1": {
+        "name": "Thermostat Bad:1",
+        "enums": [
+          "room/og/bad",
+          "function/heizung"
+        ]
+      },
+      "HmIP-RF.000A1B2C3D4E5F:4": {
+        "name": "Deckenlampe",
+        "enums": [
+          "room/eg/wohnzimmer",
+          "function/licht"
+        ],
+        "meta": {
+          "ccu-jack": {
+            "hidden": false
+          }
+        }
+      },
+      "HmIP-RF.0011223344AABB:1": {
+        "name": "Küchenlicht",
+        "enums": [
+          "room/eg/kueche",
+          "function/licht"
+        ],
+        "orphaned": true
+      }
+    },
+    "enums": {
+      "room": {
+        "name": {
+          "de": "Räume",
+          "en": "Rooms"
+        },
+        "tree": [
+          {
+            "id": "eg",
+            "name": "Erdgeschoss",
+            "children": [
+              {
+                "id": "wohnzimmer",
+                "name": "Wohnzimmer",
+                "icon": "sofa"
+              },
+              {
+                "id": "kueche",
+                "name": "Küche"
+              }
+            ]
+          },
+          {
+            "id": "og",
+            "name": "Obergeschoss",
+            "children": [
+              {
+                "id": "bad",
+                "name": "Bad"
+              }
+            ]
+          }
+        ]
+      },
+      "function": {
+        "name": {
+          "de": "Gewerke",
+          "en": "Functions"
+        },
+        "tree": [
+          {
+            "id": "licht",
+            "name": "Licht"
+          },
+          {
+            "id": "heizung",
+            "name": "Heizung"
+          }
+        ]
+      },
+      "floor": {
+        "name": {
+          "de": "Etagen",
+          "en": "Floors"
+        },
+        "tree": []
+      }
+    }
+  },
+  "ops": [
+    {
+      "op": "orphan.set",
+      "ref": "HmIP-RF.000A1B2C3D4E5F:4",
+      "orphaned": true,
+      "expect": {
+        "ok": true,
+        "revision": 13
+      }
+    },
+    {
+      "op": "orphan.set",
+      "ref": "HmIP-RF.000A1B2C3D4E5F:4",
+      "orphaned": true,
+      "expect": {
+        "ok": true,
+        "unchanged": true
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "HmIP-RF.000A1B2C3D4E5F:4",
+      "expect": {
+        "value": {
+          "orphaned": true,
+          "enums": [
+            "room/eg/wohnzimmer",
+            "function/licht"
+          ]
+        }
+      }
+    },
+    {
+      "op": "objects.query",
+      "enum": "room/eg",
+      "orphaned": true,
+      "expect": {
+        "refs": [
+          "HmIP-RF.000A1B2C3D4E5F:4",
+          "HmIP-RF.0011223344AABB:1"
+        ]
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.000A1B2C3D4E5F:4",
+      "body": {
+        "orphaned": false
+      },
+      "expect": {
+        "error": "forbidden"
+      }
+    },
+    {
+      "op": "orphan.set",
+      "ref": "HmIP-RF.000A1B2C3D4E5F:4",
+      "orphaned": false,
+      "expect": {
+        "ok": true,
+        "revision": 14
+      }
+    },
+    {
+      "op": "orphan.set",
+      "ref": "HmIP-RF.NOPE:1",
+      "orphaned": true,
+      "expect": {
+        "error": "unknown-object"
+      }
+    }
+  ],
+  "end": {
+    "revision": 14
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "_reason": "unknown-path",
+  "format": 1,
+  "revision": 3,
+  "objects": {
+    "BidCos-RF.X:1": {
+      "name": "x",
+      "enums": [
+        "room/nowhere"
+      ]
+    }
+  },
+  "enums": {
+    "room": {
+      "name": {
+        "de": "Räume",
+        "en": "Rooms"
+      },
+      "tree": []
+    },
+    "function": {
+      "name": {
+        "de": "Gewerke",
+        "en": "Functions"
+      },
+      "tree": []
+    },
+    "floor": {
+      "name": {
+        "de": "Etagen",
+        "en": "Floors"
+      },
+      "tree": []
+    }
+  }
+}

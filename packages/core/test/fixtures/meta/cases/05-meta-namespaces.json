@@ -1,0 +1,119 @@
+{
+  "title": "meta is merged per namespace; null removes one; the store never interprets it",
+  "start": "empty",
+  "ops": [
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.A:1",
+      "body": {
+        "name": "Lampe",
+        "meta": {
+          "ccu-jack": {
+            "hidden": true
+          },
+          "redmatic": {
+            "tag": "x"
+          }
+        }
+      },
+      "expect": {
+        "ok": true,
+        "revision": 1
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.A:1",
+      "body": {
+        "meta": {
+          "ccu-jack": {
+            "hidden": false
+          }
+        }
+      },
+      "expect": {
+        "ok": true,
+        "revision": 2
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "HmIP-RF.A:1",
+      "expect": {
+        "value": {
+          "meta": {
+            "ccu-jack": {
+              "hidden": false
+            },
+            "redmatic": {
+              "tag": "x"
+            }
+          }
+        }
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.A:1",
+      "body": {
+        "meta": {
+          "redmatic": null
+        }
+      },
+      "expect": {
+        "ok": true,
+        "revision": 3
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "HmIP-RF.A:1",
+      "expect": {
+        "value": {
+          "meta": {
+            "ccu-jack": {
+              "hidden": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.A:1",
+      "body": {
+        "meta": {
+          "Bad Namespace": {}
+        }
+      },
+      "expect": {
+        "error": "invalid-id"
+      }
+    },
+    {
+      "op": "object.put",
+      "ref": "HmIP-RF.A:1",
+      "body": {
+        "name": "Lampe"
+      },
+      "expect": {
+        "ok": true,
+        "revision": 4
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "HmIP-RF.A:1",
+      "expect": {
+        "value": {
+          "name": "Lampe",
+          "enums": [],
+          "meta": {}
+        }
+      }
+    }
+  ],
+  "end": {
+    "revision": 4
+  }
+}

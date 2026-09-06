@@ -1,0 +1,122 @@
+{
+  "title": "Enums are ordinary: create, rename, reorder; defaults are not special",
+  "start": "empty",
+  "ops": [
+    {
+      "op": "enum.create",
+      "id": "zone",
+      "name": {
+        "en": "Zones",
+        "de": "Zonen"
+      },
+      "expect": {
+        "ok": true,
+        "revision": 1
+      }
+    },
+    {
+      "op": "enum.create",
+      "id": "zone",
+      "name": {
+        "en": "Again"
+      },
+      "expect": {
+        "error": "duplicate-id"
+      }
+    },
+    {
+      "op": "enum.create",
+      "id": "Zone!",
+      "name": {
+        "en": "x"
+      },
+      "expect": {
+        "error": "invalid-id"
+      }
+    },
+    {
+      "op": "enum.create",
+      "id": "x",
+      "name": {
+        "de": "nur deutsch"
+      },
+      "expect": {
+        "error": "invalid-name"
+      }
+    },
+    {
+      "op": "node.create",
+      "enum": "zone",
+      "parent": null,
+      "id": "a",
+      "name": "A",
+      "expect": {
+        "ok": true,
+        "revision": 2
+      }
+    },
+    {
+      "op": "node.create",
+      "enum": "zone",
+      "parent": null,
+      "id": "b",
+      "name": "B",
+      "position": 0,
+      "expect": {
+        "ok": true,
+        "revision": 3
+      }
+    },
+    {
+      "op": "node.update",
+      "path": "zone/a",
+      "body": {
+        "position": 0
+      },
+      "expect": {
+        "ok": true,
+        "revision": 4
+      }
+    },
+    {
+      "op": "node.update",
+      "path": "zone/a",
+      "body": {
+        "position": 0
+      },
+      "expect": {
+        "ok": true,
+        "unchanged": true
+      }
+    },
+    {
+      "op": "enum.delete",
+      "id": "room",
+      "expect": {
+        "ok": true,
+        "revision": 5
+      }
+    }
+  ],
+  "end": {
+    "revision": 5,
+    "enums": {
+      "zone": {
+        "name": {
+          "en": "Zones",
+          "de": "Zonen"
+        },
+        "tree": [
+          {
+            "id": "a",
+            "name": "A"
+          },
+          {
+            "id": "b",
+            "name": "B"
+          }
+        ]
+      }
+    }
+  }
+}

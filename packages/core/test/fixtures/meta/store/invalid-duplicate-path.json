@@ -1,0 +1,72 @@
+{
+  "_reason": "duplicate-path",
+  "format": 1,
+  "revision": 1,
+  "objects": {
+    "BidCos-RF.X:1": {
+      "name": "x",
+      "enums": [
+        "function/licht",
+        "function/licht"
+      ]
+    }
+  },
+  "enums": {
+    "room": {
+      "name": {
+        "de": "Räume",
+        "en": "Rooms"
+      },
+      "tree": [
+        {
+          "id": "eg",
+          "name": "Erdgeschoss",
+          "children": [
+            {
+              "id": "wohnzimmer",
+              "name": "Wohnzimmer",
+              "icon": "sofa"
+            },
+            {
+              "id": "kueche",
+              "name": "Küche"
+            }
+          ]
+        },
+        {
+          "id": "og",
+          "name": "Obergeschoss",
+          "children": [
+            {
+              "id": "bad",
+              "name": "Bad"
+            }
+          ]
+        }
+      ]
+    },
+    "function": {
+      "name": {
+        "de": "Gewerke",
+        "en": "Functions"
+      },
+      "tree": [
+        {
+          "id": "licht",
+          "name": "Licht"
+        },
+        {
+          "id": "heizung",
+          "name": "Heizung"
+        }
+      ]
+    },
+    "floor": {
+      "name": {
+        "de": "Etagen",
+        "en": "Floors"
+      },
+      "tree": []
+    }
+  }
+}

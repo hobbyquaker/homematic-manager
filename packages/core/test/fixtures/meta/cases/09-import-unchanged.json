@@ -1,0 +1,86 @@
+{
+  "title": "An import whose result equals the document is not a revision, in either mode",
+  "start": "empty",
+  "ops": [
+    {
+      "op": "import",
+      "mode": "merge",
+      "document": {
+        "format": 1,
+        "revision": 0,
+        "objects": {
+          "BidCos-RF.ABC0000001:1": {
+            "name": "Licht",
+            "enums": ["room/eg"]
+          }
+        },
+        "enums": {
+          "room": {"name": {"en": "Rooms", "de": "Räume"}, "tree": [{"id": "eg", "name": "EG"}]},
+          "function": {"name": {"en": "Functions", "de": "Gewerke"}, "tree": []},
+          "floor": {"name": {"en": "Floors", "de": "Etagen"}, "tree": []}
+        }
+      },
+      "expect": {"ok": true, "revision": 1}
+    },
+    {
+      "op": "import",
+      "mode": "merge",
+      "document": {
+        "format": 1,
+        "revision": 0,
+        "objects": {
+          "BidCos-RF.ABC0000001:1": {
+            "name": "Licht",
+            "enums": ["room/eg"]
+          }
+        },
+        "enums": {
+          "room": {"name": {"en": "Rooms", "de": "Räume"}, "tree": [{"id": "eg", "name": "EG"}]},
+          "function": {"name": {"en": "Functions", "de": "Gewerke"}, "tree": []},
+          "floor": {"name": {"en": "Floors", "de": "Etagen"}, "tree": []}
+        }
+      },
+      "expect": {"ok": true, "unchanged": true}
+    },
+    {
+      "op": "import",
+      "mode": "replace",
+      "document": {
+        "format": 1,
+        "revision": 0,
+        "objects": {
+          "BidCos-RF.ABC0000001:1": {
+            "name": "Licht",
+            "enums": ["room/eg"]
+          }
+        },
+        "enums": {
+          "room": {"name": {"en": "Rooms", "de": "Räume"}, "tree": [{"id": "eg", "name": "EG"}]},
+          "function": {"name": {"en": "Functions", "de": "Gewerke"}, "tree": []},
+          "floor": {"name": {"en": "Floors", "de": "Etagen"}, "tree": []}
+        }
+      },
+      "expect": {"ok": true, "unchanged": true}
+    },
+    {
+      "op": "import",
+      "mode": "merge",
+      "document": {
+        "format": 1,
+        "revision": 0,
+        "objects": {
+          "BidCos-RF.ABC0000001:1": {
+            "name": "Lampe",
+            "enums": ["room/eg"]
+          }
+        },
+        "enums": {
+          "room": {"name": {"en": "Rooms", "de": "Räume"}, "tree": [{"id": "eg", "name": "EG"}]},
+          "function": {"name": {"en": "Functions", "de": "Gewerke"}, "tree": []},
+          "floor": {"name": {"en": "Floors", "de": "Etagen"}, "tree": []}
+        }
+      },
+      "expect": {"ok": true, "revision": 2}
+    }
+  ]
+}

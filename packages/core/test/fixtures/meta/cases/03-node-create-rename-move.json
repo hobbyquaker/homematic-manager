@@ -1,0 +1,264 @@
+{
+  "title": "Node ids are stable; rename keeps paths, move rewrites member paths in one revision",
+  "start": {
+    "format": 1,
+    "revision": 12,
+    "objects": {
+      "BidCos-RF.JEQ0230153": {
+        "name": "Thermostat Bad"
+      },
+      "BidCos-RF.JEQ0230153:1": {
+        "name": "Thermostat Bad:1",
+        "enums": [
+          "room/og/bad",
+          "function/heizung"
+        ]
+      },
+      "HmIP-RF.000A1B2C3D4E5F:4": {
+        "name": "Deckenlampe",
+        "enums": [
+          "room/eg/wohnzimmer",
+          "function/licht"
+        ],
+        "meta": {
+          "ccu-jack": {
+            "hidden": false
+          }
+        }
+      },
+      "HmIP-RF.0011223344AABB:1": {
+        "name": "Küchenlicht",
+        "enums": [
+          "room/eg/kueche",
+          "function/licht"
+        ],
+        "orphaned": true
+      }
+    },
+    "enums": {
+      "room": {
+        "name": {
+          "de": "Räume",
+          "en": "Rooms"
+        },
+        "tree": [
+          {
+            "id": "eg",
+            "name": "Erdgeschoss",
+            "children": [
+              {
+                "id": "wohnzimmer",
+                "name": "Wohnzimmer",
+                "icon": "sofa"
+              },
+              {
+                "id": "kueche",
+                "name": "Küche"
+              }
+            ]
+          },
+          {
+            "id": "og",
+            "name": "Obergeschoss",
+            "children": [
+              {
+                "id": "bad",
+                "name": "Bad"
+              }
+            ]
+          }
+        ]
+      },
+      "function": {
+        "name": {
+          "de": "Gewerke",
+          "en": "Functions"
+        },
+        "tree": [
+          {
+            "id": "licht",
+            "name": "Licht"
+          },
+          {
+            "id": "heizung",
+            "name": "Heizung"
+          }
+        ]
+      },
+      "floor": {
+        "name": {
+          "de": "Etagen",
+          "en": "Floors"
+        },
+        "tree": []
+      }
+    }
+  },
+  "ops": [
+    {
+      "op": "node.create",
+      "enum": "room",
+      "parent": "room/og",
+      "id": "schlafzimmer",
+      "name": "Schlafzimmer",
+      "expect": {
+        "ok": true,
+        "revision": 13
+      }
+    },
+    {
+      "op": "node.create",
+      "enum": "room",
+      "parent": "room/og",
+      "id": "schlafzimmer",
+      "name": "Nochmal",
+      "expect": {
+        "error": "duplicate-id"
+      }
+    },
+    {
+      "op": "node.create",
+      "enum": "room",
+      "parent": "room/eg",
+      "id": "Bad Zimmer",
+      "name": "x",
+      "expect": {
+        "error": "invalid-id"
+      }
+    },
+    {
+      "op": "node.create",
+      "enum": "room",
+      "parent": "room/nowhere",
+      "id": "x",
+      "name": "x",
+      "expect": {
+        "error": "unknown-path"
+      }
+    },
+    {
+      "op": "node.create",
+      "enum": "nope",
+      "parent": null,
+      "id": "x",
+      "name": "x",
+      "expect": {
+        "error": "unknown-enum"
+      }
+    },
+    {
+      "op": "node.update",
+      "path": "room/og/bad",
+      "body": {
+        "name": "Badezimmer"
+      },
+      "expect": {
+        "ok": true,
+        "revision": 14
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "BidCos-RF.JEQ0230153:1",
+      "expect": {
+        "value": {
+          "name": "Thermostat Bad:1",
+          "enums": [
+            "room/og/bad",
+            "function/heizung"
+          ]
+        }
+      }
+    },
+    {
+      "op": "node.update",
+      "path": "room/og/bad",
+      "body": {
+        "parent": "room/eg"
+      },
+      "expect": {
+        "ok": true,
+        "revision": 15
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "BidCos-RF.JEQ0230153:1",
+      "expect": {
+        "value": {
+          "enums": [
+            "room/eg/bad",
+            "function/heizung"
+          ]
+        }
+      }
+    },
+    {
+      "op": "node.update",
+      "path": "room/eg",
+      "body": {
+        "parent": "room/eg/bad"
+      },
+      "expect": {
+        "error": "invalid-move"
+      }
+    },
+    {
+      "op": "node.update",
+      "path": "room/eg",
+      "body": {
+        "parent": "room/eg"
+      },
+      "expect": {
+        "error": "invalid-move"
+      }
+    },
+    {
+      "op": "events.since",
+      "since": 14,
+      "expect": {
+        "kinds": [
+          "node.moved"
+        ]
+      }
+    }
+  ],
+  "end": {
+    "revision": 15,
+    "enums": {
+      "room": {
+        "tree": [
+          {
+            "id": "eg",
+            "name": "Erdgeschoss",
+            "children": [
+              {
+                "id": "wohnzimmer",
+                "name": "Wohnzimmer",
+                "icon": "sofa"
+              },
+              {
+                "id": "kueche",
+                "name": "Küche"
+              },
+              {
+                "id": "bad",
+                "name": "Badezimmer"
+              }
+            ]
+          },
+          {
+            "id": "og",
+            "name": "Obergeschoss",
+            "children": [
+              {
+                "id": "schlafzimmer",
+                "name": "Schlafzimmer"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

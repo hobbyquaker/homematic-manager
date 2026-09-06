@@ -1,0 +1,327 @@
+{
+  "title": "Import is all-or-nothing and one revision; bulk likewise",
+  "start": "empty",
+  "ops": [
+    {
+      "op": "import",
+      "document": {
+        "format": 1,
+        "revision": 99,
+        "objects": {
+          "BidCos-RF.JEQ0230153": {
+            "name": "Thermostat Bad"
+          },
+          "BidCos-RF.JEQ0230153:1": {
+            "name": "Thermostat Bad:1",
+            "enums": [
+              "room/og/bad",
+              "function/heizung"
+            ]
+          },
+          "HmIP-RF.000A1B2C3D4E5F:4": {
+            "name": "Deckenlampe",
+            "enums": [
+              "room/eg/wohnzimmer",
+              "function/licht"
+            ],
+            "meta": {
+              "ccu-jack": {
+                "hidden": false
+              }
+            }
+          },
+          "HmIP-RF.0011223344AABB:1": {
+            "name": "Küchenlicht",
+            "enums": [
+              "room/eg/kueche",
+              "function/licht"
+            ],
+            "orphaned": true
+          }
+        },
+        "enums": {
+          "room": {
+            "name": {
+              "de": "Räume",
+              "en": "Rooms"
+            },
+            "tree": [
+              {
+                "id": "eg",
+                "name": "Erdgeschoss",
+                "children": [
+                  {
+                    "id": "wohnzimmer",
+                    "name": "Wohnzimmer",
+                    "icon": "sofa"
+                  },
+                  {
+                    "id": "kueche",
+                    "name": "Küche"
+                  }
+                ]
+              },
+              {
+                "id": "og",
+                "name": "Obergeschoss",
+                "children": [
+                  {
+                    "id": "bad",
+                    "name": "Bad"
+                  }
+                ]
+              }
+            ]
+          },
+          "function": {
+            "name": {
+              "de": "Gewerke",
+              "en": "Functions"
+            },
+            "tree": [
+              {
+                "id": "licht",
+                "name": "Licht"
+              },
+              {
+                "id": "heizung",
+                "name": "Heizung"
+              }
+            ]
+          },
+          "floor": {
+            "name": {
+              "de": "Etagen",
+              "en": "Floors"
+            },
+            "tree": []
+          }
+        }
+      },
+      "expect": {
+        "ok": true,
+        "revision": 1
+      }
+    },
+    {
+      "op": "objects.query",
+      "enum": "room/eg",
+      "expect": {
+        "refs": [
+          "HmIP-RF.000A1B2C3D4E5F:4",
+          "HmIP-RF.0011223344AABB:1"
+        ]
+      }
+    },
+    {
+      "op": "import",
+      "document": {
+        "format": 1,
+        "revision": 0,
+        "objects": {
+          "BidCos-RF.X:1": {
+            "name": "x",
+            "enums": [
+              "room/nowhere"
+            ]
+          }
+        },
+        "enums": {
+          "room": {
+            "name": {
+              "de": "Räume",
+              "en": "Rooms"
+            },
+            "tree": [
+              {
+                "id": "eg",
+                "name": "Erdgeschoss",
+                "children": [
+                  {
+                    "id": "wohnzimmer",
+                    "name": "Wohnzimmer",
+                    "icon": "sofa"
+                  },
+                  {
+                    "id": "kueche",
+                    "name": "Küche"
+                  }
+                ]
+              },
+              {
+                "id": "og",
+                "name": "Obergeschoss",
+                "children": [
+                  {
+                    "id": "bad",
+                    "name": "Bad"
+                  }
+                ]
+              }
+            ]
+          },
+          "function": {
+            "name": {
+              "de": "Gewerke",
+              "en": "Functions"
+            },
+            "tree": [
+              {
+                "id": "licht",
+                "name": "Licht"
+              },
+              {
+                "id": "heizung",
+                "name": "Heizung"
+              }
+            ]
+          },
+          "floor": {
+            "name": {
+              "de": "Etagen",
+              "en": "Floors"
+            },
+            "tree": []
+          }
+        }
+      },
+      "expect": {
+        "error": "unknown-path"
+      }
+    },
+    {
+      "op": "objects.query",
+      "enum": "room/eg",
+      "expect": {
+        "refs": [
+          "HmIP-RF.000A1B2C3D4E5F:4",
+          "HmIP-RF.0011223344AABB:1"
+        ]
+      }
+    },
+    {
+      "op": "import",
+      "document": {
+        "format": 2,
+        "revision": 0,
+        "objects": {},
+        "enums": {}
+      },
+      "expect": {
+        "error": "format-unsupported"
+      }
+    },
+    {
+      "op": "objects.bulk",
+      "set": {
+        "BidCos-RF.N1:1": {
+          "name": "Neu 1",
+          "enums": [
+            "room/og/bad"
+          ]
+        },
+        "BidCos-RF.N2:1": {
+          "name": "Neu 2"
+        }
+      },
+      "delete": [
+        "BidCos-RF.JEQ0230153"
+      ],
+      "expect": {
+        "ok": true,
+        "revision": 2
+      }
+    },
+    {
+      "op": "objects.bulk",
+      "set": {
+        "BidCos-RF.N3:1": {
+          "name": "Neu 3",
+          "enums": [
+            "room/nowhere"
+          ]
+        }
+      },
+      "delete": [],
+      "expect": {
+        "error": "unknown-path"
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "BidCos-RF.N3:1",
+      "expect": {
+        "error": "unknown-object"
+      }
+    },
+    {
+      "op": "import",
+      "document": {
+        "format": 1,
+        "revision": 0,
+        "objects": {
+          "BidCos-RF.M:1": {
+            "name": "Merged"
+          }
+        },
+        "enums": {
+          "zone": {
+            "name": {
+              "en": "Zones"
+            },
+            "tree": [
+              {
+                "id": "a",
+                "name": "A"
+              }
+            ]
+          }
+        }
+      },
+      "mode": "merge",
+      "expect": {
+        "ok": true,
+        "revision": 3
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "BidCos-RF.N1:1",
+      "expect": {
+        "value": {
+          "name": "Neu 1"
+        }
+      }
+    },
+    {
+      "op": "objects.query",
+      "enum": "zone/a",
+      "expect": {
+        "refs": []
+      }
+    },
+    {
+      "op": "events.since",
+      "since": 0,
+      "expect": {
+        "kinds": [
+          "import",
+          "object.updated",
+          "object.updated",
+          "object.deleted",
+          "import"
+        ]
+      }
+    },
+    {
+      "op": "events.since",
+      "since": -5,
+      "expect": {
+        "resync": true
+      }
+    }
+  ],
+  "end": {
+    "revision": 3
+  }
+}

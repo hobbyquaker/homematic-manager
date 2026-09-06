@@ -9,3 +9,8 @@ out/
 package-lock.json
 ROADMAP.md
 Readme.md
+
+# openccu-lite's conformance corpus (their D-16): a verbatim copy of another repository's
+# fixtures/, refreshed by scripts/sync-meta-fixtures.mjs. Reformatting it would make every refresh
+# a diff of whitespace and hide the change that matters.
+packages/core/test/fixtures/meta/

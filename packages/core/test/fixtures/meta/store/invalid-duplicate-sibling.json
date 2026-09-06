@@ -1,0 +1,23 @@
+{
+  "_reason": "duplicate-id",
+  "format": 1,
+  "revision": 3,
+  "objects": {},
+  "enums": {
+    "room": {
+      "name": {
+        "en": "Rooms"
+      },
+      "tree": [
+        {
+          "id": "eg",
+          "name": "A"
+        },
+        {
+          "id": "eg",
+          "name": "B"
+        }
+      ]
+    }
+  }
+}

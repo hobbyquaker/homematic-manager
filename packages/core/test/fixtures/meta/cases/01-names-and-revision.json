@@ -1,0 +1,104 @@
+{
+  "title": "Setting names bumps the revision by one per write; a no-op does not",
+  "start": "empty",
+  "ops": [
+    {
+      "op": "object.set",
+      "ref": "BidCos-RF.JEQ0230153:1",
+      "body": {
+        "name": "Heizung Bad"
+      },
+      "expect": {
+        "ok": true,
+        "revision": 1
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "BidCos-RF.JEQ0230153:1",
+      "body": {
+        "name": "Heizung Bad"
+      },
+      "expect": {
+        "ok": true,
+        "unchanged": true
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "BidCos-RF.JEQ0230153:1",
+      "body": {
+        "name": "  Heizung Bad  "
+      },
+      "expect": {
+        "ok": true,
+        "unchanged": true
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "BidCos-RF.JEQ0230153:1",
+      "body": {
+        "name": "Thermostat Bad"
+      },
+      "expect": {
+        "ok": true,
+        "revision": 2
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "BidCos-RF.JEQ0230153:1",
+      "expect": {
+        "value": {
+          "name": "Thermostat Bad"
+        }
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "BidCos-RF.NOPE:1",
+      "expect": {
+        "error": "unknown-object"
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "BidCos-RF.X:1",
+      "body": {
+        "name": ""
+      },
+      "expect": {
+        "error": "invalid-name"
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "BidCos-RF.X:1",
+      "body": {
+        "name": "a\nb"
+      },
+      "expect": {
+        "error": "invalid-name"
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "noseparator",
+      "body": {
+        "name": "x"
+      },
+      "expect": {
+        "error": "invalid-ref"
+      }
+    }
+  ],
+  "end": {
+    "revision": 2,
+    "objects": {
+      "BidCos-RF.JEQ0230153:1": {
+        "name": "Thermostat Bad"
+      }
+    }
+  }
+}

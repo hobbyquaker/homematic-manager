@@ -20,7 +20,9 @@ about every half hour while the agent works; the timestamp above is the last ref
 - Branch `master` since the beta (D-38, 2026-09-06): the full history, no squashing; `3.0-dev` is
   left behind at the same commits. Push `master` from WSL after each archived task or feature
   batch; nothing on it is secret. The public release `v3.0.0-beta.0` exists; the version on
-  `master` is `3.0.0-beta.3`, tagged `v3.0.0-beta.3` (task 24).
+  `master` is `3.0.0-beta.4`, tagged `v3.0.0-beta.4` (task 24). `v3.0.0-beta.3` built its addon,
+  Electron and Docker artefacts but failed CI and the npm publish on a defect of its own (a store
+  that kept loading after `Backend.stop()`); beta.4 is that fix and is the tag to release.
 - **Task 24 (D-40, 2026-09-06) is in and archived**: the metadata store. Rooms, functions and
   floors as data in the profile, and on openccu-lite (the CCU firmware without ReGaHSS) names and
   taxonomy from the box, written back through its API, with the addon's login taking the session

@@ -83,6 +83,13 @@ undefined` and the rule is written down where it can be read.
 - **A credential that arrives later needs a nudge.** On the box the addon has no credential until
   someone opens the page; the provider now re-reads and wakes its event loop when the session
   changes, which took the first names from "after the backoff" to "at once".
+- **`stop()` did not stop the store.** The detection is not awaited by the connect, on purpose;
+  `#disconnect()` waited for it but `Backend.stop()` did not, so a store that finished loading
+  after a caller had already deleted its profile directory applied its names, asked for a cache
+  write and put the directory back. It showed up in CI as three `ENOTEMPTY` failures in suites
+  that have nothing to do with metadata — the local run had not hit it because the probe there
+  answers before the test ends. `v3.0.0-beta.4` is that fix, with a regression test that fails
+  without it and a short detection timeout for the simulator harness.
 - **The document must be visible only with the notification.** The provider updated its document
   and told the backend one `await` later (the cache write sat in between), so a reader could see a
   change nobody had announced. It made the integration test flaky, which is the good outcome.

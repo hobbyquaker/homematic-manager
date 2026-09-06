@@ -6,6 +6,13 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [3.0.0-beta.4] — 2026-09-06
+
+- **Fixed:** stopping the backend did not wait for the metadata detection, so a store that
+  finished loading afterwards could write a cache file back into a profile directory its owner had
+  already deleted. Nothing a user would have seen, everything CI saw: three unrelated suites failed
+  with `ENOTEMPTY` on 3.0.0-beta.3, whose npm package was therefore never published.
+
 ## [3.0.0-beta.3] — 2026-09-06
 
 Rooms and functions, and openccu-lite (D-40, task 24).

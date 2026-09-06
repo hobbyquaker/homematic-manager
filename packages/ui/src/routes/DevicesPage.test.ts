@@ -49,8 +49,13 @@ describe('the device grid columns', () => {
         expect(row.textContent).toContain('MASTER');
     });
 
-    it('draws a device image placeholder when no host serves one', async () => {
+    it('asks the web host route for the picture without an Electron bridge, and degrades when it 404s', async () => {
         await mountApp({hash: '#/BidCos-RF/devices'});
+        const image = screen.getByTestId('device-image-MEQ0123456');
+        expect(image.tagName).toBe('IMG');
+        expect(image.getAttribute('src')).toBe('images/HM-LC-Sw1-Pl-CT-R1');
+        // demo mode has no images route: the 404 turns the cell into the labelled placeholder
+        await fireEvent.error(image);
         const placeholder = screen.getByTestId('device-image-MEQ0123456');
         expect(placeholder.tagName).toBe('SPAN');
         expect(placeholder.getAttribute('aria-label')).toBe('HM-LC-Sw1-Pl-CT-R1');

@@ -12,6 +12,7 @@ import type {RpcProtocol, UserDefinedInterface} from '../interfaces/table.js';
 import type {ParamsetDescription} from '../paramset/description.js';
 import type {Paramset, ParamsetWrite, RpcWriteValue} from '../rpc/values.js';
 import type {LanguageChoice} from '../data/types.js';
+import type {MetaDocument, MetaEnum, MetaImportMode, MetaNodePatch} from '../meta/types.js';
 
 /** Any value an interface process returns: XML-RPC / BIN-RPC scalars, arrays and structs. */
 export type RpcValue = boolean | number | string | RpcValue[] | {[key: string]: RpcValue};
@@ -35,6 +36,35 @@ export interface ConnectionConfig {
     auth?: {user: string; password: string};
     /** ReGa is optional (D-2): names come from ReGa when present, else from the local store. */
     rega: boolean;
+    /**
+     * D-40: where names, rooms and functions come from.
+     *
+     * `auto` (the default, and what every existing profile means) probes
+     * `GET /api/meta/v1/version` on the configured host once per connect: an openccu-lite box
+     * answers and its store is used, a CCU answers 404 and nothing changes. `local` never probes
+     * and keeps everything in this profile; `occulite` insists on the box and says so when it is
+     * not there, which is what a user behind a proxy that swallows the probe needs.
+     *
+     * There is deliberately no `rega` value here. ReGa supplies *names* and is switched on with
+     * `rega` above, exactly as before; a box either has ReGa or the metadata API, never both.
+     */
+    metaProvider?: MetaProviderChoice;
+    /**
+     * The API token for the metadata store, for an installation that is **not** on the box.
+     *
+     * Created on the box's Users page (`olt_…`, role `user` reads, `admin` also writes) and stored
+     * like any other credential here. On the box itself this stays empty: the addon reads the local
+     * token from `/usr/local/etc/occulite/local-token` for reads and uses the session of whoever
+     * opened the page for writes.
+     */
+    metaToken?: string;
+    /**
+     * The box's base URL, when it is not `http(s)://<host>`.
+     *
+     * For a reverse proxy on another port and for the integration tests. Empty means "derive it
+     * from `host`, `tls` and `local`", which is what every real installation wants.
+     */
+    metaUrl?: string;
     /** Address and ports the interface processes call back to; `0` picks free ports. */
     callback: {ip: string; xmlrpcPort: number; binrpcPort: number};
     /**
@@ -192,6 +222,70 @@ export interface RegaState {
 
 /** Friendly names: address -> name (devices and channels), from ReGa or the local store. */
 export type NameMap = Record<string, string>;
+
+/** D-40: which metadata provider a profile asks for. */
+export type MetaProviderChoice = 'auto' | 'local' | 'occulite';
+
+/** The three values of {@link MetaProviderChoice} as a runtime list, for validation and a select. */
+export const META_PROVIDERS: readonly MetaProviderChoice[] = Object.freeze(['auto', 'local', 'occulite']);
+
+/**
+ * D-40: which store the names, rooms and functions come from, and whether it can be written.
+ *
+ * Shown next to the ReGa indicator, and for the same reason: a user has to be able to see where the
+ * name in the grid came from before they wonder why renaming it did not change anything in the
+ * other application.
+ */
+export interface MetaState {
+    /** `local` is this profile's own store, `occulite` an openccu-lite box. */
+    provider: 'local' | 'occulite';
+    /** For `occulite`: the box answered. Always true for `local`. */
+    reachable: boolean;
+    /**
+     * Writes are accepted.
+     *
+     * False on a box whose credential only has the `user` role - the local token of an addon, or a
+     * read-only API token - which is a normal state and not an error: the names are shown, the
+     * rename button says why it cannot be used.
+     */
+    writable: boolean;
+    /** The store's revision; `0` for a fresh one. */
+    revision: number;
+    /** How many devices and channels the store knows. */
+    objects: number;
+    /** `occulited 0.1.0`, from `/api/meta/v1/version`. */
+    implementation?: string;
+    /** The base URL the provider talks to, for the settings dialog and the log. */
+    url?: string;
+    error?: string;
+}
+
+/**
+ * One device or channel as the UI shows it: the name, the paths it is a member of, and those paths
+ * as the arrays of names every consumer of ReGa's rooms and functions has always been given.
+ *
+ * Keyed by **ref** (`<interface>.<address>`), not by address: the metadata store's identity is the
+ * ref, and two interfaces may in principle report the same address. `makeRef(interfaceName,
+ * address)` builds one.
+ */
+export interface MetaObjectView {
+    name: string;
+    /** Node paths, e.g. `room/eg/wohnzimmer`. */
+    enums: string[];
+    /** The names of the `room` nodes it belongs to, in tree order. */
+    rooms: string[];
+    /** The same for `function`. */
+    functions: string[];
+    /** The box says the address is no longer reported by any interface. */
+    orphaned?: boolean;
+}
+
+/** Everything the UI needs about the store in one answer: the state, the trees and the objects. */
+export interface MetaSnapshot {
+    state: MetaState;
+    enums: Record<string, MetaEnum>;
+    objects: Record<string, MetaObjectView>;
+}
 
 export interface LinkRecord {
     SENDER: string;
@@ -443,6 +537,63 @@ export interface ApiMethods {
     'names.get': {params: []; result: NameMap};
     'names.set': {params: [entries: Array<{address: string; name: string}>]; result: NameMap};
 
+    /*
+     * D-40: the metadata store - names, rooms, functions and any other taxonomy the user made.
+     *
+     * Every one of these works with both providers. With `local` they change this profile's own
+     * store; with `occulite` they are written through the box's metadata API, because on
+     * openccu-lite this application *is* the editor of that store. A write that the credential is
+     * not allowed to make rejects with `kind: 'validation'` and the API's own message rather than
+     * being hidden - the user has to know that their rename went nowhere.
+     */
+    'meta.state': {params: []; result: MetaState};
+    /** The state, the trees and every object in one answer; what the UI asks for on connect. */
+    'meta.get': {params: []; result: MetaSnapshot};
+    /** Every taxonomy with its tree. */
+    'meta.enums': {params: []; result: Record<string, MetaEnum>};
+    /** Every device and channel the store knows, keyed by ref. */
+    'meta.objects': {params: []; result: Record<string, MetaObjectView>};
+    /** The membership of one object: the complete list of paths it should have afterwards. */
+    'meta.setMembership': {params: [entries: Array<{ref: string; paths: string[]}>]; result: null};
+    /**
+     * The interaction that matters: select rows in the grid, assign them to a room.
+     *
+     * `on: false` takes them out of it again. One revision for the whole selection, so a consumer
+     * of the change stream sees one change and not forty.
+     */
+    'meta.assign': {params: [refs: string[], path: string, on: boolean]; result: null};
+    /** A new taxonomy beside `room`, `function` and `floor`. */
+    'meta.enum.create': {params: [id: string, name: Record<string, string>]; result: null};
+    'meta.enum.update': {params: [id: string, name: Record<string, string>]; result: null};
+    /** Refused while it has members unless `detach` is true; the UI lists them first. */
+    'meta.enum.delete': {params: [id: string, detach?: boolean]; result: null};
+    /**
+     * A node - a room, a floor, a function. The id is derived from the name and is stable
+     * afterwards; the answer is the path the node got.
+     */
+    'meta.node.create': {
+        params: [
+            enumId: string,
+            /**
+             * The parent node's path, or **absent** for a node at the root of the taxonomy.
+             *
+             * Absent and not `null`: the backend turns a `null` parameter into `undefined` because
+             * the two transports disagree about which of them an omitted argument becomes
+             * (`JSON.stringify` writes `null`, structured clone keeps `undefined`), so no method of
+             * this contract may give `null` a meaning of its own.
+             */
+            parent: string | undefined,
+            name: string,
+            options?: {icon?: string; position?: number},
+        ];
+        result: string;
+    };
+    'meta.node.update': {params: [path: string, patch: MetaNodePatch]; result: null};
+    'meta.node.delete': {params: [path: string, detach?: boolean]; result: null};
+    /** The whole document, for a backup or a move between installations. */
+    'meta.export': {params: []; result: MetaDocument};
+    'meta.import': {params: [document: unknown, mode?: MetaImportMode]; result: null};
+
     'paramset.get': {params: [interfaceName: string, address: string, paramset: string]; result: Paramset};
     'paramset.description': {
         params: [interfaceName: string, address: string, paramset: string];
@@ -550,6 +701,12 @@ export interface ApiEvents {
     'rega.changed': RegaState;
     'devices.changed': {interfaceName: string; kind: 'new' | 'deleted' | 'replaced' | 'refreshed'; addresses: string[]};
     'names.changed': NameMap;
+    /** D-40: the provider, its reachability and whether it takes writes. */
+    'meta.changed': MetaState;
+    /** D-40: a taxonomy or a node was created, renamed, moved or deleted. */
+    'meta.enums.changed': Record<string, MetaEnum>;
+    /** D-40: an object's name or membership changed - on the box, possibly by somebody else. */
+    'meta.objects.changed': Record<string, MetaObjectView>;
     'rpc.event': EventRecord;
     'serviceMessages.changed': ServiceMessage[];
     'writeLog.appended': WriteLogEntry;
@@ -605,6 +762,9 @@ const API_EVENT_FLAGS = {
     'rega.changed': true,
     'devices.changed': true,
     'names.changed': true,
+    'meta.changed': true,
+    'meta.enums.changed': true,
+    'meta.objects.changed': true,
     'rpc.event': true,
     'serviceMessages.changed': true,
     'writeLog.appended': true,
@@ -614,5 +774,5 @@ const API_EVENT_FLAGS = {
     notice: true,
 } as const satisfies Record<ApiEventName, true>;
 
-/** The ten event names of {@link ApiEvents}, in the order the contract declares them. */
+/** Every event name of {@link ApiEvents}, in the order the contract declares them. */
 export const API_EVENT_NAMES: readonly ApiEventName[] = Object.freeze(Object.keys(API_EVENT_FLAGS) as ApiEventName[]);

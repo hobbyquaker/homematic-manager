@@ -448,8 +448,15 @@ describe('the context menu', () => {
         await waitFor(() => {
             expect(screen.getByTestId('links-table')).toBeTruthy();
         });
-        // the filter box of the links grid carries the address, and the store's hand-over is clear
+        // The links grid is narrowed to that channel, and the store's hand-over is clear again.
         expect(stores.app.linksFilter).toBe('');
+
+        // Task 20 took the tab-wide filter box away, so the hand-over shows itself as a chip in
+        // the header band - a filter nobody can see and nobody can undo would be a trap.
+        const chip = await waitFor(() => screen.getByTestId('links-filter-handover'));
+        expect(chip.textContent).toContain(linked);
+        await fireEvent.click(chip);
+        expect(screen.queryByTestId('links-filter-handover')).toBeNull();
     });
 
     it('opens the delete dialog from the menu', async () => {

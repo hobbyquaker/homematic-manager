@@ -33,7 +33,14 @@
     const interfaceName = $derived(stores.app.selectedInterface);
     const interfaceType = $derived(stores.interfaces.typeOf(interfaceName));
 
-    /** #25: "show the links of this channel" hands the address over through the app store. */
+    /**
+     * #25: "show the links of this channel" hands the address over through the app store.
+     *
+     * It is the one filter that is not a column field: it means sender **or** receiver, which no
+     * single column expresses. Since task 20 took the tab-wide filter box away, the hand-over shows
+     * itself as a chip in the header band instead, and clicking the chip clears it - a filter the
+     * user cannot see and cannot undo would be worse than the box that is gone.
+     */
     $effect(() => {
         const handover = stores.app.linksFilter;
         if (handover !== '') {
@@ -231,6 +238,15 @@
             {/snippet}
 
             {#snippet status()}
+                {#if tableFilter !== ''}
+                    <button
+                        type="button"
+                        class="hmm-links-handover"
+                        data-testid="links-filter-handover"
+                        title={t('Filter')}
+                        onclick={() => (tableFilter = '')}>{tableFilter} ✕</button
+                    >
+                {/if}
                 {#if defective > 0}
                     <span class="hmm-links-defective" data-testid="links-defective"
                         >{t('{count} defective links', {}, defective)}</span
@@ -301,6 +317,17 @@
 
     .hmm-links-defective {
         color: var(--hmm-error);
+    }
+
+    .hmm-links-handover {
+        border: 1px solid var(--hmm-border);
+        border-radius: var(--hmm-radius);
+        background: var(--hmm-accent-bg);
+        color: var(--hmm-fg);
+        font: inherit;
+        line-height: 1;
+        padding: 2px 6px;
+        cursor: pointer;
     }
 
     .hmm-link-broken {

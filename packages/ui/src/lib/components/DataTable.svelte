@@ -4,6 +4,7 @@
     import {
         buildRows,
         cellText,
+        isFilterable,
         isSortable,
         nextSelection,
         tableLayout,
@@ -31,8 +32,8 @@
         /** Fixed body height. Without one the body fills its parent and is measured. */
         height?: number | undefined;
         overscan?: number;
-        /** Show the single filter box in the header band. */
-        filterBox?: boolean;
+        /** Show the per-column filter row under the column labels, as the 2.x filter toolbar did. */
+        columnFilterRow?: boolean;
         caption?: string | undefined;
         emptyText?: string;
         filterLabel?: string;
@@ -49,6 +50,14 @@
         countText?: string | undefined;
         selected?: string[];
         expanded?: string[];
+        /**
+         * The needle every filterable column is searched for, on top of the per-column fields.
+         *
+         * No control draws it any more (task 20: the maintainer's second look removed the tab-wide
+         * "filter everything" box). It stays because one workflow sets it from outside: #25 opens
+         * the Links tab already narrowed to a channel, and there is no per-column field that means
+         * "sender **or** receiver".
+         */
         filter?: string;
         sort?: SortState | undefined;
         /** Double click, or Enter on the focused row. */
@@ -69,7 +78,7 @@
         rowHeight = 26,
         height = undefined,
         overscan = 6,
-        filterBox = true,
+        columnFilterRow = true,
         caption = undefined,
         emptyText = '',
         filterLabel = 'Filter',
@@ -87,13 +96,14 @@
         testId = undefined,
     }: Props = $props();
 
+    let columnFilters = $state<Record<string, string>>({});
     let scrollTop = $state(0);
     let measuredHeight = $state(0);
     let focusIndex = $state(0);
     /**
-     * Width of the body's vertical scrollbar. The head is a sibling of the scrolling body, so
-     * without this the proportional columns of the head would be a scrollbar wider than the
-     * columns of the rows as soon as a device is expanded and the body scrolls.
+     * Width of the body's vertical scrollbar. The head and the filter row are siblings of the
+     * scrolling body, so without this the proportional columns of the head would be a scrollbar
+     * wider than the columns of the rows as soon as a device is expanded and the body scrolls.
      */
     let gutter = $state(0);
     let anchorId = $state<string | undefined>(undefined);
@@ -103,9 +113,9 @@
     const visibleSubColumns = $derived((subColumns ?? columns).filter((column) => column.hidden !== true));
     const hasExpander = $derived(subRows !== undefined);
     /**
-     * One template for the whole table (D-34). The head, the device rows and the channel
-     * sub-grid all sit on the same tracks, so a column never moves when a device is expanded
-     * and the sub-grid stands under the columns it belongs to.
+     * One template for the whole table (D-34). The head, the filter row, the device rows and the
+     * channel sub-grid all sit on the same tracks, so a column never moves when a device is
+     * expanded and the sub-grid stands under the columns it belongs to.
      */
     const layout = $derived(tableLayout(columns, subColumns, hasExpander));
     const template = $derived(layout.template);
@@ -116,7 +126,7 @@
      * the row underneath. It is part of the head, so it stays put while the body scrolls.
      */
     const hasBand = $derived(
-        caption !== undefined || filterBox || toolbar !== undefined || status !== undefined || countText !== undefined,
+        caption !== undefined || toolbar !== undefined || status !== undefined || countText !== undefined,
     );
     const selectedSet = $derived(new Set(selected));
 
@@ -128,6 +138,7 @@
             children: subRows,
             expanded: expandedSet,
             globalFilter: filter,
+            columnFilters,
             sort,
             subColumns,
             subHeader: subColumns !== undefined,
@@ -285,15 +296,6 @@
                     {@render toolbar()}
                 </div>
             {/if}
-            {#if filterBox}
-                <input
-                    class="hmm-input hmm-table-filter"
-                    type="search"
-                    bind:value={filter}
-                    placeholder={filterLabel}
-                    aria-label={filterLabel}
-                />
-            {/if}
             <div class="hmm-table-trailing">
                 {#if status}{@render status()}{/if}
                 {#if countText !== undefined}
@@ -347,6 +349,30 @@
                 </div>
             {/each}
         </div>
+
+        {#if columnFilterRow}
+            <div class="hmm-table-filters" style:grid-template-columns={template} style:padding-right={`${gutter}px`}>
+                {#if hasExpander}<div class="hmm-tf-spacer"></div>{/if}
+                {#each visibleColumns as column (column.key)}
+                    <div class="hmm-tf" style:grid-column={layout.track[column.key]}>
+                        {#if isFilterable(column)}
+                            <input
+                                class="hmm-input hmm-tf-input"
+                                type="search"
+                                aria-label={`${filterLabel}: ${column.label}`}
+                                value={columnFilters[column.key] ?? ''}
+                                oninput={(event) => {
+                                    columnFilters = {
+                                        ...columnFilters,
+                                        [column.key]: event.currentTarget.value,
+                                    };
+                                }}
+                            />
+                        {/if}
+                    </div>
+                {/each}
+            </div>
+        {/if}
 
         <div
             class="hmm-table-body"
@@ -460,10 +486,6 @@
         gap: 2px;
     }
 
-    .hmm-table-filter {
-        width: 220px;
-    }
-
     /* `margin-left: auto` rather than a spacer: the count sits on the right edge of the band
        whatever the actions on the left add up to. */
     .hmm-table-trailing {
@@ -488,7 +510,8 @@
         outline-offset: -2px;
     }
 
-    .hmm-table-head {
+    .hmm-table-head,
+    .hmm-table-filters {
         display: grid;
         background: var(--hmm-header-bg);
         border-bottom: 1px solid var(--hmm-border);
@@ -527,6 +550,16 @@
 
     .hmm-th-sort {
         font-size: var(--hmm-font-size-small);
+    }
+
+    .hmm-tf {
+        padding: 3px 4px;
+        min-width: 0;
+    }
+
+    .hmm-tf-input {
+        width: 100%;
+        height: 20px;
     }
 
     .hmm-table-body {

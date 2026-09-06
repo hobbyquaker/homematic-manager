@@ -81,21 +81,17 @@ describe('filtering', () => {
         expect(matchesText('HM-LC-Sw1', 'dim')).toBe(false);
     });
 
-    it("matches the table's one filter box against every filterable column", () => {
-        expect(matchesFilters(rows[0]!, columns, 'küche')).toBe(true);
-        expect(matchesFilters(rows[0]!, columns, 'MEQ')).toBe(true);
-        expect(matchesFilters(rows[0]!, columns, 'nothing')).toBe(false);
-        expect(matchesFilters(rows[0]!, columns, '   ')).toBe(true);
+    it('matches the global filter against every filterable column', () => {
+        expect(matchesFilters(rows[0]!, columns, 'küche', {})).toBe(true);
+        expect(matchesFilters(rows[0]!, columns, 'MEQ', {})).toBe(true);
+        expect(matchesFilters(rows[0]!, columns, 'nothing', {})).toBe(false);
+        expect(matchesFilters(rows[0]!, columns, '   ', {})).toBe(true);
     });
 
-    /**
-     * Task 20 removed the per-column inputs; `filterable: false` still means "the box does not
-     * search this column", which is what keeps an action column out of every result.
-     */
-    it('never searches a column that opted out of the filter', () => {
-        const row = {...rows[0]!, actions: 'delete'} as unknown as Row;
-        expect(matchesFilters(row, columns, 'delete')).toBe(false);
-        expect(matchesFilters(row, columns, 'Küche')).toBe(true);
+    it('applies every per-column filter, hidden columns included', () => {
+        expect(matchesFilters(rows[0]!, columns, '', {address: 'MEQ'})).toBe(true);
+        expect(matchesFilters(rows[0]!, columns, '', {address: 'JEQ'})).toBe(false);
+        expect(matchesFilters(rows[0]!, columns, '', {address: ''})).toBe(true);
     });
 });
 
@@ -138,14 +134,14 @@ describe('buildRows', () => {
         expect(flat.map((row) => row.id)).toEqual(['JEQ0000003']);
     });
 
-    it('finds nothing when neither a row nor one of its children matches', () => {
+    it('applies a column filter and finds nothing when it does not match', () => {
         const flat = buildRows({
             rows,
             columns,
             getId,
             children: subRows,
             expanded: new Set(),
-            globalFilter: 'ZZZ',
+            columnFilters: {address: 'ZZZ'},
         });
         expect(flat).toEqual([]);
     });
@@ -336,9 +332,8 @@ describe('per-depth columns', () => {
         expect(flat.map((row) => row.id)).toEqual(['MEQ0000002', 'MEQ0000001', 'JEQ0000003']);
     });
 
-    it('filters a channel through the sub-columns', () => {
-        // The channel matches through the sub-grid's own ADDRESS column; its device matches
-        // nothing, and is kept because a child of it does.
+    it('filters a channel through the sub-columns, not through the device columns', () => {
+        // `version` is a device column only; the channel matches through the sub-columns' ADDRESS.
         const flat = buildRows({
             rows,
             columns,
@@ -346,7 +341,7 @@ describe('per-depth columns', () => {
             children: subRows,
             expanded: new Set(),
             subColumns,
-            globalFilter: 'MEQ0000002:1',
+            columnFilters: {address: 'MEQ0000002:1'},
         });
         expect(flat.map((row) => row.id)).toEqual(['MEQ0000002']);
     });

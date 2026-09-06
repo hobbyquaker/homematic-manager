@@ -2,8 +2,9 @@
  * The table header of task 20, measured on the real tabs (the maintainer's second look at
  * `3.0.0-dev.3`):
  *
- * - the per-column filter fields are gone. Every tab has exactly one filter box per table, and the
- *   header rows carry column labels and nothing else.
+ * - the per-column filter fields are what a grid filters with, and the tab-wide "filter everything"
+ *   box above them is gone. So the header band draws no filter input, and the row under the column
+ *   labels draws one per filterable column.
  * - the tab's toolbar is gone as a strip above the grid. Its actions are the left half of the
  *   table's header band, the row count is the right end of the same band, and the column labels
  *   are the row underneath it.
@@ -20,29 +21,47 @@ import {mountApp} from '../testHarness.js';
 
 const hasLayout = document.body.getBoundingClientRect().width > 0;
 
-/** The tab, the route it lives on, and the tables it draws. */
+/** The tab, the route it lives on, and the tables it draws that filter per column. */
 const TABS: readonly [name: string, hash: string, tables: readonly string[]][] = [
     ['Devices', '#/BidCos-RF/devices', ['devices-table']],
     ['Links', '#/HmIP-RF/links', ['links-table']],
-    ['Radio', '#/BidCos-RF/rssi', ['radio-gateways', 'radio-table']],
+    ['Radio', '#/BidCos-RF/rssi', ['radio-table']],
     ['Service messages', '#/BidCos-RF/messages', ['messages-table']],
     ['Events', '#/BidCos-RF/events', ['events-table']],
 ];
 
-describe('no per-column filter fields in a table header', () => {
+describe('a table filters per column, and has no box that filters everything', () => {
     it.each(TABS)('%s', async (_name, hash, tables) => {
         await mountApp({transport: new MockTransport({demo: true}), hash});
 
         for (const testId of tables) {
             const table = screen.getByTestId(testId);
-            expect(table.querySelectorAll('[role="columnheader"] input')).toHaveLength(0);
-            expect(table.querySelector('.hmm-table-filters')).toBeNull();
-            // Every remaining input of the table is in its header band, above the column labels.
-            const head = table.querySelector('.hmm-table-head')!;
-            for (const input of table.querySelectorAll('input')) {
-                expect(head.contains(input)).toBe(false);
-            }
+            expect(table.querySelectorAll('.hmm-table-filters input').length).toBeGreaterThan(0);
+            // The tab-wide box is gone: nothing the DataTable itself draws sits in the band.
+            expect(table.querySelector('.hmm-table-filter')).toBeNull();
+            expect(table.querySelector('.hmm-table-band .hmm-tf-input')).toBeNull();
         }
+    });
+
+    /**
+     * The RSSI tab's gateway list is three rows in 110 px and always has been unfiltered; the
+     * device table underneath it is the one with the fields.
+     */
+    it('leaves the gateway list of the RSSI tab without a filter row', async () => {
+        await mountApp({transport: new MockTransport({demo: true}), hash: '#/BidCos-RF/rssi'});
+        expect(screen.getByTestId('radio-gateways').querySelector('.hmm-table-filters')).toBeNull();
+    });
+
+    /**
+     * The Events tab keeps the two named boxes 2.x had - ADDRESS and PARAM over core's event
+     * filter. They are not the "filter everything" box; they are the tab's own controls, and they
+     * are now part of the header band.
+     */
+    it('keeps the two named event filters, in the band', async () => {
+        await mountApp({transport: new MockTransport({demo: true}), hash: '#/BidCos-RF/events'});
+        const band = screen.getByTestId('events-table').querySelector('.hmm-table-band')!;
+        expect(band.contains(screen.getByTestId('events-filter-address'))).toBe(true);
+        expect(band.contains(screen.getByTestId('events-filter-datapoint'))).toBe(true);
     });
 });
 

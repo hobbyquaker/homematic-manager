@@ -37,7 +37,14 @@ const workspaceDirs = (patterns) =>
 // fails with a 404 on a package that was never published.
 const previous = readPackage(root).version;
 
-execFileSync(npm, ['version', 'prerelease', '--preid', 'dev', '--no-git-tag-version'], {
+// Without an argument the prerelease counter moves and the preid stays what it is (dev stays dev,
+// beta stays beta: `npm version prerelease --preid dev` on a beta would fall back to dev.0). With
+// an explicit version (`node scripts/version-dev.mjs 3.0.0-beta.0`) that version is set, which is
+// how the step from dev to alpha, beta and 3.0.0 is taken (D-18).
+const requested = process.argv[2];
+const currentPreid = /-([a-z]+)\./.exec(readPackage(root).version)?.[1] ?? 'dev';
+const versionArgs = requested ? [requested] : ['prerelease', '--preid', currentPreid];
+execFileSync(npm, ['version', ...versionArgs, '--no-git-tag-version'], {
     cwd: root,
     stdio: 'inherit',
 });

@@ -74,12 +74,11 @@ workspace package.
 npm run version:dev            # 3.0.0-dev.n  -> 3.0.0-dev.n+1
 ```
 
-For the step from dev to alpha or beta, `npm version` does it directly and `version:dev` carries
-the new preid from then on:
+For the step from dev to alpha or beta the script takes the version as its argument and carries
+the new preid from then on (`npm run version:dev` on a beta gives the next beta):
 
 ```sh
-npm version prerelease --preid beta --no-git-tag-version   # 3.0.0-dev.n -> 3.0.0-beta.0
-node scripts/version-dev.mjs                               # propagate + refresh package-lock.json
+node scripts/version-dev.mjs 3.0.0-beta.0    # sets it everywhere and refreshes package-lock.json
 ```
 
 - [ ] `npm ci` still works afterwards (the workspace ranges are exact and move with the version;

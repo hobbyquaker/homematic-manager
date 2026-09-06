@@ -93,6 +93,19 @@ async function launch(userDataDir?: string): Promise<Launched> {
     collect(app);
     const page = await app.firstWindow({timeout: WINDOW_TIMEOUT_MS});
     await page.waitForLoadState('domcontentloaded');
+    // And then wait for the app to have finished starting, which is later than that.
+    //
+    // `loadFile()` resolves on `did-finish-load` and the window is shown on `ready-to-show`, both
+    // of them after `domcontentloaded`; a test that went on here caught the window before `show()`
+    // and, worse, closed the app in the middle of the load. That is assertion 1 failing with
+    // `isVisible()` false on all three runners of build.yml 34001069697, and the six
+    // `ERR_FAILED (-2) loading .../index.html` in the same trace - a load aborted by the quit the
+    // test had already asked for, not a load that failed.
+    await expect
+        .poll(async () => app.evaluate(({BrowserWindow}) => BrowserWindow.getAllWindows()[0]?.isVisible()), {
+            timeout: WINDOW_TIMEOUT_MS,
+        })
+        .toBe(true);
     return {app, page, userData};
 }
 
@@ -184,10 +197,12 @@ test.afterAll(async () => {
 });
 
 test('1: the window opens and is shown', async () => {
+    // `launch()` is what waits for it - every other assertion needs a window that is up as much as
+    // this one does, and a wait that only one test performs is a race the other eight still run.
+    // What is left here is the assertion itself: a window that is visible proves the renderer
+    // loaded rather than that the process merely started.
     const {app, page} = await launch();
     try {
-        // `ready-to-show` is what calls `show()`; a window that is visible proves the renderer
-        // loaded rather than that the process merely started.
         expect(await app.evaluate(({BrowserWindow}) => BrowserWindow.getAllWindows()[0]?.isVisible())).toBe(true);
         expect(await page.title()).toBe('Homematic Manager');
     } finally {

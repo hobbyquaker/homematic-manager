@@ -42,8 +42,11 @@ about every half hour while the agent works; the timestamp above is the last ref
   1082 tests, `npm run lint`, `npm run typecheck`.
 - In progress by background subagents (Opus), committing distinct commits on
   `master` in the shared working tree (each stages only its own files):
-  - none; tasks 21 and 22 are archived; the beta `3.0.0-beta.0` is cut from `master` (D-37): tag
-    `v3.0.0-beta.0`, four release workflows, draft release for the maintainer to publish.
+  - **Issue triage** (agent): comments, closes and keeps open every open issue and PR with the
+    footer that Claude wrote it on the maintainer's behalf.
+  - Tasks 21, 22 and 23 are archived; `v3.0.0-beta.0` is public (pre-release); master is at
+    `3.0.0-beta.2` and deployed to the x86_64 box; the npm publish of the beta waits for the
+    trusted-publisher fix on npmjs.com.
     The Electron investigation is archived (`roadmap-archive/task-11-electron-startup.md`):
     the quit no-op, the early smoke wait, the image scheme and the unpackaged data path are fixed
     at `3.0.0-dev.5`.

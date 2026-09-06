@@ -86,7 +86,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [20. UI second look](#20-ui-second-look) ✅
 - [21. Interface popup](#21-interface-popup) ✅
 - [22. UI third look and the beta](#22-ui-third-look-and-the-beta) ✅ UI part; beta cut 2026-09-06
-- [23. Settings dialog and the help menu](#23-settings-dialog-and-the-help-menu)
+- [23. Settings dialog and the help menu](#23-settings-dialog-and-the-help-menu) ✅
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
 
@@ -688,6 +688,9 @@ Maintainer, 2026-09-06, after the third look at `3.0.0-dev.6` on the lab box:
   the drafts and posts the announcement.
 
 ## 23. Settings dialog and the help menu
+
+Done 2026-09-06, report in `roadmap-archive/task-23.md`; also the page-scroll fix (the shell bounds itself to
+the viewport now).
 
 Maintainer, 2026-09-06, on `3.0.0-beta.1`:
 

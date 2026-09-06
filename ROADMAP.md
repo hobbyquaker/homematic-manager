@@ -81,6 +81,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [18. Addon login against ReGa](#18-addon-login-against-rega) ✅ (lab check pending)
 - [19. UI polish after the first look](#19-ui-polish-after-the-first-look) ✅
 - [20. UI second look](#20-ui-second-look) ✅
+- [21. Interface popup](#21-interface-popup)
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
 
@@ -130,6 +131,7 @@ Per task:
 | 18 Addon login against ReGa (D-32) | 2-3 | 12, 13 |
 | 19 UI polish after the first look (D-34) | 4-6 | 8, 10 |
 | 20 UI second look | 2-3 | 19 |
+| 21 Interface popup | 1-2 | 20 |
 
 ## 1. Legacy stopgap release 2.8 (dropped)
 
@@ -633,6 +635,26 @@ The maintainer's second look at the dev build on the x86_64 lab box (2026-09-06,
   Minimum sizes keep the content usable, the viewport bounds the maximum.
 
 Tests in browser mode for the three points; screenshots retaken.
+
+## 21. Interface popup
+
+Maintainer, 2026-09-06: the interface selector in the header becomes a popup instead of a
+standard dropdown, and the per-interface status marks leave the top bar and move into it.
+
+- The trigger in the header shows the selected interface and one summary mark (all connected,
+  something not connected, subscribing); the popup opens below it, closes on selection, Escape or
+  a click outside, and is keyboard-operable (arrow keys, Enter, focus returns to the trigger).
+- At the top of the popup: the host name or address of the CCU (from the connection config), with
+  the backend connection state.
+- One item per configured interface, much bigger than a dropdown row, with the same hover and
+  active styling as the menu bar tabs (D-34): the interface name as the label, the status mark
+  (green connected, "not present", "subscribing", red not connected) on the item, and a second
+  small line of information: protocol, port, TLS, and what else the state carries (device count
+  when known, duty cycle for the radio interfaces). The current selection is marked.
+- The `ConnectionIndicator` in the header shrinks to the summary mark; nothing else in the header
+  changes width or position when the state changes (task 19's rule).
+- Tests in browser mode: open/close/keyboard, the marks per state, the second line's content,
+  both themes for the colours (D-22); the demo data gets one interface in each state.
 
 ## Open questions
 

@@ -1,6 +1,6 @@
 {
   "name": "@homematic-manager/ccu-addon",
-  "version": "3.0.0-beta.1",
+  "version": "3.0.0-beta.2",
   "private": true,
   "type": "module",
   "description": "CCU3 / OpenCCU addon package of the Homematic Manager",

@@ -93,6 +93,14 @@ export interface InterfaceState {
     protocol: RpcProtocol;
     host: string;
     port: number;
+    /**
+     * The connection to this interface process is encrypted - the CCU's 42xxx ports.
+     *
+     * Only present when it is true, so the state of a plain installation stays the object it was.
+     * The interface popup shows it beside protocol and port, because the port number alone says it
+     * only to somebody who knows the CCU's port table by heart.
+     */
+    tls?: boolean;
     /** `init` succeeded and the ping/event watchdog is satisfied. */
     connected: boolean;
     /** Milliseconds since epoch of the last event or ping answer, if any. */

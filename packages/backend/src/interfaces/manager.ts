@@ -434,6 +434,8 @@ export class InterfaceManager {
                 protocol: resolved.protocol,
                 host: target.host,
                 port,
+                // Only when it is on: a plain installation's state stays the object it always was.
+                ...(resolved.tls ? {tls: true} : {}),
                 connected: false,
             },
         };

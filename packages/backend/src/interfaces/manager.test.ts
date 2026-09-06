@@ -171,6 +171,22 @@ describe('InterfaceManager.start', () => {
         expect(h.connected).toEqual(['BidCos-RF', 'HmIP-RF']);
     });
 
+    it('says in the state whether the interface is talked to over TLS (task 21)', async () => {
+        // The port alone does not say it: 42001 is a number, and the interface popup shows the
+        // encryption as a word beside protocol and port. Off is absent, not `false`, so the state
+        // of a plain installation is byte-identical to what it was before this field existed.
+        const plain = harness();
+        await plain.manager.start();
+        expect(plain.manager.states().map((state) => state.tls)).toEqual([undefined, undefined]);
+
+        const secure = harness({connection: {tls: true}});
+        await secure.manager.start();
+        expect(secure.manager.states().map((state) => [state.port, state.tls])).toEqual([
+            [42_001, true],
+            [42_010, true],
+        ]);
+    });
+
     it('keeps going when one interface refuses the subscription', async () => {
         const h = harness({
             answers: {'HmIP-RF': () => Object.assign(new Error('connect ECONNREFUSED'), {})},

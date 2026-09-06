@@ -122,9 +122,14 @@ describe('connectionFromLegacy', () => {
         expect(connection).toEqual({...defaultConnection(), host: 'ccu'});
     });
 
+    /**
+     * D-36: a 2.x configuration that names a language carries a real choice and is imported as one
+     * (the test above); one that does not leaves the field empty, and the UI then follows the
+     * browser. 2.x had no language setting at all in its first versions, so this is the common case.
+     */
     it('falls back for a language and a delay 2.x never had', () => {
         const connection = connectionFromLegacy({ccuAddress: 'ccu'}, defaultConnection());
-        expect(connection.language).toBe('de');
+        expect(connection.language).toBeUndefined();
         expect(connection.writePaceMs).toBe(defaultConnection().writePaceMs);
     });
 });

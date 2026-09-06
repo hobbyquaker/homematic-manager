@@ -7,8 +7,9 @@
  * application do not look like two different programs - D-3 applies to the door as well.
  *
  * German and English: the CCU's own WebUI is German, and this page sits in front of it. The
- * language comes from `?lang=` when the visitor picked one and from `Accept-Language` otherwise,
- * and the other one is always one link away. Everything on the page is in the chosen language;
+ * language comes from `?lang=` when the visitor picked one and from `Accept-Language` otherwise -
+ * the browser's first supported entry, with English behind it (D-36), so the door speaks the same
+ * language as the room. The other one is always one link away. Everything is in the chosen language;
  * nothing here needs `packages/core`'s catalogue, which lives in the bundle this page replaces.
  */
 
@@ -88,9 +89,17 @@ export function pickLanguage(requested: string | null | undefined, acceptLanguag
     if (requested === 'de' || requested === 'en') {
         return requested;
     }
-    // the CCU is a German appliance: German unless the browser clearly asks for English first
-    const first = (acceptLanguage ?? '').split(',')[0]?.trim().toLowerCase().split('-')[0];
-    return first === 'en' ? 'en' : 'de';
+    // D-36: the browser's own order decides, English behind it - the same rule the application
+    // itself follows. Until 3.0.0-dev.7 this was German unless the browser clearly asked for
+    // English, which put a German login page in front of an English UI for everyone else.
+    for (const entry of (acceptLanguage ?? '').split(',')) {
+        // `de-DE;q=0.9` -> `de`
+        const code = entry.split(';')[0]?.trim().toLowerCase().split('-')[0];
+        if (code === 'de' || code === 'en') {
+            return code;
+        }
+    }
+    return 'en';
 }
 
 /** The login page. One self-contained document - it is served while nothing else is. */

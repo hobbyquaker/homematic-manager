@@ -2,6 +2,7 @@ import {fireEvent, render, screen, waitFor, within} from '@testing-library/svelt
 import {beforeEach, describe, expect, it} from 'vitest';
 
 import App from '../App.svelte';
+import {browserLanguage} from '../lib/i18n/i18n.svelte.js';
 import type {StorageLike} from '../lib/stores/AppStore.svelte.js';
 import {createStores, type Stores} from '../lib/stores/Stores.svelte.js';
 import {DEMO_CONFIG} from '../lib/transport/demoData.js';
@@ -118,14 +119,35 @@ describe('ConfigDialog', () => {
         await waitFor(() => expect(transport.countOf('config.clearCaches')).toBe(1));
     });
 
-    it('applies a language change to the whole shell', async () => {
+    /**
+     * D-36, task 22: the switch lives here now, not in the header. Its first entry is the browser
+     * default; a language chosen here is stored in the profile and applied to the whole shell.
+     */
+    it('applies a language change to the whole shell and stores it in the profile', async () => {
         const stores = await open(transport);
-        const select = screen.getByText('Sprache').parentElement!.querySelector('select') as HTMLSelectElement;
+        const select = screen.getByTestId<HTMLSelectElement>('config-language');
+        expect([...select.options].map((option) => option.value)).toEqual(['auto', 'de', 'en']);
+        expect(select.value).toBe('de');
+
         await fireEvent.change(select, {target: {value: 'en'}});
         await fireEvent.click(screen.getByTestId('config-save'));
 
         await waitFor(() => expect(stores.i18n.language).toBe('en'));
+        expect(transport.lastCall('config.set')?.[0]?.language).toBe('en');
         expect(screen.getByRole('tab', {name: 'Devices'})).toBeTruthy();
+    });
+
+    it('hands the profile back to the browser when the first entry is chosen', async () => {
+        const stores = await open(transport);
+        await fireEvent.change(screen.getByTestId('config-language'), {target: {value: 'auto'}});
+        await fireEvent.click(screen.getByTestId('config-save'));
+
+        // `auto` is written down rather than left out: "I want the browser" is a choice, and it
+        // has to survive the next `config.get` (D-36).
+        await waitFor(() => expect(transport.lastCall('config.set')?.[0]?.language).toBe('auto'));
+        expect(stores.app.languageChoice).toBe('auto');
+        // and the shell is in whatever the browser running this test asks for
+        expect(stores.i18n.language).toBe(browserLanguage());
     });
 
     it('keeps the backend untouched when it is cancelled', async () => {

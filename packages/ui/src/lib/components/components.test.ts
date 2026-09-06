@@ -533,14 +533,31 @@ describe('ConnectionIndicator', () => {
 });
 
 describe('LanguageSwitch and ThemeSwitch', () => {
-    it('offers exactly de and en and reports a change', async () => {
+    /** D-36: the browser is the default and is an entry of its own, above the two languages. */
+    it('offers the browser default and exactly de and en, and reports a change', async () => {
         const onchange = vi.fn();
         render(LanguageSwitch, {props: {language: 'de', onchange}});
         const select = screen.getByLabelText<HTMLSelectElement>('Language');
-        expect([...select.options].map((option) => option.value)).toEqual(['de', 'en']);
+        expect([...select.options].map((option) => option.value)).toEqual(['auto', 'de', 'en']);
+        expect(select.value).toBe('de');
 
         await fireEvent.change(select, {target: {value: 'en'}});
         expect(onchange).toHaveBeenCalledExactlyOnceWith('en');
+    });
+
+    it('reports going back to the browser as a choice of its own', async () => {
+        const onchange = vi.fn();
+        render(LanguageSwitch, {props: {language: 'de', autoLabel: 'Sprache des Browsers', onchange}});
+        const select = screen.getByLabelText<HTMLSelectElement>('Language');
+        expect([...select.options][0]?.textContent).toBe('Sprache des Browsers');
+
+        await fireEvent.change(select, {target: {value: 'auto'}});
+        expect(onchange).toHaveBeenCalledExactlyOnceWith('auto');
+    });
+
+    it('stands on the browser default when nothing was chosen', () => {
+        render(LanguageSwitch, {});
+        expect(screen.getByLabelText<HTMLSelectElement>('Language').value).toBe('auto');
     });
 
     it('cycles the theme and labels itself through the caller’s translator', async () => {

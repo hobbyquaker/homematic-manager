@@ -40,11 +40,23 @@ describe('pickLanguage', () => {
         expect(pickLanguage('de', 'en-US,en;q=0.9')).toBe('de');
     });
 
-    it('falls back to the browser, and to German - the CCU is a German appliance', () => {
+    /**
+     * D-36: the browser's own order decides and English is the fallback - the same rule the
+     * application follows, so the door speaks the language of the room. Until 3.0.0-dev.7 this
+     * was German unless the browser clearly asked for English first.
+     */
+    it('falls back to the browser, and to English', () => {
         expect(pickLanguage(null, 'en-US,en;q=0.9')).toBe('en');
         expect(pickLanguage(undefined, 'de-DE,de;q=0.9')).toBe('de');
-        expect(pickLanguage(undefined, 'fr-FR')).toBe('de');
-        expect(pickLanguage('klingon', undefined)).toBe('de');
+        expect(pickLanguage(undefined, 'fr-FR')).toBe('en');
+        expect(pickLanguage('klingon', undefined)).toBe('en');
+    });
+
+    it('takes the first entry the page has rather than the first entry there is', () => {
+        // French first, German second: French is not offered here, German is what the user asked
+        // for next - and a `q` weight is part of the entry, not part of the language.
+        expect(pickLanguage(undefined, 'fr-FR,fr;q=0.9,de;q=0.8')).toBe('de');
+        expect(pickLanguage(undefined, 'de-AT')).toBe('de');
     });
 });
 
@@ -117,8 +129,8 @@ describe('parseLoginForm', () => {
     });
 
     it('answers an empty or missing body with empty fields rather than throwing', () => {
-        expect(parseLoginForm(undefined)).toEqual({user: '', password: '', language: 'de'});
-        expect(parseLoginForm('')).toEqual({user: '', password: '', language: 'de'});
+        expect(parseLoginForm(undefined)).toEqual({user: '', password: '', language: 'en'});
+        expect(parseLoginForm('')).toEqual({user: '', password: '', language: 'en'});
     });
 });
 

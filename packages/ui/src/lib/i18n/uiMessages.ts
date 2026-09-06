@@ -15,6 +15,8 @@ export const UI_MESSAGES: MessageCatalogue = {
     Filter: {de: 'Filter', en: 'Filter'},
     'Filter all columns': {de: 'Alle Spalten filtern', en: 'Filter all columns'},
     Language: {de: 'Sprache', en: 'Language'},
+    // D-36: the first entry of the language setting, and the default.
+    'Browser language': {de: 'Sprache des Browsers', en: 'Browser language'},
     Theme: {de: 'Design', en: 'Theme'},
     'Theme: light': {de: 'Design: hell', en: 'Theme: light'},
     'Theme: dark': {de: 'Design: dunkel', en: 'Theme: dark'},

@@ -801,6 +801,9 @@ export const DEMO_CONNECTION: ConnectionConfig = {
     tls: false,
     rega: true,
     callback: {ip: '192.168.1.20', xmlrpcPort: 0, binrpcPort: 0},
+    // A profile with a language in it, which since D-36 is the "the user chose one" case and wins
+    // over the browser - the demo is what the German README's screenshots are taken from, and the
+    // one place in the tree that still shows the field being used rather than left to the browser.
     language: 'de',
     writePaceMs: 250,
     rpcLogFolder: '',

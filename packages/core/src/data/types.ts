@@ -11,6 +11,16 @@
 /** Language code as used by the UI: `de`, `en`, optionally `tr` (legacy fallback, D-15). */
 export type Language = 'de' | 'en' | 'tr';
 
+/**
+ * What a profile may store for the language (D-36).
+ *
+ * `auto` is not a language, it is the absence of a choice written down: the UI then takes the
+ * first supported entry of the browser's `navigator.languages`, with English behind it. It exists
+ * next to "the field is missing" so that a user who had chosen German can go back to the browser
+ * without the setting looking like it was never touched.
+ */
+export type LanguageChoice = Language | 'auto';
+
 /** A localised string: at least `de` and `en`; missing languages fall back to `en`, then `de`. */
 export type Localized = Partial<Record<Language, string>>;
 

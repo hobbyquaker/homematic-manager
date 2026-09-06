@@ -1,10 +1,10 @@
 <script lang="ts">
-    import type {ConnectionConfig, Language, UserDefinedInterface} from '@homematic-manager/core';
+    import type {ConnectionConfig, LanguageChoice, UserDefinedInterface} from '@homematic-manager/core';
     import {DEFAULT_INTERFACES, INTERFACE_NAMES, validateUserDefinedInterface} from '@homematic-manager/core';
 
     import Dialog from '../lib/components/Dialog.svelte';
+    import LanguageSwitch from '../lib/components/LanguageSwitch.svelte';
     import MultiSelect from '../lib/components/MultiSelect.svelte';
-    import {UI_LANGUAGES, LANGUAGE_LABELS} from '../lib/i18n/i18n.svelte.js';
     import {getStores} from '../lib/stores/context.js';
 
     interface Props {
@@ -36,7 +36,9 @@
                       tls: false,
                       rega: true,
                       callback: {ip: '', xmlrpcPort: 0, binrpcPort: 0},
-                      language: stores.app.language,
+                      // The stored *choice*, not the resolved language: a profile that has never
+                      // been saved must not turn "the browser decides" into a fixed German (D-36).
+                      language: stores.app.languageChoice,
                       writePaceMs: 250,
                       rpcLogFolder: '',
                   };
@@ -72,8 +74,8 @@
         }
         saving = false;
         if (ok) {
-            stores.app.setLanguage(connection.language);
-            stores.i18n.language = connection.language;
+            stores.app.setLanguage(connection.language ?? 'auto');
+            stores.i18n.language = stores.app.language;
             open = false;
             await stores.start();
         }
@@ -115,6 +117,13 @@
     function setAutoConfirmInbox(value: boolean): void {
         if (draft) {
             draft.autoConfirmRegaInbox = value;
+        }
+    }
+
+    /** D-36: `auto` is a value the profile stores, not the absence of one. */
+    function setDraftLanguage(choice: LanguageChoice): void {
+        if (draft) {
+            draft.language = choice;
         }
     }
 
@@ -285,13 +294,20 @@
                 />
             </label>
 
+            <!--
+                D-36, task 22: the switch left the header and is one of the settings now. The first
+                entry is the default - the browser's own order with English behind it - and a
+                choice made here is stored in the profile and wins over the browser.
+            -->
             <label class="hmm-config-row">
                 <span>{t('Language')}</span>
-                <select class="hmm-select" bind:value={draft.language}>
-                    {#each UI_LANGUAGES as language (language)}
-                        <option value={language}>{LANGUAGE_LABELS[language as Language]}</option>
-                    {/each}
-                </select>
+                <LanguageSwitch
+                    language={draft.language ?? 'auto'}
+                    label={t('Language')}
+                    autoLabel={t('Browser language')}
+                    testId="config-language"
+                    onchange={setDraftLanguage}
+                />
             </label>
 
             <label class="hmm-config-row">

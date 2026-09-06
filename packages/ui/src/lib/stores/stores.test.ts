@@ -269,6 +269,83 @@ describe('AppStore', () => {
         expect(app.language).toBe('en');
     });
 
+    /**
+     * D-36, task 22: from strong to weak - a choice made in this browser, then the profile, then
+     * the browser's own order with English behind it. The 2.x default was German, whatever the
+     * browser asked for, and this is the test that says it is not any more.
+     */
+    describe('the language it starts in (D-36)', () => {
+        const withBrowser = (languages: readonly string[], storage = new MemoryStorage()): AppStore =>
+            new AppStore(transport, notices, {location: fakeRouter().location, storage, languages});
+
+        it('follows the browser when nothing was chosen anywhere', () => {
+            expect(withBrowser(['de-DE', 'en-US']).language).toBe('de');
+            expect(withBrowser(['en-GB']).language).toBe('en');
+            expect(withBrowser(['fr-FR']).language).toBe('en');
+            expect(withBrowser(['de-DE']).languageChoice).toBe('auto');
+        });
+
+        it('takes the profile over the browser', async () => {
+            const app = withBrowser(['en-GB']);
+            expect(app.language).toBe('en');
+            // the demo profile stores German
+            await app.load();
+            expect(app.languageChoice).toBe('de');
+            expect(app.language).toBe('de');
+        });
+
+        it('follows the browser for a profile that stores no language at all', async () => {
+            const app = withBrowser(['de-DE']);
+            const connection = {...DEMO_CONFIG.connection};
+            delete connection.language;
+            transport.result('config.get', {...DEMO_CONFIG, connection});
+            await app.load();
+            expect(app.languageChoice).toBe('auto');
+            expect(app.language).toBe('de');
+        });
+
+        it('follows the browser for a profile that stores `auto`', async () => {
+            const app = withBrowser(['fr', 'de']);
+            transport.result('config.get', {
+                ...DEMO_CONFIG,
+                connection: {...DEMO_CONFIG.connection, language: 'auto' as const},
+            });
+            await app.load();
+            expect(app.language).toBe('de');
+        });
+
+        it('lets the choice made in this browser win over both', async () => {
+            const storage = new MemoryStorage();
+            storage.setItem(LANGUAGE_STORAGE_KEY, 'en');
+            const app = withBrowser(['de-DE'], storage);
+            await app.load();
+            expect(app.language).toBe('en');
+        });
+
+        it('stores `auto` rather than clearing the key, and resolves it again', () => {
+            const storage = new MemoryStorage();
+            const app = withBrowser(['de-DE'], storage);
+
+            app.setLanguage('en');
+            expect(app.language).toBe('en');
+            expect(storage.getItem(LANGUAGE_STORAGE_KEY)).toBe('en');
+
+            app.setLanguage('auto');
+            expect(storage.getItem(LANGUAGE_STORAGE_KEY)).toBe('auto');
+            expect(app.languageChoice).toBe('auto');
+            expect(app.language).toBe('de');
+        });
+
+        it('restores `auto` from storage and does not let the profile override it', async () => {
+            const storage = new MemoryStorage();
+            storage.setItem(LANGUAGE_STORAGE_KEY, 'auto');
+            const app = withBrowser(['en-GB'], storage);
+            await app.load();
+            expect(app.languageChoice).toBe('auto');
+            expect(app.language).toBe('en');
+        });
+    });
+
     it('opens the settings dialog when no host is configured', async () => {
         const unconfigured: AppConfig = {
             ...DEMO_CONFIG,

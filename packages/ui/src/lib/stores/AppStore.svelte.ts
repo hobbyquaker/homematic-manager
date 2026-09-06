@@ -1,5 +1,13 @@
-import type {AppConfig, ConnectionConfig, Language, SessionInfo, Transport} from '@homematic-manager/core';
+import type {
+    AppConfig,
+    ConnectionConfig,
+    Language,
+    LanguageChoice,
+    SessionInfo,
+    Transport,
+} from '@homematic-manager/core';
 
+import {resolveLanguage} from '../i18n/i18n.svelte.js';
 import type {NoticesStore} from './NoticesStore.svelte.js';
 import {DEFAULT_TAB, formatHash, parseHash, type TabId} from './routing.js';
 
@@ -26,6 +34,12 @@ export interface AppStoreOptions {
     /** Subscribes to external hash changes (back button); returns the unsubscribe function. */
     readonly onHashChange?: ((handler: () => void) => () => void) | undefined;
     readonly storage?: StorageLike | undefined;
+    /**
+     * The browser's preferred languages, in its own order. Defaults to `navigator.languages`; a
+     * test passes a list so that the resolution order of D-36 can be asserted without pretending
+     * to be a differently configured browser.
+     */
+    readonly languages?: readonly string[] | undefined;
 }
 
 function defaultLocation(): HashLocation {
@@ -74,7 +88,15 @@ export class AppStore {
      * it is a hand-over and not a persistent filter the user cannot get rid of.
      */
     linksFilter = $state('');
-    language = $state<Language>('de');
+    /**
+     * The language the UI is actually in - always a real one, never `auto` (D-36).
+     *
+     * `languageChoice` is what the user asked for and what is stored; this is what that resolves
+     * to once the browser has had its say. Everything that renders reads this one.
+     */
+    language = $state<Language>('en');
+    /** What the settings dialog shows: a language, or `auto` for "the browser decides". */
+    languageChoice = $state<LanguageChoice>('auto');
     theme = $state<ThemeChoice>('system');
     /**
      * D-32: who is logged in, where the host has a login at all.
@@ -94,6 +116,7 @@ export class AppStore {
     readonly #notices: NoticesStore;
     readonly #location: HashLocation;
     readonly #storage: StorageLike | undefined;
+    readonly #languages: readonly string[] | undefined;
     readonly #unsubscribe: Array<() => void> = [];
 
     constructor(transport: Transport, notices: NoticesStore, options: AppStoreOptions = {}) {
@@ -101,15 +124,19 @@ export class AppStore {
         this.#notices = notices;
         this.#location = options.location ?? defaultLocation();
         this.#storage = options.storage === undefined ? defaultStorage() : options.storage;
+        this.#languages = options.languages;
 
         const stored = this.#storage?.getItem(THEME_STORAGE_KEY);
         if (stored === 'light' || stored === 'dark' || stored === 'system') {
             this.theme = stored;
         }
+        // A local choice - the one made in the settings dialog of this browser - before the profile
+        // has even been asked for, so the loading screen is already in the right language.
         const storedLanguage = this.#storage?.getItem(LANGUAGE_STORAGE_KEY);
-        if (storedLanguage === 'de' || storedLanguage === 'en') {
-            this.language = storedLanguage;
+        if (storedLanguage === 'de' || storedLanguage === 'en' || storedLanguage === 'auto') {
+            this.languageChoice = storedLanguage;
         }
+        this.#applyLanguage();
 
         this.readRoute();
         this.connected = transport.connected;
@@ -153,9 +180,23 @@ export class AppStore {
         this.writeRoute();
     }
 
-    setLanguage(language: Language): void {
-        this.language = language;
-        this.#storage?.setItem(LANGUAGE_STORAGE_KEY, language);
+    /**
+     * What the settings dialog does: store the choice - `auto` included - and resolve it.
+     *
+     * The choice is kept in `localStorage` as well as in the profile, so a browser that has been
+     * told once starts in that language before `config.get` has answered. `auto` is stored as
+     * itself rather than by clearing the key: "the user asked for the browser" and "the user never
+     * touched this" behave the same but are not the same thing, and only the first one should
+     * survive somebody else's profile saying German.
+     */
+    setLanguage(choice: LanguageChoice): void {
+        this.languageChoice = choice;
+        this.#applyLanguage();
+        this.#storage?.setItem(LANGUAGE_STORAGE_KEY, choice);
+    }
+
+    #applyLanguage(): void {
+        this.language = resolveLanguage(this.languageChoice, this.#languages);
     }
 
     setTheme(theme: ThemeChoice): void {
@@ -240,11 +281,16 @@ export class AppStore {
     /**
      * Takes over a configuration: the language when the user has not chosen one locally, and the
      * first configured interface when the route did not name one.
+     *
+     * D-36's order, from strong to weak: what was chosen in *this* browser, then what the profile
+     * stores, then what the browser asks for. A profile without a language is `auto` - the backend
+     * writes none into a fresh profile any more - and resolves to the browser.
      */
     applyConfig(config: AppConfig): void {
         this.config = config;
         if (this.#storage?.getItem(LANGUAGE_STORAGE_KEY) == null) {
-            this.language = config.connection.language;
+            this.languageChoice = config.connection.language ?? 'auto';
+            this.#applyLanguage();
         }
         if (this.selectedInterface === '' || !config.connection.interfaces.includes(this.selectedInterface)) {
             this.selectedInterface = config.connection.interfaces[0] ?? '';

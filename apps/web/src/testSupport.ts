@@ -265,7 +265,8 @@ export async function startForTest(options: StartForTestOptions = {}): Promise<T
             local: true,
             rega: false,
             callback: {ip: '127.0.0.1', xmlrpcPort: 0, binrpcPort: 0},
-            language: 'de',
+            // No language: D-36's default, "the browser decides". A test that wants a fixed one
+            // passes it through `connectionOverrides` - the e2e fixture asks for English.
             writePaceMs: 0,
             rpcLogFolder: '',
             ...connectionOverrides,

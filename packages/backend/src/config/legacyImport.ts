@@ -87,6 +87,9 @@ export function connectionFromLegacy(legacy: LegacyConfig, base: ConnectionConfi
         ...base,
         host: typeof legacy.ccuAddress === 'string' ? legacy.ccuAddress.trim() : base.host,
         tls: legacy.useTLS === true,
+        // A 2.x configuration that names a language carries a real choice, so it is imported; one
+        // that does not leaves the field alone, and the UI follows the browser (D-36). 2.x had no
+        // setting at all in its first versions, so "missing" is the common case.
         language: LANGUAGES.find((candidate) => candidate === legacy.language) ?? base.language,
         writePaceMs:
             typeof legacy.rpcDelay === 'number' && Number.isFinite(legacy.rpcDelay) && legacy.rpcDelay >= 0

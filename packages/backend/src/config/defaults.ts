@@ -16,6 +16,7 @@ import {
     validateUserDefinedInterface,
     type ConnectionConfig,
     type Language,
+    type LanguageChoice,
     type ResolvedInterface,
     type UserDefinedInterface,
 } from '@homematic-manager/core';
@@ -41,7 +42,15 @@ export function writePaceFor(interfaceName: string, writePaceMs: number): number
 /** The languages the UI ships (`Language` in the core's data contract). */
 export const LANGUAGES: readonly Language[] = ['de', 'en', 'tr'];
 
-/** A connection nothing has configured yet: no host, the four default interfaces, ReGa on. */
+/**
+ * A connection nothing has configured yet: no host, the four default interfaces, ReGa on - and no
+ * language at all.
+ *
+ * D-36: 2.x started German first and so did this backend, which meant every user who never opened
+ * the setting got German whatever their browser asked for. Unset is the default now, and the UI
+ * reads it as "the browser decides" (`navigator.languages`, English behind it). The backend has no
+ * business guessing a language: it has neither a browser nor an `Accept-Language`.
+ */
 export function defaultConnection(): ConnectionConfig {
     return {
         host: '',
@@ -51,7 +60,6 @@ export function defaultConnection(): ConnectionConfig {
         tls: false,
         rega: true,
         callback: {ip: '', xmlrpcPort: 0, binrpcPort: 0},
-        language: 'de',
         writePaceMs: DEFAULT_WRITE_PACE_MS,
         rpcLogFolder: '',
         // #26: off unless the user asks. Acknowledging is a write, and the list of what was
@@ -92,7 +100,11 @@ export function normaliseConnection(input: unknown): ConnectionConfig {
 
     const callback =
         typeof raw.callback === 'object' && raw.callback !== null ? (raw.callback as Record<string, unknown>) : {};
-    const language = LANGUAGES.find((candidate) => candidate === raw.language) ?? defaults.language;
+    // A language that is not one of ours is dropped rather than repaired to German (D-36): the
+    // absent field is what tells the UI to follow the browser, so "unreadable" and "not chosen"
+    // end in the same, harmless place.
+    const language: LanguageChoice | undefined =
+        raw.language === 'auto' ? 'auto' : LANGUAGES.find((candidate) => candidate === raw.language);
 
     const connection: ConnectionConfig = {
         host: stringOr(raw.host, defaults.host).trim(),
@@ -107,7 +119,7 @@ export function normaliseConnection(input: unknown): ConnectionConfig {
             xmlrpcPort: isPort(callback['xmlrpcPort']) ? callback['xmlrpcPort'] : defaults.callback.xmlrpcPort,
             binrpcPort: isPort(callback['binrpcPort']) ? callback['binrpcPort'] : defaults.callback.binrpcPort,
         },
-        language,
+        ...(language === undefined ? {} : {language}),
         writePaceMs:
             typeof raw.writePaceMs === 'number' && Number.isFinite(raw.writePaceMs) && raw.writePaceMs >= 0
                 ? Math.round(raw.writePaceMs)

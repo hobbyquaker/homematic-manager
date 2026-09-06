@@ -212,7 +212,7 @@ Grouped by what a user notices; the issue numbers are the ones each answers.
 | Startup | 2.7.1 not starting on Windows 10/11 is answered by the new Electron host, not by a 2.x fix | #132, #133 |
 | Platforms | Apple Silicon (universal build), arm64 Linux; **32-bit ARM desktop builds are gone** — Electron 44 has no `linux-armv7l` binary. Use the CCU addon or the npm package there | #139, #115 |
 | Platforms | macOS Sonoma "does not open" is answered by the new build; signing and notarisation are in the workflows and wait on the Apple/SignPath side | #137, #68 |
-| Language | The whole UI is German **and** English, with plurals and interpolation, switchable at runtime | #119, #29, #28, PR #130 |
+| Language | The whole UI is German **and** English, with plurals and interpolation, switchable at runtime. It starts in the browser's language with English as the fallback instead of German first; the switch is in the settings dialog and a choice made there is stored in the profile | #119, #29, #28, PR #130 |
 | Devices | The firmware column's update button really disappears when the update has arrived | #95, #113 |
 | Devices | Name a device right after it pairs | #24 |
 | Devices | BidCos pairing with a temporary key | #20 |

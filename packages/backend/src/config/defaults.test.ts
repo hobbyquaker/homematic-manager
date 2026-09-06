@@ -39,8 +39,17 @@ describe('normaliseConnection', () => {
         const connection = normaliseConnection({host: ' ccu.lan ', tls: true});
         expect(connection.host).toBe('ccu.lan');
         expect(connection.tls).toBe(true);
-        expect(connection.language).toBe('de');
+        // D-36: no language at all, which the UI reads as "the browser decides". A backend that
+        // filled German in here was the 2.x German-first default in disguise.
+        expect(connection.language).toBeUndefined();
+        expect(Object.hasOwn(connection, 'language')).toBe(false);
         expect(connection.interfaces).toEqual(defaultConnection().interfaces);
+    });
+
+    it('keeps a language the user chose, and `auto` as the choice it is', () => {
+        expect(normaliseConnection({language: 'en'}).language).toBe('en');
+        expect(normaliseConnection({language: 'de'}).language).toBe('de');
+        expect(normaliseConnection({language: 'auto'}).language).toBe('auto');
     });
 
     it('returns the defaults for anything that is not an object', () => {
@@ -68,7 +77,9 @@ describe('normaliseConnection', () => {
         });
         expect(connection.callback).toEqual({ip: '192.168.1.5', xmlrpcPort: 0, binrpcPort: 2042});
         expect(connection.writePaceMs).toBe(DEFAULT_WRITE_PACE_MS);
-        expect(connection.language).toBe('de');
+        // A language nothing knows is dropped, not repaired to German: unset means the browser
+        // decides, which is the harmless answer for a value nobody can read (D-36).
+        expect(connection.language).toBeUndefined();
     });
 
     it('keeps auth only when there is a user', () => {

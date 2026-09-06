@@ -618,7 +618,8 @@ describe('the ReGa login (D-32)', () => {
         const page = await fetch(host.url);
         expect(page.status).toBe(200);
         const body = await page.text();
-        expect(body).toContain('Benutzername');
+        // No `Accept-Language` on this request, so English - D-36's fallback, not German.
+        expect(body).toContain('User name');
         expect(body).toContain(`action="${host.base}login"`);
         expect(body).not.toContain('<div id="app">');
         expect(page.headers.get('cache-control')).toBe('no-store');
@@ -735,7 +736,7 @@ describe('the ReGa login (D-32)', () => {
         expect(answer.headers.get('set-cookie')).toContain('Max-Age=0');
         expect(host.sessions?.size).toBe(0);
         // and the cookie the browser still has opens nothing
-        expect(await (await fetch(host.url, {headers: {Cookie: cookie}})).text()).toContain('Benutzername');
+        expect(await (await fetch(host.url, {headers: {Cookie: cookie}})).text()).toContain('User name');
         await expect(handshake(host, {cookie})).resolves.toBe(401);
     });
 

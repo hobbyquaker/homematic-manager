@@ -35,6 +35,7 @@ import {
     type DeviceDescription,
     type EventRecord,
     type InstallModeOptions,
+    type Language,
     type LinkRecord,
     type NameMap,
     type Paramset,
@@ -522,7 +523,12 @@ export class Backend {
             enabled: connection.rega,
             tls: connection.tls,
             auth: connection.auth,
-            language: connection.language,
+            // ReGa's client takes a language for the WebUI placeholder translation, which is off
+            // here anyway (`translate: false`). `auto` is not a language, so an unset profile
+            // leaves the client at its own default rather than sending a word it cannot parse.
+            ...(connection.language === undefined || connection.language === 'auto'
+                ? {}
+                : {language: connection.language}),
             names: this.#caches.names,
             onStateChanged: (state) => {
                 this.events.emit('rega.changed', state);
@@ -1134,7 +1140,12 @@ export class Backend {
         if (names.length === 0) {
             names = [...RPC_METHOD_NAMES];
         }
-        const language = this.#config.connection.language;
+        // Which slot the interface's own `system.methodHelp` text goes into, not a UI language: the
+        // shipped catalogue is the German eQ-3 specification and an interface process answers in
+        // the CCU's language, so an unset or `auto` profile keeps German here (D-36 is about the
+        // UI, which asks for its own texts through the catalogue in `packages/core`).
+        const configured = this.#config.connection.language;
+        const language: Language = configured === undefined || configured === 'auto' ? 'de' : configured;
         const methods = await Promise.all(
             methodsFor(names).map(async (method) => {
                 let merged = method;

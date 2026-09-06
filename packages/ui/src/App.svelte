@@ -1,11 +1,9 @@
 <script lang="ts">
-    import type {Language} from '@homematic-manager/core';
     import {untrack} from 'svelte';
 
     import './app.css';
 
     import InterfacePopup from './lib/components/InterfacePopup.svelte';
-    import LanguageSwitch from './lib/components/LanguageSwitch.svelte';
     import Loader from './lib/components/Loader.svelte';
     import Notices from './lib/components/Notices.svelte';
     import RpcLogPanel from './lib/components/RpcLogPanel.svelte';
@@ -111,11 +109,6 @@
             app.configDialogOpen = true;
         }),
     );
-
-    function setLanguage(language: Language): void {
-        app.setLanguage(language);
-        stores.i18n.language = language;
-    }
 </script>
 
 <div class="hmm-app" data-testid="app">
@@ -187,7 +180,11 @@
                 testId="theme-switch"
                 onclick={() => app.cycleTheme()}
             />
-            <LanguageSwitch language={stores.i18n.language} label={t('Language')} onchange={setLanguage} />
+            <!--
+                D-36, task 22: the language switch is not here any more. It is a setting a user
+                touches once, and it sits in the settings dialog with the rest of them; the header
+                keeps the two controls that are switched while working - the RPC log and the theme.
+            -->
             <ToolbarButton
                 title={t('Settings')}
                 icon="⚙"

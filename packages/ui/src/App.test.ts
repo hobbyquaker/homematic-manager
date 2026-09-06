@@ -187,11 +187,19 @@ describe('App shell', () => {
         await waitFor(() => expect(screen.getByText('BOOM')).toBeTruthy());
     });
 
-    it('switches the language and updates <html lang>', async () => {
-        await mountApp(transport);
+    /**
+     * D-36, task 22: the language switch left the header - it is one of the settings now
+     * (`ConfigDialog.test.ts` drives it there). What stays here is that the shell follows the
+     * language it was given and stamps it on the document, which is what a screen reader and the
+     * browser's own hyphenation read.
+     */
+    it('has no language switch in the header and stamps the language on <html lang>', async () => {
+        const {stores} = await mountApp(transport);
         expect(document.documentElement.lang).toBe('de');
+        expect(screen.queryByLabelText('Sprache')).toBeNull();
+        expect(screen.getByTestId('app').querySelector('.hmm-header .hmm-language')).toBeNull();
 
-        await fireEvent.change(screen.getByLabelText('Sprache'), {target: {value: 'en'}});
+        stores.i18n.language = 'en';
         await waitFor(() => expect(screen.getByRole('tab', {name: 'Devices'})).toBeTruthy());
         expect(document.documentElement.lang).toBe('en');
     });

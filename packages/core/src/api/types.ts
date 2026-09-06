@@ -11,7 +11,7 @@ import type {DeviceDescription} from '../devices/index.js';
 import type {RpcProtocol, UserDefinedInterface} from '../interfaces/table.js';
 import type {ParamsetDescription} from '../paramset/description.js';
 import type {Paramset, ParamsetWrite, RpcWriteValue} from '../rpc/values.js';
-import type {Language} from '../data/types.js';
+import type {LanguageChoice} from '../data/types.js';
 
 /** Any value an interface process returns: XML-RPC / BIN-RPC scalars, arrays and structs. */
 export type RpcValue = boolean | number | string | RpcValue[] | {[key: string]: RpcValue};
@@ -37,7 +37,15 @@ export interface ConnectionConfig {
     rega: boolean;
     /** Address and ports the interface processes call back to; `0` picks free ports. */
     callback: {ip: string; xmlrpcPort: number; binrpcPort: number};
-    language: Language;
+    /**
+     * The language the UI starts in, or `auto`/absent for "the browser decides" (D-36).
+     *
+     * Optional since 3.0.0-dev.7: the 2.x default was German first, and a backend that writes a
+     * language into a fresh profile forces one on every user who never opened the setting. Unset
+     * means the UI takes the first supported entry of `navigator.languages` with English behind
+     * it; a value here is a choice the user made in the settings dialog and wins over the browser.
+     */
+    language?: LanguageChoice;
     /** Minimum pause between two writes per interface, in milliseconds. */
     writePaceMs: number;
     /** Directory for the `putParamset` JSON dumps of 2.x; empty = off. */

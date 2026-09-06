@@ -96,10 +96,22 @@ async function launch(userDataDir?: string): Promise<Launched> {
     return {app, page, userData};
 }
 
-/** Keeps everything the app writes to stderr, so a failing test can print it. */
+/**
+ * Keeps everything the app writes to stderr, and on CI passes it straight through.
+ *
+ * Through, because a hook is not a guarantee: a test that spends its whole timeout leaves nothing
+ * for `afterEach`, and the first two runs of `build.yml` printed the bare line "Test timeout of
+ * 120000ms exceeded." with no call log, no snippet and no artifact worth downloading. Playwright
+ * interleaves what a worker writes into its own output, so a trace written as it happens survives
+ * a test that is killed, a worker that is killed, and a job that is cancelled on its timeout.
+ */
 function collect(app: ElectronApplication): void {
     app.process().stderr?.on('data', (chunk: Buffer | string) => {
-        output.push(typeof chunk === 'string' ? chunk : chunk.toString('utf8'));
+        const text = typeof chunk === 'string' ? chunk : chunk.toString('utf8');
+        output.push(text);
+        if (process.env['CI'] !== undefined) {
+            process.stderr.write(text);
+        }
     });
 }
 
@@ -111,12 +123,13 @@ function collect(app: ElectronApplication): void {
  * worker teardown after it another one.
  */
 async function closeApp(app: ElectronApplication): Promise<void> {
-    running = running.filter((other) => other !== app);
     const child = app.process();
     let timer: NodeJS.Timeout | undefined;
     const killed = new Promise<void>((resolve) => {
         timer = setTimeout(() => {
-            output.push(`[smoke] the app did not exit within ${String(CLOSE_TIMEOUT_MS)}ms; killing it\n`);
+            const message = `[smoke] the app did not exit within ${String(CLOSE_TIMEOUT_MS)}ms; killing it\n`;
+            output.push(message);
+            process.stderr.write(message);
             child.kill('SIGKILL');
             resolve();
         }, CLOSE_TIMEOUT_MS);
@@ -127,6 +140,9 @@ async function closeApp(app: ElectronApplication): Promise<void> {
         if (timer !== undefined) {
             clearTimeout(timer);
         }
+        // Only now: a test that runs out of time inside `close()` must still leave the app on the
+        // list for `afterEach` to kill.
+        running = running.filter((other) => other !== app);
     }
 }
 
@@ -150,7 +166,10 @@ test.afterEach(async () => {
     const captured = output.join('');
     if (captured === '') {
         // The CI log is the only report a cancelled job leaves behind.
-        console.log('--- the app wrote nothing to stderr ---');
+        console.log(
+            '--- this suite collected no stderr from the app; a launch that never returned leaves what ' +
+                'it did print in the call log above ---',
+        );
         return;
     }
     await testInfo.attach('electron-stderr.txt', {body: captured, contentType: 'text/plain'});

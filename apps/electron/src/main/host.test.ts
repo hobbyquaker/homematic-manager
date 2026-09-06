@@ -6,7 +6,13 @@ import path from 'node:path';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {ErrorLog, installErrorHandlers} from './errorLog.js';
-import {DISABLE_AUTO_UPDATE_ENV, readHostSettings, writeHostSettings} from './hostSettings.js';
+import {
+    DISABLE_AUTO_UPDATE_ENV,
+    DISABLE_ERROR_DIALOG_ENV,
+    errorDialogsDisabled,
+    readHostSettings,
+    writeHostSettings,
+} from './hostSettings.js';
 import {buildMenuTemplate, isAllowedExternalUrl, ISSUES_URL, type MenuTemplateItem} from './menu.js';
 import {fileRoots, resolvePaths} from './paths.js';
 import {createStartupTrace, STARTUP_TRACE_ENV, startupTraceEnabled} from './startupTrace.js';
@@ -323,5 +329,19 @@ describe('startup trace', () => {
             },
         });
         expect(() => trace('module: entered')).not.toThrow();
+    });
+});
+
+describe('errorDialogsDisabled', () => {
+    it('lets the box through unless the environment says otherwise', () => {
+        expect(errorDialogsDisabled({})).toBe(false);
+        expect(errorDialogsDisabled({[DISABLE_ERROR_DIALOG_ENV]: '0'})).toBe(false);
+        expect(errorDialogsDisabled({[DISABLE_ERROR_DIALOG_ENV]: 'false'})).toBe(false);
+    });
+
+    it('keeps it out of a run with nobody at the keyboard', () => {
+        // `dialog.showErrorBox` is modal: unattended, it stops the main process for good, and an
+        // app that cannot show its window can no longer be asked to quit either.
+        expect(errorDialogsDisabled({[DISABLE_ERROR_DIALOG_ENV]: '1'})).toBe(true);
     });
 });

@@ -24,6 +24,9 @@ export const DEFAULT_HOST_SETTINGS: HostSettings = {disableAutoUpdate: false};
 /** The environment variable that turns the updater off without a file. */
 export const DISABLE_AUTO_UPDATE_ENV = 'HMM_DISABLE_AUTO_UPDATE';
 
+/** The environment variable that keeps `dialog.showErrorBox` out of an unattended run. */
+export const DISABLE_ERROR_DIALOG_ENV = 'HMM_NO_ERROR_DIALOG';
+
 /** Reads `host.json`; anything unreadable or malformed is the default, never an error. */
 export function readHostSettings(
     file: string,
@@ -38,6 +41,18 @@ export function readHostSettings(
     }
     const value = typeof stored === 'object' && stored !== null ? (stored as Record<string, unknown>) : {};
     return {disableAutoUpdate: fromEnvironment || value['disableAutoUpdate'] === true};
+}
+
+/**
+ * May the host open a modal error box?
+ *
+ * `dialog.showErrorBox` blocks the main process until someone clicks it away. On a machine with
+ * nobody at the keyboard - CI, a kiosk, the smoke test - that turns any unhandled error into a
+ * process that neither shows a window nor ever exits, which is exactly the shape of the first
+ * `build.yml` run. The message still goes to the log and to stderr; only the box is left out.
+ */
+export function errorDialogsDisabled(environment: Readonly<Record<string, string | undefined>> = process.env): boolean {
+    return truthy(environment[DISABLE_ERROR_DIALOG_ENV]);
 }
 
 /** Writes `host.json`. Used by nothing yet; the file is hand-written until task 8 has a switch. */

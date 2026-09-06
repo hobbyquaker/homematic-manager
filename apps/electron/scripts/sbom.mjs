@@ -59,7 +59,9 @@ function parseArguments(argv) {
  * is the difference between 22 components and several hundred.
  */
 function npmSbom() {
-    const cli = path.join(repoRoot, 'node_modules', '.bin', 'cyclonedx-npm');
+    // the package's own entry, not the .bin shim: on Windows that shim is a shell script, and the
+    // first CI run there died on its first line with a SyntaxError when node was handed it
+    const cli = path.join(repoRoot, 'node_modules', '@cyclonedx', 'cyclonedx-npm', 'bin', 'cyclonedx-npm-cli.js');
     const raw = execFileSync(
         process.execPath,
         [

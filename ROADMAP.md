@@ -80,7 +80,7 @@ the generated data is committed under `data/dist/`. Last release 2.7.1 (2023-01-
 - [17. Beta cycle and 3.0 release](#17-beta-cycle-and-30-release) ✅ agent side (release waits on the maintainer)
 - [18. Addon login against ReGa](#18-addon-login-against-rega) ✅ (lab check pending)
 - [19. UI polish after the first look](#19-ui-polish-after-the-first-look) ✅
-- [20. UI second look](#20-ui-second-look)
+- [20. UI second look](#20-ui-second-look) ✅
 - [Open questions](#open-questions)
 - [Lab and hardware](#lab-and-hardware)
 
@@ -609,6 +609,9 @@ console round trip (ping → pong event) works, and five things to change:
 Screenshots in `docs/` are retaken at the end; the README's images follow.
 
 ## 20. UI second look
+
+Done 2026-09-06, report in `roadmap-archive/task-20.md` (the filter point was first done the wrong way
+round and corrected in `6292add`).
 
 The maintainer's second look at the dev build on the x86_64 lab box (2026-09-06, `3.0.0-dev.3`):
 

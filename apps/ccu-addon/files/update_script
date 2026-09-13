@@ -122,6 +122,69 @@ else
     cp $ADDON_DIR/etc/default.env $ADDON_DIR/etc/hmm.env
 fi
 
+# B-32: 3.0.0-beta.16 started node with --lite-mode, which switches off WebAssembly, and node's fetch
+# needs it: every fetch of the backend failed, and on openccu-lite no session was let in. A kept
+# hmm.env loses what that release put into it or told users to put there. Its default.env comment,
+# which calls --lite-mode the default, is replaced by the current one, and --lite-mode or --jitless
+# leave an HMM_NODE_FLAGS line, with a log line each. A line left without a flag goes, so the addon's
+# default applies again; an empty `HMM_NODE_FLAGS=` and every other flag a user set stay as they are.
+# rc.d/hmm drops the two at every start too (NodeFlags), for a file edited after the update.
+MigrateNodeFlags() {
+    env_file=$1
+    [ -f "$env_file" ] || return 0
+    old_1="# Task 44: flags for node itself, read by the rc.d script and not by the host. The default is"
+    old_2="# --lite-mode, V8 without its optimising compilers, which keeps the backend's memory down (the"
+    old_3="# addon's README, \"Memory\"). Empty runs node without flags, as before 3.0.0-beta.16."
+    new_comment="# B-32: flags for node itself, read by the rc.d script and not by the host. Unset, node runs with
+# the addon's memory flags (the addon's README, \"Memory\"); empty runs it without flags. --lite-mode
+# and --jitless are dropped wherever they are set: both switch off WebAssembly, and node's fetch
+# needs it (3.0.0-beta.16 started node with --lite-mode, and the addon could not log anybody in)."
+    changed=0
+    : > "$env_file.new" || return 0
+    set -f
+    while IFS= read -r line || [ -n "$line" ]; do
+        case "$line" in
+            "$old_1")
+                printf '%s\n' "$new_comment" >> "$env_file.new"
+                changed=1
+                continue
+                ;;
+            "$old_2" | "$old_3")
+                changed=1
+                continue
+                ;;
+            HMM_NODE_FLAGS=*)
+                # the value as rc.d/hmm reads it: quotes and a trailing comment are the shell's business
+                value="$(HMM_NODE_FLAGS=; eval "$line" 2>/dev/null; printf '%s' "$HMM_NODE_FLAGS")"
+                kept=""
+                dropped=""
+                for flag in $value; do
+                    case "$flag" in
+                        --lite-mode | --lite_mode | --jitless) dropped="${dropped:+$dropped }$flag" ;;
+                        *) kept="${kept:+$kept }$flag" ;;
+                    esac
+                done
+                if [ -n "$dropped" ]; then
+                    changed=1
+                    if [ -n "$kept" ]; then
+                        printf 'HMM_NODE_FLAGS="%s"\n' "$kept" >> "$env_file.new"
+                        logger -t $ADDON -p daemon.warn "etc/hmm.env: took $dropped out of HMM_NODE_FLAGS, now \"$kept\": it switches off WebAssembly, which node's fetch needs (B-32)"
+                    else
+                        logger -t $ADDON -p daemon.warn "etc/hmm.env: removed the line HMM_NODE_FLAGS=$value: $dropped switches off WebAssembly, which node's fetch needs (B-32); the addon's default flags apply"
+                    fi
+                    continue
+                fi
+                ;;
+        esac
+        printf '%s\n' "$line" >> "$env_file.new"
+    done < "$env_file"
+    set +f
+    # written into the same file, so its owner and mode stay
+    [ "$changed" = 1 ] && cat "$env_file.new" > "$env_file"
+    rm -f "$env_file.new"
+}
+MigrateNodeFlags $ADDON_DIR/etc/hmm.env
+
 # The token the UI's browser gets from settings.cgi after the WebUI session check, and the only
 # thing that opens the backend's API socket. Root-only, in the profile directory, so it survives an
 # update and an open browser tab keeps working across one.

@@ -1,4 +1,7 @@
-import {readFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
+import {mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 
 import {describe, expect, it} from 'vitest';
 
@@ -108,30 +111,159 @@ describe('rc.d/hmm logs to the journal on openccu-lite (task 41)', () => {
     });
 });
 
+/** Runs a POSIX shell snippet the way the addon's scripts run, with `logger` writing to stderr. */
+function runSh(script: string): {stdout: string; stderr: string; status: number | null} {
+    const result = spawnSync('sh', ['-c', `ADDON=hmm\nlogger() { echo "logger $*" >&2; }\n${script}`], {
+        encoding: 'utf8',
+    });
+    return {stdout: result.stdout, stderr: result.stderr, status: result.status};
+}
+
+/** What a node started with these flags says about WebAssembly and a fetch of a local HTTP server. */
+function probeNode(flags: readonly string[]): string {
+    const script = `
+        const {createServer} = require('node:http');
+        const server = createServer((q, s) => s.end('{"authenticated":true}')).listen(0, '127.0.0.1', async () => {
+            let answer;
+            try {
+                answer = 'fetch ' + (await fetch('http://127.0.0.1:' + server.address().port + '/api/auth/v1/state')).status;
+            } catch (error) {
+                answer = 'fetch failed: ' + (error.cause?.message ?? error.message);
+            }
+            console.log('WebAssembly=' + typeof WebAssembly + ' ' + answer);
+            server.close();
+        });`;
+    return spawnSync(process.execPath, [...flags, '-e', script], {encoding: 'utf8', timeout: 20_000}).stdout;
+}
+
+/** The comment 3.0.0-beta.16's default.env put above `#HMM_NODE_FLAGS=`, and into every hmm.env made from it. */
+const BETA16_COMMENT = [
+    '# Task 44: flags for node itself, read by the rc.d script and not by the host. The default is',
+    "# --lite-mode, V8 without its optimising compilers, which keeps the backend's memory down (the",
+    '# addon\'s README, "Memory"). Empty runs node without flags, as before 3.0.0-beta.16.',
+].join('\n');
+
 /**
- * Task 44 (D-46): node runs in V8's lite mode by default, and `etc/hmm.env` can change the flags. The
- * default is set before hmm.env is sourced, so an empty `HMM_NODE_FLAGS=` there starts node without it.
- * The container test checks the running process's command line both ways.
+ * B-32 (task 44, D-46): 3.0.0-beta.16 started node with `--lite-mode`, which switches off WebAssembly.
+ * Node's fetch parses HTTP with llhttp compiled to WebAssembly, so every fetch of the backend failed, and
+ * on openccu-lite no session was let in. The default flags must leave WebAssembly alone, and the two
+ * flags that do not are dropped at every start. The container test runs the packaged addon with the
+ * shipped flags against a stub box.
  */
-describe('rc.d/hmm starts node with --lite-mode (task 44)', () => {
+describe('rc.d/hmm starts node with flags that keep fetch working (B-32)', () => {
     const rc = file('../files/hmm/rc.d/hmm');
     const start = /\nStart\(\) \{\n([\s\S]*?)\n\}\n/.exec(rc)?.[1] ?? '';
+    const defaultLine = /\n {4}HMM_NODE_FLAGS="([^"]*)"\n/.exec(start);
+    const defaults = defaultLine?.[1] ?? '';
+    const nodeFlags = /\nNodeFlags\(\) \{\n[\s\S]*?\n\}\n/.exec(rc)?.[0] ?? '';
 
-    it('sets the flag as a default that etc/hmm.env can override', () => {
-        const defaultAt = start.indexOf('\n    HMM_NODE_FLAGS=--lite-mode\n');
-        const envAt = start.indexOf('. $ENV_FILE');
-        expect(defaultAt).toBeGreaterThan(0);
-        expect(envAt).toBeGreaterThan(defaultAt);
+    it('sets a default without --lite-mode or --jitless before etc/hmm.env is read', () => {
+        expect(defaultLine).not.toBeNull();
+        expect(defaults).not.toMatch(/lite[-_]mode|jitless/);
+        expect(start.indexOf('. $ENV_FILE')).toBeGreaterThan(defaultLine?.index ?? Infinity);
     });
 
-    it('passes the flags to node before the app, for the journal and the file alike', () => {
+    it('filters the flags after etc/hmm.env and passes them to node before the app', () => {
+        const sourced = start.indexOf('. $ENV_FILE');
+        const filtered = start.indexOf('HMM_NODE_FLAGS="$(NodeFlags "$HMM_NODE_FLAGS")"');
         const runAt = start.indexOf('"$RUN $HMM_NODE_FLAGS $APP');
+        expect(filtered).toBeGreaterThan(sourced);
+        expect(runAt).toBeGreaterThan(filtered);
         expect(runAt).toBeGreaterThan(start.indexOf('RUN="exec $NODE"'));
         expect(runAt).toBeGreaterThan(start.indexOf('RUN="exec systemd-cat -t $JOURNAL_TAG $NODE"'));
     });
 
-    it('documents the switch in default.env', () => {
-        expect(file('../files/hmm/etc/default.env')).toContain('#HMM_NODE_FLAGS=');
+    it('drops --lite-mode and --jitless with a log line each, and keeps every other flag', () => {
+        expect(nodeFlags).not.toBe('');
+        const dropped = runSh(`${nodeFlags}\nNodeFlags "--lite-mode --max-old-space-size=200 --jitless"`);
+        expect(dropped.stdout).toBe('--max-old-space-size=200');
+        expect(dropped.stderr).toContain('logger -t hmm -p daemon.warn HMM_NODE_FLAGS: dropped --lite-mode');
+        expect(dropped.stderr).toContain('HMM_NODE_FLAGS: dropped --jitless');
+        const kept = runSh(`${nodeFlags}\nNodeFlags "${defaults}"`);
+        expect(kept.stdout).toBe(defaults);
+        expect(kept.stderr).toBe('');
+    });
+
+    it('leaves WebAssembly and fetch working in node with the default flags', () => {
+        // the probe itself: --lite-mode is exactly what it has to catch
+        expect(probeNode(['--lite-mode'])).toContain('WebAssembly=undefined fetch failed: WebAssembly is not defined');
+        expect(probeNode(defaults.split(/\s+/).filter(Boolean))).toContain('WebAssembly=object fetch 200');
+    });
+
+    it('documents the switch in default.env, without calling --lite-mode the default', () => {
+        const env = file('../files/hmm/etc/default.env');
+        expect(env).toContain('\n#HMM_NODE_FLAGS=\n');
+        expect(env).not.toContain(BETA16_COMMENT);
+    });
+});
+
+/**
+ * B-32: an update keeps etc/hmm.env, and a beta.16 one may carry `--lite-mode` - in beta.16's comment,
+ * or on an `HMM_NODE_FLAGS` line copied from its README. `MigrateNodeFlags` runs here through a real
+ * `sh` on such files; the container test runs it inside the update.
+ */
+describe('update_script takes --lite-mode out of a kept etc/hmm.env (B-32)', () => {
+    const script = file('../files/update_script');
+    const migrate = /\nMigrateNodeFlags\(\) \{\n[\s\S]*?\n\}\n/.exec(script)?.[0] ?? '';
+    const env = file('../files/hmm/etc/default.env');
+    const current = env.slice(env.indexOf('# B-32: flags for node itself'), env.indexOf('\n#HMM_NODE_FLAGS=\n'));
+
+    function migrated(content: string): {env: string; log: string; status: number | null} {
+        const dir = mkdtempSync(join(tmpdir(), 'hmm-b32-'));
+        try {
+            const envFile = join(dir, 'hmm.env');
+            writeFileSync(envFile, content);
+            const out = runSh(`${migrate}\nMigrateNodeFlags '${envFile}'`);
+            return {env: readFileSync(envFile, 'utf8'), log: out.stderr, status: out.status};
+        } finally {
+            rmSync(dir, {recursive: true, force: true});
+        }
+    }
+
+    it('runs on the kept file once it is back, before anything reads it', () => {
+        expect(migrate).not.toBe('');
+        const call = script.indexOf('\nMigrateNodeFlags $ADDON_DIR/etc/hmm.env\n');
+        expect(call).toBeGreaterThan(script.indexOf('mv /tmp/hmm.env.keep $ADDON_DIR/etc/hmm.env'));
+        expect(call).toBeLessThan(script.indexOf('. $ADDON_DIR/etc/hmm.env'));
+    });
+
+    it("replaces beta.16's comment with the one default.env carries now, and leaves the rest alone", () => {
+        expect(current.length).toBeGreaterThan(100);
+        const result = migrated(`HMM_PORT=8090\n\n${BETA16_COMMENT}\n#HMM_NODE_FLAGS=\n\n#HMM_AUTH_MODE=rega\n`);
+        expect(result.env).toBe(`HMM_PORT=8090\n\n${current}\n#HMM_NODE_FLAGS=\n\n#HMM_AUTH_MODE=rega\n`);
+        expect(result.log).toBe('');
+        expect(result.status).toBe(0);
+    });
+
+    it("removes the line beta.16's README showed, so the addon's default applies again, and logs it", () => {
+        const line =
+            'HMM_NODE_FLAGS=--lite-mode             # flags for node, read by the rc.d script only - see "Memory"';
+        const result = migrated(`HMM_PORT=8090\n${line}\nHMM_LOG_LEVEL=info\n`);
+        expect(result.env).toBe('HMM_PORT=8090\nHMM_LOG_LEVEL=info\n');
+        expect(result.log).toContain(
+            'etc/hmm.env: removed the line HMM_NODE_FLAGS=--lite-mode: --lite-mode switches off',
+        );
+    });
+
+    it('keeps the other flags of a line and says what it took out', () => {
+        const result = migrated('HMM_NODE_FLAGS="--max-old-space-size=200 --lite-mode --jitless"\nHMM_PORT=8090\n');
+        expect(result.env).toBe('HMM_NODE_FLAGS="--max-old-space-size=200"\nHMM_PORT=8090\n');
+        expect(result.log).toContain(
+            'took --lite-mode --jitless out of HMM_NODE_FLAGS, now "--max-old-space-size=200"',
+        );
+    });
+
+    it('leaves an empty HMM_NODE_FLAGS=, a user flag and a file without the line exactly as they are', () => {
+        for (const content of [
+            'HMM_PORT=8090\nHMM_NODE_FLAGS=\n',
+            "HMM_NODE_FLAGS='--max-old-space-size=200'\n",
+            `HMM_PORT=8090\n${current}\n#HMM_NODE_FLAGS=\n`,
+            'HMM_PORT=8090',
+        ]) {
+            const result = migrated(content);
+            expect(result.env).toBe(content);
+            expect(result.log).toBe('');
+        }
     });
 });
 

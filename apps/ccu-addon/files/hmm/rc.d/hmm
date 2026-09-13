@@ -118,6 +118,26 @@ LogTarget() {
     fi
 }
 
+# B-32: `--lite-mode` and `--jitless` both switch off V8's WebAssembly, and node's fetch parses HTTP with
+# llhttp compiled to WebAssembly: every fetch fails, and on openccu-lite the backend can no longer ask
+# the box about a session, so nobody gets in. 3.0.0-beta.16 started node with `--lite-mode`, and its
+# README showed `HMM_NODE_FLAGS=--lite-mode`. Whoever set them, they are dropped here with a log line;
+# every other flag stays. Prints the flags to use.
+NodeFlags() {
+    kept=""
+    set -f
+    for flag in $1; do
+        case "$flag" in
+            --lite-mode | --lite_mode | --jitless)
+                logger -t $ADDON -p daemon.warn "HMM_NODE_FLAGS: dropped $flag, which switches off WebAssembly, and node's fetch needs it (B-32)"
+                ;;
+            *) kept="${kept:+$kept }$flag" ;;
+        esac
+    done
+    set +f
+    printf '%s' "$kept"
+}
+
 Start() {
     if Running; then
         echo "$ADDON already running"
@@ -158,17 +178,18 @@ Start() {
     HMM_CALLBACK_BINRPC_DEFAULT_PORT=2032
     # task 43: unset means /var/log/hmm.log
     HMM_ADDON_LOG=varlog
-    # Task 44 (D-46): flags for node itself, read here and never by the host. `--lite-mode` switches
-    # off V8's optimising compilers and keeps smaller feedback: less anonymous memory in every phase
-    # of the backend (README, "Memory"), for slower hot code, which here is the XML of a large answer
-    # now and then. hmm.env may set other flags, or `HMM_NODE_FLAGS=` for none.
-    HMM_NODE_FLAGS=--lite-mode
+    # B-32 (task 44, D-46): flags for node itself, read here and never by the host. Memory flags that
+    # leave WebAssembly alone (README, "Memory"): 3.0.0-beta.16's `--lite-mode` switched it off, and
+    # node's fetch cannot work without it. hmm.env may set other flags, or `HMM_NODE_FLAGS=` for none;
+    # NodeFlags takes out the ones that switch WebAssembly off, wherever they came from.
+    HMM_NODE_FLAGS="--max-semi-space-size=1 --optimize-for-size"
     if [ -f $ENV_FILE ]; then
         set -a
         # shellcheck source=/dev/null
         . $ENV_FILE
         set +a
     fi
+    HMM_NODE_FLAGS="$(NodeFlags "$HMM_NODE_FLAGS")"
     # D-40: openccu-lite has no ReGaHSS and its own users, so `rega` cannot work there and the
     # box's own hand-over can: its shell opens an addon page with the user's session on the URL and
     # this host checks that session against the box. Decided **at every start** from the firmware's

@@ -92,10 +92,14 @@ docker build -q -t "$IMAGE" "$ADDON_SRC/test" >/dev/null || {
 
 docker run -d --init --name "$NAME" -v "$PKG:/dist/$(basename "$PKG"):ro" \
     -v "$ADDON_SRC/test/ws-probe.mjs:/opt/ws-probe.mjs:ro" \
-    -v "$ADDON_SRC/test/ccu-auth-stub.mjs:/opt/ccu-auth-stub.mjs:ro" "$IMAGE" >/dev/null
+    -v "$ADDON_SRC/test/ccu-auth-stub.mjs:/opt/ccu-auth-stub.mjs:ro" \
+    -v "$ADDON_SRC/test/occulite-stub.mjs:/opt/occulite-stub.mjs:ro" "$IMAGE" >/dev/null
 
 # the stub ReGa treats this session id as live
 dex "printf '%s\n' $SID > /tmp/valid-sids" >/dev/null
+# a syslog, so the addon scripts' logger lines can be read back (B-32)
+docker exec -d "$NAME" busybox syslogd -n -O /tmp/messages
+syslog() { dex 'cat /tmp/messages 2>/dev/null'; }
 
 # The package where the WebUI's upload puts it, then the firmware's installer - by hand, the way
 # the CCU3 firmware's S00InstallAddon and a self-updater run it ...
@@ -155,16 +159,77 @@ check "and there is no var/hmm.log in the addon directory" "gone" \
 # task 35: the fixed callback ports travel from rc.d's environment into the host
 check "the host takes the addon's fixed callback ports while config.json says 0 (task 35)" \
     "default ports xmlrpc=2031 binrpc=2032" "$(dex 'cat /var/log/hmm.log')"
-# task 44: node runs in V8's lite mode, which the rc.d script passes before the app
+# B-32 (task 44): node runs with the default flags of the installed rc.d script, passed before the app.
+# beta.16's default was --lite-mode, which switches off the WebAssembly node's fetch runs on.
 cmdline_of_backend() { dex "tr '\\0' ' ' < /proc/\$(cat /usr/local/addons/hmm/var/hmm.pid)/cmdline"; }
-check "the backend runs with node's --lite-mode (task 44)" "/usr/local/addons/hmm/bin/node --lite-mode /usr/local/addons/hmm/app/dist/cli.js" \
+NODE_FLAGS="$(dex "sed -n 's/^    HMM_NODE_FLAGS=\"\\(.*\\)\"\$/\\1/p' /usr/local/addons/hmm/rc.d/hmm")"
+EXPECTED_CMDLINE="/usr/local/addons/hmm/bin/node ${NODE_FLAGS:+$NODE_FLAGS }/usr/local/addons/hmm/app/dist/cli.js"
+check "the backend runs with the default node flags as shipped: '$NODE_FLAGS' (B-32)" "$EXPECTED_CMDLINE" \
     "$(cmdline_of_backend)"
+absent "and without --lite-mode" "--lite-mode" "$(cmdline_of_backend)"
+absent "or --jitless" "--jitless" "$(cmdline_of_backend)"
 out="$(dex "cp /usr/local/addons/hmm/etc/hmm.env /tmp/hmm.env.t44 && echo 'HMM_NODE_FLAGS=' >> /usr/local/addons/hmm/etc/hmm.env && /usr/local/etc/config/rc.d/hmm restart; echo \"exit \$?\"")"
 check "HMM_NODE_FLAGS= in etc/hmm.env: the restart says OK" "Starting hmm: OK" "$out"
-absent "and node runs without --lite-mode" "--lite-mode" "$(cmdline_of_backend)"
+check "and node runs without flags" "/usr/local/addons/hmm/bin/node /usr/local/addons/hmm/app/dist/cli.js" \
+    "$(cmdline_of_backend)"
 out="$(dex 'cp /tmp/hmm.env.t44 /usr/local/addons/hmm/etc/hmm.env && /usr/local/etc/config/rc.d/hmm restart; echo "exit $?"')"
-check "and without the line it is back after a restart" "--lite-mode" "$(cmdline_of_backend)"
+check "and without the line the default flags are back after a restart" "$EXPECTED_CMDLINE" "$(cmdline_of_backend)"
 check "which says OK" "Starting hmm: OK" "$out"
+
+echo
+echo "the backend's fetch, against a stub openccu-lite box, with the addon started as shipped (B-32)"
+# In occulite mode the backend lets a session in only after it fetched /api/meta/v1/enums and
+# /api/auth/v1/state from the box. beta.16's --lite-mode made every such fetch fail ("fetch failed",
+# cause "WebAssembly is not defined"), and the addon could not be opened on openccu-lite at all.
+# wait_for_backend: until the (re)started backend answers on its own port
+wait_for_backend() {
+    for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+        dex 'curl -s -o /dev/null http://127.0.0.1:8090/addons/hmm/' >/dev/null && break
+        sleep 1
+    done
+}
+dex 'cp /opt/occulite-stub.mjs /usr/local/addons/hmm/app/occulite-stub.mjs' >/dev/null
+docker exec -d "$NAME" sh -c \
+    "HMM_STUB_SID=$SID /usr/local/addons/hmm/bin/node /usr/local/addons/hmm/app/occulite-stub.mjs >/tmp/occulite-stub.log 2>&1"
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+    dex 'grep -q "occulite stub on" /tmp/occulite-stub.log' >/dev/null && break
+    sleep 1
+done
+check "the stub box is up" "occulite stub on 127.0.0.1:18181" "$(dex 'cat /tmp/occulite-stub.log')"
+out="$(dex 'cp /usr/local/addons/hmm/etc/hmm.env /tmp/hmm.env.b32 \
+    && printf "HMM_AUTH_MODE=occulite\nHMM_OCCULITE_URL=http://127.0.0.1:18181\n" >> /usr/local/addons/hmm/etc/hmm.env \
+    && /usr/local/etc/config/rc.d/hmm restart; echo "exit $?"')"
+check "the addon restarts in occulite mode against the stub" "Starting hmm: OK" "$out"
+wait_for_backend
+check "still with the default node flags" "$EXPECTED_CMDLINE" "$(cmdline_of_backend)"
+out="$(dex "curl -si 'http://127.0.0.1/addons/hmm/?sid=%40${SID}%40'")"
+check "a session the box confirms is let in, through lighttpd: back to the UI" "Location: /addons/hmm/" "$out"
+check "with a session cookie of the addon" "Set-Cookie: hmm_session=" "$out"
+check "because the backend's fetch reached the box" "occulite stub: GET /api/meta/v1/enums live" \
+    "$(dex 'cat /tmp/occulite-stub.log')"
+out="$(dex "curl -si -H 'X-Occulite-Session: $SID' http://127.0.0.1:8090/addons/hmm/")"
+check "the gate's X-Occulite-Session is let in too" "200 OK" "$out"
+check "with the application shell" 'id="app"' "$out"
+check "after the box confirmed it on /api/auth/v1/state" "occulite stub: GET /api/auth/v1/state live" \
+    "$(dex 'cat /tmp/occulite-stub.log')"
+out="$(dex "curl -si 'http://127.0.0.1/addons/hmm/?sid=%400000000000%40'")"
+check "a session the box does not know goes back to the box" "Location: /" "$out"
+absent "and gets no cookie" "hmm_session=" "$out"
+absent "no fetch failed anywhere in the backend's log" "fetch failed" "$(dex 'cat /var/log/hmm.log')"
+# an explicit --lite-mode, as beta.16's README showed it, does not reach node
+out="$(dex "echo 'HMM_NODE_FLAGS=\"--lite-mode --max-old-space-size=300\"' >> /usr/local/addons/hmm/etc/hmm.env \
+    && /usr/local/etc/config/rc.d/hmm restart; echo \"exit \$?\"")"
+check "HMM_NODE_FLAGS=\"--lite-mode --max-old-space-size=300\" in etc/hmm.env: the restart says OK" "Starting hmm: OK" "$out"
+wait_for_backend
+check "node gets the user's other flag and not --lite-mode" \
+    "/usr/local/addons/hmm/bin/node --max-old-space-size=300 /usr/local/addons/hmm/app/dist/cli.js" "$(cmdline_of_backend)"
+check "and the start says so in the syslog" "HMM_NODE_FLAGS: dropped --lite-mode" "$(syslog)"
+out="$(dex "curl -si 'http://127.0.0.1/addons/hmm/?sid=%40${SID}%40'")"
+check "the login still works" "Location: /addons/hmm/" "$out"
+absent "and still no fetch failed" "fetch failed" "$(dex 'cat /var/log/hmm.log')"
+out="$(dex 'cp /tmp/hmm.env.b32 /usr/local/addons/hmm/etc/hmm.env && /usr/local/etc/config/rc.d/hmm restart; echo "exit $?"')"
+check "back to token mode and the default flags" "Starting hmm: OK" "$out"
+wait_for_backend
 
 echo
 echo "a start that starts nothing says so (B-25)"
@@ -463,9 +528,27 @@ echo
 echo "update over the running installation, through the WebUI"
 dex "echo '{\"marker\":\"kept\"}' > /usr/local/hmm/marker.json" >/dev/null
 TOKEN_BEFORE="$(dex 'cat /usr/local/hmm/token')"
+# B-32: what a beta.16 hmm.env can hold - its default.env's comment, which calls --lite-mode the
+# default, and the line its README showed
+docker exec -i "$NAME" sh -c 'cat >> /usr/local/addons/hmm/etc/hmm.env' <<'EOF'
+
+# Task 44: flags for node itself, read by the rc.d script and not by the host. The default is
+# --lite-mode, V8 without its optimising compilers, which keeps the backend's memory down (the
+# addon's README, "Memory"). Empty runs node without flags, as before 3.0.0-beta.16.
+#HMM_NODE_FLAGS=
+HMM_NODE_FLAGS=--lite-mode             # flags for node, read by the rc.d script only - see "Memory"
+EOF
 lighttpd_actions >/dev/null
 out="$(webui install)"
 check "the WebUI's request is answered - with update_script's 0, an update (#141)" "installed rc=0 curl=0" "$out"
+none "the update took beta.16's HMM_NODE_FLAGS=--lite-mode line out of etc/hmm.env (B-32)" \
+    "$(dex 'grep "^HMM_NODE_FLAGS=" /usr/local/addons/hmm/etc/hmm.env')"
+none "and beta.16's comment calling --lite-mode the default" \
+    "$(dex 'grep "flags for node itself, read by the rc.d script and not by the host. The default is" /usr/local/addons/hmm/etc/hmm.env')"
+check "which the current comment replaced" "Unset, node runs with" "$(dex 'cat /usr/local/addons/hmm/etc/hmm.env')"
+check "and it says so in the syslog" "etc/hmm.env: removed the line HMM_NODE_FLAGS=--lite-mode" "$(syslog)"
+wait_for_backend
+check "the updated backend runs with the default node flags" "$EXPECTED_CMDLINE" "$(cmdline_of_backend)"
 none "the rule was unchanged, so lighttpd was left alone entirely" "$(lighttpd_actions)"
 check "and is still the same server" "$LIGHTTPD_PID" "$(dex 'cat /run/lighttpd.pid')"
 check "the profile survived the update" "kept" "$(dex 'cat /usr/local/hmm/marker.json')"
@@ -482,6 +565,8 @@ echo "the CCU3 firmware's path: an install_addon driven by hand on a running box
 # update with a restart by hand. Both halves of that are replayed here: the marker file that makes
 # update_script take the firmware's branch, and a pidfile the installed rc.d cannot see.
 dex 'mkdir -p /etc/init.d && touch /etc/init.d/S00InstallAddon' >/dev/null
+# B-32: a user's own flags next to beta.16's --lite-mode - the update keeps them and takes it out
+dex "echo 'HMM_NODE_FLAGS=\"--max-old-space-size=300 --lite-mode\"' >> /usr/local/addons/hmm/etc/hmm.env" >/dev/null
 PID_BEFORE="$(dex 'cat /usr/local/addons/hmm/var/hmm.pid')"
 dex 'rm -f /usr/local/addons/hmm/var/hmm.pid' >/dev/null
 check "the installed rc.d can no longer see its own process, as in the chroot" "stopped" \
@@ -493,6 +578,12 @@ absent "the old backend was stopped, by name, with no pidfile to go by" "hmm/app
 check "and a new one is running, so the update needs no restart by hand" "running" \
     "$(dex '/usr/local/etc/config/rc.d/hmm status')"
 absent "with a pid of its own" "$PID_BEFORE" "$(dex 'cat /usr/local/addons/hmm/var/hmm.pid')"
+check "the update kept the user's own flag in etc/hmm.env and took --lite-mode out (B-32)" \
+    'HMM_NODE_FLAGS="--max-old-space-size=300"' "$(dex 'grep "^HMM_NODE_FLAGS=" /usr/local/addons/hmm/etc/hmm.env')"
+check "and says so in the syslog" 'took --lite-mode out of HMM_NODE_FLAGS, now "--max-old-space-size=300"' "$(syslog)"
+check "node runs with that flag alone" \
+    "/usr/local/addons/hmm/bin/node --max-old-space-size=300 /usr/local/addons/hmm/app/dist/cli.js" "$(cmdline_of_backend)"
+dex "sed -i '/^HMM_NODE_FLAGS=/d' /usr/local/addons/hmm/etc/hmm.env" >/dev/null
 for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
     dex "curl -sf -o /dev/null -b '$COOKIE' http://127.0.0.1:8090/addons/hmm/" >/dev/null && break
     sleep 1

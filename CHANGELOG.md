@@ -6,7 +6,7 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
-## [Unreleased]
+## [3.0.0-beta.17] — 2026-09-13
 
 **A hotfix for the CCU addon of 3.0.0-beta.16, which could not be opened on openccu-lite.** beta.16 started the addon's
 backend with `--lite-mode`, and that flag broke every web request the backend makes itself. **If you stay on beta.16

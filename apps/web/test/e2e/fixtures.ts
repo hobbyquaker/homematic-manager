@@ -74,7 +74,8 @@ const HMIP_DEVICES = {
             VERSION: 1,
             FIRMWARE: '1.4.8',
             CHILDREN: [`${HMIP_DIMMER}:0`, `${HMIP_DIMMER}:3`],
-            PARAMSETS: ['MASTER'],
+            // B-33: an HmIP device lists SERVICE, as hmipserver 3.89.8 does in the lab
+            PARAMSETS: ['MASTER', 'SERVICE'],
         },
         {
             ADDRESS: `${HMIP_DIMMER}:0`,
@@ -82,7 +83,8 @@ const HMIP_DEVICES = {
             VERSION: 1,
             PARENT: HMIP_DIMMER,
             PARENT_TYPE: 'HmIP-PDT',
-            PARAMSETS: ['MASTER', 'VALUES'],
+            // B-33: and so do most of its channels
+            PARAMSETS: ['MASTER', 'VALUES', 'SERVICE'],
             INDEX: 0,
         },
         {
@@ -119,7 +121,8 @@ const HMIP_DEVICES = {
             VERSION: 1,
             PARENT: HMIP_BUTTON,
             PARENT_TYPE: 'HmIP-WRC2',
-            PARAMSETS: ['MASTER', 'VALUES', 'LINK'],
+            // B-33: SERVICE listed and described empty - the case the maintainer expected; see its description
+            PARAMSETS: ['MASTER', 'VALUES', 'LINK', 'SERVICE'],
             LINK_SOURCE_ROLES: 'SWITCH',
             DIRECTION: 1,
             INDEX: 1,
@@ -224,6 +227,16 @@ const VIRTUAL_DEVICES = {
     ],
 };
 
+/** The SERVICE paramset of an HmIP device and of its channels, as hmipserver 3.89.8 describes it. */
+const HMIP_SERVICE = Object.fromEntries(
+    ['APPLICATION_VERSION', 'BOOTLOADER_VERSION', 'HARDWARE_VERSION', 'OS_VERSION', 'TEST_STATUS'].map((name) => [
+        name,
+        name === 'HARDWARE_VERSION' || name === 'TEST_STATUS'
+            ? {TYPE: 'INTEGER', OPERATIONS: 1, FLAGS: 1, DEFAULT: 0, MIN: 0, MAX: 255}
+            : {TYPE: 'STRING', OPERATIONS: 1, FLAGS: 1, DEFAULT: ''},
+    ]),
+);
+
 const PARAMSET_DESCRIPTIONS: Record<string, unknown> = {
     'BidCos-RF/HM-LC-Sw1-Pl/2.8/1/SWITCH/MASTER': {
         LOGGING: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true},
@@ -280,6 +293,13 @@ const PARAMSET_DESCRIPTIONS: Record<string, unknown> = {
         RSSI_DEVICE: {TYPE: 'INTEGER', OPERATIONS: 5, FLAGS: 1, DEFAULT: 0, MIN: -128, MAX: 127},
         STICKY_UNREACH: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 9, DEFAULT: false, MIN: false, MAX: true},
     },
+    // B-33: what hmipserver 3.89.8 answered in the lab - the MASTER of an HmIP device is empty, its
+    // SERVICE carries five parameters, and a channel's SERVICE is a copy of the device's
+    'HmIP-RF/HmIP-PDT/1.4.8/1//MASTER': {},
+    'HmIP-RF/HmIP-PDT/1.4.8/1//SERVICE': HMIP_SERVICE,
+    'HmIP-RF/HmIP-PDT/1.4.8/1/MAINTENANCE/SERVICE': HMIP_SERVICE,
+    // not seen in the lab, but the other half of the rule: a SERVICE that is listed and empty
+    'HmIP-RF/HmIP-WRC2/1.4.8/1/KEY_TRANSCEIVER/SERVICE': {},
     'HmIP-RF/HmIP-WRC2/1.4.8/1/KEY_TRANSCEIVER/MASTER': {
         LOGGING: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true},
     },

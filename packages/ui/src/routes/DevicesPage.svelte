@@ -1,7 +1,6 @@
 <script lang="ts">
     import type {DeviceDescription} from '@homematic-manager/core';
     import {
-        asStringList,
         canPairDevices,
         decodeDeviceFlags,
         decodeDirection,
@@ -23,7 +22,15 @@
     import type {DataTableColumn} from '../lib/components/tableModel.js';
     import {getStores} from '../lib/stores/context.js';
     import {STORE_INTERFACE} from '../lib/stores/routing.js';
-    import {firmwareCell, offersRepair, serviceMarks, serviceMessageExplanation} from '../lib/util/deviceGrid.js';
+    import {isHmipInterface} from '../lib/stores/suppression.js';
+    import {
+        firmwareCell,
+        offeredParamsets,
+        offersRepair,
+        serviceMarks,
+        serviceMessageExplanation,
+        type OfferedParamsets,
+    } from '../lib/util/deviceGrid.js';
     import {
         channelVisible,
         deviceMatches,
@@ -280,7 +287,7 @@
             // (found by the e2e suite when the rooms and functions columns arrived, task 25)
             fixed: true,
             sortable: false,
-            value: (device) => (asStringList(device.PARAMSETS) ?? []).join(' '),
+            value: (device) => paramsetsOf(device).names.join(' '),
         },
         {
             key: 'FLAGS',
@@ -327,7 +334,7 @@
             width: 140,
             fixed: true,
             sortable: false,
-            value: (channel) => (asStringList(channel.PARAMSETS) ?? []).join(' '),
+            value: (channel) => paramsetsOf(channel).names.join(' '),
         },
         {
             key: 'FLAGS',
@@ -357,6 +364,25 @@
             value: (channel) => (channel.AES_ACTIVE ? '🔑' : ''),
         },
     ]);
+
+    /**
+     * B-33: the paramsets a row offers - what it lists, where the description has parameters. The
+     * store keeps the answer per paramset identity, so a hundred channels of one kind cost one
+     * `getParamsetDescription`, and only for the rows that are drawn.
+     */
+    function paramsetsOf(row: DeviceDescription): OfferedParamsets {
+        const parent = isDeviceAddress(row.ADDRESS) ? undefined : index?.parentOf(row.ADDRESS);
+        // Task 26: the MASTER dialog of an HmIP channel 0 also carries the suppression rows of its
+        // service messages, which come from VALUES - an empty MASTER there still has something to show
+        const suppressible = isHmipInterface(interfaceName, interfaceType) && isMaintenanceAddress(row.ADDRESS);
+        return offeredParamsets(row.PARAMSETS, (name) => {
+            const content = stores.paramsets.contentOf(interfaceName, row, name, parent);
+            if (name !== 'MASTER' || content !== 'empty' || !suppressible) {
+                return content;
+            }
+            return stores.paramsets.contentOf(interfaceName, row, 'VALUES', parent, 'service-messages');
+        });
+    }
 
     /** #25: what a channel may be in a link, from its roles - the same rule the Links tab uses. */
     function linkRolesOf(address: string): {canSend: boolean; canReceive: boolean; links: number} {
@@ -501,21 +527,25 @@
         menuOpen = true;
     }
 
+    /** B-33: one entry per paramset the row offers, the same set as its buttons. */
+    const menuParamsets = $derived.by((): ContextMenuItem[] => {
+        const row = index?.get(menuAddress);
+        return row === undefined
+            ? []
+            : paramsetsOf(row).names.map((name) => ({id: `paramset:${name}`, label: t(`${name} Paramset`)}));
+    });
+
     /**
      * The two 2.7 context menus, merged into one that knows which row it was opened on: the device
      * menu had rename / paramsets / restore / clear / replace / delete, the channel menu rename /
-     * reportValueUsage / paramsets, both with the entries greyed out that the row cannot do.
+     * reportValueUsage / paramsets, both with the entries greyed out that the row cannot do. B-33:
+     * the paramsets are the ones the row offers, not a fixed set per kind of row.
      */
     const menuItems = $derived<ContextMenuItem[]>(
         isDeviceAddress(menuAddress)
             ? [
                   {id: 'rename', label: t('Rename')},
-                  {id: 'paramset:MASTER', label: t('MASTER Paramset')},
-                  {
-                      id: 'paramset:SERVICE',
-                      label: t('SERVICE Paramset'),
-                      disabled: !(asStringList(index?.get(menuAddress)?.PARAMSETS) ?? []).includes('SERVICE'),
-                  },
+                  ...menuParamsets,
                   {id: 'sep1', separator: true},
                   {
                       id: 'restore',
@@ -537,9 +567,7 @@
                   {id: 'usage1', label: 'reportValueUsage 1', disabled: isMaintenanceAddress(menuAddress)},
                   {id: 'usage0', label: 'reportValueUsage 0', disabled: isMaintenanceAddress(menuAddress)},
                   {id: 'sep1', separator: true},
-                  {id: 'paramset:MASTER', label: t('MASTER Paramset')},
-                  {id: 'paramset:VALUES', label: t('VALUES Paramset')},
-                  {id: 'sep2', separator: true},
+                  ...(menuParamsets.length === 0 ? [] : [...menuParamsets, {id: 'sep2', separator: true}]),
                   {id: 'assign:room', label: `${t('Assign to room')}…`, disabled: !taxonomy.writable},
                   {id: 'assign:function', label: `${t('Assign to function')}…`, disabled: !taxonomy.writable},
                   {id: 'sep3', separator: true},
@@ -844,21 +872,25 @@
                         <span class="hmm-firmware-status">{cellState.status}</span>
                     {/if}
                 {:else if column.key === 'PARAMSETS'}
-                    <!-- #143: `asStringList` and not `?? []`: a value that is not a list at all
-                         (the group process sends `PARAMSETS` as a string on some boxes) must not
-                         throw here - one throw in a reactive grid blanks the whole page. The
-                         backend shapes it too; this is the second lock on the same door. -->
-                    {#each asStringList(row.PARAMSETS)?.filter((name) => name !== 'LINK') ?? [] as name (name)}
-                        <button
-                            type="button"
-                            class="hmm-inline-button"
-                            data-testid={`paramset-${row.ADDRESS}-${name}`}
-                            onclick={(event) => {
-                                event.stopPropagation();
-                                openParamset(row.ADDRESS, name);
-                            }}>{name}</button
-                        >
-                    {/each}
+                    <!-- #143: `offeredParamsets` reads the list with `asStringList`: a value that is
+                         not a list at all (the group process sends `PARAMSETS` as a string on some
+                         boxes) must not throw here - one throw in a reactive grid blanks the whole
+                         page. The backend shapes it too; this is the second lock on the same door.
+                         B-33: busy while a listed paramset's description is still being asked for. -->
+                    {@const offered = paramsetsOf(row)}
+                    <span data-testid={`paramsets-${row.ADDRESS}`} aria-busy={offered.pending}>
+                        {#each offered.names as name (name)}
+                            <button
+                                type="button"
+                                class="hmm-inline-button"
+                                data-testid={`paramset-${row.ADDRESS}-${name}`}
+                                onclick={(event) => {
+                                    event.stopPropagation();
+                                    openParamset(row.ADDRESS, name);
+                                }}>{name}</button
+                            >
+                        {/each}
+                    </span>
                 {:else if column.key === 'AES_ACTIVE'}
                     {#if row.AES_ACTIVE}
                         <span title="AES_ACTIVE" aria-label="AES_ACTIVE" role="img">🔑</span>

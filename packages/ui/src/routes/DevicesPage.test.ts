@@ -1,10 +1,10 @@
-import type {DeviceDescription, ServiceMessage} from '@homematic-manager/core';
+import type {DeviceDescription, ParamsetDescription, ServiceMessage} from '@homematic-manager/core';
 import {fireEvent, screen, waitFor, within} from '@testing-library/svelte';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {DEMO_DEVICES, isDemoInterface} from '../lib/transport/demoData.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
-import {firmwareCell, serviceMarks} from '../lib/util/deviceGrid.js';
+import {firmwareCell, offeredParamsets, serviceMarks, type ParamsetContent} from '../lib/util/deviceGrid.js';
 import {mountApp} from '../testHarness.js';
 
 function rowOf(address: string): HTMLElement {
@@ -132,6 +132,153 @@ describe('the channel sub-grid', () => {
         await fireEvent.click(within(rowOf('000A1B2C3D4E5F')).getByRole('button', {name: 'Expand row'}));
         const header = document.querySelector<HTMLElement>('[data-row-kind="header"]');
         expect(header?.textContent).not.toContain('AES_ACTIVE');
+    });
+});
+
+describe('the paramset buttons (B-33)', () => {
+    it('offers what is listed and described with parameters, never LINK, and nothing it has no answer for yet', () => {
+        const contents: Record<string, ParamsetContent> = {
+            MASTER: 'empty',
+            VALUES: 'parameters',
+            SERVICE: 'failed',
+            LINK: 'parameters',
+        };
+        expect(offeredParamsets(['MASTER', 'VALUES', 'LINK', 'SERVICE'], (name) => contents[name])).toEqual({
+            names: ['VALUES', 'SERVICE'],
+            pending: false,
+        });
+        expect(
+            offeredParamsets(['MASTER', 'VALUES'], (name) => (name === 'MASTER' ? undefined : 'parameters')),
+        ).toEqual({
+            names: ['VALUES'],
+            pending: true,
+        });
+        // #143: a string where a list belongs, and no list at all
+        expect(offeredParamsets('MASTER VALUES', () => 'parameters')).toEqual({
+            names: ['MASTER', 'VALUES'],
+            pending: false,
+        });
+        expect(offeredParamsets(undefined, () => 'parameters')).toEqual({names: [], pending: false});
+    });
+
+    /**
+     * The lab's HmIPW-DRS8 on hmipserver 3.89.8 (2026-09-13): the device lists MASTER and SERVICE,
+     * and its MASTER is empty; the channels list SERVICE too and describe it with the device's five
+     * parameters. Channel 4 stands for what the maintainer expected and the lab did not show: a
+     * SERVICE that is listed but empty - and an empty VALUES, as on the DRI16's channel 17.
+     */
+    const DRS8 = '001618A99C5F30';
+    const SERVICE: ParamsetDescription = Object.fromEntries(
+        ['APPLICATION_VERSION', 'BOOTLOADER_VERSION', 'HARDWARE_VERSION', 'OS_VERSION', 'TEST_STATUS'].map((name) => [
+            name,
+            {TYPE: 'STRING', OPERATIONS: 1, FLAGS: 1},
+        ]),
+    );
+    const channel = (index: number, type: string, paramsets: string[]): DeviceDescription => ({
+        ADDRESS: `${DRS8}:${String(index)}`,
+        TYPE: type,
+        PARENT: DRS8,
+        PARENT_TYPE: 'HmIPW-DRS8',
+        INDEX: index,
+        PARAMSETS: paramsets,
+    });
+    const DEVICES: DeviceDescription[] = [
+        {
+            ADDRESS: DRS8,
+            TYPE: 'HmIPW-DRS8',
+            VERSION: 1,
+            FIRMWARE: '1.2.6',
+            CHILDREN: [0, 1, 2, 3, 4].map((index) => `${DRS8}:${String(index)}`),
+            PARAMSETS: ['MASTER', 'SERVICE'],
+        },
+        channel(0, 'MAINTENANCE', ['MASTER', 'VALUES', 'SERVICE']),
+        channel(1, 'SWITCH_TRANSMITTER', ['MASTER', 'VALUES', 'SERVICE']),
+        channel(2, 'SWITCH_VIRTUAL_RECEIVER', ['MASTER', 'VALUES', 'LINK', 'SERVICE']),
+        channel(3, 'SWITCH_VIRTUAL_RECEIVER', ['MASTER', 'VALUES', 'LINK', 'SERVICE']),
+        channel(4, 'ALARM_COND_SWITCH_TRANSMITTER', ['MASTER', 'VALUES', 'SERVICE']),
+    ];
+    const LOGGING = {LOGGING: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1}} satisfies ParamsetDescription;
+    const DESCRIPTIONS: Record<string, ParamsetDescription> = {
+        '|MASTER': {},
+        '|SERVICE': SERVICE,
+        // MAINTENANCE MASTER is empty here, but the dialog has service messages to suppress
+        'MAINTENANCE|MASTER': {},
+        'MAINTENANCE|VALUES': {UNREACH: {TYPE: 'BOOL', OPERATIONS: 5, FLAGS: 9}},
+        'MAINTENANCE|SERVICE': SERVICE,
+        'SWITCH_TRANSMITTER|MASTER': LOGGING,
+        'SWITCH_TRANSMITTER|VALUES': {STATE: {TYPE: 'BOOL', OPERATIONS: 5, FLAGS: 1}},
+        'SWITCH_TRANSMITTER|SERVICE': SERVICE,
+        'SWITCH_VIRTUAL_RECEIVER|MASTER': LOGGING,
+        'SWITCH_VIRTUAL_RECEIVER|VALUES': {STATE: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1}},
+        'SWITCH_VIRTUAL_RECEIVER|SERVICE': SERVICE,
+        'ALARM_COND_SWITCH_TRANSMITTER|MASTER': LOGGING,
+        'ALARM_COND_SWITCH_TRANSMITTER|VALUES': {},
+        'ALARM_COND_SWITCH_TRANSMITTER|SERVICE': {},
+    };
+
+    async function mountDrs8(): Promise<MockTransport> {
+        const transport = new MockTransport({demo: true});
+        transport.respond('devices.list', (interfaceName) =>
+            interfaceName === 'HmIP-RF' ? DEVICES : isDemoInterface(interfaceName) ? DEMO_DEVICES[interfaceName] : [],
+        );
+        transport.respond('paramset.description', (_interfaceName, address, paramset) => {
+            const type = DEVICES.find((entry) => entry.ADDRESS === address && entry.PARENT !== undefined)?.TYPE ?? '';
+            return DESCRIPTIONS[`${type}|${paramset}`] ?? {};
+        });
+        await mountApp({transport, hash: '#/HmIP-RF/devices'});
+        await waitFor(() => {
+            expect(rowOf(DRS8)).toBeTruthy();
+        });
+        await fireEvent.click(within(rowOf(DRS8)).getByRole('button', {name: 'Expand row'}));
+        return transport;
+    }
+
+    async function offered(address: string): Promise<string[]> {
+        const cell = await screen.findByTestId(`paramsets-${address}`);
+        await waitFor(() => {
+            expect(cell.getAttribute('aria-busy')).toBe('false');
+        });
+        return within(cell)
+            .queryAllByRole('button')
+            .map((button) => button.textContent.trim());
+    }
+
+    it('follows each row: SERVICE where it is described, on the channels too, and no empty paramset', async () => {
+        const transport = await mountDrs8();
+
+        expect(await offered(DRS8)).toEqual(['SERVICE']);
+        expect(await offered(`${DRS8}:0`)).toEqual(['MASTER', 'VALUES', 'SERVICE']);
+        expect(await offered(`${DRS8}:1`)).toEqual(['MASTER', 'VALUES', 'SERVICE']);
+        expect(await offered(`${DRS8}:2`)).toEqual(['MASTER', 'VALUES', 'SERVICE']);
+        expect(await offered(`${DRS8}:3`)).toEqual(['MASTER', 'VALUES', 'SERVICE']);
+        expect(await offered(`${DRS8}:4`)).toEqual(['MASTER']);
+
+        // one description per kind of channel: :2 and :3 are both SWITCH_VIRTUAL_RECEIVER
+        const receivers = transport.calls.filter(
+            (call) => call.method === 'paramset.description' && /:[23]$/.test(String(call.params[1])),
+        );
+        expect(receivers.map((call) => call.params[2]).sort()).toEqual(['MASTER', 'SERVICE', 'VALUES']);
+    });
+
+    it('offers the same paramsets in the context menu, not a fixed set per kind of row', async () => {
+        await mountDrs8();
+        await offered(DRS8);
+        await offered(`${DRS8}:4`);
+
+        await fireEvent.contextMenu(rowOf(DRS8));
+        const deviceItems = within(screen.getByTestId('devices-menu'))
+            .getAllByRole('menuitem')
+            .map((item) => item.textContent.trim());
+        expect(deviceItems.slice(0, 2)).toEqual(['Umbenennen', 'SERVICE Parametersatz']);
+        expect(deviceItems).not.toContain('MASTER Paramset');
+
+        await fireEvent.contextMenu(rowOf(`${DRS8}:4`));
+        await waitFor(() => {
+            const labels = within(screen.getByTestId('devices-menu'))
+                .getAllByRole('menuitem')
+                .map((item) => item.textContent.trim());
+            expect(labels.filter((label) => /Param/.test(label))).toEqual(['MASTER Paramset']);
+        });
     });
 });
 

@@ -1,20 +1,49 @@
-import type {
-    Paramset,
-    ParamsetDescription,
-    ParamsetWrite,
-    RpcValue,
-    RpcWriteValue,
-    Transport,
-    WriteOptions,
-    WriteResult,
+import {
+    paramsetIdentity,
+    type DeviceDescription,
+    type Paramset,
+    type ParamsetDescription,
+    type ParamsetWrite,
+    type RpcValue,
+    type RpcWriteValue,
+    type Transport,
+    type WriteOptions,
+    type WriteResult,
 } from '@homematic-manager/core';
+
+import type {ParamsetContent} from '../util/deviceGrid.js';
+import {serviceMessageParameters} from '../util/paramsetForm.js';
 
 import type {NoticesStore} from './NoticesStore.svelte.js';
 import {readSuppressed, writeSuppressed} from './suppression.js';
 
+/**
+ * What counts as content of a description: any parameter, or - for the suppression rows the MASTER
+ * dialog of an HmIP channel 0 draws from VALUES (task 26) - a service-message parameter.
+ */
+export type ContentMeasure = 'parameters' | 'service-messages';
+
 /** Cache key of a description or a value set. */
 function key(interfaceName: string, address: string, paramset: string): string {
     return `${interfaceName}|${address}|${paramset}`;
+}
+
+/**
+ * B-33: what the content of a paramset is kept under - its identity (interface, device type,
+ * firmware, version, channel type, paramset), so that every channel of the same kind shares one
+ * answer. A channel whose device is not in the index has no identity and gets the address key.
+ */
+function contentKey(
+    interfaceName: string,
+    description: DeviceDescription,
+    paramset: string,
+    parent: DeviceDescription | undefined,
+): string {
+    try {
+        return paramsetIdentity(interfaceName, description, paramset, parent);
+    } catch {
+        return key(interfaceName, description.ADDRESS, paramset);
+    }
 }
 
 /**
@@ -32,9 +61,13 @@ export class ParamsetStore {
     /** The results of the last write, one per target; the dialog shows them under the form. */
     results = $state<WriteResult[]>([]);
     writing = $state(false);
+    /** B-33: per paramset identity, what its description holds (see {@link contentOf}). */
+    contents = $state<Record<string, ParamsetContent>>({});
 
     readonly #transport: Transport;
     readonly #notices: NoticesStore;
+    /** The identities whose description is being asked for; plain, only `contentOf` reads it. */
+    #probing: string[] = [];
 
     constructor(transport: Transport, notices: NoticesStore) {
         this.#transport = transport;
@@ -60,6 +93,59 @@ export class ParamsetStore {
             this.#notices.fromError(error, `getParamsetDescription ${address} ${paramset}`);
             return undefined;
         }
+    }
+
+    /**
+     * B-33: whether the description of a paramset an object lists has parameters - what decides if
+     * the device grid offers it. `undefined` while that is not known yet.
+     *
+     * The first question for an identity starts one `getParamsetDescription` (the backend answers
+     * it from its own identity cache when it can); every other object of the same kind gets the
+     * same answer without a request. The request starts in a microtask, because this is asked while
+     * the grid renders, and a render must not change state. A failure is kept as `failed` and
+     * raises no notice: nobody asked for this description, and the dialog reports the failure when
+     * somebody does.
+     */
+    contentOf(
+        interfaceName: string,
+        description: DeviceDescription,
+        paramset: string,
+        parent: DeviceDescription | undefined,
+        measure: ContentMeasure = 'parameters',
+    ): ParamsetContent | undefined {
+        const identity = `${contentKey(interfaceName, description, paramset, parent)}#${measure}`;
+        const known = this.contents[identity];
+        if (known !== undefined || this.#probing.includes(identity)) {
+            return known;
+        }
+        this.#probing.push(identity);
+        const address = description.ADDRESS;
+        queueMicrotask(() => {
+            void this.#probe(identity, interfaceName, address, paramset, measure);
+        });
+        return undefined;
+    }
+
+    async #probe(
+        identity: string,
+        interfaceName: string,
+        address: string,
+        paramset: string,
+        measure: ContentMeasure,
+    ): Promise<void> {
+        let content: ParamsetContent;
+        try {
+            const description =
+                this.descriptions[key(interfaceName, address, paramset)] ??
+                (await this.#transport.request('paramset.description', interfaceName, address, paramset));
+            const names =
+                measure === 'service-messages' ? serviceMessageParameters(description) : Object.keys(description);
+            content = names.length === 0 ? 'empty' : 'parameters';
+        } catch {
+            content = 'failed';
+        }
+        this.#probing = this.#probing.filter((entry) => entry !== identity);
+        this.contents = {...this.contents, [identity]: content};
     }
 
     /** `getParamset`. Never cached - see the note on the class. */

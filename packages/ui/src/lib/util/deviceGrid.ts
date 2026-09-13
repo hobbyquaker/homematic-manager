@@ -1,5 +1,5 @@
 import type {DeviceDescription, ServiceMessage} from '@homematic-manager/core';
-import {deviceAddress} from '@homematic-manager/core';
+import {asStringList, deviceAddress} from '@homematic-manager/core';
 
 /**
  * The two derived cells of the device grid that carry more than text: the service-message marks in
@@ -81,6 +81,52 @@ export function serviceMessageExplanation(datapoint: string, hmip: boolean): str
     return hmip
         ? 'The configuration could not be transferred to the device'
         : 'A configuration is queued; the device takes it when it next wakes up';
+}
+
+/**
+ * What the description of a paramset an object lists turned out to hold (B-33): parameters,
+ * nothing at all, or no answer - the interface refused or the connection failed.
+ */
+export type ParamsetContent = 'parameters' | 'empty' | 'failed';
+
+/** The paramset buttons of one row, and whether a listed paramset is still being asked about. */
+export interface OfferedParamsets {
+    readonly names: string[];
+    readonly pending: boolean;
+}
+
+/**
+ * B-33: the paramsets a row of the device grid offers - as a button in the PARAMSETS cell and as an
+ * entry of the context menu.
+ *
+ * Only what the object itself lists in `PARAMSETS`, and only when its description has parameters.
+ * hmipserver lists `SERVICE` on most HmIP channels and describes it there as a copy of the device's
+ * (lab, 2026-09-13), so a channel may well have one; what it lists empty is mostly `MASTER` - every
+ * HmIP device, the virtual keys of the CCU's own radio module - and a button for it opened an empty
+ * dialog. LINK is never a button: it is the Links tab.
+ *
+ * A paramset whose description has not been answered yet is not offered: a button that appears is
+ * better than one that appears and disappears under the pointer. One whose description failed is
+ * offered, because hiding it would hide the failure too - the dialog reports it.
+ */
+export function offeredParamsets(
+    listed: unknown,
+    contentOf: (paramset: string) => ParamsetContent | undefined,
+): OfferedParamsets {
+    const names: string[] = [];
+    let pending = false;
+    for (const name of asStringList(listed) ?? []) {
+        if (name === 'LINK') {
+            continue;
+        }
+        const content = contentOf(name);
+        if (content === undefined) {
+            pending = true;
+        } else if (content !== 'empty') {
+            names.push(name);
+        }
+    }
+    return {names, pending};
 }
 
 /** Is `devices.repairConfig` worth offering for this service message on this interface? */

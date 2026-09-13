@@ -6,6 +6,22 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **The device grid offers only the paramsets that have something in them.**
+  - **The rule:** a button in the PARAMSETS column, and an entry in the context menu of a device or a channel, is there
+    when the device or channel lists the paramset and the interface describes it with parameters.
+  - **Before:** the buttons followed the list alone, and the context menu offered a fixed set per kind of row, so a
+    MASTER button opened an empty dialog: the MASTER of every HmIP device is empty, and so is the MASTER of the virtual
+    keys of the CCU's own radio module.
+  - **SERVICE on HmIP channels stays.** hmipserver lists it on most of their channels and describes it there with the
+    device's own five service parameters.
+  - **Channel 0 of an HmIP device** keeps its MASTER button when the dialog has service messages to suppress.
+  - **One description per kind of device and channel** is asked for, only for the rows on screen. A description that
+    cannot be read keeps its button, and the dialog says why. (B-33)
+
 ## [3.0.0-beta.17] — 2026-09-13
 
 **A hotfix for the CCU addon of 3.0.0-beta.16, which could not be opened on openccu-lite.** beta.16 started the addon's

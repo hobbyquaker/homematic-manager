@@ -1,4 +1,5 @@
-import {describe, expect, it} from 'vitest';
+import type {DeviceDescription} from '@homematic-manager/core';
+import {describe, expect, it, vi} from 'vitest';
 
 import {MockTransport} from '../transport/MockTransport.js';
 
@@ -31,6 +32,80 @@ describe('ParamsetStore', () => {
         expect(first).toEqual(second);
         expect(transport.countOf('paramset.description')).toBe(1);
         expect(store.description('BidCos-RF', 'MEQ0123456:1', 'MASTER')).toEqual(first);
+    });
+
+    describe('B-33: what a listed paramset holds', () => {
+        const device: DeviceDescription = {ADDRESS: 'X', TYPE: 'HmIP-PDT', FIRMWARE: '1.4.8', VERSION: 1};
+        const channel = (index: number, type: string): DeviceDescription => ({
+            ADDRESS: `X:${String(index)}`,
+            TYPE: type,
+            PARENT: 'X',
+            PARENT_TYPE: 'HmIP-PDT',
+        });
+
+        it('asks once per kind of channel and keeps the answer by identity', async () => {
+            const {transport, notices} = setup();
+            transport.respond('paramset.description', (_interfaceName, address) =>
+                address.startsWith('X:9') ? {} : {LOGGING: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1}},
+            );
+            const store = new ParamsetStore(transport, notices);
+
+            // asked while a grid renders: nothing is known yet, and nothing is requested twice
+            expect(store.contentOf('HmIP-RF', channel(1, 'KEY'), 'MASTER', device)).toBeUndefined();
+            expect(store.contentOf('HmIP-RF', channel(2, 'KEY'), 'MASTER', device)).toBeUndefined();
+            await vi.waitFor(() => {
+                expect(store.contentOf('HmIP-RF', channel(2, 'KEY'), 'MASTER', device)).toBe('parameters');
+            });
+            expect(store.contentOf('HmIP-RF', channel(1, 'KEY'), 'MASTER', device)).toBe('parameters');
+            expect(transport.countOf('paramset.description')).toBe(1);
+
+            // a channel of another kind is another identity, and its empty description is "empty"
+            expect(store.contentOf('HmIP-RF', channel(9, 'EMPTY'), 'MASTER', device)).toBeUndefined();
+            await vi.waitFor(() => {
+                expect(store.contentOf('HmIP-RF', channel(9, 'EMPTY'), 'MASTER', device)).toBe('empty');
+            });
+            expect(transport.countOf('paramset.description')).toBe(2);
+        });
+
+        it('counts only service-message parameters for the suppression rows of an HmIP channel 0', async () => {
+            const {transport, notices} = setup();
+            transport.respond('paramset.description', (_interfaceName, address) =>
+                address === 'X:0'
+                    ? {UNREACH: {TYPE: 'BOOL', OPERATIONS: 5, FLAGS: 9}}
+                    : {RSSI_DEVICE: {TYPE: 'INTEGER', OPERATIONS: 5, FLAGS: 1}},
+            );
+            const store = new ParamsetStore(transport, notices);
+            const other = {...device, ADDRESS: 'Y', TYPE: 'HmIP-WRC2'};
+            const otherChannel = {...channel(0, 'MAINTENANCE'), ADDRESS: 'Y:0', PARENT: 'Y', PARENT_TYPE: 'HmIP-WRC2'};
+
+            store.contentOf('HmIP-RF', channel(0, 'MAINTENANCE'), 'VALUES', device, 'service-messages');
+            store.contentOf('HmIP-RF', otherChannel, 'VALUES', other, 'service-messages');
+            await vi.waitFor(() => {
+                expect(
+                    store.contentOf('HmIP-RF', channel(0, 'MAINTENANCE'), 'VALUES', device, 'service-messages'),
+                ).toBe('parameters');
+                expect(store.contentOf('HmIP-RF', otherChannel, 'VALUES', other, 'service-messages')).toBe('empty');
+            });
+            // the plain question about the same VALUES is its own entry: RSSI_DEVICE is a parameter
+            store.contentOf('HmIP-RF', otherChannel, 'VALUES', other);
+            await vi.waitFor(() => {
+                expect(store.contentOf('HmIP-RF', otherChannel, 'VALUES', other)).toBe('parameters');
+            });
+        });
+
+        it('keeps a description that cannot be read as "failed", without a notice', async () => {
+            const {transport, notices} = setup();
+            transport.fail('paramset.description', 'Unknown instance');
+            const store = new ParamsetStore(transport, notices);
+            const before = notices.items.length;
+
+            expect(store.contentOf('BidCos-RF', channel(1, 'SWITCH'), 'MASTER', undefined)).toBeUndefined();
+            await vi.waitFor(() => {
+                expect(store.contentOf('BidCos-RF', channel(1, 'SWITCH'), 'MASTER', undefined)).toBe('failed');
+            });
+            expect(notices.items).toHaveLength(before);
+            expect(transport.countOf('paramset.description')).toBe(1);
+        });
     });
 
     it('never caches the values - the diff must compare against what the device holds now', async () => {

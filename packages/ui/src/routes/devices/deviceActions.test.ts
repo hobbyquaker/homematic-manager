@@ -339,6 +339,10 @@ describe('the context menu', () => {
         await fireEvent.contextMenu(rowOf('MEQ0123456'));
 
         const menu = screen.getByTestId('devices-menu');
+        // B-33: the paramsets the device offers - no greyed SERVICE entry for a device without one
+        await waitFor(() => {
+            expect(within(menu).getAllByRole('menuitem')[1]?.textContent.trim()).toBe('MASTER Paramset');
+        });
         expect(
             within(menu)
                 .getAllByRole('menuitem')
@@ -346,7 +350,6 @@ describe('the context menu', () => {
         ).toEqual([
             'Umbenennen',
             'MASTER Paramset',
-            'SERVICE Parametersatz',
             'restoreConfigToDevice',
             'clearConfigCache',
             'Konfiguration reparieren',
@@ -362,12 +365,17 @@ describe('the context menu', () => {
         await select('MEQ0123456:1');
         await fireEvent.contextMenu(rowOf('MEQ0123456:0'));
 
-        const items = within(screen.getByTestId('devices-menu')).getAllByRole('menuitem') as HTMLButtonElement[];
+        const menu = screen.getByTestId('devices-menu');
+        await waitFor(() => {
+            expect(within(menu).getAllByRole('menuitem')[3]?.textContent.trim()).toBe('VALUES Paramset');
+        });
+        const items = within(menu).getAllByRole('menuitem') as HTMLButtonElement[];
+        // B-33: the demo describes MASTER of a BidCos MAINTENANCE channel as empty, like rfd does for
+        // HM-CC-TC:0 and HM-Sec-SC:0 in the lab, so only VALUES is offered - and no greyed MASTER
         expect(items.map((item) => item.textContent.trim())).toEqual([
             'Umbenennen',
             'reportValueUsage 1',
             'reportValueUsage 0',
-            'MASTER Paramset',
             'VALUES Paramset',
             'Raum zuordnen…',
             'Gewerk zuordnen…',
@@ -378,11 +386,11 @@ describe('the context menu', () => {
         ]);
         // The three that act on the channel are off for :0; the paramsets of :0 are readable.
         expect(items.slice(0, 3).every((item) => item.disabled)).toBe(true);
-        expect(items.slice(3, 5).some((item) => item.disabled)).toBe(false);
+        expect(items[3]?.disabled).toBe(false);
         // task 25: the store of the demo takes writes, so a :0 channel may be put into a room
-        expect(items.slice(5, 7).some((item) => item.disabled)).toBe(false);
+        expect(items.slice(4, 6).some((item) => item.disabled)).toBe(false);
         // MAINTENANCE has no link roles and no TEAM_TAG, so the link and team entries are off
-        expect(items.slice(7).every((item) => item.disabled)).toBe(true);
+        expect(items.slice(6).every((item) => item.disabled)).toBe(true);
     });
 
     it('puts a smoke detector into the other detector team (#97)', async () => {

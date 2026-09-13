@@ -417,7 +417,9 @@ describe('service-message suppression in the channel-0 dialog', () => {
         await mountApp({transport, hash: '#/HmIP-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="000A1B2C3D4E5F"]')!;
         await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
-        await fireEvent.click(screen.getByTestId(`paramset-000A1B2C3D4E5F:0-${paramset}`));
+        // B-33: the MASTER of this channel 0 is empty in the demo; its button is offered because the
+        // dialog carries the suppression rows from VALUES, which takes a second description
+        await fireEvent.click(await screen.findByTestId(`paramset-000A1B2C3D4E5F:0-${paramset}`));
         await waitFor(() => {
             expect(screen.getByTestId('suppress-LOWBAT')).toBeTruthy();
         });

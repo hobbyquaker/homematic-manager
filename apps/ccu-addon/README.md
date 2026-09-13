@@ -265,7 +265,7 @@ HMM_AUTH_MODE=token  # token (default) or rega - see "The optional login (D-32)"
 HMM_SESSION_TTL=24h  # with rega: how long a login lasts without being used
 HMM_CALLBACK_XMLRPC_DEFAULT_PORT=2031  # the callback ports while the settings say 0, see "Callback ports"
 HMM_CALLBACK_BINRPC_DEFAULT_PORT=2032  # (set by the rc.d script; 0 here: a free port at every start)
-HMM_NODE_FLAGS=--lite-mode             # flags for node, read by the rc.d script only - see "Memory"
+HMM_NODE_FLAGS="--max-semi-space-size=1 --optimize-for-size"  # node's flags (the default), read by rc.d only - see "Memory"
 ```
 
 Every option of the host has an `HMM_*` environment mirror
@@ -339,29 +339,38 @@ touched by it.
 
 ## Memory
 
-Since 3.0.0-beta.16 `rc.d/hmm` starts node with `--lite-mode` (task 44): V8 without its optimising
-compilers and with smaller feedback vectors. The backend's hot paths are few - the XML of a large
-`listDevices` or `getParamsetDescription` answer now and then - so what it costs in speed is small,
-and what it saves is memory in every phase. `HMM_NODE_FLAGS=` in `etc/hmm.env` starts node without it.
+Since 3.0.0-beta.17 `rc.d/hmm` starts node with `--max-semi-space-size=1 --optimize-for-size` (B-32,
+task 44): a young generation of 1 MB instead of V8's default, which grows with a page and is never given
+back, and V8's heuristics for a small heap. The backend allocates little, so the more frequent
+collections cost next to nothing. `HMM_NODE_FLAGS=` in `etc/hmm.env` starts node without flags, and
+any other value replaces the default.
 
-Measured on 2026-09-12 with the x86_64 package of beta.15 (Node v24.21.0) on a development machine,
+**Not `--lite-mode` and not `--jitless`.** 3.0.0-beta.16 started node with `--lite-mode`, which saved a
+little more, but it switches off WebAssembly, and node's built-in `fetch` parses HTTP with WebAssembly:
+every request of the backend failed, and on openccu-lite no session was let in, so the addon could not
+be opened. `--jitless` does the same. `rc.d/hmm` drops both from `HMM_NODE_FLAGS` with a log line, and
+the update takes them out of `etc/hmm.env`.
+
+Measured on 2026-09-13 with the x86_64 package of beta.16 (Node v24.21.0) on a development machine,
 not on a CCU: the addon's own `bin/node` and app against hm-simulator on the CCU's loopback ports with
 the device list of a lab box (5 devices), in four phases - 45 s after the port listens, a page open
 for 75 s with the tabs visited, the page closed, and after the idle unsubscribe (grace 60 s for the
-run). Two runs each; MiB of PSS, anonymous memory in brackets:
+run). Two runs each, alternating; MiB of PSS, anonymous memory in brackets:
 
 | | started | page open (40 s) | page closed | after the unsubscribe | peak RSS |
 | --- | --- | --- | --- | --- | --- |
-| without a flag, run 1 | 105.9 (56.5) | 114.4 (65.0) | 114.5 (65.0) | 81.4 (31.8) | 120.9 |
-| without a flag, run 2 | 94.3 (45.3) | 88.3 (39.1) | 88.4 (39.1) | 81.2 (31.7) | 96.7 |
-| `--lite-mode`, run 1 | 62.6 (21.2) | 65.8 (24.0) | 65.8 (24.0) | 66.1 (24.0) | 79.5 |
-| `--lite-mode`, run 2 | 62.4 (21.2) | 63.0 (22.0) | 63.1 (22.0) | 63.2 (22.0) | 79.0 |
+| without flags, run 1 | 85.2 (58.3) | 92.7 (65.6) | 92.7 (65.6) | 60.7 (33.6) | 101.4 |
+| without flags, run 2 | 87.3 (60.2) | 65.2 (37.7) | 66.5 (39.0) | 60.1 (32.4) | 89.1 |
+| the default flags, run 1 | 56.0 (28.8) | 57.2 (29.6) | 57.5 (29.8) | 58.0 (30.4) | 71.5 |
+| the default flags, run 2 | 56.2 (29.4) | 60.4 (32.8) | 60.5 (32.8) | 61.1 (33.4) | 70.5 |
 
-So about **30–50 MiB less PSS while the backend is subscribed or a page is open, 15–18 MiB less after
-the idle unsubscribe**, and a steadier figure: without the flag the same run lands 10–25 MiB apart
-depending on when V8 collects. Part of the PSS here is the code of `bin/node`, which sat on a tmpfs
-and counts as shared memory (47 MiB without the flag, 40 MiB with it); on a CCU it is file-backed and
-reclaimable. Not measured yet on a CCU, and not for the time a page takes to load there.
+So about **30 MiB less PSS after the start, 5–35 MiB less with a page open, about the same after the
+idle unsubscribe**, 18–31 MiB less at the peak, and a steadier figure: without flags the same run lands
+up to 27 MiB apart depending on when V8 collects. About 26 MiB of the PSS in every run is the code of
+`bin/node`, which sat on a tmpfs and counts as shared memory; on a CCU it is file-backed and
+reclaimable. For comparison, beta.16's `--lite-mode` held 21–24 MiB of anonymous memory in the same
+harness on 2026-09-12, against 29–34 MiB here. Not measured yet on a CCU, and not for the time a page
+takes to load there.
 
 ## Troubleshooting
 

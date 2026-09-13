@@ -6,6 +6,28 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+**A hotfix for the CCU addon of 3.0.0-beta.16, which could not be opened on openccu-lite.** beta.16 started the addon's
+backend with `--lite-mode`, and that flag broke every web request the backend makes itself. **If you stay on beta.16
+for now**, set `HMM_NODE_FLAGS=` (empty) in `/usr/local/addons/hmm/etc/hmm.env` and restart the addon. **After the
+update to this version**, remove that line again: the update keeps an empty `HMM_NODE_FLAGS=`, and without the line
+the addon uses its new memory flags.
+
+### Fixed
+
+- **The CCU addon can be opened on openccu-lite again, and the backend's own web requests work again everywhere.**
+  beta.16 started node with `--lite-mode` to save memory. That flag switches off WebAssembly, and node's built-in
+  `fetch` needs it, so every request of the backend failed with `fetch failed`. On openccu-lite the addon asks the box
+  with such a request whether a session is valid: it refused every session, and the box's start page appeared in the
+  addon's frame instead of the Homematic Manager. On every firmware the device pictures the addon fetches from the CCU
+  fell back to the bundled ones. The addon now starts node with `--max-semi-space-size=1 --optimize-for-size`, which
+  keep WebAssembly and still save memory: measured with the addon's own runtime against a simulated CCU, about 30 MiB
+  less PSS after the start and 5–35 MiB less with a page open, about the same after the idle unsubscribe, and far less
+  scatter from garbage collection (the addon's README, "Memory"). `--lite-mode` and `--jitless` are dropped from
+  `HMM_NODE_FLAGS` wherever they are set, with a line in the log, and the update takes them out of `etc/hmm.env`; any
+  other flag set there stays, and so does an empty `HMM_NODE_FLAGS=`. (B-32)
+
 ## [3.0.0-beta.16] — 2026-09-12
 
 Thanks to @Herbert-Testmann for reports and ideas.

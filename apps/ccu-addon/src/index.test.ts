@@ -119,7 +119,12 @@ function runSh(script: string): {stdout: string; stderr: string; status: number 
     return {stdout: result.stdout, stderr: result.stderr, status: result.status};
 }
 
-/** What a node started with these flags says about WebAssembly and a fetch of a local HTTP server. */
+/**
+ * What a node started with these flags says about WebAssembly and a fetch of a local HTTP server, stdout and
+ * stderr together: without WebAssembly Node 24 rejects the fetch ("fetch failed", cause "WebAssembly is not
+ * defined"), while Node 22's undici throws the same ReferenceError uncaught and the process ends before it
+ * prints anything.
+ */
 function probeNode(flags: readonly string[]): string {
     const script = `
         const {createServer} = require('node:http');
@@ -133,7 +138,8 @@ function probeNode(flags: readonly string[]): string {
             console.log('WebAssembly=' + typeof WebAssembly + ' ' + answer);
             server.close();
         });`;
-    return spawnSync(process.execPath, [...flags, '-e', script], {encoding: 'utf8', timeout: 20_000}).stdout;
+    const result = spawnSync(process.execPath, [...flags, '-e', script], {encoding: 'utf8', timeout: 20_000});
+    return `${result.stdout}${result.stderr}`;
 }
 
 /** The comment 3.0.0-beta.16's default.env put above `#HMM_NODE_FLAGS=`, and into every hmm.env made from it. */
@@ -185,8 +191,10 @@ describe('rc.d/hmm starts node with flags that keep fetch working (B-32)', () =>
     });
 
     it('leaves WebAssembly and fetch working in node with the default flags', () => {
-        // the probe itself: --lite-mode is exactly what it has to catch
-        expect(probeNode(['--lite-mode'])).toContain('WebAssembly=undefined fetch failed: WebAssembly is not defined');
+        // the probe itself: --lite-mode is exactly what it has to catch, on Node 22 and 24 alike
+        const lite = probeNode(['--lite-mode']);
+        expect(lite).toContain('WebAssembly is not defined');
+        expect(lite).not.toContain('fetch 200');
         expect(probeNode(defaults.split(/\s+/).filter(Boolean))).toContain('WebAssembly=object fetch 200');
     });
 

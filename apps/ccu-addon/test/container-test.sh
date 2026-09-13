@@ -162,7 +162,8 @@ check "the host takes the addon's fixed callback ports while config.json says 0 
 # B-32 (task 44): node runs with the default flags of the installed rc.d script, passed before the app.
 # beta.16's default was --lite-mode, which switches off the WebAssembly node's fetch runs on.
 cmdline_of_backend() { dex "tr '\\0' ' ' < /proc/\$(cat /usr/local/addons/hmm/var/hmm.pid)/cmdline"; }
-NODE_FLAGS="$(dex "sed -n 's/^    HMM_NODE_FLAGS=\"\\(.*\\)\"\$/\\1/p' /usr/local/addons/hmm/rc.d/hmm")"
+# the literal default only, not the line that filters it (HMM_NODE_FLAGS="$(NodeFlags ...)")
+NODE_FLAGS="$(dex "sed -n 's/^    HMM_NODE_FLAGS=\"\\([^\$]*\\)\"\$/\\1/p' /usr/local/addons/hmm/rc.d/hmm")"
 EXPECTED_CMDLINE="/usr/local/addons/hmm/bin/node ${NODE_FLAGS:+$NODE_FLAGS }/usr/local/addons/hmm/app/dist/cli.js"
 check "the backend runs with the default node flags as shipped: '$NODE_FLAGS' (B-32)" "$EXPECTED_CMDLINE" \
     "$(cmdline_of_backend)"

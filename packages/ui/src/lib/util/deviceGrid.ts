@@ -108,10 +108,13 @@ export interface OfferedParamsets {
  * entry of the context menu.
  *
  * Only what the object itself lists in `PARAMSETS`, and only when its description has parameters.
- * hmipserver lists `SERVICE` on most HmIP channels and describes it there as a copy of the device's
- * (lab, 2026-09-13), so a channel may well have one; what it lists empty is mostly `MASTER` - every
- * HmIP device, the virtual keys of the CCU's own radio module - and a button for it opened an empty
- * dialog. LINK is never a button: it is the Links tab.
+ * What interfaces list empty is mostly `MASTER` - every HmIP device, the virtual keys of the CCU's own
+ * radio module - and a button for it opened an empty dialog. LINK is never a button: it is the Links
+ * tab.
+ *
+ * SERVICE is never a button on a channel (the maintainer, 2026-09-13), whatever it holds: hmipserver
+ * lists it on most HmIP channels and describes it there as a copy of the device's (lab, 2026-09-13),
+ * so the device's button is the one place for it. It is not even asked about.
  *
  * A paramset whose description has not been answered yet is not offered: a button that appears is
  * better than one that appears and disappears under the pointer. One whose description failed is
@@ -120,11 +123,12 @@ export interface OfferedParamsets {
 export function offeredParamsets(
     listed: unknown,
     contentOf: (paramset: string) => ParamsetContent | undefined,
+    row: {readonly channel: boolean} = {channel: false},
 ): OfferedParamsets {
     const names: string[] = [];
     let pending = false;
     for (const name of asStringList(listed) ?? []) {
-        if (name === 'LINK') {
+        if (name === 'LINK' || (row.channel && name === 'SERVICE')) {
             continue;
         }
         const content = contentOf(name);

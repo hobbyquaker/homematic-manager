@@ -16,8 +16,8 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   - **Before:** the buttons followed the list alone, and the context menu offered a fixed set per kind of row, so a
     MASTER button opened an empty dialog: the MASTER of every HmIP device is empty, and so is the MASTER of the virtual
     keys of the CCU's own radio module.
-  - **SERVICE on HmIP channels stays.** hmipserver lists it on most of their channels and describes it there with the
-    device's own five service parameters.
+  - **SERVICE is offered on devices only.** hmipserver lists it on most HmIP channels too and describes it there with the
+    device's own five service parameters, so a channel, channel 0 included, gets no SERVICE button or menu entry.
   - **Channel 0 of an HmIP device** keeps its MASTER button when the dialog has service messages to suppress.
   - **One description per kind of device and channel** is asked for, only for the rows on screen. A description that
     cannot be read keeps its button, and the dialog says why. (B-33)

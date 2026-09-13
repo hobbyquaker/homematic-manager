@@ -167,11 +167,28 @@ describe('the paramset buttons (B-33)', () => {
         expect(offeredParamsets(undefined, () => 'parameters')).toEqual({names: [], pending: false});
     });
 
+    it('never offers SERVICE on a channel, and does not ask about it there (the maintainer, 2026-09-13)', () => {
+        const asked: string[] = [];
+        const contentOf = (name: string): ParamsetContent => {
+            asked.push(name);
+            return 'parameters';
+        };
+        expect(offeredParamsets(['MASTER', 'VALUES', 'SERVICE'], contentOf, {channel: true})).toEqual({
+            names: ['MASTER', 'VALUES'],
+            pending: false,
+        });
+        expect(asked).toEqual(['MASTER', 'VALUES']);
+        expect(offeredParamsets(['MASTER', 'SERVICE'], () => 'parameters', {channel: false}).names).toEqual([
+            'MASTER',
+            'SERVICE',
+        ]);
+    });
+
     /**
      * The lab's HmIPW-DRS8 on hmipserver 3.89.8 (2026-09-13): the device lists MASTER and SERVICE,
      * and its MASTER is empty; the channels list SERVICE too and describe it with the device's five
-     * parameters. Channel 4 stands for what the maintainer expected and the lab did not show: a
-     * SERVICE that is listed but empty - and an empty VALUES, as on the DRI16's channel 17.
+     * parameters - and still get no SERVICE button (the maintainer's decision). Channel 4 has an
+     * empty VALUES, as on the DRI16's channel 17.
      */
     const DRS8 = '001618A99C5F30';
     const SERVICE: ParamsetDescription = Object.fromEntries(
@@ -249,21 +266,25 @@ describe('the paramset buttons (B-33)', () => {
             .map((button) => button.textContent.trim());
     }
 
-    it('follows each row: SERVICE where it is described, on the channels too, and no empty paramset', async () => {
+    it('follows each row: SERVICE on the device only, and no empty paramset', async () => {
         const transport = await mountDrs8();
 
         expect(await offered(DRS8)).toEqual(['SERVICE']);
-        expect(await offered(`${DRS8}:0`)).toEqual(['MASTER', 'VALUES', 'SERVICE']);
-        expect(await offered(`${DRS8}:1`)).toEqual(['MASTER', 'VALUES', 'SERVICE']);
-        expect(await offered(`${DRS8}:2`)).toEqual(['MASTER', 'VALUES', 'SERVICE']);
-        expect(await offered(`${DRS8}:3`)).toEqual(['MASTER', 'VALUES', 'SERVICE']);
+        // a filled SERVICE on every channel, channel 0 included, and no button for it
+        expect(await offered(`${DRS8}:0`)).toEqual(['MASTER', 'VALUES']);
+        expect(await offered(`${DRS8}:1`)).toEqual(['MASTER', 'VALUES']);
+        expect(await offered(`${DRS8}:2`)).toEqual(['MASTER', 'VALUES']);
+        expect(await offered(`${DRS8}:3`)).toEqual(['MASTER', 'VALUES']);
         expect(await offered(`${DRS8}:4`)).toEqual(['MASTER']);
 
         // one description per kind of channel: :2 and :3 are both SWITCH_VIRTUAL_RECEIVER
-        const receivers = transport.calls.filter(
-            (call) => call.method === 'paramset.description' && /:[23]$/.test(String(call.params[1])),
-        );
-        expect(receivers.map((call) => call.params[2]).sort()).toEqual(['MASTER', 'SERVICE', 'VALUES']);
+        const descriptions = transport.calls.filter((call) => call.method === 'paramset.description');
+        const receivers = descriptions.filter((call) => /:[23]$/.test(String(call.params[1])));
+        expect(receivers.map((call) => call.params[2]).sort()).toEqual(['MASTER', 'VALUES']);
+        // the SERVICE of a channel is not even asked for
+        expect(descriptions.filter((call) => call.params[2] === 'SERVICE').map((call) => call.params[1])).toEqual([
+            DRS8,
+        ]);
     });
 
     it('offers the same paramsets in the context menu, not a fixed set per kind of row', async () => {
@@ -284,6 +305,16 @@ describe('the paramset buttons (B-33)', () => {
                 .getAllByRole('menuitem')
                 .map((item) => item.textContent.trim());
             expect(labels.filter((label) => /Param/.test(label))).toEqual(['MASTER Paramset']);
+        });
+
+        // channel 0 has a filled SERVICE, and its menu has no entry for it either
+        await offered(`${DRS8}:0`);
+        await fireEvent.contextMenu(rowOf(`${DRS8}:0`));
+        await waitFor(() => {
+            const labels = within(screen.getByTestId('devices-menu'))
+                .getAllByRole('menuitem')
+                .map((item) => item.textContent.trim());
+            expect(labels.filter((label) => /Param/.test(label))).toEqual(['MASTER Paramset', 'VALUES Paramset']);
         });
     });
 });

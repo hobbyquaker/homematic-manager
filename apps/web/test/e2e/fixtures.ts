@@ -104,7 +104,8 @@ const HMIP_DEVICES = {
             VERSION: 1,
             FIRMWARE: '1.4.8',
             CHILDREN: [`${HMIP_BUTTON}:0`, `${HMIP_BUTTON}:1`],
-            PARAMSETS: ['MASTER'],
+            // B-33: SERVICE listed and described empty - not seen in the lab, the other half of the rule
+            PARAMSETS: ['MASTER', 'SERVICE'],
         },
         {
             ADDRESS: `${HMIP_BUTTON}:0`,
@@ -121,7 +122,7 @@ const HMIP_DEVICES = {
             VERSION: 1,
             PARENT: HMIP_BUTTON,
             PARENT_TYPE: 'HmIP-WRC2',
-            // B-33: SERVICE listed and described empty - the case the maintainer expected; see its description
+            // B-33: SERVICE listed on a channel - never a button there, whatever it holds
             PARAMSETS: ['MASTER', 'VALUES', 'LINK', 'SERVICE'],
             LINK_SOURCE_ROLES: 'SWITCH',
             DIRECTION: 1,
@@ -299,7 +300,8 @@ const PARAMSET_DESCRIPTIONS: Record<string, unknown> = {
     'HmIP-RF/HmIP-PDT/1.4.8/1//SERVICE': HMIP_SERVICE,
     'HmIP-RF/HmIP-PDT/1.4.8/1/MAINTENANCE/SERVICE': HMIP_SERVICE,
     // not seen in the lab, but the other half of the rule: a SERVICE that is listed and empty
-    'HmIP-RF/HmIP-WRC2/1.4.8/1/KEY_TRANSCEIVER/SERVICE': {},
+    'HmIP-RF/HmIP-WRC2/1.4.8/1//SERVICE': {},
+    'HmIP-RF/HmIP-WRC2/1.4.8/1/KEY_TRANSCEIVER/SERVICE': HMIP_SERVICE,
     'HmIP-RF/HmIP-WRC2/1.4.8/1/KEY_TRANSCEIVER/MASTER': {
         LOGGING: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true},
     },

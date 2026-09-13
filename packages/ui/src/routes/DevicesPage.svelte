@@ -5,6 +5,8 @@
         decodeDeviceFlags,
         decodeDirection,
         decodeRxMode,
+        isChannelAddress,
+        isChannelDescription,
         isDeviceAddress,
         isMaintenanceAddress,
         isRoaming,
@@ -378,13 +380,19 @@
         // Task 26: the MASTER dialog of an HmIP channel 0 also carries the suppression rows of its
         // service messages, which come from VALUES - an empty MASTER there still has something to show
         const suppressible = isHmipInterface(interfaceName, interfaceType) && isMaintenanceAddress(row.ADDRESS);
-        return offeredParamsets(row.PARAMSETS, (name) => {
-            const content = stores.paramsets.contentOf(interfaceName, row, name, parent);
-            if (name !== 'MASTER' || content !== 'empty' || !suppressible) {
-                return content;
-            }
-            return stores.paramsets.contentOf(interfaceName, row, 'VALUES', parent, 'service-messages');
-        });
+        // the maintainer's decision on B-33: no SERVICE button on a channel, channel 0 included
+        const channel = isChannelAddress(row.ADDRESS) || isChannelDescription(row);
+        return offeredParamsets(
+            row.PARAMSETS,
+            (name) => {
+                const content = stores.paramsets.contentOf(interfaceName, row, name, parent);
+                if (name !== 'MASTER' || content !== 'empty' || !suppressible) {
+                    return content;
+                }
+                return stores.paramsets.contentOf(interfaceName, row, 'VALUES', parent, 'service-messages');
+            },
+            {channel},
+        );
     }
 
     /** #25: what a channel may be in a link, from its roles - the same rule the Links tab uses. */

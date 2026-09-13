@@ -43,7 +43,8 @@ test('the preview shows only what changed, and the write sends only that', async
  * B-33, the maintainer: "service paramset buttons are shown for channels. but afaik the service paramsets only exists
  * for devices!" - and then "i think they are empty". The lab showed otherwise (hmipserver lists SERVICE on most HmIP
  * channels and fills it), and showed what is empty: the MASTER of every HmIP device. A button is there when the row
- * lists the paramset and the interface describes it with parameters.
+ * lists the paramset and the interface describes it with parameters - and SERVICE never on a channel, which is the
+ * maintainer's decision after the lab's answer.
  */
 test('the PARAMSETS buttons follow what each row lists and the interface describes (B-33)', async ({page, host}) => {
     await page.goto(`${host.url}#/HmIP-RF/devices`);
@@ -59,11 +60,13 @@ test('the PARAMSETS buttons follow what each row lists and the interface describ
 
     // the device: SERVICE has parameters, MASTER is empty
     expect(await offered(HMIP_DIMMER)).toEqual(['SERVICE']);
-    // a channel that lists SERVICE and has it described
-    expect(await offered(`${HMIP_DIMMER}:0`)).toEqual(['MASTER', 'VALUES', 'SERVICE']);
+    // a device whose SERVICE is listed and described empty
+    expect(await offered(HMIP_BUTTON)).toEqual(['MASTER']);
+    // channel 0 lists SERVICE and has it described - still no button on a channel
+    expect(await offered(`${HMIP_DIMMER}:0`)).toEqual(['MASTER', 'VALUES']);
     // a channel that does not list it; LINK is the Links tab
     expect(await offered(`${HMIP_DIMMER}:3`)).toEqual(['MASTER', 'VALUES']);
-    // a channel that lists it, described empty
+    // another channel that lists it
     expect(await offered(`${HMIP_BUTTON}:1`)).toEqual(['MASTER', 'VALUES']);
 
     await page.getByTestId(`paramset-${HMIP_DIMMER}-SERVICE`).click();

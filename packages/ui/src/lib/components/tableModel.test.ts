@@ -331,6 +331,24 @@ describe('sizedTemplate', () => {
         const layout = tableLayout(parent, [{key: 'name', label: 'Name', width: 90}], false);
         expect(sizedTemplate(layout, {name: 250}).template).toBe('24px 250px minmax(40px, 40fr) minmax(56px, 120fr)');
     });
+
+    /**
+     * B-34: the Msgs column holds two marks and a button. It is proportional and resizable like a
+     * text column, but a narrow window must not squeeze it to the grid's 56 px, which cut the button off.
+     */
+    it('keeps a column with its own minimum at that minimum, and a dragged width still wins', () => {
+        const layout = tableLayout(
+            [
+                {key: 'msgs', label: 'Msgs', width: 84, minWidth: 84},
+                {key: 'name', label: 'Name', width: 200},
+            ],
+            undefined,
+            false,
+        );
+        expect(layout.template).toBe('minmax(84px, 84fr) minmax(56px, 200fr)');
+        expect(sizedTemplate(layout).minWidth).toBe(84 + 56);
+        expect(sizedTemplate(layout, {msgs: 50})).toEqual({template: '50px minmax(56px, 200fr)', minWidth: 50 + 56});
+    });
 });
 
 describe('selection', () => {

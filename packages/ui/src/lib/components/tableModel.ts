@@ -21,6 +21,12 @@ export interface DataTableColumn<T> {
      * Requires {@link width}.
      */
     readonly fixed?: boolean;
+    /**
+     * The narrowest a proportional column is drawn, in pixels, when its content needs more than the
+     * grid's minimum track - three marks and a button (B-34). Below it the grid scrolls sideways.
+     * A width the user dragged still wins.
+     */
+    readonly minWidth?: number;
     readonly align?: 'left' | 'center' | 'right';
     /** Sortable by default. */
     readonly sortable?: boolean;
@@ -282,6 +288,8 @@ export interface TableTrack {
     readonly key: string;
     readonly width: number | undefined;
     readonly fixed: boolean;
+    /** B-34: the column's own minimum, where its content needs more than {@link MIN_TRACK_PX}. */
+    readonly minWidth?: number | undefined;
 }
 
 /** Where each column of a depth sits, and the template every row of the table uses. */
@@ -327,7 +335,19 @@ function trackSize(track: TableTrack, userWidth: number | undefined): string {
         return `${userWidth}px`;
     }
     const width = track.width ?? DEFAULT_WEIGHT;
-    return `minmax(${Math.min(width, MIN_TRACK_PX)}px, ${width}fr)`;
+    return `minmax(${proportionalMinimum(track)}px, ${width}fr)`;
+}
+
+/**
+ * The narrowest a proportional track is drawn: the grid's minimum, or less for a column designed
+ * narrower than that - unless the column names its own (B-34: the Msgs column's two marks and
+ * button, which a shared minimum of 56 px cut off in a narrow window).
+ */
+function proportionalMinimum(track: TableTrack): number {
+    if (track.minWidth !== undefined) {
+        return track.minWidth;
+    }
+    return Math.min(track.width ?? MIN_TRACK_PX, MIN_TRACK_PX);
 }
 
 /** The narrowest a track can be drawn: what the grid needs before it scrolls sideways. */
@@ -338,11 +358,16 @@ function trackMinimum(track: TableTrack, userWidth: number | undefined): number 
     if (userWidth !== undefined) {
         return userWidth;
     }
-    return Math.min(track.width ?? MIN_TRACK_PX, MIN_TRACK_PX);
+    return proportionalMinimum(track);
 }
 
 function trackOf<T>(column: DataTableColumn<T>): TableTrack {
-    return {key: column.key, width: column.width, fixed: column.fixed === true};
+    return {
+        key: column.key,
+        width: column.width,
+        fixed: column.fixed === true,
+        ...(column.minWidth === undefined ? {} : {minWidth: column.minWidth}),
+    };
 }
 
 /** The template with the user's widths in it, and the width below which the grid scrolls sideways. */

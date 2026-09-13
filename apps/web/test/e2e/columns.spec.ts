@@ -76,6 +76,76 @@ test('a column is dragged wider, fitted by a double click, kept over a reload an
     await expect.poll(() => widthOf(typeHeader())).toBe(designed);
 });
 
+/**
+ * B-34, the maintainer: "msgs table colum not wide enough and not resizable. if 3 icons/buttons appear the third is
+ * cut off". The widest the column gets is two marks and the repair button of an HmIP CONFIG_PENDING.
+ */
+test('the Msgs column shows two marks and the repair button whole, is resized, kept and reset (B-34)', async ({
+    page,
+    host,
+    sim,
+}) => {
+    let table = await openDevices(page, host.url);
+    const maintenance = `${HMIP_DIMMER}:0`;
+    // stored, not only sent: the messages are still there after the reload below. A sticky
+    // CONFIG_PENDING is the #98 case, and on HmIP the one the repair button is offered for.
+    // One after the other: every setValue sends all values of the channel, each in a callback of
+    // its own, and the first one's `CONFIG_PENDING: false` arriving last would clear the second.
+    sim.api.emit('setValue', 'hmip', maintenance, 'STICKY_UNREACH', true);
+    await expect(table.locator(`[data-row-id="${HMIP_DIMMER}"]`).getByLabel('STICKY_UNREACH')).toBeVisible();
+    sim.setConfigPending('hmip', maintenance, {sticky: true});
+
+    const header = (): Locator => table.getByRole('columnheader', {name: 'Msgs', exact: true});
+    const cell = (): Locator => table.locator(`[data-row-id="${HMIP_DIMMER}"] .hmm-td[data-column-key="msgs"]`);
+    const layoutOfCell = (): Promise<{items: number; inside: boolean; cutOff: boolean}> =>
+        cell().evaluate((element) => {
+            const box = element.getBoundingClientRect();
+            const items = [...element.children].map((child) => child.getBoundingClientRect());
+            return {
+                items: items.length,
+                inside: items.every((item) => item.left >= box.left - 0.5 && item.right <= box.right + 0.5),
+                cutOff: element.scrollWidth > element.clientWidth,
+            };
+        });
+
+    await expect(table.getByTestId(`repair-${HMIP_DIMMER}`)).toBeVisible();
+    for (const width of [1400, 1280, 1024]) {
+        await page.setViewportSize({width, height: 900});
+        await expect.poll(layoutOfCell).toEqual({items: 3, inside: true, cutOff: false});
+    }
+
+    await page.setViewportSize({width: 1400, height: 900});
+    const designed = await widthOf(header());
+    await drag(page, table.getByTestId('devices-table-resize-msgs'), 60);
+    await expect.poll(() => widthOf(header())).toBeGreaterThanOrEqual(designed + 57);
+    const dragged = await widthOf(header());
+    const stored = await page.evaluate(
+        () =>
+            JSON.parse(localStorage.getItem('hmm.columnWidths') ?? '{}') as Record<
+                string,
+                Record<string, Record<string, number>>
+            >,
+    );
+    expect(Object.values(stored)[0]?.['devices']).toEqual({msgs: dragged});
+
+    await page.reload();
+    table = await openDevices(page, host.url);
+    await expect.poll(() => widthOf(header())).toBe(dragged);
+    await expect(table.getByTestId(`repair-${HMIP_DIMMER}`)).toBeAttached();
+
+    // narrower than what it holds: cut off, and the tooltip says what is in it
+    await drag(page, table.getByTestId('devices-table-resize-msgs'), -300);
+    await expect.poll(async () => (await layoutOfCell()).cutOff).toBe(true);
+    await cell().hover();
+    const tooltip = page.getByRole('tooltip');
+    await expect(tooltip).toContainText('✖');
+    await expect(tooltip).toContainText('⚒');
+
+    await header().click({button: 'right'});
+    await page.getByTestId('devices-table-columns-menu').getByRole('menuitem', {name: 'Reset column widths'}).click();
+    await expect.poll(() => widthOf(header())).toBe(designed);
+});
+
 test('a cut-off cell shows its full text on hover, a cell that fits shows nothing, in both themes', async ({
     page,
     host,

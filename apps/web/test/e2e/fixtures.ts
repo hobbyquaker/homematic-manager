@@ -355,6 +355,12 @@ export interface Simulator {
     /** What a device reports: an `event` callback to every connected logic layer. */
     fireEvent(iface: string, address: string, datapoint: string, value: unknown): void;
     getValue(iface: string, address: string, datapoint: string): unknown;
+    /**
+     * CONFIG_PENDING on the device's `:0` channel. `sticky` is the #98 case - a configuration the
+     * device never acknowledged - and stays until a valid full MASTER write; without it the flag
+     * clears itself after the interface's delay.
+     */
+    setConfigPending(iface: string, address: string, options?: {sticky?: boolean}): void;
     /** Every `putParamset` the simulator accepted, oldest first. */
     getWriteLog(): {iface: string; address: string; paramset: string; values: Record<string, unknown>}[];
     getLinks(iface: string, params: unknown[]): unknown[];

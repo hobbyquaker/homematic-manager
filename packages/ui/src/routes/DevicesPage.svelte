@@ -27,6 +27,7 @@
         firmwareCell,
         offeredParamsets,
         offersRepair,
+        SERVICE_MARKS_COLUMN_WIDTH,
         serviceMarks,
         serviceMessageExplanation,
         type OfferedParamsets,
@@ -258,10 +259,12 @@
         {key: 'rooms', label: t('Rooms'), width: 120, value: (device) => taxonomyText(device, 'room')},
         {key: 'functions', label: t('Functions'), width: 110, value: (device) => taxonomyText(device, 'function')},
         {
+            // B-34: two marks and the repair button fit, it can be dragged like every text column,
+            // and a cell that is cut off after all shows its content as a tooltip (task 42)
             key: 'msgs',
             label: 'Msgs',
-            width: 48,
-            fixed: true,
+            width: SERVICE_MARKS_COLUMN_WIDTH,
+            minWidth: SERVICE_MARKS_COLUMN_WIDTH,
             align: 'center',
             filterable: false,
             sortable: false,

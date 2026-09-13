@@ -1324,8 +1324,15 @@
      * the edge only shows while the pointer is over the labels - a faint line where a column can be
      * dragged - and turns into the accent under the pointer, on focus and during a drag.
      */
+    /*
+     * B-34: above its neighbours. The cells of the head that stand over a sub-grid-only column
+     * (issue 157) come after the labels in the DOM and so paint over them; a finger is hit-tested with an
+     * area rather than a point, and 3 px inside TYPE's handle it landed on the DIRECTION cell next
+     * to it - found when the Msgs column became resizable and moved the columns by a few pixels.
+     */
     .hmm-th-resize {
         position: absolute;
+        z-index: 1;
         top: 0;
         right: 0;
         bottom: 0;

@@ -21,6 +21,12 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   - **Channel 0 of an HmIP device** keeps its MASTER button when the dialog has service messages to suppress.
   - **One description per kind of device and channel** is asked for, only for the rows on screen. A description that
     cannot be read keeps its button, and the dialog says why. (B-33)
+- **The Msgs column of the device grid is wide enough for two service-message marks and the repair button**, which it
+  used to cut off.
+  - **Resizing:** it can be dragged wider or narrower like the other columns, keeps its width over a reload, and
+    "Reset column widths" includes it.
+  - **Narrow windows:** it no longer gets narrower than that.
+  - **Tooltip:** a cell that is cut off shows its content when the pointer rests on it. (B-34)
 
 ## [3.0.0-beta.17] — 2026-09-13
 

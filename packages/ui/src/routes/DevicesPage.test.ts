@@ -4,7 +4,13 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {DEMO_DEVICES, isDemoInterface} from '../lib/transport/demoData.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
-import {firmwareCell, offeredParamsets, serviceMarks, type ParamsetContent} from '../lib/util/deviceGrid.js';
+import {
+    firmwareCell,
+    offeredParamsets,
+    SERVICE_MARKS_COLUMN_WIDTH,
+    serviceMarks,
+    type ParamsetContent,
+} from '../lib/util/deviceGrid.js';
 import {mountApp} from '../testHarness.js';
 
 function rowOf(address: string): HTMLElement {
@@ -279,6 +285,16 @@ describe('the paramset buttons (B-33)', () => {
                 .map((item) => item.textContent.trim());
             expect(labels.filter((label) => /Param/.test(label))).toEqual(['MASTER Paramset']);
         });
+    });
+});
+
+describe('the Msgs column (B-34)', () => {
+    it('is resizable and no fixed column, and never narrower than two marks and the repair button', async () => {
+        await mountApp({hash: '#/BidCos-RF/devices'});
+        expect(screen.getByTestId('devices-table-resize-msgs')).toBeTruthy();
+        const cell = rowOf('KEQ0345678').querySelector<HTMLElement>('[data-column-key="msgs"]');
+        expect(cell?.classList.contains('hmm-td-fixed')).toBe(false);
+        expect(cell?.getBoundingClientRect().width).toBeGreaterThanOrEqual(SERVICE_MARKS_COLUMN_WIDTH);
     });
 });
 

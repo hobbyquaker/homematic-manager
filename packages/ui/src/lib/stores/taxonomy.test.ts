@@ -115,6 +115,48 @@ describe('TaxonomyStore', () => {
         expect(transport.countOf('meta.assign')).toBe(2);
     });
 
+    it('sends the dialog save one request after another and answers each with its outcome (task 49)', async () => {
+        const transport = new MockTransport({demo: true});
+        const {store, notices} = build(transport);
+        await store.load();
+        const started: string[] = [];
+        const release: Array<() => void> = [];
+        transport.respond('meta.assign', (_refs, path) => {
+            started.push(path);
+            return new Promise<null>((resolve, reject) => {
+                release.push(() => {
+                    if (path === 'room/aussen') {
+                        reject(new Error('forbidden'));
+                    } else {
+                        resolve(null);
+                    }
+                });
+            });
+        });
+
+        const saving = store.assignEach([
+            {path: 'room/eg/kueche', on: false, refs: ['BidCos-RF.MEQ0123456:1']},
+            {path: 'room/aussen', on: true, refs: ['BidCos-RF.MEQ0123456:1']},
+            {path: 'function/heizung', on: true, refs: ['BidCos-RF.MEQ0123456:1']},
+        ]);
+        // the second is not asked while the first is still out
+        await Promise.resolve();
+        expect(started).toEqual(['room/eg/kueche']);
+        for (let index = 0; index < 3; index += 1) {
+            await Promise.resolve();
+            release.shift()?.();
+            await new Promise((resolve) => setTimeout(resolve, 0));
+            expect(started).toHaveLength(Math.min(3, index + 2));
+        }
+        await expect(saving).resolves.toEqual([
+            {path: 'room/eg/kueche', ok: true},
+            {path: 'room/aussen', ok: false, message: 'forbidden'},
+            {path: 'function/heizung', ok: true},
+        ]);
+        // the dialog shows a refusal; the store does not add a toast on top
+        expect(notices.items).toEqual([]);
+    });
+
     it('creates, renames, moves and deletes nodes through the contract', async () => {
         const transport = new MockTransport({demo: true});
         const {store} = build(transport);

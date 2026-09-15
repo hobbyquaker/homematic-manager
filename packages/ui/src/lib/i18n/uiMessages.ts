@@ -692,8 +692,25 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Assign to room': {de: 'Raum zuordnen', en: 'Assign to room'},
     'Assign to function': {de: 'Gewerk zuordnen', en: 'Assign to function'},
     'Rooms and functions': {de: 'Räume und Gewerke', en: 'Rooms and functions'},
-    'Add to': {de: 'Hinzufügen zu', en: 'Add to'},
-    'Remove from': {de: 'Entfernen aus', en: 'Remove from'},
+    // Task 49: the assignment dialog's checkbox list
+    'Filter rooms': {de: 'Räume filtern', en: 'Filter rooms'},
+    'Filter functions': {de: 'Gewerke filtern', en: 'Filter functions'},
+    'No match': {de: 'Kein Treffer', en: 'No match'},
+    'New room…': {de: 'Neuer Raum…', en: 'New room…'},
+    'New function…': {de: 'Neues Gewerk…', en: 'New function…'},
+    'Name of the new room': {de: 'Name des neuen Raums', en: 'Name of the new room'},
+    'Name of the new function': {de: 'Name des neuen Gewerks', en: 'Name of the new function'},
+    'Not saved: {message}': {de: 'Nicht gespeichert: {message}', en: 'Not saved: {message}'},
+    '{count} changes were not saved': {
+        de: {
+            one: 'Eine Änderung wurde nicht gespeichert. Sie ist markiert; Übernehmen versucht sie erneut.',
+            other: '{count} Änderungen wurden nicht gespeichert. Sie sind markiert; Übernehmen versucht sie erneut.',
+        },
+        en: {
+            one: 'One change was not saved. It is marked; Apply tries it again.',
+            other: '{count} changes were not saved. They are marked; Apply tries them again.',
+        },
+    },
     '{count} rows selected': {
         de: {one: 'Eine Zeile ausgewählt', other: '{count} Zeilen ausgewählt'},
         en: {one: 'One row selected', other: '{count} rows selected'},

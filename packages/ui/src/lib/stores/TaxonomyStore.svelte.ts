@@ -1,9 +1,15 @@
 import type {MetaEnum, MetaObjectView, MetaState, Transport} from '@homematic-manager/core';
 import {enumTitle, flattenAll, makeRef, type FlatNode} from '@homematic-manager/core';
 
+import {toApiRequestError} from '../transport/error.js';
+import type {AssignRequest} from '../util/assignment.js';
 import {deviceMatches, membersOf, nodeOptions, objectMatches, type NodeOption} from '../util/taxonomy.js';
 
 import type {NoticesStore} from './NoticesStore.svelte.js';
+
+/** What became of one request of the assignment dialog. */
+export type AssignOutcome =
+    {readonly path: string; readonly ok: true} | {readonly path: string; readonly ok: false; readonly message: string};
 
 /**
  * Rooms, functions and whatever other taxonomy the metadata store carries (D-40, task 25).
@@ -152,6 +158,28 @@ export class TaxonomyStore {
             this.#notices.fromError(error, 'meta.assign');
             return false;
         }
+    }
+
+    /**
+     * Task 49: the save of the assignment dialog - one `meta.assign` per changed node, one after
+     * another, each with its own outcome.
+     *
+     * One after another because the backend reads the document and then writes each object's whole
+     * list: two assignments of the same object in parallel would lose one of them. A refusal is
+     * answered, not announced: the dialog is open and shows it beside the node, and a toast per
+     * failed node would only pile up.
+     */
+    async assignEach(requests: readonly AssignRequest[]): Promise<AssignOutcome[]> {
+        const outcomes: AssignOutcome[] = [];
+        for (const request of requests) {
+            try {
+                await this.#transport.request('meta.assign', [...request.refs], request.path, request.on);
+                outcomes.push({path: request.path, ok: true});
+            } catch (error) {
+                outcomes.push({path: request.path, ok: false, message: toApiRequestError(error).message});
+            }
+        }
+        return outcomes;
     }
 
     /**

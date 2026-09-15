@@ -43,6 +43,7 @@
         namesOf,
         type TaxonomyId,
     } from '../lib/util/taxonomy.js';
+    import type {AssignTarget} from '../lib/util/assignment.js';
 
     import AddLinkDialog from './links/AddLinkDialog.svelte';
     import TeamDialog from './devices/TeamDialog.svelte';
@@ -89,7 +90,7 @@
     /** Task 25: the assign dialog for the selection. */
     let assignOpen = $state(false);
     let assignEnum = $state<TaxonomyId>('room');
-    let assignRefs = $state<string[]>([]);
+    let assignRefs = $state<AssignTarget[]>([]);
     /** The filter above the grid: a node path per taxonomy, `''` for everything. */
     let roomFilter = $state('');
     let functionFilter = $state('');
@@ -428,15 +429,28 @@
         );
     }
 
-    /** The refs the assign dialog works on: the selection, or the row the menu was opened on. */
-    function assignTargets(address: string): string[] {
+    /**
+     * One row for the assign dialog: its ref, and for a device the refs of its channels - a device is
+     * shown in a room when its channels are (task 49), and taken out of it with them.
+     */
+    function assignTargetOf(address: string): AssignTarget {
+        return {
+            ref: refOf(address),
+            channels: isDeviceAddress(address)
+                ? stores.devices.channels(interfaceName, address).map((channel) => refOf(channel.ADDRESS))
+                : [],
+        };
+    }
+
+    /** The rows the assign dialog works on: the selection, or the row the menu was opened on. */
+    function assignTargets(address: string): AssignTarget[] {
         const rows = selected.includes(address) ? selected : [address];
-        return rows.map((entry) => refOf(entry));
+        return rows.map((entry) => assignTargetOf(entry));
     }
 
     function openAssign(enumId: TaxonomyId, address?: string): void {
         assignEnum = enumId;
-        assignRefs = address === undefined ? selected.map((entry) => refOf(entry)) : assignTargets(address);
+        assignRefs = address === undefined ? selected.map((entry) => assignTargetOf(entry)) : assignTargets(address);
         if (assignRefs.length === 0) {
             return;
         }
@@ -952,7 +966,7 @@
 <AddLinkDialog bind:open={addLinkOpen} presetSenders={linkSenders} presetReceivers={linkReceivers} />
 <TeamDialog bind:open={teamOpen} address={actionAddress} />
 <RepairConfigDialog bind:open={repairOpen} address={actionAddress} />
-<AssignDialog bind:open={assignOpen} enumId={assignEnum} refs={assignRefs} />
+<AssignDialog bind:open={assignOpen} enumId={assignEnum} targets={assignRefs} />
 <ParamsetDialog bind:open={paramsetOpen} {interfaceName} address={paramsetAddress} paramset={paramsetName} />
 
 <style>

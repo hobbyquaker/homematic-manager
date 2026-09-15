@@ -1,6 +1,7 @@
 import {fireEvent, screen, waitFor, within} from '@testing-library/svelte';
 import {beforeEach, describe, expect, it} from 'vitest';
 
+import {ApiRequestError} from '../../lib/transport/error.js';
 import {MockTransport} from '../../lib/transport/MockTransport.js';
 import {mountApp} from '../../testHarness.js';
 
@@ -43,6 +44,40 @@ async function expand(address: string): Promise<void> {
 
 async function select(address: string, ctrl = false): Promise<void> {
     await fireEvent.click(rowOf(address), {ctrlKey: ctrl});
+}
+
+function assignDialog(): HTMLElement {
+    return screen.getByTestId('assign-dialog');
+}
+
+async function openAssign(button: 'devices-assign-room' | 'devices-assign-function'): Promise<void> {
+    await fireEvent.click(screen.getByTestId(button));
+    await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(true));
+}
+
+/** A node's row in the assignment dialog (task 49). */
+function assignRow(path: string): HTMLElement {
+    const row = assignDialog().querySelector<HTMLElement>(`[data-testid="assign-row"][data-path="${path}"]`);
+    expect(row, `no row for ${path}`).not.toBeNull();
+    return row!;
+}
+
+function checkOf(path: string): HTMLInputElement {
+    return assignRow(path).querySelector<HTMLInputElement>('input[type="checkbox"]')!;
+}
+
+function rowState(path: string): string | undefined {
+    return assignRow(path).dataset['state'];
+}
+
+/** Every `meta.assign` since the last reset, the refs sorted: the grid's selection order is not the point. */
+function assignCalls(transport: MockTransport): unknown[][] {
+    return transport.calls
+        .filter((call) => call.method === 'meta.assign')
+        .map((call) => {
+            const [refs, path, on] = call.params as [string[], string, boolean];
+            return [[...refs].sort(), path, on];
+        });
 }
 
 describe('the rooms and functions columns', () => {
@@ -162,38 +197,212 @@ describe('assigning the selection', () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         await select('KEQ0345678');
         await select('LEQ0456789', true);
-        await fireEvent.click(screen.getByTestId('devices-assign-room'));
-
-        await waitFor(() => expect(screen.getByTestId('assign-dialog')).toBeTruthy());
+        await openAssign('devices-assign-room');
         expect(screen.getByTestId('assign-count').textContent).toBe('2 Zeilen ausgewählt');
-        await fireEvent.change(screen.getByTestId('assign-select'), {target: {value: 'room/aussen'}});
+
+        await fireEvent.click(checkOf('room/aussen'));
         await fireEvent.click(screen.getByTestId('assign-apply'));
 
-        await waitFor(() =>
-            expect(transport.lastCall('meta.assign')).toEqual([
-                ['BidCos-RF.KEQ0345678', 'BidCos-RF.LEQ0456789'],
-                'room/aussen',
-                true,
-            ]),
-        );
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+        expect(assignCalls(transport)).toEqual([
+            [['BidCos-RF.KEQ0345678', 'BidCos-RF.LEQ0456789'], 'room/aussen', true],
+        ]);
         await waitFor(() => expect(taxonomyCells('KEQ0345678').rooms).toBe('Außen'));
-        expect(screen.getByTestId('assign-dialog').hasAttribute('open')).toBe(false);
     });
 
     it('takes the selection out of a function again', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         await expand('MEQ0123456');
         await select('MEQ0123456:1');
-        await fireEvent.click(screen.getByTestId('devices-assign-function'));
-        await waitFor(() => expect(screen.getByTestId('assign-dialog')).toBeTruthy());
-        await fireEvent.click(screen.getByTestId('assign-remove'));
-        await fireEvent.change(screen.getByTestId('assign-select'), {target: {value: 'function/licht'}});
+        await openAssign('devices-assign-function');
+        expect(rowState('function/licht')).toBe('on');
+
+        await fireEvent.click(checkOf('function/licht'));
         await fireEvent.click(screen.getByTestId('assign-apply'));
 
         await waitFor(() =>
-            expect(transport.lastCall('meta.assign')).toEqual([['BidCos-RF.MEQ0123456:1'], 'function/licht', false]),
+            expect(assignCalls(transport)).toEqual([[['BidCos-RF.MEQ0123456:1'], 'function/licht', false]]),
         );
         await waitFor(() => expect(taxonomyCells('MEQ0123456:1').functions).toBe(''));
+    });
+
+    /*
+     * Task 49: the list of checkboxes that replaced the add/remove radios and the select.
+     */
+
+    it('shows one row as checked boxes without radios, and saves only what changed, one request per node', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await expand('MEQ0123456');
+        await select('MEQ0123456:1');
+        await openAssign('devices-assign-room');
+
+        const dialog = assignDialog();
+        expect(dialog.querySelectorAll('input[type="radio"]')).toHaveLength(0);
+        expect(dialog.querySelector('select')).toBeNull();
+        expect(screen.getByTestId('assign-count').textContent).toBe('Eine Zeile ausgewählt');
+        // every node of the tree in tree order, the floors too; eight of them need no filter
+        expect(screen.getAllByTestId('assign-row').map((row) => [row.dataset['path'], row.dataset['state']])).toEqual([
+            ['room/eg', 'off'],
+            ['room/eg/kueche', 'on'],
+            ['room/eg/wohnzimmer', 'off'],
+            ['room/eg/flur', 'off'],
+            ['room/og', 'off'],
+            ['room/og/bad', 'off'],
+            ['room/og/schlafzimmer', 'off'],
+            ['room/aussen', 'off'],
+        ]);
+        expect(screen.queryByTestId('assign-filter')).toBeNull();
+        expect(checkOf('room/eg/kueche').checked).toBe(true);
+        expect(checkOf('room/aussen').checked).toBe(false);
+
+        await fireEvent.click(checkOf('room/eg/kueche'));
+        await fireEvent.click(checkOf('room/aussen'));
+        // a box toggled twice is back where it was and sends nothing
+        await fireEvent.click(checkOf('room/og/bad'));
+        await fireEvent.click(checkOf('room/og/bad'));
+        expect(rowState('room/og/bad')).toBe('off');
+        transport.reset();
+        await fireEvent.click(screen.getByTestId('assign-apply'));
+
+        await waitFor(() => expect(dialog.hasAttribute('open')).toBe(false));
+        expect(assignCalls(transport)).toEqual([
+            [['BidCos-RF.MEQ0123456:1'], 'room/eg/kueche', false],
+            [['BidCos-RF.MEQ0123456:1'], 'room/aussen', true],
+        ]);
+        await waitFor(() => expect(taxonomyCells('MEQ0123456:1').rooms).toBe('Außen'));
+    });
+
+    it('shows a mixed selection as indeterminate, cycles it all - none - as it was, and leaves it alone then', async () => {
+        const {stores} = await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await expand('MEQ0123456');
+        await expand('GEQ0567890');
+        await select('MEQ0123456:1');
+        await select('GEQ0567890:1', true);
+        await openAssign('devices-assign-room');
+
+        // one of the two is in the kitchen, the other in the living room, neither outside
+        const kueche = checkOf('room/eg/kueche');
+        expect([rowState('room/eg/kueche'), kueche.checked, kueche.indeterminate]).toEqual(['mixed', false, true]);
+        expect(rowState('room/eg/wohnzimmer')).toBe('mixed');
+        expect(rowState('room/aussen')).toBe('off');
+
+        const seen: string[] = [];
+        for (let click = 0; click < 3; click += 1) {
+            await fireEvent.click(kueche);
+            seen.push(`${rowState('room/eg/kueche') ?? ''} ${String(kueche.checked)} ${String(kueche.indeterminate)}`);
+        }
+        expect(seen).toEqual(['on true false', 'off false false', 'mixed false true']);
+
+        // the kitchen for both, outside for both, the living room left as it was
+        await fireEvent.click(kueche);
+        await fireEvent.click(checkOf('room/aussen'));
+        transport.reset();
+        await fireEvent.click(screen.getByTestId('assign-apply'));
+
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+        expect(assignCalls(transport)).toEqual([
+            [['BidCos-RF.GEQ0567890:1'], 'room/eg/kueche', true],
+            [['BidCos-RF.GEQ0567890:1', 'BidCos-RF.MEQ0123456:1'], 'room/aussen', true],
+        ]);
+        await waitFor(() =>
+            expect([...(stores.taxonomy.objects['BidCos-RF.GEQ0567890:1']?.enums ?? [])].sort()).toEqual([
+                'function/licht',
+                'room/aussen',
+                'room/eg/kueche',
+                'room/eg/wohnzimmer',
+            ]),
+        );
+        expect([...(stores.taxonomy.objects['BidCos-RF.MEQ0123456:1']?.enums ?? [])].sort()).toEqual([
+            'function/licht',
+            'room/aussen',
+            'room/eg/kueche',
+        ]);
+    });
+
+    it('counts a device row as in a room through its channels, and takes the channels out with it', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        // JEQ0234567: :1 is in the hall, :2 is not - one device, some of it
+        await select('JEQ0234567');
+        await openAssign('devices-assign-room');
+        expect(rowState('room/eg/flur')).toBe('mixed');
+        await fireEvent.click(within(assignDialog()).getByText('Abbrechen'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+
+        // MEQ0123456: its one channel but :0 is in the kitchen, so the device is
+        await select('MEQ0123456');
+        await openAssign('devices-assign-room');
+        expect(rowState('room/eg/kueche')).toBe('on');
+        await fireEvent.click(checkOf('room/eg/kueche'));
+        transport.reset();
+        await fireEvent.click(screen.getByTestId('assign-apply'));
+
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+        expect(assignCalls(transport)).toEqual([[['BidCos-RF.MEQ0123456:1'], 'room/eg/kueche', false]]);
+        await waitFor(() => expect(taxonomyCells('MEQ0123456').rooms).toBe(''));
+    });
+
+    it('filters a long list; Enter in the filter neither saves nor toggles, Enter on a box saves', async () => {
+        const {stores} = await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        const names = ['Arbeitszimmer', 'Bad', 'Büro', 'Dachboden', 'Esszimmer', 'Flur', 'Garage', 'Gäste-WC'];
+        transport.emit('meta.enums.changed', {
+            ...stores.taxonomy.enums,
+            room: {
+                name: {de: 'Räume', en: 'Rooms'},
+                tree: [...names, 'Keller', 'Küche', 'Schlafzimmer'].map((name, index) => ({
+                    id: `r${String(index)}`,
+                    name,
+                })),
+            },
+        });
+        // the store is scripted here: the demo store does not know these rooms
+        transport.respond('meta.assign', () => null);
+        await expand('MEQ0123456');
+        await select('MEQ0123456:1');
+        await openAssign('devices-assign-room');
+
+        const filter = screen.getByTestId<HTMLInputElement>('assign-filter');
+        expect(screen.getAllByTestId('assign-row')).toHaveLength(11);
+        await fireEvent.input(filter, {target: {value: 'kuche'}});
+        expect(screen.getAllByTestId('assign-row').map((row) => row.dataset['path'])).toEqual(['room/r9']);
+
+        await fireEvent.keyDown(filter, {key: 'Enter'});
+        expect(assignDialog().hasAttribute('open')).toBe(true);
+        expect(document.activeElement).toBe(checkOf('room/r9'));
+        expect(rowState('room/r9')).toBe('off');
+        expect(transport.countOf('meta.assign')).toBe(0);
+
+        await fireEvent.input(filter, {target: {value: 'zzz'}});
+        expect(screen.getByTestId('assign-list').textContent).toContain('Kein Treffer');
+        await fireEvent.input(filter, {target: {value: 'Küche'}});
+        await fireEvent.click(checkOf('room/r9'));
+        await fireEvent.keyDown(checkOf('room/r9'), {key: 'Enter'});
+
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+        expect(assignCalls(transport)).toEqual([[['BidCos-RF.MEQ0123456:1'], 'room/r9', true]]);
+    });
+
+    it('makes a new room at the root, checks it, and assigns it only with Apply', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await expand('MEQ0123456');
+        await select('MEQ0123456:1');
+        await openAssign('devices-assign-room');
+
+        await fireEvent.click(screen.getByTestId('assign-new'));
+        const name = await waitFor(() => screen.getByTestId<HTMLInputElement>('assign-new-name'));
+        expect(document.activeElement).toBe(name);
+        await fireEvent.input(name, {target: {value: 'Keller'}});
+        transport.reset();
+        await fireEvent.keyDown(name, {key: 'Enter'});
+
+        await waitFor(() => expect(rowState('room/keller')).toBe('on'));
+        expect(transport.lastCall('meta.node.create')).toEqual(['room', undefined, 'Keller']);
+        expect(transport.countOf('meta.assign')).toBe(0);
+        expect(assignDialog().hasAttribute('open')).toBe(true);
+
+        await fireEvent.click(screen.getByTestId('assign-apply'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+        expect(assignCalls(transport)).toEqual([[['BidCos-RF.MEQ0123456:1'], 'room/keller', true]]);
+        await waitFor(() => expect(taxonomyCells('MEQ0123456:1').rooms).toContain('Keller'));
     });
 
     it('opens from the context menu on the row it was opened on, or on the selection it is part of', async () => {
@@ -210,15 +419,47 @@ describe('assigning the selection', () => {
         await waitFor(() => expect(screen.getByTestId('assign-count').textContent).toBe('2 Zeilen ausgewählt'));
     });
 
-    it('reports a refused assignment and keeps the dialog open', async () => {
-        transport.fail('meta.assign', {message: 'forbidden', kind: 'validation'});
+    it('keeps a node the store refused, with its reason, and Apply sends only that one again', async () => {
         const {stores} = await mountApp({transport, hash: '#/BidCos-RF/devices'});
-        await select('MEQ0123456');
-        await fireEvent.click(screen.getByTestId('devices-assign-room'));
-        await waitFor(() => expect(screen.getByTestId('assign-dialog')).toBeTruthy());
+        await expand('MEQ0123456');
+        await select('MEQ0123456:1');
+        await openAssign('devices-assign-room');
+        // the kitchen goes through, outside is refused
+        transport.respond('meta.assign', (_refs, path) => {
+            if (path === 'room/aussen') {
+                throw new ApiRequestError({message: 'forbidden', kind: 'validation'});
+            }
+            return null;
+        });
+        const notices = stores.notices.items.length;
+
+        await fireEvent.click(checkOf('room/eg/kueche'));
+        await fireEvent.click(checkOf('room/aussen'));
+        transport.reset();
         await fireEvent.click(screen.getByTestId('assign-apply'));
-        await waitFor(() => expect(stores.notices.items.at(-1)?.message).toContain('forbidden'));
-        expect(screen.getByTestId('assign-dialog').hasAttribute('open')).toBe(true);
+
+        await waitFor(() =>
+            expect(screen.getByTestId('assign-summary').textContent).toContain('Eine Änderung wurde nicht gespeichert'),
+        );
+        expect(assignCalls(transport)).toEqual([
+            [['BidCos-RF.MEQ0123456:1'], 'room/eg/kueche', false],
+            [['BidCos-RF.MEQ0123456:1'], 'room/aussen', true],
+        ]);
+        expect(assignDialog().hasAttribute('open')).toBe(true);
+        expect(within(assignRow('room/aussen')).getByTestId('assign-error').textContent).toContain(
+            'Nicht gespeichert: forbidden',
+        );
+        expect(within(assignRow('room/eg/kueche')).queryByTestId('assign-error')).toBeNull();
+        // the user's choice stays on the refused node; no toast on top of the dialog
+        expect(rowState('room/aussen')).toBe('on');
+        expect(rowState('room/eg/kueche')).toBe('off');
+        expect(stores.notices.items).toHaveLength(notices);
+
+        transport.respond('meta.assign', () => null);
+        transport.reset();
+        await fireEvent.click(screen.getByTestId('assign-apply'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+        expect(assignCalls(transport)).toEqual([[['BidCos-RF.MEQ0123456:1'], 'room/aussen', true]]);
     });
 });
 

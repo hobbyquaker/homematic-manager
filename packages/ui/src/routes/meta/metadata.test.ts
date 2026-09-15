@@ -226,6 +226,15 @@ describe('the Metadata page of a tree store', () => {
         return row(id).querySelector('[data-depth]')?.getAttribute('data-depth') ?? '';
     }
 
+    it('lets the Devices and Channels counts be resized like any text column (B-35, #157)', async () => {
+        await open();
+        expect(screen.getByTestId('meta-table-resize-devices')).toBeTruthy();
+        expect(screen.getByTestId('meta-table-resize-channels')).toBeTruthy();
+        const counts = screen.getByTestId('meta-table').querySelectorAll('.hmm-td[data-column-key="devices"]');
+        expect(counts.length).toBeGreaterThan(0);
+        expect([...counts].some((cell) => cell.classList.contains('hmm-td-fixed'))).toBe(false);
+    });
+
     it('draws every taxonomy as a row with its nodes under it, opened, indented by depth', async () => {
         await open();
         expect(rowIds()).toEqual([

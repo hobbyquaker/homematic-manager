@@ -122,10 +122,10 @@
             value: (link) => stores.devices.index(interfaceName)?.get(link.RECEIVER)?.TYPE ?? '',
         },
         {
+            // B-35: resizable like any text column; the mark needs 22 px, below the column's 48
             key: 'FLAGS',
             label: 'FLAGS',
             width: 48,
-            fixed: true,
             align: 'center',
             sortable: false,
             value: (link) => (decodeLinkFlags(link.FLAGS).broken ? 'broken' : ''),

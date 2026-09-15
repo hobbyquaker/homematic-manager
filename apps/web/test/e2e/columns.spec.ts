@@ -146,6 +146,124 @@ test('the Msgs column shows two marks and the repair button whole, is resized, k
     await expect.poll(() => widthOf(header())).toBe(designed);
 });
 
+/** The widths the app keeps in `localStorage`, for the one profile of a test. */
+async function storedWidths(page: Page): Promise<Record<string, Record<string, number>>> {
+    const stored = await page.evaluate(
+        () =>
+            JSON.parse(localStorage.getItem('hmm.columnWidths') ?? '{}') as Record<
+                string,
+                Record<string, Record<string, number>>
+            >,
+    );
+    return Object.values(stored)[0] ?? {};
+}
+
+/**
+ * B-35, #157, Herbert-Testmann on beta.16 (macOS): "Die Spalte "Paramsets" kann nicht in der Breite angepasst werden."
+ * The column was fixed because a squeezed one put VALUES under the next cell, where a click never landed (task 25).
+ * It is resizable now, down to its buttons and no further - `PARAMSETS_COLUMN_WIDTH`, 150 px.
+ */
+test('PARAMSETS keeps its buttons whole, is resized, kept, reset, and stops at its buttons (B-35)', async ({
+    page,
+    host,
+}) => {
+    const PARAMSETS_MIN = 150;
+    const channel = `${HMIP_DIMMER}:3`;
+    let table = await openDevices(page, host.url);
+    const header = (): Locator => table.getByRole('columnheader', {name: 'PARAMSETS', exact: true});
+    const handle = (): Locator => table.getByTestId('devices-table-resize-PARAMSETS');
+    const expand = async (): Promise<void> => {
+        await table.locator(`[data-row-id="${HMIP_DIMMER}"]`).getByRole('button', {name: 'Expand row'}).click();
+        await expect(page.getByTestId(`paramsets-${channel}`)).toHaveAttribute('aria-busy', 'false');
+    };
+    /** The buttons of a row's PARAMSETS cell: how many, all inside the cell, and nothing cut off. */
+    const layoutOf = (address: string): Promise<{buttons: number; inside: boolean; cutOff: boolean}> =>
+        table.locator(`[data-row-id="${address}"] .hmm-td[data-column-key="PARAMSETS"]`).evaluate((element) => {
+            const box = element.getBoundingClientRect();
+            const buttons = [...element.querySelectorAll('button')].map((button) => button.getBoundingClientRect());
+            return {
+                buttons: buttons.length,
+                inside: buttons.every((item) => item.left >= box.left - 0.5 && item.right <= box.right + 0.5),
+                cutOff: element.scrollWidth > element.clientWidth,
+            };
+        });
+
+    // a device with one button (SERVICE) and a channel with MASTER and VALUES, at three window widths
+    await expand();
+    for (const width of [1400, 1280, 1024]) {
+        await page.setViewportSize({width, height: 900});
+        await expect.poll(() => layoutOf(channel)).toEqual({buttons: 2, inside: true, cutOff: false});
+        await expect.poll(() => layoutOf(HMIP_DIMMER)).toEqual({buttons: 1, inside: true, cutOff: false});
+    }
+
+    await page.setViewportSize({width: 1400, height: 900});
+    const designed = await widthOf(header());
+    await drag(page, handle(), 60);
+    await expect.poll(() => widthOf(header())).toBeGreaterThanOrEqual(designed + 57);
+    const dragged = await widthOf(header());
+    expect((await storedWidths(page))['devices']).toEqual({PARAMSETS: dragged});
+
+    await page.reload();
+    table = await openDevices(page, host.url);
+    await expect.poll(() => widthOf(header())).toBe(dragged);
+
+    await header().click({button: 'right'});
+    await page.getByTestId('devices-table-columns-menu').getByRole('menuitem', {name: 'Reset column widths'}).click();
+    await expect.poll(() => widthOf(header())).toBe(designed);
+
+    // as far left as a hand drags it: it stops at its buttons, and VALUES still takes its click
+    await drag(page, handle(), -400);
+    await expect.poll(() => widthOf(header())).toBe(PARAMSETS_MIN);
+    await expand();
+    await expect.poll(() => layoutOf(channel)).toEqual({buttons: 2, inside: true, cutOff: false});
+    await page.getByTestId(`paramset-${channel}-VALUES`).click();
+    await expect(page.getByTestId('paramset-dialog')).toHaveAttribute('open', '');
+});
+
+/**
+ * B-35: the other columns that were fixed for a text or a button are dragged, kept and reset like every column - FLAGS
+ * on the Links tab, and the suppress column of the HmIP service messages. hm-simulator has no suppression methods, so
+ * that column shows no button here; the button whole at the column's minimum is `messagesAndEvents.test.ts`.
+ */
+test('FLAGS on the Links tab and the suppress column are dragged, kept over a reload and reset (B-35)', async ({
+    page,
+    host,
+}) => {
+    const cases = [
+        {
+            hash: '#/HmIP-RF/links',
+            tableId: 'links',
+            testId: 'links-table',
+            key: 'FLAGS',
+        },
+        {
+            hash: '#/HmIP-RF/messages',
+            tableId: 'messages',
+            testId: 'messages-table',
+            key: 'suppress',
+        },
+    ];
+    for (const {hash, tableId, testId, key} of cases) {
+        await page.goto(`${host.url}${hash}`);
+        const head = (): Locator => page.getByTestId(testId).locator(`.hmm-table-head [data-column-key="${key}"]`);
+        await expect(head()).toBeVisible();
+        const designed = await widthOf(head());
+        expect(designed).toBeGreaterThan(0);
+
+        await drag(page, page.getByTestId(`${testId}-resize-${key}`), 50);
+        await expect.poll(() => widthOf(head())).toBeGreaterThanOrEqual(designed + 47);
+        const dragged = await widthOf(head());
+        expect((await storedWidths(page))[tableId]).toEqual({[key]: dragged});
+
+        await page.reload();
+        await expect.poll(() => widthOf(head())).toBe(dragged);
+
+        await head().click({button: 'right'});
+        await page.getByTestId(`${testId}-columns-menu`).getByRole('menuitem', {name: 'Reset column widths'}).click();
+        await expect.poll(() => widthOf(head())).toBe(designed);
+    }
+});
+
 test('a cut-off cell shows its full text on hover, a cell that fits shows nothing, in both themes', async ({
     page,
     host,

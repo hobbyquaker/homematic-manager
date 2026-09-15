@@ -27,6 +27,16 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
     "Reset column widths" includes it.
   - **Narrow windows:** it no longer gets narrower than that.
   - **Tooltip:** a cell that is cut off shows its content when the pointer rests on it. (B-34)
+- **The PARAMSETS column of the device grid can be resized** (#157, @Herbert-Testmann).
+  - **Resizing:** it can be dragged wider, keeps its width over a reload, and "Reset column widths" and "Fit column to
+    content" include it.
+  - **Its buttons stay whole:** the column is never narrower than the buttons a row offers, neither in a narrow window
+    nor after a drag, so every button still takes its click.
+  - **The other columns that could not be resized** now can: the Links count of the channel sub-grid, FLAGS on the
+    Links tab, the Devices and Channels counts of the metadata store, and the suppress button of the HmIP service
+    messages. That button column is never narrower than its button either, and now fits the German
+    "Unterdrückung aufheben", which it used to cut off.
+  - **Still fixed:** the device pictures and the receiver marks of the Funk tab. (B-35)
 
 ## [3.0.0-beta.17] — 2026-09-13
 

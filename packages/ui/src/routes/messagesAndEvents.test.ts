@@ -4,6 +4,7 @@ import {beforeEach, describe, expect, it} from 'vitest';
 
 import {DEMO_SERVICE_MESSAGES} from '../lib/transport/demoData.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
+import {SUPPRESS_COLUMN_WIDTH} from '../lib/util/deviceGrid.js';
 import {mountApp} from '../testHarness.js';
 
 const sabotage: ServiceMessage = {
@@ -292,6 +293,40 @@ describe('the service messages tab', () => {
                 (call) => call.method === 'rpc.call' && call.params[1] === 'suppressServiceMessages',
             ),
         ).toHaveLength(2);
+    });
+
+    /**
+     * B-35 (#157): the suppress column was fixed at 150 px, which could not be dragged and cut off the
+     * German "Unterdrückung aufheben". It is resizable now, down to that button and not below it.
+     */
+    it('draws the longest suppress button whole, in a column that is resized down to it and no further', async () => {
+        const lowbat: ServiceMessage = {
+            interfaceName: 'HmIP-RF',
+            address: '000A1B2C3D4E5F:0',
+            datapoint: 'LOWBAT',
+            value: true,
+            since: 0,
+        };
+        transport.result('serviceMessages.list', [lowbat]);
+        transport.respond('rpc.call', (_interfaceName, method) =>
+            method === 'getSuppressedServiceMessages' ? ['LOWBAT'] : '',
+        );
+        await mountApp({transport, hash: '#/HmIP-RF/messages'});
+
+        const button = (): HTMLElement => screen.getByTestId('suppress-000A1B2C3D4E5F:0-LOWBAT');
+        await waitFor(() => {
+            expect(button().textContent.trim()).toBe('Unterdrückung aufheben');
+        });
+        const cell = (): HTMLElement => button().closest<HTMLElement>('.hmm-td')!;
+        expect(cell().classList.contains('hmm-td-fixed')).toBe(false);
+        expect(cell().scrollWidth).toBeLessThanOrEqual(cell().clientWidth);
+
+        const handle = screen.getByTestId('messages-table-resize-suppress');
+        for (let step = 0; step < 30; step += 1) {
+            await fireEvent.keyDown(handle, {key: 'ArrowLeft'});
+        }
+        expect(Math.round(cell().getBoundingClientRect().width)).toBe(SUPPRESS_COLUMN_WIDTH);
+        expect(cell().scrollWidth).toBeLessThanOrEqual(cell().clientWidth);
     });
 
     it('offers no suppression on BidCos, where the interface has no such method', async () => {

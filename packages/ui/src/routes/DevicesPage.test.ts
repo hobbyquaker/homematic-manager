@@ -7,6 +7,7 @@ import {MockTransport} from '../lib/transport/MockTransport.js';
 import {
     firmwareCell,
     offeredParamsets,
+    PARAMSETS_COLUMN_WIDTH,
     SERVICE_MARKS_COLUMN_WIDTH,
     serviceMarks,
     type ParamsetContent,
@@ -326,6 +327,28 @@ describe('the Msgs column (B-34)', () => {
         const cell = rowOf('KEQ0345678').querySelector<HTMLElement>('[data-column-key="msgs"]');
         expect(cell?.classList.contains('hmm-td-fixed')).toBe(false);
         expect(cell?.getBoundingClientRect().width).toBeGreaterThanOrEqual(SERVICE_MARKS_COLUMN_WIDTH);
+    });
+});
+
+/**
+ * B-35 (#157), Herbert-Testmann on beta.16: "Die Spalte "Paramsets" kann nicht in der Breite angepasst werden."
+ */
+describe('the PARAMSETS and Links columns (B-35)', () => {
+    it('can be resized, and PARAMSETS never gets narrower than its buttons', async () => {
+        await mountApp({hash: '#/BidCos-RF/devices'});
+        const handle = screen.getByTestId('devices-table-resize-PARAMSETS');
+        // Links is the channel sub-grid's alone: its handle stands over the gap it leaves in the head
+        expect(screen.getByTestId('devices-table-resize-links')).toBeTruthy();
+        const cell = (): HTMLElement =>
+            rowOf('KEQ0345678').querySelector<HTMLElement>('[data-column-key="PARAMSETS"]')!;
+        expect(cell().classList.contains('hmm-td-fixed')).toBe(false);
+        expect(cell().getBoundingClientRect().width).toBeGreaterThanOrEqual(PARAMSETS_COLUMN_WIDTH);
+
+        // 30 steps of 10 px take any column to the table's 40 px; this one stops at its buttons
+        for (let step = 0; step < 30; step += 1) {
+            await fireEvent.keyDown(handle, {key: 'ArrowLeft'});
+        }
+        expect(Math.round(cell().getBoundingClientRect().width)).toBe(PARAMSETS_COLUMN_WIDTH);
     });
 });
 

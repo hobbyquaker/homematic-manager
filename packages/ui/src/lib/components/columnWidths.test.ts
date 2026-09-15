@@ -7,6 +7,7 @@ import {
     clampColumnWidth,
     fitColumnWidth,
     isResizable,
+    minimumColumnWidth,
     sanitizeColumnWidths,
 } from './columnWidths.js';
 
@@ -58,6 +59,25 @@ describe('isResizable', () => {
         expect(isResizable({key: 'type', label: 'TYPE'})).toBe(true);
         expect(isResizable({key: 'icon', label: '', width: 32, fixed: true})).toBe(false);
         expect(isResizable({key: 'secret', label: 'S', hidden: true})).toBe(false);
+        // B-35: a column of buttons is resizable, down to its own minimum
+        expect(isResizable({key: 'PARAMSETS', label: 'PARAMSETS', width: 150, minWidth: 150, keepMinWidth: true})).toBe(
+            true,
+        );
+    });
+});
+
+describe('minimumColumnWidth', () => {
+    it('is the table minimum, or the own minimum of a column that keeps it (B-35)', () => {
+        expect(minimumColumnWidth({key: 'name', label: 'Name', width: 170})).toBe(MIN_COLUMN_WIDTH);
+        // B-34's Msgs column: a minimum for a narrow window, not for a drag - it is cut off and has a tooltip
+        expect(minimumColumnWidth({key: 'msgs', label: 'Msgs', width: 84, minWidth: 84})).toBe(MIN_COLUMN_WIDTH);
+        expect(
+            minimumColumnWidth({key: 'PARAMSETS', label: 'PARAMSETS', width: 150, minWidth: 150, keepMinWidth: true}),
+        ).toBe(150);
+        expect(minimumColumnWidth({key: 'x', label: 'x', minWidth: 151.6, keepMinWidth: true})).toBe(152);
+        // never below the table's own minimum, and nothing to keep without a minimum
+        expect(minimumColumnWidth({key: 'x', label: 'x', minWidth: 12, keepMinWidth: true})).toBe(MIN_COLUMN_WIDTH);
+        expect(minimumColumnWidth({key: 'x', label: 'x', keepMinWidth: true})).toBe(MIN_COLUMN_WIDTH);
     });
 });
 

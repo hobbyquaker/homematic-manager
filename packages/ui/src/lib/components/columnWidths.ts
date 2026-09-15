@@ -66,11 +66,24 @@ export function fitColumnWidth(
 }
 
 /**
- * Picture, marker and control columns keep their pixels (`fixed`): they have nothing more to say
- * when they are wider, and a control squeezed below its size lands under the next cell.
+ * Picture and marker columns keep their pixels (`fixed`): they have nothing more to say when they
+ * are wider, and their size is computed from the picture (#148). A column of buttons is resizable
+ * down to its own minimum instead ({@link minimumColumnWidth}, B-35).
  */
 export function isResizable<T>(column: DataTableColumn<T>): boolean {
     return column.fixed !== true && column.hidden !== true;
+}
+
+/**
+ * The narrowest a user can make this column: {@link MIN_COLUMN_WIDTH}, or the column's own
+ * `minWidth` when it keeps it (`keepMinWidth`, B-35: the PARAMSETS buttons, which a narrower column
+ * put under the next cell).
+ */
+export function minimumColumnWidth<T>(column: DataTableColumn<T>): number {
+    if (column.keepMinWidth !== true || column.minWidth === undefined) {
+        return MIN_COLUMN_WIDTH;
+    }
+    return Math.max(MIN_COLUMN_WIDTH, Math.round(column.minWidth));
 }
 
 /**

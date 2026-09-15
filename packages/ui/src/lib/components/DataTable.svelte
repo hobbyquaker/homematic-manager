@@ -3,7 +3,15 @@
     import {untrack, type Snippet} from 'svelte';
 
     import {fullText, isTruncated, measureNaturalWidths} from './columnMeasure.js';
-    import {clampColumnWidth, fitColumnWidth, isResizable, RESIZE_KEY_STEP, type ColumnWidths} from './columnWidths.js';
+    import {
+        clampColumnWidth,
+        fitColumnWidth,
+        isResizable,
+        MIN_COLUMN_WIDTH,
+        minimumColumnWidth,
+        RESIZE_KEY_STEP,
+        type ColumnWidths,
+    } from './columnWidths.js';
     import ContextMenu from './ContextMenu.svelte';
     import type {ContextMenuItem} from './contextMenu.js';
     import {getDataTableEnvironment, untranslated} from './dataTableContext.js';
@@ -464,16 +472,29 @@
         return subKeys.has(key) ? 'sub' : 'table';
     }
 
+    /**
+     * B-35: the narrowest the user can make a column from where it is sized - its own minimum for a
+     * column of buttons, the table's for every other one.
+     */
+    function floorOf(key: string): number {
+        const column = (scopeOf(key) === 'sub' ? visibleSubColumns : visibleColumns).find(
+            (candidate) => candidate.key === key,
+        );
+        return column === undefined ? MIN_COLUMN_WIDTH : minimumColumnWidth(column);
+    }
+
+    /** A drag, a key and a fit all store through here, so all of them stop at {@link floorOf}. */
     function saveWidth(key: string, width: number): void {
         const store = environment?.columnWidths;
         const scope = scopeOf(key);
         const id = scope === 'sub' ? subTableId : tableId;
+        const clamped = clampColumnWidth(width, floorOf(key));
         if (id !== undefined && store !== undefined) {
-            store.set(id, key, width);
+            store.set(id, key, clamped);
         } else if (scope === 'sub') {
-            localSubWidths = {...localSubWidths, [key]: clampColumnWidth(width)};
+            localSubWidths = {...localSubWidths, [key]: clamped};
         } else {
-            localWidths = {...localWidths, [key]: clampColumnWidth(width)};
+            localWidths = {...localWidths, [key]: clamped};
         }
     }
 
@@ -533,7 +554,7 @@
         const [label = 0, ...values] = measureNaturalWidths(root, [header, ...cells]);
         // a label of the head can get the sort mark; a label row of a sub-grid is not sorted
         const labelWidth = scope === 'table' && isSortable(column) && sort?.key !== key ? label + SORT_MARK_PX : label;
-        const width = fitColumnWidth([labelWidth, ...values]);
+        const width = fitColumnWidth([labelWidth, ...values], minimumColumnWidth(column));
         if (width !== undefined) {
             saveWidth(key, width);
         }
@@ -545,6 +566,8 @@
         readonly startX: number;
         /** The column's width when the handle was pressed, as drawn - a proportional one included. */
         readonly startWidth: number;
+        /** B-35: the narrowest the drag makes the column, its own minimum for a column of buttons. */
+        readonly min: number;
         /** B-29: pressed by a finger or a pen, where only a drag resizes and a tap sorts. */
         readonly touch: boolean;
         moved: boolean;
@@ -579,6 +602,7 @@
             pointerId: event.pointerId,
             startX: event.clientX,
             startWidth: cell.getBoundingClientRect().width,
+            min: floorOf(key),
             touch: pressedByTouch,
             moved: false,
         };
@@ -607,7 +631,7 @@
             current.moved = true;
             resizingKey = current.key;
         }
-        const width = clampColumnWidth(current.startWidth + dx);
+        const width = clampColumnWidth(current.startWidth + dx, current.min);
         if (draft?.key !== current.key || draft.width !== width) {
             draft = {key: current.key, width};
         }

@@ -349,6 +349,30 @@ describe('sizedTemplate', () => {
         expect(sizedTemplate(layout).minWidth).toBe(84 + 56);
         expect(sizedTemplate(layout, {msgs: 50})).toEqual({template: '50px minmax(56px, 200fr)', minWidth: 50 + 56});
     });
+
+    /**
+     * B-35 (#157): the PARAMSETS buttons. Like the Msgs column, but a width the user dragged or that is
+     * stored does not win below the minimum: a squeezed button lands under the next cell (task 25).
+     */
+    it('draws a user width below the minimum of a column that keeps it at that minimum, and a wider one as it is', () => {
+        const paramsets: DataTableColumn<Row> = {
+            key: 'PARAMSETS',
+            label: 'PARAMSETS',
+            width: 150,
+            minWidth: 150,
+            keepMinWidth: true,
+        };
+        const layout = tableLayout([paramsets, {key: 'name', label: 'Name', width: 200}], [paramsets], false);
+        expect(layout.template).toBe('minmax(150px, 150fr) minmax(56px, 200fr)');
+        expect(sizedTemplate(layout, {PARAMSETS: 90})).toEqual({
+            template: '150px minmax(56px, 200fr)',
+            minWidth: 150 + 56,
+        });
+        expect(sizedTemplate(layout, {PARAMSETS: 210}).template).toBe('210px minmax(56px, 200fr)');
+        // without a minimum there is nothing to keep
+        const plain = tableLayout([{key: 'links', label: 'Links', width: 60, keepMinWidth: true}], undefined, false);
+        expect(sizedTemplate(plain, {links: 40}).template).toBe('40px');
+    });
 });
 
 describe('selection', () => {

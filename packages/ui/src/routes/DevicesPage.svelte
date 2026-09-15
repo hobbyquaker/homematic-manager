@@ -29,6 +29,7 @@
         firmwareCell,
         offeredParamsets,
         offersRepair,
+        PARAMSETS_COLUMN_WIDTH,
         SERVICE_MARKS_COLUMN_WIDTH,
         serviceMarks,
         serviceMessageExplanation,
@@ -286,11 +287,13 @@
         {
             key: 'PARAMSETS',
             label: 'PARAMSETS',
-            width: 150,
             // the buttons in this cell do not shrink with the window: a column that is squeezed
             // below them puts the VALUES button under the next cell, where a click never lands
-            // (found by the e2e suite when the rooms and functions columns arrived, task 25)
-            fixed: true,
+            // (found by the e2e suite when the rooms and functions columns arrived, task 25). So
+            // neither the window nor a drag makes it narrower than they are; wider it can be (B-35, #157).
+            width: PARAMSETS_COLUMN_WIDTH,
+            minWidth: PARAMSETS_COLUMN_WIDTH,
+            keepMinWidth: true,
             sortable: false,
             value: (device) => paramsetsOf(device).names.join(' '),
         },
@@ -336,8 +339,10 @@
         {
             key: 'PARAMSETS',
             label: 'PARAMSETS',
-            width: 140,
-            fixed: true,
+            // the device's column: a key both depths share is one track, sized from the head
+            width: PARAMSETS_COLUMN_WIDTH,
+            minWidth: PARAMSETS_COLUMN_WIDTH,
+            keepMinWidth: true,
             sortable: false,
             value: (channel) => paramsetsOf(channel).names.join(' '),
         },
@@ -350,10 +355,10 @@
         {
             // Issue #25 asks for the direct links to be *shown* in the Devices tab as well as
             // created there. A count is what fits in a grid; the context menu opens the list.
+            // B-35: resizable like any text column; three digits fit the grid's own minimum.
             key: 'links',
             label: t('Links'),
             width: 60,
-            fixed: true,
             align: 'right',
             filterable: false,
             value: (channel) => {

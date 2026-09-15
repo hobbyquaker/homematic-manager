@@ -121,6 +121,11 @@ describe('the links grid', () => {
         expect(screen.getByTestId('links-defective').textContent).toContain('1');
         const broken = within(document.querySelector<HTMLElement>('[data-row-id="A:1->B:1"]')!).getByRole('img');
         expect(broken.getAttribute('title')).toContain('SENDER_BROKEN');
+        // B-35 (#157): the FLAGS column is resizable like any text column, and the mark fits its designed width
+        expect(screen.getByTestId('links-table-resize-FLAGS')).toBeTruthy();
+        const cell = broken.closest<HTMLElement>('.hmm-td')!;
+        expect(cell.classList.contains('hmm-td-fixed')).toBe(false);
+        expect(cell.scrollWidth).toBeLessThanOrEqual(cell.clientWidth);
     });
 
     it('hides the two play buttons on an interface without activateLinkParamset', async () => {

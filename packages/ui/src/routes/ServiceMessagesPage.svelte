@@ -10,7 +10,7 @@
     import type {DataTableColumn} from '../lib/components/tableModel.js';
     import {getStores} from '../lib/stores/context.js';
     import {isHmipInterface} from '../lib/stores/suppression.js';
-    import {serviceMessageExplanation} from '../lib/util/deviceGrid.js';
+    import {serviceMessageExplanation, SUPPRESS_COLUMN_WIDTH} from '../lib/util/deviceGrid.js';
     import {formatDateTime, formatRpcValue} from '../lib/util/format.js';
     import {serviceMessageTotal} from '../lib/util/serviceMessageTotal.js';
 
@@ -139,10 +139,12 @@
         ...(hmip
             ? [
                   {
+                      // B-35: a button, so resizable down to the button and not below it
                       key: 'suppress',
                       label: '',
-                      width: 150,
-                      fixed: true,
+                      width: SUPPRESS_COLUMN_WIDTH,
+                      minWidth: SUPPRESS_COLUMN_WIDTH,
+                      keepMinWidth: true,
                       sortable: false,
                       filterable: false,
                       value: (message: ServiceMessage) =>

@@ -27,6 +27,14 @@ export interface DataTableColumn<T> {
      * A width the user dragged still wins.
      */
     readonly minWidth?: number;
+    /**
+     * B-35: the user cannot make the column narrower than {@link minWidth} either - a drag, the
+     * arrow keys, a fit and a stored width all stop there. For a cell of buttons: one squeezed below
+     * its size lands under the next cell, where a click never arrives (task 25), and a tooltip of it
+     * cannot be clicked. A column of text or marks leaves it out and is cut off, with its tooltip.
+     * Requires {@link minWidth}.
+     */
+    readonly keepMinWidth?: boolean;
     readonly align?: 'left' | 'center' | 'right';
     /** Sortable by default. */
     readonly sortable?: boolean;
@@ -290,6 +298,8 @@ export interface TableTrack {
     readonly fixed: boolean;
     /** B-34: the column's own minimum, where its content needs more than {@link MIN_TRACK_PX}. */
     readonly minWidth?: number | undefined;
+    /** B-35: a user width below {@link minWidth} is drawn at {@link minWidth}. */
+    readonly keepMinWidth?: boolean | undefined;
 }
 
 /** Where each column of a depth sits, and the template every row of the table uses. */
@@ -367,7 +377,20 @@ function trackOf<T>(column: DataTableColumn<T>): TableTrack {
         width: column.width,
         fixed: column.fixed === true,
         ...(column.minWidth === undefined ? {} : {minWidth: column.minWidth}),
+        ...(column.keepMinWidth === true && column.minWidth !== undefined ? {keepMinWidth: true} : {}),
     };
+}
+
+/**
+ * B-35: the user's width as it is drawn. A column of buttons stops at its own minimum whatever is
+ * stored - a hand-edited `localStorage`, or a width from before the column had a minimum - so the
+ * drag in `DataTable` is not the only lock on that door.
+ */
+function drawnUserWidth(track: TableTrack, userWidth: number | undefined): number | undefined {
+    if (userWidth === undefined || track.keepMinWidth !== true || track.minWidth === undefined) {
+        return userWidth;
+    }
+    return Math.max(userWidth, track.minWidth);
 }
 
 /** The template with the user's widths in it, and the width below which the grid scrolls sideways. */
@@ -391,7 +414,7 @@ export function sizedTemplate(
     const parts: string[] = layout.expander ? [`${EXPANDER_PX}px`] : [];
     let minWidth = layout.expander ? EXPANDER_PX : 0;
     for (const track of layout.tracks) {
-        const userWidth = track.fixed ? undefined : widths[track.key];
+        const userWidth = track.fixed ? undefined : drawnUserWidth(track, widths[track.key]);
         parts.push(trackSize(track, userWidth));
         minWidth += trackMinimum(track, userWidth);
     }

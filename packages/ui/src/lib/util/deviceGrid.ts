@@ -41,6 +41,24 @@ const MARKS: Readonly<Record<string, {symbol: string; level: 'warn' | 'error'}>>
 export const SERVICE_MARKS_COLUMN_WIDTH = 84;
 
 /**
+ * The width the PARAMSETS column is designed with, and the narrowest it is drawn or dragged (B-35,
+ * #157): the widest set of buttons a row offers after B-33, MASTER and SERVICE on a device. With
+ * the cell's padding they measure 129.7 px in Chromium with the system-ui fallback font (MASTER and
+ * VALUES on a channel 125.2 px); the rest is room for other platforms' fonts. The column was fixed
+ * at this width, because a squeezed one put VALUES under the next cell (task 25), and so it could
+ * not be dragged at all.
+ */
+export const PARAMSETS_COLUMN_WIDTH = 150;
+
+/**
+ * The width of the suppress column of the service-message tab on HmIP (task 26), and the narrowest
+ * it is drawn or dragged (B-35): its one button, at its longest the German "Unterdrückung aufheben" -
+ * 159.5 px with the cell's padding in Chromium with the system-ui fallback font, which the fixed
+ * 150 px cut off. "Unsuppress" is 86.2 px.
+ */
+export const SUPPRESS_COLUMN_WIDTH = 180;
+
+/**
  * The marks for one device, from the service messages of its channels. Unreachable first and at
  * most two of them, as 2.x did; {@link SERVICE_MARKS_COLUMN_WIDTH} has room for those two and the
  * repair button.

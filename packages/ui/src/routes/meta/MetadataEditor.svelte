@@ -139,10 +139,10 @@
         // a tree is not sorted: a parent sorted away from its children is not a tree any more
         {key: 'name', label: t('Name'), width: 240, sortable: !treeMode, value: (row) => row.name},
         {
+            // B-35: resizable like any text column; a count fits the grid's own minimum
             key: 'devices',
             label: t('Devices'),
             width: 96,
-            fixed: true,
             align: 'right',
             filterable: false,
             sortable: !treeMode,
@@ -152,7 +152,6 @@
             key: 'channels',
             label: t('Channels'),
             width: 96,
-            fixed: true,
             align: 'right',
             filterable: false,
             sortable: !treeMode,

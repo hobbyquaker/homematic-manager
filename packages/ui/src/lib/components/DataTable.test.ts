@@ -586,6 +586,58 @@ describe('column widths and the full text of a cut-off cell (#157)', () => {
         expect(widthOf(header('TYPE'))).toBe(MIN_COLUMN_WIDTH);
     });
 
+    /**
+     * B-35 (#157): a column of buttons - the Devices tab's PARAMSETS - is resizable, but no drag, key,
+     * fit or stored width makes it narrower than its own minimum: a squeezed button landed under the
+     * next cell, where a click never arrived (task 25).
+     */
+    describe('a column that keeps its minimum (B-35)', () => {
+        const BUTTONS_MIN = 130;
+        const withButtons: DataTableColumn<Row>[] = [
+            ...resizable,
+            {
+                key: 'paramsets',
+                label: 'PARAMSETS',
+                width: 150,
+                minWidth: BUTTONS_MIN,
+                keepMinWidth: true,
+                sortable: false,
+                value: () => 'MASTER',
+            },
+        ];
+
+        it.skipIf(!hasLayout)('stops a drag, the arrow keys and a fit there, and still gets wider', async () => {
+            const store = new ColumnWidthsStore(new MemoryStorage(), () => 'ccu');
+            renderGrid({tableId: 'devices', columns: withButtons}, {columnWidths: store});
+
+            await drag('paramsets', -2000);
+            expect(widthOf(header('PARAMSETS'))).toBe(BUTTONS_MIN);
+            expect(store.widths('devices')['paramsets']).toBe(BUTTONS_MIN);
+
+            await fireEvent.keyDown(screen.getByTestId('grid-resize-paramsets'), {key: 'ArrowLeft'});
+            expect(store.widths('devices')['paramsets']).toBe(BUTTONS_MIN);
+
+            // the label and the cells measure less than the minimum: a fit keeps it too
+            await drag('paramsets', 80);
+            await fireEvent.dblClick(screen.getByTestId('grid-resize-paramsets'));
+            expect(store.widths('devices')['paramsets']).toBe(BUTTONS_MIN);
+            expect(widthOf(header('PARAMSETS'))).toBe(BUTTONS_MIN);
+
+            await drag('paramsets', 60);
+            expect(Math.abs(widthOf(header('PARAMSETS')) - (BUTTONS_MIN + 60))).toBeLessThanOrEqual(2);
+        });
+
+        it.skipIf(!hasLayout)('draws a stored width below the minimum at the minimum', () => {
+            const store = new ColumnWidthsStore(new MemoryStorage(), () => 'ccu');
+            store.set('devices', 'paramsets', 60);
+            store.set('devices', 'type', 60);
+            renderGrid({tableId: 'devices', columns: withButtons}, {columnWidths: store});
+            expect(widthOf(header('PARAMSETS'))).toBe(BUTTONS_MIN);
+            // an ordinary column keeps what is stored
+            expect(widthOf(header('TYPE'))).toBe(60);
+        });
+    });
+
     it.skipIf(!hasLayout)('leaves the column alone on a click without a move', async () => {
         const store = new ColumnWidthsStore(new MemoryStorage(), () => 'ccu');
         renderGrid({tableId: 'devices'}, {columnWidths: store});

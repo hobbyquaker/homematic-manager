@@ -719,6 +719,26 @@ out="$(install_addon)"
 check "a reinstall over the kept profile is a fresh install again" "exit 10" "$out"
 check "and puts the rule back with a reload" "reload" "$(lighttpd_actions)"
 check "and it picks the old profile back up" "kept" "$(dex 'cat /usr/local/hmm/marker.json')"
+
+echo
+echo "the Config-Url: the settings page on openccu-lite, the button into the app on a CCU (B-36)"
+# openccu-lite's shell frames the Config-Url behind the gear and the Settings button; the Charly's
+# /VERSION carries VARIANT=lite and LITE=
+dex 'printf "VERSION=3.89.8.20260719\nPRODUCT=rpi3\nPLATFORM=rpi3\nVARIANT=lite\nLITE=1.0.0-alpha.0\n" > /VERSION' >/dev/null
+out="$(install_addon)"
+check "an update on openccu-lite goes through" "exit 0" "$out"
+check "and writes the settings page as the CONFIG_URL into hm_addons.cfg" \
+    "CONFIG_URL /addons/hmm/settings.cgi?cmd=config CONFIG_DESCRIPTION" "$(dex 'cat /usr/local/etc/config/hm_addons.cfg')"
+check "which keeps its description" "Ger&auml;te" "$(dex 'cat /usr/local/etc/config/hm_addons.cfg')"
+check "rc.d/hmm info names the settings page as the Config-Url" "Config-Url: /addons/hmm/settings.cgi?cmd=config" \
+    "$(dex '/usr/local/etc/config/rc.d/hmm info')"
+dex 'rm -f /VERSION' >/dev/null
+out="$(install_addon)"
+check "an update on a CCU again goes through" "exit 0" "$out"
+check "and the CONFIG_URL is the button into the app again" \
+    "CONFIG_URL /addons/hmm/settings.cgi CONFIG_DESCRIPTION" "$(dex 'cat /usr/local/etc/config/hm_addons.cfg')"
+check "and so is the Config-Url of rc.d/hmm info" "Config-Url: /addons/hmm/settings.cgi" "$(dex '/usr/local/etc/config/rc.d/hmm info')"
+absent "without ?cmd=config" "settings.cgi?cmd=config" "$(dex '/usr/local/etc/config/rc.d/hmm info')"
 dex '/usr/local/etc/config/rc.d/hmm uninstall purge' >/dev/null
 check "uninstall purge removes the profile too" "gone" "$(dex 'test -d /usr/local/hmm || echo gone')"
 

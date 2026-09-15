@@ -210,7 +210,18 @@ ln -sfn $ADDON_DIR/www $WWW_DIR
 
 # entry in Systemsteuerung
 touch $CONF_DIR/hm_addons.cfg
-$ADDON_DIR/bin/update_addon $ADDON $ADDON.cfg
+# B-134: on a CCU the CONFIG_URL is the button that opens the app (D-32), and the settings page is
+# linked from the description. On openccu-lite the app has its own entry in the addon menu and the
+# shell frames the CONFIG_URL behind the gear and the Settings button, so there it names the settings
+# page - for a box whose catalogue entry does not say so itself. rc.d/hmm's ConfigUrl says the same
+# in `info`. /VERSION as rc.d/hmm reads it; a firmware without one (the CCU3's install chroot) is a CCU.
+ADDON_CFG=$ADDON.cfg
+if grep -q '^VARIANT=lite$' /VERSION 2>/dev/null; then
+    ADDON_CFG=$ADDON-lite.cfg
+    sed "s|{CONFIG_URL /addons/$ADDON/settings.cgi |{CONFIG_URL /addons/$ADDON/settings.cgi?cmd=config |" \
+        $ADDON.cfg > $ADDON_CFG
+fi
+$ADDON_DIR/bin/update_addon $ADDON $ADDON_CFG
 
 # The lighttpd rule that puts the UI (and its WebSocket) under /addons/hmm/. The port is the one in
 # etc/hmm.env, so a user who moves the port and re-runs this gets a matching rule. Rendered next to

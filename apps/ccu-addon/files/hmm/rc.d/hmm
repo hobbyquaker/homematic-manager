@@ -376,6 +376,20 @@ Stop() {
     echo "OK"
 }
 
+# B-134: the Config-Url, printed. On a CCU it is the Systemsteuerung button that opens the app
+# (D-32: settings.cgi checks the WebUI session and hands the browser over with the token cookie), and
+# the settings page is linked from the description. On openccu-lite the app has its own entry in the
+# addon menu, and the shell frames the Config-Url behind the gear and the Settings button - there it
+# has to be the settings page. Read from /VERSION like everything else that differs between the two,
+# never remembered. update_script writes the same into hm_addons.cfg.
+ConfigUrl() {
+    if grep -q '^VARIANT=lite$' /VERSION 2>/dev/null; then
+        printf '%s' "/addons/$ADDON/settings.cgi?cmd=config"
+    else
+        printf '%s' "/addons/$ADDON/settings.cgi"
+    fi
+}
+
 case "$1" in
     init)
         # called before the CCU interfaces are up - nothing to prepare, start happens later
@@ -415,7 +429,7 @@ case "$1" in
         echo "Name: Homematic Manager"
         echo "Version: $VERSION_ADDON"
         echo "Update: /addons/$ADDON/update_check.cgi"
-        echo "Config-Url: /addons/$ADDON/settings.cgi"
+        echo "Config-Url: $(ConfigUrl)"
         echo "Operations: restart uninstall"
         ;;
 

@@ -23,7 +23,7 @@ re-installed after one.
 | Spec | Workflow |
 | --- | --- |
 | `connect.spec.ts` | connect, pick an interface, see the devices and open the channel sub-grid |
-| `rename.spec.ts` | rename a device, through ReGa |
+| `rename.spec.ts` | rename a device, through ReGa; open the dialog by a double click on a device or channel name, by F2, and by a double tap on a touch screen (task 46) |
 | `paramset.spec.ts` | edit a paramset, preview it, write it - and write *only* what changed; a paramset button only where the row lists the paramset and it has parameters, and SERVICE on devices only (B-33) |
 | `multiApply.spec.ts` | multi-apply refuses a channel on another firmware (#98) |
 | `links.spec.ts` | add a link, edit its paramset, remove it again |

@@ -73,6 +73,11 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Fixed
 
+- **Escape closes a dialog on the Devices and the Links tab again.** While one of those two tabs was shown, Escape
+  closed no dialog at all - rename, create link, and the settings dialog as well - in the browser and in the desktop
+  app alike; only the ✕ button and Cancel did. The row menu of the two grids took every Escape, also while it was not
+  open. It now takes Escape only when it is open. (B-38)
+
 - **CCU addon on openccu-lite: an `HMM_AUTH_MODE=token` left in `etc/hmm.env` by a CCU install no longer keeps the
   addon out of the box's login.** Every install from the CCU days has that line, `hmm.env` survives updates, and a
   `/usr/local` upgraded from CCU firmware to openccu-lite therefore ran the backend in token mode, where the box's

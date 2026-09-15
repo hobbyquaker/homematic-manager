@@ -105,6 +105,18 @@
         onactivate?: ((row: T) => void) | undefined;
         /** Right click on a row; the table has already called `preventDefault()`. */
         onrowcontextmenu?: ((row: T, event: MouseEvent) => void) | undefined;
+        /**
+         * Task 46: the column whose cell renames its row on a double click - the name, in every grid
+         * of this app. A double click anywhere else on the row still goes to `onactivate`.
+         */
+        renameColumn?: string;
+        /** Task 46: whether a row can be renamed at all; absent, every row can. The `:0` channel cannot. */
+        canRename?: ((row: T) => boolean) | undefined;
+        /**
+         * Task 46: opens the rename dialog for a row - on a double click on its name cell, on F2, and
+         * on Enter where the table has no `onactivate`. Absent, the table renames nothing.
+         */
+        onrename?: ((row: T) => void) | undefined;
         /** Draws one cell; without it the cell is the column's text value. */
         cell?: Snippet<[T, DataTableColumn<T>, FlatRow<T>]> | undefined;
         /**
@@ -151,6 +163,9 @@
         sort = $bindable(undefined),
         onactivate = undefined,
         onrowcontextmenu = undefined,
+        renameColumn = 'name',
+        canRename = undefined,
+        onrename = undefined,
         cell = undefined,
         tableId = undefined,
         subTableId = undefined,
@@ -369,6 +384,56 @@
         onrowcontextmenu(row.row, event);
     }
 
+    // ------------------------------------------------------------------ rename (task 46)
+
+    /**
+     * What a key or a double click is meant for when it comes from inside a control of the grid: a
+     * filter field, a paramset button, the copy button task 47 puts into the name cell. It stays
+     * with that control.
+     */
+    const CONTROL_SELECTOR = 'button, input, select, textarea, a[href], [contenteditable="true"]';
+
+    function fromControl(event: Event): boolean {
+        return event.target instanceof Element && event.target.closest(CONTROL_SELECTOR) !== null;
+    }
+
+    function renamable(row: FlatRow<T> | undefined): row is FlatRow<T> {
+        return row?.kind === 'row' && onrename !== undefined && (canRename?.(row.row) ?? true);
+    }
+
+    /**
+     * A double click on a row. On the name cell it renames, and the word the browser selected on the
+     * way is let go again, as 2.7's `removeSelectionAfterDblClick` did; everywhere else - and on the
+     * name of a row that cannot be renamed - it is the row's activation, as before. The two clicks
+     * in front of it have selected the row the way a single click does, so the dialog acts on exactly
+     * the row that is highlighted. A sub-grid's label row, where the resize handles are, is neither.
+     */
+    function onRowDblClick(row: FlatRow<T>, event: MouseEvent): void {
+        if (row.kind !== 'row') {
+            return;
+        }
+        const cell = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-column-key]') : null;
+        if (cell?.dataset['columnKey'] === renameColumn && !fromControl(event) && renamable(row)) {
+            window.getSelection()?.removeAllRanges();
+            onrename?.(row.row);
+            return;
+        }
+        onactivate?.(row.row);
+    }
+
+    /**
+     * F2, or Enter on a table without `onactivate`: the focused row, but only when it is selected -
+     * the focus starts on the first row with nothing selected, and a key must not rename a row the
+     * user cannot see highlighted - and only when the key came from the grid, not from a control.
+     */
+    function renameByKey(row: FlatRow<T> | undefined, event: KeyboardEvent): void {
+        if (!renamable(row) || !selectedSet.has(row.id) || fromControl(event)) {
+            return;
+        }
+        event.preventDefault();
+        onrename?.(row.row);
+    }
+
     function scrollFocusIntoView(): void {
         const element = viewport;
         if (!element) {
@@ -432,7 +497,12 @@
                 if (row && onactivate) {
                     event.preventDefault();
                     onactivate(row.row);
+                } else {
+                    renameByKey(row, event);
                 }
+                break;
+            case 'F2':
+                renameByKey(row, event);
                 break;
             case ' ':
                 if (row) {
@@ -1113,11 +1183,7 @@
                                 data-row-kind={flatRow.kind}
                                 style:height={`${rowHeight}px`}
                                 onclick={(event) => onRowClick(flatRow, event)}
-                                ondblclick={() => {
-                                    if (flatRow.kind === 'row') {
-                                        onactivate?.(flatRow.row);
-                                    }
-                                }}
+                                ondblclick={(event) => onRowDblClick(flatRow, event)}
                                 oncontextmenu={(event) => onRowContextMenu(flatRow, event)}
                             >
                                 {#if hasExpander}

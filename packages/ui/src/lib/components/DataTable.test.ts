@@ -309,6 +309,149 @@ describe('the channel sub-grid', () => {
     });
 });
 
+describe('rename on the name cell (task 46)', () => {
+    function nameCell(row: HTMLElement): HTMLElement {
+        const cell = row.querySelector<HTMLElement>('[data-column-key="name"]');
+        expect(cell).not.toBeNull();
+        return cell!;
+    }
+
+    const withChannels = {...base, subRows: (row: Row) => row.channels ?? []};
+
+    it('renames the row whose name was double clicked, and activates on any other cell as before', async () => {
+        const onrename = vi.fn();
+        const onactivate = vi.fn();
+        render(DataTable, {props: {...base, rows: makeRows(3), onrename, onactivate}});
+
+        await fireEvent.dblClick(nameCell(rowsInDom()[1]!));
+        expect(onrename).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00001'}));
+        expect(onactivate).not.toHaveBeenCalled();
+
+        await fireEvent.dblClick(rowsInDom()[2]!.querySelector('[data-column-key="type"]')!);
+        expect(onactivate).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00002'}));
+        expect(onrename).toHaveBeenCalledOnce();
+    });
+
+    it('keeps a click a selection, and neither expands nor collapses on the double click', async () => {
+        const onrename = vi.fn();
+        render(DataTable, {props: {...withChannels, rows: makeRows(2), onrename}});
+        await fireEvent.click(screen.getAllByRole('button', {name: 'Expand row'})[0]!);
+        expect(rowsInDom()).toHaveLength(3);
+
+        const channel = rowsInDom()[1]!;
+        await fireEvent.click(nameCell(channel));
+        expect(channel.getAttribute('aria-selected')).toBe('true');
+        expect(onrename).not.toHaveBeenCalled();
+
+        await fireEvent.dblClick(nameCell(channel));
+        expect(onrename).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00000:1'}));
+        await fireEvent.dblClick(nameCell(rowsInDom()[0]!));
+        expect(onrename).toHaveBeenLastCalledWith(expect.objectContaining({address: 'ADDR00000'}));
+        await fireEvent.dblClick(nameCell(rowsInDom()[2]!));
+        expect(onrename).toHaveBeenLastCalledWith(expect.objectContaining({address: 'ADDR00001'}));
+        // the first device is still open, the second still closed
+        expect(rowsInDom().map((row) => row.dataset['rowId'])).toEqual(['ADDR00000', 'ADDR00000:1', 'ADDR00001']);
+    });
+
+    it('lets go of the word the double click selected', async () => {
+        render(DataTable, {props: {...base, rows: makeRows(1), onrename: vi.fn()}});
+        const cell = nameCell(rowsInDom()[0]!);
+        window.getSelection()?.selectAllChildren(cell);
+        expect(window.getSelection()?.toString()).toBe('Device 0');
+
+        await fireEvent.dblClick(cell);
+        expect(window.getSelection()?.toString()).toBe('');
+    });
+
+    it('renames nothing on a row that cannot be renamed; that row activates as before', async () => {
+        const onrename = vi.fn();
+        const onactivate = vi.fn();
+        const canRename = (row: Row): boolean => row.address !== 'ADDR00001';
+        render(DataTable, {props: {...base, rows: makeRows(2), onrename, onactivate, canRename}});
+        await fireEvent.click(rowsInDom()[1]!);
+
+        await fireEvent.dblClick(nameCell(rowsInDom()[1]!));
+        await fireEvent.keyDown(screen.getByRole('grid'), {key: 'F2'});
+        expect(onrename).not.toHaveBeenCalled();
+        expect(onactivate).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00001'}));
+    });
+
+    it('renames nothing from a control inside the name cell, nor on a label row or a resize handle', async () => {
+        const onrename = vi.fn();
+        const cell = createRawSnippet((row: () => Row, column: () => DataTableColumn<Row>) => ({
+            render: () =>
+                column().key === 'name'
+                    ? `<span><span>${row().name}</span><button type="button">copy</button></span>`
+                    : `<span>${cellText(row(), column())}</span>`,
+        }));
+        const subColumns: DataTableColumn<Row>[] = [
+            {key: 'name', label: 'Name', width: 140},
+            {key: 'type', label: 'CHANNEL TYPE'},
+        ];
+        render(DataTable, {
+            props: {...withChannels, rows: makeRows(1), subColumns, onrename, cell, testId: 'grid'},
+        });
+        await fireEvent.click(screen.getByRole('button', {name: 'Expand row'}));
+
+        // the copy button task 47 puts into the cell keeps its own double click
+        await fireEvent.dblClick(within(rowsInDom()[0]!).getByRole('button', {name: 'copy'}));
+        // the sub-grid's label row, and the handle of the name column in the head
+        await fireEvent.dblClick(nameCell(rowsInDom()[1]!));
+        await fireEvent.dblClick(screen.getByTestId('grid-resize-name'));
+        expect(onrename).not.toHaveBeenCalled();
+
+        await fireEvent.dblClick(within(rowsInDom()[0]!).getByText('Device 0'));
+        expect(onrename).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00000'}));
+    });
+
+    it('renames the selected row on F2, and on Enter where nothing is activated', async () => {
+        const onrename = vi.fn();
+        render(DataTable, {props: {...base, rows: makeRows(3), onrename}});
+        const grid = screen.getByRole('grid');
+
+        // the focus starts on the first row, but nothing is selected: nothing the user can see
+        await fireEvent.keyDown(grid, {key: 'F2'});
+        await fireEvent.keyDown(grid, {key: 'Enter'});
+        expect(onrename).not.toHaveBeenCalled();
+
+        await fireEvent.keyDown(grid, {key: 'ArrowDown'});
+        await fireEvent.keyDown(grid, {key: 'F2'});
+        expect(onrename).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00001'}));
+        await fireEvent.keyDown(grid, {key: 'Enter'});
+        expect(onrename).toHaveBeenCalledTimes(2);
+
+        // a key typed into a column filter stays there
+        const filter = within(grid).getAllByRole('searchbox')[0]!;
+        await fireEvent.keyDown(filter, {key: 'Enter'});
+        await fireEvent.keyDown(filter, {key: 'F2'});
+        expect(onrename).toHaveBeenCalledTimes(2);
+    });
+
+    it('leaves Enter to onactivate where there is one; F2 still renames', async () => {
+        const onrename = vi.fn();
+        const onactivate = vi.fn();
+        render(DataTable, {props: {...base, rows: makeRows(2), onrename, onactivate}});
+        const grid = screen.getByRole('grid');
+        await fireEvent.keyDown(grid, {key: 'ArrowDown'});
+
+        await fireEvent.keyDown(grid, {key: 'Enter'});
+        expect(onactivate).toHaveBeenCalledOnce();
+        expect(onrename).not.toHaveBeenCalled();
+        await fireEvent.keyDown(grid, {key: 'F2'});
+        expect(onrename).toHaveBeenCalledOnce();
+    });
+
+    it('does nothing on F2 or a double click without onrename', async () => {
+        const onactivate = vi.fn();
+        render(DataTable, {props: {...base, rows: makeRows(2), onactivate}});
+        await fireEvent.click(rowsInDom()[0]!);
+        await fireEvent.keyDown(screen.getByRole('grid'), {key: 'F2'});
+        expect(onactivate).not.toHaveBeenCalled();
+        await fireEvent.dblClick(nameCell(rowsInDom()[0]!));
+        expect(onactivate).toHaveBeenCalledOnce();
+    });
+});
+
 /**
  * D-34, after the maintainer's first look: "table columns are not regularly sized when the channel
  * sub-grid is expanded". The whole table is drawn on one set of tracks now, so this measures

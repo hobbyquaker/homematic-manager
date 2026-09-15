@@ -260,8 +260,9 @@
             align: 'center',
             value: () => '',
         },
-        {key: 'name', label: t('Name'), width: 170, value: (device) => stores.nameOf(device.ADDRESS)},
-        {key: 'ADDRESS', label: 'ADDRESS', width: 150, mono: true},
+        // Task 47: both carry the copy button, the full name and the address whatever the cell shows
+        {key: 'name', label: t('Name'), width: 170, copy: 'name', value: (device) => stores.nameOf(device.ADDRESS)},
+        {key: 'ADDRESS', label: 'ADDRESS', width: 150, mono: true, copy: 'address'},
         // Task 25: the taxonomy of the store, as the arrays of names ReGa's rooms always were
         {key: 'rooms', label: t('Rooms'), width: 120, value: (device) => taxonomyText(device, 'room')},
         {key: 'functions', label: t('Functions'), width: 110, value: (device) => taxonomyText(device, 'function')},
@@ -336,8 +337,8 @@
      * TYPE, DIRECTION, PARAMSETS, FLAGS and - on BidCos-RF only - AES_ACTIVE.
      */
     const subColumns = $derived<DataTableColumn<DeviceDescription>[]>([
-        {key: 'name', label: t('Name'), width: 170, value: (channel) => stores.nameOf(channel.ADDRESS)},
-        {key: 'ADDRESS', label: 'ADDRESS', width: 150, mono: true},
+        {key: 'name', label: t('Name'), width: 170, copy: 'name', value: (channel) => stores.nameOf(channel.ADDRESS)},
+        {key: 'ADDRESS', label: 'ADDRESS', width: 150, mono: true, copy: 'address'},
         {key: 'rooms', label: t('Rooms'), width: 120, value: (channel) => taxonomyText(channel, 'room')},
         {key: 'functions', label: t('Functions'), width: 110, value: (channel) => taxonomyText(channel, 'function')},
         {key: 'TYPE', label: 'TYPE', width: 150},

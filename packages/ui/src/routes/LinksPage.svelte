@@ -89,9 +89,11 @@
             key: 'senderName',
             label: `${t('Sender')} ${t('Name')}`,
             width: 170,
+            // Task 47: the names and addresses of both ends carry the copy button
+            copy: 'name',
             value: (link) => stores.nameOf(link.SENDER),
         },
-        {key: 'SENDER', label: 'SENDER', width: 140, mono: true},
+        {key: 'SENDER', label: 'SENDER', width: 140, mono: true, copy: 'address'},
         {
             key: 'senderType',
             label: 'TYPE',
@@ -112,9 +114,10 @@
             key: 'receiverName',
             label: `${t('Receiver')} ${t('Name')}`,
             width: 170,
+            copy: 'name',
             value: (link) => stores.nameOf(link.RECEIVER),
         },
-        {key: 'RECEIVER', label: 'RECEIVER', width: 140, mono: true},
+        {key: 'RECEIVER', label: 'RECEIVER', width: 140, mono: true, copy: 'address'},
         {
             key: 'receiverType',
             label: 'TYPE',

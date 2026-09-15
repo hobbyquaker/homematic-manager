@@ -115,8 +115,9 @@
             align: 'center',
             value: () => '',
         },
-        {key: 'name', label: t('Name'), width: 220, value: (message) => stores.nameOf(message.address)},
-        {key: 'address', label: 'ADDRESS', width: 160, mono: true},
+        // Task 47: the device a message is about can be copied by name and by address
+        {key: 'name', label: t('Name'), width: 220, copy: 'name', value: (message) => stores.nameOf(message.address)},
+        {key: 'address', label: 'ADDRESS', width: 160, mono: true, copy: 'address'},
         {
             key: 'device',
             label: `${t('Device')} ADDRESS`,

@@ -45,7 +45,8 @@
 
     /** The 2.7 `grid-interfaces`: the LAN gateways and the built-in coprocessor of the CCU. */
     const gatewayColumns: DataTableColumn<BidcosInterfaceInfo>[] = [
-        {key: 'ADDRESS', label: 'ADDRESS', width: 180, mono: true},
+        // Task 47: a gateway's serial carries the copy button like every address
+        {key: 'ADDRESS', label: 'ADDRESS', width: 180, mono: true, copy: 'address'},
         {key: 'DESCRIPTION', label: 'DESCRIPTION', width: 220},
         {key: 'TYPE', label: 'TYPE', width: 130},
         {key: 'FIRMWARE_VERSION', label: 'FIRMWARE_VERSION', width: 150},
@@ -91,8 +92,8 @@
             align: 'center',
             value: () => '',
         },
-        {key: 'name', label: t('Name'), width: 180, value: (device) => stores.nameOf(device.ADDRESS)},
-        {key: 'ADDRESS', label: 'ADDRESS', width: 140, mono: true},
+        {key: 'name', label: t('Name'), width: 180, copy: 'name', value: (device) => stores.nameOf(device.ADDRESS)},
+        {key: 'ADDRESS', label: 'ADDRESS', width: 140, mono: true, copy: 'address'},
         {key: 'TYPE', label: 'TYPE', width: 150},
         {key: 'INTERFACE', label: 'INTERFACE', width: 140, mono: true, hidden: !isBidcos},
         {
@@ -178,8 +179,8 @@
 
     /** The 2.7 RSSI sub-grid: every peer this device measures, not only the gateways. */
     const peerColumns = $derived<DataTableColumn<DeviceDescription>[]>([
-        {key: 'name', label: t('Name'), width: 180, value: (peer) => stores.nameOf(peer.ADDRESS)},
-        {key: 'ADDRESS', label: t('Peer'), width: 200, mono: true},
+        {key: 'name', label: t('Name'), width: 180, copy: 'name', value: (peer) => stores.nameOf(peer.ADDRESS)},
+        {key: 'ADDRESS', label: t('Peer'), width: 200, mono: true, copy: 'address'},
         {key: 'rx', label: '← dBm', width: 120, align: 'right', filterable: false, value: () => ''},
         {key: 'tx', label: '→ dBm', width: 120, align: 'right', filterable: false, value: () => ''},
     ]);

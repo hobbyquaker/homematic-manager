@@ -40,9 +40,11 @@
             key: 'name',
             label: t('Name'),
             width: 200,
+            // Task 47: the copy button; an event without an address has nothing to copy and no button
+            copy: 'name',
             value: (event) => (event.address === undefined ? '' : stores.nameOf(event.address)),
         },
-        {key: 'address', label: 'ADDRESS', width: 150, mono: true},
+        {key: 'address', label: 'ADDRESS', width: 150, mono: true, copy: 'address'},
         {key: 'datapoint', label: 'PARAM', width: 180},
         {key: 'value', label: 'VALUE', width: 140, value: (event) => formatRpcValue(event.value ?? event.payload)},
         {

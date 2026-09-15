@@ -8,8 +8,9 @@
  *
  * On openccu-lite nobody logs in *here*. The box's shell has already done it, lighttpd's gate has
  * already refused everyone who has no session (their D-28), and the shell opens an addon page with
- * the session on the URL: `?sid=@xxxxxxxxxx@`, the CCU convention. That session id **is** a valid
- * credential for the box's own APIs, so the check is one request:
+ * the session on the URL: `?sid=@xxxxxxxxxx@`, the CCU convention. On an image from before their
+ * task 125 that session id **is** a valid credential for the box's own APIs, so the check is one
+ * request (on a newer image the shell sends the gate's `X-Occulite-Session` instead, see below):
  *
  * ```
  * GET /api/meta/v1/enums   Authorization: Bearer <sid>   ->  200 valid, 401 not
@@ -64,10 +65,42 @@ export interface OcculiteCheckOptions {
     readonly requireState?: boolean;
 }
 
-/** A session id as the shell hands it over, `@…@` and all, or `undefined` when it is not one. */
+/**
+ * B-36: what an openccu-lite session id looks like, and nothing else is one.
+ *
+ * - **Since openccu-lite task 125** (occulited `1f71597`, their D-77) a session id is what Go's
+ *   `crypto/rand.Text` hands out: 26 characters of base32, `A-Z` and `2-7`. The box's API and its gate
+ *   match exactly this (`sidRe`, the gate's `SID_PATTERN`).
+ * - **Before task 125** it was the CCU's shape, ten of `[0-9a-zA-Z]` (auth-off's fixed id too). Since
+ *   then that shape is only a session's *legacy alias*, which the addon CGIs parse and the box's API
+ *   refuses as a credential from anywhere. The two cannot be told apart by their characters: a
+ *   ten-character value is a session on an older box and never one on a newer box.
+ * - **An API token** (`olt_` and 32 hex digits) is neither and is never a session: the header path
+ *   asks `/api/auth/v1/state`, which also answers for a token.
+ *
+ * A value of another shape or length cannot be an openccu-lite session on any image, so it is refused
+ * here, without asking the box.
+ */
+const SESSION_ID = /^[A-Z2-7]{26}$/;
+const LEGACY_ID = /^[0-9a-zA-Z]{10}$/;
+
+/** A session id as the shell or the gate hands it over, `@…@` and all, or `undefined` when it is not one. */
 export function parseSid(value: string | null | undefined): string | undefined {
     const bare = (value ?? '').replace(/^@|@$/g, '').trim();
-    return /^[0-9a-zA-Z]{6,64}$/.test(bare) ? bare : undefined;
+    return SESSION_ID.test(bare) || LEGACY_ID.test(bare) ? bare : undefined;
+}
+
+/**
+ * B-36: can the `?sid=` of a request be a session of the box whose gate named `gate`?
+ *
+ * A gate header of the 26-character shape says the box issues session ids of that shape (task 125),
+ * so a `?sid=` of any other shape there is the session's legacy alias, which the box's API refuses:
+ * the answer is known without asking. Without such a header - a CCU, an image from before the header,
+ * a ten-character header - nothing can be concluded, and the box decides as before. This only ever
+ * *refuses*: a `true` still has to be confirmed by the box.
+ */
+export function sidCanBeSession(sid: string, gate: string | undefined): boolean {
+    return gate === undefined || !SESSION_ID.test(gate) || SESSION_ID.test(sid);
 }
 
 /** Checks a session id against the box that issued it. */

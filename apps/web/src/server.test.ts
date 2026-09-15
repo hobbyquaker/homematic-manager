@@ -933,7 +933,9 @@ describe('the openccu-lite hand-over (D-40)', () => {
         const answer = await fetch(`${host.url}?sid=%40abcdefghij%40`, {redirect: 'manual'});
         expect(answer.status).toBe(302);
         expect(answer.headers.get('location')).toBe(host.base);
-        expect(fakeBox.offered).toEqual(['@abcdefghij@']);
+        // without a gate header a ten-character id is asked about: it is a session on a box from
+        // before openccu-lite task 125 (B-36)
+        expect(fakeBox.offered).toEqual(['abcdefghij']);
 
         const ui = await fetch(host.url, {headers: {Cookie: sessionCookieOf(answer)}});
         expect(await ui.text()).toContain('<div id="app">');
@@ -1068,7 +1070,137 @@ describe('the openccu-lite hand-over (D-40)', () => {
             const host = await start({sessionChecker: checker});
             expect(await rawHandshake(host.port, `${host.base}api`, {[HEADER]: 'abcdefghij'})).toBe(401);
             await fetch(host.url, {headers: {[HEADER]: 'abcdefghij'}});
+            // nor with a ?sid= next to it (B-36)
+            const page = await fetch(`${host.url}?sid=%40abcdefghij%40`, {
+                redirect: 'manual',
+                headers: {[HEADER]: 'abcdefghij'},
+            });
+            // token mode hands out its own cookie on a loopback bind; a session of ours it never makes
+            expect(page.headers.get('set-cookie') ?? '').not.toContain('hmm_session');
             expect(checker.check).not.toHaveBeenCalled();
+        });
+
+        describe('before the ?sid= hand-over (B-36)', () => {
+            /** A session id of openccu-lite task 125's shape the fake box knows: 26 of base32. */
+            const LONG = 'ANNAANNAANNAANNAANNAANNA27';
+            /** One of that shape it does not know. */
+            const LONG_UNKNOWN = 'Z'.repeat(26);
+
+            function longBox(): Promise<WebHost> {
+                const checker = {
+                    check: vi.fn((sid: string | null | undefined, options?: {requireState?: boolean}) =>
+                        sid === LONG ? Promise.resolve({name: 'anna', level: 8, sid}) : fakeBox.check(sid, options),
+                    ),
+                };
+                return box({sessionChecker: checker});
+            }
+
+            it('signs a request in by a confirmed header, whatever ?sid= says, and takes ?sid= off the URL', async () => {
+                const host = await box();
+                // B-133 on the Charly: the shell's ?sid= was the legacy alias, which the box refuses
+                const answer = await fetch(`${host.url}?sid=%40zzzzzzzzzz%40&lang=de`, {
+                    redirect: 'manual',
+                    headers: {[HEADER]: 'abcdefghij'},
+                });
+                expect(answer.status).toBe(302);
+                expect(answer.headers.get('location')).toBe(`${host.base}?lang=de`);
+                // the header was asked about, with the state check, and the ?sid= never
+                expect(fakeBox.offered).toEqual(['abcdefghij']);
+                expect(fakeBox.requireState).toEqual([true]);
+                const ui = await fetch(host.url, {headers: {Cookie: sessionCookieOf(answer)}});
+                expect(ui.status).toBe(200);
+                expect(await ui.text()).toContain('<div id="app">');
+            });
+
+            it('lets the header win over a ?sid= the box would take, too', async () => {
+                const host = await box();
+                const answer = await fetch(`${host.url}?sid=benbenbenb`, {
+                    redirect: 'manual',
+                    headers: {[HEADER]: 'abcdefghij'},
+                });
+                expect(answer.status).toBe(302);
+                expect(fakeBox.offered).toEqual(['abcdefghij']);
+                // and the cookie that already names the header's session asks nothing at all
+                fakeBox.offered.length = 0;
+                const again = await fetch(`${host.url}?sid=benbenbenb`, {
+                    redirect: 'manual',
+                    headers: {[HEADER]: 'abcdefghij', Cookie: sessionCookieOf(answer)},
+                });
+                expect(again.status).toBe(302);
+                expect(again.headers.get('location')).toBe(host.base);
+                expect(fakeBox.offered).toEqual([]);
+            });
+
+            it('falls back to the ?sid= hand-over when the box does not confirm the header', async () => {
+                const host = await box();
+                const answer = await fetch(`${host.url}?sid=abcdefghij`, {
+                    redirect: 'manual',
+                    headers: {[HEADER]: 'nostate000'},
+                });
+                expect(answer.status).toBe(302);
+                expect(answer.headers.get('location')).toBe(host.base);
+                expect(fakeBox.offered).toEqual(['nostate000', 'abcdefghij']);
+                expect(fakeBox.requireState).toEqual([true, undefined]);
+                expect((await fetch(host.url, {headers: {Cookie: sessionCookieOf(answer)}})).status).toBe(200);
+            });
+
+            it('signs in by a header of the 26-character shape next to a ten-character alias', async () => {
+                const host = await longBox();
+                const answer = await fetch(`${host.url}?sid=%40abcdefghij%40`, {
+                    redirect: 'manual',
+                    headers: {[HEADER]: LONG},
+                });
+                expect(answer.status).toBe(302);
+                expect(answer.headers.get('location')).toBe(host.base);
+                expect((await fetch(host.url, {headers: {Cookie: sessionCookieOf(answer)}})).status).toBe(200);
+            });
+
+            it('refuses a ten-character ?sid= without asking the box when the gate names a 26-character session', async () => {
+                const host = await box();
+                // the header is not confirmed (an expired session): only the alias is left, and
+                // a box that issues 26-character ids refuses every ten-character one
+                const answer = await fetch(`${host.url}?sid=%40abcdefghij%40`, {
+                    redirect: 'manual',
+                    headers: {[HEADER]: LONG_UNKNOWN},
+                });
+                expect(answer.status).toBe(302);
+                expect(answer.headers.get('location')).toBe('/');
+                expect(answer.headers.get('set-cookie')).toBeNull();
+                // one question, about the header; `abcdefghij`, which the fake would take, was never asked
+                expect(fakeBox.offered).toEqual([LONG_UNKNOWN]);
+                // and an asset of it does not get in either
+                const asset = await fetch(`${host.url}data/manifest.json?sid=abcdefghij`, {
+                    redirect: 'manual',
+                    headers: {[HEADER]: LONG_UNKNOWN},
+                });
+                expect(asset.status).toBe(302);
+                expect(asset.headers.get('set-cookie')).toBeNull();
+            });
+
+            it('still asks about a 26-character ?sid= next to an unconfirmed 26-character header', async () => {
+                const host = await longBox();
+                const answer = await fetch(`${host.url}?sid=${LONG}`, {
+                    redirect: 'manual',
+                    headers: {[HEADER]: LONG_UNKNOWN},
+                });
+                expect(answer.status).toBe(302);
+                expect(answer.headers.get('location')).toBe(host.base);
+            });
+
+            it('asks nothing about a value that is no openccu-lite session: an API token, another length', async () => {
+                const host = await box();
+                const token = `olt_${'0123456789abcdef'.repeat(2)}`;
+                for (const value of [token, 'abcdefghijk', 'abcdefghi', 'annaannaannaannaannaanna27']) {
+                    const page = await fetch(`${host.url}?sid=${value}`, {redirect: 'manual'});
+                    // no hand-over: the request is one without a session, and goes to the box's login
+                    expect(page.status).toBe(302);
+                    expect(page.headers.get('set-cookie')).toBeNull();
+                    const withHeader = await fetch(host.url, {redirect: 'manual', headers: {[HEADER]: value}});
+                    expect(withHeader.status).toBe(302);
+                    expect(withHeader.headers.get('set-cookie')).toBeNull();
+                }
+                expect(fakeBox.offered).toEqual([]);
+            });
         });
 
         it('asks a real HTTP box with the id as a bearer token, and /api/auth/v1/state decides', async () => {

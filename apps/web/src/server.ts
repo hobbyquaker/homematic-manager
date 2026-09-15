@@ -62,7 +62,13 @@ import {
     type LoginLanguage,
 } from './login.js';
 import {createLogger, silentLogger, type Logger, type LogLevel} from './log.js';
-import {OCCULITE_SESSION_HEADER, OcculiteAuthenticator, parseSid, type OcculiteCheckOptions} from './occulite.js';
+import {
+    OCCULITE_SESSION_HEADER,
+    OcculiteAuthenticator,
+    parseSid,
+    sidCanBeSession,
+    type OcculiteCheckOptions,
+} from './occulite.js';
 import {defaultDataDir, defaultMetadataDir, defaultUiDir, packageVersion} from './paths.js';
 import {proxyRequest, proxyUpgrade} from './proxy.js';
 import {RateLimiter, SessionStore, type Session} from './sessions.js';
@@ -364,8 +370,32 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
         // session is checked against the box, turned into one of ours, and taken off the URL again
         // so that it does not sit in the address bar, in a bookmark and in every referrer.
         if (boxSessions && sessions && (method === 'GET' || method === 'HEAD')) {
-            const offered = url.searchParams.get('sid');
-            if (parseSid(offered) !== undefined) {
+            const offered = parseSid(url.searchParams.get('sid'));
+            if (offered !== undefined) {
+                // B-36: the gate header first. Since openccu-lite task 125 the `?sid=` a shell puts on
+                // the URL is the session's legacy alias, which the box's API refuses, while the same
+                // request carries the session the gate validated: a confirmed header signs the request
+                // in, whatever `?sid=` says, and the `?sid=` only comes off the URL.
+                const gate = gateSid(request);
+                if (gate !== undefined) {
+                    const session = await sessionFromGate(
+                        request,
+                        sessions.get(readCookie(request.headers.cookie, SESSION_COOKIE)),
+                    );
+                    if (session?.credential === gate) {
+                        redirectWithoutSid(request, response, session, url, rest);
+                        return;
+                    }
+                }
+                if (!sidCanBeSession(offered, gate)) {
+                    // what the box would answer, without asking it: see sidCanBeSession
+                    log.warn(
+                        `login: the session offered from ${clientAddress(request)} cannot be one of this openccu-lite's (not asked)`,
+                    );
+                    response.writeHead(302, {Location: '/', 'Cache-Control': 'no-store'});
+                    response.end();
+                    return;
+                }
                 await handleHandover(request, response, offered, url, rest);
                 return;
             }
@@ -565,17 +595,26 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
             response.end();
             return;
         }
-        const store = sessions as SessionStore;
-        const session = store.create(checked.name, checked.level, checked.sid);
+        const session = (sessions as SessionStore).create(checked.name, checked.level, checked.sid);
         backend?.noteMetaSession(checked.sid);
         log.info(`login: ${checked.name} (level ${String(checked.level)}) through the openccu-lite shell`);
-        // the same page, without the session in the URL
+        redirectWithoutSid(request, response, session, url, rest);
+    }
+
+    /** The same page without the session in the URL, with the cookie of the session it was let in by. */
+    function redirectWithoutSid(
+        request: IncomingMessage,
+        response: ServerResponse,
+        session: Session,
+        url: URL,
+        rest: string,
+    ): void {
         const query = new URLSearchParams(url.searchParams);
         query.delete('sid');
         const search = query.size === 0 ? '' : `?${query.toString()}`;
         response.writeHead(302, {
             Location: `${base}${rest}${search}`,
-            'Set-Cookie': sessionCookie(session.id, base, store.ttlMs / 1000, isHttps(request)),
+            'Set-Cookie': sessionCookie(session.id, base, (sessions as SessionStore).ttlMs / 1000, isHttps(request)),
             'Cache-Control': 'no-store',
         });
         response.end();
@@ -616,9 +655,9 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
     /**
      * B-94, D-65: the session of a request that came through openccu-lite's gate.
      *
-     * The `?sid=` hand-over and the cookie stay as they are; this only adds a third way in, for a
-     * request that has neither - a bookmark, a reload after our session expired - or whose cookie
-     * belongs to another box session than the one the gate found. The header is a claim until the box
+     * The cookie stays as it is; this adds a third way in, for a request that has none - a bookmark,
+     * a reload after our session expired - or whose cookie belongs to another box session than the
+     * one the gate found. A request with `?sid=` asks this first too (B-36). The header is a claim until the box
      * confirms it (`GET /api/auth/v1/state`): a CCU and an older openccu-lite image pass a client's
      * header through, and the backend's port is open to every process on the box.
      */

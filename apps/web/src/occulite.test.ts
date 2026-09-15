@@ -8,7 +8,7 @@
 
 import {describe, expect, it} from 'vitest';
 
-import {OCCULITE_SESSION_HEADER, OcculiteAuthenticator, parseSid} from './occulite.js';
+import {OCCULITE_SESSION_HEADER, OcculiteAuthenticator, parseSid, sidCanBeSession} from './occulite.js';
 
 interface BoxAnswers {
     readonly enums: number;
@@ -63,8 +63,53 @@ describe('parseSid', () => {
         }
     });
 
+    it("takes exactly openccu-lite's two shapes: 26 of base32 since task 125, ten alphanumerics before (B-36)", () => {
+        const long = 'ABCDEFGHIJKLMNOPQRST234567';
+        expect(long).toHaveLength(26);
+        expect(parseSid(long)).toBe(long);
+        expect(parseSid(`@${long}@`)).toBe(long);
+        // auth-off's fixed id before task 125
+        expect(parseSid('anonymous0')).toBe('anonymous0');
+        for (const value of [
+            // an API token is never a session, whatever /api/auth/v1/state would say about it
+            `olt_${'0123456789abcdef'.repeat(2)}`,
+            '0123456789abcdef'.repeat(2),
+            'abcdefghi',
+            'abcdefghijk',
+            long.slice(1),
+            `${long}A`,
+            // base32 is upper-case, and has neither 0, 1, 8 nor 9
+            long.toLowerCase(),
+            `${long.slice(0, 25)}8`,
+            `${long.slice(0, 25)}1`,
+            'abcdefghij'.repeat(2),
+        ]) {
+            expect(parseSid(value), value).toBeUndefined();
+        }
+    });
+
     it('names the header lower-case, as Node reports incoming headers', () => {
         expect(OCCULITE_SESSION_HEADER).toBe('x-occulite-session');
+    });
+});
+
+describe('sidCanBeSession (B-36)', () => {
+    const LONG = 'ANNAANNAANNAANNAANNAANNA27';
+
+    it('refuses a ?sid= of another shape only where the gate names a 26-character session', () => {
+        expect(LONG).toHaveLength(26);
+        // the legacy alias next to the session the gate validated: the box refuses it, so nobody asks
+        expect(sidCanBeSession('abcdefghij', LONG)).toBe(false);
+        expect(sidCanBeSession(LONG, LONG)).toBe(true);
+        expect(sidCanBeSession('Z'.repeat(26), LONG)).toBe(true);
+    });
+
+    it('concludes nothing without a header or with a ten-character one: the box decides', () => {
+        // a CCU, an image from before the header, an image from before task 125
+        expect(sidCanBeSession('abcdefghij', undefined)).toBe(true);
+        expect(sidCanBeSession(LONG, undefined)).toBe(true);
+        expect(sidCanBeSession('abcdefghij', 'benbenbenb')).toBe(true);
+        expect(sidCanBeSession(LONG, 'benbenbenb')).toBe(true);
     });
 });
 

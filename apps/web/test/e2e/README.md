@@ -34,6 +34,7 @@ re-installed after one.
 | `installMode.spec.ts` | open and close the install mode; name a device paired while the dialog is open (#24) |
 | `settings.spec.ts` | the settings dialog, and the theme switch of D-22 in a real browser |
 | `rssi.spec.ts` | the eight steps of the RSSI pill in the Funk grid, light and dark: fill, ink, bars, tooltip, no unit in the pill, nothing cut off by its column (#161) |
+| `assign.spec.ts` | "Assign to room" as a list of checkboxes against the profile's own store seeded with 24 rooms: all of them at once in a 1080 px window without radios, one channel gains and loses a room (Enter on a box saves); two device rows with indeterminate boxes, all / none / as it was, only the changes written; the filter by keyboard without saving, Space, Escape without a write, and "New room…" assigned with Apply (task 49) |
 | `columns.spec.ts` | drag a grid column wider, fit it, keep it over a reload, reset it; the full text of a cut-off cell (#157); a column of the channel sub-grid, and the tooltip on keyboard focus (task 42); the Msgs column with two marks and the repair button at three window widths, resized, kept and reset (B-34); PARAMSETS with its buttons whole at three window widths, resized, kept, dragged down to its buttons with VALUES still clickable, and reset, and FLAGS on the Links tab and the suppress column resized, kept and reset (B-35) |
 
 `fixtures.ts` holds the device set and the Playwright fixture. Each test gets its own host, backend,

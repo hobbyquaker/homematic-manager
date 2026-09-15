@@ -204,30 +204,7 @@ describe('the RPC console', () => {
         expect(stores.notices.items).toHaveLength(0);
     });
 
-    it('keeps a history and refills the form from it', async () => {
-        await mountApp({transport, hash: '#/BidCos-RF/console'});
-        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('console-method'));
-        await waitFor(() => {
-            expect(select.options.length).toBeGreaterThan(1);
-        });
-        await fireEvent.change(select, {target: {value: 'getParamset'}});
-        await fireEvent.input(argInput('address'), {target: {value: 'MEQ0123456:1'}});
-        await fireEvent.click(screen.getByTestId('console-send-button'));
-
-        const history = await waitFor(() => screen.getByTestId('console-history'));
-        await waitFor(() => {
-            expect(within(history).getAllByRole('button')).toHaveLength(1);
-        });
-
-        await fireEvent.change(select, {target: {value: 'listBidcosInterfaces'}});
-        await fireEvent.click(within(history).getAllByRole('button')[0]!);
-
-        await waitFor(() => {
-            expect(screen.getByTestId('console-params').textContent).toBe('getParamset("MEQ0123456:1","",0)');
-        });
-    });
-
-    it('clears the history', async () => {
+    it('has no history of its own; a call recalled from the RPC log fills the form (task 48)', async () => {
         const {stores} = await mountApp({transport, hash: '#/BidCos-RF/console'});
         const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('console-method'));
         await waitFor(() => {
@@ -236,11 +213,37 @@ describe('the RPC console', () => {
         await fireEvent.change(select, {target: {value: 'listBidcosInterfaces'}});
         await fireEvent.click(screen.getByTestId('console-send-button'));
         await waitFor(() => {
-            expect(stores.console.history).toHaveLength(1);
+            expect(screen.getByTestId<HTMLTextAreaElement>('console-response').value).not.toBe('');
+        });
+        expect(screen.queryByTestId('console-history')).toBeNull();
+        expect(screen.queryByText('History')).toBeNull();
+
+        // "open in console" on a log entry of this interface: the form is rebuilt around it
+        stores.console.recall({interfaceName: 'BidCos-RF', method: 'getParamset', params: ['MEQ0123456:1', 'MASTER']});
+        stores.app.setTab('devices');
+        stores.app.setTab('console');
+        await waitFor(() => {
+            expect(screen.getByTestId('console-params').textContent).toBe('getParamset("MEQ0123456:1","MASTER",0)');
+        });
+        expect(stores.console.pendingRecall).toBeUndefined();
+        // the response of the previous call is gone with the recall
+        expect(screen.getByTestId<HTMLTextAreaElement>('console-response').value).toBe('');
+    });
+
+    it('clears the response', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/console'});
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('console-method'));
+        await waitFor(() => {
+            expect(select.options.length).toBeGreaterThan(1);
+        });
+        await fireEvent.change(select, {target: {value: 'listBidcosInterfaces'}});
+        await fireEvent.click(screen.getByTestId('console-send-button'));
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLTextAreaElement>('console-response').value).not.toBe('');
         });
 
         await fireEvent.click(screen.getByTestId('console-clear'));
-        expect(stores.console.history).toEqual([]);
+        expect(screen.getByTestId<HTMLTextAreaElement>('console-response').value).toBe('');
     });
 
     /**

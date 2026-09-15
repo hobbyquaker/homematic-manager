@@ -16,34 +16,43 @@ export interface ConsoleCall {
     readonly durationMs: number;
 }
 
+/** A call to put back into the console's form: an entry of the RPC log, "opened in console". */
+export interface ConsoleRecall {
+    readonly interfaceName: string;
+    readonly method: string;
+    readonly params: readonly RpcValue[];
+}
+
 export interface ConsoleStoreOptions {
-    /** How many calls the history keeps. */
-    readonly max?: number;
     readonly now?: () => number;
 }
 
 /**
- * The RPC console: which methods an interface offers, and what the console has called so far.
+ * The RPC console: which methods an interface offers, and the one call in flight.
  *
  * The method list comes from the backend, which merges the shipped catalogue with the interface's
  * own `system.listMethods` and `system.methodHelp` - so a CUxD or a Homegear that offers other
  * methods gets a usable console without any vendor-specific code (D-20).
+ *
+ * Task 48: the console keeps no history of its own any more. Every call it makes is in the global
+ * RPC log like every other outgoing call (the maintainer: "we have our global rpc protokoll"),
+ * and an entry there can be opened in the console - that is {@link recall}, which the console
+ * page takes up when it is shown for the entry's interface.
  */
 export class ConsoleStore {
     methods = $state<Record<string, RpcMethodInfo[]>>({});
-    history = $state<ConsoleCall[]>([]);
     running = $state(false);
+    /** The log entry to put into the form next, until the console page has taken it. */
+    pendingRecall = $state<ConsoleRecall | undefined>(undefined);
 
     readonly #transport: Transport;
     readonly #notices: NoticesStore;
-    readonly #max: number;
     readonly #now: () => number;
     #nextId = 1;
 
     constructor(transport: Transport, notices: NoticesStore, options: ConsoleStoreOptions = {}) {
         this.#transport = transport;
         this.#notices = notices;
-        this.#max = options.max ?? 50;
         this.#now = options.now ?? (() => Date.now());
     }
 
@@ -71,18 +80,18 @@ export class ConsoleStore {
     }
 
     /**
-     * Sends one call and records it. A fault is a result, not an exception: the console exists to
-     * see what an interface answers, including its faults, so nothing here becomes a toast.
+     * Sends one call. A fault is a result, not an exception: the console exists to see what an
+     * interface answers, including its faults, so nothing here becomes a toast. The call itself
+     * lands in the RPC log through the backend, as every outgoing call does.
      */
     async call(interfaceName: string, method: string, params: RpcValue[]): Promise<ConsoleCall> {
         this.running = true;
         const started = this.#now();
         const id = this.#nextId;
         this.#nextId += 1;
-        let entry: ConsoleCall;
         try {
             const result = await this.#transport.request('rpc.call', interfaceName, method, params);
-            entry = {
+            return {
                 id,
                 timestamp: started,
                 interfaceName,
@@ -94,7 +103,7 @@ export class ConsoleStore {
             };
         } catch (error) {
             const fault = error as {message?: string; faultCode?: number};
-            entry = {
+            return {
                 id,
                 timestamp: started,
                 interfaceName,
@@ -108,12 +117,20 @@ export class ConsoleStore {
         } finally {
             this.running = false;
         }
-        const history = [entry, ...this.history];
-        this.history = history.length > this.#max ? history.slice(0, this.#max) : history;
-        return entry;
     }
 
-    clear(): void {
-        this.history = [];
+    /** "Open in console" on an RPC log entry: kept until the console page for that interface takes it. */
+    recall(call: ConsoleRecall): void {
+        this.pendingRecall = {interfaceName: call.interfaceName, method: call.method, params: [...call.params]};
+    }
+
+    /** The console page's side: the recall for its interface, if there is one, and it is consumed. */
+    takeRecall(interfaceName: string): ConsoleRecall | undefined {
+        const pending = this.pendingRecall;
+        if (pending === undefined || pending.interfaceName !== interfaceName) {
+            return undefined;
+        }
+        this.pendingRecall = undefined;
+        return pending;
     }
 }

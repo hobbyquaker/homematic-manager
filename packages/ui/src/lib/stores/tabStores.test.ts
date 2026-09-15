@@ -427,9 +427,9 @@ describe('ConsoleStore', () => {
         expect(transport.countOf('rpc.methods')).toBe(0);
     });
 
-    it('records a call, a fault and keeps the history bounded', async () => {
+    it('answers a call and a fault alike, and keeps no history of its own (task 48)', async () => {
         const {transport, notices} = setup();
-        const store = new ConsoleStore(transport, notices, {max: 2, now: () => 1000});
+        const store = new ConsoleStore(transport, notices, {now: () => 1000});
 
         const ok = await store.call('BidCos-RF', 'listDevices', []);
         expect(ok.ok).toBe(true);
@@ -441,13 +441,9 @@ describe('ConsoleStore', () => {
         expect(failed.faultCode).toBe(-2);
         // A console fault is an answer, not a notice.
         expect(notices.items).toEqual([]);
-
-        await store.call('BidCos-RF', 'listDevices', []);
-        expect(store.history).toHaveLength(2);
         expect(store.running).toBe(false);
-
-        store.clear();
-        expect(store.history).toEqual([]);
+        // every call is in the global RPC log through the backend; the store keeps none
+        expect(Object.keys(store)).not.toContain('history');
     });
 
     it('survives a rejection that is not an ApiError', async () => {

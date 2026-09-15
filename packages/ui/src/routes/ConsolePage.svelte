@@ -4,8 +4,7 @@
     import Toolbar from '../lib/components/Toolbar.svelte';
     import ToolbarButton from '../lib/components/ToolbarButton.svelte';
     import {getStores} from '../lib/stores/context.js';
-    import type {ConsoleCall} from '../lib/stores/ConsoleStore.svelte.js';
-    import {formatTime} from '../lib/util/format.js';
+    import type {ConsoleCall, ConsoleRecall} from '../lib/stores/ConsoleStore.svelte.js';
     import {
         argFields,
         buildParams,
@@ -39,6 +38,16 @@
 
     $effect(() => {
         void stores.console.load(interfaceName);
+    });
+
+    // Task 48: an RPC log entry "opened in console" - taken once, for this interface, and put
+    // into the form. The page is re-created on every interface or tab switch, which is why the
+    // store holds the recall until a console for the right interface is there to take it.
+    $effect(() => {
+        const recalled = stores.console.takeRecall(interfaceName);
+        if (recalled !== undefined) {
+            replay(recalled);
+        }
     });
 
     function choose(name: string): void {
@@ -97,7 +106,8 @@
         return typeof value === 'object' && value !== null && !Array.isArray(value);
     }
 
-    function replay(call: ConsoleCall): void {
+    /** Puts a logged call back into the form; the user sends it, or changes it first. */
+    function replay(call: ConsoleRecall): void {
         method = call.method;
         // The recorded parameters are what went out; the form is rebuilt around them where the
         // shapes match, and left empty where they do not - a replay is a starting point.
@@ -147,7 +157,6 @@
             icon="⌫"
             testId="console-clear"
             onclick={() => {
-                stores.console.clear();
                 answer = undefined;
             }}
         />
@@ -339,7 +348,9 @@
         <!--
             Task 37: the response takes what the column has left. It used to be a 220 px box with
             the history under it, which left the lower half of a normal window empty while a
-            `listDevices` answer scrolled inside those 220 px.
+            `listDevices` answer scrolled inside those 220 px. Task 48: the history is gone too -
+            every call is in the global RPC log, and an entry there opens in this form - so the
+            response has the whole column.
         -->
         <section class="hmm-console-panel hmm-console-output" data-testid="console-output">
             <h3>
@@ -359,23 +370,6 @@
                       ? JSON.stringify(answer.result, undefined, 2)
                       : `${answer.error ?? ''}${answer.faultCode === undefined ? '' : ` (${answer.faultCode})`}`}
             ></textarea>
-
-            <h3>{t('History')}</h3>
-            <ul class="hmm-console-history" data-testid="console-history">
-                {#each stores.console.history as call (call.id)}
-                    <li>
-                        <button
-                            type="button"
-                            class="hmm-console-history-item"
-                            class:hmm-console-history-failed={!call.ok}
-                            onclick={() => replay(call)}
-                        >
-                            <span class="hmm-console-history-time">{formatTime(call.timestamp)}</span>
-                            <span class="hmm-mono">{call.method}({JSON.stringify(call.params).slice(1, -1)})</span>
-                        </button>
-                    </li>
-                {/each}
-            </ul>
         </section>
     </div>
 
@@ -449,7 +443,7 @@
         font-size: var(--hmm-font-size);
     }
 
-    /* The right column: the response takes the height, the history keeps what its rows need. */
+    /* The right column: the response takes the height (task 37; the whole of it since task 48). */
     .hmm-console-output {
         display: flex;
         flex-direction: column;
@@ -524,44 +518,6 @@
 
     .hmm-console-error {
         color: var(--hmm-error);
-    }
-
-    /*
-        Its rows up to 200 px, then it scrolls - the cap it always had. Empty, it is nothing but its
-        heading, and the response gets that room too.
-    */
-    .hmm-console-history {
-        flex: 0 1 auto;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        min-height: 0;
-        max-height: 200px;
-        overflow: auto;
-    }
-
-    .hmm-console-history-item {
-        display: flex;
-        gap: 6px;
-        width: 100%;
-        padding: 1px 3px;
-        border: none;
-        background: none;
-        font: inherit;
-        text-align: left;
-        cursor: pointer;
-    }
-
-    .hmm-console-history-item:hover {
-        background: var(--hmm-row-hover);
-    }
-
-    .hmm-console-history-failed {
-        color: var(--hmm-error);
-    }
-
-    .hmm-console-history-time {
-        color: var(--hmm-fg-muted);
     }
 
     /* Task 37: a long help text scrolls inside a quarter of the window rather than pushing the

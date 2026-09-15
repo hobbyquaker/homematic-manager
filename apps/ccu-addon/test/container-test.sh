@@ -258,6 +258,14 @@ echo "openccu-lite: the backend logs to the journal, and there is no var/hmm.log
 # and appends the output to /tmp/journal-<identifier>.log. hmm.env gets the line every install from
 # the CCU days has, HMM_AUTH_MODE=token - which B-22 below expects to mean occulite on this box; the
 # backend starts in that mode without a box to ask, since nothing is asked until a request comes.
+# B-37: on openccu-lite the settings page and service.cgi want an administrator the box names, so the
+# test's lighttpd stands in for the box's from here on: a drop-in proxies /api/auth/ to the stub box of
+# the B-32 section above (which names $SID an administrator), and the CGI's real URL
+# http://127.0.0.1/api/auth/v1/state is what answers. Removed again where the test goes back to a CCU.
+dex "printf '%s\n' '\$HTTP[\"url\"] =~ \"^/api/auth/\" {' '    proxy.server = (\"\" => ((\"host\" => \"127.0.0.1\", \"port\" => 18181)))' '}' \
+    > /usr/local/etc/config/lighttpd/zz-occulite-stub.conf && /etc/init.d/S50lighttpd reload" >/dev/null
+sleep 1
+lighttpd_actions >/dev/null
 dex 'cp /usr/local/addons/hmm/etc/hmm.env /tmp/hmm.env.t41 \
     && sed -i "s/^#*HMM_AUTH_MODE=.*/HMM_AUTH_MODE=token/" /usr/local/addons/hmm/etc/hmm.env \
     && cp /opt/systemd-cat-stub /usr/bin/systemd-cat && chmod 755 /usr/bin/systemd-cat \
@@ -355,13 +363,10 @@ echo
 echo "openccu-lite: the settings page and the hand-over through lighttpd with the gate's header alone (task 50)"
 # On the box, lighttpd's gate sets X-Occulite-Session behind a session it validated, and the CGI
 # asks http://127.0.0.1/api/auth/v1/state about it - the box's lighttpd proxies /api/ to occulited.
-# Here the test's lighttpd stands in for both: a drop-in proxies /api/auth/ to the stub box of the
-# B-32 section above (which answers the state with the session's sid), and curl plays the gate.
-# The CGI's real URL is what is exercised, nothing is overridden.
-dex "printf '%s\n' '\$HTTP[\"url\"] =~ \"^/api/auth/\" {' '    proxy.server = (\"\" => ((\"host\" => \"127.0.0.1\", \"port\" => 18181)))' '}' \
-    > /usr/local/etc/config/lighttpd/zz-occulite-stub.conf && /etc/init.d/S50lighttpd reload" >/dev/null
-sleep 1
-lighttpd_actions >/dev/null
+# Here the test's lighttpd stands in for both: the drop-in set up at the start of the openccu-lite
+# part proxies /api/auth/ to the stub box of the B-32 section above (which answers the state with the
+# session's sid), and curl plays the gate. The CGI's real URL is what is exercised, nothing is
+# overridden.
 check "the stub box answers the state through lighttpd, as occulited would" "\"sid\":\"$SID\"" \
     "$(dex "curl -s -H 'Authorization: Bearer $SID' http://127.0.0.1/api/auth/v1/state")"
 dex ': > /tmp/occulite-stub.log' >/dev/null
@@ -389,6 +394,52 @@ check "an @-wrapped header is refused" "Sitzung ung" "$out"
 none "without asking the box" "$(dex 'cat /tmp/occulite-stub.log')"
 out="$(dex "curl -si -H 'X-Occulite-Session: 0000000000' 'http://127.0.0.1/addons/hmm/settings.cgi?sid=%40${SID}%40'")"
 check "an unconfirmed header falls through to a ?sid= the shim confirms" "302 Found" "$out"
+
+echo
+echo "openccu-lite: the settings page and service.cgi through lighttpd, for administrators only (B-37)"
+# The stub box names $SID an administrator and USER_SID a user; curl plays the gate again, and the
+# tclrega stub confirms an alias the box's API knows nothing about. Nothing a refused request asks for
+# may be written or restarted.
+USER_SID=USERSESSIONUSERSESSIONUS22
+dex 'cp /usr/local/addons/hmm/etc/hmm.env /tmp/hmm.env.b37' >/dev/null
+PID_B37="$(dex 'cat /usr/local/addons/hmm/var/hmm.pid')"
+dex ': > /tmp/occulite-stub.log' >/dev/null
+out="$(dex "curl -si -H 'X-Occulite-Session: $USER_SID' 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config'")"
+check "a user's session in the header gets a 403 from the settings page" "403 Forbidden" "$out"
+check "with the page that says so, in German" "Administratoren vorbehalten" "$out"
+check "and in English" "Administrators only." "$out"
+absent "and not the settings page" "Anmeldung / Login" "$out"
+check "after the CGI asked the box, which named the role user" "occulite stub: GET /api/auth/v1/state user" \
+    "$(dex 'cat /tmp/occulite-stub.log')"
+out="$(dex "curl -si --max-time 90 -H 'X-Occulite-Session: $USER_SID' 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config&auth_mode=token'")"
+check "switching the mode with it: 403" "403 Forbidden" "$out"
+absent "and nothing saved" "Saved" "$out"
+check "etc/hmm.env is unchanged" "same" "$(dex 'cmp -s /tmp/hmm.env.b37 /usr/local/addons/hmm/etc/hmm.env && echo same')"
+out="$(dex "curl -si --max-time 90 -H 'X-Occulite-Session: $USER_SID' 'http://127.0.0.1/addons/hmm/service.cgi?cmd=restart'")"
+check "service.cgi refuses a restart for it with a 403" "403 Forbidden" "$out"
+check "saying administrators only" '{"error":"administrators only"}' "$out"
+check "and the backend is the same process" "$PID_B37" "$(dex 'cat /usr/local/addons/hmm/var/hmm.pid')"
+out="$(dex "curl -si 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config&sid=%40${USER_SID}%40'")"
+check "?sid= with a user's session id: 403" "403 Forbidden" "$out"
+dex "printf '%s\n' aliasonly1 >> /tmp/valid-sids" >/dev/null
+out="$(dex "curl -si 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config&sid=%40aliasonly1%40'")"
+check "?sid= with an alias the shim confirms and the box's API does not: 403" "403 Forbidden" "$out"
+out="$(dex "curl -si 'http://127.0.0.1/addons/hmm/service.cgi?cmd=status&sid=%40aliasonly1%40'")"
+check "and service.cgi refuses it too" '{"error":"administrators only"}' "$out"
+out="$(dex "curl -si -H 'X-Occulite-Session: $USER_SID' 'http://127.0.0.1/addons/hmm/settings.cgi'")"
+check "the hand-over still lets the user's session into the app" "302 Found" "$out"
+USER_COOKIE="hmm_token=$(printf '%s' "$out" | sed -n 's/.*hmm_token=\([0-9a-f]*\);.*/\1/p' | head -1)"
+case "$USER_COOKIE" in
+    hmm_token=?*) pass "with the token cookie" ;;
+    *) fail "with the token cookie" "$out" ;;
+esac
+out="$(dex "curl -si -b '$USER_COOKIE' 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config'")"
+check "and the cookie it got does not open the settings page: 403" "403 Forbidden" "$out"
+out="$(dex "curl -si -H 'X-Occulite-Session: $SID' 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config'")"
+check "an administrator's session still opens it" "Anmeldung / Login" "$out"
+check "with a 200" "200 OK" "$out"
+check "and nothing of the refused requests was written" "same" \
+    "$(dex 'cmp -s /tmp/hmm.env.b37 /usr/local/addons/hmm/etc/hmm.env && echo same')"
 dex 'rm -f /usr/local/etc/config/lighttpd/zz-occulite-stub.conf && /etc/init.d/S50lighttpd reload' >/dev/null
 sleep 1
 lighttpd_actions >/dev/null
@@ -507,6 +558,12 @@ check "no sid at all is refused" "Sitzung ung" "$out"
 out="$(dex "curl -si -H 'X-Occulite-Session: $SID' 'http://127.0.0.1/addons/hmm/settings.cgi'")"
 check "a client-sent X-Occulite-Session is ignored on a CCU (task 50)" "Sitzung ung" "$out"
 absent "and gets no cookie" "Set-Cookie" "$out"
+# B-37: a CCU keeps today's access - no level, no box, the token cookie opens the settings page
+out="$(dex "curl -si -b '$COOKIE' 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config'")"
+check "on a CCU the token cookie opens the settings page, as before (B-37)" "Anmeldung / Login" "$out"
+absent "without a 403" "403 Forbidden" "$out"
+out="$(dex "curl -si -H 'X-Occulite-Session: USERSESSIONUSERSESSIONUS22' 'http://127.0.0.1/addons/hmm/service.cgi?cmd=status&sid=%40${SID}%40'")"
+check "and service.cgi answers a WebUI session with a client-sent header next to it" '"running"' "$out"
 
 echo
 echo "the UI through the proxy rule"

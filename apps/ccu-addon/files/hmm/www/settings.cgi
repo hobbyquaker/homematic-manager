@@ -43,7 +43,7 @@ if {[info exists params(cmd)]} {
 # calls this, checked with ReGaHSS - and what an openccu-lite shell from before the header, or one
 # that still appends the legacy alias, sends. The token cookie is how a browser that already has
 # the app open calls it; it was issued after one of the two checks above.
-if {![check_request_session $sid] && ![has_token_cookie]} {
+proc invalid_session_page {} {
     html_header
     puts "<!DOCTYPE html><html lang=\"de\"><head><meta charset=\"utf-8\">"
     puts "<title>Homematic Manager</title></head><body style=\"font-family:sans-serif;margin:2em\">"
@@ -52,6 +52,25 @@ if {![check_request_session $sid] && ![has_token_cookie]} {
     puts "<p>Invalid session. Please close this page and log in to the WebUI again.</p>"
     puts "</body></html>"
     exit 0
+}
+
+# B-37 (D-49): on openccu-lite the settings page, and so every change it makes, is for
+# administrators, and the box has to say so on this very request (lib/common.tcl,
+# lite_admin_access): the token cookie is no way in here, and neither is a ?sid= the box cannot tell
+# the role of. The hand-over below is not the settings page and is unchanged: it changes nothing on
+# the box, and what a session that is not an administrator's gets in the app is not decided here. A
+# CCU and OpenCCU take the three ways in exactly as before.
+set lite [is_openccu_lite]
+if {[string equal $cmd "config"] && $lite} {
+    set access [lite_admin_access $sid 1]
+    if {[string equal $access "none"]} {
+        invalid_session_page
+    }
+    if {![string equal $access "admin"]} {
+        admin_only_page
+    }
+} elseif {![check_request_session $sid] && ![has_token_cookie]} {
+    invalid_session_page
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -70,7 +89,7 @@ if {[string equal $cmd "config"]} {
     # CCU days is not read there, because that line is in every hmm.env a CCU install wrote, and it
     # kept the Charly's addon out of the box's login after its upgrade. A choice made on this page is
     # written into the line of the firmware the page runs on, and survives a move to the other one.
-    set lite [is_openccu_lite]
+    # ($lite was read above, before the session check.)
     if {$lite} {
         set other "occulite"
         set variable HMM_AUTH_MODE_LITE

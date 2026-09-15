@@ -117,28 +117,51 @@ proc occulite_state {id} {
     return $body
 }
 
-# 1 when the box confirms `id` as one of its live sessions. Only what can be an openccu-lite
-# session id on some image is asked about - the frontend's rule (apps/web/src/occulite.ts, B-36):
-# 26 characters of base32 (A-Z, 2-7), what occulited hands out since their task 125, or ten
-# alphanumerics, the ids of images from before (the shape of today's legacy alias). Anything else
-# - empty, @-wrapped, a line break, a space, a colon, a list of several, an API token (olt_ and
-# hex), another length - is refused without asking, so nothing but letters and digits of one of
-# the two shapes ever goes into the Authorization header. The shape only ever refuses: an id of
-# the right shape is a session only when the box says so.
-proc check_occulite_session {id} {
+# The box's word on `id`: "" when it does not confirm it as one of its live sessions, otherwise
+# the role the box names for that session - "admin" or "user" - or "-" when the answer names none.
+# Only what can be an openccu-lite session id on some image is asked about - the frontend's rule
+# (apps/web/src/occulite.ts, B-36): 26 characters of base32 (A-Z, 2-7), what occulited hands out
+# since their task 125, or ten alphanumerics, the ids of images from before (the shape of today's
+# legacy alias). Anything else - empty, @-wrapped, a line break, a space, a colon, a list of
+# several, an API token (olt_ and hex), another length - is refused without asking, so nothing but
+# letters and digits of one of the two shapes ever goes into the Authorization header. The shape
+# only ever refuses: an id of the right shape is a session only when the box says so.
+proc occulite_session_role {id} {
     if {![regexp {^[A-Z2-7]{26}$} $id] && ![regexp {^[A-Za-z0-9]{10}$} $id]} {
-        return 0
+        return ""
     }
     set state [occulite_state $id]
     # JSON escapes every quote inside a string, so a user name cannot fake a key; and "legacy_sid"
     # does not match the "sid" pattern, because the quote before the s is what the pattern asks for
     if {![regexp {"authenticated"\s*:\s*true} $state]} {
-        return 0
+        return ""
     }
     if {![regexp {"sid"\s*:\s*"([A-Za-z0-9]+)"} $state all stateSid] || ![string equal $stateSid $id]} {
+        return ""
+    }
+    # B-37: the role occulited writes for an account's session (httpapi/auth.go, `state`). A value
+    # with an escape in it, or none at all, is no role anybody is let in by: "-"
+    if {[regexp {"role"\s*:\s*"([A-Za-z]+)"} $state all role]} {
+        return $role
+    }
+    return "-"
+}
+
+# 1 when the box confirms `id` as one of its live sessions, whatever its role.
+proc check_occulite_session {id} {
+    if {[string equal [occulite_session_role $id] ""]} {
         return 0
     }
     return 1
+}
+
+# B-37: the session id a ?sid= carries - the CCU's @...@ taken off - for the box to be asked about
+# on openccu-lite. What it is not able to be is refused by occulite_session_role's shape check.
+proc sid_param_id {sid} {
+    if {[regexp {^@(.*)@$} $sid all inner]} {
+        return $inner
+    }
+    return $sid
 }
 
 # 1 when this request comes with a live session: the session header where openccu-lite sends one

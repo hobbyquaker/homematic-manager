@@ -241,8 +241,66 @@ proc html_escape {value} {
     return $value
 }
 
+# B-37 (D-49): on openccu-lite the settings page and every command of service.cgi are for
+# administrators; on a CCU and OpenCCU any WebUI session keeps its access. Called on openccu-lite
+# only. The box decides, and only the box: the session in the gate's header - or, where the box does
+# not confirm the header, the id in ?sid= - has to be a live session whose role the box names as
+# admin (occulite_session_role). A header the box confirms decides alone, so a ?sid= cannot lift a
+# signed-in account to another account's role, and an id already asked about is not asked again
+# (the gate puts the alias it let a request in by into the header). What the box cannot vouch for
+# is never an administrator: the legacy alias of a current image (the API refuses it, and the
+# tclrega shim knows the user name and no role), the token cookie (one secret for everybody the
+# hand-over let into the app), and every failure. Answers "admin"; "session" for a session - or,
+# with `cookie`, a valid token cookie - that is not a confirmed administrator's; "none" otherwise.
+proc lite_admin_access {sid cookie} {
+    set header [session_header]
+    set role ""
+    if {![string equal $header ""]} {
+        set role [occulite_session_role $header]
+    }
+    if {[string equal $role ""]} {
+        set id [sid_param_id $sid]
+        if {![string equal $id ""] && ![string equal $id $header]} {
+            set role [occulite_session_role $id]
+        }
+    }
+    if {[string equal $role "admin"]} {
+        return admin
+    }
+    if {![string equal $role ""] || [check_session $sid]} {
+        return session
+    }
+    if {$cookie && [has_token_cookie]} {
+        return session
+    }
+    return none
+}
+
+# B-37: the settings page's answer to a session that is not an administrator's on openccu-lite. A
+# 403, and nothing was read beyond the session, nothing written, nothing restarted.
+proc admin_only_page {} {
+    global BASE_PATH
+    puts "Status: 403 Forbidden"
+    html_header
+    puts "<!DOCTYPE html><html lang=\"de\"><head><meta charset=\"utf-8\">"
+    puts "<title>Homematic Manager</title></head><body style=\"font-family:sans-serif;margin:2em;max-width:44em\">"
+    puts "<h1>Homematic Manager</h1>"
+    puts "<p><b>Nur für Administratoren.</b> Die Einstellungen des Addons und die Steuerung seines Dienstes"
+    puts "sind auf openccu-lite Administratoren vorbehalten. Diese Sitzung gehört keinem Administrator, oder"
+    puts "die Box konnte ihre Rolle nicht bestätigen. Es wurde nichts geändert. Bitte als Administrator an"
+    puts "der Box anmelden und die Seite erneut öffnen.</p>"
+    puts "<p><b>Administrators only.</b> On openccu-lite the addon's settings and the control of its"
+    puts "service are reserved for administrators. This session does not belong to an administrator, or"
+    puts "the box could not confirm its role. Nothing was changed. Please sign in to the box as an"
+    puts "administrator and open the page again.</p>"
+    puts "<p><a href=\"$BASE_PATH/\">Homematic Manager öffnen / open</a></p>"
+    puts "</body></html>"
+    exit 0
+}
+
 # Answers with a JSON error and exits unless the request carries a valid session: openccu-lite's
-# session header, or a WebUI ?sid= (task 50). Returns the query parameters as a name/value list.
+# session header, or a WebUI ?sid= (task 50) - on openccu-lite an administrator's (B-37), with a 403
+# for any other session. Returns the query parameters as a name/value list.
 proc require_session {} {
     set params [query_params]
     array set query $params
@@ -250,12 +308,23 @@ proc require_session {} {
     if {[info exists query(sid)]} {
         set sid $query(sid)
     }
-    if {![check_request_session $sid]} {
-        json_header
-        puts "{\"error\":\"invalid session\"}"
-        exit 1
+    if {[is_openccu_lite]} {
+        set access [lite_admin_access $sid 0]
+        if {[string equal $access "admin"]} {
+            return $params
+        }
+        if {[string equal $access "session"]} {
+            puts "Status: 403 Forbidden"
+            json_header
+            puts "{\"error\":\"administrators only\"}"
+            exit 1
+        }
+    } elseif {[check_request_session $sid]} {
+        return $params
     }
-    return $params
+    json_header
+    puts "{\"error\":\"invalid session\"}"
+    exit 1
 }
 
 proc json_string {value} {

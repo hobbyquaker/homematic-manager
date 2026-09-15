@@ -9,9 +9,11 @@
  * `--lite-mode` switched off the WebAssembly its HTTP parser runs on - fails the login visibly:
  *
  *   GET /api/meta/v1/enums   200 for `Authorization: Bearer <sid>` with the live session, 401 otherwise
- *   GET /api/auth/v1/state   `{"authenticated":true,"user":…,"role":"admin","sid":…}` for it, not authenticated otherwise
+ *   GET /api/auth/v1/state   `{"authenticated":true,"user":…,"role":"admin","sid":…}` for it, the same with
+ *                            `"role":"user"` for the user session (B-37), not authenticated otherwise
  *
- * Every request is logged, so the test can see the backend's requests arrive. Anything else is a 404.
+ * Every request is logged (`live`, `user` or `unknown`), so the test can see the requests arrive. Anything
+ * else is a 404.
  */
 
 import {createServer} from 'node:http';
@@ -19,11 +21,14 @@ import {createServer} from 'node:http';
 const PORT = Number(process.env['HMM_STUB_OCCULITE_PORT'] ?? 18181);
 const SID = process.env['HMM_STUB_SID'] ?? 'abcdefgh12';
 const USER = process.env['HMM_STUB_USER'] ?? 'labuser';
+// B-37: a session of an account with the role user, in the shape of occulited's ids since their task 125
+const USER_SID = process.env['HMM_STUB_USER_SID'] ?? 'USERSESSIONUSERSESSIONUS22';
 
 createServer((request, response) => {
     const live = request.headers.authorization === `Bearer ${SID}`;
+    const user = request.headers.authorization === `Bearer ${USER_SID}`;
     const path = (request.url ?? '').split('?')[0];
-    console.log(`occulite stub: ${request.method} ${path} ${live ? 'live' : 'unknown'}`);
+    console.log(`occulite stub: ${request.method} ${path} ${live ? 'live' : user ? 'user' : 'unknown'}`);
     const send = (status, body) => {
         const data = Buffer.from(JSON.stringify(body));
         response.writeHead(status, {'Content-Type': 'application/json', 'Content-Length': data.length});
@@ -38,7 +43,13 @@ createServer((request, response) => {
     } else if (request.method === 'GET' && path === '/api/auth/v1/state') {
         // `sid` as occulited writes it for a session that is not a token: the settings page's
         // header check wants the state to name the very session it asked about (task 50)
-        send(200, live ? {authenticated: true, user: USER, role: 'admin', sid: SID} : {authenticated: false});
+        if (live) {
+            send(200, {authenticated: true, user: USER, role: 'admin', sid: SID});
+        } else if (user) {
+            send(200, {authenticated: true, user: 'labguest', role: 'user', sid: USER_SID});
+        } else {
+            send(200, {authenticated: false});
+        }
     } else {
         send(404, {error: 'not found'});
     }

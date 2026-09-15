@@ -62,7 +62,8 @@ answers that save a round trip:
 Install it from the box's catalogue (it is listed there as `hmm`) or upload the package for the
 box's architecture on the addon page. The `update_script` is the same one a CCU runs; nothing in
 the package is openccu-lite-specific. What the addon does differently is decided **at every start**
-from the firmware's own `/VERSION`, which carries an extra `VARIANT=lite` line:
+(the Config-Url at every install and every `rc.d/hmm info`) from the firmware's own `/VERSION`, which
+carries an extra `VARIANT=lite` line:
 
 - **the login**: `--auth-mode occulite`. openccu-lite's shell opens the addon with the user's
   session on the URL (`?sid=@xxxxxxxxxx@`, the CCU convention), the addon checks that session
@@ -74,7 +75,17 @@ from the firmware's own `/VERSION`, which carries an extra `VARIANT=lite` line:
   removes a copy a browser sent). The header is only a claim until `GET /api/auth/v1/state`
   confirms it, and the confirmation is kept for a minute; so a bookmark without `?sid=` opens the UI
   on an image that sets the header, and nothing changes on one that does not. The other two auth
-  modes never read it, because a CCU's lighttpd passes a client's header through.
+  modes never read it, because a CCU's lighttpd passes a client's header through. Since
+  3.0.0-beta.18 a confirmed header also comes **before** a `?sid=` on the URL: since openccu-lite's
+  task 125 what a shell puts there is the session's ten-character legacy alias, which the box's API
+  refuses, so the header signs the request in and the `?sid=` only comes off the URL. A `?sid=` that
+  cannot be an openccu-lite session is not asked about at all: anything but 26 characters of base32
+  (the session ids since task 125) or ten alphanumerics (before), and a ten-character one when the
+  gate names a 26-character session.
+- **the Config-Url**: on a CCU it is the Systemsteuerung button that opens the app, and the settings
+  page is linked from the description. On openccu-lite the app has its own entry in the addon menu
+  and the shell frames the Config-Url behind ⚙ and the *Settings* button, so there the install
+  (`update_script`) and `rc.d/hmm info` name the settings page, `/addons/hmm/settings.cgi?cmd=config`.
 - **the credentials for the store**: reads use the box's local token
   (`/usr/local/etc/occulite/local-token`, role `user`, read-only by design); writes use the session
   of the person looking at the page. A rename is therefore attributed to a user, and nothing

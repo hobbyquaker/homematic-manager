@@ -23,6 +23,20 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   - **If you chose `token` on an openccu-lite box with 3.0.0-beta.17 or earlier**, that choice was written as
     `HMM_AUTH_MODE=token`, which is indistinguishable from the CCU's line: the box runs `occulite` after this update, and
     the settings page puts `token` back as `HMM_AUTH_MODE_LITE=token`. (B-22)
+- **On openccu-lite the addon takes the session of the box's gate before a `?sid=` on the URL.**
+  - **Before:** a `?sid=` was checked first. Since openccu-lite's session ids have 26 characters, the ten-character
+    `?sid=` its shell put on the URL is only an alias the box's API refuses, so Homematic Manager sent its frame back to
+    the box's start page, although the same request carried a valid `X-Occulite-Session`. openccu-lite no longer puts a
+    `?sid=` on the addon's URL; this makes the addon independent of that.
+  - **Now:** a request whose gate header the box confirms is signed in, whatever `?sid=` says, and the `?sid=` comes off
+    the URL. Without a confirmed header the `?sid=` hand-over works as before, for boxes from before the header.
+  - **Not asked at all:** a `?sid=` or header that cannot be an openccu-lite session (neither 26 characters of base32
+    nor ten alphanumerics, an API token among them), and a ten-character `?sid=` next to a header of the long shape.
+    (B-36)
+- **On openccu-lite the gear of Homematic Manager opens the addon settings, not the app.** The install and
+  `rc.d/hmm info` name `/addons/hmm/settings.cgi?cmd=config` as the Config-Url there, because openccu-lite's shell
+  frames the Config-Url behind the gear and the _Settings_ button, and the app has its own entry in the addon menu. On
+  a CCU the Systemsteuerung button still opens the app. (B-36)
 - **The device grid offers only the paramsets that have something in them.**
   - **The rule:** a button in the PARAMSETS column, and an entry in the context menu of a device or a channel, is there
     when the device or channel lists the paramset and the interface describes it with parameters.

@@ -134,13 +134,28 @@ as `X-Occulite-Session` (`HTTP_X_OCCULITE_SESSION`), after removing any copy a c
 header is a claim until the box confirms it: `settings.cgi` asks `GET http://127.0.0.1/api/auth/v1/state`
 with the id as Bearer (5 s timeout), and the answer has to say `"authenticated": true` and name that
 very `sid` — an API token (authenticated, no `sid`), another session, a non-200 or a box that cannot
-be asked all mean *refused*. The id is checked against `^[A-Za-z0-9]{1,64}$` before it goes into a
+be asked all mean *refused*. Only an id of one of the two shapes of occulited's session ids (26
+characters of base32, or ten alphanumerics on images from before their task 125) goes into a
 header. The header is read on openccu-lite only (`VARIANT=lite` in `/VERSION`, the rule of
 `rc.d/hmm`): a CCU's lighttpd passes a client's header straight through, so there it counts for
 nothing. The order is header, then `?sid=` through ReGa (on openccu-lite the `tclrega.so` shim
 answers the session's legacy alias), then the token cookie; a header the box does not confirm falls
 through to `?sid=`. Because both the frontend (task 45) and this page read the header, the catalogue
 can declare `session.header_since` for the addon and the box stops putting `?sid=` into its URLs.
+
+**On openccu-lite the settings page and `service.cgi` are for administrators** (B-37, D-49); the
+hand-over above is not the settings page and keeps taking any session. `settings.cgi?cmd=config`
+and every command of `service.cgi` want the box to name the session's role as `admin`, and only the
+box can: the state answer for the header's session has to say `"role": "admin"` as well, and a
+header it confirms decides — a `?sid=` next to it is not asked. Only where the box does not confirm
+the header is the id in `?sid=` asked about the same way; on an image from before openccu-lite's
+task 125 that is the session id itself. The legacy alias of a current image is refused by the box's
+API, and the `tclrega.so` shim knows the user name behind it and no role, so `?sid=@alias@` proves a
+session and never an administrator. The `hmm_token` cookie is one secret for everybody the hand-over
+let into the app and opens neither page there. A session that is not a confirmed administrator's
+gets a 403 — a page "Nur für Administratoren / Administrators only" from `settings.cgi`,
+`{"error":"administrators only"}` from `service.cgi` — and nothing is written or restarted; without
+any session the answers stay as before. A CCU and OpenCCU are unchanged: any WebUI session.
 
 ## The optional login (D-32)
 
@@ -187,7 +202,8 @@ echo 'HMM_AUTH_MODE=rega' >> /usr/local/addons/hmm/etc/hmm.env
 The settings page takes a WebUI `sid` or the addon's own token cookie — both are proof of the same
 ReGaHSS session check — so the link works from Systemsteuerung and from a browser that has the app
 open. On openccu-lite it takes the gate's `X-Occulite-Session` first (task 50, above), so the box
-frames it without `?sid=`.
+frames it without `?sid=`, and it is for administrators only there (B-37, above): the token cookie
+does not open it on openccu-lite.
 
 `HMM_AUTH_MODE` is the CCU's setting. On openccu-lite the rc.d script reads `HMM_AUTH_MODE_LITE`
 instead (`occulite`, the box's own login, unless it says `token`) and never `HMM_AUTH_MODE`: every
@@ -473,7 +489,14 @@ apps/ccu-addon/test/container-test.sh --idle         # needs docker
   one naming another session, a 500, garbage, a box that cannot be asked (all refused after one
   call), an `@`-wrapped, line-broken, doubled, colon-carrying, token-shaped, over-long and empty
   header (refused with no call), the fall-through to `?sid=` and to the token cookie, and a CCU
-  and a firmware without `/VERSION` ignoring the header with no call.
+  and a firmware without `/VERSION` ignoring the header with no call. Since B-37 the stub answers
+  both roles, and on a lite tree an administrator's session opens the settings page and
+  `service.cgi` while a user's gets the 403 through each way in - the header (also with an
+  administrator's id in `?sid=` next to it), `?sid=` with a user's session id or with an alias the
+  shim confirms, the alias as the header, the token cookie - with nothing written or restarted;
+  an answer without a role, `Admin`, an escaped role, a user name spelling `"role":"admin"` and every
+  failed lookup are refused too, the hand-over still takes a user's session, and a CCU still takes
+  any WebUI session and the cookie without asking a box.
 - **package-test.sh** unpacks a built package into the layout a CCU installs it into — including the
   `addons/www/hmm` symlink the CGIs are reached through, which the source tree never has — runs the
   CGIs from there, and checks the SBOM against the package: its `node` component must say what the

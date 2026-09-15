@@ -50,6 +50,15 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Changed
 
+- **CCU addon on openccu-lite: the addon's settings page and `service.cgi` are for administrators.** Any account signed
+  in to the box could open `settings.cgi?cmd=config`, switch the addon's login mode (which restarts it) and start,
+  stop or restart the service through `service.cgi`. On openccu-lite both now want a session the box names as `admin`:
+  the gate's `X-Occulite-Session`, confirmed with `GET /api/auth/v1/state`, which has to say `"role": "admin"` - or,
+  where the box does not confirm the header, the session id in `?sid=`. The session's legacy alias in `?sid=` and the
+  addon's `hmm_token` cookie cannot tell whose role they carry, so they do not open these pages there. Any other
+  session gets a 403 page, "Nur für Administratoren / Administrators only", and nothing is changed. The hand-over into
+  the app (`settings.cgi` without `?cmd=config`) is unchanged, and so is a CCU or OpenCCU, where any WebUI session
+  keeps its access. (B-37)
 - **RSSI values are coloured in eight steps instead of three, with signal bars.** Until now nearly every real link
   (-40 to -90 dBm) was the same yellow "medium", because the steps came from the 2.x gradient (good from -20 dBm, bad
   below -100). The new scale has a step every 10 dB from -30 to -90 dBm, and OpenCCU's edges at -70 and -90 dBm are

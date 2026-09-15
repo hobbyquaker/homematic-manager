@@ -88,6 +88,13 @@ carries an extra `VARIANT=lite` line:
   page is linked from the description. On openccu-lite the app has its own entry in the addon menu
   and the shell frames the Config-Url behind ⚙ and the *Settings* button, so there the install
   (`update_script`) and `rc.d/hmm info` name the settings page, `/addons/hmm/settings.cgi?cmd=config`.
+- **the settings page is for administrators** (since 3.0.0-beta.18, B-37): the settings page and
+  `service.cgi` (start, stop, restart, status, the log view) want a session the box names as `admin`
+  in `GET /api/auth/v1/state` - the gate's header, or where the box does not confirm it, the session
+  id in `?sid=`. A `user` account, the session's legacy alias (which carries no role the addon can
+  see) and the addon's token cookie get "Nur für Administratoren / Administrators only" and change
+  nothing. The way into the app is not affected. On a CCU and OpenCCU any WebUI session keeps its
+  access.
 - **the credentials for the store**: reads use the box's local token
   (`/usr/local/etc/occulite/local-token`, role `user`, read-only by design); writes use the session
   of the person looking at the page. A rename is therefore attributed to a user, and nothing

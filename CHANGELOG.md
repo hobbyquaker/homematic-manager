@@ -36,6 +36,17 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   **Enter**. A single click still only selects, the double click neither opens nor closes the channels, and a double
   click anywhere else in the row or on a column edge does what it did before. The `:0` channel, which has no name of
   its own to change, opens nothing. (task 46)
+- **A tiny copy button on names and addresses.** Every grid cell with the name or the address of a device, a channel
+  or an interface - Devices and its channels, both ends of a link, the Funk tab's gateways, devices and peers, the
+  service messages and the events - has a small copy icon at its end. It appears when the pointer is over the row
+  (on a touch screen it is always there), copies the whole name or address even when the column cuts it off, and says
+  "Copied". It lies over the end of the text, so no column gets wider, and a click on it neither selects the row nor
+  opens anything; the name next to it still renames on a double click. From the keyboard, Tab reaches the buttons of
+  the selected row and Enter or Space copies. Where the browser has no clipboard access for the page - the CCU addon
+  opened over plain HTTP - it copies the old way, and if that fails too it says so and selects the text for Ctrl+C.
+  On the way, Space and Enter on a focused button inside a grid (a paramset button, the repair button) press that
+  button instead of selecting the row or opening its dialog, and a space can be typed into a column filter again.
+  (task 47)
 
 ### Changed
 

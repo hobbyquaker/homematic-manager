@@ -976,6 +976,29 @@ export const DEMO_RPC_LOG: RpcLogEntry[] = [
         durationMs: 902,
         origin: 'ui',
     },
+    // task 48: the backend's own calls and the console's are in the log too
+    {
+        id: 3,
+        timestamp: Date.parse('2026-09-05T09:58:00Z'),
+        interfaceName: 'HmIP-RF',
+        method: 'ping',
+        params: ['hmm'],
+        ok: true,
+        result: '',
+        durationMs: 8,
+        origin: 'background',
+    },
+    {
+        id: 4,
+        timestamp: Date.parse('2026-09-05T09:58:30Z'),
+        interfaceName: 'BidCos-RF',
+        method: 'getVersion',
+        params: [],
+        ok: true,
+        result: '2.3.4',
+        durationMs: 15,
+        origin: 'console',
+    },
 ];
 
 /** A short method catalogue so the console tab has something to show before task 8 fills it. */

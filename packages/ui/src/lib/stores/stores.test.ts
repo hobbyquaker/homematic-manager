@@ -11,6 +11,7 @@ import {
 import {MockTransport} from '../transport/MockTransport.js';
 
 import {AppStore, LANGUAGE_STORAGE_KEY, THEME_STORAGE_KEY, type StorageLike} from './AppStore.svelte.js';
+import {ConsoleStore} from './ConsoleStore.svelte.js';
 import {DevicesStore} from './DevicesStore.svelte.js';
 import {EventsStore} from './EventsStore.svelte.js';
 import {InterfacesStore} from './InterfacesStore.svelte.js';
@@ -801,7 +802,7 @@ describe('RpcLogStore', () => {
         const store = new RpcLogStore(transport, notices);
         await store.load(50);
         expect(transport.lastCall('rpcLog.list')).toEqual([50]);
-        expect(store.entries).toHaveLength(2);
+        expect(store.entries).toHaveLength(4);
 
         await store.clear();
         expect(store.entries).toEqual([]);
@@ -815,6 +816,36 @@ describe('RpcLogStore', () => {
         store.dispose();
         transport.emit('rpcLog.appended', entry(9));
         expect(store.entries).toEqual([]);
+    });
+
+    it('hides the background calls on request and keeps them in the log (task 48)', () => {
+        const transport = new MockTransport();
+        const store = new RpcLogStore(transport, new NoticesStore(transport));
+        transport.emit('rpcLog.appended', entry(1));
+        transport.emit('rpcLog.appended', {...entry(2), method: 'ping', origin: 'background'});
+        transport.emit('rpcLog.appended', {...entry(3), method: 'getVersion', origin: 'console'});
+        expect(store.visible.map((item) => item.id)).toEqual([3, 2, 1]);
+        store.hideBackground = true;
+        expect(store.visible.map((item) => item.id)).toEqual([3, 1]);
+        expect(store.entries).toHaveLength(3);
+    });
+});
+
+describe('ConsoleStore', () => {
+    it('holds a recalled log entry for the console of its interface, once (task 48)', () => {
+        const transport = new MockTransport();
+        const store = new ConsoleStore(transport, new NoticesStore(transport));
+        expect(store.takeRecall('BidCos-RF')).toBeUndefined();
+        store.recall({interfaceName: 'BidCos-RF', method: 'getParamset', params: ['MEQ0123456:1', 'MASTER']});
+        // another interface's console leaves it alone
+        expect(store.takeRecall('HmIP-RF')).toBeUndefined();
+        expect(store.pendingRecall?.method).toBe('getParamset');
+        expect(store.takeRecall('BidCos-RF')).toEqual({
+            interfaceName: 'BidCos-RF',
+            method: 'getParamset',
+            params: ['MEQ0123456:1', 'MASTER'],
+        });
+        expect(store.takeRecall('BidCos-RF')).toBeUndefined();
     });
 });
 

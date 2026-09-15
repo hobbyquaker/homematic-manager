@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type {RpcLogEntry} from '@homematic-manager/core';
+    import type {RpcLogEntry, RpcOrigin} from '@homematic-manager/core';
 
     import type {PendingWrite} from '../stores/RpcLogStore.svelte.js';
     import {formatDuration, formatParams, formatRpcValue, formatTime} from '../util/format.js';
@@ -23,6 +23,15 @@
         closeLabel?: string;
         /** The drag handle's accessible name; it is a `separator`, so it needs one. */
         resizeLabel?: string;
+        /** Task 48: the filter for the backend's own calls, owned by the store so every list agrees. */
+        hideBackground?: boolean;
+        hideBackgroundLabel?: string;
+        /** Task 48: what the origin column says for each origin. */
+        originLabels?: Record<RpcOrigin, string>;
+        /** Task 48: the accessible name of the "open in console" action on an entry. */
+        openLabel?: string;
+        /** Task 48: called with the entry the user wants back in the console. */
+        onopen?: ((entry: RpcLogEntry) => void) | undefined;
         /**
          * What stays above the drawer and bounds its height - the application header.
          *
@@ -44,10 +53,21 @@
         clearLabel = 'Clear',
         closeLabel = 'Close',
         resizeLabel = 'Resize the RPC log',
+        hideBackground = $bindable(false),
+        hideBackgroundLabel = 'Hide background calls',
+        originLabels = {console: 'console', ui: 'UI', background: 'background'},
+        openLabel = 'Open in console',
+        onopen = undefined,
         reservedHeight = undefined,
         onclear = undefined,
         testId = undefined,
     }: Props = $props();
+
+    /** A capped answer shows its preview and how big the whole of it was. */
+    function formatResult(entry: RpcLogEntry): string {
+        const text = formatRpcValue(entry.result);
+        return entry.resultBytes === undefined ? text : `${text} (${String(Math.round(entry.resultBytes / 1024))} kB)`;
+    }
 
     /**
      * Task 22, the maintainer's third look: the drawer was a fixed 240 px box, which is two rows of
@@ -176,6 +196,19 @@
         ></div>
         <header class="hmm-rpclog-head">
             <strong class="hmm-rpclog-title">{title}</strong>
+            <!--
+                Task 48: every outgoing call is in the log, the keep-alive and the polls included.
+                They are the bulk of it and rarely what somebody opened the drawer for, so they can
+                be hidden - hidden, not left out: the log stays complete.
+            -->
+            <label class="hmm-rpclog-filter">
+                <input
+                    type="checkbox"
+                    bind:checked={hideBackground}
+                    data-testid={testId === undefined ? undefined : `${testId}-hide-background`}
+                />
+                {hideBackgroundLabel}
+            </label>
             <button type="button" class="hmm-button" onclick={() => onclear?.()}>{clearLabel}</button>
             <button type="button" class="hmm-rpclog-close" aria-label={closeLabel} onclick={() => (open = false)}
                 >✕</button
@@ -185,24 +218,42 @@
             {#each pending as write (write.id)}
                 <li class="hmm-rpclog-entry hmm-rpclog-pending">
                     <span class="hmm-rpclog-spinner" aria-hidden="true"></span>
+                    <span class="hmm-rpclog-origin">{originLabels.ui}</span>
                     <span class="hmm-rpclog-method hmm-mono">{write.interfaceName} {write.method}</span>
                     <span class="hmm-rpclog-params hmm-mono">{formatParams(write.params)}</span>
                     <span class="hmm-rpclog-status">{pendingText}</span>
                 </li>
             {/each}
             {#each entries as entry (entry.id)}
-                <li class="hmm-rpclog-entry" class:hmm-rpclog-failed={!entry.ok}>
+                <li
+                    class="hmm-rpclog-entry"
+                    class:hmm-rpclog-failed={!entry.ok}
+                    class:hmm-rpclog-background={entry.origin === 'background'}
+                    data-origin={entry.origin}
+                >
                     <span class="hmm-rpclog-time">{formatTime(entry.timestamp)}</span>
+                    <span class="hmm-rpclog-origin">{originLabels[entry.origin]}</span>
                     <span class="hmm-rpclog-method hmm-mono">{entry.interfaceName} {entry.method}</span>
                     <span class="hmm-rpclog-params hmm-mono">{formatParams(entry.params)}</span>
                     <span class="hmm-rpclog-status">
                         {#if entry.ok}
-                            {formatRpcValue(entry.result)}
+                            {formatResult(entry)}
                         {:else}
                             {entry.error ?? ''}
                         {/if}
                     </span>
                     <span class="hmm-rpclog-duration">{formatDuration(entry.durationMs)}</span>
+                    <!--
+                        Task 48: the console has no history of its own any more; this is how a call
+                        - the console's, or anybody's - gets back into its form.
+                    -->
+                    <button
+                        type="button"
+                        class="hmm-rpclog-open"
+                        title={openLabel}
+                        aria-label={`${openLabel}: ${entry.method}`}
+                        onclick={() => onopen?.(entry)}>▸</button
+                    >
                 </li>
             {/each}
             {#if entries.length === 0 && pending.length === 0}
@@ -267,6 +318,27 @@
         padding: 0 4px;
     }
 
+    .hmm-rpclog-filter {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex: 0 0 auto;
+        white-space: nowrap;
+    }
+
+    .hmm-rpclog-open {
+        border: none;
+        background: none;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0 2px;
+        color: var(--hmm-fg-muted);
+    }
+
+    .hmm-rpclog-open:hover {
+        color: var(--hmm-accent);
+    }
+
     /* The one thing that scrolls: the entries, vertically. */
     .hmm-rpclog-list {
         list-style: none;
@@ -285,7 +357,7 @@
     */
     .hmm-rpclog-entry {
         display: grid;
-        grid-template-columns: 70px 220px minmax(0, 1fr) 200px 70px;
+        grid-template-columns: 70px 76px 220px minmax(0, 1fr) 200px 70px 20px;
         gap: 6px;
         align-items: center;
         padding: 1px 6px;
@@ -294,8 +366,19 @@
     }
 
     .hmm-rpclog-pending {
-        grid-template-columns: 70px 220px minmax(0, 1fr) 270px;
+        grid-template-columns: 70px 76px 220px minmax(0, 1fr) 296px;
         color: var(--hmm-fg-muted);
+    }
+
+    /* The backend's own calls: there, but quieter than what the user did. */
+    .hmm-rpclog-background {
+        color: var(--hmm-fg-muted);
+    }
+
+    .hmm-rpclog-origin {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: var(--hmm-font-size-small);
     }
 
     .hmm-rpclog-failed .hmm-rpclog-status {

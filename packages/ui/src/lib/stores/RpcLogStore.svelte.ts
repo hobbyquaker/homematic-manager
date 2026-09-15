@@ -1,4 +1,4 @@
-import type {ApiEvents, RpcValue, Transport, RpcLogEntry} from '@homematic-manager/core';
+import type {ApiEvents, RpcLogEntry, RpcValue, Transport} from '@homematic-manager/core';
 
 import type {NoticesStore} from './NoticesStore.svelte.js';
 
@@ -19,19 +19,26 @@ export interface RpcLogStoreOptions {
 }
 
 /**
- * The session write log, and the in-flight writes on top of it.
+ * The session RPC log, and the in-flight writes on top of it.
  *
  * This replaces the modal `dialog-rpc` of 2.x. That dialog blocked the whole window for every
  * single call, queued the calls behind itself (`rpcDialogShift`) and, when one failed, left the
  * user with a modal they had to dismiss before they could see anything else. The same information
  * - method, parameters, result or fault, duration - now goes into a drawer that can stay open, and
  * a bulk write reports through `write.progress` instead of a stack of modals.
+ *
+ * Task 48: the backend logs every outgoing call, not only the writes - the keep-alive, the
+ * `init`s, the `listDevices` sweeps included - and says where each came from. The background
+ * ones are frequent and rarely what a user is looking for, so the drawer can hide them; the
+ * switch lives here so the drawer and whoever else lists the log agree.
  */
 export class RpcLogStore {
     entries = $state<RpcLogEntry[]>([]);
     pending = $state<PendingWrite[]>([]);
     /** Progress of the running bulk write, or `undefined` when none is running. */
     progress = $state<ApiEvents['write.progress'] | undefined>(undefined);
+    /** Task 48: leave the backend's own calls out of the drawer. */
+    hideBackground = $state(false);
 
     readonly #transport: Transport;
     readonly #notices: NoticesStore;
@@ -63,6 +70,12 @@ export class RpcLogStore {
     /** The finished entries, newest first. */
     get newestFirst(): RpcLogEntry[] {
         return [...this.entries].reverse();
+    }
+
+    /** What the drawer shows: newest first, without the background calls when they are hidden. */
+    get visible(): RpcLogEntry[] {
+        const all = this.newestFirst;
+        return this.hideBackground ? all.filter((entry) => entry.origin !== 'background') : all;
     }
 
     append(entry: RpcLogEntry): void {

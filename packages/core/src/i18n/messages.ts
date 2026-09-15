@@ -416,6 +416,51 @@ export const MESSAGES: MessageCatalogue = {
         de: 'Schreibe {paramset} von {address}',
         en: 'Writing {paramset} of {address}',
     },
+    // The RPC log drawer (task 22; every outgoing call and its origin since task 48).
+    'RPC log': {
+        de: 'RPC-Protokoll',
+        en: 'RPC log',
+    },
+    'No RPC calls yet': {
+        de: 'Noch keine RPC-Aufrufe',
+        en: 'No RPC calls yet',
+    },
+    'in progress': {
+        de: 'läuft',
+        en: 'in progress',
+    },
+    Clear: {
+        de: 'Leeren',
+        en: 'Clear',
+    },
+    Close: {
+        de: 'Schließen',
+        en: 'Close',
+    },
+    'Resize the RPC log': {
+        de: 'Größe des RPC-Protokolls ändern',
+        en: 'Resize the RPC log',
+    },
+    'Hide background calls': {
+        de: 'Hintergrundaufrufe ausblenden',
+        en: 'Hide background calls',
+    },
+    'Open in console': {
+        de: 'In der Konsole öffnen',
+        en: 'Open in console',
+    },
+    'Origin: console': {
+        de: 'Konsole',
+        en: 'console',
+    },
+    'Origin: UI': {
+        de: 'UI',
+        en: 'UI',
+    },
+    'Origin: background': {
+        de: 'Hintergrund',
+        en: 'background',
+    },
 };
 
 /** The keys the catalogue knows, for the completeness test and for tooling. */

@@ -697,6 +697,73 @@ describe('RpcLogPanel', () => {
         render(RpcLogPanel, {props: {open: false, entries}});
         expect(screen.queryByText('184 ms')).toBeNull();
     });
+
+    // task 48: every outgoing call is in the log, with where it came from
+    const background: RpcLogEntry = {
+        id: 3,
+        timestamp: Date.parse('2026-09-05T09:58:00Z'),
+        interfaceName: 'HmIP-RF',
+        method: 'ping',
+        params: ['hmm'],
+        ok: true,
+        result: '',
+        durationMs: 8,
+        origin: 'background',
+    };
+
+    it('says where each call came from and marks the background ones (task 48)', () => {
+        const {container} = render(RpcLogPanel, {
+            props: {
+                open: true,
+                entries: [...entries, background],
+                originLabels: {console: 'Konsole', ui: 'UI', background: 'Hintergrund'},
+            },
+        });
+        expect(screen.getAllByText('UI')).toHaveLength(2);
+        expect(screen.getByText('Hintergrund')).toBeTruthy();
+        expect(container.querySelectorAll('.hmm-rpclog-background')).toHaveLength(1);
+        expect(container.querySelector('[data-origin="background"]')?.textContent).toContain('ping');
+    });
+
+    it('offers the background filter and hands the choice back to the store (task 48)', async () => {
+        const onopen = vi.fn();
+        render(RpcLogPanel, {
+            props: {
+                open: true,
+                entries: [background],
+                hideBackgroundLabel: 'Hide background calls',
+                onopen,
+                testId: 'log',
+            },
+        });
+        const filter = screen.getByTestId<HTMLInputElement>('log-hide-background');
+        expect(filter.checked).toBe(false);
+        expect(screen.getByLabelText('Hide background calls')).toBe(filter);
+        await fireEvent.click(filter);
+        expect(filter.checked).toBe(true);
+        // the drawer shows what it is given; the store does the filtering with the bound flag
+        expect(screen.getByText('HmIP-RF ping')).toBeTruthy();
+    });
+
+    it('opens an entry in the console (task 48)', async () => {
+        const onopen = vi.fn();
+        render(RpcLogPanel, {props: {open: true, entries, openLabel: 'Open in console', onopen}});
+        // both demo entries are putParamset; the first row is the first entry
+        await fireEvent.click(screen.getAllByLabelText('Open in console: putParamset')[0]!);
+        expect(onopen).toHaveBeenCalledWith(entries[0]);
+    });
+
+    it('shows a capped answer with its size (task 48)', () => {
+        render(RpcLogPanel, {
+            props: {
+                open: true,
+                entries: [
+                    {...background, id: 4, method: 'listDevices', result: '[{"ADDRESS":"ABC…', resultBytes: 204_800},
+                ],
+            },
+        });
+        expect(screen.getByText('[{"ADDRESS":"ABC… (200 kB)')).toBeTruthy();
+    });
 });
 
 describe('RpcProgress', () => {

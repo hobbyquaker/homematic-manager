@@ -1,6 +1,8 @@
 <script lang="ts">
     import {untrack} from 'svelte';
 
+    import type {RpcLogEntry} from '@homematic-manager/core';
+
     import './app.css';
 
     import {setDataTableEnvironment} from './lib/components/dataTableContext.js';
@@ -50,6 +52,19 @@
 
     const t = $derived(stores.i18n.t);
     const app = $derived(stores.app);
+
+    /**
+     * Task 48: "open in console" on an RPC log entry. The console page picks the call up when it
+     * is shown for that interface, so the interface and the tab are switched here and the drawer
+     * stays as it is - the user is going to send the call and look at the log again.
+     */
+    function openInConsole(entry: RpcLogEntry): void {
+        stores.console.recall(entry);
+        if (app.selectedInterface !== entry.interfaceName) {
+            app.setInterface(entry.interfaceName);
+        }
+        app.setTab('console');
+    }
 
     /** The provider names of the store's entry in the picker; `t` is reactive, so these are functions. */
     const META_PROVIDER_LABELS: Record<'local' | 'occulite' | 'rega', () => string> = {
@@ -349,16 +364,21 @@
 
     <RpcLogPanel
         bind:open={app.rpcLogOpen}
-        entries={stores.rpcLog.newestFirst}
+        entries={stores.rpcLog.visible}
         pending={stores.rpcLog.pending}
+        bind:hideBackground={stores.rpcLog.hideBackground}
         title={t('RPC log')}
         emptyText={t('No RPC calls yet')}
         pendingText={t('in progress')}
         clearLabel={t('Clear')}
         closeLabel={t('Close')}
         resizeLabel={t('Resize the RPC log')}
+        hideBackgroundLabel={t('Hide background calls')}
+        openLabel={t('Open in console')}
+        originLabels={{console: t('Origin: console'), ui: t('Origin: UI'), background: t('Origin: background')}}
         testId="rpclog"
         onclear={() => void stores.rpcLog.clear()}
+        onopen={openInConsole}
     />
 
     <Notices

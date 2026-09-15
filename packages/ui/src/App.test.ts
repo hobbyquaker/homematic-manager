@@ -224,13 +224,13 @@ describe('App shell', () => {
         await waitFor(() => expect(document.documentElement.getAttribute('data-theme')).toBeNull());
     });
 
-    it('opens the RPC log drawer and lists the write log', async () => {
+    it('opens the RPC log drawer and lists the RPC log', async () => {
         await mountApp(transport);
         await fireEvent.click(screen.getByTestId('rpclog-toggle'));
         expect(screen.getByText('Unknown parameter PROFILE_MODE')).toBeTruthy();
 
         transport.emit('rpcLog.appended', {
-            id: 3,
+            id: 5,
             timestamp: Date.parse('2026-09-05T10:01:00Z'),
             interfaceName: 'BidCos-RF',
             method: 'setValue',
@@ -240,6 +240,28 @@ describe('App shell', () => {
             origin: 'ui',
         });
         await waitFor(() => expect(screen.getByText('42 ms')).toBeTruthy());
+    });
+
+    it('hides the background calls of the RPC log on request (task 48)', async () => {
+        const {stores} = await mountApp(transport);
+        await fireEvent.click(screen.getByTestId('rpclog-toggle'));
+        // the demo log: two writes, a background ping and a console getVersion
+        expect(screen.getByText('HmIP-RF ping')).toBeTruthy();
+        await fireEvent.click(screen.getByTestId('rpclog-hide-background'));
+        expect(stores.rpcLog.hideBackground).toBe(true);
+        await waitFor(() => expect(screen.queryByText('HmIP-RF ping')).toBeNull());
+        expect(screen.getByText('BidCos-RF getVersion')).toBeTruthy();
+    });
+
+    it('opens a log entry in the console of its interface (task 48)', async () => {
+        const {stores} = await mountApp(transport, '#/HmIP-RF/devices');
+        await fireEvent.click(screen.getByTestId('rpclog-toggle'));
+        await fireEvent.click(screen.getByLabelText('In der Konsole öffnen: getVersion'));
+        expect(stores.app.selectedInterface).toBe('BidCos-RF');
+        expect(stores.app.tab).toBe('console');
+        await waitFor(() => expect(screen.getByTestId('console-params').textContent).toBe('getVersion()'));
+        // the drawer stays open: the user is going to send the call and look at the log again
+        expect(screen.getByTestId('rpclog')).toBeTruthy();
     });
 
     it('opens and closes the settings dialog with the CCU address filled in', async () => {

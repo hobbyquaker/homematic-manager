@@ -1,10 +1,11 @@
-import {fireEvent, render, screen, waitFor, within} from '@testing-library/svelte';
+import {cleanup, fireEvent, render, screen, waitFor, within} from '@testing-library/svelte';
 import {createRawSnippet, type Component} from 'svelte';
-import {describe, expect, it, vi} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {cdp, userEvent} from 'vitest/browser';
 
 import {ColumnWidthsStore} from '../stores/ColumnWidthsStore.svelte.js';
 import type {StorageLike} from '../stores/AppStore.svelte.js';
+import {isTruncated} from './columnMeasure.js';
 import {FIT_MAX_WIDTH, MIN_COLUMN_WIDTH} from './columnWidths.js';
 import DataTableComponent from './DataTable.svelte';
 import {DATA_TABLE_KEY, type DataTableEnvironment} from './dataTableContext.js';
@@ -1485,6 +1486,336 @@ describe('the resize handle under a finger (task 42)', () => {
                 const before = pixelWidth(subLabels('direction')[0]!);
                 await dragBy(subHandle(), 60, 'touch');
                 expect(Math.abs(pixelWidth(subLabels('direction')[0]!) - (before + 60))).toBeLessThanOrEqual(2);
+            } finally {
+                await session.send('Emulation.setTouchEmulationEnabled', {enabled: false});
+            }
+        },
+    );
+});
+
+/**
+ * Task 47, the maintainer: "tiny copy-to-clipboard button (really small) for device/channel names,
+ * and adress cells." The button is the grid's, switched on per column; a page only says which.
+ */
+describe('the copy button (task 47)', () => {
+    const LONG_NAME = 'Wohnzimmer Stehlampe neben dem Sofa am Fenster';
+
+    const copyColumns: DataTableColumn<Row>[] = [
+        {key: 'name', label: 'Name', width: 140, copy: 'name'},
+        {key: 'address', label: 'ADDRESS', width: 120, mono: true, copy: 'address'},
+        {key: 'type', label: 'TYPE'},
+    ];
+
+    class MemoryStorage implements StorageLike {
+        readonly map = new Map<string, string>();
+        getItem(key: string): string | null {
+            return this.map.get(key) ?? null;
+        }
+        setItem(key: string, value: string): void {
+            this.map.set(key, value);
+        }
+    }
+
+    const restores: (() => void)[] = [];
+
+    /** Replaces a property for one test - `navigator.clipboard`, `document.execCommand`. */
+    function shadow(target: object, key: string, value: unknown): void {
+        const previous = Object.getOwnPropertyDescriptor(target, key);
+        Object.defineProperty(target, key, {value, configurable: true, writable: true});
+        restores.push(() => {
+            if (previous) {
+                Object.defineProperty(target, key, previous);
+            } else {
+                Reflect.deleteProperty(target, key);
+            }
+        });
+    }
+
+    /** A Clipboard API that takes every text. */
+    function fakeClipboard(): ReturnType<typeof vi.fn<(text: string) => Promise<void>>> {
+        const writeText = vi.fn<(text: string) => Promise<void>>(() => Promise.resolve());
+        shadow(navigator, 'clipboard', {writeText});
+        return writeText;
+    }
+
+    afterEach(() => {
+        for (const restore of restores.splice(0).reverse()) {
+            restore();
+        }
+        window.getSelection()?.removeAllRanges();
+    });
+
+    function withLongName(count: number): Row[] {
+        return makeRows(count).map((row, index) => (index === 1 ? {...row, name: LONG_NAME} : row));
+    }
+
+    function copyButtons(row: HTMLElement): HTMLButtonElement[] {
+        return [...row.querySelectorAll<HTMLButtonElement>('button.hmm-copy')];
+    }
+
+    function columnOf(element: Element): string | undefined {
+        return element.closest<HTMLElement>('[data-column-key]')?.dataset['columnKey'];
+    }
+
+    function renderCopyGrid(props: Record<string, unknown> = {}, environment?: DataTableEnvironment): void {
+        render(DataTable, {
+            props: {...base, columns: copyColumns, rows: withLongName(4), testId: 'grid', ...props},
+            ...(environment === undefined ? {} : {context: new Map([[DATA_TABLE_KEY, environment]])}),
+        });
+        document.querySelector<HTMLElement>('.hmm-table')!.style.width = '1280px';
+    }
+
+    it('sits in the cells of a copy column, on rows and sub-rows, never on a label row, an empty value or another column', async () => {
+        const subColumns: DataTableColumn<Row>[] = [
+            {key: 'name', label: 'Name', width: 140, copy: 'name'},
+            {key: 'type', label: 'CHANNEL TYPE'},
+        ];
+        const rows = makeRows(2).map((row, index) => (index === 1 ? {...row, name: ''} : row));
+        render(DataTable, {
+            props: {...base, columns: copyColumns, subColumns, subRows: (row: Row) => row.channels ?? [], rows},
+        });
+        await fireEvent.click(screen.getAllByRole('button', {name: 'Expand row'})[0]!);
+        const [device, label, channel, unnamed] = rowsInDom();
+
+        expect(copyButtons(device!).map((button) => [columnOf(button), button.getAttribute('aria-label')])).toEqual([
+            ['name', 'Copy name'],
+            ['address', 'Copy address'],
+        ]);
+        expect(copyButtons(label!)).toEqual([]);
+        expect(copyButtons(channel!).map((button) => button.getAttribute('aria-label'))).toEqual(['Copy name']);
+        // a row without a name has no name to copy
+        expect(copyButtons(unnamed!).map((button) => button.getAttribute('aria-label'))).toEqual(['Copy address']);
+
+        for (const button of copyButtons(device!)) {
+            expect(button.hasAttribute('data-measure-skip')).toBe(true);
+            // an icon, no text: the cell's text is its value alone
+            expect(button.textContent.trim()).toBe('');
+        }
+        expect(device!.querySelector('[data-column-key="name"]')!.textContent.trim()).toBe('Device 0');
+    });
+
+    it('takes its label from the app’s translation', () => {
+        const german: Record<string, string> = {'Copy name': 'Namen kopieren', 'Copy address': 'Adresse kopieren'};
+        renderCopyGrid({}, {t: (key: string) => german[key] ?? key});
+        expect(copyButtons(rowsInDom()[0]!).map((button) => button.getAttribute('aria-label'))).toEqual([
+            'Namen kopieren',
+            'Adresse kopieren',
+        ]);
+    });
+
+    it.skipIf(!hasLayout)('copies the full value of a cut-off cell, not what the cell shows, and says so', async () => {
+        const writeText = fakeClipboard();
+        const store = new ColumnWidthsStore(new MemoryStorage(), () => 'ccu');
+        store.set('devices', 'name', 80);
+        renderCopyGrid({tableId: 'devices'}, {columnWidths: store});
+        const row = rowsInDom()[1]!;
+        expect(isTruncated(row.querySelector<HTMLElement>('[data-column-key="name"]')!)).toBe(true);
+        const button = within(row).getByRole('button', {name: 'Copy name'});
+
+        await userEvent.click(button);
+
+        await waitFor(() => {
+            expect(writeText).toHaveBeenCalledExactlyOnceWith(LONG_NAME);
+        });
+        expect((await screen.findByTestId('grid-copied')).textContent).toBe('Copied');
+        expect(screen.getByRole('status').textContent).toBe('Copied');
+        // shown, with a check mark instead of the copy icon
+        expect(button.classList.contains('hmm-copy-shown')).toBe(true);
+        expect(button.querySelector('rect')).toBeNull();
+        // and gone again after a moment
+        await waitFor(
+            () => {
+                expect(screen.queryByTestId('grid-copied')).toBeNull();
+            },
+            {timeout: 3000},
+        );
+        expect(screen.getByRole('status').textContent).toBe('');
+        expect(button.querySelector('rect')).not.toBeNull();
+    });
+
+    it('leaves its row alone: a click or a double click neither selects, activates nor renames', async () => {
+        const writeText = fakeClipboard();
+        const onactivate = vi.fn();
+        const onrename = vi.fn();
+        renderCopyGrid({onactivate, onrename});
+        const row = rowsInDom()[2]!;
+
+        await userEvent.dblClick(within(row).getByRole('button', {name: 'Copy address'}));
+
+        await waitFor(() => {
+            expect(writeText).toHaveBeenCalledWith('ADDR00002');
+        });
+        expect(row.getAttribute('aria-selected')).toBe('false');
+        expect(onactivate).not.toHaveBeenCalled();
+        expect(onrename).not.toHaveBeenCalled();
+        // the name cell around its own button still renames on a double click (task 46)
+        await fireEvent.dblClick(row.querySelector('[data-column-key="name"]')!);
+        expect(onrename).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00002'}));
+    });
+
+    it.skipIf(!hasLayout)(
+        'changes no column width, no cut-off check, no cut-off tooltip and no fit, and stays inside its cell',
+        async () => {
+            async function measure(tableColumns: DataTableColumn<Row>[]): Promise<unknown> {
+                const store = new ColumnWidthsStore(new MemoryStorage(), () => 'ccu');
+                store.set('devices', 'name', 80);
+                render(DataTable, {
+                    props: {...base, columns: tableColumns, rows: withLongName(4), testId: 'grid', tableId: 'devices'},
+                    context: new Map([[DATA_TABLE_KEY, {columnWidths: store}]]),
+                });
+                document.querySelector<HTMLElement>('.hmm-table')!.style.width = '1280px';
+                const widths = screen
+                    .getAllByRole('columnheader')
+                    .map((cell) => Math.round(cell.getBoundingClientRect().width));
+                const cells = rowsInDom().flatMap((row) => [...row.querySelectorAll<HTMLElement>('[role="gridcell"]')]);
+                const truncated = cells.map((cell) => isTruncated(cell));
+                const inside = cells.every((cell) => {
+                    const box = cell.getBoundingClientRect();
+                    return copyButtons(cell).every((button) => {
+                        const own = button.getBoundingClientRect();
+                        return own.left >= box.left && own.right <= box.right && own.width > 0;
+                    });
+                });
+
+                const longCell = rowsInDom()[1]!.querySelector<HTMLElement>('[data-column-key="name"]')!;
+                // the real pointer, as in the cut-off tooltip's own test: a synthetic pointerover loses
+                await userEvent.hover(longCell);
+                const tooltip = (await screen.findByRole('tooltip')).textContent;
+                await userEvent.unhover(longCell);
+                await waitFor(() => {
+                    expect(screen.queryByRole('tooltip')).toBeNull();
+                });
+
+                await fireEvent.dblClick(screen.getByTestId('grid-resize-name'));
+                const fitted = store.widths('devices')['name'];
+                cleanup();
+                return {widths, truncated, inside, tooltip, fitted};
+            }
+
+            const without = await measure(columns);
+            const withButtons = await measure(copyColumns);
+            expect(withButtons).toEqual(without);
+            expect(without).toMatchObject({inside: true, tooltip: LONG_NAME});
+            expect((withButtons as {truncated: boolean[]}).truncated).toContain(true);
+        },
+    );
+
+    it('is a tab stop only in the row the keyboard is on, and copies on Enter and Space without touching that row', async () => {
+        const writeText = fakeClipboard();
+        const onactivate = vi.fn();
+        const onrename = vi.fn();
+        renderCopyGrid({onactivate, onrename});
+        function tabStops(): string[] {
+            return [...document.querySelectorAll<HTMLButtonElement>('button.hmm-copy')]
+                .filter((button) => button.tabIndex === 0)
+                .map(
+                    (button) =>
+                        `${button.closest<HTMLElement>('[data-row-id]')!.dataset['rowId']} ${button.getAttribute('aria-label')}`,
+                );
+        }
+        expect(tabStops()).toEqual(['ADDR00000 Copy name', 'ADDR00000 Copy address']);
+
+        const row = rowsInDom()[2]!;
+        await fireEvent.click(row);
+        expect(tabStops()).toEqual(['ADDR00002 Copy name', 'ADDR00002 Copy address']);
+
+        row.focus();
+        await userEvent.tab();
+        expect(document.activeElement?.getAttribute('aria-label')).toBe('Copy name');
+        await userEvent.keyboard('{Enter}');
+        await waitFor(() => {
+            expect(writeText).toHaveBeenLastCalledWith('Device 2');
+        });
+
+        await userEvent.tab();
+        expect(document.activeElement?.getAttribute('aria-label')).toBe('Copy address');
+        await userEvent.keyboard(' ');
+        await waitFor(() => {
+            expect(writeText).toHaveBeenLastCalledWith('ADDR00002');
+        });
+
+        await userEvent.keyboard('{F2}');
+        expect(writeText).toHaveBeenCalledTimes(2);
+        expect(onactivate).not.toHaveBeenCalled();
+        expect(onrename).not.toHaveBeenCalled();
+        expect(row.getAttribute('aria-selected')).toBe('true');
+    });
+
+    it('copies through a selected field where the page has no Clipboard API, and gives the focus back', async () => {
+        shadow(navigator, 'clipboard', undefined);
+        const copied: string[] = [];
+        shadow(document, 'execCommand', () => {
+            const field = document.activeElement;
+            if (field instanceof HTMLTextAreaElement) {
+                copied.push(field.value.slice(field.selectionStart, field.selectionEnd));
+            }
+            return true;
+        });
+        renderCopyGrid();
+        const button = within(rowsInDom()[1]!).getByRole('button', {name: 'Copy name'});
+        button.focus();
+
+        await fireEvent.click(button);
+
+        await waitFor(() => {
+            expect(screen.queryByTestId('grid-copied')?.textContent).toBe('Copied');
+        });
+        expect(copied).toEqual([LONG_NAME]);
+        expect(document.activeElement).toBe(button);
+        expect(document.querySelector('textarea')).toBeNull();
+    });
+
+    it('says so when neither way copies, and selects the full text for Ctrl+C', async () => {
+        shadow(navigator, 'clipboard', {
+            writeText: () => Promise.reject(new DOMException('denied', 'NotAllowedError')),
+        });
+        shadow(document, 'execCommand', () => false);
+        renderCopyGrid();
+        const button = within(rowsInDom()[1]!).getByRole('button', {name: 'Copy name'});
+
+        await fireEvent.click(button);
+
+        await waitFor(() => {
+            expect(screen.queryByTestId('grid-copied')?.textContent).toBe('Could not copy - the text is selected');
+        });
+        expect(screen.getByRole('status').textContent).toBe('Could not copy - the text is selected');
+        expect(window.getSelection()?.toString()).toBe(LONG_NAME);
+        // no check mark for a copy that did not happen
+        expect(button.querySelector('rect')).not.toBeNull();
+    });
+
+    it.skipIf(!hasLayout)(
+        'is hidden until its row is hovered or it has the keyboard focus, and always there on a coarse pointer',
+        async () => {
+            fakeClipboard();
+            renderCopyGrid();
+            const row = rowsInDom()[0]!;
+            const button = within(row).getByRole('button', {name: 'Copy name'});
+            const opacityOf = (element: Element): string => getComputedStyle(element).opacity;
+
+            expect(opacityOf(button)).toBe('0');
+            // really small
+            expect(Math.round(button.getBoundingClientRect().width)).toBe(16);
+            await userEvent.hover(row.querySelector<HTMLElement>('[data-column-key="type"]')!);
+            expect(opacityOf(button)).toBe('1');
+            await userEvent.unhover(row);
+            expect(opacityOf(button)).toBe('0');
+
+            row.focus();
+            await userEvent.tab();
+            expect(document.activeElement).toBe(button);
+            expect(opacityOf(button)).toBe('1');
+            button.blur();
+
+            // Chromium's touch emulation is what makes `(pointer: coarse)` match, as on a tablet
+            const session = cdp();
+            await session.send('Emulation.setTouchEmulationEnabled', {enabled: true, maxTouchPoints: 1});
+            try {
+                await new Promise((resolve) => requestAnimationFrame(resolve));
+                expect(matchMedia('(pointer: coarse)').matches).toBe(true);
+                const untouched = within(rowsInDom()[3]!).getByRole('button', {name: 'Copy address'});
+                expect(opacityOf(untouched)).toBe('1');
+                expect(Math.round(untouched.getBoundingClientRect().width)).toBe(22);
             } finally {
                 await session.send('Emulation.setTouchEmulationEnabled', {enabled: false});
             }

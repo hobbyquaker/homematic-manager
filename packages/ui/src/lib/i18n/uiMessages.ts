@@ -235,6 +235,14 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Fit column to content': {de: 'Spaltenbreite an den Inhalt anpassen', en: 'Fit column to content'},
     'Reset column widths': {de: 'Spaltenbreiten zurücksetzen', en: 'Reset column widths'},
     'Column widths': {de: 'Spaltenbreiten', en: 'Column widths'},
+    // Task 47: the copy button of a name or an address cell, and what it says after a click
+    'Copy name': {de: 'Namen kopieren', en: 'Copy name'},
+    'Copy address': {de: 'Adresse kopieren', en: 'Copy address'},
+    Copied: {de: 'Kopiert', en: 'Copied'},
+    'Could not copy - the text is selected': {
+        de: 'Kopieren nicht möglich - der Text ist markiert',
+        en: 'Could not copy - the text is selected',
+    },
     // BUGS.md B-2: the receiver a BidCos-RF device is configured for, in the Funk dialog.
     Configured: {de: 'Konfiguriert', en: 'Configured'},
     'Use {interface} as receiver': {

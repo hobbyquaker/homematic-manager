@@ -2,6 +2,7 @@
     import type {MessageParams} from '@homematic-manager/core';
     import {untrack, type Snippet} from 'svelte';
 
+    import {copyText} from './clipboard.js';
     import {fullText, isTruncated, measureNaturalWidths} from './columnMeasure.js';
     import {
         clampColumnWidth,
@@ -340,6 +341,8 @@
             }
         }
         forgetTooltip();
+        // task 47: "Copied" stood under a button that has moved on
+        clearCopied();
     }
 
     function toggleSort(column: DataTableColumn<T>): void {
@@ -954,6 +957,86 @@
             clearTimeout(tooltipTimer);
         }
     });
+
+    // ------------------------------------------------------------------ the copy button (task 47)
+
+    /** How long "Copied" stays under the button, with the check mark in it. */
+    const COPIED_MS = 1500;
+    /** A failure has more to say: the text is selected, copy it by hand. */
+    const COPY_FAILED_MS = 4000;
+
+    /** The button that has just copied, and what the bubble under it says. One at a time. */
+    let copied = $state.raw<{key: string; ok: boolean; text: string; anchor: TooltipAnchor} | undefined>(undefined);
+    let copiedTimer: ReturnType<typeof setTimeout> | undefined;
+
+    /** A cell of a rendered line: the line's key is unique where a row id is not (the Funk peers). */
+    function copyKey(flatRow: FlatRow<T>, column: DataTableColumn<T>): string {
+        return `${flatRow.key} ${column.key}`;
+    }
+
+    function clearCopied(): void {
+        if (copiedTimer !== undefined) {
+            clearTimeout(copiedTimer);
+            copiedTimer = undefined;
+        }
+        if (copied !== undefined) {
+            copied = undefined;
+        }
+    }
+
+    /**
+     * The click of a copy button - Enter and Space on it included. It stays with the button: no
+     * selection, no activation, no rename. It copies the column's value, the full text however narrow
+     * the cell is. When no way of copying works the cell's text is selected in the page instead, so
+     * Ctrl+C takes it by hand.
+     */
+    async function copyCell(event: MouseEvent, flatRow: FlatRow<T>, column: DataTableColumn<T>): Promise<void> {
+        event.stopPropagation();
+        const button = event.currentTarget;
+        if (!(button instanceof HTMLElement)) {
+            return;
+        }
+        const outcome = await copyText(cellText(flatRow.row, column), {host: root});
+        // the cut-off tooltip of the cell, shown or on its way, makes room for the answer
+        hideTooltip();
+        clearCopied();
+        if (!button.isConnected) {
+            // the row scrolled out of the window while the clipboard answered
+            return;
+        }
+        const ok = outcome !== 'failed';
+        if (!ok) {
+            selectCellText(button);
+        }
+        const {left, top, bottom} = button.getBoundingClientRect();
+        copied = {
+            key: copyKey(flatRow, column),
+            ok,
+            text: ok ? t('Copied') : t('Could not copy - the text is selected'),
+            anchor: {left, top, bottom},
+        };
+        copiedTimer = setTimeout(clearCopied, ok ? COPIED_MS : COPY_FAILED_MS);
+    }
+
+    /** The whole text of the button's cell, the button left out: what Ctrl+C copies after a failure. */
+    function selectCellText(button: HTMLElement): void {
+        const cell = button.closest('.hmm-td');
+        const selection = window.getSelection();
+        if (!cell || !selection) {
+            return;
+        }
+        const range = document.createRange();
+        range.selectNodeContents(cell);
+        range.setEndBefore(button);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    $effect(() => () => {
+        if (copiedTimer !== undefined) {
+            clearTimeout(copiedTimer);
+        }
+    });
 </script>
 
 <!--
@@ -1211,6 +1294,7 @@
                                     <div
                                         class="hmm-td"
                                         class:hmm-td-fixed={column.fixed === true}
+                                        class:hmm-td-copy={column.copy !== undefined && flatRow.kind === 'row'}
                                         class:hmm-mono={column.mono === true && flatRow.kind === 'row'}
                                         role="gridcell"
                                         data-column-key={column.key}
@@ -1231,6 +1315,38 @@
                                             {@render cell(flatRow.row, column, flatRow)}
                                         {:else}
                                             {cellText(flatRow.row, column)}
+                                        {/if}
+                                        {#if column.copy !== undefined && flatRow.kind === 'row' && cellText(flatRow.row, column) !== ''}
+                                            {@const copyId = copyKey(flatRow, column)}
+                                            <!--
+                                                Task 47: over the end of the text, not beside it - the column keeps
+                                                its width and the cut-off tooltip its measurement, and
+                                                `data-measure-skip` keeps it out of a fit. An icon without text, so
+                                                the tooltip and a cell's text content stay the value alone. Only
+                                                the buttons of the row the keyboard is on are tab stops.
+                                            -->
+                                            <button
+                                                type="button"
+                                                class="hmm-copy"
+                                                class:hmm-copy-shown={copied?.key === copyId}
+                                                tabindex={window_.start + index === focusIndex ? 0 : -1}
+                                                aria-label={column.copy === 'name' ? t('Copy name') : t('Copy address')}
+                                                data-measure-skip
+                                                onclick={(event) => void copyCell(event, flatRow, column)}
+                                                ondblclick={(event) => {
+                                                    // two clicks copy twice; the row neither activates nor renames
+                                                    event.stopPropagation();
+                                                }}
+                                            >
+                                                <svg class="hmm-copy-icon" viewBox="0 0 10 10" aria-hidden="true">
+                                                    {#if copied?.key === copyId && copied.ok}
+                                                        <path d="M1.5 5.2 4 7.7 8.5 2.3" />
+                                                    {:else}
+                                                        <rect x="3.5" y="3.5" width="5.5" height="5.5" rx="1" />
+                                                        <path d="M6.5 1.5h-4a1 1 0 0 0-1 1v4" />
+                                                    {/if}
+                                                </svg>
+                                            </button>
                                         {/if}
                                     </div>
                                 {/each}
@@ -1253,6 +1369,15 @@
             testId={testId === undefined ? undefined : `${testId}-tooltip`}
         />
     {/if}
+    {#if copied !== undefined}
+        <TooltipBubble
+            text={copied.text}
+            anchor={copied.anchor}
+            testId={testId === undefined ? undefined : `${testId}-copied`}
+        />
+    {/if}
+    <!-- Task 47: the same words for a screen reader, to which a tooltip bubble is not read. -->
+    <span class="hmm-table-announce" role="status" aria-live="polite">{copied?.text ?? ''}</span>
     {#if headMenuOpen}
         <ContextMenu
             bind:open={headMenuOpen}
@@ -1571,6 +1696,85 @@
      */
     .hmm-td-fixed {
         text-overflow: clip;
+    }
+
+    /*
+     * Task 47: the copy button of a name or an address cell. It lies over the end of the text rather
+     * than beside it, so the column keeps its width, the text does not move and the cut-off check
+     * measures what it measured before. `background-color: inherit` through the cell gives the button
+     * the row's own ground - hovered, selected, a channel - so the text under it does not show through.
+     */
+    .hmm-td-copy {
+        position: relative;
+        background-color: inherit;
+    }
+
+    .hmm-copy {
+        position: absolute;
+        top: 50%;
+        right: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        padding: 0;
+        border: none;
+        border-radius: 2px;
+        background-color: inherit;
+        color: var(--hmm-fg-muted);
+        cursor: pointer;
+        opacity: 0;
+        transform: translateY(-50%);
+    }
+
+    /* Opacity, not visibility: a button that is not shown is still one the keyboard can reach. */
+    .hmm-tr:hover .hmm-copy,
+    .hmm-copy:focus-visible,
+    .hmm-copy-shown {
+        opacity: 1;
+    }
+
+    .hmm-copy:hover {
+        color: var(--hmm-fg);
+        background-color: var(--hmm-control-bg-hover);
+    }
+
+    .hmm-copy:focus-visible {
+        outline: 1px solid var(--hmm-accent);
+        outline-offset: -1px;
+    }
+
+    .hmm-tr-selected .hmm-copy {
+        color: inherit;
+    }
+
+    .hmm-copy-icon {
+        width: 10px;
+        height: 10px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.1;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    /* A touch screen has no hover: the button is always there, and big enough for a finger (task 42's query). */
+    @media (pointer: coarse) {
+        .hmm-copy {
+            width: 22px;
+            height: 22px;
+            opacity: 1;
+        }
+    }
+
+    .hmm-table-announce {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
     }
 
     .hmm-td-expander,

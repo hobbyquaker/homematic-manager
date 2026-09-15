@@ -44,6 +44,12 @@ export interface DataTableColumn<T> {
     readonly hidden?: boolean;
     /** Draw in the address font. */
     readonly mono?: boolean;
+    /**
+     * Task 47: a small copy button at the end of every cell of the column, which puts the column's
+     * full value on the clipboard - never the cut-off text the cell draws. What it copies names its
+     * label: "Copy name" or "Copy address". Only on a real row with a value.
+     */
+    readonly copy?: 'name' | 'address';
     /** Reads the value; defaults to `row[key]`. */
     readonly value?: (row: T) => CellValue;
 }

@@ -149,6 +149,26 @@ test('the settings dialog shows the live configuration and saves it', async ({pa
 });
 
 /**
+ * B-38: Escape closes a dialog on every tab. The row menu of the Devices and Links grids listened on
+ * the window and took every Escape, so no dialog closed on it while one of those tabs was shown -
+ * the settings dialog belongs to the App, not to either page, and was caught all the same.
+ */
+test('Escape closes the settings dialog on the Devices and the Links tab (B-38)', async ({page, host}) => {
+    const dialog = page.getByTestId('config-dialog');
+    for (const tab of ['devices', 'links'] as const) {
+        await page.goto(`${host.url}#/BidCos-RF/${tab}`);
+        await expect(page.getByTestId(`${tab}-table`)).toBeVisible();
+
+        await page.getByTestId('settings-button').click();
+        await expect(dialog).toHaveAttribute('open', '');
+        await page.keyboard.press('Escape');
+        await expect(dialog).not.toHaveAttribute('open');
+        // the dialog gave the focus back to the button that opened it
+        await expect(page.getByTestId('settings-button')).toBeFocused();
+    }
+});
+
+/**
  * #135: an extra interface is offered in the interface list and ticked as soon as it has a name,
  * and it leaves the list with its row. Nothing is saved - the simulator has no CCU-Jack to connect.
  */

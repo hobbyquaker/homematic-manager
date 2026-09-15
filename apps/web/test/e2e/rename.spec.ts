@@ -52,9 +52,10 @@ test('a double click on a device or a channel name opens the rename dialog for i
     await expect(page.getByTestId('rename-children')).toBeVisible();
     // the word the double click selected in the grid is let go again
     expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).toBe('');
-    // the close button rather than Escape: in this browser Escape leaves the dialog open, however it was opened
-    await dialog.getByRole('button', {name: 'Close'}).click();
+    // B-38: Escape closes it, and the focus is back in the grid, on the row the double click came from
+    await page.keyboard.press('Escape');
     await expect(dialog).not.toHaveAttribute('open');
+    await expect(row).toBeFocused();
 
     // a channel: the dialog is the channel's, and the device stays expanded
     await row.getByRole('button', {name: 'Expand row'}).click();

@@ -1,4 +1,4 @@
-import type {InterfaceState, WriteLogEntry} from '@homematic-manager/core';
+import type {InterfaceState, RpcLogEntry} from '@homematic-manager/core';
 import {fireEvent, render, screen, waitFor} from '@testing-library/svelte';
 import {describe, expect, it, vi} from 'vitest';
 
@@ -636,7 +636,7 @@ describe('Notices', () => {
 });
 
 describe('RpcLogPanel', () => {
-    const entries: WriteLogEntry[] = [
+    const entries: RpcLogEntry[] = [
         {
             id: 1,
             timestamp: Date.parse('2026-09-05T09:57:02Z'),
@@ -646,6 +646,7 @@ describe('RpcLogPanel', () => {
             ok: true,
             result: '',
             durationMs: 184,
+            origin: 'ui',
         },
         {
             id: 2,
@@ -656,6 +657,7 @@ describe('RpcLogPanel', () => {
             ok: false,
             error: 'Unknown parameter',
             durationMs: 1902,
+            origin: 'ui',
         },
     ];
 

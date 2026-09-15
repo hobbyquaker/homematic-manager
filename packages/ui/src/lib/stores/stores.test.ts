@@ -1,4 +1,4 @@
-import type {AppConfig, InterfaceState, WriteLogEntry} from '@homematic-manager/core';
+import type {AppConfig, InterfaceState, RpcLogEntry} from '@homematic-manager/core';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {
@@ -20,7 +20,7 @@ import {NoticesStore} from './NoticesStore.svelte.js';
 import {ServiceMessagesStore} from './ServiceMessagesStore.svelte.js';
 import {STORE_INTERFACE} from './routing.js';
 import {createStores} from './Stores.svelte.js';
-import {WriteLogStore} from './WriteLogStore.svelte.js';
+import {RpcLogStore} from './RpcLogStore.svelte.js';
 
 class MemoryStorage implements StorageLike {
     readonly map = new Map<string, string>();
@@ -754,8 +754,8 @@ describe('EventsStore', () => {
     });
 });
 
-describe('WriteLogStore', () => {
-    const entry = (id: number, ok = true): WriteLogEntry => ({
+describe('RpcLogStore', () => {
+    const entry = (id: number, ok = true): RpcLogEntry => ({
         id,
         timestamp: id,
         interfaceName: 'BidCos-RF',
@@ -763,14 +763,15 @@ describe('WriteLogStore', () => {
         params: ['A:1', 'MASTER', {}],
         ok,
         durationMs: 10,
+        origin: 'ui',
     });
 
     it('appends what the backend logs, newest first, capped', () => {
         const transport = new MockTransport();
-        const store = new WriteLogStore(transport, new NoticesStore(transport), {max: 2});
-        transport.emit('writeLog.appended', entry(1));
-        transport.emit('writeLog.appended', entry(2));
-        transport.emit('writeLog.appended', entry(3));
+        const store = new RpcLogStore(transport, new NoticesStore(transport), {max: 2});
+        transport.emit('rpcLog.appended', entry(1));
+        transport.emit('rpcLog.appended', entry(2));
+        transport.emit('rpcLog.appended', entry(3));
 
         expect(store.entries.map((item) => item.id)).toEqual([2, 3]);
         expect(store.newestFirst.map((item) => item.id)).toEqual([3, 2]);
@@ -778,7 +779,7 @@ describe('WriteLogStore', () => {
 
     it('tracks in-flight writes and the bulk progress', () => {
         const transport = new MockTransport();
-        const store = new WriteLogStore(transport, new NoticesStore(transport), {now: () => 42});
+        const store = new RpcLogStore(transport, new NoticesStore(transport), {now: () => 42});
         expect(store.busy).toBe(false);
 
         const id = store.beginPending('BidCos-RF', 'putParamset', ['A:1', 'MASTER', {}]);
@@ -797,22 +798,22 @@ describe('WriteLogStore', () => {
     it('loads and clears, reports failures and stops after dispose', async () => {
         const transport = new MockTransport({demo: true});
         const notices = new NoticesStore(transport);
-        const store = new WriteLogStore(transport, notices);
+        const store = new RpcLogStore(transport, notices);
         await store.load(50);
-        expect(transport.lastCall('writeLog.list')).toEqual([50]);
+        expect(transport.lastCall('rpcLog.list')).toEqual([50]);
         expect(store.entries).toHaveLength(2);
 
         await store.clear();
         expect(store.entries).toEqual([]);
 
-        transport.fail('writeLog.list', 'no log');
-        transport.fail('writeLog.clear', 'no log');
+        transport.fail('rpcLog.list', 'no log');
+        transport.fail('rpcLog.clear', 'no log');
         await store.load();
         await store.clear();
         expect(notices.items).toHaveLength(2);
 
         store.dispose();
-        transport.emit('writeLog.appended', entry(9));
+        transport.emit('rpcLog.appended', entry(9));
         expect(store.entries).toEqual([]);
     });
 });

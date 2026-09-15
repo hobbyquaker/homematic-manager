@@ -22,7 +22,7 @@ import {ServiceMessagesStore} from './ServiceMessagesStore.svelte.js';
 import {TaxonomyStore} from './TaxonomyStore.svelte.js';
 import {UnreachStore} from './UnreachStore.svelte.js';
 import {isStoreTabId, storeTabs, tabsForInterface, type TabId} from './routing.js';
-import {WriteLogStore} from './WriteLogStore.svelte.js';
+import {RpcLogStore} from './RpcLogStore.svelte.js';
 
 export interface StoresOptions extends AppStoreOptions {
     /** Passed to the events ring buffer; the tests use a small one. */
@@ -55,7 +55,7 @@ export class Stores {
     /** Issue #26: how often each device went unreachable. */
     readonly unreach: UnreachStore;
     readonly events: EventsStore;
-    readonly writeLog: WriteLogStore;
+    readonly rpcLog: RpcLogStore;
     readonly host: HostStore;
     readonly meta: MetaStore;
     /** D-40, task 25: rooms, functions and the state of the store they come from. */
@@ -80,7 +80,7 @@ export class Stores {
         this.events = new EventsStore(transport, this.notices, {
             ...(options.eventCapacity === undefined ? {} : {capacity: options.eventCapacity}),
         });
-        this.writeLog = new WriteLogStore(transport, this.notices);
+        this.rpcLog = new RpcLogStore(transport, this.notices);
         this.meta = new MetaStore(transport, {
             ...(options.dataSource === undefined ? {} : {source: options.dataSource}),
         });
@@ -88,7 +88,7 @@ export class Stores {
         this.paramsets = new ParamsetStore(transport, this.notices);
         this.radio = new RadioStore(transport, this.notices);
         this.console = new ConsoleStore(transport, this.notices);
-        this.changeSet = new ChangeSetStore(transport, this.notices, this.writeLog);
+        this.changeSet = new ChangeSetStore(transport, this.notices, this.rpcLog);
         this.host = new HostStore({
             ...(options.hostBridge === undefined ? {} : {bridge: options.hostBridge}),
             ...(options.hostScope === undefined ? {} : {scope: options.hostScope}),
@@ -121,7 +121,7 @@ export class Stores {
         void this.meta.setLanguage(this.app.language).catch(() => undefined);
         // The host is optional and must never hold up the CCU work, so its failure is swallowed.
         void this.host.load().catch(() => undefined);
-        await Promise.all([this.interfaces.load(), this.names.load(), this.writeLog.load(), this.taxonomy.load()]);
+        await Promise.all([this.interfaces.load(), this.names.load(), this.rpcLog.load(), this.taxonomy.load()]);
         // A bookmark of the store's pages (`#/%23store/rooms`) on a host that has no store, or
         // whose store does not answer: the first interface, as an unknown name in the hash gets.
         const selected =
@@ -181,7 +181,7 @@ export class Stores {
     dispose(): void {
         this.radio.dispose();
         this.host.dispose();
-        this.writeLog.dispose();
+        this.rpcLog.dispose();
         this.events.dispose();
         this.serviceMessages.dispose();
         this.taxonomy.dispose();

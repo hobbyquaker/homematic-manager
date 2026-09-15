@@ -229,7 +229,7 @@ describe('App shell', () => {
         await fireEvent.click(screen.getByTestId('rpclog-toggle'));
         expect(screen.getByText('Unknown parameter PROFILE_MODE')).toBeTruthy();
 
-        transport.emit('writeLog.appended', {
+        transport.emit('rpcLog.appended', {
             id: 3,
             timestamp: Date.parse('2026-09-05T10:01:00Z'),
             interfaceName: 'BidCos-RF',
@@ -237,6 +237,7 @@ describe('App shell', () => {
             params: ['MEQ0123456:1', 'STATE', true],
             ok: true,
             durationMs: 42,
+            origin: 'ui',
         });
         await waitFor(() => expect(screen.getByText('42 ms')).toBeTruthy());
     });

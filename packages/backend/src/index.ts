@@ -28,6 +28,8 @@ export * from './config/linkTemplates.js';
 
 // the protocol layer
 export * from './rpc/client.js';
+export * from './rpc/log.js';
+export * from './rpc/origin.js';
 export * from './rpc/server.js';
 export * from './interfaces/manager.js';
 
@@ -43,7 +45,6 @@ export * from './meta/index.js';
 
 // the write path (task 6)
 export * from './write/queue.js';
-export * from './write/log.js';
 export * from './write/paramset.js';
 
 // the optional and the peripheral

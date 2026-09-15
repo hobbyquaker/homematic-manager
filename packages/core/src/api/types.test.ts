@@ -20,10 +20,10 @@ describe('API_EVENT_NAMES', () => {
             'notice',
             'rega.changed',
             'rpc.event',
+            'rpcLog.appended',
             'serviceMessages.changed',
             'unreach.changed',
             'write.progress',
-            'writeLog.appended',
         ]);
         expect(new Set(API_EVENT_NAMES).size).toBe(API_EVENT_NAMES.length);
     });

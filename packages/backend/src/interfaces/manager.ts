@@ -51,6 +51,13 @@ import {localIPv4Addresses, probePortState, withTimeout, type PortProbe} from '.
 /** How often the watchdog looks at every interface. 2.x used the same 15 s. */
 export const WATCHDOG_INTERVAL_MS = 15_000;
 
+/**
+ * Task 48: the manager's own calls - `init`, de-init, `ping` - are the backend's business whatever
+ * asked for the connection, so they name their origin instead of inheriting a request's context
+ * (a `config.set` from the settings dialog is a UI action; the watchdog it starts is not).
+ */
+const BACKGROUND = {origin: 'background'} as const;
+
 /** Where an interface process on this very box calls back (#144). */
 export const LOOPBACK_IP = '127.0.0.1';
 
@@ -95,6 +102,8 @@ export interface InterfaceManagerOptions {
     /** Called after a successful `init`; the backend fills its caches there. */
     readonly onConnected?: (interfaceName: string) => void | Promise<void>;
     readonly onCall?: (record: RpcCallRecord) => void;
+    /** Task 48: the origin of a call that names none, handed to every client (the backend's request context). */
+    readonly originOf?: RpcClientOptions['originOf'];
     readonly now?: () => number;
     readonly rpcTimeoutMs?: number;
     readonly watchdogIntervalMs?: number;
@@ -515,7 +524,7 @@ export class InterfaceManager {
         }
         const url = this.#callbackUrl(entry.target.resolved.protocol);
         try {
-            await withTimeout(entry.client.call('init', [url, '']), SHUTDOWN_TIMEOUT_MS, () =>
+            await withTimeout(entry.client.call('init', [url, ''], BACKGROUND), SHUTDOWN_TIMEOUT_MS, () =>
                 connectionError(`${entry.name}: de-registering timed out`),
             );
         } catch {
@@ -536,6 +545,7 @@ export class InterfaceManager {
             auth: target.auth,
             ...(this.#options.rpcTimeoutMs === undefined ? {} : {timeoutMs: this.#options.rpcTimeoutMs}),
             ...(this.#options.onCall === undefined ? {} : {onCall: this.#options.onCall}),
+            ...(this.#options.originOf === undefined ? {} : {originOf: this.#options.originOf}),
         };
         const client = (this.#options.createClient ?? ((clientOptions) => new RpcClient(clientOptions)))(options);
         return {
@@ -651,7 +661,7 @@ export class InterfaceManager {
         const url = this.#callbackUrl(resolved.protocol);
         this.#update(entry, {callbackUrl: url, callbackFailure: undefined});
         try {
-            await entry.client.call('init', [url, resolved.ident]);
+            await entry.client.call('init', [url, resolved.ident], BACKGROUND);
             entry.lastEvent = this.#now();
             const wasFailing = entry.failures > 0;
             entry.failures = 0;
@@ -715,7 +725,7 @@ export class InterfaceManager {
 
     async #ping(entry: ManagedInterface): Promise<void> {
         try {
-            await entry.client.call('ping', ['hmm']);
+            await entry.client.call('ping', ['hmm'], BACKGROUND);
         } catch (error) {
             // the answer to a ping is an event, so a failing ping is only a hint; the re-init
             // happens when the silence exceeds the timeout, exactly as in 2.x

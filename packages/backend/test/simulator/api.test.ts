@@ -56,12 +56,17 @@ describe.skipIf(!simulatorAvailable)('the API against hm-simulator', () => {
             '0001D3C99ABCDE',
         ]);
         expect(version).toMatchObject({ADDRESS: '0001D3C99ABCDE', TYPE: 'HmIP-PDT'});
-        expect(await harness.backend.request('writeLog.list')).toEqual([]);
+        // task 48: the read is in the log too, as the console's
+        expect((await harness.backend.request('rpcLog.list')).at(-1)).toMatchObject({
+            method: 'getDeviceDescription',
+            origin: 'console',
+        });
 
         await harness.backend.request('rpc.call', 'HmIP-RF', 'setValue', ['0001D3C99ABCDE:3', 'STATE', true]);
-        expect((await harness.backend.request('writeLog.list')).at(-1)).toMatchObject({
+        expect((await harness.backend.request('rpcLog.list')).at(-1)).toMatchObject({
             method: 'setValue',
             ok: true,
+            origin: 'console',
         });
     });
 

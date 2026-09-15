@@ -502,7 +502,7 @@ describe.skipIf(!hasLayout)('the RPC log drawer', () => {
 
     it('never scrolls sideways, whatever is in it', async () => {
         const {panel, stores} = await openDrawer();
-        stores.writeLog.entries = [
+        stores.rpcLog.entries = [
             {
                 id: 1,
                 timestamp: Date.parse('2026-09-06T10:00:00Z'),
@@ -514,6 +514,7 @@ describe.skipIf(!hasLayout)('the RPC log drawer', () => {
                 ok: true,
                 result: '',
                 durationMs: 12,
+                origin: 'ui',
             },
         ];
 

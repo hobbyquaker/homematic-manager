@@ -2,7 +2,7 @@ import type {ParamsetWrite, Transport, WriteResult} from '@homematic-manager/cor
 import {toApiRequestError} from '../transport/error.js';
 
 import type {NoticesStore} from './NoticesStore.svelte.js';
-import type {WriteLogStore} from './WriteLogStore.svelte.js';
+import type {RpcLogStore} from './RpcLogStore.svelte.js';
 
 /** One line of a staged change, as the review dialog prints it. */
 export interface ChangeLine {
@@ -108,12 +108,12 @@ export class ChangeSetStore {
 
     readonly #transport: Transport;
     readonly #notices: NoticesStore;
-    readonly #writeLog: WriteLogStore;
+    readonly #rpcLog: RpcLogStore;
 
-    constructor(transport: Transport, notices: NoticesStore, writeLog: WriteLogStore) {
+    constructor(transport: Transport, notices: NoticesStore, rpcLog: RpcLogStore) {
         this.#transport = transport;
         this.#notices = notices;
-        this.#writeLog = writeLog;
+        this.#rpcLog = rpcLog;
     }
 
     get count(): number {
@@ -200,7 +200,7 @@ export class ChangeSetStore {
      */
     async cancel(): Promise<number> {
         this.#runToken += 1;
-        return this.#writeLog.cancel();
+        return this.#rpcLog.cancel();
     }
 
     async #applyOne(change: StagedChange): Promise<ChangeOutcome> {

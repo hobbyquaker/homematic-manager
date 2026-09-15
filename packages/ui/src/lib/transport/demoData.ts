@@ -26,7 +26,7 @@ import type {
     RssiInfo,
     ServiceMessage,
     UnreachCounter,
-    WriteLogEntry,
+    RpcLogEntry,
 } from '@homematic-manager/core';
 
 export const DEMO_INTERFACE_NAMES = ['BidCos-RF', 'HmIP-RF'] as const;
@@ -953,7 +953,7 @@ export const DEMO_EVENTS: EventRecord[] = [
     },
 ];
 
-export const DEMO_WRITE_LOG: WriteLogEntry[] = [
+export const DEMO_RPC_LOG: RpcLogEntry[] = [
     {
         id: 1,
         timestamp: Date.parse('2026-09-05T09:57:02Z'),
@@ -963,6 +963,7 @@ export const DEMO_WRITE_LOG: WriteLogEntry[] = [
         ok: true,
         result: '',
         durationMs: 184,
+        origin: 'ui',
     },
     {
         id: 2,
@@ -973,6 +974,7 @@ export const DEMO_WRITE_LOG: WriteLogEntry[] = [
         ok: false,
         error: 'Unknown parameter PROFILE_MODE',
         durationMs: 902,
+        origin: 'ui',
     },
 ];
 

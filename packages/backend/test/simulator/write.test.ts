@@ -221,7 +221,7 @@ describe.skipIf(!simulatorAvailable)('writing paramsets against hm-simulator', (
         });
         expect(result.bidcosRecovery).toBe('restoreConfigToDevice');
         expect(result.unrepairable).toEqual([]);
-        const log = await harness.backend.request('writeLog.list');
+        const log = await harness.backend.request('rpcLog.list');
         expect(log.map((entry) => entry.method)).toContain('restoreConfigToDevice');
         expect(sim.getConfigPending('rfd')).toEqual([]);
     });
@@ -296,14 +296,20 @@ describe.skipIf(!simulatorAvailable)('writing paramsets against hm-simulator', (
         expect(again[0]).toMatchObject({ok: true, skipped: true, sent: {}});
     });
 
-    it('logs every write and keeps the 2.x rpcLogFolder dump available', async () => {
+    it('logs every write, with the reads around it (task 48)', async () => {
         const {harness} = await connected();
         await harness.backend.request('paramset.put', 'HmIP-RF', [PDT], 'MASTER', {LOGGING: true});
         await harness.backend.request('value.set', 'HmIP-RF', PDT, 'STATE', true);
-        const log = await harness.backend.request('writeLog.list');
-        expect(log.map((entry) => entry.method)).toEqual(['putParamset', 'setValue']);
-        expect(log.every((entry) => entry.ok)).toBe(true);
-        expect(log[0]?.durationMs).toBeGreaterThanOrEqual(0);
+        const log = await harness.backend.request('rpcLog.list');
+        const writes = log.filter((entry) => ['putParamset', 'setValue'].includes(entry.method));
+        expect(writes.map((entry) => [entry.method, entry.origin])).toEqual([
+            ['putParamset', 'ui'],
+            ['setValue', 'ui'],
+        ]);
+        expect(writes.every((entry) => entry.ok)).toBe(true);
+        expect(writes[0]?.durationMs).toBeGreaterThanOrEqual(0);
+        // the connection's own calls are there too, as background work
+        expect(log.some((entry) => entry.method === 'init' && entry.origin === 'background')).toBe(true);
     });
 
     it('writes to a BidCos interface over binrpc', async () => {

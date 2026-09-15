@@ -89,8 +89,8 @@ import {RegaService, type RegaServiceOptions} from '../rega/client.js';
 import type {RpcCallRecord, RpcOutValue} from '../rpc/client.js';
 import {listDevicesAnswer, type CallbackHandler} from '../rpc/server.js';
 import {ApiEventEmitter} from '../util/emitter.js';
-import {WriteLog} from '../write/log.js';
-import {isWriteMethod} from '../write/log.js';
+import {RpcLog, isWriteMethod} from '../rpc/log.js';
+import {currentOrigin, runWithOrigin} from '../rpc/origin.js';
 import {ParamsetWriter} from '../write/paramset.js';
 import {ConfigRepair} from '../write/repair.js';
 import {WriteQueue} from '../write/queue.js';
@@ -167,7 +167,7 @@ export class Backend {
     readonly #options: BackendOptions;
     readonly #config: ConfigStore;
     readonly #queue: WriteQueue;
-    readonly #writeLog: WriteLog;
+    readonly #rpcLog: RpcLog;
     readonly #unknownMethodsSeen = new Set<string>();
     readonly #writer: ParamsetWriter;
     readonly #repair: ConfigRepair;
@@ -238,14 +238,14 @@ export class Backend {
         this.#queue = new WriteQueue({
             paceFor: (interfaceName) => writePaceFor(interfaceName, this.#config.connection.writePaceMs),
         });
-        this.#writeLog = new WriteLog({
+        this.#rpcLog = new RpcLog({
             file: config.cacheFile('write-log.json'),
             rpcLogFolder: config.connection.rpcLogFolder,
             onAppended: (entry) => {
-                this.events.emit('writeLog.appended', entry);
+                this.events.emit('rpcLog.appended', entry);
             },
             onError: (error) => {
-                this.#notice('warn', `write log: ${errorMessage(error)}`);
+                this.#notice('warn', `RPC log: ${errorMessage(error)}`);
             },
             ...(options.cacheWriteDelayMs === undefined ? {} : {writeDelayMs: options.cacheWriteDelayMs}),
         });
@@ -280,7 +280,7 @@ export class Backend {
         });
         await caches.load();
         const backend = new Backend(options, config, caches);
-        await backend.#writeLog.load();
+        await backend.#rpcLog.load();
         await backend.#linkTemplates.load();
         return backend;
     }
@@ -333,7 +333,7 @@ export class Backend {
         await this.#meta?.stop();
         this.#meta = undefined;
         await this.#caches.flush();
-        await this.#writeLog.flush();
+        await this.#rpcLog.flush();
         this.events.clear();
     }
 
@@ -357,7 +357,7 @@ export class Backend {
         }
         if (this.#sessions > 0) {
             if (previous === 0) {
-                void this.#resubscribe();
+                void runWithOrigin('background', () => this.#resubscribe());
             }
             return;
         }
@@ -367,7 +367,7 @@ export class Backend {
         }
         const timer = setTimeout(() => {
             this.#idleTimer = undefined;
-            void this.#unsubscribeIdle();
+            void runWithOrigin('background', () => this.#unsubscribeIdle());
         }, grace);
         if (typeof timer.unref === 'function') {
             timer.unref();
@@ -403,7 +403,9 @@ export class Backend {
      */
     async request<M extends ApiMethodName>(method: M, ...params: ApiParams<M>): Promise<ApiResult<M>> {
         try {
-            return await this.#dispatch(method, params);
+            // Task 48: everything a request awaits is a UI action for the RPC log; the console's
+            // own call is the console's. Whatever runs outside a request is background work.
+            return await runWithOrigin(method === 'rpc.call' ? 'console' : 'ui', () => this.#dispatch(method, params));
         } catch (error) {
             throw error instanceof BackendError ? error : internalError(errorMessage(error), error);
         }
@@ -610,10 +612,10 @@ export class Backend {
 
             case 'write.cancel':
                 return this.#queue.cancel(p[0]);
-            case 'writeLog.list':
-                return this.#writeLog.list(p[0]);
-            case 'writeLog.clear':
-                this.#writeLog.clear();
+            case 'rpcLog.list':
+                return this.#rpcLog.list(p[0]);
+            case 'rpcLog.clear':
+                this.#rpcLog.clear();
                 return null;
 
             case 'data.file':
@@ -640,7 +642,16 @@ export class Backend {
         return this.#manager;
     }
 
-    async #connect(): Promise<void> {
+    /**
+     * Task 48: the connection is background work even when a `config.set` from the settings dialog
+     * asks for it - the watchdog, the callback servers and the polling timers it creates would
+     * otherwise inherit that request's origin for the rest of the session.
+     */
+    #connect(): Promise<void> {
+        return runWithOrigin('background', () => this.#connectNow());
+    }
+
+    async #connectNow(): Promise<void> {
         const connection = this.#config.connection;
         this.#noServiceMessages.clear();
         this.#serviceMessageFailures.clear();
@@ -655,10 +666,12 @@ export class Backend {
             onNotice: (level, message, interfaceName) => {
                 this.#notice(level, message, interfaceName);
             },
-            onConnected: (interfaceName) => this.#onInterfaceConnected(interfaceName),
+            onConnected: (interfaceName) =>
+                runWithOrigin('background', () => this.#onInterfaceConnected(interfaceName)),
             onCall: (record) => {
                 this.#onCall(record);
             },
+            originOf: currentOrigin,
             ...(this.#options.callbackHost === undefined ? {} : {callbackHost: this.#options.callbackHost}),
             ...(this.#options.defaultCallbackPorts === undefined
                 ? {}
@@ -1015,7 +1028,7 @@ export class Backend {
      */
 
     #onCall(record: RpcCallRecord): void {
-        this.#writeLog.append(record);
+        this.#rpcLog.append(record);
     }
 
     /** A read: straight to the interface, never queued. */
@@ -1026,7 +1039,10 @@ export class Backend {
     /** A write: through the paced queue of that interface. */
     async #write(interfaceName: string, method: string, params: readonly RpcOutValue[]): Promise<RpcValue> {
         const client = this.#requireManager().client(interfaceName);
-        return this.#queue.enqueue(interfaceName, () => client.call(method, params));
+        // Task 48: the queue runs a task from the timer that drained it, which is the *previous*
+        // task's context; the origin is the one of whoever enqueued, so it is taken here.
+        const origin = currentOrigin();
+        return this.#queue.enqueue(interfaceName, () => client.call(method, params, {origin}));
     }
 
     /*
@@ -1066,7 +1082,7 @@ export class Backend {
                 : [];
         await this.#disconnect();
         const config = this.#withHostFacts(await this.#config.setConnection(connection));
-        this.#writeLog.setRpcLogFolder(config.connection.rpcLogFolder);
+        this.#rpcLog.setRpcLogFolder(config.connection.rpcLogFolder);
         if (config.connection.host !== previousHost) {
             await this.#caches.flush();
             this.#caches = new CacheStore({
@@ -1522,7 +1538,7 @@ export class Backend {
             return;
         }
         const timer = setInterval(() => {
-            void this.pollServiceMessages();
+            void runWithOrigin('background', () => this.pollServiceMessages());
         }, interval);
         if (typeof timer.unref === 'function') {
             timer.unref();
@@ -1552,7 +1568,7 @@ export class Backend {
         }
         const timer = setTimeout(() => {
             this.#hmipSweepTimer = undefined;
-            void this.sweepHmip();
+            void runWithOrigin('background', () => this.sweepHmip());
         }, this.#options.hmipSweepDelayMs ?? HMIP_SWEEP_DELAY_MS);
         if (typeof timer.unref === 'function') {
             timer.unref();
@@ -1892,8 +1908,8 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'rpc.call',
     'rpc.methods',
     'write.cancel',
-    'writeLog.list',
-    'writeLog.clear',
+    'rpcLog.list',
+    'rpcLog.clear',
     'data.file',
     'session.info',
 ] satisfies readonly (keyof ApiMethods)[];

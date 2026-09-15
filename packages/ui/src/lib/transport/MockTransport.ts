@@ -30,7 +30,7 @@ import {
     DEMO_RSSI,
     DEMO_SERVICE_MESSAGES,
     DEMO_UNREACH,
-    DEMO_WRITE_LOG,
+    DEMO_RPC_LOG,
     demoDescription,
     demoParamset,
     isDemoInterface,
@@ -257,8 +257,8 @@ export class MockTransport implements Transport {
                 : DEMO_EVENTS.filter((event) => event.interfaceName === interfaceName),
         );
         this.result('events.clear', null);
-        this.result('writeLog.list', DEMO_WRITE_LOG);
-        this.result('writeLog.clear', null);
+        this.result('rpcLog.list', DEMO_RPC_LOG);
+        this.result('rpcLog.clear', null);
         this.result('rpc.methods', DEMO_RPC_METHODS);
         this.respond('rpc.call', (_interfaceName, method, params) => ({method, params}));
         this.respond('paramset.description', (_interfaceName, address, paramset) => demoDescription(address, paramset));

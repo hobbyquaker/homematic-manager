@@ -94,7 +94,7 @@
 
     {#if set.applying}
         <RpcProgress
-            progress={stores.writeLog.progress ?? {done: set.applied, total}}
+            progress={stores.rpcLog.progress ?? {done: set.applied, total}}
             cancelLabel={t('Cancel')}
             oncancel={() => void set.cancel()}
         />

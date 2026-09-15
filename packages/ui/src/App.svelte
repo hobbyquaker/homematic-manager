@@ -349,8 +349,8 @@
 
     <RpcLogPanel
         bind:open={app.rpcLogOpen}
-        entries={stores.writeLog.newestFirst}
-        pending={stores.writeLog.pending}
+        entries={stores.rpcLog.newestFirst}
+        pending={stores.rpcLog.pending}
         title={t('RPC log')}
         emptyText={t('No RPC calls yet')}
         pendingText={t('in progress')}
@@ -358,7 +358,7 @@
         closeLabel={t('Close')}
         resizeLabel={t('Resize the RPC log')}
         testId="rpclog"
-        onclear={() => void stores.writeLog.clear()}
+        onclear={() => void stores.rpcLog.clear()}
     />
 
     <Notices
@@ -371,11 +371,11 @@
     />
 
     <RpcProgress
-        progress={stores.writeLog.progress}
+        progress={stores.rpcLog.progress}
         title={t('RPC execution')}
         cancelLabel={t('Cancel')}
         testId="rpc-progress"
-        oncancel={() => void stores.writeLog.cancel()}
+        oncancel={() => void stores.rpcLog.cancel()}
     />
     <ConfigDialog bind:open={app.configDialogOpen} />
     <ChangeSetDialog bind:open={changeSetOpen} />

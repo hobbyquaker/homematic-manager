@@ -1,4 +1,4 @@
-import type {ApiEvents, RpcValue, Transport, WriteLogEntry} from '@homematic-manager/core';
+import type {ApiEvents, RpcValue, Transport, RpcLogEntry} from '@homematic-manager/core';
 
 import type {NoticesStore} from './NoticesStore.svelte.js';
 
@@ -12,7 +12,7 @@ export interface PendingWrite {
     readonly startedAt: number;
 }
 
-export interface WriteLogStoreOptions {
+export interface RpcLogStoreOptions {
     /** How many finished entries are kept in the drawer. */
     readonly max?: number;
     readonly now?: () => number;
@@ -27,8 +27,8 @@ export interface WriteLogStoreOptions {
  * - method, parameters, result or fault, duration - now goes into a drawer that can stay open, and
  * a bulk write reports through `write.progress` instead of a stack of modals.
  */
-export class WriteLogStore {
-    entries = $state<WriteLogEntry[]>([]);
+export class RpcLogStore {
+    entries = $state<RpcLogEntry[]>([]);
     pending = $state<PendingWrite[]>([]);
     /** Progress of the running bulk write, or `undefined` when none is running. */
     progress = $state<ApiEvents['write.progress'] | undefined>(undefined);
@@ -40,13 +40,13 @@ export class WriteLogStore {
     readonly #unsubscribe: Array<() => void> = [];
     #nextPendingId = 1;
 
-    constructor(transport: Transport, notices: NoticesStore, options: WriteLogStoreOptions = {}) {
+    constructor(transport: Transport, notices: NoticesStore, options: RpcLogStoreOptions = {}) {
         this.#transport = transport;
         this.#notices = notices;
         this.#max = options.max ?? 200;
         this.#now = options.now ?? (() => Date.now());
         this.#unsubscribe.push(
-            transport.on('writeLog.appended', (entry) => {
+            transport.on('rpcLog.appended', (entry) => {
                 this.append(entry);
             }),
             transport.on('write.progress', (progress) => {
@@ -61,11 +61,11 @@ export class WriteLogStore {
     }
 
     /** The finished entries, newest first. */
-    get newestFirst(): WriteLogEntry[] {
+    get newestFirst(): RpcLogEntry[] {
         return [...this.entries].reverse();
     }
 
-    append(entry: WriteLogEntry): void {
+    append(entry: RpcLogEntry): void {
         const entries = [...this.entries, entry];
         this.entries = entries.length > this.#max ? entries.slice(entries.length - this.#max) : entries;
     }
@@ -87,9 +87,9 @@ export class WriteLogStore {
 
     async load(limit?: number): Promise<void> {
         try {
-            this.entries = await this.#transport.request('writeLog.list', limit);
+            this.entries = await this.#transport.request('rpcLog.list', limit);
         } catch (error) {
-            this.#notices.fromError(error, 'writeLog.list');
+            this.#notices.fromError(error, 'rpcLog.list');
         }
     }
 
@@ -110,9 +110,9 @@ export class WriteLogStore {
     async clear(): Promise<void> {
         this.entries = [];
         try {
-            await this.#transport.request('writeLog.clear');
+            await this.#transport.request('rpcLog.clear');
         } catch (error) {
-            this.#notices.fromError(error, 'writeLog.clear');
+            this.#notices.fromError(error, 'rpcLog.clear');
         }
     }
 

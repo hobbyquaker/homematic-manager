@@ -495,7 +495,24 @@ export interface RepairConfigResult {
     bidcosRecovery?: 'clearConfigCache' | 'restoreConfigToDevice';
 }
 
-export interface WriteLogEntry {
+/**
+ * Task 48: who asked for an RPC call. `console` is the RPC console, `ui` any other action of a
+ * user session (a tab's refresh, a paramset write, pairing), `background` the backend on its own
+ * - `init` and de-init, the keep-alive `ping`, the polls and sweeps after an event or a connect.
+ */
+export type RpcOrigin = 'console' | 'ui' | 'background';
+
+export const RPC_ORIGINS: readonly RpcOrigin[] = Object.freeze(['console', 'ui', 'background']);
+
+/**
+ * One outgoing RPC call, as the RPC log keeps it (task 48: every call, not only the writes).
+ *
+ * The parameters are what went on the wire, verbatim - a `putParamset` in `CONFIG_PENDING` is
+ * traced from them - except the keys of `changeKey`, `setTempKey` and a whitelist, which are
+ * logged as `***`. A result over the log's size cap is kept as a preview string and `resultBytes`
+ * says how big the whole answer was.
+ */
+export interface RpcLogEntry {
     id: number;
     timestamp: number;
     interfaceName: string;
@@ -503,8 +520,11 @@ export interface WriteLogEntry {
     params: RpcValue[];
     ok: boolean;
     result?: RpcValue;
+    /** Set when `result` is a preview of an answer too big for the log: the size of the whole answer, in bytes. */
+    resultBytes?: number;
     error?: string;
     durationMs: number;
+    origin: RpcOrigin;
 }
 
 export interface InstallModeOptions {
@@ -786,8 +806,9 @@ export interface ApiMethods {
      */
     'write.cancel': {params: [interfaceName?: string]; result: number};
 
-    'writeLog.list': {params: [limit?: number]; result: WriteLogEntry[]};
-    'writeLog.clear': {params: []; result: null};
+    /** Task 48: the RPC log - every outgoing call of the session, oldest first, the newest `limit` of them. */
+    'rpcLog.list': {params: [limit?: number]; result: RpcLogEntry[]};
+    'rpcLog.clear': {params: []; result: null};
 
     'data.file': {params: [path: string]; result: unknown};
 
@@ -819,7 +840,8 @@ export interface ApiEvents {
     'meta.objects.changed': Record<string, MetaObjectView>;
     'rpc.event': EventRecord;
     'serviceMessages.changed': ServiceMessage[];
-    'writeLog.appended': WriteLogEntry;
+    /** Task 48: one more outgoing call is finished and in the log. */
+    'rpcLog.appended': RpcLogEntry;
     /** Progress of a bulk write: done of total, last result. */
     'write.progress': {done: number; total: number; last?: WriteResult};
     /** Issue #26: a device went unreachable, or a counter was reset. */
@@ -877,7 +899,7 @@ const API_EVENT_FLAGS = {
     'meta.objects.changed': true,
     'rpc.event': true,
     'serviceMessages.changed': true,
-    'writeLog.appended': true,
+    'rpcLog.appended': true,
     'write.progress': true,
     'unreach.changed': true,
     'config.changed': true,

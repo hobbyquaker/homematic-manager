@@ -130,6 +130,26 @@ describe('RpcClient', () => {
         expect(records[0]?.durationMs).toBeGreaterThanOrEqual(0);
         expect(records[1]).toMatchObject({method: 'boom', ok: false});
         expect(records[1]?.error).toContain('nope');
+        // task 48: a client without a resolver is on its own, so its calls are background work
+        expect(records.map((record) => record.origin)).toEqual(['background', 'background']);
+    });
+
+    it('records the origin the resolver answers, or the one the call names (task 48)', async () => {
+        const records: RpcCallRecord[] = [];
+        let context: 'ui' | 'background' = 'ui';
+        const {rpc} = client(() => ({value: ''}), {
+            onCall: (record) => records.push(record),
+            originOf: () => context,
+        });
+        await rpc.call('listDevices');
+        context = 'background';
+        await rpc.call('ping', ['hmm']);
+        await rpc.call('getVersion', [], {origin: 'console'});
+        expect(records.map((record) => [record.method, record.origin])).toEqual([
+            ['listDevices', 'ui'],
+            ['ping', 'background'],
+            ['getVersion', 'console'],
+        ]);
     });
 
     it('closes the transport and refuses further calls', async () => {

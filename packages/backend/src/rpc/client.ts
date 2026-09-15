@@ -29,7 +29,7 @@
 import binrpc from 'binrpc';
 import xmlrpc from 'homematic-xmlrpc';
 
-import type {ExplicitDouble, RpcProtocol, RpcValue} from '@homematic-manager/core';
+import type {ExplicitDouble, RpcOrigin, RpcProtocol, RpcValue} from '@homematic-manager/core';
 
 import {BackendError, connectionError, isRpcFault, rpcFaultError} from '../errors.js';
 import {withTimeout} from '../util/net.js';
@@ -41,7 +41,7 @@ import {withTimeout} from '../util/net.js';
  */
 export type RpcOutValue = boolean | number | string | ExplicitDouble | RpcOutValue[] | {[key: string]: RpcOutValue};
 
-/** What the write log and the RPC console record for one call. */
+/** What the RPC log records for one call - every call, task 48. */
 export interface RpcCallRecord {
     readonly interfaceName: string;
     readonly method: string;
@@ -52,6 +52,14 @@ export interface RpcCallRecord {
     readonly durationMs: number;
     /** Milliseconds since epoch. */
     readonly timestamp: number;
+    /** Who asked: the console, a UI action, or the backend on its own. */
+    readonly origin: RpcOrigin;
+}
+
+/** Per-call options of {@link RpcClient.call}. */
+export interface RpcCallOptions {
+    /** The origin of this call, when the caller knows it better than the client's resolver does. */
+    readonly origin?: RpcOrigin;
 }
 
 /** Anything that answers `methodCall`; the tests pass a fake instead of a socket. */
@@ -80,8 +88,13 @@ export interface RpcClientOptions {
     readonly encoding?: string;
     /** A CCU's TLS certificate is self-signed, so this is false by default. */
     readonly rejectUnauthorized?: boolean;
-    /** Called for every finished call - the write log and the console history hang off it. */
+    /** Called for every finished call - the RPC log hangs off it. */
     readonly onCall?: (record: RpcCallRecord) => void;
+    /**
+     * The origin of a call that names none: the backend answers from its request context (task
+     * 48). Without a resolver every call is `background`, which is right for a client on its own.
+     */
+    readonly originOf?: () => RpcOrigin;
     /** Injected by the tests in place of the real libraries. */
     readonly createTransport?: (options: RpcClientOptions) => RpcTransport;
 }
@@ -174,6 +187,7 @@ export class RpcClient {
     readonly #transport: RpcTransport;
     readonly #timeoutMs: number;
     readonly #onCall: (record: RpcCallRecord) => void;
+    readonly #originOf: () => RpcOrigin;
     #closed = false;
 
     constructor(options: RpcClientOptions) {
@@ -183,6 +197,7 @@ export class RpcClient {
         this.protocol = options.protocol;
         this.#timeoutMs = options.timeoutMs ?? DEFAULT_RPC_TIMEOUT_MS;
         this.#onCall = options.onCall ?? (() => undefined);
+        this.#originOf = options.originOf ?? (() => 'background');
         this.#transport = (options.createTransport ?? createTransport)(options);
     }
 
@@ -193,22 +208,25 @@ export class RpcClient {
 
     /**
      * Calls a method. Rejects with a `BackendError`: `kind: 'rpc'` for a fault the interface
-     * answered, `kind: 'connection'` for a timeout or a socket problem.
+     * answered, `kind: 'connection'` for a timeout or a socket problem. Every call, however it
+     * ends, is reported through `onCall` with its origin - the one given here, or the resolver's.
      */
-    async call(method: string, params: readonly RpcOutValue[] = []): Promise<RpcValue> {
+    async call(method: string, params: readonly RpcOutValue[] = [], options: RpcCallOptions = {}): Promise<RpcValue> {
         if (this.#closed) {
             throw connectionError(`${this.description}: the client is closed`);
         }
+        // resolved before the first await: the context that asked is the one that counts
+        const origin = options.origin ?? this.#originOf();
         const started = Date.now();
         try {
             const result = await withTimeout(this.#invoke(method, [...params]), this.#timeoutMs, () =>
                 connectionError(`${this.description}: ${method} timed out after ${String(this.#timeoutMs)} ms`),
             );
-            this.#record(method, params, started, {ok: true, result});
+            this.#record(method, params, started, origin, {ok: true, result});
             return result;
         } catch (error) {
             const failure = this.#asBackendError(method, error);
-            this.#record(method, params, started, {ok: false, error: failure.message});
+            this.#record(method, params, started, origin, {ok: false, error: failure.message});
             throw failure;
         }
     }
@@ -260,6 +278,7 @@ export class RpcClient {
         method: string,
         params: readonly RpcOutValue[],
         started: number,
+        origin: RpcOrigin,
         outcome: {ok: boolean; result?: RpcValue; error?: string},
     ): void {
         this.#onCall({
@@ -271,6 +290,7 @@ export class RpcClient {
             ...(outcome.error === undefined ? {} : {error: outcome.error}),
             durationMs: Date.now() - started,
             timestamp: started,
+            origin,
         });
     }
 }

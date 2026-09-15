@@ -9,7 +9,13 @@ import type {ApiEventName, AppConfig, DeviceDescription, RpcValue} from '@homema
 import {BackendError, connectionError, rpcFaultError} from '../errors.js';
 import {InterfaceManager, type InterfaceManagerOptions} from '../interfaces/manager.js';
 import {META_READ_SCRIPT} from '../rega/scripts.js';
-import type {RpcClient, RpcClientOptions, RpcOutValue} from '../rpc/client.js';
+import {
+    RpcClient,
+    type RpcCallOptions,
+    type RpcClientOptions,
+    type RpcOutValue,
+    type RpcTransport,
+} from '../rpc/client.js';
 import type {CallbackHandler, CallbackServerSet} from '../rpc/server.js';
 import {Backend, type BackendOptions} from './backend.js';
 import {InProcessTransport} from './transport.js';
@@ -30,6 +36,8 @@ type Answer = (method: string, params: readonly RpcOutValue[]) => RpcValue | Err
 interface Harness {
     backend: Backend;
     calls: {interfaceName: string; method: string; params: readonly RpcOutValue[]}[];
+    /** Task 48: what went through the transports when the harness runs the real `RpcClient`. */
+    transportCalls: {interfaceName: string; method: string}[];
     handler: CallbackHandler;
     events: {name: ApiEventName; payload: unknown}[];
     dir: string;
@@ -85,9 +93,12 @@ async function harness(
         regaChannels?: {id: number; address: string; name: string}[];
         /** What the rooms-and-functions script answers instead of the document built from the channels. */
         regaMeta?: string;
+        /** Task 48: the real `RpcClient` over a fake transport, so the log is fed by the real hook. */
+        realClient?: boolean;
     } = {},
 ): Promise<Harness> {
     const calls: Harness['calls'] = [];
+    const transportCalls: Harness['transportCalls'] = [];
     const events: Harness['events'] = [];
     let handler: CallbackHandler | undefined;
     const answers = {...defaultAnswers, ...options.answers};
@@ -99,7 +110,7 @@ async function harness(
         stop: () => Promise.resolve(),
     };
 
-    const createClient = (clientOptions: RpcClientOptions): RpcClient =>
+    const fakeClient = (clientOptions: RpcClientOptions): RpcClient =>
         ({
             name: clientOptions.name,
             host: clientOptions.host,
@@ -107,16 +118,17 @@ async function harness(
             protocol: clientOptions.protocol,
             closed: false,
             description: clientOptions.name,
-            call: (method: string, params: readonly RpcOutValue[] = []) => {
+            call: (method: string, params: readonly RpcOutValue[] = [], callOptions: RpcCallOptions = {}) => {
                 calls.push({interfaceName: clientOptions.name, method, params});
                 const answer = (answers[clientOptions.name] ?? (() => ''))(method, params);
-                // the real client reports every finished call; the write log hangs off that hook
+                // the real client reports every finished call; the RPC log hangs off that hook
                 const record = {
                     interfaceName: clientOptions.name,
                     method,
                     params: [...params],
                     durationMs: 0,
                     timestamp: Date.now(),
+                    origin: callOptions.origin ?? clientOptions.originOf?.() ?? ('background' as const),
                 };
                 if (answer instanceof Error) {
                     clientOptions.onCall?.({...record, ok: false, error: answer.message});
@@ -127,6 +139,27 @@ async function harness(
             },
             close: () => undefined,
         }) as unknown as RpcClient;
+
+    /** Task 48: the real client, with the socket replaced by the answer table. */
+    const realClient = (clientOptions: RpcClientOptions): RpcClient =>
+        new RpcClient({
+            ...clientOptions,
+            createTransport: (): RpcTransport => ({
+                methodCall: (method, params, callback) => {
+                    transportCalls.push({interfaceName: clientOptions.name, method});
+                    calls.push({interfaceName: clientOptions.name, method, params});
+                    const answer = (answers[clientOptions.name] ?? (() => ''))(method, params);
+                    setTimeout(() => {
+                        if (answer instanceof Error) {
+                            callback(answer);
+                        } else {
+                            callback(null, answer);
+                        }
+                    }, 0);
+                },
+            }),
+        });
+    const createClient = options.realClient === true ? realClient : fakeClient;
 
     const rega = {
         getChannels: vi.fn(() =>
@@ -184,7 +217,7 @@ async function harness(
         'names.changed',
         'rpc.event',
         'serviceMessages.changed',
-        'writeLog.appended',
+        'rpcLog.appended',
         'write.progress',
         'unreach.changed',
         'config.changed',
@@ -201,7 +234,7 @@ async function harness(
         ...options.connection,
     } as never);
 
-    return {backend, calls, handler: handler as CallbackHandler, events, dir, rega};
+    return {backend, calls, transportCalls, handler: handler as CallbackHandler, events, dir, rega};
 }
 
 describe('smoke detector teams (#97)', () => {
@@ -569,8 +602,8 @@ describe('unreach counters and the auto-acknowledge (#26)', () => {
                     ),
                 ).toBe(true);
             });
-            // the failure is in the write log as well, which is what the RPC log drawer shows
-            const log = await h.backend.request('writeLog.list');
+            // the failure is in the RPC log as well, which is what the RPC log drawer shows
+            const log = await h.backend.request('rpcLog.list');
             expect(
                 log
                     .filter((entry) => entry.method === 'setValue')
@@ -1210,12 +1243,12 @@ describe('paramsets, values and links', () => {
         const h = await harness();
         const results = await h.backend.request('paramset.put', 'HmIP-RF', ['ABC1:1'], 'MASTER', {LOGGING: true});
         expect(results[0]?.sent).toEqual({LOGGING: true});
-        const log = await h.backend.request('writeLog.list');
-        expect(log.at(-1)).toMatchObject({method: 'putParamset', ok: true});
-        expect(h.events.some((event) => event.name === 'writeLog.appended')).toBe(true);
+        const log = await h.backend.request('rpcLog.list');
+        expect(log.at(-1)).toMatchObject({method: 'putParamset', ok: true, origin: 'ui'});
+        expect(h.events.some((event) => event.name === 'rpcLog.appended')).toBe(true);
         expect(h.events.some((event) => event.name === 'write.progress')).toBe(true);
-        expect(await h.backend.request('writeLog.clear')).toBeNull();
-        expect(await h.backend.request('writeLog.list')).toEqual([]);
+        expect(await h.backend.request('rpcLog.clear')).toBeNull();
+        expect(await h.backend.request('rpcLog.list')).toEqual([]);
         await h.backend.stop();
     });
 
@@ -1761,12 +1794,15 @@ describe('the service-message poll and methods an interface does not have (B-26,
 });
 
 describe('the console and data files', () => {
-    it('sends a read straight through and a write through the log', async () => {
+    it('sends a read straight through and a write through the queue, both into the log', async () => {
         const h = await harness();
         await h.backend.request('rpc.call', 'HmIP-RF', 'getVersion', []);
-        expect(await h.backend.request('writeLog.list')).toEqual([]);
+        expect((await h.backend.request('rpcLog.list')).at(-1)).toMatchObject({
+            method: 'getVersion',
+            origin: 'console',
+        });
         await h.backend.request('rpc.call', 'HmIP-RF', 'setValue', ['ABC1:1', 'STATE', true]);
-        expect((await h.backend.request('writeLog.list')).at(-1)?.method).toBe('setValue');
+        expect((await h.backend.request('rpcLog.list')).at(-1)).toMatchObject({method: 'setValue', origin: 'console'});
         await h.backend.stop();
     });
 
@@ -1815,6 +1851,95 @@ describe('the console and data files', () => {
         expect(await h.backend.request('data.file', 'data/manifest.json')).toEqual({version: 1});
         await expect(h.backend.request('data.file', 'etc/passwd')).rejects.toThrow('readable roots');
         await h.backend.stop();
+    });
+});
+
+describe('the RPC log (task 48)', () => {
+    const entriesOf = async (h: Harness, method: string) =>
+        (await h.backend.request('rpcLog.list')).filter((entry) => entry.method === method);
+
+    it('logs the connection as background work although a config.set asked for it', async () => {
+        const h = await harness();
+        // the harness connects through `config.set`, a UI request: the init, the listDevices
+        // sweep and the service messages after it belong to the backend, not to that request
+        const log = await h.backend.request('rpcLog.list');
+        expect(log.length).toBeGreaterThan(0);
+        expect(log.map((entry) => entry.method)).toEqual(expect.arrayContaining(['init', 'listDevices']));
+        expect(new Set(log.map((entry) => entry.origin))).toEqual(new Set(['background']));
+        expect(log.find((entry) => entry.method === 'init')?.params).toEqual([
+            'http://192.168.1.5:2042',
+            'hmm_HmIP-RF',
+        ]);
+        await h.backend.stop();
+    });
+
+    it('tells a UI action, the console and the background apart', async () => {
+        const h = await harness();
+        await h.backend.request('devices.list', 'HmIP-RF', {refresh: true});
+        expect((await entriesOf(h, 'listDevices')).at(-1)?.origin).toBe('ui');
+        await h.backend.request('rpc.call', 'HmIP-RF', 'getVersion', []);
+        expect((await entriesOf(h, 'getVersion')).at(-1)?.origin).toBe('console');
+        await h.backend.request('value.set', 'HmIP-RF', 'ABC1:1', 'LOGGING', true);
+        expect((await entriesOf(h, 'setValue')).at(-1)?.origin).toBe('ui');
+        await h.backend.pollServiceMessages();
+        expect((await entriesOf(h, 'getServiceMessages')).at(-1)?.origin).toBe('background');
+        await h.backend.stop();
+    });
+
+    it('logs the idle unsubscribe and the resubscribe as background (D-31)', async () => {
+        vi.useFakeTimers();
+        try {
+            const h = await harness({backend: {idleUnsubscribeMs: 60_000}});
+            h.backend.noteSessions(1);
+            h.backend.noteSessions(0);
+            await vi.advanceTimersByTimeAsync(60_000);
+            const deinit = (await entriesOf(h, 'init')).filter((entry) => entry.params[1] === '');
+            expect(deinit.length).toBeGreaterThan(0);
+            expect(deinit.every((entry) => entry.origin === 'background')).toBe(true);
+            h.backend.noteSessions(1);
+            await vi.advanceTimersByTimeAsync(10);
+            const again = (await entriesOf(h, 'init')).filter((entry) => entry.params[1] !== '');
+            expect(again.length).toBeGreaterThan(1);
+            expect(again.every((entry) => entry.origin === 'background')).toBe(true);
+            await h.backend.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('logs a queued write with the origin of whoever enqueued it', async () => {
+        const h = await harness({connection: {writePaceMs: 5}});
+        // a console write first, so the UI write below runs from the queue's timer - in the
+        // draining context of the console's, which is not where it came from
+        const console_ = h.backend.request('rpc.call', 'HmIP-RF', 'setValue', ['ABC1:1', 'LOGGING', true]);
+        const ui = h.backend.request('value.set', 'HmIP-RF', 'ABC1:1', 'LOGGING', false);
+        await Promise.all([console_, ui]);
+        const writes = (await h.backend.request('rpcLog.list')).filter((entry) => entry.method === 'setValue');
+        expect(writes.map((entry) => [entry.params[2], entry.origin])).toEqual([
+            [true, 'console'],
+            [false, 'ui'],
+        ]);
+        await h.backend.stop();
+    });
+
+    it('records every call that reaches a transport - nothing bypasses the logging layer', async () => {
+        const h = await harness({realClient: true});
+        await h.backend.request('devices.list', 'HmIP-RF', {refresh: true});
+        await h.backend.request('rpc.call', 'HmIP-RF', 'getVersion', []);
+        await h.backend.request('value.set', 'HmIP-RF', 'ABC1:1', 'LOGGING', true);
+        await h.backend.request('paramset.get', 'HmIP-RF', 'ABC1:1', 'MASTER');
+        await h.backend.request('serviceMessages.refresh', 'BidCos-RF');
+        await h.backend.request('rpc.call', 'HmIP-RF', 'noSuchMethod', []).catch(() => undefined);
+        await h.backend.pollServiceMessages();
+        await h.backend.sweepHmip();
+        await h.backend.stop();
+        // `stop()` de-registers with `init('')`; that is on the wire and therefore in the log
+        const log = await h.backend.request('rpcLog.list');
+        expect(h.transportCalls.length).toBeGreaterThan(10);
+        expect(log.map((entry) => `${entry.interfaceName} ${entry.method}`).sort()).toEqual(
+            h.transportCalls.map((call) => `${call.interfaceName} ${call.method}`).sort(),
+        );
+        expect(log.every((entry) => ['console', 'ui', 'background'].includes(entry.origin))).toBe(true);
     });
 });
 

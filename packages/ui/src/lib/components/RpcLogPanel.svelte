@@ -1,7 +1,7 @@
 <script lang="ts">
-    import type {WriteLogEntry} from '@homematic-manager/core';
+    import type {RpcLogEntry} from '@homematic-manager/core';
 
-    import type {PendingWrite} from '../stores/WriteLogStore.svelte.js';
+    import type {PendingWrite} from '../stores/RpcLogStore.svelte.js';
     import {formatDuration, formatParams, formatRpcValue, formatTime} from '../util/format.js';
     import {
         PANEL_MIN_HEIGHT,
@@ -14,7 +14,7 @@
 
     interface Props {
         open?: boolean;
-        entries: WriteLogEntry[];
+        entries: RpcLogEntry[];
         pending?: PendingWrite[];
         title?: string;
         emptyText?: string;

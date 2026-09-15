@@ -427,4 +427,44 @@ describe('ReGa as the store (task 27)', () => {
         expect(rega.scripts.at(-1)).toBe('dom.GetObject(10).Remove(1);\n');
         expect(meta.objects()['BidCos-RF.ABC0000001:1']?.rooms).toEqual([]);
     });
+
+    /**
+     * Task 49: a device row on a CCU. ReGa files channels, so a device holds no path of its own, and
+     * a device's membership list is applied to each of its channels as their complete list - an
+     * assign that sent the device's (empty) list plus the room took the channels out of every other
+     * room and function, and a removal through the device removed nothing.
+     */
+    it('assigns a device row on ReGa through its channels, and touches no other membership', async () => {
+        const box = fakeBox({status: 404});
+        const rega = fakeRega(
+            true,
+            JSON.stringify({
+                objects: [
+                    {id: 1, address: 'ABC0000001', interface: 'BidCos-RF', name: 'Dimmer'},
+                    {id: 2, address: 'ABC0000001:0', interface: 'BidCos-RF', name: 'Dimmer:0'},
+                    {id: 3, address: 'ABC0000001:1', interface: 'BidCos-RF', name: 'Dimmer:1'},
+                    {id: 4, address: 'ABC0000001:2', interface: 'BidCos-RF', name: 'Dimmer:2'},
+                ],
+                rooms: [
+                    {id: 10, name: 'Erdgeschoss', channels: [3]},
+                    {id: 11, name: 'Bad', channels: [3]},
+                ],
+                functions: [{id: 20, name: 'Licht', channels: [3, 4]}],
+            }),
+        );
+        const meta = await service({metaUrl: 'http://ccu', rega: true}, box.fetch, undefined, rega);
+        await meta.start();
+
+        await meta.assign(['BidCos-RF.ABC0000001'], 'room/r11', true);
+        // the channel already in Bad is left alone, Erdgeschoss and Licht stay, :0 is not filed
+        expect(rega.scripts.at(-1)).toBe('dom.GetObject(11).Add(4);\n');
+        expect(meta.objects()['BidCos-RF.ABC0000001:1']?.enums).toEqual(['room/r10', 'room/r11', 'function/r20']);
+        expect(meta.objects()['BidCos-RF.ABC0000001:2']?.enums).toEqual(['room/r11', 'function/r20']);
+        expect(meta.objects()['BidCos-RF.ABC0000001:0']?.enums).toEqual([]);
+
+        await meta.assign(['BidCos-RF.ABC0000001'], 'room/r10', false);
+        expect(rega.scripts.at(-1)).toBe('dom.GetObject(10).Remove(3);\n');
+        expect(meta.objects()['BidCos-RF.ABC0000001:1']?.enums).toEqual(['room/r11', 'function/r20']);
+        expect(meta.objects()['BidCos-RF.ABC0000001:2']?.enums).toEqual(['room/r11', 'function/r20']);
+    });
 });

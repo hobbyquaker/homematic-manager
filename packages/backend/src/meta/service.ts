@@ -309,7 +309,7 @@ export class MetaService {
     async assign(refs: readonly string[], nodePath: string, on: boolean): Promise<void> {
         const document = this.#provider.document();
         const entries: MetaMembershipEntry[] = [];
-        for (const ref of refs) {
+        for (const ref of this.#provider.kind === 'rega' ? channelsOfDevices(refs, document) : refs) {
             const object = document.objects[ref];
             const current = object?.enums ?? [];
             const has = current.includes(nodePath);
@@ -473,6 +473,30 @@ export class MetaService {
 }
 
 /** The ids already taken among the siblings a new node would join. */
+/**
+ * The refs an assignment on ReGa works on: a device is replaced by its channels, `:0` aside.
+ *
+ * ReGa files channels, so a device holds no path of its own, and the ReGa provider applies a
+ * device's membership list to each of its channels as their complete list. Handing it the device's
+ * empty list plus the one room took the channels out of every other room and function, and a
+ * removal through the device removed nothing (task 49). Channel by channel, each keeps its own list
+ * and only the one path changes. A device the document knows no channels of stays as it is.
+ */
+function channelsOfDevices(refs: readonly string[], document: MetaDocument): string[] {
+    const result = new Set<string>();
+    for (const ref of refs) {
+        const parsed = parseRef(ref);
+        const channels =
+            parsed === undefined || parsed.address.includes(':')
+                ? []
+                : Object.keys(document.objects).filter((key) => key.startsWith(`${ref}:`) && !key.endsWith(':0'));
+        for (const entry of channels.length === 0 ? [ref] : channels) {
+            result.add(entry);
+        }
+    }
+    return [...result];
+}
+
 function siblingIds(definition: MetaEnum, parent: string | null | undefined, enumId: string): string[] {
     if (parent === null || parent === undefined || parent === enumId) {
         return definition.tree.map((node) => node.id);

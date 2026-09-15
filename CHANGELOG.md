@@ -50,6 +50,20 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Changed
 
+- **_Assign to room_ and _Assign to function_ are a list of checkboxes** instead of "Add to" / "Remove from" and a
+  small list to pick one room from. The dialog is as tall as its rooms need, up to the window, so every room is seen at
+  once; only in a window too short for all of them does the list scroll, and the buttons stay in view. (task 49)
+  - **A checkbox per room:** checked when the selected row is in it. For several rows, a room that holds only some of
+    them shows a dash; a click puts all of them in, the next takes all out, a third leaves it as it was. A device row
+    counts as in a room when all its channels are (the `:0` channel aside).
+  - **Apply writes only what was changed.** If the store refuses a room, the dialog stays open, marks that room with
+    the reason, and Apply tries just that one again.
+  - **With more than ten rooms** a filter field is shown (`kuche` finds _Küche_; Enter there jumps to the list and saves
+    nothing). **New room…** makes a room and checks it; it is assigned with Apply.
+  - **Keys:** Space toggles, Enter on a checkbox saves, Escape cancels.
+  - **On a CCU** (rooms and functions from ReGa), assigning a device row to a room took its channels out of every other
+    room and function, and taking a device row out of a room did nothing. Now only that one room changes, channel by
+    channel.
 - **CCU addon on openccu-lite: the addon's settings page and `service.cgi` are for administrators.** Any account signed
   in to the box could open `settings.cgi?cmd=config`, switch the addon's login mode (which restarts it) and start,
   stop or restart the service through `service.cgi`. On openccu-lite both now want a session the box names as `admin`:

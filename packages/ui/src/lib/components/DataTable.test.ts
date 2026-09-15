@@ -453,6 +453,54 @@ describe('rename on the name cell (task 46)', () => {
 });
 
 /**
+ * Task 47: Enter and Space are what presses a button. The grid moves its row selection on the same
+ * keys, and took them from a button in a cell - the copy button, a paramset button - as well: Space
+ * toggled the row and cancelled the button, Enter opened the row's dialog on a grid with `onactivate`.
+ */
+describe('keys from a control inside the grid (task 47)', () => {
+    it('leaves Enter and Space to a button in a cell: it is pressed, the row is neither activated nor toggled', async () => {
+        const pressed = vi.fn();
+        const onactivate = vi.fn();
+        const onrename = vi.fn();
+        const cell = createRawSnippet((row: () => Row, column: () => DataTableColumn<Row>) => ({
+            render: () =>
+                column().key === 'type'
+                    ? '<span><button type="button">go</button></span>'
+                    : `<span>${cellText(row(), column())}</span>`,
+            setup: (element: Element) => {
+                element.querySelector('button')?.addEventListener('click', pressed);
+            },
+        }));
+        render(DataTable, {props: {...base, rows: makeRows(2), cell, onactivate, onrename}});
+        await fireEvent.click(rowsInDom()[1]!);
+        const button = within(rowsInDom()[1]!).getByRole('button', {name: 'go'});
+        button.focus();
+
+        await userEvent.keyboard('{Enter}');
+        await userEvent.keyboard(' ');
+        await userEvent.keyboard('{F2}');
+
+        expect(pressed).toHaveBeenCalledTimes(2);
+        expect(onactivate).not.toHaveBeenCalled();
+        expect(onrename).not.toHaveBeenCalled();
+        expect(rowsInDom()[1]!.getAttribute('aria-selected')).toBe('true');
+
+        // from the grid itself the keys still do what they did
+        await fireEvent.keyDown(screen.getByRole('grid'), {key: 'Enter'});
+        expect(onactivate).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00001'}));
+        await fireEvent.keyDown(screen.getByRole('grid'), {key: ' '});
+        expect(rowsInDom()[1]!.getAttribute('aria-selected')).toBe('false');
+    });
+
+    it('lets a space be typed into a column filter', async () => {
+        render(DataTable, {props: {...base, rows: makeRows(2)}});
+        const filter = within(screen.getByRole('grid')).getAllByRole('searchbox')[0]!;
+        await userEvent.type(filter, 'Device 1');
+        expect((filter as HTMLInputElement).value).toBe('Device 1');
+    });
+});
+
+/**
  * D-34, after the maintainer's first look: "table columns are not regularly sized when the channel
  * sub-grid is expanded". The whole table is drawn on one set of tracks now, so this measures
  * pixels rather than class names - which is what browser mode is for. jsdom has no layout and

@@ -494,6 +494,10 @@
                 }
                 break;
             case 'Enter':
+                // Task 47: Enter on a control in the grid - the copy button, a paramset button - presses that control
+                if (fromControl(event)) {
+                    break;
+                }
                 if (row && onactivate) {
                     event.preventDefault();
                     onactivate(row.row);
@@ -505,7 +509,8 @@
                 renameByKey(row, event);
                 break;
             case ' ':
-                if (row) {
+                // Task 47: and Space presses a button or is typed into a filter field, rather than toggling the row
+                if (row && !fromControl(event)) {
                     event.preventDefault();
                     selectRow(row, {ctrl: true});
                 }

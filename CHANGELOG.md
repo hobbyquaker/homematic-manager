@@ -93,9 +93,11 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
     cannot be read keeps its button, and the dialog says why. (B-33)
 - **The Msgs column of the device grid is wide enough for two service-message marks and the repair button**, which it
   used to cut off.
-  - **Resizing:** it can be dragged wider or narrower like the other columns, keeps its width over a reload, and
-    "Reset column widths" includes it.
-  - **Narrow windows:** it no longer gets narrower than that.
+  - **Resizing:** it can be dragged wider like the other columns, keeps its width over a reload, and "Reset column
+    widths" includes it.
+  - **Never narrower than the marks and the button:** neither a narrow window nor a drag makes it narrower than that,
+    like the PARAMSETS column, so the repair button stays whole and takes its click. A width stored narrower by an
+    earlier build of this version is drawn at that minimum.
   - **Tooltip:** a cell that is cut off shows its content when the pointer rests on it. (B-34)
 - **The PARAMSETS column of the device grid can be resized** (#157, @Herbert-Testmann).
   - **Resizing:** it can be dragged wider, keeps its width over a reload, and "Reset column widths" and "Fit column to

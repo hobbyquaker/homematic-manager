@@ -56,23 +56,26 @@ if {[string equal $cmd "config"]} {
     # the box's own - it is `occulite`, where the session the box's shell hands over is checked
     # against the box's own API. Which of the two is offered is decided at runtime, so the same
     # package behaves correctly on either firmware.
+    # B-22: and each firmware has its own line in hmm.env, read the way rc.d/hmm reads it (its
+    # LiteAuthMode). A CCU reads HMM_AUTH_MODE, token unless it says rega. openccu-lite reads
+    # HMM_AUTH_MODE_LITE, occulite unless it says exactly `token` - a `HMM_AUTH_MODE=token` from the
+    # CCU days is not read there, because that line is in every hmm.env a CCU install wrote, and it
+    # kept the Charly's addon out of the box's login after its upgrade. A choice made on this page is
+    # written into the line of the firmware the page runs on, and survives a move to the other one.
     set lite [is_openccu_lite]
     if {$lite} {
         set other "occulite"
+        set variable HMM_AUTH_MODE_LITE
     } else {
         set other "rega"
+        set variable HMM_AUTH_MODE
     }
-    set mode [read_env HMM_AUTH_MODE ""]
-    if {[string equal $mode ""]} {
-        # unset means "whatever fits this firmware": the rc.d script picks `occulite` on a lite box
-        # and `token` everywhere else
-        if {$lite} {
+    set mode [read_env $variable ""]
+    if {$lite} {
+        if {![string equal $mode "token"]} {
             set mode "occulite"
-        } else {
-            set mode "token"
         }
-    }
-    if {![string equal $mode $other]} {
+    } elseif {![string equal $mode "rega"]} {
         set mode "token"
     }
 
@@ -80,7 +83,7 @@ if {[string equal $cmd "config"]} {
         set wanted $params(auth_mode)
         if {[string equal $wanted "token"] || [string equal $wanted $other]} {
             if {![string equal $wanted $mode]} {
-                write_env HMM_AUTH_MODE $wanted
+                write_env $variable $wanted
                 set mode $wanted
                 catch {exec $RC_SCRIPT restart} output
                 set message "Gespeichert, der Dienst wurde neu gestartet. / Saved, the service was restarted."
@@ -156,13 +159,20 @@ if {[string equal $cmd "config"]} {
         puts "<p><a href=\"settings.cgi?cmd=config&amp;auth_mode=[html_escape $other]$query\">Auf"
         puts "<b>[html_escape $other]</b> umstellen / switch to <b>[html_escape $other]</b></a></p>"
     }
-    puts "<p class=\"note\">Das schreibt HMM_AUTH_MODE nach"
+    puts "<p class=\"note\">Das schreibt $variable nach"
     puts "/usr/local/addons/hmm/etc/hmm.env und startet den Dienst neu. Dieselbe Datei nimmt jede"
     puts "weitere Option des Hosts auf (<code>homematic-manager-web --help</code>), z.B."
     puts "HMM_SESSION_TTL.</p>"
-    puts "<p class=\"note\">This writes HMM_AUTH_MODE to /usr/local/addons/hmm/etc/hmm.env and"
+    puts "<p class=\"note\">This writes $variable to /usr/local/addons/hmm/etc/hmm.env and"
     puts "restarts the service. The same file takes every other option of the host, e.g."
     puts "HMM_SESSION_TTL.</p>"
+    if {$lite && ![string equal [read_env HMM_AUTH_MODE ""] ""]} {
+        # B-22: the line a CCU install left behind, so nobody wonders why it has no effect
+        puts "<p class=\"note\">HMM_AUTH_MODE=[html_escape [read_env HMM_AUTH_MODE ""]] steht auch in"
+        puts "der Datei: das ist die Einstellung einer CCU und wird auf openccu-lite nicht gelesen."
+        puts "<br>HMM_AUTH_MODE=[html_escape [read_env HMM_AUTH_MODE ""]] is in the file as well: that"
+        puts "is a CCU's setting and is not read on openccu-lite.</p>"
+    }
     puts "<h2>Log</h2>"
     if {$lite} {
         # tasks 41 and 43: there is no log file on openccu-lite; the box's Log page shows the journal,

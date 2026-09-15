@@ -515,18 +515,155 @@ case "$out" in
     *'current: <b>token</b>'*) pass "switching a lite box to token works" ;;
     *) fail "switching a lite box to token works" "$out" ;;
 esac
-case "$(grep '^HMM_AUTH_MODE' "$TREE/etc/hmm.env")" in
-    'HMM_AUTH_MODE=token') pass "and is written into etc/hmm.env" ;;
-    *) fail "and is written into etc/hmm.env" "$(grep 'HMM_AUTH_MODE' "$TREE/etc/hmm.env")" ;;
+# B-22: as the firmware's own line, HMM_AUTH_MODE_LITE, replacing its commented-out default; the CCU's
+# HMM_AUTH_MODE is left as it was, for the day the same /usr/local is moved back to a CCU
+case "$(grep '^HMM_AUTH_MODE_LITE=' "$TREE/etc/hmm.env")" in
+    'HMM_AUTH_MODE_LITE=token') pass "and is written into etc/hmm.env as HMM_AUTH_MODE_LITE (B-22)" ;;
+    *) fail "and is written into etc/hmm.env as HMM_AUTH_MODE_LITE (B-22)" "$(grep 'HMM_AUTH_MODE' "$TREE/etc/hmm.env")" ;;
+esac
+if [ "$(grep -cE '^ *#? *HMM_AUTH_MODE_LITE=' "$TREE/etc/hmm.env")" = 1 ]; then
+    pass "exactly one HMM_AUTH_MODE_LITE line is left"
+else
+    fail "exactly one HMM_AUTH_MODE_LITE line is left" "$(grep -nE '^ *#? *HMM_AUTH_MODE_LITE=' "$TREE/etc/hmm.env")"
+fi
+if grep -q '^HMM_AUTH_MODE=' "$TREE/etc/hmm.env"; then
+    fail "and the CCU's HMM_AUTH_MODE line is not touched" "$(grep 'HMM_AUTH_MODE' "$TREE/etc/hmm.env")"
+else
+    pass "and the CCU's HMM_AUTH_MODE line is not touched"
+fi
+case "$out" in
+    *'This writes HMM_AUTH_MODE_LITE to'*) pass "and the page names the line it writes" ;;
+    *) fail "and the page names the line it writes" "$out" ;;
 esac
 out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config&auth_mode=occulite' HMM_VERSION_FILE="$LITE_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
-case "$(grep '^HMM_AUTH_MODE' "$TREE/etc/hmm.env")" in
-    'HMM_AUTH_MODE=occulite') pass "and back to occulite, which is written this time" ;;
+case "$(grep '^HMM_AUTH_MODE_LITE=' "$TREE/etc/hmm.env")" in
+    'HMM_AUTH_MODE_LITE=occulite') pass "and back to occulite, which is written this time" ;;
     *) fail "and back to occulite, which is written this time" "$(grep 'HMM_AUTH_MODE' "$TREE/etc/hmm.env")" ;;
 esac
 case "$out" in
     *'current: <b>occulite</b>'*) pass "and the page says so" ;;
     *) fail "and the page says so" "$out" ;;
+esac
+
+echo "a CCU install's HMM_AUTH_MODE=token on an openccu-lite box (B-22)"
+# The file every install from the CCU days has (task 13's default.env wrote the line, and so does the
+# CCU's settings page): moved to openccu-lite with the upgrade, it kept the addon in token mode, where
+# the box's shell can never get in. The page shows what rc.d/hmm runs: occulite, and says why.
+cp -a "$ADDON_SRC/files/hmm/etc/default.env" "$TREE/etc/hmm.env"
+printf 'HMM_AUTH_MODE=token\n' >> "$TREE/etc/hmm.env"
+: > "$RC_CALLS"
+out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$LITE_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'current: <b>occulite</b>'*) pass "HMM_AUTH_MODE=token from the CCU days shows occulite on a lite box" ;;
+    *) fail "HMM_AUTH_MODE=token from the CCU days shows occulite on a lite box" "$out" ;;
+esac
+case "$out" in
+    *'HMM_AUTH_MODE=token is in the file as well'*"is a CCU's setting and is not read on openccu-lite"*) pass "and the page says the CCU's line is not read here" ;;
+    *) fail "and the page says the CCU's line is not read here" "$out" ;;
+esac
+out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config&auth_mode=occulite' HMM_VERSION_FILE="$LITE_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
+if grep -q '^HMM_AUTH_MODE_LITE' "$TREE/etc/hmm.env" || [ -s "$RC_CALLS" ]; then
+    fail "choosing occulite there writes nothing, it is what runs" "$(grep 'HMM_AUTH_MODE' "$TREE/etc/hmm.env"; cat "$RC_CALLS")"
+else
+    pass "choosing occulite there writes nothing, it is what runs"
+fi
+# a token deliberately chosen on a lite box: the marker line, which the page writes (above) and a
+# user may write by hand
+printf 'HMM_AUTH_MODE_LITE=token\n' >> "$TREE/etc/hmm.env"
+out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$LITE_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'current: <b>token</b>'*) pass "HMM_AUTH_MODE_LITE=token shows token on a lite box" ;;
+    *) fail "HMM_AUTH_MODE_LITE=token shows token on a lite box" "$out" ;;
+esac
+# the same file on a CCU: the lite line is not read, the CCU's own line is - rega here
+sed -i 's/^HMM_AUTH_MODE=token$/HMM_AUTH_MODE=rega/' "$TREE/etc/hmm.env"
+out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$CCU_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'current: <b>rega</b>'*) pass "on a CCU the same file means rega: HMM_AUTH_MODE_LITE is not read there" ;;
+    *) fail "on a CCU the same file means rega: HMM_AUTH_MODE_LITE is not read there" "$out" ;;
+esac
+case "$out" in
+    *"is a CCU's setting and is not read"*) fail "and no note about the CCU's line on a CCU" "$out" ;;
+    *) pass "and no note about the CCU's line on a CCU" ;;
+esac
+# a value of the lite line that is not a lite mode: rega, a typo, nothing - occulite, exactly as
+# rc.d/hmm runs it
+for value in rega occulite2 ''; do
+    sed -i "s/^HMM_AUTH_MODE_LITE=.*/HMM_AUTH_MODE_LITE=$value/" "$TREE/etc/hmm.env"
+    out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$LITE_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
+    case "$out" in
+        *'current: <b>occulite</b>'*) pass "HMM_AUTH_MODE_LITE=$value shows occulite on a lite box" ;;
+        *) fail "HMM_AUTH_MODE_LITE=$value shows occulite on a lite box" "$out" ;;
+    esac
+done
+cp -a "$ADDON_SRC/files/hmm/etc/default.env" "$TREE/etc/hmm.env"
+
+echo "rc.d/hmm's LiteAuthMode, the decision itself (B-22)"
+# The function as shipped, run under sh with hmm.env's two lines in the environment, the way Start
+# has them after sourcing the file. logger goes to a file here.
+LITE_AUTH_MODE="$TMP/lite-auth-mode.sh"
+sed -n '/^LiteAuthMode() {$/,/^}$/p' "$ADDON_SRC/files/hmm/rc.d/hmm" > "$LITE_AUTH_MODE"
+if [ -s "$LITE_AUTH_MODE" ] && grep -q 'printf' "$LITE_AUTH_MODE"; then
+    pass "LiteAuthMode could be taken out of rc.d/hmm"
+else
+    fail "LiteAuthMode could be taken out of rc.d/hmm" "$(cat "$LITE_AUTH_MODE")"
+fi
+LOGGER_CALLS="$TMP/logger-calls"
+# lite_auth_mode <HMM_AUTH_MODE> <HMM_AUTH_MODE_LITE>: prints the mode; the syslog lines go to $LOGGER_CALLS
+lite_auth_mode() {
+    : > "$LOGGER_CALLS"
+    HMM_AUTH_MODE="$1" HMM_AUTH_MODE_LITE="$2" ADDON=hmm sh -c "logger() { printf '%s\n' \"\$*\" >> '$LOGGER_CALLS'; }; . '$LITE_AUTH_MODE'; LiteAuthMode"
+}
+# lite_case <description> <expected mode> <HMM_AUTH_MODE> <HMM_AUTH_MODE_LITE>
+lite_case() {
+    got="$(lite_auth_mode "$3" "$4")"
+    if [ "$got" = "$2" ]; then
+        pass "$1: $2"
+    else
+        fail "$1: $2" "got '$got'"
+    fi
+}
+lite_case "nothing set" occulite '' ''
+lite_case "HMM_AUTH_MODE=token from the CCU days, no lite line" occulite token ''
+lite_case "HMM_AUTH_MODE=rega from a CCU, no lite line" occulite rega ''
+lite_case "HMM_AUTH_MODE=occulite, what beta.17's page wrote on a lite box" occulite occulite ''
+lite_case "HMM_AUTH_MODE=oauth, a value the host would refuse, no lite line" occulite oauth ''
+lite_case "a deliberate HMM_AUTH_MODE_LITE=token" token '' token
+lite_case "HMM_AUTH_MODE_LITE=token next to the CCU's token" token token token
+lite_case "HMM_AUTH_MODE_LITE=token next to the CCU's rega" token rega token
+lite_case "HMM_AUTH_MODE_LITE=occulite" occulite '' occulite
+lite_case "HMM_AUTH_MODE_LITE=rega, a mode of the CCU's" occulite '' rega
+lite_case "HMM_AUTH_MODE_LITE=Token, the wrong case" occulite '' Token
+lite_case "HMM_AUTH_MODE_LITE='token ' with a trailing blank inside the quotes" occulite '' 'token '
+lite_case "HMM_AUTH_MODE_LITE=token with a Windows line ending" occulite '' "$(printf 'token\r')"
+lite_case "HMM_AUTH_MODE_LITE=oauth" occulite '' oauth
+lite_case "HMM_AUTH_MODE_LITE=oauth next to the CCU's token" occulite token oauth
+lite_auth_mode '' oauth >/dev/null
+case "$(cat "$LOGGER_CALLS")" in
+    *'HMM_AUTH_MODE_LITE in etc/hmm.env is neither token nor occulite: --auth-mode occulite'*) pass "a value that is no lite mode is said in the syslog" ;;
+    *) fail "a value that is no lite mode is said in the syslog" "$(cat "$LOGGER_CALLS")" ;;
+esac
+case "$(cat "$LOGGER_CALLS")" in
+    *oauth*) fail "without the value" "$(cat "$LOGGER_CALLS")" ;;
+    *) pass "without the value" ;;
+esac
+lite_auth_mode token '' >/dev/null
+case "$(cat "$LOGGER_CALLS")" in
+    *"HMM_AUTH_MODE=token in etc/hmm.env is the CCU's setting and is not read on openccu-lite"*) pass "a CCU's line that would have meant another mode is said in the syslog" ;;
+    *) fail "a CCU's line that would have meant another mode is said in the syslog" "$(cat "$LOGGER_CALLS")" ;;
+esac
+lite_auth_mode occulite '' >/dev/null
+if [ -s "$LOGGER_CALLS" ]; then
+    fail "a CCU's line that means the same mode is not" "$(cat "$LOGGER_CALLS")"
+else
+    pass "a CCU's line that means the same mode is not"
+fi
+# and the line of Start that uses it: on a lite box the answer replaces HMM_AUTH_MODE, on a CCU
+# HMM_AUTH_MODE stays what hmm.env made it
+case "$(cat "$ADDON_SRC/files/hmm/rc.d/hmm")" in
+    *'if grep -q '"'"'^VARIANT=lite$'"'"' /VERSION 2>/dev/null; then
+        HMM_AUTH_MODE="$(LiteAuthMode)"'*) pass "Start takes LiteAuthMode's answer as the mode where VARIANT=lite is in /VERSION, and only there" ;;
+    *) fail "Start takes LiteAuthMode's answer as the mode where VARIANT=lite is in /VERSION, and only there" "the grep and the assignment are not together in rc.d/hmm" ;;
 esac
 
 echo "update_check.cgi"

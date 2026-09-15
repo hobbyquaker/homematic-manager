@@ -174,6 +174,14 @@ The settings page takes a WebUI `sid` or the addon's own token cookie — both a
 ReGaHSS session check — so the link works from Systemsteuerung and from a browser that has the app
 open.
 
+`HMM_AUTH_MODE` is the CCU's setting. On openccu-lite the rc.d script reads `HMM_AUTH_MODE_LITE`
+instead (`occulite`, the box's own login, unless it says `token`) and never `HMM_AUTH_MODE`: every
+install from the CCU days has `HMM_AUTH_MODE=token` in its `hmm.env`, and a `/usr/local` upgraded to
+openccu-lite with that line kept the addon in token mode, where the box's shell can never get in
+(B-22). Each firmware has its own line, each is ignored on the other, so the same `/usr/local` can
+move between them; the settings page writes the line of the firmware it runs on. A lite line that is
+neither `token` nor `occulite` runs `occulite`, and the syslog says so.
+
 ## The lighttpd rule
 
 `/usr/local/etc/config/lighttpd/hmm.conf`, written at install time with the port from
@@ -261,8 +269,9 @@ overwritten again:
 HMM_PORT=8090        # loopback only; change hmm.conf with it, or re-run update_script
 HMM_LOG_LEVEL=info   # error, warn, info, debug
 HMM_ADDON_LOG=varlog # varlog (/var/log/hmm.log, default) or addon (var/hmm.log) - see "Troubleshooting"
-HMM_AUTH_MODE=token  # token (default) or rega - see "The optional login (D-32)"
-HMM_SESSION_TTL=24h  # with rega: how long a login lasts without being used
+HMM_AUTH_MODE=token  # on a CCU: token (default) or rega - see "The optional login (D-32)"
+HMM_AUTH_MODE_LITE=occulite  # on openccu-lite: occulite (default) or token - not read on a CCU, and vice versa
+HMM_SESSION_TTL=24h  # with rega or occulite: how long a login lasts without being used
 HMM_CALLBACK_XMLRPC_DEFAULT_PORT=2031  # the callback ports while the settings say 0, see "Callback ports"
 HMM_CALLBACK_BINRPC_DEFAULT_PORT=2032  # (set by the rc.d script; 0 here: a free port at every start)
 HMM_NODE_FLAGS="--max-semi-space-size=1 --optimize-for-size"  # node's flags (the default), read by rc.d only - see "Memory"

@@ -255,8 +255,9 @@ check "and the service runs" "running" "$(dex '/usr/local/etc/config/rc.d/hmm st
 echo
 echo "openccu-lite: the backend logs to the journal, and there is no var/hmm.log (task 41)"
 # The container runs no journald: a systemd-cat stand-in execs the command the way the real one does
-# and appends the output to /tmp/journal-<identifier>.log. Token mode keeps the backend independent of
-# occulited, which is not here either; the auth mode is not what this part is about.
+# and appends the output to /tmp/journal-<identifier>.log. hmm.env gets the line every install from
+# the CCU days has, HMM_AUTH_MODE=token - which B-22 below expects to mean occulite on this box; the
+# backend starts in that mode without a box to ask, since nothing is asked until a request comes.
 dex 'cp /usr/local/addons/hmm/etc/hmm.env /tmp/hmm.env.t41 \
     && sed -i "s/^#*HMM_AUTH_MODE=.*/HMM_AUTH_MODE=token/" /usr/local/addons/hmm/etc/hmm.env \
     && cp /opt/systemd-cat-stub /usr/bin/systemd-cat && chmod 755 /usr/bin/systemd-cat \
@@ -290,6 +291,65 @@ check "and nothing in /var/log either (task 43)" "gone" "$(dex 'test -e /var/log
 out="$(dex "curl -si 'http://127.0.0.1/addons/hmm/service.cgi?sid=%40${SID}%40&cmd=log'")"
 check "service.cgi's log view sends the browser to the box's Log page with the addon's unit" \
     "Location: /log?unit=addon-hmm" "$out"
+
+echo
+echo "openccu-lite: a CCU install's HMM_AUTH_MODE=token means occulite, HMM_AUTH_MODE_LITE=token is a choice (B-22)"
+# The lab Charly after its upgrade from the CCU3 firmware: its hmm.env said HMM_AUTH_MODE=token from
+# the CCU days, the backend ran in token mode and the box's shell could not get in. The start above
+# had exactly that file. The journal has the backend's own line for the mode it runs, the syslog the
+# rc.d script's; LITE_SETTINGS is the page, which shows the same rule.
+LITE_SETTINGS="http://127.0.0.1/addons/hmm/settings.cgi?cmd=config&sid=%40${SID}%40"
+# lite_restart: a restart with an empty journal, then wait for the backend's start line
+lite_restart() {
+    dex ': > /tmp/journal-addon-hmm.log; /usr/local/etc/config/rc.d/hmm restart' >/dev/null
+    for _ in 1 2 3 4 5 6 7 8 9 10; do
+        dex 'grep -q "homematic-manager-web" /tmp/journal-addon-hmm.log' >/dev/null && break
+        sleep 1
+    done
+}
+check "the backend runs in occulite mode: its start line says so" "login: the session openccu-lite hands over is checked against" \
+    "$(dex 'cat /tmp/journal-addon-hmm.log')"
+check "the rc.d script said which mode it chose" "openccu-lite detected (VARIANT=lite): --auth-mode occulite" "$(syslog)"
+check "and that the CCU's line is not read here" "HMM_AUTH_MODE=token in etc/hmm.env is the CCU's setting and is not read on openccu-lite" "$(syslog)"
+check "the settings page shows occulite" "current: <b>occulite</b>" "$(dex "curl -s '$LITE_SETTINGS'")"
+check "and names the CCU's line" "HMM_AUTH_MODE=token is in the file as well" "$(dex "curl -s '$LITE_SETTINGS'")"
+# the choice, written by the page
+out="$(dex "curl -s --max-time 90 '$LITE_SETTINGS&auth_mode=token'")"
+check "choosing token on the page saves and restarts" "Saved, the service was restarted." "$out"
+check "as HMM_AUTH_MODE_LITE=token in etc/hmm.env" "HMM_AUTH_MODE_LITE=token" \
+    "$(dex 'grep "^HMM_AUTH_MODE_LITE=" /usr/local/addons/hmm/etc/hmm.env')"
+check "next to the CCU's line, which stays" "HMM_AUTH_MODE=token" "$(dex 'grep "^HMM_AUTH_MODE=" /usr/local/addons/hmm/etc/hmm.env')"
+check "and the service runs" "running" "$(dex '/usr/local/etc/config/rc.d/hmm status')"
+lite_restart
+check "the backend runs in token mode now" "openccu-lite detected (VARIANT=lite): --auth-mode token" "$(syslog)"
+absent "without the occulite login line" "login: the session openccu-lite hands over" "$(dex 'cat /tmp/journal-addon-hmm.log')"
+check "the settings page shows token" "current: <b>token</b>" "$(dex "curl -s '$LITE_SETTINGS'")"
+# a value of the lite line that is no lite mode, by hand: occulite, and the syslog says why
+dex "sed -i 's/^HMM_AUTH_MODE_LITE=.*/HMM_AUTH_MODE_LITE=rega/' /usr/local/addons/hmm/etc/hmm.env" >/dev/null
+lite_restart
+check "HMM_AUTH_MODE_LITE=rega, a mode of the CCU's: the backend runs occulite" "login: the session openccu-lite hands over is checked against" \
+    "$(dex 'cat /tmp/journal-addon-hmm.log')"
+check "and the syslog says the line is no lite mode" "HMM_AUTH_MODE_LITE in etc/hmm.env is neither token nor occulite: --auth-mode occulite" "$(syslog)"
+check "the settings page shows occulite" "current: <b>occulite</b>" "$(dex "curl -s '$LITE_SETTINGS'")"
+# what the page offers from there is the switch to token, and it replaces the line, whatever it held
+# (asking it for occulite writes nothing: that is what runs already)
+out="$(dex "curl -s --max-time 90 '$LITE_SETTINGS&auth_mode=token'")"
+check "choosing token on the page from there saves and restarts" "Saved, the service was restarted." "$out"
+check "and replaces the rega line" "HMM_AUTH_MODE_LITE=token" \
+    "$(dex 'grep "^HMM_AUTH_MODE_LITE=" /usr/local/addons/hmm/etc/hmm.env')"
+absent "with nothing of it left" "HMM_AUTH_MODE_LITE=rega" "$(dex 'cat /usr/local/addons/hmm/etc/hmm.env')"
+# and back to occulite from the page, which writes the line rather than removing it
+dex ': > /tmp/journal-addon-hmm.log' >/dev/null
+out="$(dex "curl -s --max-time 90 '$LITE_SETTINGS&auth_mode=occulite'")"
+check "choosing occulite on the page saves and restarts" "Saved, the service was restarted." "$out"
+check "as HMM_AUTH_MODE_LITE=occulite" "HMM_AUTH_MODE_LITE=occulite" \
+    "$(dex 'grep "^HMM_AUTH_MODE_LITE=" /usr/local/addons/hmm/etc/hmm.env')"
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+    dex 'grep -q "login: the session openccu-lite hands over" /tmp/journal-addon-hmm.log' >/dev/null && break
+    sleep 1
+done
+check "and the backend runs occulite again" "login: the session openccu-lite hands over is checked against" \
+    "$(dex 'cat /tmp/journal-addon-hmm.log')"
 # back to a CCU for everything below, which reads the log file
 dex 'rm -f /VERSION /usr/bin/systemd-cat && cp /tmp/hmm.env.t41 /usr/local/addons/hmm/etc/hmm.env \
     && /usr/local/etc/config/rc.d/hmm restart' >/dev/null
@@ -446,9 +506,14 @@ for _ in 1 2 3 4 5 6 7 8 9 10; do
 done
 check "the stub CCU services are up (rega 8183, udp 1998)" "auth stub on udp" "$(dex 'cat /tmp/ccu-stub.log')"
 
-dex "sed -i 's/^#*HMM_AUTH_MODE=.*/HMM_AUTH_MODE=rega/' /usr/local/addons/hmm/etc/hmm.env" >/dev/null
+# B-22: and openccu-lite's line next to it, which a CCU does not read - the same file after a move
+# back from a lite box, where token was chosen. The syslog is emptied first: the lite part above
+# has lines about that variable, and the point here is that this start writes none.
+dex "sed -i 's/^#*HMM_AUTH_MODE=.*/HMM_AUTH_MODE=rega/; s/^#*HMM_AUTH_MODE_LITE=.*/HMM_AUTH_MODE_LITE=token/' /usr/local/addons/hmm/etc/hmm.env; : > /tmp/messages" >/dev/null
 check "HMM_AUTH_MODE=rega is in etc/hmm.env" "HMM_AUTH_MODE=rega" \
-    "$(dex 'grep ^HMM_AUTH_MODE /usr/local/addons/hmm/etc/hmm.env')"
+    "$(dex 'grep ^HMM_AUTH_MODE= /usr/local/addons/hmm/etc/hmm.env')"
+check "and so is HMM_AUTH_MODE_LITE=token (B-22)" "HMM_AUTH_MODE_LITE=token" \
+    "$(dex 'grep ^HMM_AUTH_MODE_LITE= /usr/local/addons/hmm/etc/hmm.env')"
 dex '/usr/local/etc/config/rc.d/hmm restart' >/dev/null
 for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
     dex 'curl -sf -o /dev/null http://127.0.0.1:8090/addons/hmm/login' >/dev/null && break
@@ -456,6 +521,8 @@ for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
 done
 check "the host started in rega mode and says so in the log" "CCU credentials required" \
     "$(dex 'tail -40 /var/log/hmm.log')"
+absent "the lite line was not read on a CCU (B-22)" "HMM_AUTH_MODE_LITE" "$(syslog)"
+absent "and the CCU's line was not questioned" "is the CCU's setting and is not read" "$(syslog)"
 
 out="$(dex "curl -s http://127.0.0.1/addons/hmm/")"
 check "a browser without a session gets the login page instead of the UI" 'name="password"' "$out"

@@ -80,10 +80,14 @@ from the firmware's own `/VERSION`, which carries an extra `VARIANT=lite` line:
   of the person looking at the page. A rename is therefore attributed to a user, and nothing
   renames a device unless somebody asked for it.
 
-Nothing is written into `etc/hmm.env` for any of this. Setting `HMM_AUTH_MODE` there by hand
-overrides the automatic choice and then stays wrong if the same `/usr/local` is later moved to the
-other firmware; the addon's settings page (`/addons/hmm/settings.cgi?cmd=config`) offers the two
-modes that fit the firmware it is running on.
+Nothing is written into `etc/hmm.env` for any of this. The auth mode has one line per firmware
+there: `HMM_AUTH_MODE` is the CCU's and is not read on openccu-lite, `HMM_AUTH_MODE_LITE` is
+openccu-lite's (`occulite` unless it says `token`) and is not read on a CCU — so the same
+`/usr/local` can move between the two firmwares and each keeps its own choice, and the
+`HMM_AUTH_MODE=token` every install from the CCU days carries does not keep the addon out of the
+box's login after an upgrade (B-22). The addon's settings page
+(`/addons/hmm/settings.cgi?cmd=config`) offers the two modes that fit the firmware it is running
+on and writes that firmware's line.
 
 ## Off the box: a desktop, a server, Docker
 

@@ -10,6 +10,19 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Fixed
 
+- **CCU addon on openccu-lite: an `HMM_AUTH_MODE=token` left in `etc/hmm.env` by a CCU install no longer keeps the
+  addon out of the box's login.** Every install from the CCU days has that line, `hmm.env` survives updates, and a
+  `/usr/local` upgraded from CCU firmware to openccu-lite therefore ran the backend in token mode, where the box's
+  shell could not open the addon (every socket from the frame was refused).
+  - **The rule:** `HMM_AUTH_MODE` is the CCU's setting and is not read on openccu-lite. openccu-lite reads
+    `HMM_AUTH_MODE_LITE` — `occulite`, the box's own login, unless it says `token` — and a CCU does not read that one,
+    so the same `/usr/local` can move between the firmwares and each keeps its own choice. A lite value that is neither
+    `token` nor `occulite` runs `occulite`, and the syslog says so.
+  - **The settings page** (`settings.cgi?cmd=config`) writes the line of the firmware it runs on and, on openccu-lite,
+    names a CCU line it found in the file.
+  - **If you chose `token` on an openccu-lite box with 3.0.0-beta.17 or earlier**, that choice was written as
+    `HMM_AUTH_MODE=token`, which is indistinguishable from the CCU's line: the box runs `occulite` after this update, and
+    the settings page puts `token` back as `HMM_AUTH_MODE_LITE=token`. (B-22)
 - **The device grid offers only the paramsets that have something in them.**
   - **The rule:** a button in the PARAMSETS column, and an entry in the context menu of a device or a channel, is there
     when the device or channel lists the paramset and the interface describes it with parameters.

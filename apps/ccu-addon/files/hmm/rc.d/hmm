@@ -138,6 +138,38 @@ NodeFlags() {
     printf '%s' "$kept"
 }
 
+# D-40, B-22: the auth mode on openccu-lite, printed. Called after hmm.env was sourced, only on a box
+# whose /VERSION says VARIANT=lite.
+#
+# HMM_AUTH_MODE is the CCU's setting and is not read here: `token` is what every install from the
+# CCU days wrote into hmm.env (task 13's default.env, the CCU's settings page), and the same
+# /usr/local moved to openccu-lite then ran the backend in token mode, where the box's shell can never
+# get in (B-22, the lab Charly after its upgrade). `rega` needs the CCU's ReGa and asks nothing else.
+# The choice a user made on this firmware is HMM_AUTH_MODE_LITE, which the settings page writes on a
+# lite box and a CCU never reads - so a /usr/local that moves between the firmwares carries one
+# setting for each and neither is mistaken for the other. `token` counts only there, spelled exactly:
+# a value that is neither `token` nor `occulite` - a typo, a CRLF - runs `occulite`, the box's
+# default and its login, and says so in the syslog; nothing in either file can put a lite box into a
+# mode of the CCU's.
+LiteAuthMode() {
+    case "$HMM_AUTH_MODE_LITE" in
+        token | occulite)
+            mode=$HMM_AUTH_MODE_LITE
+            ;;
+        '')
+            mode=occulite
+            ;;
+        *)
+            logger -t $ADDON -p daemon.warn "HMM_AUTH_MODE_LITE in etc/hmm.env is neither token nor occulite: --auth-mode occulite (B-22)"
+            mode=occulite
+            ;;
+    esac
+    if [ -n "$HMM_AUTH_MODE" ] && [ "$HMM_AUTH_MODE" != "$mode" ]; then
+        logger -t $ADDON -p daemon.info "HMM_AUTH_MODE=$HMM_AUTH_MODE in etc/hmm.env is the CCU's setting and is not read on openccu-lite; HMM_AUTH_MODE_LITE chooses here (B-22)"
+    fi
+    printf '%s' "$mode"
+}
+
 Start() {
     if Running; then
         echo "$ADDON already running"
@@ -195,10 +227,11 @@ Start() {
     # this host checks that session against the box. Decided **at every start** from the firmware's
     # own `/VERSION` (their D-17 keeps PRODUCT and PLATFORM and adds `VARIANT=lite`), never written
     # into hmm.env - the same /usr/local may be moved from openccu-lite to OpenCCU and back, and a
-    # remembered answer would be wrong on the other side. A mode the user set by hand always wins.
-    if [ -z "$HMM_AUTH_MODE" ] && grep -q '^VARIANT=lite$' /VERSION 2>/dev/null; then
-        HMM_AUTH_MODE=occulite
-        logger -t $ADDON -p daemon.info "openccu-lite detected (VARIANT=lite): --auth-mode occulite"
+    # remembered answer would be wrong on the other side. On a CCU, HMM_AUTH_MODE as the user set it
+    # (unset: the host's default, token); on openccu-lite, HMM_AUTH_MODE_LITE (B-22, LiteAuthMode).
+    if grep -q '^VARIANT=lite$' /VERSION 2>/dev/null; then
+        HMM_AUTH_MODE="$(LiteAuthMode)"
+        logger -t $ADDON -p daemon.info "openccu-lite detected (VARIANT=lite): --auth-mode $HMM_AUTH_MODE"
     fi
     [ -n "$HMM_AUTH_MODE" ] && export HMM_AUTH_MODE
 

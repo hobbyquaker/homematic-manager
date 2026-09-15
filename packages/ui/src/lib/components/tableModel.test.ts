@@ -333,13 +333,13 @@ describe('sizedTemplate', () => {
     });
 
     /**
-     * B-34: the Msgs column holds two marks and a button. It is proportional and resizable like a
-     * text column, but a narrow window must not squeeze it to the grid's 56 px, which cut the button off.
+     * B-34 gave a column its own minimum: a narrow window must not squeeze it to the grid's 56 px. On
+     * its own that minimum is the window's only; a dragged width still wins.
      */
     it('keeps a column with its own minimum at that minimum, and a dragged width still wins', () => {
         const layout = tableLayout(
             [
-                {key: 'msgs', label: 'Msgs', width: 84, minWidth: 84},
+                {key: 'marks', label: 'Marks', width: 84, minWidth: 84},
                 {key: 'name', label: 'Name', width: 200},
             ],
             undefined,
@@ -347,12 +347,12 @@ describe('sizedTemplate', () => {
         );
         expect(layout.template).toBe('minmax(84px, 84fr) minmax(56px, 200fr)');
         expect(sizedTemplate(layout).minWidth).toBe(84 + 56);
-        expect(sizedTemplate(layout, {msgs: 50})).toEqual({template: '50px minmax(56px, 200fr)', minWidth: 50 + 56});
+        expect(sizedTemplate(layout, {marks: 50})).toEqual({template: '50px minmax(56px, 200fr)', minWidth: 50 + 56});
     });
 
     /**
-     * B-35 (#157): the PARAMSETS buttons. Like the Msgs column, but a width the user dragged or that is
-     * stored does not win below the minimum: a squeezed button lands under the next cell (task 25).
+     * B-35 (#157): the PARAMSETS buttons. A width the user dragged or that is stored does not win below
+     * the minimum: a squeezed button lands under the next cell (task 25).
      */
     it('draws a user width below the minimum of a column that keeps it at that minimum, and a wider one as it is', () => {
         const paramsets: DataTableColumn<Row> = {

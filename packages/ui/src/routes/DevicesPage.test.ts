@@ -321,12 +321,35 @@ describe('the paramset buttons (B-33)', () => {
 });
 
 describe('the Msgs column (B-34)', () => {
+    const cell = (): HTMLElement => rowOf('KEQ0345678').querySelector<HTMLElement>('[data-column-key="msgs"]')!;
+
     it('is resizable and no fixed column, and never narrower than two marks and the repair button', async () => {
-        await mountApp({hash: '#/BidCos-RF/devices'});
-        expect(screen.getByTestId('devices-table-resize-msgs')).toBeTruthy();
-        const cell = rowOf('KEQ0345678').querySelector<HTMLElement>('[data-column-key="msgs"]');
-        expect(cell?.classList.contains('hmm-td-fixed')).toBe(false);
-        expect(cell?.getBoundingClientRect().width).toBeGreaterThanOrEqual(SERVICE_MARKS_COLUMN_WIDTH);
+        const {stores} = await mountApp({hash: '#/BidCos-RF/devices'});
+        const handle = screen.getByTestId('devices-table-resize-msgs');
+        expect(cell().classList.contains('hmm-td-fixed')).toBe(false);
+        expect(cell().getBoundingClientRect().width).toBeGreaterThanOrEqual(SERVICE_MARKS_COLUMN_WIDTH);
+
+        // dragged narrow it stops there, like the button columns of B-35: a squeezed repair button
+        // slides under the next cell. 30 steps of 10 px take any other column to the table's 40 px.
+        for (let step = 0; step < 30; step += 1) {
+            await fireEvent.keyDown(handle, {key: 'ArrowLeft'});
+        }
+        expect(Math.round(cell().getBoundingClientRect().width)).toBe(SERVICE_MARKS_COLUMN_WIDTH);
+        expect(stores.app.columnWidths.widths('devices')['msgs']).toBe(SERVICE_MARKS_COLUMN_WIDTH);
+    });
+
+    it('draws a width stored below the minimum before it was kept at the minimum, and a wider one as it is', async () => {
+        const {stores} = await mountApp({hash: '#/BidCos-RF/devices'});
+        // a wider one first, so the narrow one below is seen to be drawn and not merely ignored
+        stores.app.columnWidths.set('devices', 'msgs', 120);
+        await waitFor(() => {
+            expect(Math.round(cell().getBoundingClientRect().width)).toBe(120);
+        });
+        // what a drag left in the storage while the column could still go below its minimum
+        stores.app.columnWidths.set('devices', 'msgs', 50);
+        await waitFor(() => {
+            expect(Math.round(cell().getBoundingClientRect().width)).toBe(SERVICE_MARKS_COLUMN_WIDTH);
+        });
     });
 });
 

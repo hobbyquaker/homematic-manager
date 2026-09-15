@@ -78,13 +78,15 @@ test('a column is dragged wider, fitted by a double click, kept over a reload an
 
 /**
  * B-34, the maintainer: "msgs table colum not wide enough and not resizable. if 3 icons/buttons appear the third is
- * cut off". The widest the column gets is two marks and the repair button of an HmIP CONFIG_PENDING.
+ * cut off". The widest the column gets is two marks and the repair button of an HmIP CONFIG_PENDING. Since B-34's
+ * follow-up it stops there, like the button columns of B-35 - `SERVICE_MARKS_COLUMN_WIDTH`, 84 px.
  */
-test('the Msgs column shows two marks and the repair button whole, is resized, kept and reset (B-34)', async ({
+test('the Msgs column shows two marks and the repair button whole, is resized, kept, stops at them and is reset (B-34)', async ({
     page,
     host,
     sim,
 }) => {
+    const MSGS_MIN = 84;
     let table = await openDevices(page, host.url);
     const maintenance = `${HMIP_DIMMER}:0`;
     // stored, not only sent: the messages are still there after the reload below. A sticky
@@ -133,13 +135,31 @@ test('the Msgs column shows two marks and the repair button whole, is resized, k
     await expect.poll(() => widthOf(header())).toBe(dragged);
     await expect(table.getByTestId(`repair-${HMIP_DIMMER}`)).toBeAttached();
 
-    // narrower than what it holds: cut off, and the tooltip says what is in it
+    // dragged narrow it stops at what it holds, like the button columns (B-35): the marks and the repair
+    // button stay whole, and the button still takes a click instead of sliding under the next cell
     await drag(page, table.getByTestId('devices-table-resize-msgs'), -300);
-    await expect.poll(async () => (await layoutOfCell()).cutOff).toBe(true);
-    await cell().hover();
-    const tooltip = page.getByRole('tooltip');
-    await expect(tooltip).toContainText('✖');
-    await expect(tooltip).toContainText('⚒');
+    await expect.poll(() => widthOf(header())).toBe(MSGS_MIN);
+    await expect.poll(layoutOfCell).toEqual({items: 3, inside: true, cutOff: false});
+    expect((await storedWidths(page))['devices']).toEqual({msgs: MSGS_MIN});
+    await table.getByTestId(`repair-${HMIP_DIMMER}`).click({trial: true});
+
+    // a width a drag stored below it before, while the column could still go there, comes back at it
+    await page.evaluate(() => {
+        const stored = JSON.parse(localStorage.getItem('hmm.columnWidths') ?? '{}') as Record<
+            string,
+            Record<string, Record<string, number>>
+        >;
+        for (const tables of Object.values(stored)) {
+            tables['devices'] = {msgs: 50};
+        }
+        localStorage.setItem('hmm.columnWidths', JSON.stringify(stored));
+    });
+    await page.reload();
+    table = await openDevices(page, host.url);
+    expect((await storedWidths(page))['devices']).toEqual({msgs: 50});
+    await expect(table.getByTestId(`repair-${HMIP_DIMMER}`)).toBeVisible();
+    await expect.poll(() => widthOf(header())).toBe(MSGS_MIN);
+    await expect.poll(layoutOfCell).toEqual({items: 3, inside: true, cutOff: false});
 
     await header().click({button: 'right'});
     await page.getByTestId('devices-table-columns-menu').getByRole('menuitem', {name: 'Reset column widths'}).click();

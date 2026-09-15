@@ -266,12 +266,14 @@
         {key: 'rooms', label: t('Rooms'), width: 120, value: (device) => taxonomyText(device, 'room')},
         {key: 'functions', label: t('Functions'), width: 110, value: (device) => taxonomyText(device, 'function')},
         {
-            // B-34: two marks and the repair button fit, it can be dragged like every text column,
-            // and a cell that is cut off after all shows its content as a tooltip (task 42)
+            // B-34: two marks and the repair button fit, and it can be dragged wider. Not narrower than
+            // they are, like PARAMSETS (B-35): a squeezed repair button slides under the next cell,
+            // where its click is lost. A cell cut off after all shows its content as a tooltip (task 42)
             key: 'msgs',
             label: 'Msgs',
             width: SERVICE_MARKS_COLUMN_WIDTH,
             minWidth: SERVICE_MARKS_COLUMN_WIDTH,
+            keepMinWidth: true,
             align: 'center',
             filterable: false,
             sortable: false,

@@ -34,9 +34,10 @@ const MARKS: Readonly<Record<string, {symbol: string; level: 'warn' | 'error'}>>
 };
 
 /**
- * The width the Msgs column is designed with, and the narrowest the grid draws it (B-34): two marks
- * and the repair button that follows a `CONFIG_PENDING` on HmIP. At 48 px the button was cut off,
- * and the column could neither be dragged wider nor show a tooltip.
+ * The width the Msgs column is designed with, and the narrowest it is drawn or dragged (B-34): two
+ * marks and the repair button that follows a `CONFIG_PENDING` on HmIP, 67.4 px with the cell's
+ * padding in Chromium with the system-ui fallback font. At 48 px the button was cut off, and the
+ * column could neither be dragged wider nor show a tooltip.
  */
 export const SERVICE_MARKS_COLUMN_WIDTH = 84;
 

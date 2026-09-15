@@ -69,8 +69,10 @@ describe('isResizable', () => {
 describe('minimumColumnWidth', () => {
     it('is the table minimum, or the own minimum of a column that keeps it (B-35)', () => {
         expect(minimumColumnWidth({key: 'name', label: 'Name', width: 170})).toBe(MIN_COLUMN_WIDTH);
-        // B-34's Msgs column: a minimum for a narrow window, not for a drag - it is cut off and has a tooltip
-        expect(minimumColumnWidth({key: 'msgs', label: 'Msgs', width: 84, minWidth: 84})).toBe(MIN_COLUMN_WIDTH);
+        // a minimum on its own is for a narrow window, not for a drag
+        expect(minimumColumnWidth({key: 'marks', label: 'Marks', width: 84, minWidth: 84})).toBe(MIN_COLUMN_WIDTH);
+        // B-34's Msgs column keeps it since its follow-up: it holds the repair button
+        expect(minimumColumnWidth({key: 'msgs', label: 'Msgs', width: 84, minWidth: 84, keepMinWidth: true})).toBe(84);
         expect(
             minimumColumnWidth({key: 'PARAMSETS', label: 'PARAMSETS', width: 150, minWidth: 150, keepMinWidth: true}),
         ).toBe(150);

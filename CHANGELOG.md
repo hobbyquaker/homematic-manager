@@ -10,6 +10,19 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### New
 
+- **The RPC log shows every outgoing call, and the RPC console has no history of its own.** The drawer used to list
+  the writes and nothing else; now every call the app makes is in it - `init` and de-init, the keep-alive `ping`,
+  `listDevices`, the descriptions and paramsets, `setValue`, `getServiceMessages`, the console's calls - each with
+  its time, interface, method, parameters, duration, result or fault, and where it came from: console, UI, or
+  background. The background calls are the bulk of it and are drawn muted; "Hide background calls" in the drawer's
+  header takes them out of view without taking them out of the log. Every entry has "open in console", which puts
+  that call - anybody's, not only the console's - back into the console's form; that replaces the history list the
+  console kept under its response field, and the response takes the whole column now. What bounds the log on a CCU:
+  1000 entries, 4 MiB in total, an answer over 8 KiB kept as a preview with its size; a passphrase (`changeKey`,
+  `setTempKey`) or a whitelist device key is logged as `***`. Only the writes are still persisted across sessions
+  (`write-log.json`) and the 2.x `rpcLogFolder` dump of `putParamset` is unchanged. For the API: `writeLog.*` is
+  `rpcLog.*`, the entry carries `origin`, and the drawer's labels are in German now too. (task 48)
+
 - **CCU addon on openccu-lite: the settings page and the Systemsteuerung hand-over take the box's session header.**
   `settings.cgi` (and `service.cgi`) read the `X-Occulite-Session` that openccu-lite's gate sets behind a session it
   validated, confirm it with the box (`GET /api/auth/v1/state` must say `authenticated` and name that very `sid`; an

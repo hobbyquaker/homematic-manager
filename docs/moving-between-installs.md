@@ -28,7 +28,7 @@ Inside it:
 | `cache/<host>/devices.json` | device descriptions per interface | yes, but pointless — it is re-read from the CCU in seconds |
 | `cache/<host>/descriptions.json` | paramset descriptions, keyed by description identity | same |
 | `cache/<host>/names.json` | local names and the ReGa object ids | **worth copying** if you renamed devices locally without ReGa |
-| `cache/<host>/write-log.json` | the write log of the session | yes, if you want the history |
+| `cache/<host>/write-log.json` | the writes of the session's RPC log (the reads are kept in memory only) | yes, if you want the history |
 | `link-templates.json` | the saved link profile templates (#21) | **yes** — they are your own work |
 | `images/` | device pictures fetched from the CCU | no need — they are fetched again |
 | `token` (addon only) | the API token | **no**, see below |

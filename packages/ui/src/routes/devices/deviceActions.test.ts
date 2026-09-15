@@ -234,6 +234,98 @@ describe('the rename dialog', () => {
     });
 });
 
+describe('the rename dialog from the name cell (task 46)', () => {
+    let transport: MockTransport;
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+    });
+
+    function nameCellOf(address: string): HTMLElement {
+        const cell = rowOf(address).querySelector<HTMLElement>('[data-column-key="name"]');
+        expect(cell, `no name cell for ${address}`).not.toBeNull();
+        return cell!;
+    }
+
+    function dialogOpen(): boolean {
+        return screen.queryByTestId('rename-dialog')?.hasAttribute('open') === true;
+    }
+
+    /** The address the dialog says it renames. */
+    function dialogAddress(): string {
+        return screen.getByTestId('rename-dialog').querySelector('.hmm-rename-address')?.textContent ?? '';
+    }
+
+    function grid(): HTMLElement {
+        return screen.getByTestId('devices-table').querySelector<HTMLElement>('[role="grid"]')!;
+    }
+
+    it('selects on a click and opens for the device on a double click on its name', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await fireEvent.click(nameCellOf('MEQ0123456'));
+        expect(rowOf('MEQ0123456').getAttribute('aria-selected')).toBe('true');
+        expect(dialogOpen()).toBe(false);
+
+        await fireEvent.dblClick(nameCellOf('MEQ0123456'));
+        expect(dialogOpen()).toBe(true);
+        expect(dialogAddress()).toBe('MEQ0123456');
+        expect(screen.getByTestId<HTMLInputElement>('rename-input').value).toBe('Licht Küche');
+        expect(screen.queryByTestId('rename-children')).not.toBeNull();
+    });
+
+    it('opens for the channel on a double click on its name, and the device stays expanded', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await select('MEQ0123456:1');
+        await fireEvent.dblClick(nameCellOf('MEQ0123456:1'));
+
+        expect(dialogOpen()).toBe(true);
+        expect(dialogAddress()).toBe('MEQ0123456:1');
+        expect(screen.queryByTestId('rename-children')).toBeNull();
+        expect(within(rowOf('MEQ0123456')).getByRole('button', {name: 'Collapse row'})).toBeTruthy();
+
+        await fireEvent.input(screen.getByTestId('rename-input'), {target: {value: 'Kanal'}});
+        await fireEvent.click(screen.getByTestId('rename-save'));
+        await waitFor(() => {
+            expect(transport.lastCall('names.set')).toEqual([[{address: 'MEQ0123456:1', name: 'Kanal'}]]);
+        });
+    });
+
+    it('opens nothing on the :0 channel, on another cell or on the expander', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await select('MEQ0123456:0');
+        await fireEvent.dblClick(nameCellOf('MEQ0123456:0'));
+        await fireEvent.keyDown(grid(), {key: 'F2'});
+        await fireEvent.keyDown(grid(), {key: 'Enter'});
+        expect(dialogOpen()).toBe(false);
+
+        await fireEvent.dblClick(rowOf('MEQ0123456').querySelector<HTMLElement>('[data-column-key="ADDRESS"]')!);
+        await fireEvent.dblClick(within(rowOf('MEQ0123456')).getByRole('button', {name: 'Collapse row'}));
+        expect(dialogOpen()).toBe(false);
+    });
+
+    it('opens for the selected row on F2', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await fireEvent.keyDown(grid(), {key: 'F2'});
+        expect(dialogOpen()).toBe(false);
+
+        await select('JEQ0234567');
+        await fireEvent.keyDown(grid(), {key: 'F2'});
+        expect(dialogOpen()).toBe(true);
+        expect(dialogAddress()).toBe('JEQ0234567');
+    });
+
+    it('opens for the selected row on Enter, but not on an Enter typed into a column filter', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await select('MEQ0123456:1');
+        await fireEvent.keyDown(within(grid()).getAllByRole('searchbox')[0]!, {key: 'Enter'});
+        expect(dialogOpen()).toBe(false);
+
+        await fireEvent.keyDown(grid(), {key: 'Enter'});
+        expect(dialogOpen()).toBe(true);
+        expect(dialogAddress()).toBe('MEQ0123456:1');
+    });
+});
+
 describe('the delete dialog', () => {
     let transport: MockTransport;
 

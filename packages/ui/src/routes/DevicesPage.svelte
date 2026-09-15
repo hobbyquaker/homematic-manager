@@ -213,7 +213,11 @@
     const channelSelection = $derived(
         selected.filter((address) => !isDeviceAddress(address) && !isMaintenanceAddress(address)),
     );
-    const canRename = $derived(one !== '' && !isMaintenanceAddress(one));
+    /** The `:0` maintenance channel has no name of its own to change; 2.x greyed rename out there. */
+    function renamable(address: string): boolean {
+        return address !== '' && !isMaintenanceAddress(address);
+    }
+    const canRename = $derived(renamable(one));
     /**
      * `DontDelete` is set on the CCU's own virtual devices and on everything the interface refuses
      * to remove; 2.x greyed delete, replace and rename out for those rows.
@@ -579,7 +583,7 @@
                   {id: 'delete', label: t('Delete'), danger: true, disabled: dontDeleteOf(menuAddress)},
               ]
             : [
-                  {id: 'rename', label: t('Rename'), disabled: isMaintenanceAddress(menuAddress)},
+                  {id: 'rename', label: t('Rename'), disabled: !renamable(menuAddress)},
                   {id: 'usage1', label: 'reportValueUsage 1', disabled: isMaintenanceAddress(menuAddress)},
                   {id: 'usage0', label: 'reportValueUsage 0', disabled: isMaintenanceAddress(menuAddress)},
                   {id: 'sep1', separator: true},
@@ -691,6 +695,8 @@
             clearFilterLabel={t('Clear filter')}
             showingText={(shown, total) => t('Showing {shown} of {total}', {shown, total})}
             onrowcontextmenu={openMenu}
+            canRename={(row) => renamable(row.ADDRESS)}
+            onrename={(row) => openRename(row.ADDRESS)}
             toolbarLabel={t('Devices')}
             countText={t('{count} devices', {}, devices.length)}
             tableId="devices"

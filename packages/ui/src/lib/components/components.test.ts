@@ -324,6 +324,26 @@ describe('ContextMenu', () => {
         expect(onclose).toHaveBeenCalledTimes(2);
     });
 
+    it('leaves Escape alone while closed, so a dialog still gets it (B-38)', async () => {
+        const onclose = vi.fn();
+        render(ContextMenu, {props: {items, open: false, onclose}});
+        const escape = new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true});
+        window.dispatchEvent(escape);
+        // a prevented Escape is one the browser never turns into a dialog's `cancel` event
+        expect(escape.defaultPrevented).toBe(false);
+        expect(onclose).not.toHaveBeenCalled();
+    });
+
+    it('takes Escape while open, so it closes the menu and not the dialog under it', async () => {
+        const onclose = vi.fn();
+        render(ContextMenu, {props: {items, open: true, onclose}});
+        const escape = new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true});
+        window.dispatchEvent(escape);
+        expect(escape.defaultPrevented).toBe(true);
+        expect(onclose).toHaveBeenCalledOnce();
+        await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+    });
+
     it('draws nothing while closed', () => {
         render(ContextMenu, {props: {items, open: false}});
         expect(screen.queryByRole('menu')).toBeNull();

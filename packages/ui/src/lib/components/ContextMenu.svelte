@@ -58,8 +58,14 @@
         onselect?.(item.id);
     }
 
+    /**
+     * Escape closes the open menu, and only an open one. The listener is on the window for as long
+     * as the page is mounted; when it took every Escape, its `preventDefault` kept the key from the
+     * browser, a modal `<dialog>` never got its `cancel` event, and no dialog closed on Escape while
+     * the Devices or Links tab was shown (B-38).
+     */
     function onKeyDown(event: KeyboardEvent): void {
-        if (event.key === 'Escape') {
+        if (open && event.key === 'Escape') {
             event.preventDefault();
             close();
         }

@@ -18,6 +18,11 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   URLs, and the openccu-lite addon catalogue can declare `session.header_since` for it, after which the box stops
   putting the session id into the addon's addresses (history, bookmarks, referrers). The header is read on openccu-lite
   only; a CCU passes a client's header through and ignores it. (task 50)
+- **A double click on a device or channel name in the device grid opens the rename dialog** for exactly that row -
+  the same dialog as the ✎ button and _Rename_ in the row menu. **F2** opens it for the selected row, and so does
+  **Enter**. A single click still only selects, the double click neither opens nor closes the channels, and a double
+  click anywhere else in the row or on a column edge does what it did before. The `:0` channel, which has no name of
+  its own to change, opens nothing. (task 46)
 
 ### Changed
 

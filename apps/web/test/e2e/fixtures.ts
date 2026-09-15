@@ -370,6 +370,8 @@ export interface Simulator {
     getInstallMode(iface: string): number;
     /** Devices that appear the next time the install mode is switched on. */
     scriptNewDevices(iface: string, devices: unknown[], delay?: number): void;
+    /** A device and its channels, added at once; every logic layer is told with `newDevices`. */
+    addDevice(iface: string, ...descriptions: unknown[]): unknown[];
     /**
      * The temporary BidCos pairing key (#20), as `setTempKey` left it. Optional on purpose: it
      * arrived in hm-simulator 1.0.1, and the spec that uses it feature-detects rather than pinning

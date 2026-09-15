@@ -8,6 +8,17 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ## [Unreleased]
 
+### New
+
+- **CCU addon on openccu-lite: the settings page and the Systemsteuerung hand-over take the box's session header.**
+  `settings.cgi` (and `service.cgi`) read the `X-Occulite-Session` that openccu-lite's gate sets behind a session it
+  validated, confirm it with the box (`GET /api/auth/v1/state` must say `authenticated` and name that very `sid`; an
+  API token, another session or a box that cannot be asked mean refused), and only then fall back to `?sid=` and the
+  token cookie. With the frontend reading the header since beta.16, the whole addon now works without `?sid=` in its
+  URLs, and the openccu-lite addon catalogue can declare `session.header_since` for it, after which the box stops
+  putting the session id into the addon's addresses (history, bookmarks, referrers). The header is read on openccu-lite
+  only; a CCU passes a client's header through and ignores it. (task 50)
+
 ### Fixed
 
 - **CCU addon on openccu-lite: an `HMM_AUTH_MODE=token` left in `etc/hmm.env` by a CCU install no longer keeps the

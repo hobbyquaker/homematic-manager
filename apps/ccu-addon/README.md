@@ -128,6 +128,20 @@ GET /addons/hmm/api   (upgrade)  ->  no cookie            ->  401
 - `SameSite=Strict` means a foreign page cannot make the browser send it, which is what makes the
   missing Origin check on the socket harmless.
 
+**On openccu-lite the same page is opened without `?sid=`** (task 50). The box's lighttpd gate lets
+no request under `/addons/` through without a live session and hands the CGI the id of that session
+as `X-Occulite-Session` (`HTTP_X_OCCULITE_SESSION`), after removing any copy a client sent. The
+header is a claim until the box confirms it: `settings.cgi` asks `GET http://127.0.0.1/api/auth/v1/state`
+with the id as Bearer (5 s timeout), and the answer has to say `"authenticated": true` and name that
+very `sid` — an API token (authenticated, no `sid`), another session, a non-200 or a box that cannot
+be asked all mean *refused*. The id is checked against `^[A-Za-z0-9]{1,64}$` before it goes into a
+header. The header is read on openccu-lite only (`VARIANT=lite` in `/VERSION`, the rule of
+`rc.d/hmm`): a CCU's lighttpd passes a client's header straight through, so there it counts for
+nothing. The order is header, then `?sid=` through ReGa (on openccu-lite the `tclrega.so` shim
+answers the session's legacy alias), then the token cookie; a header the box does not confirm falls
+through to `?sid=`. Because both the frontend (task 45) and this page read the header, the catalogue
+can declare `session.header_since` for the addon and the box stops putting `?sid=` into its URLs.
+
 ## The optional login (D-32)
 
 `HMM_AUTH_MODE=rega` in `etc/hmm.env` puts a login page in front of the UI for everybody who does
@@ -172,7 +186,8 @@ echo 'HMM_AUTH_MODE=rega' >> /usr/local/addons/hmm/etc/hmm.env
 
 The settings page takes a WebUI `sid` or the addon's own token cookie — both are proof of the same
 ReGaHSS session check — so the link works from Systemsteuerung and from a browser that has the app
-open.
+open. On openccu-lite it takes the gate's `X-Occulite-Session` first (task 50, above), so the box
+frames it without `?sid=`.
 
 `HMM_AUTH_MODE` is the CCU's setting. On openccu-lite the rc.d script reads `HMM_AUTH_MODE_LITE`
 instead (`occulite`, the box's own login, unless it says `token`) and never `HMM_AUTH_MODE`: every
@@ -451,7 +466,14 @@ apps/ccu-addon/test/container-test.sh --idle         # needs docker
 - **cgi-test.sh** runs every CGI against a Tcl stub for `tclrega.so`: the cookie and its attributes,
   a valid, an expired, a malformed and a percent-encoded session id, a query string that tries to
   make the decoder execute commands, the service commands, and a grep for Tcl constructs newer than
-  8.2 (the CCU3 firmware's interpreter) and for paths outside `/usr/local`.
+  8.2 (the CCU3 firmware's interpreter) and for paths outside `/usr/local`. Since task 50 it also
+  runs `occulite-state-stub.tcl`, a stub `/api/auth/v1/state` with a request log, and drives the
+  openccu-lite session header through `settings.cgi` and `service.cgi`: the hand-over and the
+  settings page with the header alone, a header the box does not confirm, an answer without a `sid`,
+  one naming another session, a 500, garbage, a box that cannot be asked (all refused after one
+  call), an `@`-wrapped, line-broken, doubled, colon-carrying, token-shaped, over-long and empty
+  header (refused with no call), the fall-through to `?sid=` and to the token cookie, and a CCU
+  and a firmware without `/VERSION` ignoring the header with no call.
 - **package-test.sh** unpacks a built package into the layout a CCU installs it into — including the
   `addons/www/hmm` symlink the CGIs are reached through, which the source tree never has — runs the
   CGIs from there, and checks the SBOM against the package: its `node` component must say what the
@@ -471,7 +493,10 @@ apps/ccu-addon/test/container-test.sh --idle         # needs docker
   and the way back to `token`. Since task 43 it also follows the log: `/var/log/hmm.log` after the
   install, the settings page's switch to the addon directory and back with `service.cgi`'s log view
   following, the 1 MB rotation of both files, the fallback when `/var/log/hmm.log` cannot be written,
-  and the file going with an uninstall.
+  and the file going with an uninstall. Since task 50 the openccu-lite part also proxies
+  `/api/auth/` to the stub box and opens the hand-over, the settings page and `service.cgi` through
+  lighttpd with only `X-Occulite-Session` (the CGI's real state URL), refuses an unconfirmed and an
+  `@`-wrapped header, falls through to `?sid=`, and shows a CCU ignoring a client-sent header.
 
 Without `tclsh` on the machine (a plain WSL Debian has none) the first two run in the test image:
 

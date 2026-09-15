@@ -20,7 +20,8 @@ command -v tclsh >/dev/null || {
 }
 
 TMP="$(mktemp -d)"
-trap 'rm -rf "$TMP"' EXIT
+STATE_STUB_PID=""
+trap 'if [ -n "$STATE_STUB_PID" ]; then kill "$STATE_STUB_PID" 2>/dev/null; fi; rm -rf "$TMP"' EXIT
 
 TREE="$TMP/hmm"
 STATE="$TMP/state"
@@ -597,6 +598,204 @@ for value in rega occulite2 ''; do
     esac
 done
 cp -a "$ADDON_SRC/files/hmm/etc/default.env" "$TREE/etc/hmm.env"
+
+echo "the openccu-lite session header on settings.cgi and service.cgi (task 50)"
+# The box's gate hands a CGI the validated session as HTTP_X_OCCULITE_SESSION. The stub below is
+# the box the CGI asks about it (GET /api/auth/v1/state with the id as Bearer), on a port of its own
+# that HMM_OCCULITE_URL points the CGI at; it logs every call, so the cases where no call may be
+# made - a CCU, a malformed id - are checked against the log and not only against the answer.
+# ReGa refuses every ?sid= in this section (HMM_TEST_SESSION=invalid), so only the header can
+# admit, unless a case says otherwise.
+STATE_PORT_FILE="$TMP/state-port"
+STATE_LOG="$TMP/state-log"
+tclsh "$ADDON_SRC/test/occulite-state-stub.tcl" "$STATE_PORT_FILE" "$STATE_LOG" &
+STATE_STUB_PID=$!
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+    [ -s "$STATE_PORT_FILE" ] && break
+    sleep 1
+done
+if [ -s "$STATE_PORT_FILE" ]; then
+    pass "the stub state endpoint is up"
+else
+    fail "the stub state endpoint is up" "no port file after 10 s"
+fi
+STATE_URL="http://127.0.0.1:$(cat "$STATE_PORT_FILE" 2>/dev/null || echo 1)"
+# the ids of occulite-state-stub.tcl
+LIVE=ABCDEFGHIJKLMNOPQRSTUVWXYZ
+OLD=abcdefgh12
+NOSID=NOSIDNOSIDNOSIDNOSIDNOSI22
+OTHER=OTHERSESSIONOTHERSESSION22
+BROKEN=BROKENBROKENBROKENBROKEN22
+GARBAGE=GARBAGEGARBAGEGARBAGEGAR22
+# lite_cgi <script> <query> <header>: the CGI on a lite box, the header as the gate sets it
+lite_cgi() {
+    (cd "$TREE/www" && QUERY_STRING="$2" HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
+        HTTP_X_OCCULITE_SESSION="$3" HMM_TEST_SESSION=invalid tclsh "$STUB" "$1" 2>&1)
+}
+# state_calls: the stub's log since the last look
+state_calls() {
+    cat "$STATE_LOG" 2>/dev/null
+    : > "$STATE_LOG"
+}
+
+out="$(lite_cgi settings.cgi '' "$LIVE")"
+case "$out" in
+    *'Status: 302 Found'*) pass "a header the box confirms: the hand-over redirects into the UI without ?sid=" ;;
+    *) fail "a header the box confirms: the hand-over redirects into the UI without ?sid=" "$out" ;;
+esac
+case "$out" in
+    *'Set-Cookie: hmm_token=deadbeefcafebabe0123456789abcdef; Path=/addons/hmm/; HttpOnly; SameSite=Strict'*) pass "with the same token cookie as the ?sid= hand-over" ;;
+    *) fail "with the same token cookie as the ?sid= hand-over" "$out" ;;
+esac
+case "$out" in
+    *'Location: /addons/hmm/'*) pass "to the UI, where the frontend reads the header itself" ;;
+    *) fail "to the UI, where the frontend reads the header itself" "$out" ;;
+esac
+calls="$(state_calls)"
+if [ "$calls" = "GET /api/auth/v1/state Bearer $LIVE" ]; then
+    pass "the box was asked exactly once, with the id as Bearer"
+else
+    fail "the box was asked exactly once, with the id as Bearer" "$calls"
+fi
+out="$(lite_cgi settings.cgi 'cmd=config' "$LIVE")"
+case "$out" in
+    *'Anmeldung / Login'*) pass "and ?cmd=config renders the settings page with the header alone" ;;
+    *) fail "and ?cmd=config renders the settings page with the header alone" "$out" ;;
+esac
+case "$out" in
+    *'&amp;sid='* | *'settings.cgi?sid='*) fail "whose links carry no sid" "$out" ;;
+    *) pass "whose links carry no sid" ;;
+esac
+case "$out" in
+    *'href="/addons/hmm/">Homematic Manager'*) pass "and whose open link goes to the UI directly" ;;
+    *) fail "and whose open link goes to the UI directly" "$out" ;;
+esac
+state_calls >/dev/null
+out="$(lite_cgi settings.cgi 'sid=@1234567890@' "$LIVE")"
+case "$out" in
+    *'Status: 302 Found'*) pass "the header comes first: a ?sid= ReGa refuses next to a confirmed header is let in" ;;
+    *) fail "the header comes first: a ?sid= ReGa refuses next to a confirmed header is let in" "$out" ;;
+esac
+state_calls >/dev/null
+out="$(lite_cgi service.cgi 'cmd=status' "$LIVE")"
+case "$out" in
+    *'"running"'*) pass "service.cgi takes the header too (the log view is a page the shell opens)" ;;
+    *) fail "service.cgi takes the header too (the log view is a page the shell opens)" "$out" ;;
+esac
+state_calls >/dev/null
+# an image from before occulited's task 125 hands out ten-character ids, and the gate sends those
+out="$(lite_cgi settings.cgi '' "$OLD")"
+case "$out" in
+    *'Status: 302 Found'*) pass "a ten-character session id of an older image is asked about and let in" ;;
+    *) fail "a ten-character session id of an older image is asked about and let in" "$out" ;;
+esac
+calls="$(state_calls)"
+if [ "$calls" = "GET /api/auth/v1/state Bearer $OLD" ]; then
+    pass "with that id as Bearer"
+else
+    fail "with that id as Bearer" "$calls"
+fi
+
+# what the box does not confirm is refused, and every failure is a refusal
+for case in "UNKNOWNUNKNOWNUNKNOWNUNK22:an id the box does not know" "$NOSID:a state without a sid (what a box answers for an API token)" \
+    "$OTHER:a state that names another session" "$BROKEN:a 500 from the box" "$GARBAGE:an answer that is no JSON"; do
+    id="${case%%:*}"
+    what="${case#*:}"
+    out="$(lite_cgi settings.cgi '' "$id")"
+    case "$out" in
+        *'Sitzung ungültig'*) pass "$what is refused" ;;
+        *) fail "$what is refused" "$out" ;;
+    esac
+    case "$out" in
+        *deadbeefcafebabe*) fail "and never sees the token" "$out" ;;
+        *) pass "and never sees the token" ;;
+    esac
+    calls="$(state_calls)"
+    case "$calls" in
+        "GET /api/auth/v1/state Bearer $id") pass "after the box was asked" ;;
+        *) fail "after the box was asked" "$calls" ;;
+    esac
+done
+out="$(lite_cgi service.cgi 'cmd=status' "UNKNOWNUNKNOWNUNKNOWNUNK22")"
+case "$out" in
+    *'"error":"invalid session"'*) pass "service.cgi refuses an unconfirmed header" ;;
+    *) fail "service.cgi refuses an unconfirmed header" "$out" ;;
+esac
+state_calls >/dev/null
+out="$(cd "$TREE/www" && QUERY_STRING='' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="http://127.0.0.1:1" \
+    HTTP_X_OCCULITE_SESSION="$LIVE" HMM_TEST_SESSION=invalid tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'Sitzung ungültig'*) pass "a box that cannot be asked (connection refused) means refused, not admitted" ;;
+    *) fail "a box that cannot be asked (connection refused) means refused, not admitted" "$out" ;;
+esac
+
+# a value that cannot be an openccu-lite session id on any image never reaches the box (the
+# frontend's shapes, B-36): only 26 of [A-Z2-7] or ten alphanumerics go into an Authorization header
+crlf="$(printf '%s\r\nX-Injected: 1' "$LIVE")"
+for case in "@$LIVE@:an @-wrapped id" "$crlf:an id with a line break" "$LIVE $LIVE:two ids" "$LIVE:x:an id with a colon" \
+    "olt_0123456789abcdef0123456789abcdef:an API token of the box's shape" "abcdefghijklmnopqrstuvwxyz:26 lower-case letters" \
+    "ABCDEFGHIJKLMNOPQRSTUVWXY:25 characters" "ABCDEFGHIJKLMNOPQRSTUVWXYZ2:27 characters" "abcdefgh123:eleven alphanumerics" \
+    "abcdefgh1:nine alphanumerics" ":an empty header"; do
+    id="${case%:*}"
+    what="${case##*:}"
+    out="$(lite_cgi settings.cgi '' "$id")"
+    case "$out" in
+        *'Sitzung ungültig'*) pass "$what is refused" ;;
+        *) fail "$what is refused" "$out" ;;
+    esac
+    calls="$(state_calls)"
+    if [ -z "$calls" ]; then
+        pass "without asking the box"
+    else
+        fail "without asking the box" "$calls"
+    fi
+done
+
+# the fallbacks stay: ?sid= through ReGa when the box does not confirm the header (as the
+# frontend does, B-36), and the token cookie
+out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
+    HTTP_X_OCCULITE_SESSION="UNKNOWNUNKNOWNUNKNOWNUNK22" tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'Status: 302 Found'*) pass "an unconfirmed header falls through to a ?sid= ReGa confirms" ;;
+    *) fail "an unconfirmed header falls through to a ?sid= ReGa confirms" "$out" ;;
+esac
+state_calls >/dev/null
+out="$(cd "$TREE/www" && QUERY_STRING='cmd=config' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
+    HTTP_X_OCCULITE_SESSION="UNKNOWNUNKNOWNUNKNOWNUNK22" HTTP_COOKIE='hmm_token=deadbeefcafebabe0123456789abcdef' \
+    HMM_TEST_SESSION=invalid tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'Anmeldung / Login'*) pass "and to the token cookie" ;;
+    *) fail "and to the token cookie" "$out" ;;
+esac
+state_calls >/dev/null
+
+# a CCU passes a client's header straight through to the CGI, so there it is not looked at at all
+for case in "$CCU_VERSION:a CCU" "$TMP/no-such-VERSION:a firmware without /VERSION"; do
+    file="${case%%:*}"
+    what="${case#*:}"
+    out="$(cd "$TREE/www" && QUERY_STRING='' HMM_VERSION_FILE="$file" HMM_OCCULITE_URL="$STATE_URL" \
+        HTTP_X_OCCULITE_SESSION="$LIVE" HMM_TEST_SESSION=invalid tclsh "$STUB" settings.cgi 2>&1)"
+    case "$out" in
+        *'Sitzung ungültig'*) pass "$what ignores the header: the confirmed id is refused there" ;;
+        *) fail "$what ignores the header: the confirmed id is refused there" "$out" ;;
+    esac
+    calls="$(state_calls)"
+    if [ -z "$calls" ]; then
+        pass "and no state call is made"
+    else
+        fail "and no state call is made" "$calls"
+    fi
+    out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@' HMM_VERSION_FILE="$file" HMM_OCCULITE_URL="$STATE_URL" \
+        HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
+    case "$out" in
+        *'Status: 302 Found'*) pass "while ?sid= works there as before" ;;
+        *) fail "while ?sid= works there as before" "$out" ;;
+    esac
+    state_calls >/dev/null
+done
+kill "$STATE_STUB_PID" 2>/dev/null
+wait "$STATE_STUB_PID" 2>/dev/null
+STATE_STUB_PID=""
 
 echo "rc.d/hmm's LiteAuthMode, the decision itself (B-22)"
 # The function as shipped, run under sh with hmm.env's two lines in the environment, the way Start

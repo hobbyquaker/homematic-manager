@@ -45,7 +45,9 @@ answers that save a round trip:
 - **`exec()` of HM-Script**, `dom.GetObject`, `system.GetSessionVarStr` from application code:
   gone. The Tcl form `rega_script` used by addon settings pages for the **session check** keeps
   working through openccu-lite's `tclrega.so` shim, and this addon's `settings.cgi` uses exactly
-  that one call and no other.
+  that one call and no other. Since 3.0.0-beta.18 the settings page reads the gate's
+  `X-Occulite-Session` first (task 50), confirmed with `GET /api/auth/v1/state`, and needs no
+  `?sid=` on openccu-lite at all; the shim answers the `?sid=` of older shells as before.
 - **ReGa ids** (`dom.GetObject(1234)`): there are none. The identity of an object is its **ref**,
   `<interface>.<address>` — `BidCos-RF.JEQ0230153:1` for a channel, `HmIP-RF.0001D3C99C7D4B` for a
   device.

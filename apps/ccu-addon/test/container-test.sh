@@ -350,6 +350,48 @@ for _ in 1 2 3 4 5 6 7 8 9 10; do
 done
 check "and the backend runs occulite again" "login: the session openccu-lite hands over is checked against" \
     "$(dex 'cat /tmp/journal-addon-hmm.log')"
+
+echo
+echo "openccu-lite: the settings page and the hand-over through lighttpd with the gate's header alone (task 50)"
+# On the box, lighttpd's gate sets X-Occulite-Session behind a session it validated, and the CGI
+# asks http://127.0.0.1/api/auth/v1/state about it - the box's lighttpd proxies /api/ to occulited.
+# Here the test's lighttpd stands in for both: a drop-in proxies /api/auth/ to the stub box of the
+# B-32 section above (which answers the state with the session's sid), and curl plays the gate.
+# The CGI's real URL is what is exercised, nothing is overridden.
+dex "printf '%s\n' '\$HTTP[\"url\"] =~ \"^/api/auth/\" {' '    proxy.server = (\"\" => ((\"host\" => \"127.0.0.1\", \"port\" => 18181)))' '}' \
+    > /usr/local/etc/config/lighttpd/zz-occulite-stub.conf && /etc/init.d/S50lighttpd reload" >/dev/null
+sleep 1
+lighttpd_actions >/dev/null
+check "the stub box answers the state through lighttpd, as occulited would" "\"sid\":\"$SID\"" \
+    "$(dex "curl -s -H 'Authorization: Bearer $SID' http://127.0.0.1/api/auth/v1/state")"
+dex ': > /tmp/occulite-stub.log' >/dev/null
+out="$(dex "curl -si -H 'X-Occulite-Session: $SID' 'http://127.0.0.1/addons/hmm/settings.cgi'")"
+check "the hand-over with the header and no ?sid= redirects into the UI" "302 Found" "$out"
+check "with the token cookie, issued as for ?sid=" "Set-Cookie: hmm_token=" "$out"
+check "scoped, HttpOnly and SameSite=Strict" "Path=/addons/hmm/; HttpOnly; SameSite=Strict" "$out"
+check "after the CGI asked the box about the header's session" "occulite stub: GET /api/auth/v1/state live" \
+    "$(dex 'cat /tmp/occulite-stub.log')"
+out="$(dex "curl -si -H 'X-Occulite-Session: $SID' 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config'")"
+check "the settings page renders with the header alone" "Anmeldung / Login" "$out"
+absent "and its links carry no sid" "&amp;sid=" "$out"
+out="$(dex "curl -si -H 'X-Occulite-Session: $SID' 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config&sid=%400000000000%40'")"
+check "a ?sid= the shim refuses next to the confirmed header: the header decides" "Anmeldung / Login" "$out"
+out="$(dex "curl -si -H 'X-Occulite-Session: $SID' 'http://127.0.0.1/addons/hmm/service.cgi?cmd=status'")"
+check "service.cgi answers the header too" '"running"' "$out"
+dex ': > /tmp/occulite-stub.log' >/dev/null
+out="$(dex "curl -si -H 'X-Occulite-Session: 0000000000' 'http://127.0.0.1/addons/hmm/settings.cgi'")"
+check "a header the box does not confirm is refused" "Sitzung ung" "$out"
+absent "and gets no cookie" "Set-Cookie" "$out"
+check "after the box was asked" "occulite stub: GET /api/auth/v1/state unknown" "$(dex 'cat /tmp/occulite-stub.log')"
+dex ': > /tmp/occulite-stub.log' >/dev/null
+out="$(dex "curl -si -H 'X-Occulite-Session: @$SID@' 'http://127.0.0.1/addons/hmm/settings.cgi'")"
+check "an @-wrapped header is refused" "Sitzung ung" "$out"
+none "without asking the box" "$(dex 'cat /tmp/occulite-stub.log')"
+out="$(dex "curl -si -H 'X-Occulite-Session: 0000000000' 'http://127.0.0.1/addons/hmm/settings.cgi?sid=%40${SID}%40'")"
+check "an unconfirmed header falls through to a ?sid= the shim confirms" "302 Found" "$out"
+dex 'rm -f /usr/local/etc/config/lighttpd/zz-occulite-stub.conf && /etc/init.d/S50lighttpd reload' >/dev/null
+sleep 1
+lighttpd_actions >/dev/null
 # back to a CCU for everything below, which reads the log file
 dex 'rm -f /VERSION /usr/bin/systemd-cat && cp /tmp/hmm.env.t41 /usr/local/addons/hmm/etc/hmm.env \
     && /usr/local/etc/config/rc.d/hmm restart' >/dev/null
@@ -461,6 +503,10 @@ check "a wrong sid is refused" "Sitzung ung" "$out"
 absent "and gets no cookie" "Set-Cookie" "$out"
 out="$(dex "curl -si 'http://127.0.0.1/addons/hmm/settings.cgi'")"
 check "no sid at all is refused" "Sitzung ung" "$out"
+# task 50: a CCU's lighttpd passes a client's X-Occulite-Session through, so on a CCU it counts for nothing
+out="$(dex "curl -si -H 'X-Occulite-Session: $SID' 'http://127.0.0.1/addons/hmm/settings.cgi'")"
+check "a client-sent X-Occulite-Session is ignored on a CCU (task 50)" "Sitzung ung" "$out"
+absent "and gets no cookie" "Set-Cookie" "$out"
 
 echo
 echo "the UI through the proxy rule"

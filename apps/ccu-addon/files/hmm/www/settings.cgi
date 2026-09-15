@@ -10,6 +10,9 @@
 #                 SameSite=Strict (and Secure when the WebUI was reached over https)
 #     -> invalid  a page that says so, in German and English
 #
+# On openccu-lite the same page is opened without ?sid=: the box's gate sends the session it
+# validated as X-Occulite-Session, and the CGI confirms that with the box (task 50, lib/session.tcl).
+#
 # The browser then replays the cookie on the WebSocket upgrade of the same origin all by itself,
 # the host rewrites it into the `?token=` form the backend accepts, and `packages/ui` needs to know
 # nothing about any of it (task 12). The host itself runs with `--no-issue-cookie`: behind the CCU's
@@ -33,9 +36,14 @@ if {[info exists params(cmd)]} {
     set cmd $params(cmd)
 }
 
-# `sid` is how the WebUI calls this; the token cookie is how a browser that already has the app
-# open calls it. Both were issued after the same ReGaHSS session check.
-if {![check_session $sid] && ![has_token_cookie]} {
+# Three ways in, tried in this order and lazily. The session header is how openccu-lite's gate
+# calls this (task 50: the header the gate sets behind a session it validated, confirmed with the
+# box before it counts, read on openccu-lite only - a CCU passes a client's header through); with
+# it neither the button nor ?cmd=config needs ?sid= in its address. `sid` is how the CCU WebUI
+# calls this, checked with ReGaHSS - and what an openccu-lite shell from before the header, or one
+# that still appends the legacy alias, sends. The token cookie is how a browser that already has
+# the app open calls it; it was issued after one of the two checks above.
+if {![check_request_session $sid] && ![has_token_cookie]} {
     html_header
     puts "<!DOCTYPE html><html lang=\"de\"><head><meta charset=\"utf-8\">"
     puts "<title>Homematic Manager</title></head><body style=\"font-family:sans-serif;margin:2em\">"

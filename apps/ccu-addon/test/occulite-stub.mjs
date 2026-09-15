@@ -9,7 +9,7 @@
  * `--lite-mode` switched off the WebAssembly its HTTP parser runs on - fails the login visibly:
  *
  *   GET /api/meta/v1/enums   200 for `Authorization: Bearer <sid>` with the live session, 401 otherwise
- *   GET /api/auth/v1/state   `{"authenticated":true,"user":…,"role":"admin"}` for it, not authenticated otherwise
+ *   GET /api/auth/v1/state   `{"authenticated":true,"user":…,"role":"admin","sid":…}` for it, not authenticated otherwise
  *
  * Every request is logged, so the test can see the backend's requests arrive. Anything else is a 404.
  */
@@ -36,7 +36,9 @@ createServer((request, response) => {
             send(401, {error: 'unauthorized'});
         }
     } else if (request.method === 'GET' && path === '/api/auth/v1/state') {
-        send(200, live ? {authenticated: true, user: USER, role: 'admin'} : {authenticated: false});
+        // `sid` as occulited writes it for a session that is not a token: the settings page's
+        // header check wants the state to name the very session it asked about (task 50)
+        send(200, live ? {authenticated: true, user: USER, role: 'admin', sid: SID} : {authenticated: false});
     } else {
         send(404, {error: 'not found'});
     }

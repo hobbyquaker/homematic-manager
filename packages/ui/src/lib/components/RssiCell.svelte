@@ -1,57 +1,141 @@
 <script lang="ts">
-    import {rssiClass} from '@homematic-manager/core';
+    import type {RssiBand} from '@homematic-manager/core';
+    import {rssiBand} from '@homematic-manager/core';
 
     interface Props {
         /** dBm, or `undefined` where the interface reported 65536 ("not known"). */
         value?: number | undefined;
+        /** The band's name in the UI language, for the tooltip; the English label without it. */
+        labelOf?: (band: RssiBand) => string;
         testId?: string | undefined;
     }
 
-    let {value = undefined, testId = undefined}: Props = $props();
+    let {value = undefined, labelOf = (band: RssiBand) => band.label, testId = undefined}: Props = $props();
 
-    const level = $derived(rssiClass(value));
+    const band = $derived(rssiBand(value));
+    /** The unit is not in the pill, only in the column head - but a tooltip stands on its own. */
+    const description = $derived(band === undefined ? undefined : `${String(value)} dBm · ${labelOf(band)}`);
+
+    /** The four bars, weakest first. */
+    const BARS = [1, 2, 3, 4] as const;
 </script>
 
 <!--
-    The colour of an RSSI value carries its meaning, so it is a semantic class over a theme token
-    rather than the inline `#rrgg00` gradient of 2.x (`rssiColor()`, homematic-manager.js:4649).
-    The gradient looked the same in both themes, and in the dark one "good" was unreadable green on
-    near-black. The four classes are the ones core's `rssiClass()` produces and they are asserted in
-    both themes (D-22).
+    #161, arrangement B: the value without its unit, then four signal bars, on the fill of one of
+    the eight steps of core's `RSSI_BANDS`. The bars carry the step for someone who cannot tell the
+    greens apart; bars and value are drawn in the step's ink, light or dark, never in a colour. The
+    fill and the ink are theme tokens (`--hmm-rssi-<step>`, D-22), and a reading the interface does
+    not know is a faint dash with neither.
 -->
-<span
-    class="hmm-rssi"
-    class:hmm-rssi-good={level === 'good'}
-    class:hmm-rssi-medium={level === 'medium'}
-    class:hmm-rssi-bad={level === 'bad'}
-    class:hmm-rssi-unknown={level === 'unknown'}
-    data-rssi={level}
-    data-testid={testId}>{value === undefined ? '—' : `${value} dBm`}</span
->
+{#if band === undefined}
+    <span class="hmm-rssi hmm-rssi-unknown" data-rssi="unknown" data-testid={testId}>—</span>
+{:else}
+    <span
+        class="hmm-rssi hmm-rssi-{band.step}"
+        role="img"
+        title={description}
+        aria-label={description}
+        data-rssi={band.step}
+        data-bars={band.bars}
+        data-testid={testId}
+        ><span class="hmm-rssi-value">{value}</span><span class="hmm-rssi-bars" aria-hidden="true"
+            >{#each BARS as bar (bar)}<span class="hmm-rssi-bar" class:hmm-rssi-bar-off={bar > band.bars}
+                ></span>{/each}</span
+        ></span
+    >
+{/if}
 
 <style>
     .hmm-rssi {
-        display: inline-block;
-        min-width: 62px;
-        padding: 0 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 5px;
+        box-sizing: border-box;
+        min-width: 56px;
+        height: 18px;
+        padding: 0 5px;
         border-radius: 2px;
-        text-align: right;
         font-family: var(--hmm-font-mono);
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+        white-space: nowrap;
+        vertical-align: middle;
     }
 
-    .hmm-rssi-good {
-        background: var(--hmm-rssi-good);
-        color: var(--hmm-rssi-text);
+    .hmm-rssi-bars {
+        display: inline-flex;
+        align-items: flex-end;
+        gap: 1px;
+        height: 11px;
     }
 
-    .hmm-rssi-medium {
-        background: var(--hmm-rssi-medium);
-        color: var(--hmm-rssi-text);
+    .hmm-rssi-bar {
+        display: block;
+        width: 3px;
+        border-radius: 0.5px;
+        background: currentColor;
     }
 
-    .hmm-rssi-bad {
-        background: var(--hmm-rssi-bad);
-        color: var(--hmm-rssi-text);
+    .hmm-rssi-bar:nth-child(1) {
+        height: 4px;
+    }
+
+    .hmm-rssi-bar:nth-child(2) {
+        height: 6px;
+    }
+
+    .hmm-rssi-bar:nth-child(3) {
+        height: 8.5px;
+    }
+
+    .hmm-rssi-bar:nth-child(4) {
+        height: 11px;
+    }
+
+    .hmm-rssi-bar-off {
+        opacity: 0.28;
+    }
+
+    .hmm-rssi-1 {
+        background: var(--hmm-rssi-1);
+        color: var(--hmm-rssi-1-text);
+    }
+
+    .hmm-rssi-2 {
+        background: var(--hmm-rssi-2);
+        color: var(--hmm-rssi-2-text);
+    }
+
+    .hmm-rssi-3 {
+        background: var(--hmm-rssi-3);
+        color: var(--hmm-rssi-3-text);
+    }
+
+    .hmm-rssi-4 {
+        background: var(--hmm-rssi-4);
+        color: var(--hmm-rssi-4-text);
+    }
+
+    .hmm-rssi-5 {
+        background: var(--hmm-rssi-5);
+        color: var(--hmm-rssi-5-text);
+    }
+
+    .hmm-rssi-6 {
+        background: var(--hmm-rssi-6);
+        color: var(--hmm-rssi-6-text);
+    }
+
+    .hmm-rssi-7 {
+        background: var(--hmm-rssi-7);
+        color: var(--hmm-rssi-7-text);
+    }
+
+    .hmm-rssi-8 {
+        background: var(--hmm-rssi-8);
+        color: var(--hmm-rssi-8-text);
     }
 
     .hmm-rssi-unknown {

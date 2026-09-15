@@ -106,8 +106,14 @@
                                 <span class="hmm-set-interface-name">{bidcosInterfaceLabel(entry)}</span>
                             {/if}
                         </td>
-                        <td><RssiCell value={measured?.rx} /></td>
-                        <td><RssiCell value={measured?.tx} testId={`set-interface-tx-${entry.ADDRESS}`} /></td>
+                        <td><RssiCell value={measured?.rx} labelOf={(band) => t(band.label)} /></td>
+                        <td>
+                            <RssiCell
+                                value={measured?.tx}
+                                labelOf={(band) => t(band.label)}
+                                testId={`set-interface-tx-${entry.ADDRESS}`}
+                            />
+                        </td>
                     </tr>
                 {/each}
             </tbody>

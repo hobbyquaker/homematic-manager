@@ -320,6 +320,7 @@
                     {@const measured = stores.radio.pair(interfaceName, rootOf(flatRow.rootId), row.ADDRESS)}
                     <RssiCell
                         value={column.key === 'rx' ? measured?.rx : measured?.tx}
+                        labelOf={(band) => t(band.label)}
                         testId={`rssi-${flatRow.rootId}-${row.ADDRESS}-${column.key}`}
                     />
                 {:else if column.key.startsWith('set:') && flatRow.depth === 0}
@@ -344,6 +345,7 @@
                     {@const measured = stores.radio.pair(interfaceName, row.ADDRESS, gateway)}
                     <RssiCell
                         value={column.key.startsWith('rx:') ? measured?.rx : measured?.tx}
+                        labelOf={(band) => t(band.label)}
                         testId={`rssi-${row.ADDRESS}-${gateway}-${column.key.slice(0, 2)}`}
                     />
                 {:else}

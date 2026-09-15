@@ -257,6 +257,15 @@ export const UI_MESSAGES: MessageCatalogue = {
             en: 'A switch is proposed only when the best interface receives the device at least this much better than the configured one - two reads of the same link differ by a few dB.',
         },
     Proposed: {de: 'Vorgeschlagen', en: 'Proposed'},
+    // #161: the bands of core's `RSSI_BANDS`, in the tooltip of an RSSI pill ("-65 dBm · Ausreichend")
+    'Very good (maximum)': {de: 'Sehr gut (Maximum)', en: 'Very good (maximum)'},
+    'Very good': {de: 'Sehr gut', en: 'Very good'},
+    Good: {de: 'Gut', en: 'Good'},
+    'Good (normal operation)': {de: 'Gut (Normalbetrieb)', en: 'Good (normal operation)'},
+    Sufficient: {de: 'Ausreichend', en: 'Sufficient'},
+    'Sufficient to weak': {de: 'Ausreichend bis schwach', en: 'Sufficient to weak'},
+    Poor: {de: 'Schlecht', en: 'Poor'},
+    Critical: {de: 'Kritisch', en: 'Critical'},
     Gain: {de: 'Gewinn', en: 'Gain'},
     'Below the margin': {de: 'Unter dem Mindestabstand', en: 'Below the margin'},
     'Not heard by the configured receiver': {

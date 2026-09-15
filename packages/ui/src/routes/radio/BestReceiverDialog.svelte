@@ -163,9 +163,9 @@
                             <td>{stores.nameOf(row.address)}</td>
                             <td class="hmm-mono">{row.address}</td>
                             <td>{labelOf(row.configured)}</td>
-                            <td><RssiCell value={row.configuredTx} /></td>
+                            <td><RssiCell value={row.configuredTx} labelOf={(band) => t(band.label)} /></td>
                             <td>{labelOf(row.best)}</td>
-                            <td><RssiCell value={row.bestTx} /></td>
+                            <td><RssiCell value={row.bestTx} labelOf={(band) => t(band.label)} /></td>
                             <td class="hmm-best-receiver-gain" data-testid={`best-receiver-gain-${row.address}`}>
                                 {row.gain === undefined ? '—' : `+${String(row.gain)} dB`}
                             </td>

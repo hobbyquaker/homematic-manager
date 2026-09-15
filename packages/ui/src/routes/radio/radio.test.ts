@@ -1,4 +1,4 @@
-import type {RssiInfo} from '@homematic-manager/core';
+import type {RssiBand, RssiInfo} from '@homematic-manager/core';
 import {fireEvent, render, screen, waitFor, within} from '@testing-library/svelte';
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 
@@ -11,32 +11,68 @@ describe('the RSSI cell', () => {
         document.documentElement.removeAttribute('data-theme');
     });
 
-    it('prints the value with its unit, and a dash for what the interface does not know', () => {
+    // #161, arrangement B: the unit is in the column head, and in the tooltip, never in the pill
+    it('prints the value without its unit, names value, unit and band in the tooltip', () => {
         const {container} = render(RssiCell, {props: {value: -52}});
-        expect(container.textContent).toBe('-52 dBm');
+        const cell = container.querySelector('.hmm-rssi')!;
+        expect(container.textContent).toBe('-52');
+        expect(container.textContent).not.toContain('dBm');
+        expect(cell.getAttribute('title')).toBe('-52 dBm · Good (normal operation)');
+        expect(cell.getAttribute('aria-label')).toBe('-52 dBm · Good (normal operation)');
+        expect(cell.getAttribute('role')).toBe('img');
+        // the bars are drawing, not text
+        expect(cell.querySelector('.hmm-rssi-bars')?.getAttribute('aria-hidden')).toBe('true');
+    });
 
-        const empty = render(RssiCell, {props: {}});
-        expect(empty.container.textContent).toBe('—');
+    it('takes the band name in the UI language from its caller', () => {
+        const german: Record<string, string> = {Sufficient: 'Ausreichend'};
+        const {container} = render(RssiCell, {
+            props: {value: -65, labelOf: (band: RssiBand) => german[band.label] ?? band.label},
+        });
+        expect(container.querySelector('.hmm-rssi')?.getAttribute('title')).toBe('-65 dBm · Ausreichend');
+    });
+
+    it('draws a faint dash without fill, bars or tooltip for what the interface does not know', () => {
+        // 65536 is the interface process' placeholder for "not known", 128 the radio chip's (#154)
+        for (const value of [undefined, 65_536, 128]) {
+            const {container} = render(RssiCell, {props: {value}});
+            const cell = container.querySelector('.hmm-rssi')!;
+            expect(container.textContent, String(value)).toBe('—');
+            expect(cell.getAttribute('data-rssi')).toBe('unknown');
+            expect(cell.classList.contains('hmm-rssi-unknown')).toBe(true);
+            expect(cell.hasAttribute('data-bars')).toBe(false);
+            expect(cell.hasAttribute('title')).toBe(false);
+            expect(cell.querySelectorAll('.hmm-rssi-bar')).toHaveLength(0);
+        }
     });
 
     // D-22: the RSSI colours carry meaning, so they are asserted in both themes. The class is what
-    // the theme switches, never the structure - the 2.x inline `#rrgg00` could not do that.
+    // the tokens reach the pill by, never an inline colour.
     for (const theme of ['light', 'dark'] as const) {
-        it(`keeps the four RSSI classes apart in the ${theme} theme`, () => {
+        it(`gives each of the eight steps its class, its bars and its value in the ${theme} theme`, () => {
             document.documentElement.setAttribute('data-theme', theme);
             const cases = [
-                {value: -10, expected: 'good'},
-                {value: -60, expected: 'medium'},
-                {value: -110, expected: 'bad'},
-                {value: undefined, expected: 'unknown'},
-                // 65536 is the interface process' placeholder for "not known".
-                {value: 65_536, expected: 'unknown'},
+                {value: -30, step: 1, bars: 4},
+                {value: -35, step: 2, bars: 4},
+                {value: -40, step: 2, bars: 4},
+                {value: -45, step: 3, bars: 4},
+                {value: -55, step: 4, bars: 3},
+                {value: -65, step: 5, bars: 3},
+                {value: -75, step: 6, bars: 2},
+                {value: -85, step: 7, bars: 1},
+                {value: -90, step: 7, bars: 1},
+                {value: -112, step: 8, bars: 0},
             ];
-            for (const {value, expected} of cases) {
+            for (const {value, step, bars} of cases) {
                 const {container} = render(RssiCell, {props: {value}});
-                const cell = container.querySelector('.hmm-rssi');
-                expect(cell?.getAttribute('data-rssi'), String(value)).toBe(expected);
-                expect(cell?.classList.contains(`hmm-rssi-${expected}`), String(value)).toBe(true);
+                const cell = container.querySelector('.hmm-rssi')!;
+                expect(cell.getAttribute('data-rssi'), String(value)).toBe(String(step));
+                expect(cell.getAttribute('data-bars'), String(value)).toBe(String(bars));
+                expect(cell.classList.contains(`hmm-rssi-${String(step)}`), String(value)).toBe(true);
+                expect(container.textContent, String(value)).toBe(String(value));
+                // always four bars; the ones above the reading's count are dimmed
+                expect(cell.querySelectorAll('.hmm-rssi-bar')).toHaveLength(4);
+                expect(cell.querySelectorAll('.hmm-rssi-bar:not(.hmm-rssi-bar-off)'), String(value)).toHaveLength(bars);
             }
         });
     }
@@ -71,16 +107,19 @@ describe('the radio tab', () => {
         expect(row?.textContent).toContain('1 %');
     });
 
-    it('draws a receive/send pair per gateway, coloured by the core classes', async () => {
+    it('draws a receive/send pair per gateway in the steps of core, the band named in the UI language (#161)', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/rssi'});
 
         await waitFor(() => {
             expect(screen.getByTestId('rssi-MEQ0123456-BidCoS-RF-rx')).toBeTruthy();
         });
-        expect(screen.getByTestId('rssi-MEQ0123456-BidCoS-RF-rx').textContent).toBe('-52 dBm');
-        expect(screen.getByTestId('rssi-MEQ0123456-BidCoS-RF-rx').getAttribute('data-rssi')).toBe('medium');
-        // LEQ0456789 is at -112 dBm: bad. Its tx is 65536 and therefore unknown.
-        expect(screen.getByTestId('rssi-LEQ0456789-BidCoS-RF-rx').getAttribute('data-rssi')).toBe('bad');
+        const rx = screen.getByTestId('rssi-MEQ0123456-BidCoS-RF-rx');
+        expect(rx.textContent).toBe('-52');
+        expect(rx.getAttribute('data-rssi')).toBe('4');
+        // the demo profile chooses German (D-36)
+        expect(rx.getAttribute('title')).toBe('-52 dBm · Gut (Normalbetrieb)');
+        // LEQ0456789 is at -112 dBm: critical. Its tx is 65536 and therefore unknown.
+        expect(screen.getByTestId('rssi-LEQ0456789-BidCoS-RF-rx').getAttribute('data-rssi')).toBe('8');
         expect(screen.getByTestId('rssi-LEQ0456789-BidCoS-RF-tx').getAttribute('data-rssi')).toBe('unknown');
     });
 
@@ -145,7 +184,7 @@ describe('the radio tab', () => {
         await waitFor(() => {
             expect(screen.getByTestId('rssi-MEQ0123456-JEQ0234567-rx')).toBeTruthy();
         });
-        expect(screen.getByTestId('rssi-MEQ0123456-JEQ0234567-rx').textContent).toBe('-70 dBm');
+        expect(screen.getByTestId('rssi-MEQ0123456-JEQ0234567-rx').textContent).toBe('-70');
     });
 
     it('builds the HmIP matrix from the RSSI_DEVICE and RSSI_PEER events', async () => {
@@ -267,7 +306,9 @@ describe('setBidcosInterface', () => {
             expect(row?.textContent).toContain('7');
         });
         // a device that never failed shows nothing at all rather than a zero
-        expect(document.querySelector('[data-row-id="GEQ0567890"]')?.textContent).not.toContain('0 dBm7');
+        expect(
+            document.querySelector('[data-row-id="GEQ0567890"] [data-column-key="unreach"]')?.textContent.trim(),
+        ).toBe('');
 
         await fireEvent.click(screen.getByTestId('radio-reset-unreach'));
         await waitFor(() => {

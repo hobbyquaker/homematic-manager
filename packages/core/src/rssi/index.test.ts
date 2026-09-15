@@ -7,9 +7,9 @@ import {
     normaliseRssiValue,
     proposeReceivers,
     receiverLabel,
+    RSSI_BANDS,
     RSSI_UNKNOWN,
-    rssiClass,
-    rssiColor,
+    rssiBand,
     RssiStore,
 } from './index.js';
 
@@ -85,41 +85,73 @@ describe('normaliseRssiInfo', () => {
     });
 });
 
-describe('rssiClass', () => {
-    it('grades a signal', () => {
-        expect(rssiClass(-10)).toBe('good');
-        expect(rssiClass(-20)).toBe('good');
-        expect(rssiClass(-60)).toBe('medium');
-        expect(rssiClass(-100)).toBe('medium');
-        expect(rssiClass(-101)).toBe('bad');
-        expect(rssiClass(-130)).toBe('bad');
+describe('rssiBand (#161)', () => {
+    /** The scale as decided on the issue: step, lower edge, bars, label. */
+    const decided = [
+        [1, -30, 4, 'Very good (maximum)'],
+        [2, -40, 4, 'Very good'],
+        [3, -50, 4, 'Good'],
+        [4, -60, 3, 'Good (normal operation)'],
+        [5, -70, 3, 'Sufficient'],
+        [6, -80, 2, 'Sufficient to weak'],
+        [7, -90, 1, 'Poor'],
+        [8, Number.NEGATIVE_INFINITY, 0, 'Critical'],
+    ] as const;
+
+    it('has the eight bands of Variante 3, strongest first, with the bars of arrangement B', () => {
+        expect(RSSI_BANDS.map((band) => [band.step, band.min, band.bars, band.label])).toEqual(decided);
     });
 
-    it('calls a missing value unknown', () => {
-        expect(rssiClass(undefined)).toBe('unknown');
-        expect(rssiClass(RSSI_UNKNOWN)).toBe('unknown');
-    });
-});
-
-describe('rssiColor', () => {
-    it('reproduces the 2.x gradient', () => {
-        expect(rssiColor(-20)).toBe('#00ff00');
-        expect(rssiColor(-100)).toBe('#ffff00');
-        expect(rssiColor(-120)).toBe('#ff0000');
+    it('puts a reading at a lower edge into that band, and one below it into the next', () => {
+        for (const [step, min, bars] of decided.slice(0, 7)) {
+            expect(rssiBand(min), `${min}`).toMatchObject({step, bars});
+            expect(rssiBand(min - 1)?.step, `${min - 1}`).toBe(step + 1);
+        }
     });
 
-    it('clamps both channels instead of producing nonsense', () => {
-        expect(rssiColor(-1)).toBe('#00ff00');
-        expect(rssiColor(-126)).toBe('#ff0000');
-        // #154: a placeholder has no colour at all, and -200 is not one - it is -48 dBm
-        expect(rssiColor(0)).toBeUndefined();
-        expect(rssiColor(128)).toBeUndefined();
-        expect(rssiColor(-208)).toBe(rssiColor(-48));
+    it('finds the band of a reading inside each one', () => {
+        const inside: [number, number][] = [
+            [-1, 1],
+            [-25, 1],
+            [-35, 2],
+            [-45, 3],
+            [-55, 4],
+            [-65, 5],
+            [-75, 6],
+            [-85, 7],
+            [-95, 8],
+            [-126, 8],
+        ];
+        for (const [value, step] of inside) {
+            expect(rssiBand(value)?.step, `${value}`).toBe(step);
+        }
     });
 
-    it('has no colour for a value there is none for', () => {
-        expect(rssiColor(undefined)).toBeUndefined();
-        expect(rssiColor(RSSI_UNKNOWN)).toBeUndefined();
+    it('lights fewer bars the weaker the signal, never more', () => {
+        const bars = RSSI_BANDS.map((band) => band.bars);
+        expect(bars).toEqual([...bars].sort((a, b) => b - a));
+    });
+
+    it('has no band for the placeholders of #154, and reads a lost sign the way normaliseRssiValue does', () => {
+        for (const placeholder of [
+            undefined,
+            0,
+            1,
+            -1 * 0,
+            128,
+            -128,
+            129,
+            -129,
+            256,
+            -256,
+            RSSI_UNKNOWN,
+            -RSSI_UNKNOWN,
+        ]) {
+            expect(rssiBand(placeholder), `${placeholder}`).toBeUndefined();
+        }
+        // -208 is -48 dBm, 37 is -37 dBm
+        expect(rssiBand(-208)?.step).toBe(3);
+        expect(rssiBand(37)?.step).toBe(2);
     });
 });
 

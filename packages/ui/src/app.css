@@ -63,12 +63,29 @@
     --hmm-error: #cd3131;
     --hmm-focus: #0070c1;
 
-    /* The RSSI scale of the radio tab. The 2.x gradient was computed per cell and looked the same
-       in both themes; these are the three classes core's `rssiClass()` produces, as tokens. */
-    --hmm-rssi-good: #c9e6c9;
-    --hmm-rssi-medium: #f3e2ad;
-    --hmm-rssi-bad: #f0c0c0;
-    --hmm-rssi-text: #262626;
+    /*
+     * The RSSI scale of the Funk tab (#161): the fill of each step of core's `RSSI_BANDS` and the
+     * ink of its value and bars. The fills are "Variante 3" as voted on the issue and are the same
+     * in both themes - a pill is a small, self-contained surface, so it needs no second palette -
+     * which is why the two dark blocks repeat them unchanged. The ink is #1a1a1a or white, whichever
+     * has the higher contrast on the fill; `theme.test.ts` computes both and requires 4.5 : 1.
+     */
+    --hmm-rssi-1: #00ff66;
+    --hmm-rssi-1-text: #1a1a1a;
+    --hmm-rssi-2: #00c844;
+    --hmm-rssi-2-text: #1a1a1a;
+    --hmm-rssi-3: #48c738;
+    --hmm-rssi-3-text: #1a1a1a;
+    --hmm-rssi-4: #82c738;
+    --hmm-rssi-4-text: #1a1a1a;
+    --hmm-rssi-5: #b8c738;
+    --hmm-rssi-5-text: #1a1a1a;
+    --hmm-rssi-6: #fdd835;
+    --hmm-rssi-6-text: #1a1a1a;
+    --hmm-rssi-7: #fb8c00;
+    --hmm-rssi-7-text: #1a1a1a;
+    --hmm-rssi-8: #d32f2f;
+    --hmm-rssi-8-text: #ffffff;
 
     /* Metrics. 13 px is `she`'s reading size; the grids were 12 px and one line taller than they
        needed to be at that size. */
@@ -162,10 +179,22 @@
         --hmm-error: #f48771;
         --hmm-focus: #569cd6;
 
-        --hmm-rssi-good: #2f5d3a;
-        --hmm-rssi-medium: #6d5a1c;
-        --hmm-rssi-bad: #6f2f2f;
-        --hmm-rssi-text: #f0f0f0;
+        --hmm-rssi-1: #00ff66;
+        --hmm-rssi-1-text: #1a1a1a;
+        --hmm-rssi-2: #00c844;
+        --hmm-rssi-2-text: #1a1a1a;
+        --hmm-rssi-3: #48c738;
+        --hmm-rssi-3-text: #1a1a1a;
+        --hmm-rssi-4: #82c738;
+        --hmm-rssi-4-text: #1a1a1a;
+        --hmm-rssi-5: #b8c738;
+        --hmm-rssi-5-text: #1a1a1a;
+        --hmm-rssi-6: #fdd835;
+        --hmm-rssi-6-text: #1a1a1a;
+        --hmm-rssi-7: #fb8c00;
+        --hmm-rssi-7-text: #1a1a1a;
+        --hmm-rssi-8: #d32f2f;
+        --hmm-rssi-8-text: #ffffff;
 
         --hmm-device-image-filter: invert(1) hue-rotate(180deg) contrast(0.75) brightness(0.9);
     }
@@ -208,10 +237,22 @@
     --hmm-error: #f48771;
     --hmm-focus: #569cd6;
 
-    --hmm-rssi-good: #2f5d3a;
-    --hmm-rssi-medium: #6d5a1c;
-    --hmm-rssi-bad: #6f2f2f;
-    --hmm-rssi-text: #f0f0f0;
+    --hmm-rssi-1: #00ff66;
+    --hmm-rssi-1-text: #1a1a1a;
+    --hmm-rssi-2: #00c844;
+    --hmm-rssi-2-text: #1a1a1a;
+    --hmm-rssi-3: #48c738;
+    --hmm-rssi-3-text: #1a1a1a;
+    --hmm-rssi-4: #82c738;
+    --hmm-rssi-4-text: #1a1a1a;
+    --hmm-rssi-5: #b8c738;
+    --hmm-rssi-5-text: #1a1a1a;
+    --hmm-rssi-6: #fdd835;
+    --hmm-rssi-6-text: #1a1a1a;
+    --hmm-rssi-7: #fb8c00;
+    --hmm-rssi-7-text: #1a1a1a;
+    --hmm-rssi-8: #d32f2f;
+    --hmm-rssi-8-text: #ffffff;
 
     --hmm-device-image-filter: invert(1) hue-rotate(180deg) contrast(0.75) brightness(0.9);
 }

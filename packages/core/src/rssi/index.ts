@@ -14,11 +14,6 @@ import type {Paramset, ParamsetValue} from '../rpc/values.js';
 /** What an interface process sends instead of a value it does not have. */
 export const RSSI_UNKNOWN = 65536;
 
-/** The thresholds of the 2.x `rssiColor()` (homematic-manager.js:4649). */
-export const RSSI_BAD = -120;
-export const RSSI_MEDIUM = -100;
-export const RSSI_GOOD = -20;
-
 /** What one partner measures of another. `undefined` where the interface reported 65536. */
 export interface RssiPair {
     /** What this device receives from the peer, in dBm. */
@@ -33,8 +28,46 @@ export type RawRssiInfo = Readonly<Record<string, Readonly<Record<string, readon
 /** device or interface address -> peer address -> the pair. */
 export type RssiMatrix = Record<string, Record<string, RssiPair>>;
 
-/** How good a signal is, for the colour of the grid cell. */
-export type RssiClass = 'unknown' | 'bad' | 'medium' | 'good';
+/** A step of the RSSI scale, 1 the strongest signal, 8 the weakest. */
+export type RssiStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+
+/** How many of the pill's four signal bars a step lights. */
+export type RssiBars = 0 | 1 | 2 | 3 | 4;
+
+/** One band of the RSSI scale. */
+export interface RssiBand {
+    readonly step: RssiStep;
+    /** The lowest reading that still belongs to the band, in dBm; `-Infinity` for the last one. */
+    readonly min: number;
+    readonly bars: RssiBars;
+    /** What the band means, in English - the key the UI translates it by. */
+    readonly label: string;
+}
+
+/**
+ * The RSSI scale of the Funk tab (#161): eight bands, 10 dB apart from -30 to -90 dBm.
+ *
+ * Until 3.0.0-beta.17 there were three classes from the 2.x colour gradient - good from -20 dBm,
+ * bad below -100 - and nearly every real link, which lies between -40 and -90, was the same yellow
+ * "medium". Issue #161 (@Baxxy13) asked for a finer scale closer to the OpenCCU WebUI, which colours
+ * green above -70, yellow down to -90 and red below; both of its edges are edges here. The maintainer
+ * posted three eight-step palettes, and on 2026-09-15 he, @Baxxy13 and @Herbert-Testmann settled on
+ * "Variante 3" with signal bars in the pill (arrangement B), so that the step reads without its
+ * colour too. The fills are theme tokens (`--hmm-rssi-<step>`); this table is the part that is not
+ * a colour.
+ *
+ * A reading belongs to the first band whose lower edge it reaches: -30 is step 1, -40 is step 2.
+ */
+export const RSSI_BANDS: readonly RssiBand[] = [
+    {step: 1, min: -30, bars: 4, label: 'Very good (maximum)'},
+    {step: 2, min: -40, bars: 4, label: 'Very good'},
+    {step: 3, min: -50, bars: 4, label: 'Good'},
+    {step: 4, min: -60, bars: 3, label: 'Good (normal operation)'},
+    {step: 5, min: -70, bars: 3, label: 'Sufficient'},
+    {step: 6, min: -80, bars: 2, label: 'Sufficient to weak'},
+    {step: 7, min: -90, bars: 1, label: 'Poor'},
+    {step: 8, min: Number.NEGATIVE_INFINITY, bars: 0, label: 'Critical'},
+];
 
 /**
  * One RSSI value as the CCU hands it out, as dBm - or `undefined` where it is not a measurement.
@@ -94,32 +127,15 @@ export function normaliseRssiInfo(raw: RawRssiInfo): RssiMatrix {
 }
 
 /**
- * How good a signal is. -20 dBm and better is good, -100 and worse is bad, in between is medium;
- * an absent value is unknown. The bounds come from the 2.x colour gradient.
+ * The band of {@link RSSI_BANDS} a reading falls into, or `undefined` where it is not a measurement
+ * at all (65536 and the other placeholders of #154) - the grid shows a faint dash for those.
  */
-export function rssiClass(dbm: number | undefined): RssiClass {
-    const value = normaliseRssiValue(dbm);
-    if (value === undefined) {
-        return 'unknown';
-    }
-    if (value >= RSSI_GOOD) {
-        return 'good';
-    }
-    return value >= RSSI_MEDIUM ? 'medium' : 'bad';
-}
-
-/**
- * The red/green gradient of the 2.x grid, kept so the radio tab looks the same (D-3).
- * `undefined` for a value there is none for - the cell stays empty, as it did.
- */
-export function rssiColor(dbm: number | undefined): string | undefined {
+export function rssiBand(dbm: number | undefined): RssiBand | undefined {
     const value = normaliseRssiValue(dbm);
     if (value === undefined) {
         return undefined;
     }
-    const red = channel((256 * (value - RSSI_GOOD)) / (RSSI_MEDIUM - RSSI_GOOD));
-    const green = channel((256 * (value - RSSI_BAD)) / (RSSI_MEDIUM - RSSI_BAD));
-    return `#${hex(red)}${hex(green)}00`;
+    return RSSI_BANDS.find((band) => value >= band.min);
 }
 
 /** The two fields of a `listBidcosInterfaces` entry that name it. */
@@ -283,14 +299,6 @@ function pair(rx: number | undefined, tx: number | undefined): RssiPair {
         result.tx = tx;
     }
     return result;
-}
-
-function channel(value: number): number {
-    return Math.min(255, Math.max(0, Math.round(value)));
-}
-
-function hex(value: number): string {
-    return `0${value.toString(16)}`.slice(-2);
 }
 
 /**

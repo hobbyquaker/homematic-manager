@@ -10,6 +10,7 @@ import './app.css';
 import ConnectionIndicator from './lib/components/ConnectionIndicator.svelte';
 import DeviceImage from './lib/components/DeviceImage.svelte';
 import InterfacePopup from './lib/components/InterfacePopup.svelte';
+import rssiCellSource from './lib/components/RssiCell.svelte?raw';
 import DataTableComponent from './lib/components/DataTable.svelte';
 import Notices from './lib/components/Notices.svelte';
 import ToolbarButton from './lib/components/ToolbarButton.svelte';
@@ -65,10 +66,8 @@ const MEANINGFUL_TOKENS = [
     '--hmm-backdrop',
     '--hmm-shadow-menu',
     '--hmm-shadow-toast',
-    '--hmm-rssi-good',
-    '--hmm-rssi-medium',
-    '--hmm-rssi-bad',
-    '--hmm-rssi-text',
+    // The RSSI steps (#161) are not here: their fills are the same in both themes on purpose, and
+    // `the RSSI scale` below asserts that instead.
 ];
 
 function block(css: string, selector: string): string {
@@ -155,6 +154,101 @@ describe('the theme tokens', () => {
         expect(tokenValue(mediaBlock, '--hmm-device-image-filter')).toBe(
             tokenValue(darkBlock, '--hmm-device-image-filter'),
         );
+    });
+});
+
+/**
+ * #161: the eight steps of the RSSI pill, "Variante 3" as voted on the issue on 2026-09-15.
+ *
+ * Unlike every token above, a step's fill is the same in light and dark: the pill is a small
+ * surface of its own, and its ink is chosen against the fill, not against the page. So the rule
+ * here is the opposite of `MEANINGFUL_TOKENS` - all three blocks define the step, and with the same
+ * value - and the legibility is computed rather than assumed: WCAG's contrast ratio of fill and ink
+ * from the values in this stylesheet, at least 4.5 : 1 (level AA for 12 px text), in every block.
+ */
+describe('the RSSI scale (#161)', () => {
+    const DARK_INK = '#1a1a1a';
+    const LIGHT_INK = '#ffffff';
+
+    /** step -> [fill, ink], as decided. */
+    const decided: readonly (readonly [string, string])[] = [
+        ['#00ff66', DARK_INK],
+        ['#00c844', DARK_INK],
+        ['#48c738', DARK_INK],
+        ['#82c738', DARK_INK],
+        ['#b8c738', DARK_INK],
+        ['#fdd835', DARK_INK],
+        ['#fb8c00', DARK_INK],
+        ['#d32f2f', LIGHT_INK],
+    ];
+
+    const blocks = [
+        ['light', lightBlock],
+        ['prefers-color-scheme: dark', mediaBlock],
+        ["[data-theme='dark']", darkBlock],
+    ] as const;
+
+    /** WCAG 2 relative luminance of a `#rrggbb` colour. */
+    function luminance(hex: string): number {
+        expect(hex, `${hex} is not a #rrggbb colour`).toMatch(/^#[0-9a-f]{6}$/i);
+        const [red, green, blue] = [1, 3, 5].map((start) => {
+            const channel = Number.parseInt(hex.slice(start, start + 2), 16) / 255;
+            return channel <= 0.040_45 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+        }) as [number, number, number];
+        return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+    }
+
+    function contrast(first: string, second: string): number {
+        const [lighter, darker] = [luminance(first), luminance(second)].sort((a, b) => b - a) as [number, number];
+        return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    it('defines a fill and an ink for every step in all three blocks, with the same value in each', () => {
+        for (let step = 1; step <= 8; step += 1) {
+            for (const token of [`--hmm-rssi-${String(step)}`, `--hmm-rssi-${String(step)}-text`]) {
+                const light = tokenValue(lightBlock, token);
+                expect(light, `${token} has no light value`).toBeDefined();
+                expect(tokenValue(mediaBlock, token), `${token} in prefers-color-scheme: dark`).toBe(light);
+                expect(tokenValue(darkBlock, token), `${token} under [data-theme='dark']`).toBe(light);
+            }
+        }
+    });
+
+    it('has the fills of Variante 3, each with the ink of the higher contrast', () => {
+        decided.forEach(([fill, ink], index) => {
+            const step = String(index + 1);
+            expect(tokenValue(lightBlock, `--hmm-rssi-${step}`)?.toLowerCase(), `step ${step}`).toBe(fill);
+            expect(tokenValue(lightBlock, `--hmm-rssi-${step}-text`)?.toLowerCase(), `step ${step}`).toBe(ink);
+            const other = ink === DARK_INK ? LIGHT_INK : DARK_INK;
+            expect(contrast(fill, ink), `step ${step}: ${ink} is not the more legible ink`).toBeGreaterThan(
+                contrast(fill, other),
+            );
+        });
+    });
+
+    it('keeps value and bars at 4.5 : 1 or better on every step, in both themes', () => {
+        for (const [name, source] of blocks) {
+            for (let step = 1; step <= 8; step += 1) {
+                const fill = tokenValue(source, `--hmm-rssi-${String(step)}`) ?? '';
+                const ink = tokenValue(source, `--hmm-rssi-${String(step)}-text`) ?? '';
+                expect(contrast(fill, ink), `${name}, step ${String(step)}: ${fill} / ${ink}`).toBeGreaterThanOrEqual(
+                    4.5,
+                );
+            }
+        }
+    });
+
+    it('leaves nothing of the three classes of the old scale behind', () => {
+        expect(appCss).not.toMatch(/--hmm-rssi-(good|medium|bad|text)\b/);
+    });
+
+    it('paints the pill of every step from its own two tokens', () => {
+        for (let step = 1; step <= 8; step += 1) {
+            const rule = new RegExp(
+                `\\.hmm-rssi-${String(step)} \\{\\s*background: var\\(--hmm-rssi-${String(step)}\\);\\s*color: var\\(--hmm-rssi-${String(step)}-text\\);`,
+            );
+            expect(rssiCellSource, `step ${String(step)}`).toMatch(rule);
+        }
     });
 });
 

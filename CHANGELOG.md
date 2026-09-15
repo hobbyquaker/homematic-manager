@@ -19,6 +19,20 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   putting the session id into the addon's addresses (history, bookmarks, referrers). The header is read on openccu-lite
   only; a CCU passes a client's header through and ignores it. (task 50)
 
+### Changed
+
+- **RSSI values are coloured in eight steps instead of three, with signal bars.** Until now nearly every real link
+  (-40 to -90 dBm) was the same yellow "medium", because the steps came from the 2.x gradient (good from -20 dBm, bad
+  below -100). The new scale has a step every 10 dB from -30 to -90 dBm, and OpenCCU's edges at -70 and -90 dBm are
+  edges of it too. (#161, @Baxxy13, @Herbert-Testmann)
+  - **The pill** shows the value without its unit and up to four bars, so the step can be read without telling the
+    colours apart; the unit stays in the column head (`← dBm` / `→ dBm`), and the pill is narrower than before.
+  - **The tooltip** names value, unit and band, e.g. "-65 dBm · Ausreichend".
+  - **The colours** are the same in the light and the dark theme; the text and bars on them are dark or white,
+    whichever reads better, at a contrast of at least 4.5 : 1.
+  - The same pill is used in the Funk grid, its peer sub-grid, the setBidcosInterface dialog and the best-receiver
+    dialog.
+
 ### Fixed
 
 - **CCU addon on openccu-lite: an `HMM_AUTH_MODE=token` left in `etc/hmm.env` by a CCU install no longer keeps the

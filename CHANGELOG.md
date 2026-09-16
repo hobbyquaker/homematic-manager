@@ -6,6 +6,13 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### New
+
+- **A favicon.** The browser tab shows the Homematic Manager logo (16, 32 and 48 px, taken from the desktop app's
+  icon). The login page stays without it: it loads nothing but itself.
+
 ## [3.0.0-beta.18] — 2026-09-15
 
 ### New

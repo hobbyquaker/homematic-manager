@@ -1,21 +1,20 @@
 #!/usr/bin/env bash
 #
-# Exercises the addon's CGIs against a throwaway copy of the addon tree. Needs tclsh, nothing else -
-# no CCU, no web server, no package.
+# Exercises the addon's CGIs against a throwaway copy of the addon tree. Needs tclsh and shellcheck,
+# nothing else - no CCU, no web server, no package.
 #
-#   apps/ccu-addon/test/cgi-test.sh
+#   npm run test:cgi -w apps/ccu-addon
 #
-# On a machine without tclsh (a plain WSL Debian has none), run it inside the test image:
-#
-#   docker build -t hmm-addon-test apps/ccu-addon/test
-#   docker run --rm -v "$PWD:/repo" -w /repo hmm-addon-test apps/ccu-addon/test/cgi-test.sh
+# That runs it here when both tools are installed and in the hmm-addon-test image otherwise
+# (test/in-image.sh, B-50; a plain WSL Debian has neither). Called directly it needs both on the
+# machine; without shellcheck it fails unless SKIP_SHELLCHECK=1, which CI never sets.
 
 set -uo pipefail
 
 cd "$(dirname "$0")/.." || exit 1
 ADDON_SRC="$PWD"
 command -v tclsh >/dev/null || {
-    echo "tclsh is required" >&2
+    echo "tclsh is required - or run it as: npm run test:cgi -w apps/ccu-addon (uses the test image)" >&2
     exit 1
 }
 
@@ -1218,8 +1217,10 @@ if command -v shellcheck >/dev/null 2>&1; then
             fail "shellcheck -S error is clean on $script" "$out"
         fi
     done
+elif [ "${SKIP_SHELLCHECK:-}" = 1 ]; then
+    skip "shellcheck on the addon scripts" "SKIP_SHELLCHECK=1 - CI runs it"
 else
-    skip "shellcheck on the addon scripts" "shellcheck is not installed"
+    fail "shellcheck on the addon scripts" "shellcheck is not installed; npm run test:cgi -w apps/ccu-addon runs it in the test image"
 fi
 
 echo "the host is started the way the addon needs it"

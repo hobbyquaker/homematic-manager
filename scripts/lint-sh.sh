@@ -16,9 +16,13 @@
 # Directories that do not exist are skipped, not an error: `apps/ccu-addon` was being written while
 # this was, and a checkout without it must still lint.
 #
-# ShellCheck itself is not on every machine. Without it the script still runs `sh -n` and says, in one
-# line, that the static analysis did not happen. CI has it (it ships with the GitHub Ubuntu image),
-# so the full check always runs there.
+# ShellCheck itself is not on every machine. Without it the script runs shellcheck inside the addon's
+# test image (`apps/ccu-addon/test/in-image.sh`, needs docker), and without docker either it FAILS
+# (B-50): a green lint that only checked the syntax is how beta.8's `echo -n` reached CI unseen, and
+# the fix is one `apt-get install shellcheck`. A contributor who can do neither sets
+# SKIP_SHELLCHECK=1 and gets the old syntax-only run with a warning - a choice made on the command
+# line, not a skip nobody notices. CI has shellcheck on the runner and sets
+# LINT_SH_REQUIRE_SHELLCHECK=1, which allows neither the image nor the opt-out.
 
 set -eu
 
@@ -71,9 +75,10 @@ for file in $files; do
     fi
 done
 
+# `-x` follows `.`-sourced files, which the addon's scripts use for `default.env`; one call for all
+# of them, so a failure lists everything at once.
+in_image=apps/ccu-addon/test/in-image.sh
 if command -v shellcheck >/dev/null 2>&1; then
-    # `-x` follows `.`-sourced files, which the addon's scripts use for `default.env`.
-    # one call for all of them, so a failure lists everything at once
     # shellcheck disable=SC2086
     if ! shellcheck -x -S warning $files; then
         status=1
@@ -83,10 +88,20 @@ elif [ "${LINT_SH_REQUIRE_SHELLCHECK:-}" = '1' ]; then
     # quietly stopped shipping shellcheck must not turn into a green check that tested nothing.
     echo 'lint:sh: shellcheck is not installed and LINT_SH_REQUIRE_SHELLCHECK=1'
     status=1
+elif [ "${SKIP_SHELLCHECK:-}" = '1' ]; then
+    echo 'lint:sh: WARNING - SKIP_SHELLCHECK=1: shellcheck did NOT run, only the syntax was checked.'
+    echo 'lint:sh:           CI runs it and will fail where this passed.'
+elif [ -f "$in_image" ] && command -v docker >/dev/null 2>&1; then
+    echo 'lint:sh: shellcheck is not installed here, running it in the hmm-addon-test image'
+    # shellcheck disable=SC2086
+    if ! HMM_TEST_IN=image sh "$in_image" shellcheck -x -S warning $files; then
+        status=1
+    fi
 else
-    echo 'lint:sh: WARNING - shellcheck is not installed, only the syntax was checked.'
-    echo 'lint:sh:           Debian/Ubuntu: apt-get install shellcheck   macOS: brew install shellcheck'
-    echo 'lint:sh:           Set LINT_SH_REQUIRE_SHELLCHECK=1 to make this a failure.'
+    echo 'lint:sh: FAIL - shellcheck is not installed and there is no docker to run it in the test image.'
+    echo 'lint:sh:        Debian/Ubuntu: apt-get install shellcheck   macOS: brew install shellcheck'
+    echo 'lint:sh:        SKIP_SHELLCHECK=1 checks only the syntax (CI still runs shellcheck).'
+    status=1
 fi
 
 exit $status

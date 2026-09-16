@@ -30,6 +30,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   exe on Windows, the portable exe of your architecture when you run the portable one, and the deb of your
   architecture on a deb install - or the release page if that file is missing. The AppImage keeps updating itself:
   download in the bar, install on quit. (#163, @Herbert-Testmann)
+- **The desktop app's update downloads go to a folder called `homematic-manager-updater`.** Up to beta.18 it was
+  `@homematic-managerelectron-updater`, after an internal package name, in the user's cache directory
+  (`%LOCALAPPDATA%` on Windows, `~/Library/Caches` on macOS, `~/.cache` on Linux). The old folder stays where it is
+  and can be deleted; on Windows it holds a copy of the previously installed Setup exe.
 
 ## [3.0.0-beta.18] — 2026-09-15
 

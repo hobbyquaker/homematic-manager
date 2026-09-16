@@ -119,6 +119,12 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: false
         run: npx electron-builder ${{ matrix.target }} --publish never
 
+      # B-47 (#163): electron-updater downloads exactly the name a `latest*.yml` gives, so every
+      # name in them has to be a file here, under a name the release upload keeps as it is.
+      - name: Check the update manifests against the installers
+        working-directory: apps/electron
+        run: npm run check:update-names
+
       # D-27. The script fails when the SBOM has too few components or no Electron in it, which is
       # why it runs on every push build and not only on a tag: a broken SBOM step has to be found
       # before someone cuts a release with it.

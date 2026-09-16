@@ -22,6 +22,7 @@
     "start": "electron-vite preview",
     "typecheck": "svelte-check --tsconfig ./tsconfig.renderer.json",
     "sbom": "node scripts/sbom.mjs",
+    "check:update-names": "node scripts/update-names.mjs",
     "dist": "electron-builder --publish never",
     "dist:linux": "electron-builder --linux --publish never",
     "dist:mac": "electron-builder --mac --publish never",

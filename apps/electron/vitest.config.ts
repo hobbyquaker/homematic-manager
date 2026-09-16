@@ -4,6 +4,7 @@ export default defineConfig({
     test: {
         name: 'electron',
         environment: 'node',
-        include: ['src/**/*.test.ts'],
+        // `scripts/`: the packaging checks (B-47) run in node like the main process.
+        include: ['src/**/*.test.ts', 'scripts/**/*.test.mjs'],
     },
 });

@@ -15,7 +15,7 @@ import {BackendError} from '../errors.js';
 import {normaliseConnection} from '../config/defaults.js';
 import {RpcClient, type RpcClientOptions} from '../rpc/client.js';
 import type {CallbackHandler, CallbackServerSet} from '../rpc/server.js';
-import type {PortProbe} from '../util/net.js';
+import type {CallbackNetwork, LocalIPv4, PortProbe} from '../util/net.js';
 import {InterfaceManager, callbackBindHost, firstBidcosInterfaceAddress} from './manager.js';
 
 /** A callback server set that binds nothing. */
@@ -71,6 +71,39 @@ function fakeClients(answers: Record<string, Answer> = {}): {
     };
 }
 
+/**
+ * B-53: a machine in `192.168.1.0/24` whose CCU `ccu.lan` is `192.168.1.2` - unless the test says
+ * otherwise. `lookups` counts the name lookups, `routes` the route probes.
+ */
+function fakeNetwork(
+    options: {
+        interfaces?: LocalIPv4[];
+        hosts?: Record<string, string>;
+        route?: (address: string) => string | undefined;
+    } = {},
+): CallbackNetwork & {lookups: string[]; routes: string[]; set: (interfaces: LocalIPv4[]) => void} {
+    let interfaces = options.interfaces ?? [{address: '192.168.1.5', netmask: '255.255.255.0'}];
+    const hosts = options.hosts ?? {'ccu.lan': '192.168.1.2'};
+    const lookups: string[] = [];
+    const routes: string[] = [];
+    return {
+        lookups,
+        routes,
+        set: (next) => {
+            interfaces = next;
+        },
+        interfaces: () => interfaces,
+        resolve: (host) => {
+            lookups.push(host);
+            return Promise.resolve(/^\d+\.\d+\.\d+\.\d+$/.test(host) ? host : hosts[host]);
+        },
+        route: (address) => {
+            routes.push(address);
+            return Promise.resolve(options.route?.(address));
+        },
+    };
+}
+
 interface Harness {
     manager: InterfaceManager;
     states: InterfaceState[][];
@@ -87,6 +120,8 @@ function harness(
         answers?: Record<string, Answer>;
         probe?: (host: string, port: number) => Promise<PortProbe>;
         initBackoffMs?: number;
+        network?: CallbackNetwork;
+        keepConfiguredCallbackIp?: boolean;
     } = {},
 ): Harness {
     const states: InterfaceState[][] = [];
@@ -116,6 +151,10 @@ function harness(
         createClient: clients.create,
         createCallbackServers: () => servers,
         ...(options.initBackoffMs === undefined ? {} : {initBackoffMs: options.initBackoffMs}),
+        network: options.network ?? fakeNetwork(),
+        ...(options.keepConfiguredCallbackIp === undefined
+            ? {}
+            : {keepConfiguredCallbackIp: options.keepConfiguredCallbackIp}),
         ...(options.probe ? {probe: options.probe} : {probe: () => Promise.resolve<PortProbe>('open')}),
     });
     return {manager, states, notices, connected, servers, clients, clock};
@@ -302,6 +341,280 @@ describe('InterfaceManager.start', () => {
             connection: {host: '127.0.0.1', local: true, callback: {ip: '10.0.0.9', xmlrpcPort: 0, binrpcPort: 0}},
         });
         expect(h.manager.callbackIp).toBe('10.0.0.9');
+    });
+});
+
+/**
+ * B-53 (#162, #165): with no callback address set, "the first local address" was the default, and
+ * on a Mac with a VPN, a bridge or a link-local address listed first the CCU called back into the
+ * void. The default is now the address that reaches the CCU, worked out at every `init`.
+ */
+describe('the automatic callback address (B-53)', () => {
+    const AUTO = {callback: {ip: '', xmlrpcPort: 0, binrpcPort: 0}};
+    const initUrls = (h: Harness): RpcValue[] =>
+        h.clients.calls.filter((call) => call.method === 'init').map((call) => call.params[0] as RpcValue);
+
+    it('takes the address in the CCU subnet over interfaces listed before it', async () => {
+        const network = fakeNetwork({
+            interfaces: [
+                {address: '10.8.0.2', netmask: '255.255.255.255'}, // utun, a VPN
+                {address: '192.168.64.1', netmask: '255.255.255.0'}, // bridge100, a VM
+                {address: '192.168.1.5', netmask: '255.255.255.0'},
+            ],
+        });
+        const h = harness({connection: AUTO, network});
+        await h.manager.start();
+        expect(h.manager.callbackIp).toBe('192.168.1.5');
+        expect(initUrls(h)).toEqual(['http://192.168.1.5:2042', 'http://192.168.1.5:2042']);
+        // a CCU in our own network needs no route probe
+        expect(network.routes).toEqual([]);
+        expect(h.notices).toEqual([]);
+    });
+
+    it('never takes a link-local address listed first', async () => {
+        const network = fakeNetwork({
+            interfaces: [
+                {address: '169.254.12.34', netmask: '255.255.0.0'},
+                {address: '172.20.0.7', netmask: '255.255.0.0'},
+            ],
+        });
+        const h = harness({connection: AUTO, network});
+        await h.manager.start();
+        // the CCU is in neither network and the route says nothing: the first that is not link-local
+        expect(h.manager.callbackIp).toBe('172.20.0.7');
+        expect(network.routes).toEqual(['192.168.1.2']);
+    });
+
+    it('takes the address the route to a CCU in another network leaves from', async () => {
+        const network = fakeNetwork({
+            interfaces: [
+                {address: '10.8.0.2', netmask: '255.255.255.255'},
+                {address: '172.16.23.50', netmask: '255.255.255.0'},
+            ],
+            hosts: {'ccu.lan': '172.16.24.145'},
+            route: () => '172.16.23.50',
+        });
+        const h = harness({connection: AUTO, network});
+        await h.manager.start();
+        expect(h.manager.callbackIp).toBe('172.16.23.50');
+    });
+
+    it('ignores a route whose source is no address it offers, or is link-local', async () => {
+        const network = fakeNetwork({
+            interfaces: [
+                {address: '169.254.1.1', netmask: '255.255.0.0'},
+                {address: '10.0.0.3', netmask: '255.255.255.0'},
+            ],
+            hosts: {'ccu.lan': '172.16.24.145'},
+            route: () => '169.254.1.1',
+        });
+        const h = harness({connection: AUTO, network});
+        await h.manager.start();
+        expect(h.manager.callbackIp).toBe('10.0.0.3');
+    });
+
+    it('resolves a CCU given by name', async () => {
+        const network = fakeNetwork({
+            interfaces: [
+                {address: '10.0.0.3', netmask: '255.255.255.0'},
+                {address: '192.168.178.20', netmask: '255.255.255.0'},
+            ],
+            hosts: {'ccu3-webui': '192.168.178.2'},
+        });
+        const h = harness({connection: {...AUTO, host: 'ccu3-webui'}, network});
+        // before the first connect only an address literal can be matched: the first address
+        expect(h.manager.callbackIp).toBe('10.0.0.3');
+        await h.manager.start();
+        expect(network.lookups).toEqual(['ccu3-webui']);
+        expect(h.manager.callbackIp).toBe('192.168.178.20');
+    });
+
+    it('matches an address literal before the first connect', () => {
+        const network = fakeNetwork({
+            interfaces: [
+                {address: '10.0.0.3', netmask: '255.255.255.0'},
+                {address: '192.168.178.20', netmask: '255.255.255.0'},
+            ],
+        });
+        const h = harness({connection: {...AUTO, host: '192.168.178.2'}, network});
+        expect(h.manager.callbackIp).toBe('192.168.178.20');
+    });
+
+    it('falls back to the first address when the name does not resolve', async () => {
+        const network = fakeNetwork({hosts: {}});
+        const h = harness({connection: {...AUTO, host: 'nowhere.invalid'}, network});
+        await h.manager.start();
+        expect(h.manager.callbackIp).toBe('192.168.1.5');
+        expect(network.routes).toEqual([]);
+    });
+
+    it('works it out again at every connect, so a new lease is followed', async () => {
+        const network = fakeNetwork();
+        const h = harness({connection: AUTO, network});
+        await h.manager.start();
+        expect(h.manager.callbackIp).toBe('192.168.1.5');
+        // one lookup for both interfaces of the same connect
+        expect(network.lookups).toEqual(['ccu.lan']);
+
+        network.set([{address: '192.168.1.77', netmask: '255.255.255.0'}]);
+        await h.manager.reconnect();
+        expect(h.manager.callbackIp).toBe('192.168.1.77');
+        expect(initUrls(h).slice(2)).toEqual(['http://192.168.1.77:2042', 'http://192.168.1.77:2042']);
+
+        // and the de-registration names the URL each interface was registered with
+        await h.manager.stop();
+        const deinit = h.clients.calls.filter((call) => call.method === 'init' && call.params[1] === '');
+        expect(deinit.map((call) => call.params[0])).toEqual(['http://192.168.1.77:2042', 'http://192.168.1.77:2042']);
+    });
+
+    it('keeps an address that is set and fits', async () => {
+        const network = fakeNetwork({
+            interfaces: [
+                {address: '192.168.1.5', netmask: '255.255.255.0'},
+                {address: '192.168.1.6', netmask: '255.255.255.0'},
+            ],
+        });
+        const h = harness({connection: {callback: {ip: '192.168.1.6', xmlrpcPort: 0, binrpcPort: 0}}, network});
+        await h.manager.start();
+        expect(h.manager.callbackIp).toBe('192.168.1.6');
+        expect(h.manager.callbackWarning).toBeUndefined();
+        expect(h.manager.states().every((state) => state.callbackWarning === undefined)).toBe(true);
+    });
+
+    it('uses the automatic address, and says so once, when the set one is no address of this machine', async () => {
+        const network = fakeNetwork();
+        const h = harness({connection: {callback: {ip: '192.168.0.99', xmlrpcPort: 0, binrpcPort: 0}}, network});
+        await h.manager.start();
+        expect(h.manager.callbackIp).toBe('192.168.1.5');
+        expect(initUrls(h)).toEqual(['http://192.168.1.5:2042', 'http://192.168.1.5:2042']);
+        const warning = {address: '192.168.0.99', reason: 'notLocal', auto: '192.168.1.5'};
+        expect(h.manager.callbackWarning).toEqual(warning);
+        expect(h.manager.states().map((state) => state.callbackWarning)).toEqual([warning, warning]);
+        const said = h.notices.filter((notice) => notice.message.includes('192.168.0.99'));
+        expect(said).toHaveLength(1);
+        expect(said[0]?.level).toBe('warn');
+
+        await h.manager.reconnect();
+        expect(h.notices.filter((notice) => notice.message.includes('192.168.0.99'))).toHaveLength(1);
+
+        // the address comes back: used again, and the warning is gone
+        network.set([
+            {address: '192.168.1.5', netmask: '255.255.255.0'},
+            {address: '192.168.0.99', netmask: '255.255.255.0'},
+        ]);
+        await h.manager.reconnect();
+        expect(h.manager.callbackIp).toBe('192.168.0.99');
+        // 192.168.0.99 is not in the CCU's network, so it is kept with the other warning
+        expect(h.manager.callbackWarning?.reason).toBe('otherNetwork');
+    });
+
+    it('keeps a set address outside the CCU network, with a warning', async () => {
+        const network = fakeNetwork({
+            interfaces: [
+                {address: '192.168.1.5', netmask: '255.255.255.0'},
+                {address: '10.211.55.2', netmask: '255.255.255.0'},
+            ],
+        });
+        const h = harness({connection: {callback: {ip: '10.211.55.2', xmlrpcPort: 0, binrpcPort: 0}}, network});
+        await h.manager.start();
+        expect(h.manager.callbackIp).toBe('10.211.55.2');
+        expect(h.manager.callbackWarning).toEqual({
+            address: '10.211.55.2',
+            reason: 'otherNetwork',
+            auto: '192.168.1.5',
+        });
+        expect(h.notices.filter((notice) => notice.level === 'warn')).toHaveLength(1);
+    });
+
+    it('does not warn about a set address that is the route to a routed CCU', async () => {
+        const network = fakeNetwork({
+            interfaces: [
+                {address: '10.211.55.2', netmask: '255.255.255.0'},
+                {address: '172.16.23.50', netmask: '255.255.255.0'},
+            ],
+            hosts: {'ccu.lan': '172.16.24.145'},
+            route: () => '172.16.23.50',
+        });
+        const h = harness({connection: {callback: {ip: '172.16.23.50', xmlrpcPort: 0, binrpcPort: 0}}, network});
+        await h.manager.start();
+        expect(h.manager.callbackWarning).toBeUndefined();
+    });
+
+    it('takes a set address as it is where the host says so (task 38, a container)', async () => {
+        const network = fakeNetwork();
+        const h = harness({
+            connection: {callback: {ip: '192.168.0.99', xmlrpcPort: 0, binrpcPort: 0}},
+            network,
+            keepConfiguredCallbackIp: true,
+        });
+        await h.manager.start();
+        expect(h.manager.callbackIp).toBe('192.168.0.99');
+        expect(h.manager.callbackWarning).toBeUndefined();
+        expect(network.lookups).toEqual([]);
+    });
+
+    it('never questions a set loopback address', async () => {
+        const network = fakeNetwork();
+        const h = harness({connection: {callback: {ip: '127.0.0.1', xmlrpcPort: 0, binrpcPort: 0}}, network});
+        await h.manager.start();
+        expect(h.manager.callbackIp).toBe('127.0.0.1');
+        expect(h.manager.callbackWarning).toBeUndefined();
+    });
+
+    it('calls a CCU on the loopback back on the loopback', async () => {
+        const network = fakeNetwork();
+        const h = harness({connection: {...AUTO, host: '127.0.0.1'}, network});
+        expect(h.manager.callbackIp).toBe('127.0.0.1');
+        await h.manager.start();
+        expect(h.manager.callbackIp).toBe('127.0.0.1');
+    });
+
+    it('stays on the loopback for local: true and looks nothing up (#144)', async () => {
+        const network = fakeNetwork({interfaces: [{address: '10.0.0.3', netmask: '255.255.255.0'}]});
+        const h = harness({connection: {...AUTO, host: '127.0.0.1', local: true}, network});
+        await h.manager.start();
+        expect(h.manager.callbackIp).toBe('127.0.0.1');
+        expect(network.lookups).toEqual([]);
+        expect(network.routes).toEqual([]);
+    });
+
+    it('subscribes nothing when it is stopped during the name lookup', async () => {
+        let answer: ((value: string | undefined) => void) | undefined;
+        const network = {
+            ...fakeNetwork(),
+            resolve: () =>
+                new Promise<string | undefined>((resolve) => {
+                    answer = resolve;
+                }),
+        };
+        const h = harness({connection: AUTO, network});
+        const starting = h.manager.start();
+        await vi.waitFor(() => {
+            expect(answer).toBeDefined();
+        });
+        const stopping = h.manager.stop();
+        answer?.('192.168.1.2');
+        await Promise.all([starting, stopping]);
+        expect(h.clients.calls.filter((call) => call.method === 'init' && call.params[1] !== '')).toEqual([]);
+    });
+
+    it('falls back to the old rule when the interface list throws', async () => {
+        const network = fakeNetwork();
+        let calls = 0;
+        const throwing: CallbackNetwork = {
+            ...network,
+            interfaces: () => {
+                calls += 1;
+                if (calls > 1) {
+                    throw new Error('no interfaces');
+                }
+                return network.interfaces();
+            },
+        };
+        const h = harness({connection: AUTO, network: throwing});
+        expect(h.manager.callbackIp).toBe('192.168.1.5');
+        await h.manager.start();
+        expect(typeof h.manager.callbackIp).toBe('string');
     });
 });
 

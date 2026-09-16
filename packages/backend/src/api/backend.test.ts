@@ -1400,6 +1400,83 @@ describe('paramsets, values and links', () => {
         await h.backend.stop();
     });
 
+    it('answers config.callbackAddresses for the configured CCU and for a host being typed (B-53)', async () => {
+        let managerOptions: InterfaceManagerOptions | undefined;
+        const network = {
+            interfaces: () => [
+                {address: '10.8.0.2', netmask: '255.255.255.255'},
+                {address: '192.168.1.5', netmask: '255.255.255.0'},
+            ],
+            resolve: (host: string) =>
+                Promise.resolve(host === 'ccu.lan' ? '192.168.1.2' : /^[\d.]+$/.test(host) ? host : undefined),
+            route: () => Promise.resolve('192.168.1.5'),
+        };
+        const h = await harness({
+            backend: {
+                network,
+                createInterfaceManager: (options) => {
+                    managerOptions = options;
+                    return new InterfaceManager(options);
+                },
+            },
+        });
+        expect(managerOptions?.network).toBe(network);
+        expect(managerOptions).not.toHaveProperty('keepConfiguredCallbackIp');
+        expect(await h.backend.request('config.callbackAddresses')).toEqual({
+            host: 'ccu.lan',
+            hostAddress: '192.168.1.2',
+            auto: {address: '192.168.1.5', reason: 'subnet'},
+            addresses: [
+                {address: '10.8.0.2', inSubnet: false},
+                {address: '192.168.1.5', inSubnet: true},
+                {address: '127.0.0.1', inSubnet: false},
+            ],
+        });
+        const typed = await h.backend.request('config.callbackAddresses', ' 172.16.24.145 ');
+        expect(typed.host).toBe('172.16.24.145');
+        expect(typed.auto).toEqual({address: '192.168.1.5', reason: 'route'});
+        expect(typed.addresses.every((entry) => !entry.inSubnet)).toBe(true);
+        // `null` is what an omitted argument becomes over the WebSocket
+        expect((await h.backend.request('config.callbackAddresses', null as never)).host).toBe('ccu.lan');
+        await h.backend.stop();
+    });
+
+    it('takes an injected address list as the network when none is given (B-53)', async () => {
+        const h = await harness();
+        const info = await h.backend.request('config.callbackAddresses', '127.0.0.1');
+        expect(info.auto).toEqual({address: '127.0.0.1', reason: 'loopback'});
+        expect(info.addresses.map((entry) => entry.address)).toEqual(['192.168.1.5', '127.0.0.1']);
+        expect(info).not.toHaveProperty('keepsConfigured');
+        await h.backend.stop();
+    });
+
+    it('keeps a set callback address as it is in a container or where it was set at start (B-53)', async () => {
+        let managerOptions: InterfaceManagerOptions | undefined;
+        const container = await harness({
+            backend: {
+                inContainer: true,
+                createInterfaceManager: (options) => {
+                    managerOptions = options;
+                    return new InterfaceManager(options);
+                },
+            },
+        });
+        expect(managerOptions?.keepConfiguredCallbackIp).toBe(true);
+        expect((await container.backend.request('config.callbackAddresses')).keepsConfigured).toBe(true);
+        await container.backend.stop();
+
+        const pinned = await harness({backend: {pinnedCallback: {ip: '192.168.0.10'}}});
+        expect((await pinned.backend.request('config.callbackAddresses')).keepsConfigured).toBe(true);
+        await pinned.backend.stop();
+    });
+
+    it('stays on the loopback for local: true (B-53)', async () => {
+        const h = await harness({connection: {host: '127.0.0.1', local: true}});
+        const info = await h.backend.request('config.callbackAddresses', 'ccu.lan');
+        expect(info.auto).toEqual({address: '127.0.0.1', reason: 'loopback'});
+        await h.backend.stop();
+    });
+
     it('says nothing about publishing outside a container (task 38)', async () => {
         const h = await harness();
         expect(await h.backend.request('config.get')).not.toHaveProperty('publishCallbackPorts');

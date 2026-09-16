@@ -82,9 +82,9 @@ describe('InterfaceManager without injected parts', () => {
         expect(manager.callbackIp).toBe('127.0.0.1');
     });
 
-    it('takes the first local address when the callback address is empty', () => {
+    it('takes the first local address when the callback address is empty and the CCU is elsewhere', () => {
         const manager = new InterfaceManager({
-            connection: normaliseConnection({host: '127.0.0.1', interfaces: ['HmIP-RF']}),
+            connection: normaliseConnection({host: '192.0.2.10', interfaces: ['HmIP-RF']}),
             handler,
             localAddresses: () => ['10.1.2.3', '10.1.2.4'],
             onStateChanged: () => undefined,
@@ -95,9 +95,20 @@ describe('InterfaceManager without injected parts', () => {
 
     it('falls back to loopback when this machine has no external address', () => {
         const manager = new InterfaceManager({
-            connection: normaliseConnection({host: '127.0.0.1', interfaces: ['HmIP-RF']}),
+            connection: normaliseConnection({host: '192.0.2.10', interfaces: ['HmIP-RF']}),
             handler,
             localAddresses: () => [],
+            onStateChanged: () => undefined,
+            onNotice: () => undefined,
+        });
+        expect(manager.callbackIp).toBe('127.0.0.1');
+    });
+
+    it('calls a CCU on the loopback back on the loopback (B-53)', () => {
+        const manager = new InterfaceManager({
+            connection: normaliseConnection({host: '127.0.0.1', interfaces: ['HmIP-RF']}),
+            handler,
+            localAddresses: () => ['10.1.2.3'],
             onStateChanged: () => undefined,
             onNotice: () => undefined,
         });

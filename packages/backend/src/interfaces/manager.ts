@@ -22,6 +22,7 @@
 
 import type {
     CallbackPins,
+    CallbackWarning,
     ConnectionConfig,
     InterfaceState,
     ResolvedInterface,
@@ -46,7 +47,18 @@ import {
 import {interfaceTargets, type InterfaceTarget} from '../config/defaults.js';
 import {RpcClient, type RpcCallRecord, type RpcClientOptions} from '../rpc/client.js';
 import {CallbackServers, type CallbackHandler, type CallbackServerSet} from '../rpc/server.js';
-import {localIPv4Addresses, probePortState, withTimeout, type PortProbe} from '../util/net.js';
+import {
+    describeCallbackAddresses,
+    ipv4ToNumber,
+    localIPv4Addresses,
+    pickCallbackAddress,
+    probePortState,
+    staticNetwork,
+    systemNetwork,
+    withTimeout,
+    type CallbackNetwork,
+    type PortProbe,
+} from '../util/net.js';
 
 /** How often the watchdog looks at every interface. 2.x used the same 15 s. */
 export const WATCHDOG_INTERVAL_MS = 15_000;
@@ -129,8 +141,20 @@ export interface InterfaceManagerOptions {
     readonly createClient?: (options: RpcClientOptions) => RpcClient;
     readonly createCallbackServers?: (handler: CallbackHandler) => CallbackServerSet;
     readonly probe?: (host: string, port: number) => Promise<PortProbe>;
-    /** Injected for the callback address; defaults to this machine's IPv4 addresses. */
+    /**
+     * Injected for the callback address; defaults to this machine's IPv4 addresses. A list given
+     * here has no netmasks, so the automatic choice is its first entry (or the loopback for a CCU
+     * on the loopback) unless {@link network} is given as well.
+     */
     readonly localAddresses?: () => string[];
+    /** B-53: the interfaces, name lookup and route probe the automatic callback address is worked out from. */
+    readonly network?: CallbackNetwork;
+    /**
+     * B-53: take a set callback address as it is, even when it is no address of this machine - the
+     * host set it at start (task 38) or runs in a container, where the Docker host's address is the
+     * one that works. No fallback and no warning then.
+     */
+    readonly keepConfiguredCallbackIp?: boolean;
     /**
      * Overrides the port of one interface, for a process that does not sit on the well-known one:
      * the integration tests point at an hm-simulator on an ephemeral port, and an unusual proxy
@@ -187,6 +211,11 @@ export class InterfaceManager {
     readonly #reopening = new Map<RpcProtocol, Promise<boolean>>();
 
     #watchdog: ReturnType<typeof setInterval> | undefined;
+    /** B-53: the callback address of the last connect, and what did not fit about the configured one. */
+    #callback: {ip: string; warning?: CallbackWarning} | undefined;
+    #callbackRefresh: Promise<{ip: string; warning?: CallbackWarning}> | undefined;
+    /** B-53: the warning last logged, so a watchdog round does not log it again. */
+    #callbackNoted = '';
     #detected: string[] = [];
     #stopping = false;
     #idle = false;
@@ -231,17 +260,112 @@ export class InterfaceManager {
      * one address that changes - a new lease, another network - while `init` registrations survive
      * such a change in the interface process's handler list, and every other local subscriber on a
      * CCU registers on the loopback, which is what a look at that list expects to see.
+     *
+     * B-53 (#162, #165): with no address set, the one in the CCU's network, else the one the route
+     * to the CCU leaves from, else the first one that is not link-local - worked out again at every
+     * `init`. Until the first `init` this is the same choice without the name lookup and the route.
      */
     get callbackIp(): string {
-        const configured = this.#options.connection.callback.ip;
-        if (configured !== '') {
-            return configured;
+        return this.#callback?.ip ?? this.#immediateCallbackIp();
+    }
+
+    /** B-53: the callback address set in the settings that does not fit, as of the last connect. */
+    get callbackWarning(): CallbackWarning | undefined {
+        return this.#callback?.warning;
+    }
+
+    /** Read through a method, so that the check after an `await` is not narrowed away. */
+    #hasStopped(): boolean {
+        return this.#stopping;
+    }
+
+    #network(): CallbackNetwork {
+        if (this.#options.network !== undefined) {
+            return this.#options.network;
         }
-        if (this.#options.connection.local === true) {
+        const injected = this.#options.localAddresses;
+        return injected === undefined ? systemNetwork() : staticNetwork(injected);
+    }
+
+    #immediateCallbackIp(): string {
+        const {host, local, callback} = this.#options.connection;
+        if (callback.ip !== '') {
+            return callback.ip;
+        }
+        if (local === true) {
             return LOOPBACK_IP;
         }
-        const addresses = (this.#options.localAddresses ?? (() => localIPv4Addresses()))();
-        return addresses[0] ?? LOOPBACK_IP;
+        const literal = ipv4ToNumber(host) === undefined ? undefined : host;
+        return pickCallbackAddress(host, literal, this.#network().interfaces(), undefined).auto.address;
+    }
+
+    /** B-53: works the callback address out once for every `init` that runs at the same time. */
+    #refreshCallback(): Promise<{ip: string; warning?: CallbackWarning}> {
+        this.#callbackRefresh ??= this.#resolveCallback().finally(() => {
+            this.#callbackRefresh = undefined;
+        });
+        return this.#callbackRefresh;
+    }
+
+    async #resolveCallback(): Promise<{ip: string; warning?: CallbackWarning}> {
+        const {host, local, callback} = this.#options.connection;
+        const configured = callback.ip;
+        let result: {ip: string; warning?: CallbackWarning};
+        if (local === true) {
+            // the addon: the loopback, or what was set - nothing on the CCU itself is second-guessed
+            result = {ip: configured === '' ? LOOPBACK_IP : configured};
+        } else if (
+            configured !== '' &&
+            (this.#options.keepConfiguredCallbackIp === true || configured === LOOPBACK_IP)
+        ) {
+            result = {ip: configured};
+        } else {
+            let info;
+            try {
+                info = await describeCallbackAddresses(host, this.#network());
+            } catch {
+                // the lookups never reject; an interface list that throws leaves the old rule
+                info = undefined;
+            }
+            if (info === undefined) {
+                result = {ip: configured === '' ? (localIPv4Addresses()[0] ?? LOOPBACK_IP) : configured};
+            } else if (configured === '') {
+                result = {ip: info.auto.address};
+            } else {
+                const candidate = info.addresses.find((entry) => entry.address === configured);
+                const auto = info.auto.address;
+                if (candidate === undefined) {
+                    result = {ip: auto, warning: {address: configured, reason: 'notLocal', auto}};
+                } else if (info.hostAddress !== undefined && !candidate.inSubnet && configured !== auto) {
+                    result = {ip: configured, warning: {address: configured, reason: 'otherNetwork', auto}};
+                } else {
+                    result = {ip: configured};
+                }
+            }
+        }
+        this.#callback = result;
+        this.#noteCallbackWarning(result.warning);
+        return result;
+    }
+
+    /** B-53: a warning is logged when it appears or changes, not at every watchdog `init`. */
+    #noteCallbackWarning(warning: CallbackWarning | undefined): void {
+        const key = warning === undefined ? '' : `${warning.reason} ${warning.address} ${warning.auto}`;
+        if (key === this.#callbackNoted) {
+            return;
+        }
+        this.#callbackNoted = key;
+        if (warning === undefined) {
+            return;
+        }
+        this.#options.onNotice(
+            'warn',
+            warning.reason === 'notLocal'
+                ? `callback address ${warning.address} from the settings is no address of this machine any more - ` +
+                      `the automatic address ${warning.auto} is used instead; choose "Automatic" in the settings to keep it that way`
+                : `callback address ${warning.address} from the settings is not in the CCU's network - ` +
+                      `the CCU may not reach it and send no events; the automatic address would be ${warning.auto}`,
+        );
     }
 
     /** D-31: are the subscriptions currently dropped because nobody is looking? */
@@ -522,7 +646,8 @@ export class InterfaceManager {
         if (!entry.target.resolved.init || this.#callbackFailures.has(entry.target.resolved.protocol)) {
             return;
         }
-        const url = this.#callbackUrl(entry.target.resolved.protocol);
+        // the URL it was registered with: the automatic address may have moved since (B-53)
+        const url = entry.state.callbackUrl ?? this.#callbackUrl(entry.target.resolved.protocol);
         try {
             await withTimeout(entry.client.call('init', [url, ''], BACKGROUND), SHUTDOWN_TIMEOUT_MS, () =>
                 connectionError(`${entry.name}: de-registering timed out`),
@@ -658,8 +783,13 @@ export class InterfaceManager {
             this.#noteNoCallbackServer(entry, this.#callbackFailures.get(resolved.protocol) ?? failure);
             return;
         }
-        const url = this.#callbackUrl(resolved.protocol);
-        this.#update(entry, {callbackUrl: url, callbackFailure: undefined});
+        const callback = await this.#refreshCallback();
+        // a name lookup may take seconds; a manager stopped meanwhile subscribes nothing any more
+        if (this.#hasStopped()) {
+            return;
+        }
+        const url = this.#servers.callbackUrl(resolved.protocol, callback.ip);
+        this.#update(entry, {callbackUrl: url, callbackFailure: undefined, callbackWarning: callback.warning});
         try {
             await entry.client.call('init', [url, resolved.ident], BACKGROUND);
             entry.lastEvent = this.#now();
@@ -744,6 +874,7 @@ export class InterfaceManager {
             idle?: boolean;
             callbackUrl?: string | undefined;
             callbackFailure?: {port: number; inUse: boolean} | undefined;
+            callbackWarning?: CallbackWarning | undefined;
         },
     ): void {
         const state: InterfaceState = {
@@ -774,6 +905,13 @@ export class InterfaceManager {
                 delete (state as {callbackFailure?: unknown}).callbackFailure;
             } else {
                 state.callbackFailure = changes.callbackFailure;
+            }
+        }
+        if ('callbackWarning' in changes) {
+            if (changes.callbackWarning === undefined) {
+                delete (state as {callbackWarning?: unknown}).callbackWarning;
+            } else {
+                state.callbackWarning = {...changes.callbackWarning};
             }
         }
         entry.state = state;

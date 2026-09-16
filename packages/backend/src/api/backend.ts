@@ -28,6 +28,7 @@ import {
     callbackPinOption,
     type AppConfig,
     type ApiEventName,
+    type CallbackAddressInfo,
     type CallbackPins,
     type ApiEvents,
     type ApiMethodName,
@@ -89,6 +90,7 @@ import {RegaService, type RegaServiceOptions} from '../rega/client.js';
 import type {RpcCallRecord, RpcOutValue} from '../rpc/client.js';
 import {listDevicesAnswer, type CallbackHandler} from '../rpc/server.js';
 import {ApiEventEmitter} from '../util/emitter.js';
+import {describeCallbackAddresses, staticNetwork, systemNetwork, type CallbackNetwork} from '../util/net.js';
 import {RpcLog, isWriteMethod} from '../rpc/log.js';
 import {currentOrigin, runWithOrigin} from '../rpc/origin.js';
 import {ParamsetWriter} from '../write/paramset.js';
@@ -134,6 +136,11 @@ export interface BackendOptions extends Omit<ConfigStoreOptions, 'version'> {
      * popup to say that the callback ports must be published unchanged.
      */
     readonly inContainer?: boolean;
+    /**
+     * B-53: the interfaces, name lookup and route probe the automatic callback address comes from.
+     * Absent, the machine's own - or, where `localAddresses` is injected, that list alone.
+     */
+    readonly network?: CallbackNetwork;
     readonly rpcTimeoutMs?: number;
     readonly watchdogIntervalMs?: number;
     readonly serviceMessagePollMs?: number;
@@ -431,6 +438,8 @@ export class Backend {
                 return this.#discover();
             case 'config.clearCaches':
                 return this.#clearCaches();
+            case 'config.callbackAddresses':
+                return this.#callbackAddresses(p[0]);
 
             case 'interfaces.list':
                 return this.#manager?.states() ?? [];
@@ -682,6 +691,8 @@ export class Backend {
                 ? {}
                 : {watchdogIntervalMs: this.#options.watchdogIntervalMs}),
             ...(this.#options.localAddresses === undefined ? {} : {localAddresses: this.#options.localAddresses}),
+            ...(this.#options.network === undefined ? {} : {network: this.#options.network}),
+            ...(this.#keepsConfiguredCallbackIp() ? {keepConfiguredCallbackIp: true} : {}),
             ...(this.#options.now === undefined ? {} : {now: this.#options.now}),
             ...this.#options.interfaceManagerOptions,
         });
@@ -1153,6 +1164,30 @@ export class Backend {
                 );
             }
         }
+    }
+
+    /**
+     * B-53: a callback address set at start (task 38) or inside a container is taken as it is - the
+     * Docker host's address is none of the container's, and it is still the right one.
+     */
+    #keepsConfiguredCallbackIp(): boolean {
+        return this.#options.inContainer === true || this.#config.callbackPins?.ip === true;
+    }
+
+    #network(): CallbackNetwork {
+        if (this.#options.network !== undefined) {
+            return this.#options.network;
+        }
+        const injected = this.#options.localAddresses;
+        return injected === undefined ? systemNetwork() : staticNetwork(injected);
+    }
+
+    /** B-53: `config.callbackAddresses` - for the host being typed, or the configured one. */
+    async #callbackAddresses(host: unknown): Promise<CallbackAddressInfo> {
+        const {connection} = this.#config;
+        const target = typeof host === 'string' ? host.trim() : connection.host;
+        const info = await describeCallbackAddresses(target, this.#network(), connection.local === true);
+        return this.#keepsConfiguredCallbackIp() ? {...info, keepsConfigured: true} : info;
     }
 
     async #discover(): Promise<AppConfig['discovered']> {
@@ -1843,6 +1878,7 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'config.set',
     'config.discover',
     'config.clearCaches',
+    'config.callbackAddresses',
     'interfaces.list',
     'interfaces.reconnect',
     'rega.state',

@@ -142,6 +142,60 @@ export interface AppConfig {
     publishCallbackPorts?: boolean;
 }
 
+/**
+ * B-53 (#162, #165): why the automatic callback address is the one it is.
+ *
+ * - `loopback`: the interface processes are on this machine (`local`, or a CCU at `127.x`);
+ * - `subnet`: the address of this machine in the CCU's own network;
+ * - `route`: no address shares the CCU's network, so the one the operating system sends from
+ *   towards the CCU (a routed CCU, a VPN);
+ * - `first`: neither could be found out (no CCU configured, a name that does not resolve), so the
+ *   first address of this machine that is not link-local - the only rule there was until beta.18.
+ */
+export type CallbackAutoReason = 'loopback' | 'subnet' | 'route' | 'first';
+
+/** B-53: one address of this machine, as the settings dialog offers it. */
+export interface CallbackAddressCandidate {
+    address: string;
+    /** In the CCU's network (its `address/netmask` holds the CCU); always false while the CCU's address is unknown. */
+    inSubnet: boolean;
+    /** `169.254.0.0/16`: never chosen automatically unless the CCU is there too. */
+    linkLocal?: boolean;
+}
+
+/**
+ * B-53: what `config.callbackAddresses` answers - the address the backend takes when none is set,
+ * and every address of this machine with whether it is in the CCU's network.
+ */
+export interface CallbackAddressInfo {
+    /** The CCU host it was worked out for. */
+    host: string;
+    /** That host's IPv4 address; absent when it could not be resolved (or no host is set). */
+    hostAddress?: string;
+    auto: {address: string; reason: CallbackAutoReason};
+    /** The machine's IPv4 addresses in the operating system's order, the loopback last. */
+    addresses: CallbackAddressCandidate[];
+    /**
+     * The host takes a set address as it is, even one that is not on this machine: it was set at
+     * start (task 38) or the host runs in a container, where the Docker host's address is the right
+     * one. The dialog then warns about nothing.
+     */
+    keepsConfigured?: boolean;
+}
+
+/**
+ * B-53: a set callback address that does not fit. `notLocal`: it is no address of this machine
+ * any more (another lease, another network), so the automatic one is used instead. `otherNetwork`:
+ * it is one, but neither in the CCU's network nor the one this machine sends from towards the CCU;
+ * it is used as set, and the CCU may well not reach it.
+ */
+export interface CallbackWarning {
+    address: string;
+    reason: 'notLocal' | 'otherNetwork';
+    /** The address the automatic choice would take (and, for `notLocal`, takes). */
+    auto: string;
+}
+
 /** Task 38: which of `connection.callback`'s fields the host set at start. */
 export interface CallbackPins {
     ip?: boolean;
@@ -233,6 +287,11 @@ export interface InterfaceState {
      * free port instead: a fixed port is the one that was published or opened in a firewall.
      */
     callbackFailure?: {port: number; inUse: boolean};
+    /**
+     * B-53: the callback address set in the settings does not fit this machine or the CCU's
+     * network. The interface popup shows it with a one-click switch to the automatic address.
+     */
+    callbackWarning?: CallbackWarning;
 }
 
 /**
@@ -594,6 +653,11 @@ export interface ApiMethods {
     'config.set': {params: [connection: ConnectionConfig, options?: ConfigSetOptions]; result: AppConfig};
     'config.discover': {params: []; result: DiscoveredCcu[]};
     'config.clearCaches': {params: []; result: null};
+    /**
+     * B-53: the automatic callback address and this machine's addresses, worked out for `host` -
+     * the one being typed into the settings dialog - or the configured CCU when it is absent.
+     */
+    'config.callbackAddresses': {params: [host?: string]; result: CallbackAddressInfo};
 
     'interfaces.list': {params: []; result: InterfaceState[]};
     'interfaces.reconnect': {params: [interfaceName?: string]; result: null};

@@ -179,7 +179,7 @@ procedure is in [data/README.md](data/README.md).
 `ci.yml` runs lint, the test matrix on Node 22 and 24, the web e2e suites, the merged coverage
 report, an `npm pack` with its SBOM and an amd64 Docker build with its SBOM, on every push and pull
 request. `addon.yml` builds the three addon packages on every push. `build.yml` packages the desktop
-app for all three platforms on every push to `3.0-dev` and keeps the artifacts for 14 days (D-21),
+app for all three platforms on every push to `master` and keeps the artifacts for 14 days (D-21),
 which is how the maintainer gets a dev build without cutting a release.
 
 ## hm-simulator
@@ -203,21 +203,23 @@ npm install --no-save ~/repos/hm-simulator
 
 ## Versioning (D-18)
 
-3.0 development runs at `3.0.0-dev.n`; every dev build bumps the counter:
+3.0 development ran at `3.0.0-dev.n` and runs at `3.0.0-beta.n` since the first beta; every significant
+change bumps the counter (D-35), on a beta to the next beta:
 
 ```sh
 npm run version:dev
 ```
 
-`scripts/version-dev.mjs` runs `npm version prerelease --preid dev --no-git-tag-version` at the root
-and writes the same version into every workspace `package.json`, **including the exact
+`scripts/version-dev.mjs` runs `npm version prerelease --preid <the current preid> --no-git-tag-version`
+at the root (with a version as its argument it sets that one, e.g. `3.0.0` for the release) and writes the same version into every workspace `package.json`, **including the exact
 `"@homematic-manager/core": "3.0.0-dev.n"` ranges the workspaces pin each other with** — leaving
 those behind would break the next `npm ci`. It does not commit, tag, push or publish.
 
 The series is `3.0.0-dev.n` → `3.0.0-alpha.n` → `3.0.0-beta.n` → `3.0.0`. One commit per significant
-change, with a message that explains _why_; no squashed "WIP" commits. **Tags, releases and pushes to
-`master` are the maintainer's**, never an agent's; pushing the `3.0-dev` branch for CI and artifact
-builds is fine (D-21).
+change, with a message that explains _why_; no squashed "WIP" commits. The work happens on `master`
+(D-38); pushing it for CI and artifact builds is fine (D-21). **Tags, releases and the push of a
+release are the maintainer's**, or an agent's only on his explicit word (D-37); see
+[docs/release-checklist.md](docs/release-checklist.md).
 
 ## Release workflows (D-24)
 

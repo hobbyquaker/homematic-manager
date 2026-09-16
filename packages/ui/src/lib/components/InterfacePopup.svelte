@@ -1,9 +1,10 @@
 <script lang="ts">
-    import type {InterfaceState} from '@homematic-manager/core';
+    import type {CallbackWarning, InterfaceState} from '@homematic-manager/core';
 
     import ConnectionIndicator from './ConnectionIndicator.svelte';
     import {
         callbackLine,
+        callbackWarningOf,
         detailParts,
         MARK_GLYPH,
         markOf,
@@ -49,6 +50,11 @@
         callbackPortInUseLabel?: (port: number) => string;
         callbackPortFailedLabel?: (port: number) => string;
         publishPortText?: string;
+        /** B-53: what the popup says about a set callback address that does not fit. */
+        callbackWarningLabel?: (warning: CallbackWarning) => string;
+        useAutomaticText?: string;
+        /** B-53: without it there is no "use automatic" button. */
+        onuseautomatic?: (() => void) | undefined;
         onselect?: ((interfaceName: string) => void) | undefined;
         /**
          * The metadata store as an entry of its own, under the host and above the interfaces
@@ -85,6 +91,12 @@
         callbackPortInUseLabel = (port: number) => `Callback port ${String(port)} is in use`,
         callbackPortFailedLabel = (port: number) => `Callback port ${String(port)} cannot be opened`,
         publishPortText = 'Publish this port unchanged',
+        callbackWarningLabel = (warning: CallbackWarning) =>
+            warning.reason === 'notLocal'
+                ? `The callback address ${warning.address} is not an address of this machine; ${warning.auto} is used instead`
+                : `The callback address ${warning.address} is not in the CCU's network; the CCU may not reach it and send no events`,
+        useAutomaticText = 'Use automatic',
+        onuseautomatic = undefined,
         onselect = undefined,
         store = undefined,
         storeTestId = undefined,
@@ -96,6 +108,11 @@
     let root = $state<HTMLDivElement | undefined>(undefined);
     let trigger = $state<HTMLButtonElement | undefined>(undefined);
     let retryButton = $state<HTMLButtonElement | undefined>(undefined);
+    let autoButton = $state<HTMLButtonElement | undefined>(undefined);
+    /** B-53: the set callback address that does not fit, if any. */
+    const callbackWarning = $derived(callbackWarningOf(interfaces));
+    /** The buttons under the list, in tab order: "use automatic", then "retry now". */
+    const footButtons = $derived([autoButton, retryButton].filter((button) => button !== undefined));
     /** B-28: what the retry button tries; the button is only there while this is not empty. */
     const retryNames = $derived(onretry === undefined ? [] : notAnsweringNames(interfaces));
     /** The option buttons, by index; `bind:this` fills and clears them. */
@@ -239,10 +256,11 @@
                 break;
             }
             case 'Tab': {
-                // B-28: forwards, the retry button under the list is the one stop left inside
-                if (!event.shiftKey && retryButton !== undefined) {
+                // B-28, B-53: forwards, the buttons under the list are the stops left inside
+                const first = footButtons[0];
+                if (!event.shiftKey && first !== undefined) {
                     event.preventDefault();
-                    retryButton.focus();
+                    first.focus();
                     break;
                 }
                 // Leaving by keyboard closes it, but the focus goes where the user sent it.
@@ -255,15 +273,22 @@
         }
     }
 
-    function onRetryKeyDown(event: KeyboardEvent): void {
+    function onFootKeyDown(event: KeyboardEvent): void {
+        const index = footButtons.findIndex((button) => button === event.currentTarget);
         if (event.key === 'Escape') {
             event.preventDefault();
             close(true);
         } else if (event.key === 'Tab' && event.shiftKey) {
             event.preventDefault();
-            items[activeIndex]?.focus();
+            (footButtons[index - 1] ?? items[activeIndex])?.focus();
         } else if (event.key === 'Tab') {
-            close(false);
+            const next = footButtons[index + 1];
+            if (next === undefined) {
+                close(false);
+            } else {
+                event.preventDefault();
+                next.focus();
+            }
         }
     }
 
@@ -310,6 +335,15 @@
             {subscribingText}
             testId={testId === undefined ? undefined : `${testId}-summary`}
         />
+        {#if callbackWarning !== undefined}
+            <!-- B-53: seen without opening anything; the popup says what and offers the way out -->
+            <span
+                class="hmm-interface-warn"
+                title={callbackWarningLabel(callbackWarning)}
+                data-testid={testId === undefined ? undefined : `${testId}-callback-warning`}
+                aria-hidden="true">⚠</span
+            >
+        {/if}
         <span class="hmm-interface-trigger-name">{selectedLabel}</span>
         <span class="hmm-interface-arrow" aria-hidden="true">▾</span>
     </button>
@@ -413,6 +447,25 @@
                 {/each}
             </div>
 
+            {#if callbackWarning !== undefined}
+                <div class="hmm-interface-warning" role="alert" data-testid="interface-callback-warning">
+                    <span>{callbackWarningLabel(callbackWarning)}</span>
+                    {#if onuseautomatic !== undefined}
+                        <button
+                            type="button"
+                            class="hmm-interface-retry"
+                            bind:this={autoButton}
+                            data-testid="interface-callback-use-auto"
+                            onclick={() => {
+                                close(false);
+                                onuseautomatic();
+                            }}
+                            onkeydown={onFootKeyDown}>{useAutomaticText}</button
+                        >
+                    {/if}
+                </div>
+            {/if}
+
             {#if retryNames.length > 0}
                 <!--
                     B-28: an interface that does not answer is retried by the watchdog, with a wait
@@ -426,7 +479,7 @@
                         bind:this={retryButton}
                         data-testid={testId === undefined ? undefined : `${testId}-retry`}
                         onclick={() => onretry?.(retryNames)}
-                        onkeydown={onRetryKeyDown}>{retryText}</button
+                        onkeydown={onFootKeyDown}>{retryText}</button
                     >
                 </div>
             {/if}
@@ -671,6 +724,27 @@
 
     .hmm-interface-mark-busy {
         color: var(--hmm-warn);
+    }
+
+    .hmm-interface-warn {
+        flex: 0 0 auto;
+        color: var(--hmm-warn);
+    }
+
+    /* B-53: the callback address that does not fit, between the list and its buttons */
+    .hmm-interface-warning {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+        padding: 6px 10px;
+        border-top: 1px solid var(--hmm-border-muted);
+        color: var(--hmm-warn);
+        font-size: var(--hmm-font-size-small);
+    }
+
+    .hmm-interface-warning > span {
+        align-self: stretch;
     }
 
     .hmm-interface-foot {

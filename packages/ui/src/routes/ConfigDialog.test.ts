@@ -6,7 +6,7 @@ import App from '../App.svelte';
 import {browserLanguage} from '../lib/i18n/i18n.svelte.js';
 import type {StorageLike} from '../lib/stores/AppStore.svelte.js';
 import {createStores, type Stores} from '../lib/stores/Stores.svelte.js';
-import {DEMO_CONFIG} from '../lib/transport/demoData.js';
+import {DEMO_CONFIG, demoCallbackAddresses} from '../lib/transport/demoData.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
 
 class MemoryStorage implements StorageLike {
@@ -505,6 +505,188 @@ describe('ConfigDialog', () => {
         expect(screen.getByTestId('config-callback-ip-hint').textContent).toBe(
             'The address the interface processes call back to',
         );
+    });
+
+    /**
+     * B-53 (#162, #165): "Select" meant "the first address", which on a Mac with a VPN or a bridge
+     * listed first was not the one the CCU reaches. The dialog now says what the automatic address
+     * is and why, marks the addresses outside the CCU's network, and warns about a set one that does
+     * not fit.
+     */
+    describe('the callback address (B-53)', () => {
+        function optionTexts(): string[] {
+            return [...screen.getByTestId<HTMLSelectElement>('config-callback-ip').options].map((option) =>
+                option.textContent.trim(),
+            );
+        }
+
+        function withCallbackIp(ip: string, extra: Record<string, unknown> = {}): void {
+            transport.result('config.get', {
+                ...DEMO_CONFIG,
+                connection: {...DEMO_CONFIG.connection, callback: {ip, xmlrpcPort: 0, binrpcPort: 0}},
+                ...extra,
+            });
+        }
+
+        it('offers the automatic address first, with why, and marks the others', async () => {
+            withCallbackIp('');
+            await open(transport);
+            await waitFor(() => {
+                expect(optionTexts()).toEqual([
+                    'Automatisch (192.168.1.20, im Netz der CCU)',
+                    '192.168.1.20',
+                    '10.0.0.5 (nicht im Netz der CCU)',
+                    '127.0.0.1 (nicht im Netz der CCU)',
+                ]);
+            });
+            expect(transport.lastCall('config.callbackAddresses')).toEqual(['demo.local']);
+            expect(screen.getByTestId<HTMLSelectElement>('config-callback-ip').value).toBe('');
+            expect(screen.getByTestId('config-callback-ip').getAttribute('title')).toBe(
+                'Automatisch nimmt die Adresse dieses Rechners im Netz der CCU, sonst die auf dem Weg zur CCU',
+            );
+            expect(screen.queryByTestId('config-callback-ip-warning')).toBeNull();
+        });
+
+        it('asks again for a host being typed, and names the route', async () => {
+            withCallbackIp('');
+            await open(transport);
+            await waitFor(() => expect(transport.countOf('config.callbackAddresses')).toBe(1));
+            const host = screen.getByTestId<HTMLInputElement>('config-host');
+            await fireEvent.input(host, {target: {value: 'ccu-elsewhere'}});
+            // while the answer is about another host, the choice is named without a reason
+            expect(screen.getByTestId('config-callback-ip-auto').textContent.trim()).toBe('Automatisch');
+            await waitFor(() => {
+                expect(screen.getByTestId('config-callback-ip-auto').textContent.trim()).toBe(
+                    'Automatisch (192.168.1.20, auf dem Weg zur CCU)',
+                );
+            });
+            expect(transport.lastCall('config.callbackAddresses')).toEqual(['ccu-elsewhere']);
+            expect(optionTexts()[1]).toBe('192.168.1.20 (nicht im Netz der CCU)');
+        });
+
+        it('names every reason', async () => {
+            const answers = [
+                {
+                    address: '127.0.0.1',
+                    reason: 'loopback',
+                    text: 'Automatisch (127.0.0.1, die CCU ist auf diesem Rechner)',
+                },
+                {address: '10.0.0.5', reason: 'first', text: 'Automatisch (10.0.0.5, keine bessere Wahl)'},
+            ] as const;
+            withCallbackIp('');
+            for (const answer of answers) {
+                transport.result('config.callbackAddresses', {
+                    host: 'demo.local',
+                    auto: {address: answer.address, reason: answer.reason},
+                    addresses: [
+                        {address: '169.254.1.1', inSubnet: false, linkLocal: true},
+                        {address: '10.0.0.5', inSubnet: false},
+                        {address: '127.0.0.1', inSubnet: false},
+                    ],
+                });
+                const {location, onHashChange} = router();
+                const stores = createStores(transport, {location, onHashChange, storage: new MemoryStorage()});
+                const view = render(App, {props: {stores}});
+                await stores.start();
+                await fireEvent.click(view.getByTestId('settings-button'));
+                await waitFor(() => {
+                    expect(view.getByTestId('config-callback-ip-auto').textContent.trim()).toBe(answer.text);
+                });
+                // without the CCU's address nothing is said about its network, only about link-local
+                const options = [...screen.getByTestId<HTMLSelectElement>('config-callback-ip').options].map((option) =>
+                    option.textContent.trim(),
+                );
+                expect(options.slice(1)).toEqual(['169.254.1.1 (link-lokal)', '10.0.0.5', '127.0.0.1']);
+                view.unmount();
+            }
+        });
+
+        it('warns about a set address that is not on this machine, and switches to automatic in one click', async () => {
+            withCallbackIp('192.168.0.99');
+            await open(transport);
+            const warning = await waitFor(() => screen.getByTestId('config-callback-ip-warning'));
+            expect(warning.textContent).toContain(
+                'Die Callback-Adresse 192.168.0.99 ist keine Adresse dieses Rechners; stattdessen wird 192.168.1.20 verwendet',
+            );
+            // the set address is still what the select shows
+            expect(screen.getByTestId<HTMLSelectElement>('config-callback-ip').value).toBe('192.168.0.99');
+            await fireEvent.click(screen.getByTestId('config-callback-ip-use-auto'));
+            expect(screen.getByTestId<HTMLSelectElement>('config-callback-ip').value).toBe('');
+            expect(screen.queryByTestId('config-callback-ip-warning')).toBeNull();
+            await fireEvent.click(screen.getByTestId('config-save'));
+            await waitFor(() => {
+                expect(transport.lastCall('config.set')?.[0]?.callback.ip).toBe('');
+            });
+        });
+
+        it('warns about a set address outside the CCU network', async () => {
+            withCallbackIp('10.0.0.5');
+            await open(transport);
+            const warning = await waitFor(() => screen.getByTestId('config-callback-ip-warning'));
+            expect(warning.textContent).toContain(
+                'Die Callback-Adresse 10.0.0.5 liegt nicht im Netz der CCU; die CCU erreicht sie womöglich nicht und sendet keine Ereignisse',
+            );
+            expect(warning.textContent).toContain('Automatisch verwenden');
+        });
+
+        it('warns in English as well', async () => {
+            transport.result('config.get', {
+                ...DEMO_CONFIG,
+                connection: {
+                    ...DEMO_CONFIG.connection,
+                    language: 'en',
+                    callback: {ip: '192.168.0.99', xmlrpcPort: 0, binrpcPort: 0},
+                },
+            });
+            await open(transport);
+            const warning = await waitFor(() => screen.getByTestId('config-callback-ip-warning'));
+            expect(warning.textContent).toContain(
+                'The callback address 192.168.0.99 is not an address of this machine; 192.168.1.20 is used instead',
+            );
+            expect(screen.getByTestId('config-callback-ip-use-auto').textContent).toBe('Use automatic');
+            expect(screen.getByTestId('config-callback-ip-auto').textContent.trim()).toBe(
+                "Automatic (192.168.1.20, in the CCU's network)",
+            );
+        });
+
+        it('says nothing where a set address fits, the host keeps it, it is the loopback, or on the CCU itself', async () => {
+            const cases: Array<[string, Record<string, unknown>, Record<string, unknown>?]> = [
+                ['192.168.1.20', {}],
+                ['127.0.0.1', {}],
+                ['192.168.0.99', {}, {keepsConfigured: true}],
+                ['192.168.0.99', {local: true}],
+            ];
+            for (const [ip, connection, answer] of cases) {
+                transport.result('config.get', {
+                    ...DEMO_CONFIG,
+                    connection: {
+                        ...DEMO_CONFIG.connection,
+                        ...connection,
+                        callback: {ip, xmlrpcPort: 0, binrpcPort: 0},
+                    },
+                });
+                transport.respond('config.callbackAddresses', (host) => ({
+                    ...demoCallbackAddresses(host),
+                    ...answer,
+                }));
+                const {location, onHashChange} = router();
+                const stores = createStores(transport, {location, onHashChange, storage: new MemoryStorage()});
+                const view = render(App, {props: {stores}});
+                await stores.start();
+                await fireEvent.click(view.getByTestId('settings-button'));
+                await waitFor(() => expect(stores.app.callbackAddresses).toBeDefined());
+                expect(view.queryByTestId('config-callback-ip-warning')).toBeNull();
+                view.unmount();
+            }
+        });
+
+        it('keeps the plain address list on a host that does not know the question', async () => {
+            transport.fail('config.callbackAddresses', 'no mock handler');
+            withCallbackIp('');
+            await open(transport);
+            await waitFor(() => expect(transport.countOf('config.callbackAddresses')).toBe(1));
+            expect(optionTexts()).toEqual(['Automatisch', '192.168.1.20', '10.0.0.5']);
+        });
     });
 
     /**

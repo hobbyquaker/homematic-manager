@@ -2,7 +2,7 @@ import {fireEvent, screen, waitFor, within} from '@testing-library/svelte';
 import {beforeEach, describe, expect, it} from 'vitest';
 
 import type {HostBridge, HostInfo, HostMenuAction, HostUpdateState} from '../lib/host/types.js';
-import {DEMO_CONFIG} from '../lib/transport/demoData.js';
+import {DEMO_CONFIG, DEMO_INTERFACE_STATES} from '../lib/transport/demoData.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
 import {mountApp} from '../testHarness.js';
 
@@ -424,5 +424,56 @@ describe('the settings dialog', () => {
         // The only protocol select in the dialog belongs to an extra interface, and there is none.
         expect(within(dialog).queryByLabelText('Protokoll 0')).toBeNull();
         expect(dialog.textContent).not.toContain('BIN-RPC bevorzugen');
+    });
+});
+
+describe('the callback warning in the interface popup (B-53)', () => {
+    it('saves "automatic" in one click and starts again', async () => {
+        const transport = new MockTransport({demo: true});
+        const warning = {address: '192.168.0.99', reason: 'notLocal', auto: '192.168.1.20'} as const;
+        transport.result('config.get', {
+            ...DEMO_CONFIG,
+            connection: {...DEMO_CONFIG.connection, callback: {ip: '192.168.0.99', xmlrpcPort: 0, binrpcPort: 0}},
+        });
+        transport.result(
+            'interfaces.list',
+            DEMO_INTERFACE_STATES.map((state) => ({...state, callbackWarning: warning})),
+        );
+        await mountApp({transport});
+        expect(screen.getByTestId('interface-select-callback-warning').getAttribute('title')).toBe(
+            'Die Callback-Adresse 192.168.0.99 ist keine Adresse dieses Rechners; stattdessen wird 192.168.1.20 verwendet',
+        );
+        await fireEvent.click(screen.getByTestId('interface-select-trigger'));
+        const button = screen.getByTestId('interface-callback-use-auto');
+        expect(button.textContent).toBe('Automatisch verwenden');
+        const loads = transport.countOf('config.get');
+        await fireEvent.click(button);
+        await waitFor(() => {
+            expect(transport.lastCall('config.set')?.[0]?.callback.ip).toBe('');
+        });
+        // Save & Restart's second half: the app loads again, as after the settings dialog
+        await waitFor(() => {
+            expect(transport.countOf('config.get')).toBe(loads + 1);
+        });
+    });
+
+    it('does not start again when the save fails', async () => {
+        const transport = new MockTransport({demo: true});
+        transport.result(
+            'interfaces.list',
+            DEMO_INTERFACE_STATES.map((state) => ({
+                ...state,
+                callbackWarning: {address: '10.0.0.5', reason: 'otherNetwork', auto: '192.168.1.20'} as const,
+            })),
+        );
+        transport.fail('config.set', 'busy');
+        await mountApp({transport});
+        await fireEvent.click(screen.getByTestId('interface-select-trigger'));
+        const loads = transport.countOf('config.get');
+        await fireEvent.click(screen.getByTestId('interface-callback-use-auto'));
+        await waitFor(() => {
+            expect(transport.countOf('config.set')).toBe(1);
+        });
+        expect(transport.countOf('config.get')).toBe(loads);
     });
 });

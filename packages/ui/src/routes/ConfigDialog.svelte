@@ -1,5 +1,6 @@
 <script lang="ts">
     import type {
+        CallbackAddressInfo,
         CallbackPins,
         ConnectionConfig,
         LanguageChoice,
@@ -117,6 +118,95 @@
      */
     let heldTicks: boolean[] = [];
     const addressOptions = $derived(stores.app.config?.localAddresses ?? []);
+
+    /**
+     * B-53 (#162, #165): the automatic callback address for the host in the field, asked again a
+     * moment after the host changes. `askedHost` is plain on purpose: the effect must not run again
+     * because an answer arrived.
+     */
+    let askedHost: string | undefined;
+    $effect(() => {
+        if (!open || draft === undefined) {
+            askedHost = undefined;
+            return;
+        }
+        const host = draft.host.trim();
+        if (host === askedHost) {
+            return;
+        }
+        const wait = askedHost === undefined ? 0 : 400;
+        const timer = setTimeout(() => {
+            askedHost = host;
+            void stores.app.loadCallbackAddresses(host);
+        }, wait);
+        return () => {
+            clearTimeout(timer);
+        };
+    });
+    /** The answer, only while it is about the host in the field. */
+    const callbackInfo = $derived<CallbackAddressInfo | undefined>(
+        stores.app.callbackAddresses !== undefined && stores.app.callbackAddresses.host === draft?.host.trim()
+            ? stores.app.callbackAddresses
+            : undefined,
+    );
+    const autoLabel = $derived.by(() => {
+        if (callbackInfo === undefined) {
+            return t('Automatic');
+        }
+        const {address, reason} = callbackInfo.auto;
+        const why = {
+            subnet: t("in the CCU's network"),
+            route: t('on the route to the CCU'),
+            loopback: t('the CCU is on this machine'),
+            first: t('no better match'),
+        }[reason];
+        return t('Automatic ({address}, {why})', {address, why});
+    });
+    /** Every address with its marks; the plain list of the configuration where the backend has no answer. */
+    const addressChoices = $derived(
+        callbackInfo === undefined
+            ? addressOptions.map((address) => ({address, label: address}))
+            : callbackInfo.addresses.map((entry) => {
+                  const marks = [
+                      ...(callbackInfo.hostAddress !== undefined && !entry.inSubnet
+                          ? [t("not in the CCU's network")]
+                          : []),
+                      ...(entry.linkLocal === true ? [t('link-local')] : []),
+                  ];
+                  return {
+                      address: entry.address,
+                      label: marks.length === 0 ? entry.address : `${entry.address} (${marks.join(', ')})`,
+                  };
+              }),
+    );
+    /**
+     * B-53: a set address that does not fit - no address of this machine (the backend takes the
+     * automatic one instead), or outside the CCU's network and not on the route to it. Nothing is
+     * said where the host keeps a set address as it is (task 38) or on the CCU itself.
+     */
+    const callbackWarning = $derived.by(() => {
+        const ip = draft?.callback.ip ?? '';
+        if (ip === '' || callbackInfo === undefined || callbackInfo.keepsConfigured === true) {
+            return '';
+        }
+        if (pinned('ip') || draft?.local === true || ip === '127.0.0.1') {
+            return '';
+        }
+        const entry = callbackInfo.addresses.find((candidate) => candidate.address === ip);
+        if (entry === undefined) {
+            return t('The callback address {address} is not an address of this machine; {auto} is used instead', {
+                address: ip,
+                auto: callbackInfo.auto.address,
+            });
+        }
+        if (callbackInfo.hostAddress !== undefined && !entry.inSubnet && ip !== callbackInfo.auto.address) {
+            return t(
+                "The callback address {address} is not in the CCU's network; the CCU may not reach it and send no events",
+                {address: ip},
+            );
+        }
+        return '';
+    });
     const discovered = $derived(stores.app.config?.discovered ?? []);
 
     /**
@@ -462,18 +552,22 @@
                                         class="hmm-select hmm-config-wide"
                                         bind:value={draft.callback.ip}
                                         disabled={pinned('ip')}
+                                        title={t(
+                                            "Automatic takes this machine's address in the CCU's network, else the one on the route to the CCU",
+                                        )}
                                         data-testid="config-callback-ip"
                                     >
-                                        <option value="">{t('Select')}</option>
-                                        {#each addressOptions as address (address)}
-                                            <option value={address}>{address}</option>
+                                        <!-- B-53: the automatic choice first, then every address with its marks -->
+                                        <option value="" data-testid="config-callback-ip-auto">{autoLabel}</option>
+                                        {#each addressChoices as choice (choice.address)}
+                                            <option value={choice.address}>{choice.label}</option>
                                         {/each}
                                         <!--
                                             Task 38: an address that is not one of this machine's - the
                                             Docker host's, seen from a container - is still what is set,
                                             so it is shown rather than an empty "Select".
                                         -->
-                                        {#if draft.callback.ip !== '' && !addressOptions.includes(draft.callback.ip)}
+                                        {#if draft.callback.ip !== '' && !addressChoices.some((choice) => choice.address === draft?.callback.ip)}
                                             <option value={draft.callback.ip}>{draft.callback.ip}</option>
                                         {/if}
                                     </select>
@@ -482,6 +576,25 @@
                                             ? pinHint('ip')
                                             : t('The address the interface processes call back to')}</small
                                     >
+                                    {#if callbackWarning !== ''}
+                                        <span
+                                            class="hmm-config-warning"
+                                            role="alert"
+                                            data-testid="config-callback-ip-warning"
+                                        >
+                                            <span>{callbackWarning}</span>
+                                            <button
+                                                type="button"
+                                                class="hmm-button"
+                                                data-testid="config-callback-ip-use-auto"
+                                                onclick={() => {
+                                                    if (draft) {
+                                                        draft.callback.ip = '';
+                                                    }
+                                                }}>{t('Use automatic')}</button
+                                            >
+                                        </span>
+                                    {/if}
                                 </span>
                             </label>
 
@@ -1008,6 +1121,19 @@
 
     .hmm-config-help {
         color: var(--hmm-fg-muted);
+        font-size: var(--hmm-font-size-small);
+    }
+
+    /*
+        B-53: a set callback address that does not fit. The warning colour of the theme, with its
+        one-click way out beside it; it wraps under the select on a narrow dialog.
+    */
+    .hmm-config-warning {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 8px;
+        color: var(--hmm-warn);
         font-size: var(--hmm-font-size-small);
     }
 

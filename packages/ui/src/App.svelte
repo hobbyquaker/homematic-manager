@@ -217,6 +217,20 @@
             callbackPortInUseLabel={(port) => t('Callback port {port} is in use', {port: String(port)})}
             callbackPortFailedLabel={(port) => t('Callback port {port} cannot be opened', {port: String(port)})}
             publishPortText={t('Publish this port unchanged')}
+            callbackWarningLabel={(warning) =>
+                warning.reason === 'notLocal'
+                    ? t('The callback address {address} is not an address of this machine; {auto} is used instead', {
+                          address: warning.address,
+                          auto: warning.auto,
+                      })
+                    : t(
+                          "The callback address {address} is not in the CCU's network; the CCU may not reach it and send no events",
+                          {address: warning.address},
+                      )}
+            useAutomaticText={t('Use automatic')}
+            onuseautomatic={() => {
+                void app.useAutomaticCallback().then((saved) => (saved ? stores.start() : undefined));
+            }}
             testId="interface-select"
             onselect={(name) => void stores.selectInterface(name)}
             store={storeEntry}

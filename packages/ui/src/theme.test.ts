@@ -346,6 +346,32 @@ describe('colours that carry meaning', () => {
             expect(container.querySelectorAll('.hmm-interface-item-current')).toHaveLength(1);
         });
 
+        /** B-53: the callback warning is painted with --hmm-warn in both themes, on the trigger and in the popup. */
+        it(`paints the callback warning in the warning colour in the ${theme} theme`, async () => {
+            document.documentElement.setAttribute('data-theme', theme);
+            const warned: InterfaceState[] = [
+                {...interfaces[0]!, callbackWarning: {address: '10.0.0.9', reason: 'notLocal', auto: '192.168.1.5'}},
+            ];
+            const {container} = render(InterfacePopup, {
+                props: {interfaces: warned, selected: 'BidCos-RF', onuseautomatic: () => undefined},
+            });
+            const mark = container.querySelector<HTMLElement>('.hmm-interface-warn');
+            expect(mark).not.toBeNull();
+            await fireEvent.click(container.querySelector('.hmm-interface-trigger')!);
+            const block = container.querySelector<HTMLElement>('.hmm-interface-warning');
+            expect(block).not.toBeNull();
+            if (hasLayout) {
+                const warn = getComputedStyle(document.documentElement).getPropertyValue('--hmm-warn').trim();
+                const probe = document.createElement('span');
+                probe.style.color = warn;
+                document.body.append(probe);
+                const expected = getComputedStyle(probe).color;
+                probe.remove();
+                expect(getComputedStyle(mark!).color).toBe(expected);
+                expect(getComputedStyle(block!).color).toBe(expected);
+            }
+        });
+
         it(`marks the service-message severities in the ${theme} theme`, () => {
             document.documentElement.setAttribute('data-theme', theme);
             const {container} = render(Notices, {props: {notices}});

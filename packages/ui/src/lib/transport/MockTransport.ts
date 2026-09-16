@@ -17,6 +17,7 @@ import {
     DEMO_BIDCOS_INTERFACES,
     DEMO_HMIP_INTERFACES,
     DEMO_CONFIG,
+    demoCallbackAddresses,
     DEMO_DATA_FILES,
     DEMO_DEVICES,
     DEMO_EVENTS,
@@ -184,6 +185,7 @@ export class MockTransport implements Transport {
         this.respond('config.set', (connection) => ({...DEMO_CONFIG, connection}));
         this.result('config.discover', DEMO_CONFIG.discovered);
         this.result('config.clearCaches', null);
+        this.respond('config.callbackAddresses', (host) => demoCallbackAddresses(host));
         this.result('interfaces.list', DEMO_INTERFACE_STATES);
         this.result('interfaces.reconnect', null);
         this.result('rega.state', DEMO_REGA_STATE);

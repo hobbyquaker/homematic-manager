@@ -1,5 +1,6 @@
 import type {
     AppConfig,
+    CallbackAddressInfo,
     ConfigSetOptions,
     ConnectionConfig,
     Language,
@@ -92,6 +93,12 @@ export class AppStore {
     connected = $state(false);
     /** #149: why the last `config.set` failed, for the settings dialog to show. */
     saveError = $state('');
+    /**
+     * B-53: the automatic callback address and this machine's addresses, for the host the settings
+     * dialog asked about last. `undefined` until then, and on a host that does not know the request.
+     */
+    callbackAddresses = $state<CallbackAddressInfo | undefined>(undefined);
+    #callbackAsk = 0;
     selectedInterface = $state('');
     tab = $state<TabId>(DEFAULT_TAB);
     /**
@@ -307,6 +314,40 @@ export class AppStore {
             this.#notices.fromError(error, 'config.set');
             return false;
         }
+    }
+
+    /**
+     * B-53: asks for the automatic callback address, for `host` or the configured CCU. Only the
+     * newest question's answer is kept, and a failure is silent: the dialog then offers the plain
+     * address list it always had.
+     */
+    async loadCallbackAddresses(host?: string): Promise<void> {
+        this.#callbackAsk += 1;
+        const ask = this.#callbackAsk;
+        let info: CallbackAddressInfo | undefined;
+        try {
+            info = await (host === undefined
+                ? this.#transport.request('config.callbackAddresses')
+                : this.#transport.request('config.callbackAddresses', host));
+        } catch {
+            info = undefined;
+        }
+        if (ask === this.#callbackAsk) {
+            this.callbackAddresses = info;
+        }
+    }
+
+    /**
+     * B-53: the interface popup's "use automatic" - saves the profile with no callback address,
+     * which reconnects with the automatic one. False when there is nothing to save or it failed.
+     */
+    async useAutomaticCallback(): Promise<boolean> {
+        const connection = this.config?.connection;
+        if (connection === undefined) {
+            return false;
+        }
+        const next = $state.snapshot(connection);
+        return this.save({...next, callback: {...next.callback, ip: ''}});
     }
 
     async discover(): Promise<void> {

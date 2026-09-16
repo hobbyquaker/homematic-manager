@@ -180,6 +180,27 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Detect interfaces': {de: 'Schnittstellen erkennen', en: 'Detect interfaces'},
     Interfaces: {de: 'Schnittstellen', en: 'Interfaces'},
     'Callback address': {de: 'Callback-Adresse', en: 'Callback address'},
+    // B-53 (#162, #165): the automatic callback address, why it is that one, and a set one that does not fit.
+    'Automatic ({address}, {why})': {de: 'Automatisch ({address}, {why})', en: 'Automatic ({address}, {why})'},
+    "in the CCU's network": {de: 'im Netz der CCU', en: "in the CCU's network"},
+    'on the route to the CCU': {de: 'auf dem Weg zur CCU', en: 'on the route to the CCU'},
+    'the CCU is on this machine': {de: 'die CCU ist auf diesem Rechner', en: 'the CCU is on this machine'},
+    'no better match': {de: 'keine bessere Wahl', en: 'no better match'},
+    "not in the CCU's network": {de: 'nicht im Netz der CCU', en: "not in the CCU's network"},
+    'link-local': {de: 'link-lokal', en: 'link-local'},
+    'Use automatic': {de: 'Automatisch verwenden', en: 'Use automatic'},
+    'The callback address {address} is not an address of this machine; {auto} is used instead': {
+        de: 'Die Callback-Adresse {address} ist keine Adresse dieses Rechners; stattdessen wird {auto} verwendet',
+        en: 'The callback address {address} is not an address of this machine; {auto} is used instead',
+    },
+    "The callback address {address} is not in the CCU's network; the CCU may not reach it and send no events": {
+        de: 'Die Callback-Adresse {address} liegt nicht im Netz der CCU; die CCU erreicht sie womöglich nicht und sendet keine Ereignisse',
+        en: "The callback address {address} is not in the CCU's network; the CCU may not reach it and send no events",
+    },
+    "Automatic takes this machine's address in the CCU's network, else the one on the route to the CCU": {
+        de: 'Automatisch nimmt die Adresse dieses Rechners im Netz der CCU, sonst die auf dem Weg zur CCU',
+        en: "Automatic takes this machine's address in the CCU's network, else the one on the route to the CCU",
+    },
     'Callback XML-RPC port': {de: 'Callback-Port XML-RPC', en: 'Callback XML-RPC port'},
     'Callback BIN-RPC port': {de: 'Callback-Port BIN-RPC', en: 'Callback BIN-RPC port'},
     'Use TLS': {de: 'TLS verwenden', en: 'Use TLS'},

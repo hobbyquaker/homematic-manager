@@ -400,6 +400,51 @@ describe('AppStore', () => {
         expect(notices.items).toHaveLength(2);
     });
 
+    it('asks for the callback addresses and keeps only the newest answer (B-53)', async () => {
+        const app = new AppStore(transport, notices, {location: fakeRouter().location, storage: new MemoryStorage()});
+        await app.load();
+        await app.loadCallbackAddresses();
+        expect(transport.lastCall('config.callbackAddresses')).toEqual([]);
+        expect(app.callbackAddresses?.auto).toEqual({address: '192.168.1.20', reason: 'subnet'});
+
+        const pending: Array<(value: unknown) => void> = [];
+        transport.respond(
+            'config.callbackAddresses',
+            (host) =>
+                new Promise((resolve) => {
+                    pending.push(() => {
+                        resolve({host: host ?? '', auto: {address: '10.0.0.5', reason: 'first'}, addresses: []});
+                    });
+                }),
+        );
+        const first = app.loadCallbackAddresses('old');
+        const second = app.loadCallbackAddresses('new');
+        pending[1]?.(undefined);
+        await second;
+        pending[0]?.(undefined);
+        await first;
+        expect(app.callbackAddresses?.host).toBe('new');
+
+        // a host that does not know the question: nothing, and no notice
+        transport.fail('config.callbackAddresses', 'unknown method');
+        await app.loadCallbackAddresses('x');
+        expect(app.callbackAddresses).toBeUndefined();
+        expect(notices.items).toHaveLength(0);
+    });
+
+    it('switches the callback address to automatic (B-53)', async () => {
+        const app = new AppStore(transport, notices, {location: fakeRouter().location, storage: new MemoryStorage()});
+        await expect(app.useAutomaticCallback()).resolves.toBe(false);
+        expect(transport.countOf('config.set')).toBe(0);
+
+        await app.load();
+        await expect(app.useAutomaticCallback()).resolves.toBe(true);
+        expect(transport.lastCall('config.set')).toEqual([
+            {...DEMO_CONFIG.connection, callback: {...DEMO_CONFIG.connection.callback, ip: ''}},
+        ]);
+        expect(app.config?.connection.callback.ip).toBe('');
+    });
+
     it('persists theme and language and cycles the theme', () => {
         const storage = new MemoryStorage();
         const app = new AppStore(transport, notices, {location: fakeRouter().location, storage});

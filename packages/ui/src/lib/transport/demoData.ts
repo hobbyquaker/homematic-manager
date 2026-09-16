@@ -12,6 +12,7 @@
 import type {
     AppConfig,
     BidcosInterfaceInfo,
+    CallbackAddressInfo,
     ConnectionConfig,
     DeviceDescription,
     EventRecord,
@@ -917,6 +918,24 @@ export const DEMO_CONFIG: AppConfig = {
         },
     ],
 };
+
+/**
+ * B-53: what the demo machine answers for the callback address - the demo CCU is in the
+ * `192.168.1.0/24` network of its first address; any other host is somewhere the route leads.
+ */
+export function demoCallbackAddresses(host: string = DEMO_CONNECTION.host): CallbackAddressInfo {
+    const local = host === DEMO_CONNECTION.host;
+    return {
+        host,
+        ...(host === '' ? {} : {hostAddress: local ? '192.168.1.2' : '172.16.0.2'}),
+        auto: {address: '192.168.1.20', reason: host === '' ? 'first' : local ? 'subnet' : 'route'},
+        addresses: [
+            {address: '192.168.1.20', inSubnet: local},
+            {address: '10.0.0.5', inSubnet: false},
+            {address: '127.0.0.1', inSubnet: false},
+        ],
+    };
+}
 
 export const DEMO_EVENTS: EventRecord[] = [
     {

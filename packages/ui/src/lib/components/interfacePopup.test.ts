@@ -3,7 +3,7 @@ import {fireEvent, render, screen} from '@testing-library/svelte';
 import {describe, expect, it, vi} from 'vitest';
 
 import InterfacePopup from './InterfacePopup.svelte';
-import {callbackLine, detailParts, markOf, summaryMark} from './interfacePopup.js';
+import {callbackLine, callbackWarningOf, detailParts, markOf, summaryMark} from './interfacePopup.js';
 
 function state(name: string, extra: Partial<InterfaceState> = {}): InterfaceState {
     return {name, type: name, protocol: 'xmlrpc', host: 'ccu', port: 2001, connected: true, ...extra};
@@ -156,6 +156,14 @@ describe('the callback line of an item', () => {
         expect(callbackLine(taken, true, labels)).toEqual({text: 'Callback-Port 2126 ist belegt', bad: true});
         const refused = state('HmIP-RF', {connected: false, callbackFailure: {port: 80, inUse: false}});
         expect(callbackLine(refused, false, labels)?.text).toBe('Callback-Port 80 lässt sich nicht öffnen');
+    });
+});
+
+describe('the callback warning (B-53)', () => {
+    it('is the first one any interface carries', () => {
+        const warning = {address: '10.0.0.9', reason: 'notLocal', auto: '192.168.1.5'} as const;
+        expect(callbackWarningOf(INTERFACES)).toBeUndefined();
+        expect(callbackWarningOf([state('A'), state('B', {callbackWarning: warning}), state('C')])).toEqual(warning);
     });
 });
 
@@ -324,6 +332,87 @@ describe('InterfacePopup', () => {
         await fireEvent.keyDown(retry, {key: 'Escape'});
         expect(screen.queryByRole('listbox')).toBeNull();
         expect(document.activeElement).toBe(trigger());
+    });
+
+    describe('a callback address that does not fit (B-53)', () => {
+        const NOT_LOCAL = {address: '10.0.0.9', reason: 'notLocal', auto: '192.168.1.5'} as const;
+        const OTHER = {address: '10.211.55.2', reason: 'otherNetwork', auto: '192.168.1.5'} as const;
+
+        it('shows a mark on the trigger and the warning with a way out in the popup', async () => {
+            const onuseautomatic = vi.fn();
+            const interfaces = [state('BidCos-RF', {callbackWarning: NOT_LOCAL}), state('HmIP-RF')];
+            mount({
+                interfaces,
+                onuseautomatic,
+                useAutomaticText: 'Automatisch verwenden',
+                callbackWarningLabel: (warning: {address: string}) => `passt nicht: ${warning.address}`,
+            });
+            const mark = screen.getByTestId('interface-select-callback-warning');
+            expect(mark.getAttribute('title')).toBe('passt nicht: 10.0.0.9');
+            await openPopup();
+            expect(screen.getByTestId('interface-callback-warning').textContent).toContain('passt nicht: 10.0.0.9');
+            const button = screen.getByTestId('interface-callback-use-auto');
+            expect(button.textContent).toBe('Automatisch verwenden');
+            await fireEvent.click(button);
+            expect(onuseautomatic).toHaveBeenCalledOnce();
+            expect(screen.queryByRole('listbox')).toBeNull();
+        });
+
+        it('words both reasons in English by default, and has no button without a handler', async () => {
+            mount({interfaces: [state('BidCos-RF', {callbackWarning: OTHER})]});
+            expect(screen.getByTestId('interface-select-callback-warning').getAttribute('title')).toBe(
+                "The callback address 10.211.55.2 is not in the CCU's network; the CCU may not reach it and send no events",
+            );
+            await openPopup();
+            expect(screen.queryByTestId('interface-callback-use-auto')).toBeNull();
+        });
+
+        it('says what the automatic address is when the set one is gone', () => {
+            mount({interfaces: [state('BidCos-RF', {callbackWarning: NOT_LOCAL})]});
+            expect(screen.getByTestId('interface-select-callback-warning').getAttribute('title')).toBe(
+                'The callback address 10.0.0.9 is not an address of this machine; 192.168.1.5 is used instead',
+            );
+        });
+
+        it('shows nothing when every address fits', async () => {
+            mount({onuseautomatic: vi.fn()});
+            expect(screen.queryByTestId('interface-select-callback-warning')).toBeNull();
+            await openPopup();
+            expect(screen.queryByTestId('interface-callback-warning')).toBeNull();
+        });
+
+        it('puts "use automatic" before "retry now" in the Tab order', async () => {
+            const interfaces = [
+                state('BidCos-RF', {callbackWarning: NOT_LOCAL}),
+                state('Silent', {connected: false, unreachable: true}),
+            ];
+            mount({interfaces, onretry: vi.fn(), onuseautomatic: vi.fn()});
+            await openPopup();
+            const first = screen.getByTestId('interface-item-BidCos-RF');
+            const auto = screen.getByTestId('interface-callback-use-auto');
+            const retry = screen.getByTestId('interface-select-retry');
+            await fireEvent.keyDown(first, {key: 'Tab'});
+            expect(document.activeElement).toBe(auto);
+            await fireEvent.keyDown(auto, {key: 'Tab'});
+            expect(document.activeElement).toBe(retry);
+            await fireEvent.keyDown(retry, {key: 'Tab', shiftKey: true});
+            expect(document.activeElement).toBe(auto);
+            await fireEvent.keyDown(auto, {key: 'Tab', shiftKey: true});
+            expect(document.activeElement).toBe(first);
+            // the last stop lets Tab leave, and the popup closes behind it
+            await fireEvent.keyDown(first, {key: 'Tab'});
+            await fireEvent.keyDown(auto, {key: 'Tab'});
+            await fireEvent.keyDown(retry, {key: 'Tab'});
+            expect(screen.queryByRole('listbox')).toBeNull();
+        });
+
+        it('closes on Escape from the button', async () => {
+            mount({interfaces: [state('BidCos-RF', {callbackWarning: NOT_LOCAL})], onuseautomatic: vi.fn()});
+            await openPopup();
+            await fireEvent.keyDown(screen.getByTestId('interface-callback-use-auto'), {key: 'Escape'});
+            expect(screen.queryByRole('listbox')).toBeNull();
+            expect(document.activeElement).toBe(trigger());
+        });
     });
 
     it('marks the current selection and nothing else', async () => {

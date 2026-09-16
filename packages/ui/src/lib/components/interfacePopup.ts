@@ -1,4 +1,4 @@
-import type {InterfaceState} from '@homematic-manager/core';
+import type {CallbackWarning, InterfaceState} from '@homematic-manager/core';
 
 import type {MetaMark} from './metaIndicator.js';
 
@@ -119,6 +119,14 @@ export function callbackLine(
         return undefined;
     }
     return {text: publish ? `${state.callbackUrl} · ${labels.publish}` : state.callbackUrl, bad: false};
+}
+
+/**
+ * B-53 (#162, #165): the set callback address does not fit - the same for every interface, since
+ * they all share it, so the first one that says so speaks for all of them.
+ */
+export function callbackWarningOf(states: readonly InterfaceState[]): CallbackWarning | undefined {
+    return states.find((state) => state.callbackWarning !== undefined)?.callbackWarning;
 }
 
 export interface DetailLabels {

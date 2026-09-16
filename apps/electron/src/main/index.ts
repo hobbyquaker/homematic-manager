@@ -24,7 +24,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import {Backend, InProcessTransport} from '@homematic-manager/backend';
-import {app, BrowserWindow, dialog, ipcMain, Menu, nativeTheme, protocol, screen, shell} from 'electron';
+import {app, BrowserWindow, dialog, ipcMain, Menu, nativeTheme, net, protocol, screen, shell} from 'electron';
 
 import {
     HOST_EVENT_CHANNEL,
@@ -46,7 +46,14 @@ import {buildMenuTemplate, externalUrlFromRenderer, isAllowedExternalUrl, ISSUES
 import {fileRoots, resolvePaths} from './paths.js';
 import {createImageProtocolHandler, PRIVILEGED_SCHEMES} from './protocol.js';
 import {createStartupTrace} from './startupTrace.js';
-import {manualCheckReport, UpdateFlow, updaterDisabledReason, type AutoUpdaterLike} from './updater.js';
+import {
+    manualCheckReport,
+    UpdateFlow,
+    updateInstall,
+    updaterDisabledReason,
+    type AutoUpdaterLike,
+    type UpdateLinkOptions,
+} from './updater.js';
 import {browserWindowBounds, WindowStateKeeper} from './windowState.js';
 
 const APP_ID = 'de.hobbyquaker.homematic-manager';
@@ -282,15 +289,21 @@ async function checkForUpdatesFromMenu(): Promise<void> {
         return;
     }
     const report = manualCheckReport(await updates.check({manual: true}), version);
+    const download = report.download === true;
     const options: Electron.MessageBoxOptions = {
         type: report.type,
         title: 'Homematic Manager',
         message: report.message,
         detail: report.detail,
-        buttons: ['OK'],
+        buttons: download ? ['Download', 'Close'] : ['OK'],
+        defaultId: 0,
+        cancelId: download ? 1 : 0,
     };
     try {
-        await (mainWindow ? dialog.showMessageBox(mainWindow, options) : dialog.showMessageBox(options));
+        const answer = await (mainWindow ? dialog.showMessageBox(mainWindow, options) : dialog.showMessageBox(options));
+        if (download && answer.response === 0) {
+            await updates.download();
+        }
     } catch (error) {
         errorLog.append('update:dialog', error);
     }
@@ -335,6 +348,36 @@ function registerHostCommands(): void {
     });
 }
 
+/**
+ * Link mode's pieces (task 53), or `undefined` where the app installs the update itself. Main
+ * picks the installer and opens it; the renderer only says "download", never which URL.
+ */
+function updateLink(): UpdateLinkOptions | undefined {
+    let packageType: string | undefined;
+    try {
+        packageType = fs.readFileSync(path.join(process.resourcesPath, 'package-type'), 'utf8').trim();
+    } catch {
+        packageType = undefined;
+    }
+    const choice = updateInstall({
+        platform: process.platform,
+        arch: process.arch,
+        portableExecutable: process.env['PORTABLE_EXECUTABLE_FILE'],
+        packageType,
+    });
+    if (choice.install === 'app') {
+        return undefined;
+    }
+    return {
+        asset: choice.asset,
+        open: (url) => shell.openExternal(url),
+        exists: async (url) => {
+            const response = await net.fetch(url, {method: 'HEAD', signal: AbortSignal.timeout(8000)});
+            return response.ok;
+        },
+    };
+}
+
 async function start(): Promise<void> {
     trace('start: entered');
     backend = await withDeadline(
@@ -376,6 +419,7 @@ async function start(): Promise<void> {
     });
     updates = new UpdateFlow({
         updater: autoUpdater as unknown as AutoUpdaterLike,
+        link: updateLink(),
         enabled: disabledReason === undefined,
         disabledReason,
         currentVersion: version,

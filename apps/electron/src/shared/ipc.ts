@@ -75,8 +75,16 @@ export type UpdatePhase =
 /** What an `error` state failed at (B-47). */
 export type UpdateFailedStep = 'check' | 'download';
 
+/**
+ * How an update reaches the machine (task 53): `app` downloads and installs it on quit, `link`
+ * opens the installer in the browser (macOS, Windows, deb).
+ */
+export type UpdateInstallMode = 'app' | 'link';
+
 export interface UpdateState {
     phase: UpdatePhase;
+    /** Set by the flow on every state; absent only from a host older than task 53. */
+    install?: UpdateInstallMode;
     /** The version that is available, being downloaded or ready. */
     version?: string;
     /** 0-100 while downloading. */

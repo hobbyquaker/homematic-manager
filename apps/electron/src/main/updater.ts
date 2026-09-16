@@ -1,5 +1,6 @@
 /**
- * Automatic updates (D-16): check, notify, ask, and only then install.
+ * Automatic updates (D-16): check, notify, ask, and only then install - or, on macOS and Windows,
+ * check, notify and hand the user the installer (task 53, #163).
  *
  * The rules the decision spells out, and what they mean here:
  *
@@ -11,12 +12,18 @@
  * - **Switchable off.** Whoever repackages the app sets `disableAutoUpdate` in `host.json` or the
  *   environment variable, and no check ever runs.
  *
+ * - **Where the app cannot install itself, it links.** On macOS and Windows (installed or
+ *   portable) and for a deb install the flow runs in *link* mode ({@link updateInstall}): the check
+ *   is the same, but "Download" opens the matching installer of the new release in the browser,
+ *   and electron-updater never downloads or installs anything. See {@link updateInstall} for why.
+ *
  * The flow is a state machine over an injected updater, so the test drives every path - including
  * the ones that only happen when a GitHub release is broken - without a network and without
  * Electron.
  */
 
-import type {UpdateFailedStep, UpdateState} from '../shared/ipc.js';
+import type {UpdateFailedStep, UpdateInstallMode, UpdateState} from '../shared/ipc.js';
+import {RELEASES_URL} from './menu.js';
 
 /** The part of `electron-updater`'s `autoUpdater` this flow uses. */
 export interface AutoUpdaterLike {
@@ -42,11 +49,93 @@ export interface UpdateFlowOptions {
     readonly firstCheckDelayMs?: number;
     /** And then every six hours. */
     readonly checkIntervalMs?: number;
+    /**
+     * Link mode (task 53): "Download" opens this platform's installer instead of downloading it.
+     * Without it the app installs the update itself (D-16's original flow).
+     */
+    readonly link?: UpdateLinkOptions | undefined;
+}
+
+/** What link mode needs: which file, how to open it, and whether it is there. */
+export interface UpdateLinkOptions {
+    /** The installer's file name for a version, from {@link updateInstall}. */
+    readonly asset: (version: string) => string;
+    /** Opens a URL in the user's browser (`shell.openExternal`). */
+    readonly open: (url: string) => Promise<void> | void;
+    /**
+     * Whether the URL answers 200. When it does not, or cannot tell, the release page is opened
+     * instead, so a renamed or missing asset still leads somewhere. Without it the asset is opened
+     * unchecked.
+     */
+    readonly exists?: ((url: string) => Promise<boolean>) | undefined;
+}
+
+/** A release asset's download URL. */
+export function releaseAssetUrl(version: string, name: string): string {
+    return `${RELEASES_URL}/download/v${encodeURIComponent(version)}/${encodeURIComponent(name)}`;
+}
+
+/** A release's own page: the fallback when the asset cannot be confirmed. */
+export function releasePageUrl(version: string): string {
+    return `${RELEASES_URL}/tag/v${encodeURIComponent(version)}`;
+}
+
+/** What the running installation is, as far as updates care. */
+export interface InstallEnvironment {
+    readonly platform: NodeJS.Platform;
+    readonly arch: string;
+    /** `process.env.PORTABLE_EXECUTABLE_FILE`: set by electron-builder's portable exe. */
+    readonly portableExecutable?: string | undefined;
+    /** `<resources>/package-type`, trimmed: `deb` for a deb install (electron-builder writes it). */
+    readonly packageType?: string | undefined;
+}
+
+/** How an update gets onto this machine, and for link mode the installer's name. */
+export type UpdateInstall =
+    {readonly install: 'app'} | {readonly install: 'link'; readonly asset: (version: string) => string};
+
+/**
+ * In-app update or download link (task 53, the maintainer's instruction on #163, 2026-09-16).
+ *
+ * - **macOS: link.** The build is unsigned, and Squirrel.Mac, which electron-updater uses there,
+ *   installs only into a signed app whose designated requirement the update satisfies.
+ * - **Windows: link.** The portable exe has no in-app update at all; an unsigned NSIS update would
+ *   install, but the Windows signing is blocked (#68) and cannot be tested here.
+ * - **Linux deb: link.** electron-updater's deb path runs `dpkg -i` through a graphical sudo, which
+ *   most desktops only half provide and which could not be tested.
+ * - **Linux AppImage: the app installs the update itself** - the one path verified end to end
+ *   (task 53: an AppImage replaced itself with a newer one from a local update server).
+ *
+ * The names are the ones electron-builder.yml gives the files (B-47), pinned by
+ * `scripts/update-names.test.mjs`.
+ */
+export function updateInstall(env: InstallEnvironment): UpdateInstall {
+    const arch = env.arch;
+    switch (env.platform) {
+        case 'darwin':
+            return {install: 'link', asset: (version) => `Homematic-Manager-${version}-universal.dmg`};
+        case 'win32': {
+            const portable = env.portableExecutable !== undefined && env.portableExecutable !== '';
+            if (!portable) {
+                return {install: 'link', asset: (version) => `Homematic-Manager-Setup-${version}.exe`};
+            }
+            // One exe per arch, and a combined one for anything else Windows might report.
+            const suffix = arch === 'x64' || arch === 'arm64' ? `-${arch}` : '';
+            return {install: 'link', asset: (version) => `Homematic-Manager-${version}-portable${suffix}.exe`};
+        }
+        default:
+            if (env.packageType === 'deb') {
+                const debArch = arch === 'x64' ? 'amd64' : arch;
+                return {install: 'link', asset: (version) => `homematic-manager_${version}_${debArch}.deb`};
+            }
+            return {install: 'app'};
+    }
 }
 
 const HOURS = 60 * 60 * 1000;
 
 const state = (
+    install: UpdateInstallMode,
     phase: UpdateState['phase'],
     fields: {
         version?: string | undefined;
@@ -57,6 +146,7 @@ const state = (
     dismissed = false,
 ): UpdateState => ({
     phase,
+    install,
     dismissed,
     ...(fields.version === undefined ? {} : {version: fields.version}),
     ...(fields.percent === undefined ? {} : {percent: fields.percent}),
@@ -81,8 +171,8 @@ export class UpdateFlow {
     constructor(options: UpdateFlowOptions) {
         this.#options = options;
         this.#state = options.enabled
-            ? state('idle')
-            : state('disabled', {message: options.disabledReason ?? 'automatic updates are switched off'});
+            ? this.#make('idle')
+            : this.#make('disabled', {message: options.disabledReason ?? 'automatic updates are switched off'});
 
         if (!options.enabled) {
             return;
@@ -92,11 +182,11 @@ export class UpdateFlow {
         updater.autoInstallOnAppQuit = false;
         updater.on('download-progress', ((progress: {percent?: number}) => {
             this.#emit(
-                state('downloading', {version: this.#state.version, percent: Math.round(progress.percent ?? 0)}),
+                this.#make('downloading', {version: this.#state.version, percent: Math.round(progress.percent ?? 0)}),
             );
         }) as (...args: never[]) => void);
         updater.on('update-downloaded', ((info: {version?: string}) => {
-            this.#emit(state('downloaded', {version: info.version ?? this.#state.version}));
+            this.#emit(this.#make('downloaded', {version: info.version ?? this.#state.version}));
         }) as (...args: never[]) => void);
         updater.on('error', ((error: Error) => {
             this.#fail('updater', error);
@@ -157,16 +247,18 @@ export class UpdateFlow {
         this.#busy = true;
         const known = this.#state.version;
         const dismissed = this.#state.dismissed;
-        this.#emit(state('checking', {version: known}, dismissed));
+        this.#emit(this.#make('checking', {version: known}, dismissed));
         try {
             const result = await this.#options.updater.checkForUpdates();
             const version = result?.updateInfo.version;
             if (version === undefined || version === this.#options.currentVersion) {
-                this.#emit(state('idle'));
+                this.#emit(this.#make('idle'));
             } else {
                 // A dismissal is for one version; a newer one is announced again, and so is the same
                 // one when the user asks from the menu.
-                this.#emit(state('available', {version}, options.manual !== true && dismissed && version === known));
+                this.#emit(
+                    this.#make('available', {version}, options.manual !== true && dismissed && version === known),
+                );
             }
         } catch (error) {
             this.#fail('check', error);
@@ -182,14 +274,18 @@ export class UpdateFlow {
             return this.state;
         }
         const version = this.#state.version;
-        this.#emit(state('downloading', {version, percent: 0}));
+        if (this.#options.link !== undefined) {
+            await this.#openDownload(this.#options.link, version ?? '');
+            return this.state;
+        }
+        this.#emit(this.#make('downloading', {version, percent: 0}));
         try {
             await this.#options.updater.downloadUpdate();
             // `this.state`, not `this.#state`: the phase moved on inside `#emit`, which the
             // narrowing of the guard above does not know about.
             if (this.state.phase === 'downloading') {
                 // `update-downloaded` normally moved us on already; make sure either way.
-                this.#emit(state('downloaded', {version}));
+                this.#emit(this.#make('downloaded', {version}));
             }
         } catch (error) {
             this.#fail('download', error);
@@ -202,11 +298,15 @@ export class UpdateFlow {
      * user quits it, not this method.
      */
     installOnQuit(): UpdateState {
+        if (this.linkMode) {
+            // Nothing was downloaded, so there is nothing to arm.
+            return this.state;
+        }
         if (this.#state.phase !== 'downloaded' && this.#state.phase !== 'installOnQuit') {
             return this.state;
         }
         this.#armed = true;
-        this.#emit(state('installOnQuit', {version: this.#state.version}));
+        this.#emit(this.#make('installOnQuit', {version: this.#state.version}));
         return this.state;
     }
 
@@ -214,7 +314,7 @@ export class UpdateFlow {
     dismiss(): UpdateState {
         this.#armed = false;
         this.#emit(
-            state(
+            this.#make(
                 this.#state.phase,
                 {version: this.#state.version, message: this.#state.message, failed: this.#state.failed},
                 true,
@@ -241,6 +341,39 @@ export class UpdateFlow {
         }
     }
 
+    /** Link mode (task 53): the app never downloads or installs; "Download" opens the installer. */
+    get linkMode(): boolean {
+        return this.#options.link !== undefined;
+    }
+
+    #make(phase: UpdateState['phase'], fields?: Parameters<typeof state>[2], dismissed?: boolean): UpdateState {
+        return state(this.linkMode ? 'link' : 'app', phase, fields, dismissed);
+    }
+
+    /**
+     * Link mode's "Download": the installer of that version in the browser, or the release page
+     * when the installer cannot be confirmed. The strip stays as it is - the user may dismiss it.
+     */
+    async #openDownload(link: UpdateLinkOptions, version: string): Promise<void> {
+        try {
+            let url = releaseAssetUrl(version, link.asset(version));
+            if (link.exists !== undefined) {
+                let found = false;
+                try {
+                    found = await link.exists(url);
+                } catch (error) {
+                    this.#options.onError?.('link', error);
+                }
+                if (!found) {
+                    url = releasePageUrl(version);
+                }
+            }
+            await link.open(url);
+        } catch (error) {
+            this.#fail('download', error);
+        }
+    }
+
     #emit(next: UpdateState): void {
         this.#state = next;
         this.#options.onState(this.state);
@@ -249,7 +382,7 @@ export class UpdateFlow {
     #fail(scope: string, error: unknown): void {
         this.#options.onError?.(scope, error);
         this.#emit(
-            state(
+            this.#make(
                 'error',
                 {
                     version: this.#state.version,
@@ -308,6 +441,8 @@ export interface UpdateCheckReport {
     readonly type: 'info' | 'error';
     readonly message: string;
     readonly detail: string;
+    /** Link mode, a version available: the box offers "Download", which opens the installer (task 53). */
+    readonly download?: boolean;
 }
 
 /**
@@ -328,6 +463,14 @@ export function manualCheckReport(result: UpdateState, currentVersion: string): 
                 detail: `${currentVersion} is the newest version.`,
             };
         case 'available':
+            if (result.install === 'link') {
+                return {
+                    type: 'info',
+                    message: `Version ${version} is available.`,
+                    detail: `You have ${currentVersion}. "Download" opens the installer of the new version in your browser; install it from there. The bar at the top of the window offers the same.`,
+                    download: true,
+                };
+            }
             return {
                 type: 'info',
                 message: `Version ${version} is available.`,

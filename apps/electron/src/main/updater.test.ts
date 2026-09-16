@@ -2,7 +2,17 @@ import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 import type {UpdateState} from '../shared/ipc.js';
 
-import {manualCheckReport, UpdateFlow, updaterDisabledReason, type AutoUpdaterLike} from './updater.js';
+import {
+    manualCheckReport,
+    releaseAssetUrl,
+    releasePageUrl,
+    UpdateFlow,
+    updateInstall,
+    updaterDisabledReason,
+    type AutoUpdaterLike,
+    type InstallEnvironment,
+    type UpdateLinkOptions,
+} from './updater.js';
 
 /** An `autoUpdater` whose answers the test decides and whose events it fires. */
 class FakeUpdater implements AutoUpdaterLike {
@@ -97,13 +107,14 @@ describe('UpdateFlow', () => {
     });
 
     it('starts idle when it is enabled', () => {
-        expect(flow().state).toEqual({phase: 'idle', dismissed: false});
+        expect(flow().state).toEqual({phase: 'idle', install: 'app', dismissed: false});
     });
 
     it('reports itself disabled with a reason, and then does nothing at all', async () => {
         const disabled = flow({enabled: false, disabledReason: 'this build is not packaged'});
         expect(disabled.state).toEqual({
             phase: 'disabled',
+            install: 'app',
             dismissed: false,
             message: 'this build is not packaged',
         });
@@ -117,7 +128,7 @@ describe('UpdateFlow', () => {
     it('stays idle when the running version is the newest', async () => {
         updater.available = '3.0.0';
         const f = flow();
-        await expect(f.check()).resolves.toEqual({phase: 'idle', dismissed: false});
+        await expect(f.check()).resolves.toEqual({phase: 'idle', install: 'app', dismissed: false});
         expect(states.map((s) => s.phase)).toEqual(['checking', 'idle']);
     });
 
@@ -129,7 +140,12 @@ describe('UpdateFlow', () => {
     it('announces a newer version without downloading it', async () => {
         updater.available = '3.1.0';
         const f = flow();
-        await expect(f.check()).resolves.toEqual({phase: 'available', version: '3.1.0', dismissed: false});
+        await expect(f.check()).resolves.toEqual({
+            phase: 'available',
+            install: 'app',
+            version: '3.1.0',
+            dismissed: false,
+        });
         expect(updater.downloads).toBe(0);
     });
 
@@ -138,7 +154,12 @@ describe('UpdateFlow', () => {
         const f = flow();
         await f.check();
         states.length = 0;
-        await expect(f.download()).resolves.toEqual({phase: 'downloaded', version: '3.1.0', dismissed: false});
+        await expect(f.download()).resolves.toEqual({
+            phase: 'downloaded',
+            install: 'app',
+            version: '3.1.0',
+            dismissed: false,
+        });
         expect(states.map((s) => s.phase)).toEqual(['downloading', 'downloading', 'downloaded']);
         expect(states[1]?.percent).toBe(42);
     });
@@ -213,6 +234,7 @@ describe('UpdateFlow', () => {
         f.dismiss();
         await expect(f.check({manual: true})).resolves.toEqual({
             phase: 'available',
+            install: 'app',
             version: '3.1.0',
             dismissed: false,
         });
@@ -294,6 +316,7 @@ describe('UpdateFlow', () => {
         await f.download();
         expect(f.dismiss()).toEqual({
             phase: 'error',
+            install: 'app',
             version: '3.1.0',
             message: 'status 404',
             failed: 'download',
@@ -364,6 +387,168 @@ describe('UpdateFlow', () => {
     });
 });
 
+const RELEASE = 'https://github.com/hobbyquaker/homematic-manager/releases';
+
+/** The installer URL {@link updateInstall} picks for an environment, or `app`. */
+const pick = (env: InstallEnvironment, version = '3.0.0-beta.19'): string => {
+    const choice = updateInstall(env);
+    return choice.install === 'app' ? 'app' : releaseAssetUrl(version, choice.asset(version));
+};
+
+describe('updateInstall (task 53, #163)', () => {
+    it('links the universal dmg on macOS, whatever the arch', () => {
+        for (const arch of ['arm64', 'x64']) {
+            expect(pick({platform: 'darwin', arch})).toBe(
+                `${RELEASE}/download/v3.0.0-beta.19/Homematic-Manager-3.0.0-beta.19-universal.dmg`,
+            );
+        }
+    });
+
+    it('links the one Setup exe for an installed Windows app, on both archs', () => {
+        for (const arch of ['x64', 'arm64']) {
+            expect(pick({platform: 'win32', arch})).toBe(
+                `${RELEASE}/download/v3.0.0-beta.19/Homematic-Manager-Setup-3.0.0-beta.19.exe`,
+            );
+            // an empty variable is no portable exe
+            expect(pick({platform: 'win32', arch, portableExecutable: ''})).toContain('Setup');
+        }
+    });
+
+    it("links the portable exe of the running arch when the portable exe's variable is set", () => {
+        const portable = 'C:\\Users\\x\\Downloads\\Homematic-Manager-3.0.0-beta.18-portable-x64.exe';
+        expect(pick({platform: 'win32', arch: 'x64', portableExecutable: portable})).toBe(
+            `${RELEASE}/download/v3.0.0-beta.19/Homematic-Manager-3.0.0-beta.19-portable-x64.exe`,
+        );
+        expect(pick({platform: 'win32', arch: 'arm64', portableExecutable: portable})).toBe(
+            `${RELEASE}/download/v3.0.0-beta.19/Homematic-Manager-3.0.0-beta.19-portable-arm64.exe`,
+        );
+        // an arch there is no exe of its own for gets the combined one
+        expect(pick({platform: 'win32', arch: 'ia32', portableExecutable: portable})).toBe(
+            `${RELEASE}/download/v3.0.0-beta.19/Homematic-Manager-3.0.0-beta.19-portable.exe`,
+        );
+    });
+
+    it('links the deb of the running arch for a deb install', () => {
+        expect(pick({platform: 'linux', arch: 'x64', packageType: 'deb'})).toBe(
+            `${RELEASE}/download/v3.0.0-beta.19/homematic-manager_3.0.0-beta.19_amd64.deb`,
+        );
+        expect(pick({platform: 'linux', arch: 'arm64', packageType: 'deb'})).toBe(
+            `${RELEASE}/download/v3.0.0-beta.19/homematic-manager_3.0.0-beta.19_arm64.deb`,
+        );
+    });
+
+    it('lets the AppImage (no package-type file) install its update itself', () => {
+        expect(pick({platform: 'linux', arch: 'x64'})).toBe('app');
+        expect(pick({platform: 'linux', arch: 'arm64', packageType: undefined})).toBe('app');
+    });
+
+    it('builds the release page URL and escapes what does not belong in a path', () => {
+        expect(releasePageUrl('3.0.0-beta.19')).toBe(`${RELEASE}/tag/v3.0.0-beta.19`);
+        expect(releaseAssetUrl('1.0.0+x/y', 'a b.exe')).toBe(`${RELEASE}/download/v1.0.0%2Bx%2Fy/a%20b.exe`);
+    });
+});
+
+describe('UpdateFlow in link mode (task 53)', () => {
+    let opened: string[];
+    let probed: string[];
+
+    const linkFlow = (link: Partial<UpdateLinkOptions> = {}): UpdateFlow =>
+        flow({
+            link: {
+                asset: (version) => `Homematic-Manager-${version}-universal.dmg`,
+                open: (url) => {
+                    opened.push(url);
+                },
+                ...link,
+            },
+        });
+
+    beforeEach(() => {
+        opened = [];
+        probed = [];
+    });
+
+    it('checks like the app mode and says it links', async () => {
+        updater.available = '3.1.0';
+        const f = linkFlow();
+        expect(f.linkMode).toBe(true);
+        expect(f.state).toEqual({phase: 'idle', install: 'link', dismissed: false});
+        await expect(f.check()).resolves.toEqual({
+            phase: 'available',
+            install: 'link',
+            version: '3.1.0',
+            dismissed: false,
+        });
+        expect(updater.autoDownload).toBe(false);
+        expect(updater.autoInstallOnAppQuit).toBe(false);
+    });
+
+    it('opens the installer instead of downloading, and never arms an install', async () => {
+        updater.available = '3.1.0';
+        const f = linkFlow({
+            exists: (url) => {
+                probed.push(url);
+                return Promise.resolve(true);
+            },
+        });
+        await f.check();
+        states.length = 0;
+        await expect(f.download()).resolves.toMatchObject({phase: 'available', version: '3.1.0'});
+        expect(updater.downloads).toBe(0);
+        expect(probed).toEqual([`${RELEASE}/download/v3.1.0/Homematic-Manager-3.1.0-universal.dmg`]);
+        expect(opened).toEqual(probed);
+        // no "downloading", no "downloaded": the strip stays as it was
+        expect(states).toEqual([]);
+
+        expect(f.installOnQuit()).toMatchObject({phase: 'available'});
+        expect(f.willInstallOnQuit).toBe(false);
+        expect(f.installIfArmed()).toBe(false);
+        expect(updater.installed).toEqual([]);
+
+        // a second click opens it again
+        await f.download();
+        expect(opened).toHaveLength(2);
+        expect(updater.downloads).toBe(0);
+    });
+
+    it('opens nothing before a version was announced', async () => {
+        const f = linkFlow();
+        await f.download();
+        expect(opened).toEqual([]);
+        expect(updater.downloads).toBe(0);
+    });
+
+    it('opens the release page when the installer is not there', async () => {
+        updater.available = '3.1.0';
+        const f = linkFlow({exists: () => Promise.resolve(false)});
+        await f.check();
+        await f.download();
+        expect(opened).toEqual([`${RELEASE}/tag/v3.1.0`]);
+    });
+
+    it('opens the release page when the probe fails, and logs why', async () => {
+        updater.available = '3.1.0';
+        const f = linkFlow({exists: () => Promise.reject(new Error('offline'))});
+        await f.check();
+        await expect(f.download()).resolves.toMatchObject({phase: 'available'});
+        expect(opened).toEqual([`${RELEASE}/tag/v3.1.0`]);
+        expect(errors.map(([scope]) => scope)).toEqual(['link']);
+    });
+
+    it('turns a browser that cannot be opened into a failed download', async () => {
+        updater.available = '3.1.0';
+        const f = linkFlow({open: () => Promise.reject(new Error('no browser'))});
+        await f.check();
+        await expect(f.download()).resolves.toMatchObject({
+            phase: 'error',
+            install: 'link',
+            failed: 'download',
+            message: 'no browser',
+        });
+        expect(updater.downloads).toBe(0);
+    });
+});
+
 describe('updaterDisabledReason', () => {
     it('names an unpackaged build', () => {
         expect(updaterDisabledReason({packaged: false, disabledBySetting: false})).toContain('not packaged');
@@ -410,6 +595,17 @@ describe('manualCheckReport (#160)', () => {
         expect(report.message).toBe('Version 3.1.0 is available.');
         expect(report.detail).toContain('You have 3.0.0');
         expect(report.detail).toContain('without your confirmation');
+        expect(report.download).toBeUndefined();
+    });
+
+    it('offers the download in the box in link mode, and says it opens the browser (task 53)', async () => {
+        updater.available = '3.1.0';
+        const linked = flow({link: {asset: (v) => v, open: () => undefined}});
+        const report = manualCheckReport(await linked.check({manual: true}), '3.0.0');
+        expect(report.message).toBe('Version 3.1.0 is available.');
+        expect(report.download).toBe(true);
+        expect(report.detail).toContain('in your browser');
+        expect(report.detail).not.toContain('confirmation');
     });
 
     it('says a failed check failed, with its reason', async () => {

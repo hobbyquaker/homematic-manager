@@ -123,8 +123,10 @@ Everything is under Electron's `userData` directory for the product name **Homem
 | `host.json` | host settings; today only `disableAutoUpdate` |
 
 Delete `cache/` to force a full re-read from the CCU; delete `config.json` to start over. **Nothing
-outside this directory is written**, which is why the Windows installer is per-user and needs no
-administrator.
+outside this directory is written** but the updater's download folder `homematic-manager-updater` in the
+user's cache directory (`%LOCALAPPDATA%`, `~/Library/Caches`, `~/.cache`), where the Windows installer
+also keeps a copy of itself - which is why the Windows installer is per-user and needs no administrator.
+Up to 3.0.0-beta.18 that folder was called `@homematic-managerelectron-updater`; it can be deleted.
 
 Coming from 2.x, the configuration is imported once on the very first start — see
 [migration-from-2.x.md](migration-from-2.x.md). Moving the profile to a server install or to the CCU

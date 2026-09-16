@@ -50,8 +50,10 @@ It cannot cover `src/renderer`, which imports `.svelte` modules; `svelte-check` 
 | `host.json` | host settings; today only `disableAutoUpdate` |
 
 Delete `cache/` to force a full re-read from the CCU; delete `config.json` to start over. Nothing
-outside this directory is written, which is why the Windows installer is per-user and needs no
-administrator.
+outside this directory is written but electron-updater's download folder `homematic-manager-updater` in
+the user's cache directory (`%LOCALAPPDATA%`, `~/Library/Caches`, `~/.cache`), where the Windows
+installer also keeps a copy of itself - which is why the Windows installer is per-user and needs no
+administrator. The folder is named by `extraMetadata.name` in `electron-builder.yml` (B-49).
 
 ## The 2.x configuration is imported once (D-17)
 

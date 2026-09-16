@@ -29,6 +29,16 @@ productName: Homematic Manager
 # Without this the binary would be called `@homematic-manager/electron` after the workspace name,
 # which is not a file name on any of the three platforms.
 executableName: homematic-manager
+# The `name` in the app's packaged package.json (B-49). electron-builder names electron-updater's
+# download folder after it: `app-update.yml` says `updaterCacheDirName: <name>-updater`, and with the
+# workspace name that was `@homematic-managerelectron-updater` (the `/` dropped) under ~/.cache,
+# ~/Library/Caches and %LOCALAPPDATA% - where the Windows installer also keeps a copy of itself.
+# `publish.updaterCacheDirName` would not help: app-builder-lib 26 overwrites it with this derived
+# value. Nothing else reads the name: Electron takes app.getName() and the profile folder from
+# `productName`, the deb and the executable are named above and below, every installer names
+# itself. `scripts/update-names.mjs` checks the folder name in the config and in a build.
+extraMetadata:
+  name: homematic-manager
 copyright: Copyright © 2016-2026 Sebastian Raff and contributors, AGPL-3.0-or-later
 
 directories:

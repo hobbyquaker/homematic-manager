@@ -1,4 +1,6 @@
 <script lang="ts">
+    import {followExternalLink, type OpenExternal} from '../util/externalLink.js';
+
     interface Props {
         /** Where the icon goes. One URL, and main's allow-list holds the same one. */
         href: string;
@@ -8,31 +10,18 @@
          * Hands the URL to the host, and says whether the host took it. `false` - no host, or a
          * preload that predates the command - lets the browser follow the link itself.
          */
-        openExternal?: ((url: string) => Promise<boolean>) | undefined;
+        openExternal?: OpenExternal | undefined;
         testId?: string | undefined;
     }
 
     let {href, label, openExternal = undefined, testId = undefined}: Props = $props();
 
     /**
-     * A real link, even in Electron.
-     *
-     * The browser case is the plain one the roadmap asks for - `target="_blank"` with
-     * `rel="noopener noreferrer"`, so the new tab gets no handle on this one. In Electron the click
-     * is answered by the host bridge instead and the default is prevented, because a renderer that
-     * opened a window itself would be a window nobody wanted; the anchor stays an anchor so that
-     * the middle button, the context menu and a screen reader all still see a link.
+     * A real link, even in Electron: the browser case is the plain one the roadmap asks for, and
+     * in Electron the host bridge opens it ({@link followExternalLink}).
      */
     function open(event: MouseEvent): void {
-        if (!openExternal || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey) {
-            return;
-        }
-        event.preventDefault();
-        void openExternal(href).then((handled) => {
-            if (!handled) {
-                window.open(href, '_blank', 'noopener,noreferrer');
-            }
-        });
+        followExternalLink(event, href, openExternal);
     }
 </script>
 

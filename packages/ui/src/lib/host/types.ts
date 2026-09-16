@@ -24,6 +24,8 @@ export interface HostUpdateState {
     readonly percent?: number;
     /** Why the updater is off, or what went wrong. */
     readonly message?: string;
+    /** With `error`: the step that failed, when it is known (B-47). */
+    readonly failed?: 'check' | 'download';
     /** The user dismissed the notice for this version. */
     readonly dismissed: boolean;
 }
@@ -60,7 +62,7 @@ export interface HostBridge {
      * both sides of this contract only ever gain optional members. Where it is missing the UI
      * falls back to what the browser does with a `target="_blank"` link, which is what `apps/web`
      * and the CCU addon do anyway. Main decides what may be opened, not the page: it has an
-     * allow-list of exactly the project URL.
+     * allow-list of exactly the project URL and its release list (B-47).
      */
     openExternal?(url: string): Promise<void>;
     update: {

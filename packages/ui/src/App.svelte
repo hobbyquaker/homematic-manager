@@ -33,6 +33,9 @@
 
     /** The project page, opened by the header's GitHub icon (task 23). */
     const PROJECT_URL = 'https://github.com/hobbyquaker/homematic-manager';
+    // B-47: where the update strip sends the user when a check or download failed; main's
+    // allow-list for the renderer has exactly this URL next to the project page.
+    const RELEASES_URL = `${PROJECT_URL}/releases`;
 
     interface Props {
         stores: Stores;
@@ -300,7 +303,13 @@
             download: t('Download'),
             install: t('Install on quit'),
             dismiss: t('Dismiss'),
+            checkFailed: t('The update check failed'),
+            downloadFailed: t('The download of the update failed'),
+            failed: t('The update failed'),
+            releases: t('Releases on GitHub'),
         }}
+        releasesUrl={RELEASES_URL}
+        openExternal={(url) => stores.host.openExternal(url)}
         testId="update-notice"
         ondownload={() => void stores.host.downloadUpdate()}
         oninstall={() => void stores.host.installUpdateOnQuit()}

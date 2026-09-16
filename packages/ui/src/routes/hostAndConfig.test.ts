@@ -158,6 +158,82 @@ describe('the update notice', () => {
             expect(screen.queryByTestId('update-notice')).toBeNull();
         });
     });
+
+    /**
+     * B-47 (#163): "Herunterladen" 404'd, the flow went to `error`, and the strip drew nothing for
+     * it - "nach dem Klick passiert nichts". Now it says what failed, why, and where the release is.
+     */
+    it('says that the download failed, why, and links the release list through the host', async () => {
+        const bridge = fakeHost();
+        await mountApp({hostBridge: bridge});
+        bridge.fireUpdate({
+            phase: 'error',
+            failed: 'download',
+            version: '3.1.0',
+            message: '404 Not Found\n"method: GET url: https://github.com/x"\nHeaders: {"server": "github.com"}',
+            dismissed: false,
+        });
+
+        const notice = await waitFor(() => screen.getByTestId('update-notice'));
+        expect(notice.getAttribute('role')).toBe('alert');
+        expect(notice.textContent).toContain('Das Herunterladen der Aktualisierung ist fehlgeschlagen (3.1.0):');
+        expect(screen.getByTestId('update-error-reason').textContent).toBe('404 Not Found');
+        const text = notice.querySelector('.hmm-update-text');
+        expect(text?.getAttribute('title')).toBe('404 Not Found\n"method: GET url: https://github.com/x"');
+        expect(screen.queryByTestId('update-download')).toBeNull();
+
+        const link = screen.getByTestId<HTMLAnchorElement>('update-releases');
+        expect(link.textContent).toBe('Versionen auf GitHub');
+        expect(link.getAttribute('href')).toBe('https://github.com/hobbyquaker/homematic-manager/releases');
+        expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+        const click = new MouseEvent('click', {bubbles: true, cancelable: true, button: 0});
+        link.dispatchEvent(click);
+        await waitFor(() => {
+            expect(bridge.opened()).toEqual(['https://github.com/hobbyquaker/homematic-manager/releases']);
+        });
+        expect(click.defaultPrevented).toBe(true);
+
+        await fireEvent.click(screen.getByTestId('update-dismiss'));
+        await waitFor(() => {
+            expect(screen.queryByTestId('update-notice')).toBeNull();
+        });
+        expect(bridge.calls()).toContain('dismiss');
+    });
+
+    it('says that the check failed, or only that the update failed when the step is unknown', async () => {
+        const bridge = fakeHost();
+        await mountApp({hostBridge: bridge});
+
+        bridge.fireUpdate({
+            phase: 'error',
+            failed: 'check',
+            message: 'net::ERR_INTERNET_DISCONNECTED',
+            dismissed: false,
+        });
+        await waitFor(() => {
+            expect(screen.getByTestId('update-notice').textContent).toContain(
+                'Die Suche nach Aktualisierungen ist fehlgeschlagen: net::ERR_INTERNET_DISCONNECTED',
+            );
+        });
+
+        bridge.fireUpdate({phase: 'error', dismissed: false});
+        await waitFor(() => {
+            expect(screen.getByTestId('update-notice').textContent).toContain('Die Aktualisierung ist fehlgeschlagen');
+        });
+        expect(screen.queryByTestId('update-error-reason')).toBeNull();
+        expect(screen.getByTestId('update-notice').querySelector('.hmm-update-text')?.hasAttribute('title')).toBe(
+            false,
+        );
+        expect(screen.getByTestId('update-releases')).toBeTruthy();
+    });
+
+    it('stays away for an error the user dismissed', async () => {
+        const bridge = fakeHost();
+        await mountApp({hostBridge: bridge});
+        bridge.fireUpdate({phase: 'error', failed: 'check', message: 'offline', dismissed: true});
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        expect(screen.queryByTestId('update-notice')).toBeNull();
+    });
 });
 
 describe('the GitHub icon in the header', () => {

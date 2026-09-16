@@ -47,15 +47,18 @@ export class HostStore {
 
     /**
      * A version notice the user has not dismissed and that is worth showing: `available`,
-     * `downloading`, `downloaded` and `installOnQuit`. `disabled`, `idle` and `checking` are not
-     * news, and `error` is reported through the notices, not through a banner.
+     * `downloading`, `downloaded`, `installOnQuit` and `error`. `disabled`, `idle` and `checking`
+     * are not news. `error` was left out until B-47 (#163): a download that failed took the strip
+     * away, and "nothing happens" was all a user saw.
      */
     get updateNotice(): HostUpdateState | undefined {
         const state = this.update;
         if (!state || state.dismissed) {
             return undefined;
         }
-        return ['available', 'downloading', 'downloaded', 'installOnQuit'].includes(state.phase) ? state : undefined;
+        return ['available', 'downloading', 'downloaded', 'installOnQuit', 'error'].includes(state.phase)
+            ? state
+            : undefined;
     }
 
     /**

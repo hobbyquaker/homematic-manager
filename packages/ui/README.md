@@ -98,8 +98,8 @@ descriptions they are tested against.
 
 `window.__HMM_HOST__` (Electron, task 11) is read through `HostStore` and nowhere else. Without it -
 `apps/web`, the CCU addon, demo mode - `available` is false, every method is a no-op that resolves,
-the update notice never appears, the GitHub icon in the header is a plain `target="_blank"` link
-instead of a `shell.openExternal` through the bridge, the settings dialog's info line shows the
+the update notice never appears, the GitHub icon in the header (and the update notice's link to the
+release list) is a plain `target="_blank"` link instead of a `shell.openExternal` through the bridge, the settings dialog's info line shows the
 API's version instead of Electron's, and a device image falls back to a labelled placeholder.
 
 ## Demo mode

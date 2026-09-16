@@ -543,6 +543,17 @@ export const UI_MESSAGES: MessageCatalogue = {
     },
     Download: {de: 'Herunterladen', en: 'Download'},
     'Install on quit': {de: 'Beim Beenden installieren', en: 'Install on quit'},
+    // B-47 (#163): a failed check or download used to take the strip away without a word.
+    'The update check failed': {
+        de: 'Die Suche nach Aktualisierungen ist fehlgeschlagen',
+        en: 'The update check failed',
+    },
+    'The download of the update failed': {
+        de: 'Das Herunterladen der Aktualisierung ist fehlgeschlagen',
+        en: 'The download of the update failed',
+    },
+    'The update failed': {de: 'Die Aktualisierung ist fehlgeschlagen', en: 'The update failed'},
+    'Releases on GitHub': {de: 'Versionen auf GitHub', en: 'Releases on GitHub'},
     'Device data': {de: 'Gerätedaten', en: 'Device data'},
     // Task 23: the accessible name of the GitHub icon that replaced the "?" menu.
     'Homematic Manager on GitHub': {

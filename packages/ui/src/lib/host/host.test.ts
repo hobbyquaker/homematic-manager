@@ -128,15 +128,18 @@ describe('HostStore with a host', () => {
         const bridge = fakeBridge();
         const store = new HostStore({bridge});
 
-        for (const phase of ['disabled', 'idle', 'checking', 'error'] as const) {
+        for (const phase of ['disabled', 'idle', 'checking'] as const) {
             bridge.fireUpdate({phase, dismissed: false});
             expect(store.updateNotice, phase).toBeUndefined();
         }
-        for (const phase of ['available', 'downloading', 'downloaded', 'installOnQuit'] as const) {
+        // B-47: a failed check or download is news too; it used to take the strip away silently
+        for (const phase of ['available', 'downloading', 'downloaded', 'installOnQuit', 'error'] as const) {
             bridge.fireUpdate({phase, version: '3.1.0', dismissed: false});
             expect(store.updateNotice?.phase, phase).toBe(phase);
         }
         bridge.fireUpdate({phase: 'available', version: '3.1.0', dismissed: true});
+        expect(store.updateNotice).toBeUndefined();
+        bridge.fireUpdate({phase: 'error', failed: 'download', message: '404 Not Found', dismissed: true});
         expect(store.updateNotice).toBeUndefined();
 
         await store.checkForUpdate();

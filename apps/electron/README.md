@@ -227,10 +227,11 @@ to every artefact would be a false statement.
 
 | file | trigger | what it does |
 | --- | --- | --- |
-| `.github/workflows/build.yml` | push to `3.0-dev`, manual | packages all three platforms, uploads the artifacts for 14 days, publishes nothing (D-21) |
-| `.github/workflows/release-electron.yml` | `v*` tag, manual with a tag input | the same build, attached to a **draft** GitHub release |
+| `.github/workflows/build.yml` | push to `master` (not when it changes only Markdown, `docs/` or `roadmap-archive/`), manual | packages all three platforms, checks the update manifests and writes the SBOMs, uploads the artifacts for 14 days, then runs the Electron smoke test, which is reported but never withholds the artifacts; publishes nothing (D-21) |
+| `.github/workflows/release-electron.yml` | `v*` tag, manual with a tag input | the same packaging, manifest check and SBOMs without the smoke test, plus the build-provenance and SBOM attestations; the assets go to a **draft** GitHub release, titled and described by `scripts/release-notes.mjs` |
 
-Per D-24 the release workflow is one of three independent ones and has no `needs:` on any other.
+Per D-24 the release workflow is one of four independent ones (with `release-npm.yml`,
+`release-docker.yml` and `release-addon.yml`) and has no `needs:` on any other.
 The release is created as a draft and published by the maintainer, because `electron-updater` polls
 the latest *published* release: publishing one whose `latest*.yml` and installers are still
 uploading would offer every running app an update it cannot download.

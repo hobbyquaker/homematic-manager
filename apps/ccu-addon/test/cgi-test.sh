@@ -638,6 +638,46 @@ for value in rega occulite2 ''; do
 done
 cp -a "$ADDON_SRC/files/hmm/etc/default.env" "$TREE/etc/hmm.env"
 
+echo "no update of the addon's own on the settings page (task 54)"
+# On openccu-lite the box updates its addons (openccu-lite task 140), so the addon offers no update
+# check, download or installer of its own - and none on a CCU either, where the WebUI's
+# Zusatzsoftware page asks update_check.cgi, not this page. The settings page shows no version, so
+# it has no line pointing at the box's Addons page either. Checked on the whole output.
+UPDATE_WORDS='update|download|herunterlad|aktualisier|install|github|releases'
+# no_update_action <name> <output>
+no_update_action() {
+    if printf '%s' "$2" | grep -qiE "$UPDATE_WORDS"; then
+        fail "$1" "$(printf '%s' "$2" | grep -iE "$UPDATE_WORDS")"
+    else
+        pass "$1"
+    fi
+}
+out="$(cd "$TREE/www" && QUERY_STRING='cmd=config' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
+    HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'Anmeldung / Login'*) no_update_action "VARIANT=lite: the settings page offers no update, download or installer" "$out" ;;
+    *) fail "VARIANT=lite: the settings page offers no update, download or installer" "the page did not render: $out" ;;
+esac
+out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$CCU_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'Anmeldung / Login'*) no_update_action "on a CCU it offers none either" "$out" ;;
+    *) fail "on a CCU it offers none either" "the page did not render: $out" ;;
+esac
+# the hand-over on a lite box is a redirect into the UI and nothing else
+out="$(cd "$TREE/www" && QUERY_STRING='' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
+    HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'Location: /addons/hmm/'*) no_update_action "VARIANT=lite: the hand-over redirects into the UI, with no update in it" "$out" ;;
+    *) fail "VARIANT=lite: the hand-over redirects into the UI, with no update in it" "$out" ;;
+esac
+# service.cgi's status names the versions and offers nothing to do with them
+out="$(cd "$TREE/www" && QUERY_STRING='cmd=status' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
+    HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" service.cgi 2>&1)"
+case "$out" in
+    *'"VERSION_ADDON":"3.0.0-dev.0"'*) no_update_action "VARIANT=lite: service.cgi's status carries no update action" "$out" ;;
+    *) fail "VARIANT=lite: service.cgi's status carries no update action" "$out" ;;
+esac
+
 echo "the openccu-lite session header on settings.cgi and service.cgi (task 50)"
 # The box's gate hands a CGI the validated session as HTTP_X_OCCULITE_SESSION. The stub started at
 # the top is the box the CGI asks about it (GET /api/auth/v1/state with the id as Bearer). ReGa

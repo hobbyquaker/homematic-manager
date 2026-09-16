@@ -1,13 +1,13 @@
 name: Release (npm package)
 
-# One of the three independent release pipelines of D-24. This one publishes `apps/web` - the
+# One of the four independent release pipelines of D-24. This one publishes `apps/web` - the
 # Homematic Manager server: the backend as an HTTP/WebSocket host with the built UI inside the
 # tarball - to npm, and attaches the tarball and its SBOM to the GitHub release for a `v*` tag.
 #
-# It has no `needs:` on anything. The Electron app (`release-electron.yml`, task 11) and the CCU
-# addon (`release-addon.yml`, task 13) run for the same tag in parallel, and a failure in either
-# must never hold this one back or roll it back; re-running one alone is `workflow_dispatch` with
-# the tag as its input.
+# It has no `needs:` on anything. The Electron app (`release-electron.yml`, task 11), the CCU
+# addon (`release-addon.yml`, task 13) and the Docker image (`release-docker.yml`) run for the same
+# tag in parallel, and a failure in any of them must never hold this one back or roll it back;
+# re-running one alone is `workflow_dispatch` with the tag as its input.
 #
 # D-33: the package is `homematic-manager`, the name the 2.x desktop app had on npm, so what this
 # workflow packs and publishes is `homematic-manager-<version>.tgz` and its SBOM is
@@ -21,8 +21,8 @@ name: Release (npm package)
 # this file therefore breaks publishing with `ENEEDAUTH` until the publisher is updated, and an
 # `ENEEDAUTH` here is the intended failure, not a reason to add a token secret.
 #
-# The GitHub release is created as a draft by whichever of the three workflows gets there first and
-# published by the maintainer (see `release-electron.yml` for why).
+# The GitHub release is created as a draft by whichever of the four workflows gets there first and
+# published by the maintainer or on his word (see `release-electron.yml` for why).
 
 on:
   push:
@@ -112,11 +112,9 @@ jobs:
       # rather than packing a second, possibly different one. `--provenance` adds npm's own
       # provenance statement on top of the GitHub attestations.
       - name: Publish
-        # A pre-release (3.0.0-dev.n, -alpha.n, -beta.n) goes out under the `next` dist-tag so
-        # that `npm install -g homematic-manager` keeps giving whatever `latest` points at - which
-        # until 3.0.0 is released is still the deprecated 2.x-era 1.0.14, with its deprecation
-        # notice. Pre-release testers install `homematic-manager@next`. A plain version moves
-        # `latest` and ends that.
+        # Every version goes out as `latest`, a pre-release (3.0.0-beta.n) as well - D-39 below.
+        # Until 2026-09-06 a pre-release went out under `next` only, which left `latest` on the
+        # deprecated 1.0.14.
         run: |
           # D-39 (maintainer, 2026-09-06): the 1.x versions under this name are dead, so a pre-release
           # is what `npm install -g homematic-manager` should give; it is published as `latest` and

@@ -12,7 +12,8 @@ name: Release (CCU addon)
 # glibc packages.
 #
 # The release is created as a **draft** by whichever of the four workflows gets there first and
-# published by the maintainer (see `release-electron.yml` for why that matters to the updater).
+# published by the maintainer or on his word (see `release-electron.yml` for why that matters to the
+# updater).
 
 on:
   push:

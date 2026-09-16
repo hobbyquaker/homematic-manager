@@ -1,8 +1,8 @@
 name: Build
 
-# Development builds of the Electron app (roadmap task 11, D-21): every push to the development
-# branch produces installable artifacts for the three platforms, which is how the maintainer gets
-# a dev build without cutting a release. Nothing here publishes anything - `--publish never` is on
+# Development builds of the Electron app (roadmap task 11, D-21): every push to `master`, where the
+# work happens since D-38, produces installable artifacts for the three platforms, which is how the
+# maintainer gets a dev build without cutting a release. Nothing here publishes anything - `--publish never` is on
 # every electron-builder call, and the release workflow is `release-electron.yml` (D-24).
 #
 # Lint, typecheck, tests and coverage are `ci.yml`; this workflow only packages.

@@ -1,12 +1,13 @@
 name: Release (Electron app)
 
-# One of the three independent release pipelines of D-24. This one packages the desktop app and
+# One of the four independent release pipelines of D-24. This one packages the desktop app and
 # attaches its assets to the GitHub release for a `v*` tag. It has no `needs:` on anything: the npm
-# package (`release-npm.yml`, task 12) and the CCU addon (`release-addon.yml`, task 13) run for the
-# same tag, in parallel, and a failure in either must never hold this one back or roll it back.
+# package (`release-npm.yml`, task 12), the CCU addon (`release-addon.yml`, task 13) and the Docker
+# image (`release-docker.yml`) run for the same tag, in parallel, and a failure in any of them must
+# never hold this one back or roll it back.
 #
-# The release is created as a **draft**, by whichever of the three workflows gets there first, and
-# published by the maintainer. That is not tidiness: `electron-updater` polls the latest published
+# The release is created as a **draft**, by whichever of the four workflows gets there first, and
+# published by the maintainer (or on his word). That is not tidiness: `electron-updater` polls the latest published
 # release, and a release that is published while its `latest*.yml` and installers are still
 # uploading would offer every running app an update it cannot download.
 #

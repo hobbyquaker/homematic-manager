@@ -145,9 +145,16 @@ cache for this platform.
 
 | platform | targets | artifacts |
 | --- | --- | --- |
-| macOS 12+ | dmg, zip, universal | `Homematic Manager-<version>-universal.dmg`, `...-universal-mac.zip` |
-| Windows 10+ | nsis, portable, x64 + arm64 | `Homematic Manager Setup <version>.exe`, `Homematic Manager-<version>-portable-<arch>.exe` |
-| Linux glibc 2.31+ | AppImage, deb, x64 + arm64 | `Homematic Manager-<version><-arch>.AppImage`, `homematic-manager_<version>_<arch>.deb` |
+| macOS 12+ | dmg, zip, universal | `Homematic-Manager-<version>-universal.dmg`, `...-universal-mac.zip` |
+| Windows 10+ | nsis, portable, x64 + arm64 | `Homematic-Manager-Setup-<version>.exe` (both archs), `Homematic-Manager-<version>-portable-<arch>.exe` and `...-portable.exe` (both archs) |
+| Linux glibc 2.31+ | AppImage, deb, x64 + arm64 | `Homematic-Manager-<version>-<arch>.AppImage` (`x86_64`, `arm64`), `homematic-manager_<version>_<arch>.deb` |
+
+**No space in any of these names** (B-47, #163). electron-updater downloads the file a
+`latest*.yml` names, and electron-builder writes a name with a space into it with a dash while the
+file keeps the space - and the release upload makes a dot of it. Up to 3.0.0-beta.18 that was every
+name but the deb's, and no in-app download worked. `npm run check:update-names` checks the
+templates in `electron-builder.yml` and, after packaging, that every name in every `latest*.yml` is
+a file in `dist-electron/`; both workflows run it after packaging.
 
 Cross-building only works in one direction that matters: Linux arm64 builds on an x64 runner, and
 the macOS universal build needs a macOS runner. Windows installers are built on Windows.
@@ -186,7 +193,7 @@ On a release the assets are attested with `actions/attest-build-provenance` and
 `actions/attest-sbom`, which anyone can check offline against a downloaded file:
 
 ```sh
-gh attestation verify 'Homematic Manager-3.0.0.AppImage' --repo hobbyquaker/homematic-manager
+gh attestation verify Homematic-Manager-3.0.0-x86_64.AppImage --repo hobbyquaker/homematic-manager
 ```
 
 The attestation uses `sbom.cdx.json`, a copy without the per-installer `metadata.component`: the

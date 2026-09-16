@@ -37,12 +37,15 @@ From the [latest release](https://github.com/hobbyquaker/homematic-manager/relea
 
 | OS | File | Notes |
 | --- | --- | --- |
-| Windows | `Homematic Manager Setup <version>.exe` | NSIS installer, **per user** — no administrator needed, nothing outside your profile is written |
-| Windows | `Homematic Manager-<version>-portable-<arch>.exe` | portable, installs nothing |
-| macOS | `Homematic Manager-<version>-universal.dmg` | Intel and Apple Silicon |
-| macOS | `Homematic Manager-<version>-universal-mac.zip` | the same app, zipped |
-| Linux | `Homematic Manager-<version><-arch>.AppImage` | `chmod +x`, then run |
+| Windows | `Homematic-Manager-Setup-<version>.exe` | NSIS installer for x64 and arm64, **per user** — no administrator needed, nothing outside your profile is written |
+| Windows | `Homematic-Manager-<version>-portable-<arch>.exe` | portable, installs nothing (`...-portable.exe` without an arch holds both) |
+| macOS | `Homematic-Manager-<version>-universal.dmg` | Intel and Apple Silicon |
+| macOS | `Homematic-Manager-<version>-universal-mac.zip` | the same app, zipped |
+| Linux | `Homematic-Manager-<version>-<arch>.AppImage` | `x86_64` or `arm64`; `chmod +x`, then run |
 | Linux | `homematic-manager_<version>_<arch>.deb` | `sudo apt install ./homematic-manager_<version>_amd64.deb` |
+
+Up to 3.0.0-beta.18 the files were called `Homematic.Manager-…` (and the x64 AppImage had no arch in
+its name).
 
 Every installer has a CycloneDX 1.6 SBOM next to it (`<installer>.cdx.json`, D-27) that lists what
 is really inside — including Electron, its Chromium, Node and V8 as separate components, so a CVE
@@ -50,7 +53,7 @@ feed can be searched for "chromium 152" rather than for "electron 44" — and bo
 GitHub artifact attestations:
 
 ```sh
-gh attestation verify 'Homematic Manager-3.0.0.AppImage' --repo hobbyquaker/homematic-manager
+gh attestation verify Homematic-Manager-3.0.0-x86_64.AppImage --repo hobbyquaker/homematic-manager
 ```
 
 ## Windows: the SmartScreen warning
@@ -88,8 +91,8 @@ not by a 2.x fix.
 The AppImage needs nothing installed:
 
 ```sh
-chmod +x 'Homematic Manager-3.0.0.AppImage'
-./'Homematic Manager-3.0.0.AppImage'
+chmod +x Homematic-Manager-3.0.0-x86_64.AppImage
+./Homematic-Manager-3.0.0-x86_64.AppImage
 ```
 
 The `.deb` registers a desktop entry:

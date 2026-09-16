@@ -13,6 +13,16 @@
 #   - notarisation and signing: both are switched on from the workflow when the secrets exist, so
 #     that a build without them produces unsigned artifacts instead of failing. See
 #     .github/workflows/build.yml and the README.
+#
+# Every target names its file itself, without a space (B-47, #163). electron-builder's default names
+# start with the product name, `Homematic Manager-...`; the update manifests (`latest*.yml`) it writes
+# next to them name the same file with a dash, `Homematic-Manager-...`, and the release upload turns
+# the space into a dot, `Homematic.Manager-...`. electron-updater asks the release for the dashed
+# name, gets 404, and no in-app download worked from beta.1 to beta.18. A name that is already safe
+# for GitHub (letters, digits, `.`, `_`, `-`) is written into the manifest unchanged, so file,
+# asset and manifest agree; `scripts/update-names.mjs` checks both the templates and a build.
+# The names are the ones the manifests already used - except the x64 AppImage, which now says
+# `x86_64`: a template that names the arch always names it.
 
 appId: de.hobbyquaker.homematic-manager
 productName: Homematic Manager
@@ -52,6 +62,9 @@ mac:
   icon: build/icon.icns
   # D-16: macOS 12 and newer.
   minimumSystemVersion: '12.0'
+  # The zip's name, which electron-updater downloads on macOS; the dmg names itself below. The zip
+  # target reads no section of its own, only this one.
+  artifactName: Homematic-Manager-${version}-${arch}-mac.${ext}
   hardenedRuntime: true
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist
@@ -67,6 +80,7 @@ mac:
       arch: [universal]
 
 dmg:
+  artifactName: Homematic-Manager-${version}-${arch}.${ext}
   contents:
     - x: 130
       y: 220
@@ -84,6 +98,9 @@ win:
       arch: [x64, arm64]
 
 nsis:
+  # One installer for both archs, as before: no `${arch}` here, or electron-builder would add one
+  # installer per arch next to it.
+  artifactName: Homematic-Manager-Setup-${version}.${ext}
   # D-26: the installer shows the AGPLv3 of the repository root, not a copy that can drift. The
   # path is resolved against this directory, so `../../LICENSE` is the one at the top of the tree.
   license: ../../LICENSE
@@ -98,7 +115,11 @@ nsis:
   deleteAppDataOnUninstall: false
 
 portable:
-  artifactName: ${productName}-${version}-portable-${arch}.${ext}
+  # One exe per arch, plus the combined one, which has no arch in its name.
+  artifactName: Homematic-Manager-${version}-portable-${arch}.${ext}
+
+appImage:
+  artifactName: Homematic-Manager-${version}-${arch}.${ext}
 
 linux:
   icon: build/icon.png

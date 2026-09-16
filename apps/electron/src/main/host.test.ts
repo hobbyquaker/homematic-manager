@@ -19,6 +19,7 @@ import {
     isAllowedExternalUrl,
     ISSUES_URL,
     PROJECT_URL,
+    RELEASES_URL,
     type MenuTemplateItem,
 } from './menu.js';
 import {fileRoots, resolvePaths} from './paths.js';
@@ -342,12 +343,21 @@ describe('isAllowedExternalUrl', () => {
 });
 
 /**
- * Task 23: the renderer's GitHub icon asks main to open the project page. What main will open on
- * that request is a list of one, not a rule - the renderer is the side an XSS bug would speak from.
+ * Task 23: the renderer's GitHub icon asks main to open the project page, and B-47's update strip
+ * the release list. What main will open on that request is a list of two, not a rule - the renderer
+ * is the side an XSS bug would speak from.
  */
 describe('externalUrlFromRenderer', () => {
     it('allows the project page, and answers with the URL main will open', () => {
         expect(externalUrlFromRenderer(PROJECT_URL)).toBe(PROJECT_URL);
+    });
+
+    it('allows the release list, which the update strip links to when an update failed (B-47)', () => {
+        expect(externalUrlFromRenderer(RELEASES_URL)).toBe(RELEASES_URL);
+        expect(RELEASES_URL).toBe('https://github.com/hobbyquaker/homematic-manager/releases');
+        expect(externalUrlFromRenderer(`${RELEASES_URL}/`)).toBeUndefined();
+        expect(externalUrlFromRenderer(`${RELEASES_URL}/download/v3.0.0/evil.exe`)).toBeUndefined();
+        expect(externalUrlFromRenderer(`${RELEASES_URL}?x`)).toBeUndefined();
     });
 
     it('refuses every other URL, including the ones the menu itself may open', () => {

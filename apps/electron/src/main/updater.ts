@@ -16,7 +16,7 @@
  * Electron.
  */
 
-import type {UpdateState} from '../shared/ipc.js';
+import type {UpdateFailedStep, UpdateState} from '../shared/ipc.js';
 
 /** The part of `electron-updater`'s `autoUpdater` this flow uses. */
 export interface AutoUpdaterLike {
@@ -48,7 +48,12 @@ const HOURS = 60 * 60 * 1000;
 
 const state = (
     phase: UpdateState['phase'],
-    fields: {version?: string | undefined; percent?: number | undefined; message?: string | undefined} = {},
+    fields: {
+        version?: string | undefined;
+        percent?: number | undefined;
+        message?: string | undefined;
+        failed?: UpdateFailedStep | undefined;
+    } = {},
     dismissed = false,
 ): UpdateState => ({
     phase,
@@ -56,6 +61,7 @@ const state = (
     ...(fields.version === undefined ? {} : {version: fields.version}),
     ...(fields.percent === undefined ? {} : {percent: fields.percent}),
     ...(fields.message === undefined ? {} : {message: fields.message}),
+    ...(fields.failed === undefined ? {} : {failed: fields.failed}),
 });
 
 /**
@@ -207,7 +213,13 @@ export class UpdateFlow {
     /** The user does not want to hear about this version again until the next one. */
     dismiss(): UpdateState {
         this.#armed = false;
-        this.#emit(state(this.#state.phase, {version: this.#state.version, message: this.#state.message}, true));
+        this.#emit(
+            state(
+                this.#state.phase,
+                {version: this.#state.version, message: this.#state.message, failed: this.#state.failed},
+                true,
+            ),
+        );
         return this.state;
     }
 
@@ -239,10 +251,35 @@ export class UpdateFlow {
         this.#emit(
             state(
                 'error',
-                {version: this.#state.version, message: error instanceof Error ? error.message : String(error)},
+                {
+                    version: this.#state.version,
+                    message: error instanceof Error ? error.message : String(error),
+                    failed: this.#failedStep(scope),
+                },
                 this.#state.dismissed,
             ),
         );
+    }
+
+    /**
+     * Which step the strip says failed (B-47). electron-updater emits its own `error` before the
+     * promise of the check or the download rejects, so for that one the phase it interrupted
+     * tells; the rejection that follows names the step again.
+     */
+    #failedStep(scope: string): UpdateFailedStep | undefined {
+        if (scope === 'check' || scope === 'download') {
+            return scope;
+        }
+        if (scope === 'updater') {
+            if (this.#state.phase === 'checking') {
+                return 'check';
+            }
+            if (this.#state.phase === 'downloading') {
+                return 'download';
+            }
+            return this.#state.failed;
+        }
+        return undefined;
     }
 }
 

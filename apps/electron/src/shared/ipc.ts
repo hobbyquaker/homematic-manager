@@ -72,6 +72,9 @@ export type ThemeSource = 'system' | 'light' | 'dark';
 export type UpdatePhase =
     'disabled' | 'idle' | 'checking' | 'available' | 'downloading' | 'downloaded' | 'installOnQuit' | 'error';
 
+/** What an `error` state failed at (B-47). */
+export type UpdateFailedStep = 'check' | 'download';
+
 export interface UpdateState {
     phase: UpdatePhase;
     /** The version that is available, being downloaded or ready. */
@@ -80,6 +83,11 @@ export interface UpdateState {
     percent?: number;
     /** Why the updater is disabled, or what went wrong. */
     message?: string;
+    /**
+     * With `error`: the step that failed, when it is known - the check or the download (B-47). An
+     * error electron-updater emits outside of both, or a failed install, has none.
+     */
+    failed?: UpdateFailedStep;
     /** The user dismissed the notification for {@link UpdateState.version}. */
     dismissed: boolean;
 }
@@ -103,9 +111,10 @@ export interface HostCommands {
     'app.info': {params: []; result: HostInfo};
     'theme.set': {params: [source: ThemeSource]; result: null};
     /**
-     * Open a URL in the user's own browser (task 23: the GitHub icon in the header).
+     * Open a URL in the user's own browser (task 23: the GitHub icon in the header; B-47: the
+     * update strip's link to the release list).
      *
-     * Main answers this with an allow-list of exactly the project page - see
+     * Main answers this with an allow-list of exactly those two pages - see
      * `externalUrlFromRenderer()` in src/main/menu.ts. The parameter is a string rather than
      * nothing so that the two sides name the same URL and a mismatch is visible.
      */

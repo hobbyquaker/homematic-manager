@@ -122,16 +122,20 @@ export const ISSUES_URL = 'https://github.com/hobbyquaker/homematic-manager/issu
 /** The project page: what the GitHub icon in the header opens (task 23). */
 export const PROJECT_URL = 'https://github.com/hobbyquaker/homematic-manager';
 
+/** The release list: where the update strip sends the user when an update failed (B-47). */
+export const RELEASES_URL = `${PROJECT_URL}/releases`;
+
 /**
- * The one URL the *renderer* may ask main to open, and it is a list of one.
+ * The URLs the *renderer* may ask main to open, and they are a list of two.
  *
  * {@link isAllowedExternalUrl} is the rule for the links main itself follows, and it is a rule -
  * any https URL on four hosts. What comes over the IPC channel is not: the renderer asks for
- * exactly the project page or it gets nothing, so a cross-site scripting bug in the UI cannot use
- * `shell.openExternal` as a way to launch a URL of its choosing on the user's desktop.
+ * exactly the project page (task 23) or the release list (B-47) or it gets nothing, so a
+ * cross-site scripting bug in the UI cannot use `shell.openExternal` as a way to launch a URL of
+ * its choosing on the user's desktop.
  */
 export function externalUrlFromRenderer(requested: unknown): string | undefined {
-    return requested === PROJECT_URL ? PROJECT_URL : undefined;
+    return requested === PROJECT_URL || requested === RELEASES_URL ? requested : undefined;
 }
 
 /**

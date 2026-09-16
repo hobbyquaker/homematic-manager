@@ -17,12 +17,17 @@ class FakeUpdater implements AutoUpdaterLike {
     failInstall: Error | undefined;
     /** Set to have `downloadUpdate()` resolve without an `update-downloaded` event. */
     silentDownload = false;
+    /** electron-updater emits `error` before its promise rejects; set to do the same. */
+    emitsErrors = false;
 
     readonly #handlers = new Map<string, Array<(...args: never[]) => void>>();
 
     checkForUpdates(): Promise<{updateInfo: {version: string}} | null> {
         this.checks += 1;
         if (this.failCheck) {
+            if (this.emitsErrors) {
+                this.emit('error', this.failCheck);
+            }
             return Promise.reject(this.failCheck);
         }
         return Promise.resolve(this.available === null ? null : {updateInfo: {version: this.available}});
@@ -31,6 +36,9 @@ class FakeUpdater implements AutoUpdaterLike {
     async downloadUpdate(): Promise<unknown> {
         this.downloads += 1;
         if (this.failDownload) {
+            if (this.emitsErrors) {
+                this.emit('error', this.failDownload);
+            }
             throw this.failDownload;
         }
         if (!this.silentDownload) {
@@ -237,7 +245,11 @@ describe('UpdateFlow', () => {
     it('turns a failed check into an error state and not into an exception', async () => {
         updater.failCheck = new Error('404 from GitHub');
         const f = flow();
-        await expect(f.check()).resolves.toMatchObject({phase: 'error', message: '404 from GitHub'});
+        await expect(f.check()).resolves.toMatchObject({
+            phase: 'error',
+            message: '404 from GitHub',
+            failed: 'check',
+        });
         expect(errors[0]?.[0]).toBe('check');
     });
 
@@ -246,7 +258,47 @@ describe('UpdateFlow', () => {
         updater.failDownload = new Error('checksum mismatch');
         const f = flow();
         await f.check();
-        await expect(f.download()).resolves.toMatchObject({phase: 'error', message: 'checksum mismatch'});
+        await expect(f.download()).resolves.toMatchObject({
+            phase: 'error',
+            version: '3.1.0',
+            message: 'checksum mismatch',
+            failed: 'download',
+        });
+    });
+
+    /**
+     * B-47 (#163): the download 404'd and the strip vanished. The strip now says which step
+     * failed, and electron-updater's own `error` event, which comes first, must say the same.
+     */
+    it('names the failed step also for the error electron-updater emits before it rejects', async () => {
+        updater.emitsErrors = true;
+        updater.failCheck = new Error('net::ERR_INTERNET_DISCONNECTED');
+        const f = flow();
+        await f.check();
+        expect(states.filter((s) => s.phase === 'error').map((s) => s.failed)).toEqual(['check', 'check']);
+
+        updater.failCheck = undefined;
+        updater.available = '3.1.0';
+        updater.failDownload = new Error('Cannot download "https://github.com/x", status 404');
+        await f.check();
+        states = [];
+        await f.download();
+        expect(states.filter((s) => s.phase === 'error').map((s) => s.failed)).toEqual(['download', 'download']);
+    });
+
+    it('keeps the failed step when the error is dismissed', async () => {
+        updater.available = '3.1.0';
+        updater.failDownload = new Error('status 404');
+        const f = flow();
+        await f.check();
+        await f.download();
+        expect(f.dismiss()).toEqual({
+            phase: 'error',
+            version: '3.1.0',
+            message: 'status 404',
+            failed: 'download',
+            dismissed: true,
+        });
     });
 
     it('turns a failed install into an error state and stays in the app', async () => {
@@ -258,12 +310,15 @@ describe('UpdateFlow', () => {
         f.installOnQuit();
         expect(f.installIfArmed()).toBe(false);
         expect(f.state).toMatchObject({phase: 'error'});
+        expect(f.state.failed).toBeUndefined();
     });
 
     it('reports an error the updater emits on its own', () => {
         const f = flow();
         updater.emit('error', new Error('ENOTFOUND github.com'));
         expect(f.state).toMatchObject({phase: 'error', message: 'ENOTFOUND github.com'});
+        // outside a check or a download there is no step to name
+        expect(f.state.failed).toBeUndefined();
     });
 
     it('runs one check at a time', async () => {

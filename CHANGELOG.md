@@ -13,6 +13,18 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 - **A favicon.** The browser tab shows the Homematic Manager logo (16, 32 and 48 px, taken from the desktop app's
   icon). The login page stays without it: it loads nothing but itself.
 
+### Fixed
+
+- **The desktop app's "Download" in the update bar finds the file, and a failed update says so.** The in-app download
+  never worked from any release on macOS, Windows or the AppImage: the update manifests named the files
+  `Homematic-Manager-…`, the release carried them as `Homematic.Manager-…`, and the app asked GitHub for a file that
+  did not exist. The bar then vanished without a word. The installers are now called `Homematic-Manager-…` everywhere
+  (the x64 AppImage `Homematic-Manager-<version>-x86_64.AppImage`), the build checks every manifest entry against the
+  files, and a failed check or download stays in the bar with its reason and a link to the releases. Installed
+  Windows and AppImage copies of the earlier betas can take this version from the bar. **On macOS, download the dmg
+  from the release by hand:** the Mac build is not signed, and macOS installs an update only into a signed app.
+  (#163, @Herbert-Testmann)
+
 ## [3.0.0-beta.18] — 2026-09-15
 
 ### New

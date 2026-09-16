@@ -20,6 +20,10 @@
  *   next to it, and every file a release would carry has a safe name. This is the check on what
  *   electron-builder actually did; the release and build workflows run it after packaging.
  *
+ * Both also pin electron-updater's download folder (B-49): electron-builder writes it into every
+ * packaged `app-update.yml` as `updaterCacheDirName`, derived from the app's package name, and from
+ * beta.1 to beta.18 that was `@homematic-managerelectron-updater`.
+ *
  * Usage: node scripts/update-names.mjs [--dir <dist-electron>] [--config-only]
  * Exits 1 and lists the problems when there are any.
  */
@@ -41,6 +45,30 @@ function loadYaml() {
     const builder = createRequire(here.resolve('electron-builder'));
     const lib = createRequire(builder.resolve('app-builder-lib/package.json'));
     return lib('js-yaml');
+}
+
+/**
+ * `sanitizeFileName` of builder-util, which electron-builder applies to the package name before it
+ * derives the updater's folder from it.
+ */
+function loadSanitizeFileName() {
+    const here = createRequire(import.meta.url);
+    const builder = createRequire(here.resolve('electron-builder'));
+    const lib = createRequire(builder.resolve('app-builder-lib/package.json'));
+    return lib('builder-util/out/filename').sanitizeFileName;
+}
+
+/** electron-updater's download folder under the user's cache directory (B-49). */
+export const UPDATER_CACHE_DIR_NAME = 'homematic-manager-updater';
+
+/**
+ * The folder name electron-builder writes into `app-update.yml`: `AppInfo.updaterCacheDirName` in
+ * app-builder-lib 26, from the package name after `extraMetadata`. A `updaterCacheDirName` in the
+ * `publish` section is overwritten with it, so this is the only name that counts.
+ */
+export function updaterCacheDirName({config, packageJson}, sanitizeFileName = loadSanitizeFileName()) {
+    const name = config.extraMetadata?.name ?? packageJson.name;
+    return `${sanitizeFileName(name).toLowerCase()}-updater`;
 }
 
 /** What GitHub keeps as it is in an asset name; `isSafeGithubName` in app-builder-lib. */
@@ -108,11 +136,20 @@ function asArray(value) {
  * @param {object} input.config the parsed electron-builder.yml
  * @param {{name: string, productName?: string}} input.packageJson the app's package.json
  * @param {string} input.version
+ * @param {(name: string) => string} [sanitizeFileName] builder-util's, by default
  * @returns {{names: string[], problems: string[]}}
  */
-export function checkBuilderConfig({config, packageJson, version}) {
+export function checkBuilderConfig({config, packageJson, version}, sanitizeFileName = loadSanitizeFileName()) {
     const names = [];
     const problems = [];
+    const cacheDir = updaterCacheDirName({config, packageJson}, sanitizeFileName);
+    if (cacheDir !== UPDATER_CACHE_DIR_NAME) {
+        problems.push(
+            `the updater's download folder would be "${cacheDir}", not "${UPDATER_CACHE_DIR_NAME}"; set extraMetadata.name`,
+        );
+    }
+    // `${name}` in a template is the package name after `extraMetadata`, as for electron-builder.
+    const name = config.extraMetadata?.name ?? packageJson.name;
     const productName = config.productName ?? packageJson.productName ?? packageJson.name;
     const seen = new Map();
     for (const os of ['mac', 'win', 'linux']) {
@@ -151,7 +188,7 @@ export function checkBuilderConfig({config, packageJson, version}) {
                         os,
                         version,
                         productName,
-                        name: packageJson.name,
+                        name,
                     });
                 } catch (error) {
                     problems.push(`${os} target ${target}: ${error.message}`);
@@ -176,12 +213,32 @@ export function checkBuilderConfig({config, packageJson, version}) {
 }
 
 /**
- * What is wrong with a packaging output directory: manifest entries without their file, and files
- * whose names a release upload would change.
+ * The `app-update.yml` files of the packaged apps in `dir`: `<platform>-unpacked/resources/` on
+ * Windows and Linux, `mac-universal/<product>.app/Contents/Resources/` on macOS. Real directories only (an app
+ * bundle's frameworks are full of symlinks), four levels deep, without electron-builder's
+ * `__<target>-<arch>` staging directories.
+ */
+function findAppUpdateFiles(dir, depth = 4) {
+    const found = [];
+    for (const entry of fs.readdirSync(dir, {withFileTypes: true})) {
+        const full = path.join(dir, entry.name);
+        if (entry.isFile() && entry.name === 'app-update.yml') {
+            found.push(full);
+        } else if (entry.isDirectory() && depth > 0 && !entry.name.startsWith('__')) {
+            found.push(...findAppUpdateFiles(full, depth - 1));
+        }
+    }
+    return found;
+}
+
+/**
+ * What is wrong with a packaging output directory: manifest entries without their file, files
+ * whose names a release upload would change, and packaged apps whose updater would download into
+ * another folder than {@link UPDATER_CACHE_DIR_NAME}.
  *
  * @param {string} dir
  * @param {{load: (text: string) => unknown}} yaml
- * @returns {{manifests: string[], problems: string[]}}
+ * @returns {{manifests: string[], appUpdates: string[], problems: string[]}}
  */
 export function checkOutput(dir, yaml = loadYaml()) {
     const problems = [];
@@ -207,7 +264,21 @@ export function checkOutput(dir, yaml = loadYaml()) {
             problems.push(`"${file}" is not a GitHub asset name; the release would carry it under another one`);
         }
     }
-    return {manifests, problems};
+    const appUpdates = findAppUpdateFiles(dir)
+        .map((file) => path.relative(dir, file))
+        .sort();
+    if (manifests.length > 0 && appUpdates.length === 0) {
+        problems.push(`no packaged app-update.yml in ${dir}, so the updater's folder cannot be checked`);
+    }
+    for (const file of appUpdates) {
+        const config = yaml.load(fs.readFileSync(path.join(dir, file), 'utf8')) ?? {};
+        if (config.updaterCacheDirName !== UPDATER_CACHE_DIR_NAME) {
+            problems.push(
+                `${file}: updaterCacheDirName is "${config.updaterCacheDirName}", not "${UPDATER_CACHE_DIR_NAME}"`,
+            );
+        }
+    }
+    return {manifests, appUpdates, problems};
 }
 
 function parseArguments(argv) {
@@ -235,17 +306,19 @@ function main() {
         if (fromOutput.manifests.length === 0) {
             problems.push(`no latest*.yml in ${options.dir}`);
         }
-        console.log(`checked: ${fromOutput.manifests.join(', ')}`);
+        console.log(`checked: ${[...fromOutput.manifests, ...fromOutput.appUpdates].join(', ')}`);
         problems.push(...fromOutput.problems);
     }
     if (problems.length > 0) {
-        console.error(`update names (B-47): ${problems.length} problem(s)`);
+        console.error(`update names (B-47, B-49): ${problems.length} problem(s)`);
         for (const problem of problems) {
             console.error(`  - ${problem}`);
         }
         process.exit(1);
     }
-    console.log('update names (B-47): the manifests and the files agree');
+    console.log(
+        `update names (B-47, B-49): the manifests and the files agree, the updater folder is ${UPDATER_CACHE_DIR_NAME}`,
+    );
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

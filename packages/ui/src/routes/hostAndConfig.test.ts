@@ -60,7 +60,14 @@ function fakeHost(initial: HostUpdateState = {phase: 'idle', dismissed: false}):
         update: {
             state: () => Promise.resolve(state),
             check: () => record('check', {phase: 'available', version: '3.1.0', dismissed: false}),
-            download: () => record('download', {phase: 'downloading', version: '3.1.0', percent: 40, dismissed: false}),
+            // Task 53: in link mode main opens the installer and the state stays as it is.
+            download: () =>
+                record(
+                    'download',
+                    state.install === 'link'
+                        ? state
+                        : {phase: 'downloading', version: '3.1.0', percent: 40, dismissed: false},
+                ),
             installOnQuit: () => record('installOnQuit', {phase: 'installOnQuit', version: '3.1.0', dismissed: false}),
             dismiss: () => record('dismiss', {...state, dismissed: true}),
             on(handler: (next: HostUpdateState) => void) {
@@ -143,6 +150,40 @@ describe('the update notice', () => {
         await waitFor(() => {
             expect(bridge.calls()).toContain('installOnQuit');
         });
+    });
+
+    /**
+     * Task 53 (#163): on macOS, Windows and for a deb the same button makes main open the installer
+     * in the browser. The strip passes no URL and offers no install.
+     */
+    it('in link mode, says the download opens in the browser and stays as it is', async () => {
+        const bridge = fakeHost();
+        await mountApp({hostBridge: bridge});
+        bridge.fireUpdate({phase: 'available', install: 'link', version: '3.1.0', dismissed: false});
+        const notice = await waitFor(() => screen.getByTestId('update-notice'));
+        expect(notice.getAttribute('data-install')).toBe('link');
+        expect(notice.textContent).toContain('Eine neue Version ist verfügbar 3.1.0');
+        const button = screen.getByTestId('update-download');
+        expect(button.textContent).toBe('Herunterladen');
+        expect(button.getAttribute('title')).toBe('Öffnet das Installationsprogramm der neuen Version im Browser');
+
+        await fireEvent.click(button);
+        await waitFor(() => {
+            expect(bridge.calls()).toEqual(['download']);
+        });
+        // main opened the link; the renderer asked for no URL of its own
+        expect(bridge.opened()).toEqual([]);
+        expect(screen.getByTestId('update-notice').getAttribute('data-phase')).toBe('available');
+        expect(screen.queryByTestId('update-install')).toBeNull();
+    });
+
+    it('in app mode, the Download button has no browser hint', async () => {
+        const bridge = fakeHost();
+        await mountApp({hostBridge: bridge});
+        bridge.fireUpdate({phase: 'available', install: 'app', version: '3.1.0', dismissed: false});
+        const notice = await waitFor(() => screen.getByTestId('update-notice'));
+        expect(notice.getAttribute('data-install')).toBe('app');
+        expect(screen.getByTestId('update-download').hasAttribute('title')).toBe(false);
     });
 
     it('disappears once it is dismissed', async () => {

@@ -307,6 +307,7 @@
             downloadFailed: t('The download of the update failed'),
             failed: t('The update failed'),
             releases: t('Releases on GitHub'),
+            downloadInBrowser: t('Opens the installer of the new version in your browser'),
         }}
         releasesUrl={RELEASES_URL}
         openExternal={(url) => stores.host.openExternal(url)}

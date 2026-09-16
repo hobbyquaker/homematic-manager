@@ -18,6 +18,11 @@ export type HostUpdatePhase =
 
 export interface HostUpdateState {
     readonly phase: HostUpdatePhase;
+    /**
+     * Task 53: `link` - "Download" opens the installer in the browser and nothing is installed by
+     * the app (macOS, Windows, deb); `app` or absent - the app downloads and installs on quit.
+     */
+    readonly install?: 'app' | 'link';
     /** The version that is available, being downloaded or ready to install. */
     readonly version?: string;
     /** 0-100 while downloading. */

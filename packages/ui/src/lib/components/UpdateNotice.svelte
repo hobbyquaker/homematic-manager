@@ -19,6 +19,8 @@
             failed: string;
             /** The link to {@link Props.releasesUrl}. */
             releases: string;
+            /** Task 53: the Download button's hint in link mode - it opens the browser. */
+            downloadInBrowser: string;
         };
         /** Where a failed check or download sends the user; no link without it. */
         releasesUrl?: string | undefined;
@@ -66,6 +68,8 @@
     });
 
     const failed = $derived(state?.phase === 'error');
+    // Task 53: on macOS, Windows and for a deb, "Download" opens the installer in the browser.
+    const linked = $derived(state?.install === 'link');
     const reason = $derived(failed ? shortUpdateReason(state?.message) : '');
 </script>
 
@@ -77,6 +81,10 @@
 
     B-47 (#163): a failed check or download says so here, with the reason and the way to the
     release list, instead of taking the strip away without a word.
+
+    Task 53 (#163): in link mode (`state.install === 'link'`) the same "Download" button makes the
+    host open the installer in the browser; main picks the URL, the strip never sees it, and there
+    is no "downloaded" or "install on quit" in that mode.
 -->
 {#if state && text !== ''}
     <div
@@ -85,6 +93,7 @@
         role={failed ? 'alert' : 'status'}
         data-testid={testId}
         data-phase={state.phase}
+        data-install={state.install ?? 'app'}
     >
         {#if failed}
             <span class="hmm-update-text" title={fullUpdateReason(state.message) || undefined}
@@ -105,8 +114,12 @@
             <span class="hmm-update-text">{text}{state.version === undefined ? '' : ` ${state.version}`}</span>
         {/if}
         {#if state.phase === 'available'}
-            <button type="button" class="hmm-button" data-testid="update-download" onclick={() => ondownload()}
-                >{labels.download}</button
+            <button
+                type="button"
+                class="hmm-button"
+                data-testid="update-download"
+                title={linked ? labels.downloadInBrowser : undefined}
+                onclick={() => ondownload()}>{labels.download}</button
             >
         {:else if state.phase === 'downloaded'}
             <button type="button" class="hmm-button" data-testid="update-install" onclick={() => oninstall()}

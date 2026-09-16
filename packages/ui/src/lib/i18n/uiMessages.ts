@@ -554,6 +554,11 @@ export const UI_MESSAGES: MessageCatalogue = {
     },
     'The update failed': {de: 'Die Aktualisierung ist fehlgeschlagen', en: 'The update failed'},
     'Releases on GitHub': {de: 'Versionen auf GitHub', en: 'Releases on GitHub'},
+    // Task 53 (#163): on macOS, Windows and for a deb the Download button opens the browser.
+    'Opens the installer of the new version in your browser': {
+        de: 'Öffnet das Installationsprogramm der neuen Version im Browser',
+        en: 'Opens the installer of the new version in your browser',
+    },
     'Device data': {de: 'Gerätedaten', en: 'Device data'},
     // Task 23: the accessible name of the GitHub icon that replaced the "?" menu.
     'Homematic Manager on GitHub': {

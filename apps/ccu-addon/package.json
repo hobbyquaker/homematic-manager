@@ -13,8 +13,8 @@
   "scripts": {
     "build": "tsc -b",
     "package": "./build.sh",
-    "test:cgi": "./test/cgi-test.sh",
-    "test:package": "./test/package-test.sh",
+    "test:cgi": "./test/in-image.sh ./test/cgi-test.sh",
+    "test:package": "./test/in-image.sh ./test/package-test.sh",
     "test:container": "./test/container-test.sh"
   }
 }

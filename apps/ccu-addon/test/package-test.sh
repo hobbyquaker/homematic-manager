@@ -7,6 +7,9 @@
 #
 #   apps/ccu-addon/test/package-test.sh apps/ccu-addon/out/hmm-ccu-x86_64-<version>.tar.gz
 #
+# Needs tclsh. `npm run test:package -w apps/ccu-addon -- out/hmm-ccu-x86_64-<version>.tar.gz` runs it
+# in the hmm-addon-test image when the machine has no tclsh or shellcheck (test/in-image.sh, B-50).
+#
 # It also checks the SBOM (D-27) against the package it describes: the Node version in the document
 # has to be the version of the binary that is really in there.
 
@@ -22,7 +25,7 @@ PKG="$(cd "$(dirname "$PKG")" && pwd)/$(basename "$PKG")"
 cd "$(dirname "$0")/.." || exit 1
 ADDON_SRC="$PWD"
 command -v tclsh >/dev/null || {
-    echo "tclsh is required" >&2
+    echo "tclsh is required - or run it as: npm run test:package -w apps/ccu-addon -- <package> (uses the test image)" >&2
     exit 1
 }
 

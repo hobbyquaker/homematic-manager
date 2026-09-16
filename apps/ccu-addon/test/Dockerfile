@@ -7,6 +7,10 @@
 # including the WebSocket upgrade, and every CGI over HTTP. What it cannot: Tcl 8.2 (the CCU3
 # firmware's interpreter - `cgi-test.sh` greps for constructs newer than that instead), the CCU3's
 # chroot install, the real tclrega.so, and an actual CCU behind the backend.
+#
+# It is also where the local gate gets the tools a workstation often lacks (B-50): tclsh for
+# cgi-test.sh and package-test.sh, and shellcheck for them and for `npm run lint:sh`.
+# `in-image.sh` next to this file runs a command in here when the host has not got them.
 
 FROM debian:trixie-slim
 
@@ -22,6 +26,7 @@ RUN apt-get update \
         openssl \
         pkg-config \
         procps \
+        shellcheck \
         tcl \
         tcl-dev \
     && rm -rf /var/lib/apt/lists/*

@@ -32,6 +32,7 @@ re-installed after one.
 | `events.spec.ts` | live events, the two filters, pause and catch up |
 | `console.spec.ts` | pick a method, fill the generated argument form, read the answer, see a fault |
 | `installMode.spec.ts` | open and close the install mode; name a device paired while the dialog is open (#24) |
+| `noUpdate.spec.ts` | the UI served under `/addons/hmm/` in `local` mode, as the addon runs it, has no host bridge and shows no update strip, download, install or releases link, nor one in the settings dialog (task 54) |
 | `settings.spec.ts` | the settings dialog, and the theme switch of D-22 in a real browser |
 | `rssi.spec.ts` | the eight steps of the RSSI pill in the Funk grid, light and dark: fill, ink, bars, tooltip, no unit in the pill, nothing cut off by its column (#161) |
 | `assign.spec.ts` | "Assign to room" as a list of checkboxes against the profile's own store seeded with 24 rooms: all of them at once in a 1080 px window without radios, one channel gains and loses a room (Enter on a box saves); two device rows with indeterminate boxes, all / none / as it was, only the changes written; the filter by keyboard without saving, Space, Escape without a write, and "New room…" assigned with Apply (task 49) |

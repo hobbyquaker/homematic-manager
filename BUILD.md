@@ -17,9 +17,10 @@ Contents: [Requirements](#requirements) · [Layout](#layout) · [First build](#f
 - A **Linux shell**. On Windows use WSL, not PowerShell: the repository commits **LF only**
   (`.gitattributes` sets `eol=lf`), and a CRLF, a BOM or a lost execute bit breaks the CCU addon's
   busybox `sh` and its Tcl CGIs silently.
-- For the CCU addon package: `curl`, `tar`, and `patchelf` for the `armv7l` runtime. For its CGI
-  tests: `tclsh` (a plain Debian has none — there is a test image for that). For the container
-  replay: Docker.
+- For the CCU addon package: `curl`, `tar`, and `patchelf` for the `armv7l` runtime. For its CGI and
+  package tests and for `npm run lint:sh`: `tclsh` and `shellcheck`, **or Docker** — without them the
+  npm scripts run in the `hmm-addon-test` image (see [Tests](#tests)). For the container replay:
+  Docker.
 - For the browser-based tests: `npx playwright install chromium`. `npm ci` does not fetch browsers.
 - Electron 44 no longer downloads its binary in `postinstall`; run `npx install-electron` before
   working on the desktop app.
@@ -174,6 +175,24 @@ procedure is in [data/README.md](data/README.md).
   SBOM against it, and `test:container` replays OpenCCU's `/bin/install_addon` in a container with
   busybox as `/bin/sh`, a real lighttpd and a compiled stub `tclrega.so` — install, update,
   uninstall, the session check, the proxy rule, the WebSocket upgrade and an idle socket.
+- **Run the addon tests and the shell lint through npm**, so they fail locally where CI would:
+
+  ```sh
+  npm run lint:sh
+  npm run test:cgi -w apps/ccu-addon
+  npm run test:package -w apps/ccu-addon -- out/hmm-ccu-x86_64-<version>.tar.gz
+  npm run test:container -w apps/ccu-addon -- --idle
+  ```
+
+  `test:cgi` and `test:package` go through `apps/ccu-addon/test/in-image.sh`: on this machine when it
+  has `tclsh` and `shellcheck`, otherwise in the `hmm-addon-test` image (built from
+  `apps/ccu-addon/test/Dockerfile` on first use; `HMM_TEST_IN=host|image` forces the place).
+  `lint:sh` runs shellcheck in the same image when it is not installed. **A missing shellcheck is a
+  failure, not a skip**, in `lint:sh` and `cgi-test.sh` alike: a lint that only checked the syntax
+  once let an `echo -n` through to CI. Without shellcheck and without Docker, install it
+  (`apt-get install shellcheck tcl`), or set `SKIP_SHELLCHECK=1` to check only the syntax and accept
+  that CI may still fail. CI installs both tools on the runner and is unaffected.
+
 - **Beyond that there is only hardware.** See [Lab scripts](#lab-scripts).
 
 `ci.yml` runs lint, the test matrix on Node 22 and 24, the web e2e suites, the merged coverage

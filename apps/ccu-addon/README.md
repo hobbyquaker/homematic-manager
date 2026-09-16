@@ -474,9 +474,9 @@ a container, and its `--json` output is what puts the `pkg:apk/alpine/...` compo
 ## Tests
 
 ```sh
-apps/ccu-addon/test/cgi-test.sh                      # needs tclsh
-apps/ccu-addon/test/package-test.sh out/hmm-ccu-x86_64-*.tar.gz
-apps/ccu-addon/test/container-test.sh --idle         # needs docker
+npm run test:cgi -w apps/ccu-addon                                   # tclsh + shellcheck, or docker
+npm run test:package -w apps/ccu-addon -- out/hmm-ccu-x86_64-<version>.tar.gz
+npm run test:container -w apps/ccu-addon -- --idle                   # needs docker
 ```
 
 - **cgi-test.sh** runs every CGI against a Tcl stub for `tclrega.so`: the cookie and its attributes,
@@ -521,12 +521,13 @@ apps/ccu-addon/test/container-test.sh --idle         # needs docker
   lighttpd with only `X-Occulite-Session` (the CGI's real state URL), refuses an unconfirmed and an
   `@`-wrapped header, falls through to `?sid=`, and shows a CCU ignoring a client-sent header.
 
-Without `tclsh` on the machine (a plain WSL Debian has none) the first two run in the test image:
-
-```sh
-docker build -t hmm-addon-test apps/ccu-addon/test
-docker run --rm -v "$PWD:/repo" -w /repo hmm-addon-test bash apps/ccu-addon/test/cgi-test.sh
-```
+The first two need `tclsh` and `shellcheck`. A plain WSL Debian has neither, so `test:cgi` and
+`test:package` go through `test/in-image.sh`: it runs the script right here when both are installed
+and otherwise inside the `hmm-addon-test` image, built from `test/Dockerfile` on first use, with the
+checkout mounted at its own path and the script running as the calling user
+(`HMM_TEST_IN=host|image` forces the place). Called directly, `cgi-test.sh` fails without shellcheck
+instead of skipping it; `SKIP_SHELLCHECK=1` turns that back into a skip for a machine with neither
+shellcheck nor Docker (B-50).
 
 `.github/workflows/addon.yml` runs all of it for the three architectures on every push,
 `release-addon.yml` for a `v*` tag (D-24: no `needs:` on any other workflow).

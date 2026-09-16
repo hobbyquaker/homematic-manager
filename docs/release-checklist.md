@@ -64,11 +64,11 @@ npm run build
 npm test
 npm run test:e2e
 npm run test:e2e:electron                          # with ELECTRON_RUN_AS_NODE unset
-npm run lint:sh                                    # with shellcheck present, see below
+npm run lint:sh                                    # shellcheck here or in the test image
 apps/ccu-addon/build.sh x86_64                     # the container test installs the newest package in out/
 apps/ccu-addon/build.sh aarch64
 npm run test:cgi --workspace apps/ccu-addon
-npm run test:package --workspace apps/ccu-addon
+npm run test:package --workspace apps/ccu-addon -- out/hmm-ccu-x86_64-<version>.tar.gz
 apps/ccu-addon/test/container-test.sh --idle      # needs docker
 scripts/docker-callback-test.sh                    # needs docker and the image, see the script
 ```
@@ -81,11 +81,9 @@ scripts/docker-callback-test.sh                    # needs docker and the image,
       `hmm-ccu-x86_64-*.tar.gz` in `apps/ccu-addon/out/`, and a stale one from an earlier build tests
       yesterday's addon (beta.13's gate first ran against a beta.9 package and failed only the new
       check).
-- [ ] **shellcheck has to run.** Without it `lint:sh` only checks the syntax and says so in one line
-      (beta.8's CI failed on an `echo -n` the local lint never saw). Where it is not installed, run it
-      through docker over the files `scripts/lint-sh.sh` selects — its shebang rule, not a hand-made
-      list (`bin/update_addon` is tclsh and makes shellcheck exit 123):
-      `docker run --rm -v "$PWD:/mnt" -w /mnt koalaman/shellcheck:stable -x -S warning <files>`.
+- [ ] **shellcheck has to run.** `lint:sh` and `test:cgi` run it in the `hmm-addon-test` image where it
+      is not installed, and fail where neither it nor Docker is there (beta.8's CI failed on an
+      `echo -n` a syntax-only local lint never saw). `SKIP_SHELLCHECK=1` is never set for a release.
 - [ ] **A red e2e spec is rerun alone and in the full run** before it is called a regression: beta.8
       (a fixture leak between tests), beta.9 (a seeded count) and beta.18 (`rename.spec.ts`, F2 right
       after Escape) were spec races, not defects.

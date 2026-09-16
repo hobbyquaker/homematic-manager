@@ -15,6 +15,17 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Fixed
 
+- **With no callback address chosen, the CCU calls back on the address that reaches it.** Without a chosen address the
+  app used to take the first address of the machine, and on a Mac with a VPN, a virtual-machine bridge, a second adapter
+  or a link-local address listed first that was not one the CCU could reach: the interfaces showed as connected, no
+  events arrived and the device list never loaded. The automatic address is now this machine's address in the CCU's
+  network, otherwise the one the route to the CCU leaves from, otherwise the first one that is not link-local, and it is
+  worked out again at every connect, so a new network or lease is followed. The settings dialog names it and why
+  (_Automatic (192.168.1.20, in the CCU's network)_) and marks the addresses outside the CCU's network. A chosen address
+  that is no address of this machine any more is replaced by the automatic one; it, and a chosen address outside the
+  CCU's network, get a warning in the settings dialog and beside the interface picker, with a one-click **Use
+  automatic**. The CCU addon and a callback address set at start or in a container are unchanged. (#162, #165,
+  @Herbert-Testmann, @ChrWi)
 - **The desktop app's "Download" in the update bar finds the file, and a failed update says so.** The in-app download
   never worked from any release on macOS, Windows or the AppImage: the update manifests named the files
   `Homematic-Manager-…`, the release carried them as `Homematic.Manager-…`, and the app asked GitHub for a file that

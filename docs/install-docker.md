@@ -33,8 +33,9 @@ below.
 
 ## Variant 1 (recommended): host networking
 
-The container shares the host's network stack. The backend sees the host's real addresses, the CCU
-reaches the callback ports at the host, and nothing has to be published or configured.
+The container shares the host's network stack. The backend sees the host's real addresses and takes
+the one in the CCU's network (or the one on the route to the CCU), the CCU reaches the callback ports
+at the host, and nothing has to be published or configured.
 
 ```sh
 docker run -d --name homematic-manager \

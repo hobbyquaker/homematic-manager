@@ -63,7 +63,7 @@ hard-coding it.
 | `--issue-cookie` | loopback binds only | hand the token to the browser on the page load |
 | `-a, --ccu` | - | CCU address; written to the configuration when it differs |
 | `--local` | - | we run on the CCU itself: talk to the interface processes directly |
-| `--callback-ip` | auto | address the interfaces call back to; needed where this host cannot see it (Docker) |
+| `--callback-ip` | auto | address the interfaces call back to; needed where this host cannot see it (Docker). Auto is this host's address in the CCU's network, else the one on the route to the CCU |
 | `--callback-xmlrpc-port`, `--callback-binrpc-port` | free ports | fixed callback ports, so a container can publish them |
 | `--callback-xmlrpc-default-port`, `--callback-binrpc-default-port` | - | callback ports while the configured ones are 0, a free port when one is taken (the CCU addon: 2031, 2032; never written to the configuration) |
 | `--demo` | off | serve the UI on its demo fixture and start no backend |

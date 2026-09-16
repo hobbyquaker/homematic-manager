@@ -184,7 +184,27 @@ In the CCU's WebUI, `Settings → Control panel → Security → Firewall`:
 The event direction needs nothing opened on the CCU: the CCU connects *out* to the app. What it does
 need is that **your machine is reachable from the CCU** — a local firewall on the workstation has to
 let the callback ports through. By default they are picked freely at start; the settings dialog can
-pin them, and it offers this machine's addresses as callback-address candidates.
+pin them.
+
+### Which address the CCU calls back to
+
+With **Automatic** (the default, no address chosen), the app takes, at every connect:
+
+1. this machine's address **in the CCU's network** (the CCU's name is resolved and matched against each
+   address and netmask);
+2. otherwise the address the operating system **sends from towards the CCU** (a routed CCU, a VPN);
+3. otherwise the first address that is not link-local (`169.254.x.x`).
+
+A link-local address is never taken unless the CCU is in that network too. The settings dialog shows
+the choice and the reason in its first entry, e.g. *Automatic (192.168.1.20, in the CCU's network)*,
+and marks every other address that is not in the CCU's network. A VPN, a virtual-machine bridge or a
+second adapter therefore no longer decides where the events go.
+
+Choose an address by hand only when Automatic picks the wrong one. A chosen address that is no longer
+an address of this machine (another network, another lease) is not used: the app connects with the
+automatic one, says so in a notice, and shows a warning with **Use automatic** in the settings dialog
+and in the interface popup. A chosen address outside the CCU's network is used as chosen, with the
+same warning.
 
 ## Troubleshooting
 
@@ -193,7 +213,7 @@ pin them, and it offers this machine's addresses as callback-address candidates.
 | "Windows protected your PC" on the installer | Expected until the Windows signing is in place; **More info → Run anyway**. See [above](#windows-the-smartscreen-warning). |
 | macOS: "cannot be opened because the developer cannot be verified" | Unsigned build; right-click → **Open** once. |
 | The app starts but no device list appears | The CCU's XML-RPC API firewall setting, or the wrong address. The settings dialog has a discovery button (UDP broadcast) that finds CCUs on the same subnet. |
-| Interfaces show as connected, but nothing ever updates | The callback. The CCU could reach the app but not the other way round: check the local firewall, and pin the callback address in the settings dialog if this machine has several. |
+| Interfaces show as connected, but nothing ever updates | The callback. The CCU could reach the app but not the other way round: check the local firewall, and the callback address in the settings dialog - *Automatic* names the address it uses; a ⚠ beside the interface picker means a chosen address does not fit (see [above](#which-address-the-ccu-calls-back-to)). |
 | Names are missing, a ReGa indicator is red | ReGa is optional (D-2): the app carries on with local names. Enable "Remote Homematic-Script API" in the CCU's firewall to get the CCU's names back. |
 | `BidCos-Wired` shows as "not present" | `hs485d` runs only on a CCU that has a wired gateway. The app notices the refused port, says so once and stops retrying every 15 s. Untick BidCos-Wired in the settings dialog to hide it. |
 | Device pictures are missing | They are fetched from the CCU (D-10). Without a reachable CCU a small bundled set answers instead; with TLS the CCU's self-signed certificate cannot be accepted by the fetch, so the bundled picture is used. |

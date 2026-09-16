@@ -22,8 +22,14 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   (the x64 AppImage `Homematic-Manager-<version>-x86_64.AppImage`), the build checks every manifest entry against the
   files, and a failed check or download stays in the bar with its reason and a link to the releases. Installed
   Windows and AppImage copies of the earlier betas can take this version from the bar. **On macOS, download the dmg
-  from the release by hand:** the Mac build is not signed, and macOS installs an update only into a signed app.
-  (#163, @Herbert-Testmann)
+  of this version from the release by hand:** the Mac build is not signed, macOS installs an update only into a
+  signed app, and the earlier betas do not know the download link below yet. (#163, @Herbert-Testmann)
+- **On macOS and Windows, "Download" in the update bar opens the installer in your browser.** The app no longer tries
+  to download and install an update it cannot install unsigned: from this version on, the bar's "Download" (and the
+  one in _Check for Updates…_) opens the matching file of the new release - the universal dmg on macOS, the Setup
+  exe on Windows, the portable exe of your architecture when you run the portable one, and the deb of your
+  architecture on a deb install - or the release page if that file is missing. The AppImage keeps updating itself:
+  download in the bar, install on quit. (#163, @Herbert-Testmann)
 
 ## [3.0.0-beta.18] — 2026-09-15
 

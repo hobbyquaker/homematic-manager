@@ -113,9 +113,21 @@ placeholder instead of a picture, the version without the host information in th
 
 1. checks ten seconds after the app settled, and then every six hours;
 2. when a newer version is there, it says so - and downloads nothing;
-3. the user asks for the download, and watches the progress;
-4. the user confirms **install on quit**, and the update is installed the next time the app is
-   quit - by the user, never by the app.
+3. then it depends on the platform (task 53, #163; `updateInstall()` in `src/main/updater.ts`):
+   - **AppImage** (the only in-app install): the user asks for the download and watches the
+     progress, then confirms **install on quit**, and the AppImage replaces itself the next time the
+     app is quit - by the user, never by the app;
+   - **macOS, Windows (Setup or portable), deb** (*link mode*): "Download" makes main open the
+     matching installer of the new release in the browser - `…-universal.dmg`,
+     `Homematic-Manager-Setup-<v>.exe`, `…-portable-<arch>.exe`, `homematic-manager_<v>_<arch>.deb`
+     (the release page when a `HEAD` on the asset is not 200). `downloadUpdate()` and
+     `quitAndInstall()` are never called there. Why: the Mac build is unsigned and Squirrel.Mac
+     installs only into a signed app; the Windows signing is blocked (#68) and the portable exe has
+     no updater; the deb's `pkexec dpkg -i` could not be tested. A portable exe is recognised by
+     `PORTABLE_EXECUTABLE_FILE`, a deb by `<resources>/package-type`.
+
+The renderer never names the URL: the strip sends the same `update.download` command in both modes,
+and `UpdateState.install` (`app` or `link`) only changes its hint.
 
 `autoDownload` and `autoInstallOnAppQuit`, which `electron-updater` defaults to on, are off. The
 updater is disabled entirely in development and in any unpackaged build, and can be switched off

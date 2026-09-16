@@ -132,13 +132,22 @@ addon is [moving-between-installs.md](moving-between-installs.md).
 
 ## Updates (D-16)
 
-`electron-updater` against the GitHub releases of this repository. **It never installs anything by
-itself:**
+`electron-updater` against the GitHub releases of this repository. The app checks ten seconds after
+it has settled, and then every six hours; when a newer version exists, a bar under the header says so
+— and downloads nothing. What **Download** does depends on the platform:
 
-1. it checks ten seconds after the app has settled, and then every six hours;
-2. when a newer version exists it says so — and downloads nothing;
-3. you ask for the download and watch the progress;
-4. you confirm **install on quit**, and the update is installed the next time you quit the app.
+| Installed as | Download | Install |
+| --- | --- | --- |
+| macOS (dmg) | opens `Homematic-Manager-<version>-universal.dmg` of the new release in your browser | by you, from the dmg |
+| Windows, installer | opens `Homematic-Manager-Setup-<version>.exe` in your browser | by you, with the installer |
+| Windows, portable exe | opens `Homematic-Manager-<version>-portable-<x64\|arm64>.exe` in your browser | replace the exe you run |
+| Linux, deb | opens `homematic-manager_<version>_<amd64\|arm64>.deb` in your browser | by you, e.g. `sudo apt install ./homematic-manager_….deb` |
+| Linux, AppImage | downloads in the app, with progress | you confirm **install on quit**; the AppImage replaces itself the next time you quit and starts again |
+
+The app installs an update itself only as an AppImage: the Mac and Windows builds are not signed, and
+macOS installs an update only into a signed app (#163). If the installer is not on the release, the
+link opens the release page instead. **Help → Check for Updates…** answers with the same choice:
+on macOS, Windows and for a deb its dialog has a **Download** button.
 
 `autoDownload` and `autoInstallOnAppQuit`, which `electron-updater` turns on by default, are both
 off. The updater is disabled entirely in development and in any unpackaged build.

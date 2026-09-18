@@ -47,7 +47,7 @@ names, 480 descriptions).
 6. Commit `sources.json` and `dist/` together.
 
 `npm run update` is steps 2 and 3 (without `--update-hashes`). `npm run icons-subset` is not part of
-it: it needs `sharp` and the `legacy/` tree, and its output changes only when the images do.
+it: it needs `sharp` and a CCU's picture directory, and its output changes only when the images do.
 
 `upstream/` is git-ignored. `npm test` and everything the app does read `dist/` only, so a fresh
 checkout never needs to fetch anything.
@@ -135,7 +135,7 @@ committed.
 | `npm run convert` | write `dist/` from `upstream/` |
 | `npm run update` | fetch + convert |
 | `npm run compare-legacy` | write `COMPARISON.md` from `dist/` and `legacy/www/easymodes/` |
-| `npm run icons-subset` | rebuild `dist/icons/` (`-- --height 40 --quality 75` to shrink it) |
+| `npm run icons-subset -- --ccu <dir>` | rebuild `dist/icons/` from a CCU's `www/config/img/devices` (its `50/` thumbnails, `250/` scaled down where a thumbnail is missing; D-51); without `--ccu` from `legacy/`, BidCos only (`--height 40 --quality 75` to shrink it) |
 | `npm test` | validate `dist/` against the contract and against the facts in `docs/analysis-2026-09.md` |
 
 ## Licensing

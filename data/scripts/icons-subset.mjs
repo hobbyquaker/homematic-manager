@@ -1,17 +1,20 @@
 /**
- * D-10: device images are fetched from the connected CCU at runtime, but a Homegear or bare
- * rfd/hmipserver installation has no CCU to fetch them from. This script builds the small webp
- * subset that ships with the app for exactly that case.
+ * The device pictures that ship with the app, `data/dist/icons/`: the CCU is asked first (D-10), and
+ * these are what a box without `/config/img` shows - openccu-lite, Homegear, a bare rfd/hmipserver
+ * installation - and what stands in when a CCU does not answer.
  *
- * Source are the 2.7.1 images under `legacy/www/images/`, mapped through
- * `legacy/www/js/deviceImages.json`; only the BidCos-RF (`HM-*`) and BidCos-Wired (`HMW-*`) device
- * types are taken - HomematicIP devices need a CCU anyway, and the 250 px variants are for the
- * device detail view, which is not part of the fallback.
+ * D-51 (B-57): the CCU's 50 px list thumbnails for **every** file of `dist/device-icons.json`,
+ * HomematicIP included. The source is the CCU's `www/config/img/devices` directory (openccu-base's,
+ * or a CCU's `/www/config/img/devices` copied off the box), given with `--ccu`: `50/<stem>_thumb.png`
+ * where it exists, otherwise the 250 px picture (`250/<file>` or `250/coupling/<file>`) scaled down.
+ * Without `--ccu` the old source is used: the 2.7.1 images under `legacy/www/images/`, mapped
+ * through `legacy/www/js/deviceImages.json`, BidCos only. With both, the legacy pictures fill in the
+ * device types that have no entry in `device-icons.json`.
  *
  * The output is named after the file name in `dist/device-icons.json`, so the app resolves an icon
  * the same way for both sources: `deviceIcons[type]` with the extension swapped for `.webp`.
  *
- * Usage: node scripts/icons-subset.mjs [--height 50] [--quality 80]
+ * Usage: node scripts/icons-subset.mjs [--ccu <path to config/img/devices>] [--height 50] [--quality 80]
  */
 import {existsSync, mkdirSync, readFileSync, readdirSync, statSync} from 'node:fs';
 import path from 'node:path';
@@ -26,16 +29,23 @@ const argument = (name, fallback) => {
 };
 const height = argument('height', 50);
 const quality = argument('quality', 80);
+const ccuIndex = process.argv.indexOf('--ccu');
+const ccuDir = ccuIndex === -1 ? '' : path.resolve(process.argv[ccuIndex + 1] ?? '');
 
 const legacyImages = path.join(legacyDir, 'www', 'js', 'deviceImages.json');
-if (!existsSync(legacyImages)) {
-    console.error(`${legacyImages} is gone - the subset can only be rebuilt while legacy/ exists`);
+const haveLegacy = existsSync(legacyImages);
+if (!ccuDir && !haveLegacy) {
+    console.error(`${legacyImages} is gone - give the CCU's pictures with --ccu <path to config/img/devices>`);
+    process.exit(1);
+}
+if (ccuDir && !existsSync(path.join(ccuDir, '50'))) {
+    console.error(`${ccuDir}/50 does not exist - --ccu wants the directory that holds 50/ and 250/`);
     process.exit(1);
 }
 
 const deviceIcons = JSON.parse(readFileSync(path.join(distDir, 'device-icons.json'), 'utf8'));
 /** @type {Record<string, string>} */
-const images = JSON.parse(readFileSync(legacyImages, 'utf8'));
+const images = haveLegacy ? JSON.parse(readFileSync(legacyImages, 'utf8')) : {};
 
 const stem = (file) =>
     path
@@ -47,10 +57,35 @@ const stem = (file) =>
 const wanted = new Map();
 const substitutions = [];
 let withoutMapping = 0;
+let fromThumb = 0;
+let fromLarge = 0;
+const missing = [];
+
+// D-51: the CCU's pictures first, one per file name of device-icons.json
+if (ccuDir) {
+    for (const file of [...new Set(Object.values(deviceIcons))].sort()) {
+        const target = stem(file);
+        const thumb = path.join(ccuDir, '50', `${target}_thumb.png`);
+        const large = [path.join(ccuDir, '250', file), path.join(ccuDir, '250', 'coupling', file)].find((f) =>
+            existsSync(f),
+        );
+        if (existsSync(thumb)) {
+            wanted.set(target, thumb);
+            fromThumb += 1;
+        } else if (large) {
+            wanted.set(target, large);
+            fromLarge += 1;
+        } else {
+            missing.push(file);
+        }
+    }
+}
 
 for (const [deviceType, relative] of Object.entries(images)) {
     const type = deviceType.toUpperCase();
     if (!type.startsWith('HM-') && !type.startsWith('HMW-')) continue;
+    // with the CCU's pictures, the legacy ones only fill in what those do not cover
+    if (ccuDir && deviceIcons[type] !== undefined) continue;
     const source = path.join(legacyDir, 'www', relative);
     if (!existsSync(source)) continue;
 
@@ -78,6 +113,10 @@ console.log(
         `${(bytes / 1024).toFixed(0)} KiB total (${(bytes / written.length).toFixed(0)} B average)`,
 );
 if (withoutMapping > 0) console.log(`${withoutMapping} device type(s) have no entry in device-icons.json`);
+if (ccuDir) {
+    console.log(`from the CCU: ${fromThumb} thumbnails, ${fromLarge} scaled down from 250 px`);
+    if (missing.length > 0) console.log(`no CCU picture for ${missing.length} file(s): ${missing.join(', ')}`);
+}
 if (substitutions.length > 0) {
     console.log(`${substitutions.length} device type(s) where 2.x used a different image than the CCU serves:`);
     for (const line of substitutions) console.log(`  ${line}`);

@@ -67,6 +67,30 @@ export function imageMimeType(file: string): string | undefined {
 }
 
 /**
+ * Whether a body is a picture, by its first bytes (B-57): PNG, JPEG, GIF, WebP or SVG. A box
+ * without `/config/img` (openccu-lite) answered the request with its UI's HTML page and 200, and
+ * that page was cached and served as the device picture.
+ */
+export function looksLikeImage(body: Buffer): boolean {
+    if (body.length < 4) {
+        return false;
+    }
+    if (body[0] === 0x89 && body.subarray(1, 4).toString('latin1') === 'PNG') {
+        return true;
+    }
+    if (body[0] === 0xff && body[1] === 0xd8 && body[2] === 0xff) {
+        return true;
+    }
+    const head = body.subarray(0, 12).toString('latin1');
+    if (head.startsWith('GIF8') || (head.startsWith('RIFF') && head.slice(8, 12) === 'WEBP')) {
+        return true;
+    }
+    // SVG is text: an <svg> root, possibly after an XML declaration or a comment - never an HTML page
+    const text = body.subarray(0, 512).toString('utf8').trimStart().toLowerCase();
+    return !text.startsWith('<!doctype html') && !text.startsWith('<html') && text.includes('<svg');
+}
+
+/**
  * A file name from `device-icons.json`, as a name and nothing else.
  *
  * The map is generated data, but it decides a path under the cache directory and a URL on the CCU,
@@ -224,7 +248,13 @@ export class DeviceImageService {
             return undefined;
         }
         const cacheFile = path.join(this.#options.cacheDir, cacheFileName(deviceType, iconFile));
-        const fromDisk = await readIfPresent(cacheFile);
+        let fromDisk = await readIfPresent(cacheFile);
+        if (fromDisk && !looksLikeImage(fromDisk)) {
+            // B-57: an earlier version cached what the box answered, a page included
+            this.#log.warn(`cached ${cacheFile} is not a picture - removed`);
+            await fs.rm(cacheFile, {force: true}).catch(() => undefined);
+            fromDisk = undefined;
+        }
         if (fromDisk) {
             return this.#remember(deviceType, {mime: mimeOrDefault(cacheFile), body: fromDisk, source: 'disk'});
         }
@@ -262,7 +292,14 @@ export class DeviceImageService {
                     signal: AbortSignal.timeout(this.#options.timeoutMs ?? DEFAULT_IMAGE_TIMEOUT_MS),
                 });
                 if (response.ok) {
-                    return Buffer.from(await response.arrayBuffer());
+                    const body = Buffer.from(await response.arrayBuffer());
+                    const type = (response.headers.get('content-type') ?? '').toLowerCase();
+                    if ((type === '' || type.startsWith('image/')) && looksLikeImage(body)) {
+                        return body;
+                    }
+                    // B-57: a box without the file answered with a page; the next shape may exist
+                    this.#log.debug(`${url} answered ${response.status} with ${type || 'no type'}, not a picture`);
+                    continue;
                 }
                 this.#log.debug(`${url} answered ${response.status}`);
             } catch (error) {

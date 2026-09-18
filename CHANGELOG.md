@@ -6,6 +6,16 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **Device pictures on a box that does not serve them.** A box without the WebUI's pictures answered the request for
+  one with a web page, which the app stored and showed as the picture, so every device had a broken image. A picture
+  now only counts as one when it is one; a page already stored is thrown away and fetched again. And the pictures the
+  app ships for exactly this case cover every device type now, HomematicIP included (278 pictures, 238 KiB, from the
+  CCU's own thumbnails), where they used to cover the BidCos types only.
+
 ## [3.0.0-beta.19] — 2026-09-16
 
 ### New

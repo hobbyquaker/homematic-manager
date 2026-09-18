@@ -18,6 +18,7 @@ import {
     DeviceImageService,
     imageMimeType,
     isSafeIconName,
+    looksLikeImage,
     readIconMapFile,
     type DeviceImageLog,
     type DeviceImageServiceOptions,
@@ -72,14 +73,31 @@ function service(options: {
     });
 }
 
+/** A PNG as far as the service can tell (B-57: it checks the first bytes), carrying a label. */
+const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+function pic(label: string): Buffer {
+    return Buffer.concat([PNG_MAGIC, Buffer.from(label)]);
+}
+function label(body: Buffer | undefined): string | undefined {
+    return body?.subarray(PNG_MAGIC.length).toString();
+}
+function picture(labelText: string): Response {
+    return new Response(new Uint8Array(pic(labelText)), {status: 200, headers: {'Content-Type': 'image/png'}});
+}
+/** What openccu-lite answered for a picture it does not have (B-57): its UI's page, with 200. */
+const HTML_PAGE = '<!doctype html>\n<html lang="de"><head><meta charset="utf-8"></head></html>';
+function page(): Response {
+    return new Response(HTML_PAGE, {status: 200, headers: {'Content-Type': 'text/html; charset=utf-8'}});
+}
+
 function okFetch(body: string): FetchMock {
-    return vi.fn(() => Promise.resolve(new Response(body, {status: 200})));
+    return vi.fn(() => Promise.resolve(picture(body)));
 }
 
 function answering(match: (url: string) => string | undefined): FetchMock {
     return vi.fn((url: string) => {
         const body = match(url);
-        return Promise.resolve(body === undefined ? new Response('nope', {status: 404}) : new Response(body));
+        return Promise.resolve(body === undefined ? new Response('nope', {status: 404}) : picture(body));
     });
 }
 
@@ -111,6 +129,24 @@ describe('the small helpers', () => {
         expect(ccuOrigin({host: 'ccu', tls: true})).toBe('https://ccu');
         expect(ccuOrigin({host: ''})).toBeUndefined();
         expect(ccuOrigin(undefined)).toBeUndefined();
+    });
+});
+
+describe('looksLikeImage', () => {
+    it('knows the picture formats by their first bytes', () => {
+        expect(looksLikeImage(pic('x'))).toBe(true);
+        expect(looksLikeImage(Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0]))).toBe(true);
+        expect(looksLikeImage(Buffer.from('GIF89a...'))).toBe(true);
+        expect(looksLikeImage(Buffer.from('RIFF\0\0\0\0WEBPVP8 '))).toBe(true);
+        expect(looksLikeImage(Buffer.from('<?xml version="1.0"?>\n<svg xmlns="http://www.w3.org/2000/svg"/>'))).toBe(
+            true,
+        );
+    });
+    it('refuses a page, text and nothing', () => {
+        expect(looksLikeImage(Buffer.from(HTML_PAGE))).toBe(false);
+        expect(looksLikeImage(Buffer.from('<html><body><svg/></body></html>'))).toBe(false);
+        expect(looksLikeImage(Buffer.from('not found\n'))).toBe(false);
+        expect(looksLikeImage(Buffer.alloc(0))).toBe(false);
     });
 });
 
@@ -153,7 +189,7 @@ describe('DeviceImageService', () => {
 
         const first = await images.get('HmIP-PDT');
         expect(first).toMatchObject({source: 'ccu', mime: 'image/png'});
-        expect(first?.body.toString()).toBe('FROM-CCU');
+        expect(label(first?.body)).toBe('FROM-CCU');
         expect(upstreamFetch.mock.calls[0]?.[0]).toBe('http://ccu3/config/img/devices/250/134_hmip-pdt.png');
 
         expect(await images.get('HmIP-PDT')).toMatchObject({source: 'memory'});
@@ -162,7 +198,7 @@ describe('DeviceImageService', () => {
         // a fresh service, same cache directory: the disk copy answers without any request
         const second = service({fetch: okFetch('OTHER'), upstream: {host: 'ccu3'}});
         expect(await second.get('HmIP-PDT')).toMatchObject({source: 'disk'});
-        expect((await fs.readFile(path.join(cacheDir, 'HmIP-PDT.png'))).toString()).toBe('FROM-CCU');
+        expect(label(await fs.readFile(path.join(cacheDir, 'HmIP-PDT.png')))).toBe('FROM-CCU');
     });
 
     it('uses https and basic auth when the connection asks for them', async () => {
@@ -184,14 +220,14 @@ describe('DeviceImageService', () => {
             url.endsWith('/250/coupling/134_hmip-pdt.png') ? 'COUPLED' : undefined,
         );
         const image = await service({fetch: upstreamFetch, upstream: {host: 'ccu3'}}).get('HmIP-PDT');
-        expect(image?.body.toString()).toBe('COUPLED');
+        expect(label(image?.body)).toBe('COUPLED');
     });
 
     it('takes the _thumb of the 50 directory when the 250 one is not there', async () => {
         const upstreamFetch = answering((url) => (url.endsWith('/50/134_hmip-pdt_thumb.png') ? 'THUMB' : undefined));
         const image = await service({fetch: upstreamFetch, upstream: {host: 'ccu3'}}).get('HmIP-PDT');
         expect(image).toMatchObject({source: 'ccu', mime: 'image/png'});
-        expect(image?.body.toString()).toBe('THUMB');
+        expect(label(image?.body)).toBe('THUMB');
     });
 
     it('falls back to the bundled webp when there is no CCU at all (D-2, D-10)', async () => {
@@ -279,6 +315,47 @@ describe('DeviceImageService', () => {
         const all = await Promise.all(Array.from({length: 100}, () => images.get('HmIP-PDT')));
         expect(upstreamFetch).toHaveBeenCalledTimes(1);
         expect(all.every((image) => image?.source === 'ccu')).toBe(true);
+    });
+
+    // B-57: openccu-lite has no /config/img and answered with its UI's page and 200
+    it('takes a page for no picture: the next shape, then the bundled one, and caches none of it', async () => {
+        const upstreamFetch: FetchMock = vi.fn((url: string) =>
+            Promise.resolve(url.endsWith('/50/134_hmip-pdt_thumb.png') ? picture('THUMB') : page()),
+        );
+        const image = await service({fetch: upstreamFetch, upstream: {host: 'lite'}}).get('HmIP-PDT');
+        expect(label(image?.body)).toBe('THUMB');
+
+        const pagesOnly: FetchMock = vi.fn(() => Promise.resolve(page()));
+        const bundled = await service({fetch: pagesOnly, upstream: {host: 'lite'}}).get('HM-LC-Sw1-Pl');
+        expect(bundled).toMatchObject({source: 'bundled', mime: 'image/webp'});
+        expect(pagesOnly).toHaveBeenCalledTimes(ccuImagePaths('x.png').length);
+        await expect(fs.readFile(path.join(cacheDir, 'HM-LC-Sw1-Pl.png'))).rejects.toThrow();
+    });
+
+    it('does not take a picture served with a page type, or a page served as a picture', async () => {
+        const wrongType: FetchMock = vi.fn(() =>
+            Promise.resolve(
+                new Response(new Uint8Array(pic('X')), {status: 200, headers: {'Content-Type': 'text/html'}}),
+            ),
+        );
+        expect(await service({fetch: wrongType, upstream: {host: 'lite'}}).get('HM-LC-Sw1-Pl')).toMatchObject({
+            source: 'bundled',
+        });
+        const disguised: FetchMock = vi.fn(() =>
+            Promise.resolve(new Response(HTML_PAGE, {status: 200, headers: {'Content-Type': 'image/png'}})),
+        );
+        expect(await service({fetch: disguised, upstream: {host: 'lite'}}).get('HM-LC-Sw1-Pl')).toMatchObject({
+            source: 'bundled',
+        });
+    });
+
+    it('removes a page an earlier version cached as the picture and asks again', async () => {
+        await fs.mkdir(cacheDir, {recursive: true});
+        await fs.writeFile(path.join(cacheDir, 'HmIP-PDT.png'), HTML_PAGE);
+        const image = await service({fetch: okFetch('FRESH'), upstream: {host: 'ccu3'}}).get('HmIP-PDT');
+        expect(image).toMatchObject({source: 'ccu'});
+        expect(label(await fs.readFile(path.join(cacheDir, 'HmIP-PDT.png')))).toBe('FRESH');
+        expect(warnings.join(' ')).toContain('is not a picture');
     });
 
     it('does not grow without bound', async () => {

@@ -274,7 +274,11 @@ describe('the image proxy (D-10)', () => {
     });
 
     it('fetches from the configured CCU and caches it', async () => {
-        const upstream = vi.fn<(url: string) => Promise<Response>>(() => Promise.resolve(new Response('FROM-CCU')));
+        // B-57: a picture as far as the service can tell - an image type and a PNG's first bytes
+        const png = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47]), Buffer.from('FROM-CCU')]);
+        const upstream = vi.fn<(url: string) => Promise<Response>>(() =>
+            Promise.resolve(new Response(new Uint8Array(png), {headers: {'Content-Type': 'image/png'}})),
+        );
         const host = await start({fetch: upstream as unknown as typeof globalThis.fetch});
         const config = await backendOf(host).request('config.get');
         // a host but no interface: the image proxy has its address and nothing tries to connect
@@ -287,7 +291,11 @@ describe('the image proxy (D-10)', () => {
 
         const answer = await fetch(`${host.url}images/HM-LC-Sw1-Pl`);
         expect(answer.headers.get('x-hmm-image-source')).toBe('ccu');
-        expect(await answer.text()).toBe('FROM-CCU');
+        expect(
+            Buffer.from(await answer.arrayBuffer())
+                .subarray(4)
+                .toString(),
+        ).toBe('FROM-CCU');
         expect(upstream.mock.calls[0]?.[0]).toContain('http://127.0.0.1/config/img/devices/250/OM55_DimmerSwitch.png');
         expect(await fs.readdir(path.join(dataDir, 'images'))).toContain('HM-LC-Sw1-Pl.png');
     });

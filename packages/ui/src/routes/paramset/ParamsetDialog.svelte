@@ -1,6 +1,6 @@
 <script lang="ts">
     import type {MasterView, Paramset, ParamsetDescription, ParamsetValue, WriteResult} from '@homematic-manager/core';
-    import {multiApplyEligibility} from '@homematic-manager/core';
+    import {easyFormOf, easyFormParams, multiApplyEligibility} from '@homematic-manager/core';
     import {untrack} from 'svelte';
 
     import Dialog from '../../lib/components/Dialog.svelte';
@@ -20,6 +20,7 @@
         type WritePreview,
     } from '../../lib/util/paramsetForm.js';
 
+    import EasyForm from './EasyForm.svelte';
     import DeviceEditors from './editors/DeviceEditors.svelte';
     import ParameterRow from './ParameterRow.svelte';
     import RoutingTable from './RoutingTable.svelte';
@@ -46,6 +47,8 @@
     let writeAll = $state(false);
     let showHidden = $state(false);
     let showCovered = $state(false);
+    /** Task 63 (D-55): every parameter raw instead of the CCU's form. */
+    let expertView = $state(false);
     let previewOpen = $state(false);
     let preview = $state<WritePreview | undefined>(undefined);
     let results = $state<WriteResult[]>([]);
@@ -176,8 +179,35 @@
             ? detectDeviceEditors({interfaceName, address, channelType, paramset, description}, editorContext)
             : [],
     );
-    const covered = $derived(showCovered ? new Set<string>() : coveredParameters(editors));
+    // the expert view of task 63 shows every parameter raw, the ones an editor covers as well
+    const covered = $derived(showCovered || expertView ? new Set<string>() : coveredParameters(editors));
     const shownFields = $derived(fields.filter((field) => (showHidden || field.visible) && !covered.has(field.name)));
+
+    /**
+     * Task 63 (D-55): the CCU's MASTER form of this channel type, where the data has one. Without
+     * the expert view only its controls are shown; with it every parameter, raw, the form's ones
+     * marked. The device editors of task 10 stay above either.
+     */
+    const masterForm = $derived(
+        paramset === 'MASTER' && description ? easyFormOf(view?.controls, description) : undefined,
+    );
+    const form = $derived(expertView ? undefined : masterForm);
+    const easyParams = $derived(expertView ? easyFormParams(masterForm) : new Set<string>());
+    const fieldsByName = $derived(new Map(fields.map((field) => [field.name, field])));
+    /**
+     * The device editors of task 10 in the easy mode: one whose parameters the CCU's form already
+     * edits is left out there (the duration pairs of a button channel, say, are the form's time
+     * selector); the expert view shows every editor, as before.
+     */
+    const formParams = $derived(easyFormParams(masterForm));
+    const shownEditors = $derived(
+        form ? editors.filter((spec) => !spec.covers.every((param) => formParams.has(param))) : editors,
+    );
+    $effect(() => {
+        if (open && paramset === 'MASTER') {
+            void stores.meta.loadPresets();
+        }
+    });
     /** VALUES is the only paramset whose datapoints can be written one at a time. */
     const perDatapoint = $derived(paramset === 'VALUES');
     /** Multi-apply is a MASTER affair; 2.x offered its channel picker only there. */
@@ -244,6 +274,7 @@
             readBack = [];
             targets = [];
             writeAll = false;
+            expertView = false;
         });
     });
 
@@ -455,13 +486,19 @@
                 <input type="checkbox" bind:checked={writeAll} data-testid="paramset-write-all" />
                 <span>{t('Write every parameter, not only the changed ones')}</span>
             </label>
-            {#if editors.length > 0}
+            {#if masterForm}
+                <label class="hmm-paramset-option">
+                    <input type="checkbox" bind:checked={expertView} data-testid="paramset-expert" />
+                    <span>{t('Expert view')}</span>
+                </label>
+            {/if}
+            {#if editors.length > 0 && !form}
                 <label class="hmm-paramset-option">
                     <input type="checkbox" bind:checked={showCovered} data-testid="paramset-show-covered" />
                     <span>{t('Show the raw parameters as well')}</span>
                 </label>
             {/if}
-            {#if fields.some((field) => !field.visible)}
+            {#if fields.some((field) => !field.visible) && !form}
                 <label class="hmm-paramset-option">
                     <input type="checkbox" bind:checked={showHidden} data-testid="paramset-show-hidden" />
                     <span>{t('Show hidden parameters')}</span>
@@ -477,32 +514,55 @@
             </ul>
         {/if}
 
-        <DeviceEditors specs={editors} values={merged()} {channelType} onchange={changeMany} />
+        <DeviceEditors specs={shownEditors} values={merged()} {channelType} onchange={changeMany} />
 
         {#if paramset === 'ROUTING_TABLE'}
             <!-- task 26: an HmIP router's table is read-only and numbered; a graph says more than rows -->
             <RoutingTable values={original} self={address.split(':')[0] ?? address} />
         {/if}
+        {#if expertView && easyParams.size > 0}
+            <p class="hmm-paramset-legend" data-testid="paramset-easy-legend">
+                <span class="hmm-paramset-easy-swatch" aria-hidden="true"></span>{t(
+                    'Marked: the parameters the easy mode of this channel shows',
+                )}
+            </p>
+        {/if}
         <div class="hmm-paramset-list" class:hmm-paramset-raw={paramset === 'ROUTING_TABLE'}>
-            {#each shownFields as field (field.name)}
-                {@const withSuppress = serviceNames.includes(field.name)}
-                <ParameterRow
-                    {field}
-                    value={valueOf(field)}
-                    label={labelOf(field)}
-                    help={helpOf(field)}
-                    changed={isChanged(field)}
-                    valueLabel={(entry) => stores.meta.valueLabel(field.name, entry, channelType)}
-                    onchange={(value) => change(field, value)}
-                    onset={perDatapoint && field.writable ? () => void setOne(field) : undefined}
-                    suppressed={withSuppress ? isSuppressed(field.name) : undefined}
-                    onsuppress={withSuppress ? (value) => editSuppress(field.name, value) : undefined}
-                    suppressLabel={t('suppressed')}
-                    suppressTitle={t(
-                        'A suppressed one reports a value that raises no message; the CCU shows it as inactive.',
-                    )}
-                    suppressChanged={withSuppress && suppressChanged(field.name)}
+            {#if form && description}
+                <EasyForm
+                    {form}
+                    fields={fieldsByName}
+                    values={merged()}
+                    changed={(param) => Object.prototype.hasOwnProperty.call(edited, param)}
+                    {description}
+                    {channelType}
+                    presets={stores.meta.presets}
+                    timeSelectors={stores.meta.timeSelectors}
+                    onchange={changeMany}
+                    testId="paramset-easy-form"
                 />
+            {/if}
+            {#each form ? [] : shownFields as field (field.name)}
+                {@const withSuppress = serviceNames.includes(field.name)}
+                <div class="hmm-paramset-easy-mark" class:hmm-paramset-easy-marked={easyParams.has(field.name)}>
+                    <ParameterRow
+                        {field}
+                        value={valueOf(field)}
+                        label={labelOf(field)}
+                        help={helpOf(field)}
+                        changed={isChanged(field)}
+                        valueLabel={(entry) => stores.meta.valueLabel(field.name, entry, channelType)}
+                        onchange={(value) => change(field, value)}
+                        onset={perDatapoint && field.writable ? () => void setOne(field) : undefined}
+                        suppressed={withSuppress ? isSuppressed(field.name) : undefined}
+                        onsuppress={withSuppress ? (value) => editSuppress(field.name, value) : undefined}
+                        suppressLabel={t('suppressed')}
+                        suppressTitle={t(
+                            'A suppressed one reports a value that raises no message; the CCU shows it as inactive.',
+                        )}
+                        suppressChanged={withSuppress && suppressChanged(field.name)}
+                    />
+                </div>
             {/each}
             <!--
                 Task 26: in the MASTER dialog of channel 0 the service datapoints are not part of
@@ -603,6 +663,29 @@
 {/if}
 
 <style>
+    /* Task 63: in the expert view, the rows the easy mode shows - as in the link dialog */
+    .hmm-paramset-easy-marked {
+        background: var(--hmm-bg-sunken);
+        box-shadow: inset 3px 0 0 var(--hmm-accent);
+    }
+
+    .hmm-paramset-legend {
+        margin: 4px 0;
+        font-size: var(--hmm-font-size-small);
+        color: var(--hmm-fg-muted);
+    }
+
+    .hmm-paramset-easy-swatch {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin-right: 6px;
+        vertical-align: -1px;
+        background: var(--hmm-bg-sunken);
+        box-shadow: inset 3px 0 0 var(--hmm-accent);
+        border: 1px solid var(--hmm-border-muted);
+    }
+
     .hmm-paramset-top {
         display: flex;
         align-items: center;

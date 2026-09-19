@@ -1,51 +1,45 @@
 import type {EasyControl, LinkParameterSubset, LinkProfile, Localized} from '../data/types.js';
 import type {ParamsetDescription} from '../paramset/description.js';
-import type {TimeParameterPair} from '../paramset/time.js';
+import {findDurationPairs, type DurationPair} from '../paramset/time.js';
 
 /**
- * Task 62 (D-54): the CCU easy mode's form of a profile, for one device.
+ * Tasks 62 and 63 (D-54, D-55): the CCU easy mode's form, for one device.
  *
- * The extracted controls (`LinkProfile.controls`) are the union of every branch the WebUI's TCL can
- * take. What a device actually shows depends on its LINK description: a control whose parameter,
- * time pair or `requires` the description lacks is not on its form - the colour selector of an
- * optical-signal device on a plain dimmer, say.
+ * The extracted controls - a link profile's (`LinkProfile.controls`) or a channel type's MASTER
+ * form (`MasterMetadata.controls`) - are the union of every branch the WebUI's Tcl can take. What
+ * a device actually shows depends on its description: a control whose parameter, time pair or
+ * `requires` the description lacks is not on its form - the colour selector of an optical-signal
+ * device on a plain dimmer, say.
  */
 export type EasyFormControl =
-    | {kind: 'time'; pair: TimeParameterPair; selector: string; label?: Localized}
+    | {kind: 'time'; pair: DurationPair; selector: string; label?: Localized}
     | {kind: 'param'; param: string; also: string[]; option?: string; label?: Localized}
     | {kind: 'subset'; subsets: number[]; names?: Array<Localized | null>; label?: Localized};
-
-/** `SHORT_ON_TIME` -> the pair `SHORT_ON_TIME_BASE` / `SHORT_ON_TIME_FACTOR`, named `SHORT_ON`. */
-function pairOf(prefix: string): TimeParameterPair {
-    return {
-        name: prefix.endsWith('_TIME') ? prefix.slice(0, -'_TIME'.length) : prefix,
-        baseParam: `${prefix}_BASE`,
-        factorParam: `${prefix}_FACTOR`,
-    };
-}
 
 function withLabel<T extends object>(control: T, label: Localized | undefined): T & {label?: Localized} {
     return label === undefined ? control : {...control, label};
 }
 
 /**
- * The profile's form on this device, in the WebUI's order; `undefined` when the profile has no
- * extracted form or nothing of it applies, which is the dialog's cue to show every parameter.
+ * The form of a list of controls on this device, in the WebUI's order; `undefined` when there are
+ * none or nothing of them applies, which is the dialogs' cue to show every parameter.
  */
-export function easyForm(
-    profile: LinkProfile | undefined,
+export function easyFormOf(
+    controls: readonly EasyControl[] | undefined,
     description: ParamsetDescription,
 ): EasyFormControl[] | undefined {
-    const controls: readonly EasyControl[] = profile?.controls ?? [];
+    // a time control names the pair by its prefix: `SHORT_ON_TIME` for `SHORT_ON_TIME_BASE`, and
+    // `EVENT_DELAY` for `EVENT_DELAY_UNIT` - both are among the description's duration pairs
+    const pairs = new Map(findDurationPairs(description).map((pair) => [pair.unitParam, pair]));
     const form: EasyFormControl[] = [];
-    for (const control of controls) {
+    for (const control of controls ?? []) {
         if (!(control.requires ?? []).every((param) => param in description)) {
             continue;
         }
         switch (control.kind) {
             case 'time': {
-                const pair = pairOf(control.prefix);
-                if (pair.baseParam in description && pair.factorParam in description) {
+                const pair = pairs.get(`${control.prefix}_BASE`) ?? pairs.get(`${control.prefix}_UNIT`);
+                if (pair) {
                     form.push(withLabel({kind: 'time' as const, pair, selector: control.selector}, control.label));
                 }
                 break;
@@ -77,6 +71,14 @@ export function easyForm(
     return form.length > 0 ? form : undefined;
 }
 
+/** A link profile's form on this device (task 62). */
+export function easyForm(
+    profile: LinkProfile | undefined,
+    description: ParamsetDescription,
+): EasyFormControl[] | undefined {
+    return easyFormOf(profile?.controls, description);
+}
+
 /**
  * Every parameter the form edits: both halves of each time pair, each combo box's parameter and
  * the ones it writes along, and the members of the offered subsets. The expert view highlights
@@ -89,8 +91,8 @@ export function easyFormParams(
     const params = new Set<string>();
     for (const control of form ?? []) {
         if (control.kind === 'time') {
-            params.add(control.pair.baseParam);
-            params.add(control.pair.factorParam);
+            params.add(control.pair.unitParam);
+            params.add(control.pair.countParam);
         } else if (control.kind === 'param') {
             params.add(control.param);
             for (const param of control.also) params.add(param);

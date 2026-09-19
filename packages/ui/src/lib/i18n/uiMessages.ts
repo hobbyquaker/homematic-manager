@@ -451,6 +451,10 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Not active': {de: 'Nicht aktiv', en: 'Not active'},
     Permanent: {de: 'dauerhaft', en: 'permanent'},
     'Enter value': {de: 'Wert eingeben', en: 'Enter value'},
+    'Marked: the parameters the easy mode of this channel shows': {
+        de: 'Markiert: die Parameter, die der Easy-Mode dieses Kanals zeigt',
+        en: 'Marked: the parameters the easy mode of this channel shows',
+    },
     'Marked: the parameters the easy mode of this profile shows': {
         de: 'Markiert: die Parameter, die der Easy-Mode dieses Profils zeigt',
         en: 'Marked: the parameters the easy mode of this profile shows',

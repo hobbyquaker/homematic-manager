@@ -55,7 +55,10 @@ export interface LinkProfile {
  */
 export type EasyControl =
     | {
-          /** One duration over `<prefix>_BASE` / `<prefix>_FACTOR`, e.g. `SHORT_ON_TIME`. */
+          /**
+           * One duration over `<prefix>_BASE` / `<prefix>_FACTOR` (a link's `SHORT_ON_TIME`) or
+           * `<prefix>_UNIT` / `<prefix>_VALUE` (an HmIP MASTER parameter such as `EVENT_DELAY`).
+           */
           kind: 'time';
           prefix: string;
           /** The preset list, a key of the time selector file (`timeOnOff`, `rampOnOff`, ...). */
@@ -141,6 +144,11 @@ export interface MasterMetadata {
     optionPresets?: Record<string, string>;
     /** Optional fieldsets the WebUI renders the MASTER parameters in; `labelKey` refers to `Translations.uiLabels`. */
     parameterGroups?: Array<{id: string; labelKey?: string; parameters: string[]}>;
+    /**
+     * Task 63 (D-55): the controls the CCU's own MASTER form draws for this channel type, in its
+     * order, extracted from the WebUI like `LinkProfile.controls`. Absent where there is no form.
+     */
+    controls?: EasyControl[];
 }
 
 export interface OptionPresetEntry {

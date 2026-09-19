@@ -19,6 +19,11 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   view ticked every parameter is shown raw, and the ones the easy mode shows are marked. The forms were read out of
   the CCU's own easy mode files (OpenCCU 3.89.8) for about 2200 profiles; a profile without one keeps the full list,
   with a hint.
+- **The MASTER dialog shows the CCU's form too.** A channel's or device's settings (MASTER) now show what the CCU's own
+  settings page shows for that channel type - for an HmIP button: the channel on/off, the LED and sound confirmations,
+  the double-click and long-press times, and the long-press timeout as one selector ("2 Minuten") - instead of every
+  parameter of the paramset. A new **Expertenansicht** checkbox shows every parameter raw, the ones of the form marked.
+  The forms were read out of the CCU for 63 HmIP channel types; BidCos channels and the rest keep the full list.
 
 ## [3.0.0-beta.20] — 2026-09-19
 

@@ -568,3 +568,133 @@ describe('service-message suppression in the channel-0 dialog', () => {
         expect(rpcCalls()).toEqual([]);
     });
 });
+
+describe('the CCU MASTER form (task 63, D-55)', () => {
+    // An HmIP button channel: its MASTER form on the CCU shows the LED switch and the long-press
+    // timeout (one selector over the unit/value pair); PERMANENT_FULL_RX is not on it.
+    const CHANNEL = '0001D8A9B7C6D5:1';
+    const description: ParamsetDescription = {
+        LED_DISABLE_CHANNELSTATE: {TYPE: 'BOOL', OPERATIONS: 3, DEFAULT: false},
+        REPEATED_LONG_PRESS_TIMEOUT_UNIT: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['S', 'M', 'H']},
+        REPEATED_LONG_PRESS_TIMEOUT_VALUE: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 15},
+        PERMANENT_FULL_RX: {TYPE: 'BOOL', OPERATIONS: 3, DEFAULT: true},
+    };
+    const masterMetadata = {
+        KEY_TRANSCEIVER: {
+            channelType: 'KEY_TRANSCEIVER',
+            controls: [
+                {kind: 'param', param: 'LED_DISABLE_CHANNELSTATE', label: {de: 'Geräte-LED deaktivieren'}},
+                {
+                    kind: 'time',
+                    prefix: 'REPEATED_LONG_PRESS_TIMEOUT',
+                    selector: 'timeOnOffShort',
+                    label: {de: 'Timeout'},
+                },
+                {kind: 'param', param: 'SOMETHING_ELSE', requires: ['SOMETHING_ELSE']},
+            ],
+        },
+    };
+    let transport: MockTransport;
+
+    async function openButton(): Promise<void> {
+        await mountApp({transport, hash: '#/HmIP-RF/devices'});
+        const parent = document.querySelector<HTMLElement>('[data-row-id="0001D8A9B7C6D5"]')!;
+        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(await screen.findByTestId(`paramset-${CHANNEL}-MASTER`));
+    }
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+        const demoFile = transport.handlerFor('data.file');
+        transport.respond('data.file', (path) => {
+            if (path === 'data/master-metadata.json') return {...(demoFile(path) as object), ...masterMetadata};
+            if (path === 'data/easymode-time-selectors.json') {
+                return {
+                    source: 'test',
+                    types: {
+                        timeOnOffShort: [
+                            {special: 'notActive', label: {de: 'Nicht aktiv'}},
+                            {seconds: 120, label: {de: '2 Minuten'}},
+                            {special: 'enterValue', label: {de: 'Wert eingeben'}},
+                        ],
+                    },
+                };
+            }
+            return demoFile(path);
+        });
+        const demoDescription = transport.handlerFor('paramset.description');
+        transport.respond('paramset.description', (interfaceName, address, paramset) =>
+            address === CHANNEL && paramset === 'MASTER'
+                ? description
+                : demoDescription(interfaceName, address, paramset),
+        );
+        const demoGet = transport.handlerFor('paramset.get');
+        transport.respond('paramset.get', (interfaceName, address, paramset) =>
+            address === CHANNEL && paramset === 'MASTER'
+                ? {
+                      LED_DISABLE_CHANNELSTATE: false,
+                      REPEATED_LONG_PRESS_TIMEOUT_UNIT: 1,
+                      REPEATED_LONG_PRESS_TIMEOUT_VALUE: 2,
+                      PERMANENT_FULL_RX: true,
+                  }
+                : demoGet(interfaceName, address, paramset),
+        );
+    });
+
+    it('shows only the CCU form, the time as one selector, and hides the rest', async () => {
+        await openButton();
+        const form = await screen.findByTestId('paramset-easy-form');
+        expect(within(form).getByTestId('param-LED_DISABLE_CHANNELSTATE')).toBeTruthy();
+        expect(within(form).getByText('Geräte-LED deaktivieren')).toBeTruthy();
+        const select = within(form).getByTestId<HTMLSelectElement>('easy-time-select-REPEATED_LONG_PRESS_TIMEOUT');
+        // M x 2 = 120 s
+        expect(select.selectedOptions[0]?.textContent).toBe('2 Minuten');
+        expect(screen.queryByTestId('param-PERMANENT_FULL_RX')).toBeNull();
+        expect(screen.queryByTestId('param-REPEATED_LONG_PRESS_TIMEOUT_UNIT')).toBeNull();
+        // the duration editor of task 10 would edit the same pair a second time: not in the easy mode
+        expect(screen.queryByTestId('duration-REPEATED_LONG_PRESS_TIMEOUT')).toBeNull();
+        await fireEvent.click(screen.getByTestId('paramset-expert'));
+        await waitFor(() => {
+            expect(screen.getByTestId('duration-REPEATED_LONG_PRESS_TIMEOUT')).toBeTruthy();
+        });
+    });
+
+    it('writes a preset as unit and value', async () => {
+        await openButton();
+        const select = await screen.findByTestId<HTMLSelectElement>('easy-time-select-REPEATED_LONG_PRESS_TIMEOUT');
+        await fireEvent.change(select, {target: {value: '0'}});
+        await fireEvent.click(screen.getByTestId('paramset-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('preview-REPEATED_LONG_PRESS_TIMEOUT_VALUE').textContent).toContain('0');
+        });
+    });
+
+    it('shows every parameter raw with the expert view, the form ones marked', async () => {
+        await openButton();
+        await screen.findByTestId('paramset-easy-form');
+        await fireEvent.click(screen.getByTestId('paramset-expert'));
+        await waitFor(() => {
+            expect(screen.getByTestId('param-PERMANENT_FULL_RX')).toBeTruthy();
+        });
+        expect(screen.queryByTestId('paramset-easy-form')).toBeNull();
+        expect(screen.getByTestId('paramset-easy-legend')).toBeTruthy();
+        const marked = (param: string): boolean =>
+            screen.getByTestId(`param-${param}`).parentElement?.classList.contains('hmm-paramset-easy-marked') ?? false;
+        expect(marked('LED_DISABLE_CHANNELSTATE')).toBe(true);
+        expect(marked('REPEATED_LONG_PRESS_TIMEOUT_UNIT')).toBe(true);
+        expect(marked('REPEATED_LONG_PRESS_TIMEOUT_VALUE')).toBe(true);
+        expect(marked('PERMANENT_FULL_RX')).toBe(false);
+    });
+
+    it('keeps the full list, without the checkbox, where the channel type has no form', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
+        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:1-MASTER'));
+        await waitFor(() => {
+            expect(document.querySelectorAll('[data-testid^="param-"]').length).toBeGreaterThan(0);
+        });
+        expect(screen.queryByTestId('paramset-easy-form')).toBeNull();
+        expect(screen.queryByTestId('paramset-expert')).toBeNull();
+    });
+});

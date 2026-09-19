@@ -1,4 +1,5 @@
 import type {ParamsetDescription, TimeSelectorOption} from '@homematic-manager/core';
+import {findDurationPairs} from '@homematic-manager/core';
 import {describe, expect, it} from 'vitest';
 
 import {
@@ -13,7 +14,28 @@ import {
     timeOptionValues,
 } from './linkEasyForm.js';
 
-const pair = {name: 'SHORT_ON', baseParam: 'SHORT_ON_TIME_BASE', factorParam: 'SHORT_ON_TIME_FACTOR'};
+const pair = findDurationPairs({
+    SHORT_ON_TIME_BASE: {
+        TYPE: 'ENUM',
+        OPERATIONS: 3,
+        VALUE_LIST: [
+            'BASE_100_MS',
+            'BASE_1_S',
+            'BASE_5_S',
+            'BASE_10_S',
+            'BASE_1_M',
+            'BASE_5_M',
+            'BASE_10_M',
+            'BASE_1_H',
+        ],
+    },
+    SHORT_ON_TIME_FACTOR: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 31},
+})[0]!;
+// an HmIP MASTER pair (task 63): unit tokens, a count up to the description's MAX
+const unitPair = findDurationPairs({
+    EVENT_DELAY_UNIT: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['S', 'M', 'H']},
+    EVENT_DELAY_VALUE: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 15},
+})[0]!;
 const options: TimeSelectorOption[] = [
     {special: 'notActive', label: {de: 'Nicht aktiv'}},
     {seconds: 1},
@@ -45,6 +67,16 @@ describe('the time selector (task 62)', () => {
             SHORT_ON_TIME_FACTOR: 31,
         });
         expect(timeOptionValues({special: 'enterValue'}, pair)).toBeUndefined();
+    });
+
+    it('reads and writes a unit/value pair of an HmIP MASTER parameter (task 63)', () => {
+        expect(timeOptionValues({seconds: 120}, unitPair)).toEqual({EVENT_DELAY_UNIT: 1, EVENT_DELAY_VALUE: 2});
+        expect(timeOptionValues({special: 'permanent'}, unitPair)).toEqual({
+            EVENT_DELAY_UNIT: 2,
+            EVENT_DELAY_VALUE: 15,
+        });
+        expect(timeOptionIndex(options, {EVENT_DELAY_UNIT: 'M', EVENT_DELAY_VALUE: 1}, unitPair)).toBe(2);
+        expect(timeOptionIndex(options, {EVENT_DELAY_UNIT: 'H', EVENT_DELAY_VALUE: 15}, unitPair)).toBe(3);
     });
 
     it('labels an option with the WebUI text, a formatted duration, or the app string', () => {

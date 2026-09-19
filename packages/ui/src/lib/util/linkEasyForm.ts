@@ -1,17 +1,18 @@
 import type {
+    DurationPair,
     LinkParameterSubset,
     Localized,
     OptionPreset,
     ParamsetDescription,
     ParamsetValue,
-    TimeParameterPair,
     TimeSelectorOption,
 } from '@homematic-manager/core';
-import {MAX_TIME_FACTOR, TIME_BASES, readTimePair, writeTimePair} from '@homematic-manager/core';
+import {readDurationPair, writeDurationPair} from '@homematic-manager/core';
 
 /**
- * Task 62 (D-54): the easy mode's controls in the CCU's shape - a time selector over a base/factor
- * pair, and one choice among the subsets of a sender type. The rows themselves are Svelte; what
+ * Tasks 62 and 63 (D-54, D-55): the easy mode's controls in the CCU's shape - a time selector over
+ * a duration pair (a link's base/factor, an HmIP MASTER parameter's unit/value), a preset combo
+ * box, and one choice among the subsets of a sender type. The rows themselves are Svelte; what
  * they decide is here, where it can be tested without a DOM.
  */
 
@@ -44,9 +45,6 @@ export function timeOptionLabel(
     );
 }
 
-/** The largest base with the largest factor: the pair's "for ever". */
-const PERMANENT = {base: TIME_BASES.length - 1, factor: MAX_TIME_FACTOR};
-
 /**
  * Which option the pair's current values stand for: `notActive` at 0 s, `permanent` at the pair's
  * maximum, the preset of the same duration otherwise, and `enterValue` for anything in between -
@@ -56,14 +54,14 @@ const PERMANENT = {base: TIME_BASES.length - 1, factor: MAX_TIME_FACTOR};
 export function timeOptionIndex(
     options: readonly TimeSelectorOption[],
     values: Readonly<Record<string, ParamsetValue>>,
-    pair: TimeParameterPair,
+    pair: DurationPair,
 ): number {
-    const decoded = readTimePair(values, pair);
+    const decoded = readDurationPair(values, pair);
     if (decoded === undefined) return -1;
     const index = options.findIndex((option) => {
-        if ('seconds' in option) return !decoded.infinite && Math.abs(option.seconds - decoded.seconds) < 1e-6;
+        if ('seconds' in option) return !decoded.maximal && Math.abs(option.seconds - decoded.seconds) < 1e-6;
         if (option.special === 'notActive') return decoded.seconds === 0;
-        if (option.special === 'permanent') return decoded.infinite;
+        if (option.special === 'permanent') return decoded.maximal;
         return false;
     });
     return index >= 0 ? index : options.findIndex((option) => 'special' in option && option.special === 'enterValue');
@@ -73,13 +71,13 @@ export function timeOptionIndex(
  * The values a chosen option writes: base index and factor. `undefined` for `enterValue`, which
  * writes nothing and only opens the raw fields.
  */
-export function timeOptionValues(
-    option: TimeSelectorOption,
-    pair: TimeParameterPair,
-): Record<string, number> | undefined {
-    if ('seconds' in option) return writeTimePair(option.seconds, pair);
-    if (option.special === 'notActive') return {[pair.baseParam]: 0, [pair.factorParam]: 0};
-    if (option.special === 'permanent') return {[pair.baseParam]: PERMANENT.base, [pair.factorParam]: PERMANENT.factor};
+export function timeOptionValues(option: TimeSelectorOption, pair: DurationPair): Record<string, number> | undefined {
+    if ('seconds' in option) return writeDurationPair(option.seconds, pair);
+    if (option.special === 'notActive') return {[pair.unitParam]: 0, [pair.countParam]: 0};
+    // the largest unit with the largest count: the pair's "for ever"
+    if (option.special === 'permanent') {
+        return {[pair.unitParam]: pair.units.length - 1, [pair.countParam]: pair.maxCount};
+    }
     return undefined;
 }
 

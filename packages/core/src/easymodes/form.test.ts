@@ -3,10 +3,25 @@ import {describe, expect, it} from 'vitest';
 import type {LinkProfile} from '../data/types.js';
 import type {ParamsetDescription} from '../paramset/description.js';
 
-import {easyForm, easyFormParams} from './form.js';
+import {easyForm, easyFormOf, easyFormParams} from './form.js';
 
 const description: ParamsetDescription = {
-    SHORT_ON_TIME_BASE: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['BASE_100_MS', 'BASE_1_S']},
+    SHORT_ON_TIME_BASE: {
+        TYPE: 'ENUM',
+        OPERATIONS: 3,
+        VALUE_LIST: [
+            'BASE_100_MS',
+            'BASE_1_S',
+            'BASE_5_S',
+            'BASE_10_S',
+            'BASE_1_M',
+            'BASE_5_M',
+            'BASE_10_M',
+            'BASE_1_H',
+        ],
+    },
+    EVENT_DELAY_UNIT: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['S', 'M', 'H']},
+    EVENT_DELAY_VALUE: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 15},
     SHORT_ON_TIME_FACTOR: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 31},
     SHORT_ON_LEVEL: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 1},
     LONG_ON_LEVEL: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 1},
@@ -33,16 +48,26 @@ describe('easyForm (task 62)', () => {
     const form = easyForm(profile, description);
 
     it('keeps what the device has, in the WebUI order', () => {
-        expect(form).toEqual([
-            {
-                kind: 'time',
-                pair: {name: 'SHORT_ON', baseParam: 'SHORT_ON_TIME_BASE', factorParam: 'SHORT_ON_TIME_FACTOR'},
-                selector: 'timeOnOff',
-                label: {de: 'Einschaltdauer'},
-            },
+        expect(form?.[0]).toMatchObject({
+            kind: 'time',
+            pair: {kind: 'base-factor', unitParam: 'SHORT_ON_TIME_BASE', countParam: 'SHORT_ON_TIME_FACTOR'},
+            selector: 'timeOnOff',
+            label: {de: 'Einschaltdauer'},
+        });
+        expect(form?.slice(1)).toEqual([
             {kind: 'param', param: 'SHORT_ON_LEVEL', also: ['LONG_ON_LEVEL'], option: 'DIM_ONLEVEL'},
             {kind: 'subset', subsets: [1, 2]},
         ]);
+    });
+
+    it('finds an HmIP MASTER unit/value pair by its prefix too (task 63)', () => {
+        const master = easyFormOf([{kind: 'time', prefix: 'EVENT_DELAY', selector: 'delayShort'}], description);
+        expect(master?.[0]).toMatchObject({
+            kind: 'time',
+            selector: 'delayShort',
+            pair: {kind: 'unit-value', unitParam: 'EVENT_DELAY_UNIT', countParam: 'EVENT_DELAY_VALUE', maxCount: 15},
+        });
+        expect(easyFormOf(undefined, description)).toBeUndefined();
     });
 
     it('is undefined without controls, for no profile, and when nothing applies', () => {

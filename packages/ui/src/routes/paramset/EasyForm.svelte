@@ -19,30 +19,34 @@
         timeOptionLabel,
         timeOptionValues,
     } from '../../lib/util/linkEasyForm.js';
-    import type {LinkField} from '../../lib/util/linkForm.js';
-    import ParameterRow from '../paramset/ParameterRow.svelte';
+    import type {FormField} from '../../lib/util/paramsetForm.js';
+
+    import ParameterRow from './ParameterRow.svelte';
 
     /**
-     * Task 62 (D-54): the CCU easy mode's form of the chosen profile - only the controls the WebUI
-     * draws for it, in its order, in its shape: a time is one selector over the base/factor pair
-     * (its presets, "not active", "permanent" and "enter value", which opens the raw pair), a level
-     * is a combo box with the WebUI's option set, a subset is one choice. Everything else the
-     * profile sets is written from the profile, as the WebUI does; the expert view shows it all raw.
+     * Tasks 62 and 63 (D-54, D-55): the CCU easy mode's form - of a link profile in the link
+     * dialog, of a channel type's MASTER paramset in the paramset dialog. Only the controls the
+     * WebUI draws, in its order, in its shape: a time is one selector over the duration pair (its
+     * presets, "not active", "permanent" and "enter value", which opens the raw pair), a level is
+     * a combo box with the WebUI's option set, a subset is one choice. The expert view of either
+     * dialog shows every parameter raw instead.
      */
     interface Props {
         form: readonly EasyFormControl[];
-        /** Every LINK field of the receiver, by name - the rows are drawn from these. */
-        fields: ReadonlyMap<string, LinkField>;
+        /** Every field of the paramset, by name - the rows are drawn from these. */
+        fields: ReadonlyMap<string, FormField & {readonly fixedByProfile?: boolean}>;
         /** The stored values with the edits on top. */
         values: Readonly<Record<string, ParamsetValue>>;
         /** Which parameters differ from what the device answered. */
         changed: (param: string) => boolean;
         description: ParamsetDescription;
-        receiverType: string;
+        /** The channel type the labels and value names are looked up for. */
+        channelType: string;
         subsets?: readonly LinkParameterSubset[] | undefined;
         presets: Readonly<Record<string, OptionPreset>>;
         timeSelectors: Readonly<Record<string, readonly TimeSelectorOption[]>>;
         onchange: (changes: Record<string, ParamsetValue>) => void;
+        testId?: string;
     }
 
     let {
@@ -51,11 +55,12 @@
         values,
         changed,
         description,
-        receiverType,
+        channelType,
         subsets = [],
         presets,
         timeSelectors,
         onchange,
+        testId = 'easy-form',
     }: Props = $props();
 
     const stores = getStores();
@@ -71,7 +76,7 @@
             control === undefined
                 ? ''
                 : control.kind === 'time'
-                  ? control.pair.baseParam
+                  ? control.pair.unitParam
                   : control.kind === 'param'
                     ? control.param
                     : '';
@@ -87,7 +92,7 @@
     }
 
     function labelOf(control: EasyFormControl, fallbackParam: string): string {
-        return localizedText(control.label, language) ?? stores.meta.parameterLabel(fallbackParam, receiverType);
+        return localizedText(control.label, language) ?? stores.meta.parameterLabel(fallbackParam, channelType);
     }
 
     /** The combo box's option set, where the WebUI names one and the data has it. */
@@ -121,7 +126,7 @@
     }
 </script>
 
-<div class="hmm-link-easy" data-testid="link-easy-form">
+<div class="hmm-link-easy" data-testid={testId}>
     {#each form as control, index (control.kind === 'time' ? control.pair.name : control.kind === 'param' ? control.param : `subset-${String(control.subsets)}`)}
         {@const heading = headingBefore(index)}
         {#if heading}
@@ -135,10 +140,10 @@
                 entering[control.pair.name] === true ||
                 (current >= 0 && current === enterIndex) ||
                 options.length === 0}
-            {@const label = labelOf(control, control.pair.factorParam)}
+            {@const label = labelOf(control, control.pair.countParam)}
             <div
                 class="hmm-link-easy-row"
-                class:hmm-param-changed={changed(control.pair.baseParam) || changed(control.pair.factorParam)}
+                class:hmm-param-changed={changed(control.pair.unitParam) || changed(control.pair.countParam)}
                 data-testid={`easy-time-${control.pair.name}`}
             >
                 <span class="hmm-link-easy-label">{label}</span>
@@ -160,16 +165,16 @@
                 {/if}
             </div>
             {#if raw}
-                {#each [control.pair.baseParam, control.pair.factorParam] as param (param)}
+                {#each [control.pair.unitParam, control.pair.countParam] as param (param)}
                     {@const field = fields.get(param)}
                     {#if field}
                         <ParameterRow
                             {field}
                             value={values[param] ?? field.description.DEFAULT}
-                            label={stores.meta.parameterLabel(param, receiverType)}
-                            help={stores.meta.parameterHelp(param, receiverType)}
+                            label={stores.meta.parameterLabel(param, channelType)}
+                            help={stores.meta.parameterHelp(param, channelType)}
                             changed={changed(param)}
-                            valueLabel={(entry) => stores.meta.valueLabel(param, entry, receiverType)}
+                            valueLabel={(entry) => stores.meta.valueLabel(param, entry, channelType)}
                             onchange={(value) => onchange({[param]: value})}
                         />
                     {/if}
@@ -178,7 +183,7 @@
         {:else if control.kind === 'param'}
             {@const field = fields.get(control.param)}
             {@const preset = presetOf(control)}
-            {#if field && preset && !field.fixedByProfile}
+            {#if field && preset && field.fixedByProfile !== true}
                 <!-- the WebUI's combo box: the current preset, or "enter value" and the free field -->
                 {@const value = values[control.param] ?? field.description.DEFAULT}
                 {@const current = presetIndex(preset, value)}
@@ -200,7 +205,7 @@
                         {#each preset.presets as entry, entryIndex (entryIndex)}
                             <option value={String(entryIndex)}
                                 >{entry.label ??
-                                    stores.meta.valueLabel(control.param, entry.labelKey ?? '', receiverType)}</option
+                                    stores.meta.valueLabel(control.param, entry.labelKey ?? '', channelType)}</option
                             >
                         {/each}
                         <option value="-1">{t('Enter value')}</option>
@@ -210,10 +215,10 @@
                     <ParameterRow
                         {field}
                         {value}
-                        label={stores.meta.parameterLabel(control.param, receiverType)}
-                        help={stores.meta.parameterHelp(control.param, receiverType)}
+                        label={stores.meta.parameterLabel(control.param, channelType)}
+                        help={stores.meta.parameterHelp(control.param, channelType)}
                         changed={changed(control.param)}
-                        valueLabel={(entry) => stores.meta.valueLabel(control.param, entry, receiverType)}
+                        valueLabel={(entry) => stores.meta.valueLabel(control.param, entry, channelType)}
                         onchange={(changedValue) => changeParam(control, changedValue)}
                     />
                 {/if}
@@ -222,10 +227,10 @@
                     {field}
                     value={values[control.param] ?? field.description.DEFAULT}
                     label={labelOf(control, control.param)}
-                    help={stores.meta.parameterHelp(control.param, receiverType)}
+                    help={stores.meta.parameterHelp(control.param, channelType)}
                     changed={changed(control.param)}
-                    disabled={field.fixedByProfile}
-                    valueLabel={(entry) => stores.meta.valueLabel(control.param, entry, receiverType)}
+                    disabled={field.fixedByProfile === true}
+                    valueLabel={(entry) => stores.meta.valueLabel(control.param, entry, channelType)}
                     onchange={(changedValue) => changeParam(control, changedValue)}
                 />
             {/if}
@@ -251,7 +256,7 @@
                         {#each choices as subset, choiceIndex (subset.id)}
                             <option value={String(choiceIndex)}
                                 >{localizedText(control.names?.[control.subsets.indexOf(subset.id)], language) ??
-                                    stores.meta.parameterLabel(subset.key, receiverType)}</option
+                                    stores.meta.parameterLabel(subset.key, channelType)}</option
                             >
                         {/each}
                     </select>

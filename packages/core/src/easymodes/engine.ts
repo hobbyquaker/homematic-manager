@@ -15,6 +15,7 @@
 import type {
     CrossValidationRule,
     DataSource,
+    EasyControl,
     LinkProfile,
     LinkSenderMetadata,
     MasterMetadata,
@@ -82,6 +83,8 @@ export interface MasterView {
     /** In display order: the metadata's order first, then the rest by `TAB_ORDER`. */
     readonly parameters: readonly MasterParameterView[];
     readonly problems: readonly CrossValidationProblem[];
+    /** Task 63: the CCU's MASTER form of the channel type, where the data has one. */
+    readonly controls?: readonly EasyControl[];
 }
 
 /** Reads the easy-mode data through a `DataSource` and answers the dialogs' questions. */
@@ -223,6 +226,7 @@ export class EasyModeEngine {
         return {
             channelType,
             parameters,
+            ...(metadata?.controls ? {controls: metadata.controls} : {}),
             problems: rules
                 .filter((rule) => appliesTo(rule, description))
                 .filter((rule) => !holds(rule, values))

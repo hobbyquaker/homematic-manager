@@ -24,7 +24,7 @@
     import ParameterRow from '../paramset/ParameterRow.svelte';
     import WritePreviewDialog from '../paramset/WritePreviewDialog.svelte';
 
-    import LinkEasyForm from './LinkEasyForm.svelte';
+    import EasyForm from '../paramset/EasyForm.svelte';
 
     interface Props {
         open?: boolean;
@@ -611,13 +611,14 @@
             {/if}
             <div class="hmm-link-list" data-testid="link-receiver-params">
                 {#if form && receiverDescription}
-                    <LinkEasyForm
+                    <EasyForm
                         {form}
+                        testId="link-easy-form"
                         fields={fieldsByName}
                         values={current}
                         changed={(param) => Object.prototype.hasOwnProperty.call(edited, param)}
                         description={receiverDescription}
-                        {receiverType}
+                        channelType={receiverType}
                         subsets={metadata?.subsets}
                         presets={stores.meta.presets}
                         timeSelectors={stores.meta.timeSelectors}

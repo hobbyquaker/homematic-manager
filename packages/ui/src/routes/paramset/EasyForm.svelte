@@ -175,6 +175,7 @@
                             help={stores.meta.parameterHelp(param, channelType)}
                             changed={changed(param)}
                             valueLabel={(entry) => stores.meta.valueLabel(param, entry, channelType)}
+                            presetLabel={(key) => stores.meta.uiLabel(key)}
                             onchange={(value) => onchange({[param]: value})}
                         />
                     {/if}
@@ -204,8 +205,7 @@
                     >
                         {#each preset.presets as entry, entryIndex (entryIndex)}
                             <option value={String(entryIndex)}
-                                >{entry.label ??
-                                    stores.meta.valueLabel(control.param, entry.labelKey ?? '', channelType)}</option
+                                >{entry.label ?? stores.meta.uiLabel(entry.labelKey ?? '')}</option
                             >
                         {/each}
                         <option value="-1">{t('Enter value')}</option>
@@ -219,6 +219,7 @@
                         help={stores.meta.parameterHelp(control.param, channelType)}
                         changed={changed(control.param)}
                         valueLabel={(entry) => stores.meta.valueLabel(control.param, entry, channelType)}
+                        presetLabel={(key) => stores.meta.uiLabel(key)}
                         onchange={(changedValue) => changeParam(control, changedValue)}
                     />
                 {/if}
@@ -231,6 +232,7 @@
                     changed={changed(control.param)}
                     disabled={field.fixedByProfile === true}
                     valueLabel={(entry) => stores.meta.valueLabel(control.param, entry, channelType)}
+                    presetLabel={(key) => stores.meta.uiLabel(key)}
                     onchange={(changedValue) => changeParam(control, changedValue)}
                 />
             {/if}

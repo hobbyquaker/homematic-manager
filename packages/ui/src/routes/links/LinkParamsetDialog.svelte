@@ -496,6 +496,7 @@
                             help={stores.meta.parameterHelp(field.name, senderType)}
                             changed={Object.prototype.hasOwnProperty.call(senderEdited, field.name)}
                             valueLabel={(entry) => stores.meta.valueLabel(field.name, entry, senderType)}
+                            presetLabel={(key) => stores.meta.uiLabel(key)}
                             onchange={(value) => (senderEdited = {...senderEdited, [field.name]: value})}
                         />
                     {/each}
@@ -635,6 +636,7 @@
                                 changed={Object.prototype.hasOwnProperty.call(edited, field.name)}
                                 disabled={field.fixedByProfile}
                                 valueLabel={(entry) => stores.meta.valueLabel(field.name, entry, receiverType)}
+                                presetLabel={(key) => stores.meta.uiLabel(key)}
                                 onchange={(value) => (edited = {...edited, [field.name]: value})}
                             />
                         </div>

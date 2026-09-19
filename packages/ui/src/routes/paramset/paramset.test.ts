@@ -578,12 +578,14 @@ describe('the CCU MASTER form (task 63, D-55)', () => {
         REPEATED_LONG_PRESS_TIMEOUT_UNIT: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['S', 'M', 'H']},
         REPEATED_LONG_PRESS_TIMEOUT_VALUE: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 15},
         PERMANENT_FULL_RX: {TYPE: 'BOOL', OPERATIONS: 3, DEFAULT: true},
+        EVENT_DELAY: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 111_600, DEFAULT: 5},
     };
     const masterMetadata = {
         KEY_TRANSCEIVER: {
             channelType: 'KEY_TRANSCEIVER',
             controls: [
                 {kind: 'param', param: 'LED_DISABLE_CHANNELSTATE', label: {de: 'Geräte-LED deaktivieren'}},
+                {kind: 'param', param: 'EVENT_DELAY', option: 'duration'},
                 {
                     kind: 'time',
                     prefix: 'REPEATED_LONG_PRESS_TIMEOUT',
@@ -657,6 +659,15 @@ describe('the CCU MASTER form (task 63, D-55)', () => {
         await waitFor(() => {
             expect(screen.getByTestId('duration-REPEATED_LONG_PRESS_TIMEOUT')).toBeTruthy();
         });
+    });
+
+    // a preset's label key is one of the WebUI's labels (uiLabels), not an enum name: the easy form
+    // showed "stringtablelogicor" where the expert view said "OR (höherer Pegel hat Priorität)"
+    it("names a preset by the WebUI's label, not by its key", async () => {
+        await openButton();
+        const select = await screen.findByTestId<HTMLSelectElement>('easy-preset-select-EVENT_DELAY');
+        const labels = [...select.options].map((option) => option.textContent.trim());
+        expect(labels).toEqual(['5s', '30s', 'nicht benutzt', 'Wert eingeben']);
     });
 
     it('writes a preset as unit and value', async () => {

@@ -552,6 +552,7 @@
                         help={helpOf(field)}
                         changed={isChanged(field)}
                         valueLabel={(entry) => stores.meta.valueLabel(field.name, entry, channelType)}
+                        presetLabel={(key) => stores.meta.uiLabel(key)}
                         onchange={(value) => change(field, value)}
                         onset={perDatapoint && field.writable ? () => void setOne(field) : undefined}
                         suppressed={withSuppress ? isSuppressed(field.name) : undefined}

@@ -11,8 +11,13 @@
         label: string;
         /** Help text of the CCU's own string table, already stripped of its markup. */
         help?: string | undefined;
-        /** Translates one enum name or preset label. */
+        /** Translates one enum name. */
         valueLabel?: ((value: string) => string) | undefined;
+        /**
+         * Translates a preset's `labelKey`, a WebUI label key (`Translations.uiLabels`) - not an enum
+         * name, so `valueLabel` would not find it and show the key itself.
+         */
+        presetLabel?: ((key: string) => string) | undefined;
         /** A `setValue` button next to the control - the VALUES paramset has one per datapoint. */
         onset?: (() => void) | undefined;
         onchange: (value: ParamsetValue) => void;
@@ -39,6 +44,7 @@
         label,
         help = undefined,
         valueLabel = undefined,
+        presetLabel = undefined,
         onset = undefined,
         onchange,
         changed = false,
@@ -156,7 +162,9 @@
                 >
                     <option value="">…</option>
                     {#each field.preset.presets as entry (String(entry.value))}
-                        <option value={String(entry.value)}>{entry.label ?? labelOf(entry.labelKey ?? '')}</option>
+                        <option value={String(entry.value)}
+                            >{entry.label ?? (presetLabel ?? labelOf)(entry.labelKey ?? '')}</option
+                        >
                     {/each}
                 </select>
             {/if}

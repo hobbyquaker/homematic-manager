@@ -55,6 +55,13 @@
     let readBack = $state<ReadBackEntry[]>([]);
     let loading = $state(false);
     let loadToken = 0;
+    /**
+     * B-58: which link and which load the values on screen belong to (`<interface>|<sender>|<receiver>#<n>`),
+     * `''` while a load runs; and which sender/receiver channel types `profiles` were read for.
+     */
+    let loadedFor = $state('');
+    let profilesFor = $state('');
+    let profilesToken = 0;
     /** Issue #21: the name the current values would be saved under, and the chosen template. */
     let templateName = $state('');
     let templateChoice = $state('');
@@ -124,6 +131,15 @@
         const token = (loadToken += 1);
         const request = {interfaceName, sender, receiver};
         loading = true;
+        // B-58: the dialog is mounted once and reused for every link. Drop the previous link's values
+        // at once, so that nothing - the profile detection above all - works on them in the meantime.
+        loadedFor = '';
+        receiverDescription = undefined;
+        receiverValues = {};
+        senderDescription = undefined;
+        senderValues = {};
+        edited = {};
+        senderEdited = {};
         void (async () => {
             const [receiverDesc, receiverParamset, senderDesc, senderParamset, info] = await Promise.all([
                 stores.paramsets.describe(request.interfaceName, request.receiver, 'LINK'),
@@ -148,6 +164,7 @@
             results = [];
             readBack = [];
             loading = false;
+            loadedFor = `${request.interfaceName}|${request.sender}|${request.receiver}#${String(token)}`;
         })();
     });
 
@@ -156,27 +173,44 @@
         if (!open || receiverType === '' || senderType === '') {
             return;
         }
+        const types = `${receiverType}|${senderType}`;
+        if (types === profilesFor) {
+            return;
+        }
+        // Another pair of channel types: the old list is not this link's, and a late answer for a
+        // pair opened before must not overwrite the current one.
+        const token = (profilesToken += 1);
+        profilesFor = '';
+        profiles = [];
         void Promise.all([
             stores.meta.profilesFor(receiverType, senderType),
             stores.meta.linkMetadataFor(receiverType, senderType),
             stores.meta.loadPresets(),
         ]).then(([list, meta]) => {
+            if (token !== profilesToken) {
+                return;
+            }
             profiles = list;
             metadata = meta;
+            profilesFor = types;
         });
     });
 
     /**
      * Which profile the stored values follow: `UI_HINT` first, then the fixed parameters.
      *
-     * Once per link, and never again - `detectedFor` is a plain variable on purpose, so that the
-     * effect neither depends on it nor detects a second time after the user has picked a profile
-     * (which would put the dropdown straight back to where it was).
+     * Once per load of a link, and only on the values loaded for it (B-58: the dialog is reused, and
+     * detecting on the previous link's values showed that link's profile). `detectedFor` is a plain
+     * variable on purpose, so that the effect neither depends on it nor detects a second time after
+     * the user has picked a profile (which would put the dropdown straight back to where it was).
      */
     let detectedFor = '';
     $effect(() => {
-        const key = `${sender}|${receiver}|${String(profiles.length)}`;
-        if (profiles.length === 0 || receiverDescription === undefined || detectedFor === key) {
+        if (loadedFor === '' || profilesFor !== `${receiverType}|${senderType}` || profiles.length === 0) {
+            return;
+        }
+        const key = `${loadedFor}|${profilesFor}`;
+        if (detectedFor === key) {
             return;
         }
         detectedFor = key;

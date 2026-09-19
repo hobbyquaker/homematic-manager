@@ -475,6 +475,50 @@ describe('the link paramset dialog', () => {
         });
     });
 
+    it('detects each link’s profile from its own values, even when they arrive late (B-58)', async () => {
+        // Two buttons of one remote linked to the same actuator channel: same sender and receiver
+        // types, so the same profile list, but each link follows another profile. HmIP writes no
+        // UI_HINT, so the profile is detected from the values alone.
+        const first = {SENDER: '0001D8A9B7C6D5:1', RECEIVER: '000A1B2C3D4E5F:4', NAME: '', DESCRIPTION: '', FLAGS: 0};
+        const second = {SENDER: '0001D8A9B7C6D5:2', RECEIVER: '000A1B2C3D4E5F:4', NAME: '', DESCRIPTION: '', FLAGS: 0};
+        transport.respond('links.list', (interfaceName) => (interfaceName === 'HmIP-RF' ? [first, second] : []));
+        let releaseSecond: () => void = () => undefined;
+        transport.respond('paramset.get', async (_interfaceName, address, paramset) => {
+            if (address !== '000A1B2C3D4E5F:4') {
+                return {LONG_PRESS_TIME: 0.4};
+            }
+            if (paramset === second.SENDER) {
+                // The second link's values answer only when the test says so.
+                await new Promise<void>((resolve) => {
+                    releaseSecond = resolve;
+                });
+                return {SHORT_ACTION_TYPE: 1, SHORT_ON_LEVEL: 1, SHORT_ON_TIME: 60};
+            }
+            return {SHORT_ACTION_TYPE: 1, SHORT_ON_LEVEL: 1, SHORT_ON_TIME: 111_600};
+        });
+        const {stores} = await mountApp({transport, hash: '#/HmIP-RF/links'});
+        await waitFor(() => {
+            expect(stores.links.of('HmIP-RF').length).toBe(2);
+        });
+        const select = (): HTMLSelectElement => screen.getByTestId<HTMLSelectElement>('link-profile');
+
+        await fireEvent.dblClick(document.querySelector(`[data-row-id="${first.SENDER}->${first.RECEIVER}"]`)!);
+        await waitFor(() => {
+            expect(select().value).toBe('1');
+        });
+        await fireEvent.click(screen.getByTestId('link-paramset-dialog').querySelector('.hmm-dialog-close')!);
+
+        await fireEvent.dblClick(document.querySelector(`[data-row-id="${second.SENDER}->${second.RECEIVER}"]`)!);
+        // Not the first link's profile while the second link's values are still on their way.
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        expect(screen.queryByTestId<HTMLSelectElement>('link-profile')?.value).not.toBe('1');
+        releaseSecond();
+        await waitFor(() => {
+            expect(select().value).toBe('2');
+        });
+        expect(screen.queryByTestId('param-SHORT_ON_TIME')).toBeTruthy();
+    });
+
     it('keeps the sender paramset collapsed until it is asked for, as 2.7 did', async () => {
         await openLink();
         expect(screen.queryByTestId('link-sender-params')).toBeNull();

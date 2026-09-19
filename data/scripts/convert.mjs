@@ -22,10 +22,20 @@
  */
 import {existsSync, readFileSync, readdirSync} from 'node:fs';
 import path from 'node:path';
+import {gunzipSync} from 'node:zlib';
 
 import {toConstraint} from './lib/constraints.mjs';
 import {hasLegacy, legacyEasymodesDir, legacyLocalization, legacyProfiles, legacyReceiverTypes} from './lib/legacy.mjs';
-import {distDir, readSources, readUpstreamJson, removeDir, sha256, sortKeys, upstreamDir} from './lib/paths.mjs';
+import {
+    dataDir,
+    distDir,
+    readSources,
+    readUpstreamJson,
+    removeDir,
+    sha256,
+    sortKeys,
+    upstreamDir,
+} from './lib/paths.mjs';
 import {CROSS_VALIDATION_MESSAGES, identifierKey, labelKey, mergeMap, valueKey} from './lib/translations.mjs';
 import {writeJson} from './lib/write-json.mjs';
 
@@ -39,6 +49,14 @@ const sources = readSources();
 const easymode = readUpstreamJson('easymode_extract.json.gz');
 const extract = readUpstreamJson('translation_extract.json.gz');
 const aliases = readUpstreamJson('profiles/_receiver_type_aliases.json');
+// task 62 (D-54): the CCU easy mode's forms, extracted from the WebUI by scripts/easymode-controls.mjs
+const easymodeControlsFile = path.join(dataDir, 'extracted', 'easymode_controls.json.gz');
+const easymodeControls = existsSync(easymodeControlsFile)
+    ? /** @type {{source: string, timeSelectors: Record<string, object[]>, receivers: Record<string, Record<string, Record<string, object[]>>>}} */ (
+          JSON.parse(gunzipSync(readFileSync(easymodeControlsFile)).toString('utf8'))
+      )
+    : undefined;
+let profilesWithControls = 0;
 const custom = Object.fromEntries(
     Object.keys(sources.openccuData.files)
         .filter((file) => file.startsWith('translation_custom/'))
@@ -211,12 +229,15 @@ for (const receiverType of receiverTypes) {
                 en: p?.description?.en || legacyText.en?.[id],
                 tr: legacyText.tr?.[id],
             });
+            const controls = easymodeControls?.receivers[receiverType]?.[senderType]?.[String(id)];
+            if (controls) profilesWithControls += 1;
             list.push({
                 id,
                 key,
                 name,
                 description,
                 params: convertParams(p?.params ?? e?.params ?? {}, where),
+                ...(controls ? {controls} : {}),
             });
             profileCount += 1;
         }
@@ -405,6 +426,14 @@ const manifestSources = [
         sha256: bundleHash((file) => file.startsWith('translation_custom/')),
     },
 ];
+if (easymodeControls) {
+    manifestSources.push({
+        name: 'webui/easymode-controls',
+        version: easymodeControls.source,
+        url: 'https://github.com/hobbyquaker/homematic-manager/blob/master/data/scripts/easymode-controls.mjs',
+        sha256: sha256(readFileSync(easymodeControlsFile)),
+    });
+}
 if (legacyFiles.length > 0) {
     manifestSources.push({
         name: 'homematic-manager/legacy-easymode-localization',
@@ -451,6 +480,12 @@ await write('receiver-type-aliases.json', sortKeys(aliases));
 await write('master-metadata.json', sortKeys(masterMetadata));
 await write('option-presets.json', sortKeys(optionPresets));
 await write('cross-validations.json', crossValidations);
+if (easymodeControls) {
+    await write('easymode-time-selectors.json', {
+        source: easymodeControls.source,
+        types: easymodeControls.timeSelectors,
+    });
+}
 for (const language of ['de', 'en']) {
     await write(`translations/${language}.json`, {
         language,
@@ -476,7 +511,8 @@ await write('manifest.json', manifest);
 
 console.log(
     `dist/: ${files} files, ${(bytes / 1024).toFixed(0)} KiB, ${receiverTypes.length} receiver types, ` +
-        `${profileCount} link profiles (${profilesFromEasymodeOnly} only in easymode_extract), ` +
+        `${profileCount} link profiles (${profilesFromEasymodeOnly} only in easymode_extract, ` +
+        `${profilesWithControls} with the CCU easy mode's form), ` +
         `${Object.keys(masterMetadata).length} MASTER metadata entries, ` +
         `${Object.keys(optionPresets).length} option presets, ${crossValidations.length} cross validations`,
 );

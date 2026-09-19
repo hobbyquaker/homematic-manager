@@ -107,7 +107,45 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Geschwindigkeit/Fahrzeit Pos. A", "en": "Speed/driving time posistion A"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Position A", "en": "Position A"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Geschwindigkeit/Fahrzeit Pos. B", "en": "Speed/driving time position. A"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Position B", "en": "Position B"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegelbegrenzung Position A", "en": "Level limitation position A"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVEL",
+            "label": {"de": "Pegelbegrenzung Position B", "en": "Level limitation position B"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -226,7 +264,45 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Geschwindigkeit/Fahrzeit Pos. A", "en": "Speed/driving time posistion A"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Position A", "en": "Position A"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Geschwindigkeit/Fahrzeit Pos. B", "en": "Speed/driving time position. A"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Position B", "en": "Position B"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegelbegrenzung Position A", "en": "Level limitation position A"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVEL",
+            "label": {"de": "Pegelbegrenzung Position B", "en": "Level limitation position B"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -348,7 +424,45 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Geschwindigkeit/Fahrzeit Pos. A", "en": "Speed/driving time posistion A"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Position A", "en": "Position A"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Geschwindigkeit/Fahrzeit Pos. B", "en": "Speed/driving time position. A"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Position B", "en": "Position B"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegelbegrenzung Position A", "en": "Level limitation position A"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVEL",
+            "label": {"de": "Pegelbegrenzung Position B", "en": "Level limitation position B"}
+          }
+        ]
       },
       {
         "id": 2,

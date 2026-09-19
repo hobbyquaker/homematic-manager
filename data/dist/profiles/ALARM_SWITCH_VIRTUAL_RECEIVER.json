@@ -41,7 +41,43 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Schaltmodus", "en": "Switch mode"},
+            "names": [
+              {"de": "Bewegung/Geneigt", "en": "Motion/Tilted"},
+              {"de": "Ruhe/Waagerecht", "en": "Standby/Horizontal"},
+              {"de": "Jede Änderung", "en": "Every change"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -76,7 +112,31 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Änderungssignal", "en": "Change signal"},
+            "names": [
+              {"de": "Bewegung/Geneigt", "en": "Motion/Tilted"},
+              {"de": "Ruhe/Waagerecht", "en": "Standby/Horizontal"},
+              {"de": "Jede Änderung", "en": "Every change"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -132,7 +192,21 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -211,7 +285,21 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 4, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -267,7 +355,33 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -323,7 +437,33 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 4, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          }
+        ]
       }
     ],
     "DISPLAY_LEVEL_INPUT_TRANSMITTER": [
@@ -390,7 +530,21 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 4, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -446,7 +600,33 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -502,7 +682,33 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 4, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          }
+        ]
       }
     ],
     "KEY_TRANSCEIVER": [
@@ -570,7 +776,21 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 4, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -629,7 +849,33 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -688,7 +934,33 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 4, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          }
+        ]
       }
     ],
     "MOTIONDETECTOR_TRANSCEIVER": [
@@ -729,7 +1001,21 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -782,7 +1068,21 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -864,7 +1164,21 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 4, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -920,7 +1234,33 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -976,7 +1316,33 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 4, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          }
+        ]
       }
     ],
     "MULTI_MODE_INPUT_TRANSMITTER_2": [
@@ -1019,7 +1385,15 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 4, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1051,7 +1425,21 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -1083,7 +1471,21 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 4, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          }
+        ]
       }
     ],
     "MULTI_MODE_INPUT_TRANSMITTER_3": [
@@ -1125,7 +1527,33 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1159,7 +1587,31 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4, 5],
+            "label": {"de": "Änderungssignal", "en": "Change signal"},
+            "names": [
+              {"de": "Öffnen", "en": "Opening"},
+              {"de": "Schließen", "en": "Closing"},
+              {"de": "Ändern", "en": "Changing"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       }
     ],
     "MULTI_MODE_INPUT_TRANSMITTER_4": [
@@ -1226,7 +1678,21 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 4, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1282,7 +1748,33 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -1338,7 +1830,33 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 4, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "LONG_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          }
+        ]
       }
     ],
     "PASSAGE_DETECTOR_COUNTER_TRANSMITTER": [
@@ -1378,7 +1896,31 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4, 5],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [
+              {"de": "rechts -> links", "en": "right -> left"},
+              {"de": "links -> rechts", "en": "left -> right"},
+              {"de": "links -> rechts oder rechts -> links", "en": "left -> right or right -> left"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1434,7 +1976,21 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1494,7 +2050,21 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1550,7 +2120,38 @@
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_COND_VALUE_LO",
+            "label": {"de": "Definition offen", "en": "Definition open"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1585,7 +2186,33 @@
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4, 5, 6, 7],
+            "label": {"de": "Änderungssignal", "en": "Change signal"},
+            "names": [
+              {"de": "Schließen", "en": "Closing"},
+              {"de": "Kippen", "en": "Tilt"},
+              {"de": "ganz Öffnen", "en": "Open wide"},
+              {"de": "Kippen oder ganz Öffnen", "en": "Ttilt or open wide"},
+              {"de": "jede Änderung", "en": "Every change"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       }
     ],
     "SHUTTER_CONTACT": [
@@ -1628,7 +2255,33 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Ausschaltdauer", "en": "Switch-off time (duration in status \"off\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1663,7 +2316,31 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4, 5],
+            "label": {"de": "Änderungssignal", "en": "Change signal"},
+            "names": [
+              {"de": "Öffnen", "en": "Opening"},
+              {"de": "Schließen", "en": "Closing"},
+              {"de": "Ändern", "en": "Changing"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       }
     ],
     "WATER_DETECTION_TRANSMITTER": [
@@ -1707,7 +2384,32 @@
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3, 4],
+            "label": {"de": "Schalten bei", "en": "Switching command in case of"},
+            "names": [
+              {"de": "Feuchtigkeit", "en": "Humidity"},
+              {"de": "Wasserstand", "en": "Water"},
+              {"de": "Feuchtigkeit oder Wasserstand", "en": "Humidity or water"},
+              {"de": "Trockenheit", "en": "Draught"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Einschaltverzögerung", "en": "Switch on delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,

@@ -21,7 +21,8 @@
         "params": {
           "LONG_ACT_HSV_COLOR_VALUE": {"kind": "list", "values": [253, 254, 255]},
           "SHORT_ACT_HSV_COLOR_VALUE": {"kind": "list", "values": [253, 254, 255]}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_ACT_HSV_COLOR_VALUE", "also": ["LONG_ACT_HSV_COLOR_VALUE"]}]
       },
       {
         "id": 2,
@@ -35,7 +36,11 @@
         "params": {
           "LONG_ACT_HSV_COLOR_VALUE": {"kind": "range", "min": 0, "max": 200, "default": 0},
           "SHORT_ACT_HSV_COLOR_VALUE": {"kind": "range", "min": 0, "max": 200, "default": 0}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_ACT_HSV_COLOR_VALUE"},
+          {"kind": "param", "param": "LONG_ACT_HSV_COLOR_VALUE"}
+        ]
       }
     ],
     "VIRTUAL_KEY": [
@@ -54,7 +59,8 @@
         "params": {
           "LONG_ACT_HSV_COLOR_VALUE": {"kind": "list", "values": [253, 254, 255]},
           "SHORT_ACT_HSV_COLOR_VALUE": {"kind": "list", "values": [253, 254, 255]}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_ACT_HSV_COLOR_VALUE", "also": ["LONG_ACT_HSV_COLOR_VALUE"]}]
       },
       {
         "id": 2,
@@ -64,7 +70,11 @@
         "params": {
           "LONG_ACT_HSV_COLOR_VALUE": {"kind": "range", "min": 0, "max": 200, "default": 0},
           "SHORT_ACT_HSV_COLOR_VALUE": {"kind": "range", "min": 0, "max": 200, "default": 0}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_ACT_HSV_COLOR_VALUE"},
+          {"kind": "param", "param": "LONG_ACT_HSV_COLOR_VALUE"}
+        ]
       }
     ]
   }

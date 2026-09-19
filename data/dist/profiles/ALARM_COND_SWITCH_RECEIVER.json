@@ -19,7 +19,15 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       }
     ],
     "DISPLAY_INPUT_TRANSMITTER": [
@@ -40,7 +48,15 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -71,7 +87,15 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -105,7 +129,15 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_SIGNAL_SELECTION_ACOUSTIC": {"kind": "range", "min": 0, "max": 17, "default": 1},
           "SHORT_SIGNAL_SELECTION_OPTICAL": {"kind": "range", "min": 0, "max": 7, "default": 4}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "alarmTimeMax10Min",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,

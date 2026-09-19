@@ -29,7 +29,22 @@
           "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 2},
           "SHORT_JT_RAMPON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Entscheidungswert", "en": "Decision value"},
+            "names": [
+              {
+                "de": "Unterer Grenzwert unterschritten / Oberer Grenzwert überschritten",
+                "en": "Fallen below lower threshold/upper threshold value exceeded"
+              },
+              {"de": "Oberer Grenzwert überschritten", "en": "Upper threshold exceeded"},
+              {"de": "Unterer Grenzwert unterschritten", "en": "Lower value falls below threshold"}
+            ]
+          }
+        ]
       },
       {
         "id": 2,
@@ -51,7 +66,22 @@
           "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_RAMPON": {"kind": "fixed", "value": 1},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Entscheidungswert", "en": "Decision value"},
+            "names": [
+              {
+                "de": "Unterer Grenzwert unterschritten / Oberer Grenzwert überschritten",
+                "en": "Fallen below lower threshold/upper threshold value exceeded"
+              },
+              {"de": "Oberer Grenzwert überschritten", "en": "Upper threshold exceeded"},
+              {"de": "Unterer Grenzwert unterschritten", "en": "Lower value falls below threshold"}
+            ]
+          }
+        ]
       },
       {
         "id": 3,
@@ -73,7 +103,22 @@
           "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 3},
           "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Entscheidungswert", "en": "Decision value"},
+            "names": [
+              {
+                "de": "Unterer Grenzwert unterschritten / Oberer Grenzwert überschritten",
+                "en": "Fallen below lower threshold/upper threshold value exceeded"
+              },
+              {"de": "Oberer Grenzwert überschritten", "en": "Upper threshold exceeded"},
+              {"de": "Unterer Grenzwert unterschritten", "en": "Lower value falls below threshold"}
+            ]
+          }
+        ]
       },
       {
         "id": 4,
@@ -95,7 +140,22 @@
           "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 4},
           "SHORT_JT_RAMPON": {"kind": "fixed", "value": 4},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Entscheidungswert", "en": "Decision value"},
+            "names": [
+              {
+                "de": "Unterer Grenzwert unterschritten / Oberer Grenzwert überschritten",
+                "en": "Fallen below lower threshold/upper threshold value exceeded"
+              },
+              {"de": "Oberer Grenzwert überschritten", "en": "Upper threshold exceeded"},
+              {"de": "Unterer Grenzwert unterschritten", "en": "Lower value falls below threshold"}
+            ]
+          }
+        ]
       }
     ],
     "DISPLAY_INPUT_TRANSMITTER": [
@@ -1089,7 +1149,18 @@
           "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 2},
           "SHORT_JT_RAMPON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Öffnen", "en": "Opening"},
+              {"de": "Schließen", "en": "Closing"}
+            ]
+          }
+        ]
       },
       {
         "id": 2,
@@ -1108,7 +1179,18 @@
           "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Offen - Tor auf / Zu - Tor zu", "en": "Open - garage door open / closed - garage door closed"},
+              {"de": "Offen - Tor zu / Zu - Tor auf", "en": "Open - garage door closed / closed - garage door open"}
+            ]
+          }
+        ]
       },
       {
         "id": 3,
@@ -1127,7 +1209,19 @@
           "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_RAMPON": {"kind": "fixed", "value": 1},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4, 5],
+            "label": {"de": "Änderungssignal", "en": "Change signal"},
+            "names": [
+              {"de": "Öffnen", "en": "Opening"},
+              {"de": "Schließen", "en": "Closing"},
+              {"de": "Ändern", "en": "Changing"}
+            ]
+          }
+        ]
       }
     ],
     "MULTI_MODE_INPUT_TRANSMITTER_4": [
@@ -1347,7 +1441,18 @@
           "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 2},
           "SHORT_JT_RAMPON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Öffnen", "en": "Opening"},
+              {"de": "Schließen", "en": "Closing"}
+            ]
+          }
+        ]
       },
       {
         "id": 2,
@@ -1369,7 +1474,18 @@
           "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 2},
           "SHORT_JT_RAMPON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Offen - Tor auf / Zu - Tor zu", "en": "Open - garage door open / closed - garage door closed"},
+              {"de": "Offen - Tor zu / Zu - Tor auf", "en": "Open - garage door closed / closed - garage door open"}
+            ]
+          }
+        ]
       },
       {
         "id": 3,
@@ -1391,7 +1507,19 @@
           "SHORT_JT_RAMPOFF": {"kind": "fixed", "value": 2},
           "SHORT_JT_RAMPON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4, 5],
+            "label": {"de": "Änderungssignal", "en": "Change signal"},
+            "names": [
+              {"de": "Öffnen", "en": "Opening"},
+              {"de": "Schließen", "en": "Closing"},
+              {"de": "Ändern", "en": "Changing"}
+            ]
+          }
+        ]
       }
     ],
     "SWITCH_TRANSCEIVER": [

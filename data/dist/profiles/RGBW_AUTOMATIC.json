@@ -24,7 +24,13 @@
           "SHORT_ACT_COLOR_PROGRAM": {"kind": "fixed", "value": 0},
           "SHORT_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
           "SHORT_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_ACT_MIN_BOARDER"},
+          {"kind": "param", "param": "SHORT_ACT_MAX_BOARDER"},
+          {"kind": "param", "param": "LONG_ACT_MIN_BOARDER"},
+          {"kind": "param", "param": "LONG_ACT_MAX_BOARDER"}
+        ]
       },
       {
         "id": 2,
@@ -41,7 +47,13 @@
           "SHORT_ACT_COLOR_PROGRAM": {"kind": "fixed", "value": 2},
           "SHORT_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
           "SHORT_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_ACT_MIN_BOARDER"},
+          {"kind": "param", "param": "SHORT_ACT_MAX_BOARDER"},
+          {"kind": "param", "param": "LONG_ACT_MIN_BOARDER"},
+          {"kind": "param", "param": "LONG_ACT_MAX_BOARDER"}
+        ]
       },
       {
         "id": 3,
@@ -58,7 +70,15 @@
           "SHORT_ACT_COLOR_PROGRAM": {"kind": "range", "min": 0, "max": 6, "default": 0},
           "SHORT_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
           "SHORT_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_ACT_COLOR_PROGRAM"},
+          {"kind": "param", "param": "SHORT_ACT_MIN_BOARDER"},
+          {"kind": "param", "param": "SHORT_ACT_MAX_BOARDER"},
+          {"kind": "param", "param": "LONG_ACT_COLOR_PROGRAM"},
+          {"kind": "param", "param": "LONG_ACT_MIN_BOARDER"},
+          {"kind": "param", "param": "LONG_ACT_MAX_BOARDER"}
+        ]
       }
     ],
     "VIRTUAL_KEY": [
@@ -81,7 +101,13 @@
           "SHORT_ACT_COLOR_PROGRAM": {"kind": "fixed", "value": 0},
           "SHORT_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
           "SHORT_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_ACT_MIN_BOARDER"},
+          {"kind": "param", "param": "SHORT_ACT_MAX_BOARDER"},
+          {"kind": "param", "param": "LONG_ACT_MIN_BOARDER"},
+          {"kind": "param", "param": "LONG_ACT_MAX_BOARDER"}
+        ]
       },
       {
         "id": 2,
@@ -95,7 +121,13 @@
           "SHORT_ACT_COLOR_PROGRAM": {"kind": "fixed", "value": 2},
           "SHORT_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
           "SHORT_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_ACT_MIN_BOARDER"},
+          {"kind": "param", "param": "SHORT_ACT_MAX_BOARDER"},
+          {"kind": "param", "param": "LONG_ACT_MIN_BOARDER"},
+          {"kind": "param", "param": "LONG_ACT_MAX_BOARDER"}
+        ]
       },
       {
         "id": 3,
@@ -109,7 +141,15 @@
           "SHORT_ACT_COLOR_PROGRAM": {"kind": "range", "min": 0, "max": 6, "default": 0},
           "SHORT_ACT_MAX_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0},
           "SHORT_ACT_MIN_BOARDER": {"kind": "range", "min": 0, "max": 255, "default": 0}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_ACT_COLOR_PROGRAM"},
+          {"kind": "param", "param": "SHORT_ACT_MIN_BOARDER"},
+          {"kind": "param", "param": "SHORT_ACT_MAX_BOARDER"},
+          {"kind": "param", "param": "LONG_ACT_COLOR_PROGRAM"},
+          {"kind": "param", "param": "LONG_ACT_MIN_BOARDER"},
+          {"kind": "param", "param": "LONG_ACT_MAX_BOARDER"}
+        ]
       }
     ]
   },

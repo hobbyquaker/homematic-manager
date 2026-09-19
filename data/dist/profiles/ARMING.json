@@ -55,7 +55,23 @@
           "SHORT_ON_LEVEL": {"kind": "fixed", "value": 2},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "also": ["LONG_ONDELAY_TIME"],
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -103,7 +119,23 @@
           "SHORT_ON_LEVEL": {"kind": "fixed", "value": 2},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "also": ["LONG_OFFDELAY_TIME"],
+            "option": "DELAY",
+            "label": {"de": "Ausschaltverzögerung", "en": "Off delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"aus\"", "en": "Duration for status \"off\""}
+          }
+        ]
       },
       {
         "id": 3,
@@ -151,7 +183,37 @@
           "SHORT_ON_LEVEL": {"kind": "fixed", "value": 2},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "also": ["LONG_ONDELAY_TIME"],
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "also": ["LONG_OFFDELAY_TIME"],
+            "option": "DELAY",
+            "label": {"de": "Ausschaltverzögerung", "en": "Off delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"aus\"", "en": "Duration for status \"off\""}
+          }
+        ]
       }
     ],
     "ROTARY_HANDLE_SENSOR": [
@@ -182,7 +244,31 @@
           "SHORT_ON_LEVEL": {"kind": "fixed", "value": 2},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Öffnen - scharf", "en": "Opening - armed"},
+              {"de": "Schließen - scharf", "en": "Closing - armed"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "SHORT_ON_LEVEL", "label": {"de": "Modus", "en": "Mode"}}
+        ]
       }
     ],
     "SHUTTER_CONTACT": [
@@ -214,7 +300,31 @@
           "SHORT_ON_LEVEL": {"kind": "fixed", "value": 2},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Öffnen - scharf", "en": "Opening - armed"},
+              {"de": "Schließen - scharf", "en": "Closing - armed"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "SHORT_ON_LEVEL", "label": {"de": "Modus", "en": "Mode"}}
+        ]
       }
     ]
   },

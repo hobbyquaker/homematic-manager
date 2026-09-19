@@ -54,7 +54,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -101,7 +115,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -148,7 +176,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -195,7 +249,60 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -242,7 +349,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       }
     ],
     "COND_SWITCH_TRANSMITTER": [
@@ -298,7 +431,34 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Entscheidungswert", "en": "Decision value"},
+            "names": [
+              {"de": "Oberer Grenzwert überschritten", "en": "Upper threshold exceeded"},
+              {"de": "Unterer Grenzwert unterschritten", "en": "Lower value falls below threshold"},
+              {
+                "de": "Unterer Grenzwert unter- / oberer Grenzwert überschritten",
+                "en": "Lower threshold value/upper threshold value exceeded"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -345,7 +505,34 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Entscheidungswert", "en": "Decision value"},
+            "names": [
+              {"de": "Oberer Grenzwert überschritten", "en": "Upper threshold exceeded"},
+              {"de": "Unterer Grenzwert unterschritten", "en": "Lower value falls below threshold"},
+              {
+                "de": "Unterer Grenzwert unter- / oberer Grenzwert überschritten",
+                "en": "Lower threshold value/upper threshold value exceeded"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -392,7 +579,46 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Entscheidungswert", "en": "Decision value"},
+            "names": [
+              {"de": "Oberer Grenzwert überschritten", "en": "Upper threshold exceeded"},
+              {"de": "Unterer Grenzwert unterschritten", "en": "Lower value falls below threshold"},
+              {
+                "de": "Unterer Grenzwert unter- / oberer Grenzwert überschritten",
+                "en": "Lower threshold value/upper threshold value exceeded"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -439,7 +665,73 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Entscheidungswert", "en": "Decision value"},
+            "names": [
+              {"de": "Oberer Grenzwert überschritten", "en": "Upper threshold exceeded"},
+              {"de": "Unterer Grenzwert unterschritten", "en": "Lower value falls below threshold"},
+              {
+                "de": "Unterer Grenzwert unter- / oberer Grenzwert überschritten",
+                "en": "Lower threshold value/upper threshold value exceeded"
+              }
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "moved up/down in toggle mode"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "COND_SWITCH_TRANSMITTER_BRIGHTNESS": [
@@ -490,7 +782,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
+              {
+                "de": "Unterschreiten der unteren Helligkeitsschwelle",
+                "en": "Value falls below lower brightness threshold"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -532,7 +850,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
+              {
+                "de": "Unterschreiten der unteren Helligkeitsschwelle",
+                "en": "Value falls below lower brightness threshold"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -574,7 +918,45 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
+              {
+                "de": "Unterschreiten der unteren Helligkeitsschwelle",
+                "en": "Value falls below lower brightness threshold"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -616,7 +998,72 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [4, 5],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {
+                "de": "Unterschreiten der unteren Helligkeitsschwelle",
+                "en": "Value falls below lower brightness threshold"
+              },
+              {"de": "%DCberschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"}
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "moved up/down in toggle mode"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "COND_SWITCH_TRANSMITTER_HUMIDITY": [
@@ -667,7 +1114,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten der oberen Feuchtigkeitsschwelle"},
+              {
+                "de": "Unterschreiten der unteren Feuchtigkeitsschwelle",
+                "en": "Value falls below lower humidity threshold"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -709,7 +1182,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten der oberen Feuchtigkeitsschwelle"},
+              {
+                "de": "Unterschreiten der unteren Feuchtigkeitsschwelle",
+                "en": "Value falls below lower humidity threshold"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -751,7 +1250,45 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten der oberen Feuchtigkeitsschwelle"},
+              {
+                "de": "Unterschreiten der unteren Feuchtigkeitsschwelle",
+                "en": "Value falls below lower humidity threshold"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -793,7 +1330,72 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [4, 5],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {
+                "de": "Unterschreiten der unteren Feuchtigkeitsschwelle",
+                "en": "Value falls below lower humidity threshold"
+              },
+              {"de": "%DCberschreiten der oberen Feuchtigkeitsschwelle", "en": "Reaching the upper humidity threshold"}
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "moved up/down in toggle mode"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "COND_SWITCH_TRANSMITTER_PARTICULATE_MATTER": [
@@ -844,7 +1446,36 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {
+                "de": "%DCberschreiten der oberen Feinstaubkonzentration",
+                "en": "Reaching the upper particulate matter threshold"
+              },
+              {
+                "de": "Unterschreiten der unteren Feinstaubkonzentration",
+                "en": "Value falls below lower particulate matter threshold"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -886,7 +1517,36 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {
+                "de": "%DCberschreiten der oberen Feinstaubkonzentration",
+                "en": "Reaching the upper particulate matter threshold"
+              },
+              {
+                "de": "Unterschreiten der unteren Feinstaubkonzentration",
+                "en": "Value falls below lower particulate matter threshold"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -928,7 +1588,48 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {
+                "de": "%DCberschreiten der oberen Feinstaubkonzentration",
+                "en": "Reaching the upper particulate matter threshold"
+              },
+              {
+                "de": "Unterschreiten der unteren Feinstaubkonzentration",
+                "en": "Value falls below lower particulate matter threshold"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -970,7 +1671,75 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [4, 5],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {
+                "de": "Unterschreiten der unteren Feinstaubkonzentration",
+                "en": "Value falls below lower particulate matter threshold"
+              },
+              {
+                "de": "%DCberschreiten der oberen Feinstaubkonzentration",
+                "en": "Reaching the upper particulate matter threshold"
+              }
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "moved up/down in toggle mode"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "COND_SWITCH_TRANSMITTER_RAIN_DROP": [
@@ -1021,7 +1790,30 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "Trockenheit", "en": "Draught"},
+              {"de": "Regen", "en": "Rain"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1063,7 +1855,30 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "Trockenheit", "en": "Draught"},
+              {"de": "Regen", "en": "Rain"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -1105,7 +1920,42 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "Trockenheit", "en": "Draught"},
+              {"de": "Regen", "en": "Rain"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -1147,7 +1997,66 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [4, 5],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [{"de": "Regen", "en": "Rain'"}, {"de": "Trockenheit"}]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "moved up/down in toggle mode"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "COND_SWITCH_TRANSMITTER_RAIN_QUANTITY": [
@@ -1198,7 +2107,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1240,7 +2163,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -1282,7 +2219,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -1324,7 +2287,60 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "moved up/down in toggle mode"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "COND_SWITCH_TRANSMITTER_TEMPERATURE": [
@@ -1375,7 +2391,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
+              {
+                "de": "Unterschreiten der unteren Temperaturschwelle",
+                "en": "Value falls below lower temperature threshold"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1417,7 +2459,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
+              {
+                "de": "Unterschreiten der unteren Temperaturschwelle",
+                "en": "Value falls below lower temperature threshold"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -1459,7 +2527,45 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
+              {
+                "de": "Unterschreiten der unteren Temperaturschwelle",
+                "en": "Value falls below lower temperature threshold"
+              }
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -1501,7 +2607,72 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [4, 5],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {
+                "de": "Unterschreiten der unteren Temperaturschwelle",
+                "en": "Value falls below lower temperature threshold"
+              },
+              {"de": "%DCberschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"}
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "moved up/down in toggle mode"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "COND_SWITCH_TRANSMITTER_WIND_DIRECTION": [
@@ -1552,7 +2723,30 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten des oberen Wertes", "en": "Reaching the upper value"},
+              {"de": "Unterschreiten des unteren Wertes", "en": "Reaching the lower value"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1594,7 +2788,30 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten des oberen Wertes", "en": "Reaching the upper value"},
+              {"de": "Unterschreiten des unteren Wertes", "en": "Reaching the lower value"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -1636,7 +2853,42 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten des oberen Wertes", "en": "Reaching the upper value"},
+              {"de": "Unterschreiten des unteren Wertes", "en": "Reaching the lower value"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -1678,7 +2930,69 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [4, 5],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "Unterschreiten des unteren Wertes", "en": "Reaching the lower value"},
+              {"de": "%DCberschreiten des oberen Wertes", "en": "Reaching the upper value"}
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "moved up/down in toggle mode"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "COND_SWITCH_TRANSMITTER_WIND_SPEED": [
@@ -1729,7 +3043,30 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshold"},
+              {"de": "Unterschreiten der unteren Windschwelle", "en": "Value falls below lower wind threshold"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1771,7 +3108,30 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshold"},
+              {"de": "Unterschreiten der unteren Windschwelle", "en": "Value falls below lower wind threshold"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -1813,7 +3173,42 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "%DCberschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshold"},
+              {"de": "Unterschreiten der unteren Windschwelle", "en": "Value falls below lower wind threshold"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -1855,7 +3250,69 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [4, 5],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "Unterschreiten der unteren Windschwelle", "en": "Value falls below lower wind threshold"},
+              {"de": "%DCberschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshold"}
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "moved up/down in toggle mode"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "DISPLAY_INPUT_TRANSMITTER": [
@@ -1943,7 +3400,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -2023,7 +3494,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -2103,7 +3588,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -2183,7 +3694,60 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -2263,7 +3827,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       }
     ],
     "DISPLAY_LEVEL_INPUT_TRANSMITTER": [
@@ -2351,7 +3941,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -2431,7 +4035,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -2511,7 +4129,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -2591,7 +4235,60 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -2671,7 +4368,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       }
     ],
     "KEY_TRANSCEIVER": [
@@ -2762,7 +4485,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -2845,7 +4582,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -2928,7 +4679,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -3011,7 +4788,60 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -3094,7 +4924,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       }
     ],
     "MOTIONDETECTOR_TRANSCEIVER": [
@@ -3182,7 +5038,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -3262,7 +5132,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -3342,7 +5226,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -3421,7 +5331,60 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "MOTIONDETECTOR_VIRTUAL_TRANSCEIVER": [
@@ -3509,7 +5472,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -3589,7 +5566,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -3669,7 +5660,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -3748,7 +5765,60 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "MULTI_MODE_INPUT_TRANSMITTER": [
@@ -3839,7 +5909,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -3919,7 +6003,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -3999,7 +6097,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -4079,7 +6203,60 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -4157,7 +6334,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       }
     ],
     "MULTI_MODE_INPUT_TRANSMITTER_2": [
@@ -4210,7 +6413,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -4254,7 +6471,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -4298,7 +6529,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "list", "values": [2, 1]}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -4342,7 +6599,72 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL_2",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Lamellenposition, wenn heruntergefahren", "en": "Slat position when in position down"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL_2",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Lamellenposition, wenn hochgefahren", "en": "Slat position when in position up"}
+          }
+        ]
       }
     ],
     "MULTI_MODE_INPUT_TRANSMITTER_3": [
@@ -4431,7 +6753,31 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Offen", "en": "Open"},
+              {"de": "Zu", "en": "Close"},
+              {"de": "Ändern", "en": "Change"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -4511,7 +6857,31 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Offen", "en": "Open"},
+              {"de": "Zu", "en": "Close"},
+              {"de": "Ändern", "en": "Change"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -4591,7 +6961,43 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7, 8],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Schließen", "en": "Close"},
+              {"de": "Öffnen", "en": "Open"},
+              {"de": "Ändern", "en": "Change"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -4671,7 +7077,82 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7, 8],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Schließen", "en": "Close"},
+              {"de": "Öffnen", "en": "Open"},
+              {"de": "Ändern", "en": "Change"}
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "moved up/down in toggle mode"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL_2",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Lamellenposition, wenn heruntergefahren", "en": "Slat position when in position down"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL_2",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Lamellenposition, wenn hochgefahren", "en": "Slat position when in position up"}
+          }
+        ]
       }
     ],
     "MULTI_MODE_INPUT_TRANSMITTER_4": [
@@ -4759,7 +7240,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -4839,7 +7334,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -4919,7 +7428,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -4999,7 +7534,60 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -5079,7 +7667,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       }
     ],
     "MULTI_MODE_INPUT_TRANSMITTER_5": [
@@ -5132,7 +7746,34 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Entscheidungswert", "en": "Decision value"},
+            "names": [
+              {"de": "Oberer Grenzwert überschritten", "en": "Upper threshold exceeded"},
+              {
+                "de": "Unterer Grenzwert überschritten / Oberer Grenzwert unterschritten",
+                "en": "Lower threshold value exceeded / Upper threshold value falls below threshold"
+              },
+              {"de": "Unterer Grenzwert überschritten", "en": "Lower threshold value exceeded"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -5176,7 +7817,34 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Entscheidungswert", "en": "Decision value"},
+            "names": [
+              {"de": "Oberer Grenzwert überschritten", "en": "Upper threshold exceeded"},
+              {
+                "de": "Unterer Grenzwert überschritten / Oberer Grenzwert unterschritten",
+                "en": "Lower threshold value exceeded / Upper threshold value falls below threshold"
+              },
+              {"de": "Unterer Grenzwert überschritten", "en": "Lower threshold value exceeded"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -5220,7 +7888,46 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Entscheidungswert", "en": "Decision value"},
+            "names": [
+              {"de": "Oberer Grenzwert überschritten", "en": "Upper threshold exceeded"},
+              {
+                "de": "Unterer Grenzwert überschritten / Oberer Grenzwert unterschritten",
+                "en": "Lower threshold value exceeded / Upper threshold value falls below threshold"
+              },
+              {"de": "Unterer Grenzwert überschritten", "en": "Lower threshold value exceeded"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -5264,7 +7971,73 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Entscheidungswert", "en": "Decision value"},
+            "names": [
+              {"de": "Oberer Grenzwert überschritten", "en": "Upper threshold exceeded"},
+              {
+                "de": "Unterer Grenzwert überschritten / Oberer Grenzwert unterschritten",
+                "en": "Lower threshold value exceeded / Upper threshold value falls below threshold"
+              },
+              {"de": "Unterer Grenzwert überschritten", "en": "Lower threshold value exceeded"}
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "moved up/down in toggle mode"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "PASSAGE_DETECTOR_COUNTER_TRANSMITTER": [
@@ -5315,7 +8088,49 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7, 8],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [
+              {"de": "rechts -> links", "en": "right -> left"},
+              {"de": "links -> rechts", "en": "left -> right"},
+              {"de": "links -> rechts oder rechts -> links", "en": "left -> right or right -> left"}
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [6],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [{"de": "rechts -> links", "en": "right -> left"}]
+          },
+          {
+            "kind": "subset",
+            "subsets": [7],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [{"de": "links -> rechts", "en": "left -> right"}]
+          },
+          {
+            "kind": "subset",
+            "subsets": [4],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [{"de": "rechts > links ein / links > rechts aus", "en": "right > left on / left > right off"}]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -5357,7 +8172,49 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7, 8],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [
+              {"de": "rechts -> links", "en": "right -> left"},
+              {"de": "links -> rechts", "en": "left -> right"},
+              {"de": "links -> rechts oder rechts -> links", "en": "left -> right or right -> left"}
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [6],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [{"de": "rechts -> links", "en": "right -> left"}]
+          },
+          {
+            "kind": "subset",
+            "subsets": [7],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [{"de": "links -> rechts", "en": "left -> right"}]
+          },
+          {
+            "kind": "subset",
+            "subsets": [4],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [{"de": "rechts > links ein / links > rechts aus", "en": "right > left on / left > right off"}]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -5399,7 +8256,61 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7, 8],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [
+              {"de": "rechts -> links", "en": "right -> left"},
+              {"de": "links -> rechts", "en": "left -> right"},
+              {"de": "links -> rechts oder rechts -> links", "en": "left -> right or right -> left"}
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [6],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [{"de": "rechts -> links", "en": "right -> left"}]
+          },
+          {
+            "kind": "subset",
+            "subsets": [7],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [{"de": "links -> rechts", "en": "left -> right"}]
+          },
+          {
+            "kind": "subset",
+            "subsets": [4],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [{"de": "rechts > links ein / links > rechts aus", "en": "right > left on / left > right off"}]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -5441,7 +8352,88 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7, 8],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [
+              {"de": "rechts -> links", "en": "right -> left"},
+              {"de": "links -> rechts", "en": "left -> right"},
+              {"de": "links -> rechts oder rechts -> links", "en": "left -> right or right -> left"}
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [6],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [{"de": "rechts -> links", "en": "right -> left"}]
+          },
+          {
+            "kind": "subset",
+            "subsets": [7],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [{"de": "links -> rechts", "en": "left -> right"}]
+          },
+          {
+            "kind": "subset",
+            "subsets": [4],
+            "label": {"de": "Entscheidungswert Durchgang", "en": "Decision value passage"},
+            "names": [{"de": "rechts > links ein / links > rechts aus", "en": "right > left on / left > right off"}]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "moved up/down in toggle mode"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -5506,7 +8498,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -5548,7 +8554,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -5590,7 +8610,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -5632,7 +8678,60 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up/down in toggle mode"},
+              {"de": "heruntergefahren"},
+              {"de": "hoch- / heruntergefahren im Wechsel"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -5702,7 +8801,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -5749,7 +8862,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -5796,7 +8923,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -5843,7 +8996,60 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -5913,7 +9119,31 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Schaltbefehl", "en": "Switch command"},
+            "names": [
+              {"de": "Regen", "en": "Rain"},
+              {"de": "Trockenheit", "en": "Dry conditions"},
+              {"de": "Änderung", "en": "Change"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -5960,7 +9190,31 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Schaltbefehl", "en": "Switch command"},
+            "names": [
+              {"de": "Regen", "en": "Rain"},
+              {"de": "Trockenheit", "en": "Dry conditions"},
+              {"de": "Änderung", "en": "Change"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -6007,7 +9261,43 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7, 8],
+            "label": {"de": "Schaltbefehl", "en": "Switch command"},
+            "names": [
+              {"de": "Trockenheit", "en": "Dry conditions"},
+              {"de": "Regen", "en": "Rain"},
+              {"de": "Änderung", "en": "Change"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -6054,7 +9344,70 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7, 8],
+            "label": {"de": "Schaltbefehl", "en": "Switch command"},
+            "names": [
+              {"de": "Trockenheit", "en": "Dry conditions"},
+              {"de": "Regen", "en": "Rain"},
+              {"de": "Änderung", "en": "Change"}
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -6156,7 +9509,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -6236,7 +9603,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -6316,7 +9697,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -6396,7 +9803,60 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -6476,7 +9936,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 6,
@@ -6578,7 +10064,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -6658,7 +10158,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -6738,7 +10252,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -6818,7 +10358,60 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -6898,7 +10491,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 6,
@@ -6968,7 +10587,27 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [{"de": "Offen"}, {"de": "Zu"}, {"de": "Ändern"}]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -7015,7 +10654,27 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [{"de": "Offen"}, {"de": "Zu"}, {"de": "Ändern"}]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -7062,7 +10721,39 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7, 8],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [{"de": "Schließen"}, {"de": "Öffnen"}, {"de": "Ändern"}]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -7109,7 +10800,66 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7, 8],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [{"de": "Schließen"}, {"de": "Öffnen"}, {"de": "Ändern"}]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "SHUTTER_CONTACT": [
@@ -7201,7 +10951,27 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [{"de": "Offen"}, {"de": "Zu"}, {"de": "Ändern"}]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -7284,7 +11054,27 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [9, 10, 8],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [{"de": "Offen"}, {"de": "Zu"}, {"de": "Ändern"}]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -7367,7 +11157,39 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7, 8],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [{"de": "Schließen"}, {"de": "Öffnen"}, {"de": "Ändern"}]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -7450,7 +11272,66 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7, 8],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [{"de": "Schließen"}, {"de": "Öffnen"}, {"de": "Ändern"}]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "SWITCH_TRANSCEIVER": [
@@ -7540,7 +11421,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -7622,7 +11517,21 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -7704,7 +11613,33 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -7786,7 +11721,56 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [{"de": "hochgefahren"}, {"de": "heruntergefahren"}, {"de": "hoch- / heruntergefahren im Wechsel"}]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ],
     "WATER_DETECTION_TRANSMITTER": [
@@ -7842,7 +11826,32 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [4, 5, 6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "Feuchtigkeit", "en": "Humidity"},
+              {"de": "Wasserstand", "en": "Water"},
+              {"de": "Feuchtigkeit oder Wasserstand", "en": "Humidity or water"},
+              {"de": "Trockenheit", "en": "Draught"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -7889,7 +11898,32 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [4, 5, 6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "Feuchtigkeit", "en": "Humidity"},
+              {"de": "Wasserstand", "en": "Water"},
+              {"de": "Feuchtigkeit oder Wasserstand", "en": "Humidity or water"},
+              {"de": "Trockenheit", "en": "Draught"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -7936,7 +11970,44 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [4, 5, 6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "Feuchtigkeit", "en": "Humidity"},
+              {"de": "Wasserstand", "en": "Water"},
+              {"de": "Feuchtigkeit oder Wasserstand", "en": "Humidity or water"},
+              {"de": "Trockenheit", "en": "Draught"}
+            ]
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -7983,7 +12054,71 @@
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 31},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [4, 5, 6, 7],
+            "label": {"de": "Schalten bei", "en": "Switching at"},
+            "names": [
+              {"de": "Feuchtigkeit", "en": "Humidity"},
+              {"de": "Wasserstand", "en": "Water"},
+              {"de": "Feuchtigkeit oder Wasserstand", "en": "Humidity or water"},
+              {"de": "Trockenheit", "en": "Draught"}
+            ]
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Hochgefahren-Position", "en": "Up position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "option": "BLIND_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration while in state \"up\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFF_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration while in state \"down\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+          }
+        ]
       }
     ]
   },

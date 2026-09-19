@@ -27,7 +27,8 @@
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_JT_OFF", "also": ["LONG_JT_OFF"]}]
       },
       {
         "id": 2,
@@ -107,7 +108,8 @@
           "SHORT_JT_ON": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_WP_OPTIONS", "also": ["LONG_WP_OPTIONS"]}]
       }
     ],
     "DISPLAY_INPUT_TRANSMITTER": [
@@ -140,7 +142,8 @@
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_JT_OFF", "also": ["LONG_JT_OFF"]}]
       },
       {
         "id": 2,
@@ -236,7 +239,8 @@
           "SHORT_JT_ON": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_WP_OPTIONS", "also": ["LONG_WP_OPTIONS"]}]
       }
     ],
     "DISPLAY_LEVEL_INPUT_TRANSMITTER": [
@@ -269,7 +273,8 @@
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_JT_OFF", "also": ["LONG_JT_OFF"]}]
       },
       {
         "id": 2,
@@ -365,7 +370,8 @@
           "SHORT_JT_ON": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_WP_OPTIONS", "also": ["LONG_WP_OPTIONS"]}]
       }
     ],
     "KEY_TRANSCEIVER": [
@@ -401,7 +407,8 @@
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_JT_OFF", "also": ["LONG_JT_OFF"]}]
       },
       {
         "id": 2,
@@ -509,7 +516,8 @@
           "SHORT_JT_ON": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_WP_OPTIONS", "also": ["LONG_WP_OPTIONS"]}]
       }
     ],
     "MULTI_MODE_INPUT_TRANSMITTER": [
@@ -545,7 +553,8 @@
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_JT_OFF", "also": ["LONG_JT_OFF"]}]
       },
       {
         "id": 2,
@@ -641,7 +650,8 @@
           "SHORT_JT_ON": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_WP_OPTIONS": {"kind": "list", "values": [0, 1, 2]}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_WP_OPTIONS", "also": ["LONG_WP_OPTIONS"]}]
       }
     ],
     "MULTI_MODE_INPUT_TRANSMITTER_2": [
@@ -674,7 +684,8 @@
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_WP_OPTIONS", "also": ["LONG_WP_OPTIONS"]}]
       },
       {
         "id": 2,
@@ -771,7 +782,8 @@
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_JT_OFF", "also": ["LONG_JT_OFF"]}]
       },
       {
         "id": 2,
@@ -815,7 +827,8 @@
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1},
           "SHORT_WP_OPTIONS": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [{"kind": "param", "param": "SHORT_JT_OFF", "also": ["LONG_JT_OFF"]}]
       },
       {
         "id": 2,

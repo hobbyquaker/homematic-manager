@@ -55,7 +55,23 @@
           "SHORT_ON_LEVEL_SIRPAN": {"kind": "fixed", "value": 200},
           "SHORT_ON_TIME_MODE_SIRPAN": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME_SIRPAN": {"kind": "fixed", "value": 120}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME_SIRPAN",
+            "also": ["LONG_ONDELAY_TIME_SIRPAN"],
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME_SIRPAN",
+            "also": ["LONG_ON_TIME_SIRPAN"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -103,7 +119,23 @@
           "SHORT_ON_LEVEL_SIRPAN": {"kind": "fixed", "value": 200},
           "SHORT_ON_TIME_MODE_SIRPAN": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME_SIRPAN": {"kind": "fixed", "value": 120}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME_SIRPAN",
+            "also": ["LONG_OFFDELAY_TIME_SIRPAN"],
+            "option": "DELAY",
+            "label": {"de": "Ausschaltverzögerung", "en": "Off delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME_SIRPAN",
+            "also": ["LONG_OFF_TIME_SIRPAN"],
+            "option": "LENGTH_OF_OFF",
+            "label": {"de": "Verweildauer im Zustand \"aus\"", "en": "Duration for status \"off\""}
+          }
+        ]
       },
       {
         "id": 3,
@@ -151,7 +183,37 @@
           "SHORT_ON_LEVEL_SIRPAN": {"kind": "fixed", "value": 200},
           "SHORT_ON_TIME_MODE_SIRPAN": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME_SIRPAN": {"kind": "fixed", "value": 120}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME_SIRPAN",
+            "also": ["LONG_ONDELAY_TIME_SIRPAN"],
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME_SIRPAN",
+            "also": ["LONG_ON_TIME_SIRPAN"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME_SIRPAN",
+            "also": ["LONG_OFFDELAY_TIME_SIRPAN"],
+            "option": "DELAY",
+            "label": {"de": "Ausschaltverzögerung", "en": "Off delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME_SIRPAN",
+            "also": ["LONG_OFF_TIME_SIRPAN"],
+            "option": "LENGTH_OF_OFF",
+            "label": {"de": "Verweildauer im Zustand \"aus\"", "en": "Duration for status \"off\""}
+          }
+        ]
       }
     ],
     "MOTION_DETECTOR": [
@@ -205,7 +267,21 @@
           "SHORT_ON_LEVEL_SIRPAN": {"kind": "fixed", "value": 200},
           "SHORT_ON_TIME_MODE_SIRPAN": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME_SIRPAN": {"kind": "fixed", "value": 120}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME_MODE_SIRPAN",
+            "label": {"de": "Art der Verweildauer", "en": "Type of duration"}
+          },
+          {"kind": "param", "param": "SHORT_ON_TIME_SIRPAN", "option": "LENGTH_OF_STAY"},
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME_SIRPAN",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -256,7 +332,30 @@
           "SHORT_ON_LEVEL_SIRPAN": {"kind": "fixed", "value": 200},
           "SHORT_ON_TIME_MODE_SIRPAN": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME_SIRPAN": {"kind": "fixed", "value": 120}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Offen - ein", "en": "Open - on"},
+              {"de": "Zu - ein", "en": "Closed - on"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME_SIRPAN",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME_SIRPAN",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -285,7 +384,31 @@
           "SHORT_ON_LEVEL_SIRPAN": {"kind": "fixed", "value": 200},
           "SHORT_ON_TIME_MODE_SIRPAN": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME_SIRPAN": {"kind": "fixed", "value": 120}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4, 5],
+            "label": {"de": "Änderungssignal", "en": "Change signal"},
+            "names": [
+              {"de": "Öffnen", "en": "Open"},
+              {"de": "Schließen", "en": "Close"},
+              {"de": "Ändern", "en": "Change"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME_SIRPAN",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME_SIRPAN",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -314,7 +437,42 @@
           "SHORT_ON_LEVEL_SIRPAN": {"kind": "fixed", "value": 200},
           "SHORT_ON_TIME_MODE_SIRPAN": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME_SIRPAN": {"kind": "fixed", "value": 120}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Offen - ein", "en": "Open - on"},
+              {"de": "Zu - ein", "en": "Closed - off"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME_SIRPAN",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME_SIRPAN",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME_SIRPAN",
+            "option": "DELAY",
+            "label": {"de": "Ausschaltverzögerung", "en": "Off delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME_SIRPAN",
+            "option": "LENGTH_OF_OFF",
+            "label": {"de": "Verweildauer im Zustand \"aus\"", "en": "Duration for status \"off\""}
+          }
+        ]
       }
     ],
     "SHUTTER_CONTACT": [
@@ -353,7 +511,30 @@
           "SHORT_ON_LEVEL_SIRPAN": {"kind": "fixed", "value": 200},
           "SHORT_ON_TIME_MODE_SIRPAN": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME_SIRPAN": {"kind": "fixed", "value": 120}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Offen - ein", "en": "Open - on"},
+              {"de": "Zu - ein", "en": "Closed - on"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME_SIRPAN",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME_SIRPAN",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -383,7 +564,31 @@
           "SHORT_ON_LEVEL_SIRPAN": {"kind": "fixed", "value": 200},
           "SHORT_ON_TIME_MODE_SIRPAN": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME_SIRPAN": {"kind": "fixed", "value": 120}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4, 5],
+            "label": {"de": "Änderungssignal", "en": "Change signal"},
+            "names": [
+              {"de": "Öffnen", "en": "Open"},
+              {"de": "Schließen", "en": "Close"},
+              {"de": "Ändern", "en": "Change"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME_SIRPAN",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME_SIRPAN",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -413,7 +618,42 @@
           "SHORT_ON_LEVEL_SIRPAN": {"kind": "fixed", "value": 200},
           "SHORT_ON_TIME_MODE_SIRPAN": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME_SIRPAN": {"kind": "fixed", "value": 120}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [6, 7],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Offen - ein", "en": "Open - on"},
+              {"de": "Zu - ein", "en": "Closed - on"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME_SIRPAN",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME_SIRPAN",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME_SIRPAN",
+            "option": "DELAY",
+            "label": {"de": "Ausschaltverzögerung", "en": "Off delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME_SIRPAN",
+            "option": "LENGTH_OF_OFF",
+            "label": {"de": "Verweildauer im Zustand \"aus\"", "en": "Duration for status \"off\""}
+          }
+        ]
       }
     ],
     "VIRTUAL_KEY": [
@@ -469,7 +709,23 @@
           "SHORT_ON_LEVEL_SIRPAN": {"kind": "fixed", "value": 200},
           "SHORT_ON_TIME_MODE_SIRPAN": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME_SIRPAN": {"kind": "fixed", "value": 120}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME_SIRPAN",
+            "also": ["LONG_ONDELAY_TIME_SIRPAN"],
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME_SIRPAN",
+            "also": ["LONG_ON_TIME_SIRPAN"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -516,7 +772,23 @@
           "SHORT_ON_LEVEL_SIRPAN": {"kind": "fixed", "value": 200},
           "SHORT_ON_TIME_MODE_SIRPAN": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME_SIRPAN": {"kind": "fixed", "value": 120}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME_SIRPAN",
+            "also": ["LONG_OFFDELAY_TIME_SIRPAN"],
+            "option": "DELAY",
+            "label": {"de": "Ausschaltverzögerung", "en": "Off delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME_SIRPAN",
+            "also": ["LONG_OFF_TIME_SIRPAN"],
+            "option": "LENGTH_OF_OFF",
+            "label": {"de": "Verweildauer im Zustand \"aus\"", "en": "Duration for status \"off\""}
+          }
+        ]
       },
       {
         "id": 3,
@@ -563,7 +835,37 @@
           "SHORT_ON_LEVEL_SIRPAN": {"kind": "fixed", "value": 200},
           "SHORT_ON_TIME_MODE_SIRPAN": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME_SIRPAN": {"kind": "fixed", "value": 120}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME_SIRPAN",
+            "also": ["LONG_ONDELAY_TIME_SIRPAN"],
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME_SIRPAN",
+            "also": ["LONG_ON_TIME_SIRPAN"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME_SIRPAN",
+            "also": ["LONG_OFFDELAY_TIME_SIRPAN"],
+            "option": "DELAY",
+            "label": {"de": "Ausschaltverzögerung", "en": "Off delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME_SIRPAN",
+            "also": ["LONG_OFF_TIME_SIRPAN"],
+            "option": "LENGTH_OF_OFF",
+            "label": {"de": "Verweildauer im Zustand \"aus\"", "en": "Duration for status \"off\""}
+          }
+        ]
       }
     ]
   },

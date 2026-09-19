@@ -88,6 +88,7 @@ describe('dist layout', () => {
         expect(json).toContain('option-presets.json');
         expect(json).toContain('cross-validations.json');
         expect(json).toContain('device-icons.json');
+        expect(json).toContain('easymode-time-selectors.json');
         expect(json).toContain('translations/de.json');
         expect(json).toContain('translations/en.json');
         expect(json).toContain('translations/tr.json');
@@ -103,6 +104,7 @@ describe('dist layout', () => {
                     'option-presets.json',
                     'cross-validations.json',
                     'device-icons.json',
+                    'easymode-time-selectors.json',
                 ].includes(file),
         );
         expect(unexpected).toEqual([]);

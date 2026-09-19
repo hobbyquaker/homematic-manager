@@ -31,7 +31,21 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -55,7 +69,16 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_OFF_LEVEL", "label": {"de": "Aktion", "en": "Activity"}},
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       }
     ],
     "CONDITION_FREQUENCY": [
@@ -88,7 +111,21 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -112,7 +149,16 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_OFF_LEVEL", "label": {"de": "Aktion", "en": "Activity"}},
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       }
     ],
     "CONDITION_POWER": [
@@ -145,7 +191,21 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -169,7 +229,16 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_OFF_LEVEL", "label": {"de": "Aktion", "en": "Activity"}},
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       }
     ],
     "CONDITION_VOLTAGE": [
@@ -202,7 +271,21 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -226,7 +309,16 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_OFF_LEVEL", "label": {"de": "Aktion", "en": "Activity"}},
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       }
     ],
     "KEY": [
@@ -278,7 +370,23 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "also": ["LONG_ON_LEVEL"],
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "also": ["LONG_RAMPON_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -321,7 +429,22 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "also": ["LONG_OFF_LEVEL"],
+            "label": {"de": "Aktion", "en": "Activity"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "also": ["LONG_RAMPOFF_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -364,7 +487,36 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "also": ["LONG_ON_LEVEL"],
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "also": ["LONG_RAMPON_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "also": ["LONG_OFF_LEVEL"],
+            "label": {"de": "Aktion", "en": "Activity"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "also": ["LONG_RAMPOFF_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -407,7 +559,43 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 900},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "also": ["LONG_ON_LEVEL"],
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "also": ["LONG_RAMPON_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "WINDOW_OPEN_TIME",
+            "label": {"de": "Verweildauer im Zustand \"Gekippt\"", "en": "Duration for status \"Tilt\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "also": ["LONG_OFF_LEVEL"],
+            "label": {"de": "Aktion", "en": "Activity"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "also": ["LONG_RAMPOFF_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       }
     ],
     "MOTION_DETECTOR": [
@@ -442,7 +630,43 @@
           "SHORT_ON_TIME": {"kind": "range", "min": 0, "max": 65535, "default": 900},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "also": ["LONG_ON_LEVEL"],
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "also": ["LONG_RAMPON_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "WINDOW_OPEN_TIME",
+            "label": {"de": "Verweildauer im Zustand \"Gekippt\"", "en": "Duration for status \"Tilt\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "also": ["LONG_OFF_LEVEL"],
+            "label": {"de": "Aktion", "en": "Activity"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "also": ["LONG_RAMPOFF_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -487,7 +711,36 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "also": ["LONG_OFF_LEVEL"],
+            "label": {"de": "Aktion", "en": "Activity"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "also": ["LONG_ON_LEVEL"],
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "also": ["LONG_RAMPON_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "also": ["LONG_RAMPOFF_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -532,7 +785,44 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_COND_VALUE_LO", "label": {"de": "Lüften bei", "en": "Ventilation if"}},
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "also": ["LONG_OFF_LEVEL"],
+            "label": {"de": "Aktion", "en": "Activity"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "also": ["LONG_ON_LEVEL"],
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "also": ["LONG_RAMPON_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "also": ["LONG_RAMPOFF_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "WINDOW_OPEN_TIME",
+            "label": {"de": "Verweildauer im Zustand \"Gekippt\"", "en": "Duration for status \"Tilt\""}
+          }
+        ]
       },
       {
         "id": 2,
@@ -571,7 +861,22 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "also": ["LONG_OFF_LEVEL"],
+            "label": {"de": "Aktion", "en": "Activity"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "also": ["LONG_RAMPOFF_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -589,7 +894,23 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "also": ["LONG_ON_LEVEL"],
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "also": ["LONG_RAMPON_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -609,7 +930,36 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "also": ["LONG_OFF_LEVEL"],
+            "label": {"de": "Aktion", "en": "Activity"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "also": ["LONG_ON_LEVEL"],
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "also": ["LONG_RAMPON_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "also": ["LONG_RAMPOFF_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -629,7 +979,43 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 900},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "also": ["LONG_ON_LEVEL"],
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "also": ["LONG_RAMPON_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "WINDOW_OPEN_TIME",
+            "label": {"de": "Verweildauer im Zustand \"Gekippt\"", "en": "Duration for status \"Tilt\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "also": ["LONG_OFF_LEVEL"],
+            "label": {"de": "Aktion", "en": "Activity"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "also": ["LONG_RAMPOFF_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       }
     ],
     "TEMPLATE": [
@@ -691,7 +1077,23 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "also": ["LONG_ON_LEVEL"],
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "also": ["LONG_RAMPON_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -733,7 +1135,22 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "also": ["LONG_OFF_LEVEL"],
+            "label": {"de": "Aktion", "en": "Activity"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "also": ["LONG_RAMPOFF_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -775,7 +1192,36 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "also": ["LONG_ON_LEVEL"],
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "also": ["LONG_RAMPON_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "also": ["LONG_OFF_LEVEL"],
+            "label": {"de": "Aktion", "en": "Activity"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "also": ["LONG_RAMPOFF_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -817,7 +1263,43 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 900},
           "SHORT_RAMPOFF_SPEED": {"kind": "fixed", "value": 1},
           "SHORT_RAMPON_SPEED": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "also": ["LONG_ON_LEVEL"],
+            "option": "WINDOW_OPEN_LEVEL",
+            "label": {"de": "Kippen auf Kippweite", "en": "Tilt to tilt level"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_SPEED",
+            "also": ["LONG_RAMPON_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "WINDOW_OPEN_TIME",
+            "label": {"de": "Verweildauer im Zustand \"Gekippt\"", "en": "Duration for status \"Tilt\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "also": ["LONG_OFF_LEVEL"],
+            "label": {"de": "Aktion", "en": "Activity"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_SPEED",
+            "also": ["LONG_RAMPOFF_SPEED"],
+            "option": "WINDOW_RUNNING_SPEED",
+            "label": {"de": "Fahrgeschwindigkeit", "en": "Speed"}
+          }
+        ]
       }
     ]
   },

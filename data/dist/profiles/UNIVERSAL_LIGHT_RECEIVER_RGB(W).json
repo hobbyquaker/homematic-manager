@@ -14,65 +14,357 @@
         "key": "dimmer_on_brighter",
         "name": {"de": "Dimmer - ein / heller", "en": "Dimmer - on / brighter"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP",
+            "option": "DIM_STEPwoLastValue_5",
+            "requires": ["LONG_DIM_STEP"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 2,
         "key": "dimmer_off_darker",
         "name": {"de": "Dimmer - aus / dunkler", "en": "Dimmer - off / darker"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "also": ["LONG_OFFDELAY_BLINK"],
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 3,
         "key": "dimmer_on_off_b_d",
         "name": {"de": "Dimmer - ein / aus & heller / dunkler", "en": "Dimmer - on/off & brighter/darker"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 4,
         "key": "color_up",
         "name": {"de": "Farbwert (H) - hoch", "en": "Colour value (H) - up"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 5,
         "key": "color_down",
         "name": {"de": "Farbwert (H) - runter", "en": "Colour value (H) - down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 6,
         "key": "color_up_down",
         "name": {"de": "Farbwert (H) - hoch / runter", "en": "Colour value (H) - up/down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'ein'", "en": "Ramp time colour change in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'aus'", "en": "Ramp time colour change in status 'off'"}
+          }
+        ]
       },
       {
         "id": 7,
         "key": "saturation_up",
         "name": {"de": "Sättigung (S) - hoch", "en": "Saturation (S) - up"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'ein'", "en": "Saturation in status 'on'"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]}
+        ]
       },
       {
         "id": 8,
         "key": "saturation_down",
         "name": {"de": "Sättigung (S) - runter", "en": "Saturation (S) - down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'aus'", "en": "Saturation in status 'off'"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_SATURATION", "requires": ["LONG_DIM_STEP_SATURATION"]}
+        ]
       },
       {
         "id": 9,
         "key": "saturation_up_down",
         "name": {"de": "Sättigung (S) - hoch / runter", "en": "Saturation (S) - up/down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'ein'",
+              "en": "Ramp time of the change in status 'on'"
+            }
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'ein'", "en": "Saturation in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Verzögerung bis zur Rampe 'aus'", "en": "Delay until ramp 'off'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'aus'",
+              "en": "Ramp time of the change in status 'off'"
+            }
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'aus'", "en": "Saturation in status 'off'"}
+          }
+        ]
       },
-      {"id": 10, "key": "Effect", "name": {"de": "Effekt", "en": "Effect"}, "description": {}, "params": {}},
+      {
+        "id": 10,
+        "key": "Effect",
+        "name": {"de": "Effekt", "en": "Effect"},
+        "description": {},
+        "params": {},
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_0",
+            "label": {"de": "Helligkeit", "en": "Brightness"}
+          }
+        ]
+      },
       {
         "id": 11,
         "key": "not_active",
@@ -94,65 +386,357 @@
         "key": "dimmer_on_brighter",
         "name": {"de": "Dimmer - ein / heller", "en": "Dimmer - on / brighter"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP",
+            "option": "DIM_STEPwoLastValue_5",
+            "requires": ["LONG_DIM_STEP"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 2,
         "key": "dimmer_off_darker",
         "name": {"de": "Dimmer - aus / dunkler", "en": "Dimmer - off / darker"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "also": ["LONG_OFFDELAY_BLINK"],
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 3,
         "key": "dimmer_on_off_b_d",
         "name": {"de": "Dimmer - ein / aus & heller / dunkler", "en": "Dimmer - on/off & brighter/darker"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 4,
         "key": "color_up",
         "name": {"de": "Farbwert (H) - hoch", "en": "Colour value (H) - up"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 5,
         "key": "color_down",
         "name": {"de": "Farbwert (H) - runter", "en": "Colour value (H) - down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 6,
         "key": "color_up_down",
         "name": {"de": "Farbwert (H) - hoch / runter", "en": "Colour value (H) - up/down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'ein'", "en": "Ramp time colour change in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'aus'", "en": "Ramp time colour change in status 'off'"}
+          }
+        ]
       },
       {
         "id": 7,
         "key": "saturation_up",
         "name": {"de": "Sättigung (S) - hoch", "en": "Saturation (S) - up"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'ein'", "en": "Saturation in status 'on'"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]}
+        ]
       },
       {
         "id": 8,
         "key": "saturation_down",
         "name": {"de": "Sättigung (S) - runter", "en": "Saturation (S) - down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'aus'", "en": "Saturation in status 'off'"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_SATURATION", "requires": ["LONG_DIM_STEP_SATURATION"]}
+        ]
       },
       {
         "id": 9,
         "key": "saturation_up_down",
         "name": {"de": "Sättigung (S) - hoch / runter", "en": "Saturation (S) - up/down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'ein'",
+              "en": "Ramp time of the change in status 'on'"
+            }
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'ein'", "en": "Saturation in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Verzögerung bis zur Rampe 'aus'", "en": "Delay until ramp 'off'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'aus'",
+              "en": "Ramp time of the change in status 'off'"
+            }
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'aus'", "en": "Saturation in status 'off'"}
+          }
+        ]
       },
-      {"id": 10, "key": "Effect", "name": {"de": "Effekt", "en": "Effect"}, "description": {}, "params": {}},
+      {
+        "id": 10,
+        "key": "Effect",
+        "name": {"de": "Effekt", "en": "Effect"},
+        "description": {},
+        "params": {},
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_0",
+            "label": {"de": "Helligkeit", "en": "Brightness"}
+          }
+        ]
+      },
       {
         "id": 11,
         "key": "not_active",
@@ -294,7 +878,40 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP",
+            "option": "DIM_STEPwoLastValue_5",
+            "requires": ["LONG_DIM_STEP"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -420,7 +1037,34 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "fixed", "value": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "fixed", "value": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "also": ["LONG_OFFDELAY_BLINK"],
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -547,7 +1191,57 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -674,7 +1368,41 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -801,7 +1529,28 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 6,
@@ -928,7 +1677,34 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'ein'", "en": "Ramp time colour change in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'aus'", "en": "Ramp time colour change in status 'off'"}
+          }
+        ]
       },
       {
         "id": 7,
@@ -1055,7 +1831,28 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'ein'", "en": "Saturation in status 'on'"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]}
+        ]
       },
       {
         "id": 8,
@@ -1182,7 +1979,28 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'aus'", "en": "Saturation in status 'off'"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_SATURATION", "requires": ["LONG_DIM_STEP_SATURATION"]}
+        ]
       },
       {
         "id": 9,
@@ -1309,7 +2127,51 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'ein'",
+              "en": "Ramp time of the change in status 'on'"
+            }
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'ein'", "en": "Saturation in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Verzögerung bis zur Rampe 'aus'", "en": "Delay until ramp 'off'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'aus'",
+              "en": "Ramp time of the change in status 'off'"
+            }
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'aus'", "en": "Saturation in status 'off'"}
+          }
+        ]
       },
       {
         "id": 10,
@@ -1340,7 +2202,15 @@
           "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
           "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
           "SHORT_OUTPUT_BEHAVIOUR": {"kind": "range", "min": 0, "max": 20, "default": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_0",
+            "label": {"de": "Helligkeit", "en": "Brightness"}
+          }
+        ]
       },
       {
         "id": 11,
@@ -1369,65 +2239,357 @@
         "key": "dimmer_on_brighter",
         "name": {"de": "Dimmer - ein / heller", "en": "Dimmer - on / brighter"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP",
+            "option": "DIM_STEPwoLastValue_5",
+            "requires": ["LONG_DIM_STEP"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 2,
         "key": "dimmer_off_darker",
         "name": {"de": "Dimmer - aus / dunkler", "en": "Dimmer - off / darker"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "also": ["LONG_OFFDELAY_BLINK"],
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 3,
         "key": "dimmer_on_off_b_d",
         "name": {"de": "Dimmer - ein / aus & heller / dunkler", "en": "Dimmer - on/off & brighter/darker"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 4,
         "key": "color_up",
         "name": {"de": "Farbwert (H) - hoch", "en": "Colour value (H) - up"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 5,
         "key": "color_down",
         "name": {"de": "Farbwert (H) - runter", "en": "Colour value (H) - down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 6,
         "key": "color_up_down",
         "name": {"de": "Farbwert (H) - hoch / runter", "en": "Colour value (H) - up/down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'ein'", "en": "Ramp time colour change in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'aus'", "en": "Ramp time colour change in status 'off'"}
+          }
+        ]
       },
       {
         "id": 7,
         "key": "saturation_up",
         "name": {"de": "Sättigung (S) - hoch", "en": "Saturation (S) - up"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'ein'", "en": "Saturation in status 'on'"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]}
+        ]
       },
       {
         "id": 8,
         "key": "saturation_down",
         "name": {"de": "Sättigung (S) - runter", "en": "Saturation (S) - down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'aus'", "en": "Saturation in status 'off'"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_SATURATION", "requires": ["LONG_DIM_STEP_SATURATION"]}
+        ]
       },
       {
         "id": 9,
         "key": "saturation_up_down",
         "name": {"de": "Sättigung (S) - hoch / runter", "en": "Saturation (S) - up/down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'ein'",
+              "en": "Ramp time of the change in status 'on'"
+            }
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'ein'", "en": "Saturation in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Verzögerung bis zur Rampe 'aus'", "en": "Delay until ramp 'off'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'aus'",
+              "en": "Ramp time of the change in status 'off'"
+            }
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'aus'", "en": "Saturation in status 'off'"}
+          }
+        ]
       },
-      {"id": 10, "key": "Effect", "name": {"de": "Effekt", "en": "Effect"}, "description": {}, "params": {}},
+      {
+        "id": 10,
+        "key": "Effect",
+        "name": {"de": "Effekt", "en": "Effect"},
+        "description": {},
+        "params": {},
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_0",
+            "label": {"de": "Helligkeit", "en": "Brightness"}
+          }
+        ]
+      },
       {
         "id": 11,
         "key": "not_active",
@@ -1449,65 +2611,357 @@
         "key": "dimmer_on",
         "name": {"de": "Dimmer - ein", "en": "Dimmer - on"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP",
+            "option": "DIM_STEPwoLastValue_5",
+            "requires": ["LONG_DIM_STEP"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 2,
         "key": "dimmer_off",
         "name": {"de": "Dimmer - aus", "en": "Dimmer - off"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "also": ["LONG_OFFDELAY_BLINK"],
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 3,
         "key": "dimmer_on_off",
         "name": {"de": "Dimmer - ein / aus", "en": "Dimmer - on / off"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 4,
         "key": "color_a",
         "name": {"de": "Farbwert (H) - A", "en": "Colour value (H) - A"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 5,
         "key": "color_b",
         "name": {"de": "Farbwert (H) - B", "en": "Colour value (H) - B"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 6,
         "key": "color_a_b",
         "name": {"de": "Farbwert (H) - A / B", "en": "Colour value (H) - A / B"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'ein'", "en": "Ramp time colour change in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'aus'", "en": "Ramp time colour change in status 'off'"}
+          }
+        ]
       },
       {
         "id": 7,
         "key": "saturation_up",
         "name": {"de": "Sättigung (S) - hoch", "en": "Saturation (S) - up"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'ein'", "en": "Saturation in status 'on'"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]}
+        ]
       },
       {
         "id": 8,
         "key": "saturation_down",
         "name": {"de": "Sättigung (S) - runter", "en": "Saturation (S) - down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'aus'", "en": "Saturation in status 'off'"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_SATURATION", "requires": ["LONG_DIM_STEP_SATURATION"]}
+        ]
       },
       {
         "id": 9,
         "key": "saturation_up_down",
         "name": {"de": "Sättigung (S) - hoch / runter", "en": "Saturation (S) - up/down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'ein'",
+              "en": "Ramp time of the change in status 'on'"
+            }
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'ein'", "en": "Saturation in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Verzögerung bis zur Rampe 'aus'", "en": "Delay until ramp 'off'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'aus'",
+              "en": "Ramp time of the change in status 'off'"
+            }
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'aus'", "en": "Saturation in status 'off'"}
+          }
+        ]
       },
-      {"id": 10, "key": "Effect", "name": {"de": "Effekt", "en": "Effect"}, "description": {}, "params": {}},
+      {
+        "id": 10,
+        "key": "Effect",
+        "name": {"de": "Effekt", "en": "Effect"},
+        "description": {},
+        "params": {},
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_0",
+            "label": {"de": "Helligkeit", "en": "Brightness"}
+          }
+        ]
+      },
       {
         "id": 11,
         "key": "not_active",
@@ -1529,65 +2983,357 @@
         "key": "dimmer_on",
         "name": {"de": "Dimmer - ein", "en": "Dimmer - on"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP",
+            "option": "DIM_STEPwoLastValue_5",
+            "requires": ["LONG_DIM_STEP"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 2,
         "key": "dimmer_off",
         "name": {"de": "Dimmer - aus", "en": "Dimmer - off"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "also": ["LONG_OFFDELAY_BLINK"],
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 3,
         "key": "dimmer_on_off",
         "name": {"de": "Dimmer - ein / aus", "en": "Dimmer - on / off"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 4,
         "key": "color_a",
         "name": {"de": "Farbwert (H) - A", "en": "Colour value (H) - A"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 5,
         "key": "color_b",
         "name": {"de": "Farbwert (H) - B", "en": "Colour value (H) - B"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 6,
         "key": "color_a_b",
         "name": {"de": "Farbwert (H) - A / B", "en": "Colour value (H) - A / B"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'ein'", "en": "Ramp time colour change in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'aus'", "en": "Ramp time colour change in status 'off'"}
+          }
+        ]
       },
       {
         "id": 7,
         "key": "saturation_a",
         "name": {"de": "Sättigung (S) - A", "en": "Saturation (S) - A"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung A", "en": "Saturation A"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]}
+        ]
       },
       {
         "id": 8,
         "key": "saturation_b",
         "name": {"de": "Sättigung (S) - B", "en": "Saturation (S) - B"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung B", "en": "Saturation B"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_SATURATION", "requires": ["LONG_DIM_STEP_SATURATION"]}
+        ]
       },
       {
         "id": 9,
         "key": "saturation_a_b",
         "name": {"de": "Sättigung (S) - A / B", "en": "Saturation (S) - A / B"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'ein'",
+              "en": "Ramp time of the change in status 'on'"
+            }
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung A", "en": "Saturation A"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Verzögerung bis zur Rampe 'aus'", "en": "Delay until ramp 'off'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'aus'",
+              "en": "Ramp time of the change in status 'off'"
+            }
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung B", "en": "Saturation B"}
+          }
+        ]
       },
-      {"id": 10, "key": "Effect", "name": {"de": "Effekt", "en": "Effect"}, "description": {}, "params": {}},
+      {
+        "id": 10,
+        "key": "Effect",
+        "name": {"de": "Effekt", "en": "Effect"},
+        "description": {},
+        "params": {},
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_0",
+            "label": {"de": "Helligkeit", "en": "Brightness"}
+          }
+        ]
+      },
       {
         "id": 11,
         "key": "not_active",
@@ -1609,65 +3355,357 @@
         "key": "dimmer_on_brighter",
         "name": {"de": "Dimmer - ein / heller", "en": "Dimmer - on / brighter"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP",
+            "option": "DIM_STEPwoLastValue_5",
+            "requires": ["LONG_DIM_STEP"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 2,
         "key": "dimmer_off_darker",
         "name": {"de": "Dimmer - aus / dunkler", "en": "Dimmer - off / darker"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "also": ["LONG_OFFDELAY_BLINK"],
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 3,
         "key": "dimmer_on_off_b_d",
         "name": {"de": "Dimmer - ein / aus & heller / dunkler", "en": "Dimmer - on/off & brighter/darker"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MAX_LEVEL",
+            "option": "DIM_LEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Hochdimmen", "en": "Maximum dim level"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_MIN_LEVEL",
+            "option": "DIM_OFFLEVELwoLastValue",
+            "label": {"de": "Pegelbegrenzung beim Herunterdimmen", "en": "Minimum dim level"}
+          }
+        ]
       },
       {
         "id": 4,
         "key": "color_up",
         "name": {"de": "Farbwert (H) - hoch", "en": "Colour value (H) - up"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP", "requires": ["LONG_DIM_STEP"]},
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 5,
         "key": "color_down",
         "name": {"de": "Farbwert (H) - runter", "en": "Colour value (H) - down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "param",
+            "param": "LONG_DIM_STEP_HUE",
+            "option": "HUE_STEP",
+            "requires": ["LONG_DIM_STEP_HUE"],
+            "label": {"de": "Schrittweite", "en": "Step width"}
+          }
+        ]
       },
       {
         "id": 6,
         "key": "color_up_down",
         "name": {"de": "Farbwert (H) - hoch / runter", "en": "Colour value (H) - up/down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'ein'", "en": "Ramp time colour change in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]},
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'aus'", "en": "Ramp time colour change in status 'off'"}
+          }
+        ]
       },
       {
         "id": 7,
         "key": "saturation_up",
         "name": {"de": "Sättigung (S) - hoch", "en": "Saturation (S) - up"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'ein'", "en": "Saturation in status 'on'"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_HUE", "requires": ["LONG_DIM_STEP_HUE"]}
+        ]
       },
       {
         "id": 8,
         "key": "saturation_down",
         "name": {"de": "Sättigung (S) - runter", "en": "Saturation (S) - down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'aus'", "en": "Saturation in status 'off'"}
+          },
+          {"kind": "param", "param": "LONG_DIM_STEP_SATURATION", "requires": ["LONG_DIM_STEP_SATURATION"]}
+        ]
       },
       {
         "id": 9,
         "key": "saturation_up_down",
         "name": {"de": "Sättigung (S) - hoch / runter", "en": "Saturation (S) - up/down"},
         "description": {},
-        "params": {}
+        "params": {},
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'ein'",
+              "en": "Ramp time of the change in status 'on'"
+            }
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'ein'", "en": "Saturation in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Verzögerung bis zur Rampe 'aus'", "en": "Delay until ramp 'off'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'aus'",
+              "en": "Ramp time of the change in status 'off'"
+            }
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung im Zustand 'aus'", "en": "Saturation in status 'off'"}
+          }
+        ]
       },
-      {"id": 10, "key": "Effect", "name": {"de": "Effekt", "en": "Effect"}, "description": {}, "params": {}},
+      {
+        "id": 10,
+        "key": "Effect",
+        "name": {"de": "Effekt", "en": "Effect"},
+        "description": {},
+        "params": {},
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_0",
+            "label": {"de": "Helligkeit", "en": "Brightness"}
+          }
+        ]
+      },
       {
         "id": 11,
         "key": "not_active",
@@ -1809,7 +3847,27 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          }
+        ]
       },
       {
         "id": 2,
@@ -1935,7 +3993,27 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "fixed", "value": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "fixed", "value": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "also": ["LONG_OFFDELAY_BLINK"],
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -2062,7 +4140,44 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -2189,7 +4304,33 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          }
+        ]
       },
       {
         "id": 5,
@@ -2316,7 +4457,21 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel", "en": "Ramp time color change"}
+          }
+        ]
       },
       {
         "id": 6,
@@ -2443,7 +4598,33 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'ein'", "en": "Ramp time colour change in status 'on'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Ausschaltverzögerung", "en": "Switch off delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Farbwechsel in Zustand 'aus'", "en": "Ramp time colour change in status 'off'"}
+          }
+        ]
       },
       {
         "id": 7,
@@ -2570,7 +4751,27 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ONDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung A", "en": "Saturation A"}
+          }
+        ]
       },
       {
         "id": 8,
@@ -2697,7 +4898,27 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Sättigungwechselverzögerung", "en": "Saturation change delay"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {"de": "Rampenzeit Sättigungswechsel", "en": "Ramp time saturation change"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung B", "en": "Saturation B"}
+          }
+        ]
       },
       {
         "id": 9,
@@ -2824,7 +5045,51 @@
           "SHORT_RAMPON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_RAMPON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPON_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'ein'",
+              "en": "Ramp time of the change in status 'on'"
+            }
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung A", "en": "Saturation A"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_OFFDELAY_TIME",
+            "selector": "delay",
+            "label": {"de": "Verzögerung bis zur Rampe 'aus'", "en": "Delay until ramp 'off'"}
+          },
+          {
+            "kind": "time",
+            "prefix": "SHORT_RAMPOFF_TIME",
+            "selector": "rampOnOff",
+            "label": {
+              "de": "Rampenzeit des Wechsels in den Zustand 'aus'",
+              "en": "Ramp time of the change in status 'off'"
+            }
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_SATURATION",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Sättigung B", "en": "Saturation B"}
+          }
+        ]
       },
       {
         "id": 10,
@@ -2855,7 +5120,15 @@
           "SHORT_JT_RAMPON": {"kind": "fixed", "value": 3},
           "SHORT_ON_LEVEL": {"kind": "range", "min": 0, "max": 1, "default": 1},
           "SHORT_OUTPUT_BEHAVIOUR": {"kind": "range", "min": 0, "max": 20, "default": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_0",
+            "label": {"de": "Helligkeit", "en": "Brightness"}
+          }
+        ]
       },
       {
         "id": 11,

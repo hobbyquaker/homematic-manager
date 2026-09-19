@@ -22,7 +22,15 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 1},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -48,7 +56,15 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -83,7 +99,15 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 1},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -109,7 +133,15 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -144,7 +176,15 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 1},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -170,7 +210,15 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -205,7 +253,15 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 1},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -231,7 +287,15 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -266,7 +330,15 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 1},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -292,7 +364,15 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          }
+        ]
       },
       {
         "id": 4,

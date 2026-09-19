@@ -25,7 +25,24 @@
           "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
           "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "SHORT_TEMPERATURE_RC", "label": {"de": "Temperatur", "en": "Temperature"}},
+          {"kind": "param", "param": "LONG_CONTROL_MODE_RC"},
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "LONG_TEMPERATURE_RC", "label": {"de": "Temperatur", "en": "Temperature"}}
+        ]
       },
       {
         "id": 2,
@@ -61,7 +78,15 @@
           "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
           "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_TEMPERATURE_RC",
+            "also": ["LONG_TEMPERATURE_RC"],
+            "label": {"de": "Temperatur", "en": "Temperature"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -142,7 +167,24 @@
           "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
           "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "SHORT_TEMPERATURE_RC", "label": {"de": "Temperatur", "en": "Temperature"}},
+          {"kind": "param", "param": "LONG_CONTROL_MODE_RC"},
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "LONG_TEMPERATURE_RC", "label": {"de": "Temperatur", "en": "Temperature"}}
+        ]
       },
       {
         "id": 2,
@@ -178,7 +220,15 @@
           "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
           "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_TEMPERATURE_RC",
+            "also": ["LONG_TEMPERATURE_RC"],
+            "label": {"de": "Temperatur", "en": "Temperature"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -259,7 +309,24 @@
           "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
           "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "SHORT_TEMPERATURE_RC", "label": {"de": "Temperatur", "en": "Temperature"}},
+          {"kind": "param", "param": "LONG_CONTROL_MODE_RC"},
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "LONG_TEMPERATURE_RC", "label": {"de": "Temperatur", "en": "Temperature"}}
+        ]
       },
       {
         "id": 2,
@@ -301,7 +368,15 @@
           "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
           "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_TEMPERATURE_RC",
+            "also": ["LONG_TEMPERATURE_RC"],
+            "label": {"de": "Temperatur", "en": "Temperature"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -394,7 +469,24 @@
           "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
           "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "SHORT_TEMPERATURE_RC", "label": {"de": "Temperatur", "en": "Temperature"}},
+          {"kind": "param", "param": "LONG_CONTROL_MODE_RC"},
+          {
+            "kind": "time",
+            "prefix": "LONG_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "LONG_TEMPERATURE_RC", "label": {"de": "Temperatur", "en": "Temperature"}}
+        ]
       },
       {
         "id": 2,
@@ -430,7 +522,15 @@
           "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
           "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_TEMPERATURE_RC",
+            "also": ["LONG_TEMPERATURE_RC"],
+            "label": {"de": "Temperatur", "en": "Temperature"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -511,7 +611,16 @@
           "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
           "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
-        }
+        },
+        "controls": [
+          {
+            "kind": "time",
+            "prefix": "SHORT_ON_TIME",
+            "selector": "timeOnOff",
+            "label": {"de": "Einschaltdauer", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {"kind": "param", "param": "SHORT_TEMPERATURE_RC", "label": {"de": "Temperatur", "en": "Temperature"}}
+        ]
       },
       {
         "id": 2,
@@ -547,7 +656,15 @@
           "SHORT_ON_TIME_BASE": {"kind": "range", "min": 0, "max": 7, "default": 0},
           "SHORT_ON_TIME_FACTOR": {"kind": "range", "min": 0, "max": 31, "default": 0},
           "SHORT_TEMPERATURE_RC": {"kind": "range", "min": 5, "max": 30, "default": 17}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_TEMPERATURE_RC",
+            "also": ["LONG_TEMPERATURE_RC"],
+            "label": {"de": "Temperatur", "en": "Temperature"}
+          }
+        ]
       },
       {
         "id": 4,

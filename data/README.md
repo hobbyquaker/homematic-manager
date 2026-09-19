@@ -74,6 +74,19 @@ Three sources overlap, and they do not agree. The order below is what the conver
    string (D-15), and supplies the name key of the ten profiles that only exist in the profiles
    files.
 
+### The CCU easy mode's form of each profile (task 62, D-54)
+
+Neither source says which parameters the CCU's easy mode puts on a profile's form; that is only in
+the WebUI's `set_htmlParams` Tcl, which builds each form by hand. `scripts/easymode-controls.mjs`
+reads it out of a WebUI easymode tree (`/www/config/easymodes`, copied from a CCU or OpenCCU) into
+the committed `extracted/easymode_controls.json.gz`, and the converter adds it to each profile as
+`controls`: the form's controls in the WebUI's order - a time selector over a `*_TIME_BASE` /
+`*_TIME_FACTOR` pair with its preset type, a combo box with its option set, a subset choice - with
+the WebUI's own row label where it could be resolved and the parameters an `info exists` branch asks
+for (`requires`). The time selectors' presets go to `easymode-time-selectors.json`. The current
+extract is from OpenCCU 3.89.8.20260719: 609 easymodes, 2205 profiles with a form; the rest keep the
+dialog's full list. Unlike `upstream/`, `extracted/` is committed, because it cannot be downloaded.
+
 ### Translations
 
 **`translation_custom/*.json` over `translation_extract.json.gz`.** openccu-data's `NOTICE.md` calls
@@ -135,6 +148,7 @@ committed.
 | `npm run convert` | write `dist/` from `upstream/` |
 | `npm run update` | fetch + convert |
 | `npm run compare-legacy` | write `COMPARISON.md` from `dist/` and `legacy/www/easymodes/` |
+| `node scripts/easymode-controls.mjs <easymodes dir> --source "<firmware>"` | rebuild `extracted/easymode_controls.json.gz` from a WebUI easymode tree (task 62); `npm run convert` afterwards |
 | `npm run icons-subset -- --ccu <dir>` | rebuild `dist/icons/` from a CCU's `www/config/img/devices` (its `50/` thumbnails, `250/` scaled down where a thumbnail is missing; D-51); without `--ccu` from `legacy/`, BidCos only (`--height 40 --quality 75` to shrink it) |
 | `npm test` | validate `dist/` against the contract and against the facts in `docs/analysis-2026-09.md` |
 

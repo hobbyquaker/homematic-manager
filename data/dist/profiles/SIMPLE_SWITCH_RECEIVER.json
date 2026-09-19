@@ -25,7 +25,19 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Schaltmodus", "en": "Switch mode"},
+            "names": [
+              {"de": "Bewegung/Geneigt", "en": "Motion/Tilted"},
+              {"de": "Ruhe/Waagerecht", "en": "Standby/horizontal"},
+              {"de": "Jede Änderung", "en": "Every change"}
+            ]
+          }
+        ]
       },
       {
         "id": 2,
@@ -43,7 +55,19 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 0},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Schaltmodus", "en": "Switch mode"},
+            "names": [
+              {"de": "Bewegung/Geneigt", "en": "Motion/Tilted"},
+              {"de": "Ruhe/Waagerecht", "en": "Standby/horizontal"},
+              {"de": "Jede Änderung", "en": "Every change"}
+            ]
+          }
+        ]
       },
       {
         "id": 3,
@@ -61,7 +85,19 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 0},
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Schaltmodus", "en": "Switch mode"},
+            "names": [
+              {"de": "Bewegung/Geneigt", "en": "Motion/Tilted"},
+              {"de": "Ruhe/Waagerecht", "en": "Standby/horizontal"},
+              {"de": "Jede Änderung", "en": "Every change"}
+            ]
+          }
+        ]
       },
       {
         "id": 4,
@@ -601,7 +637,18 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Öffnen", "en": "Opening"},
+              {"de": "Schließen", "en": "Closin"}
+            ]
+          }
+        ]
       },
       {
         "id": 2,
@@ -616,7 +663,18 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Offen - ein / Zu - aus", "en": "Open - on / Closed - off"},
+              {"de": "Offen - aus / Zu - ein", "en": "Open - off / Closed - on"}
+            ]
+          }
+        ]
       },
       {
         "id": 3,
@@ -631,7 +689,19 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 1},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4, 5],
+            "label": {"de": "Änderungssignal", "en": "Change signal"},
+            "names": [
+              {"de": "Öffnen", "en": "Opening"},
+              {"de": "Schließen", "en": "Closin"},
+              {"de": "Ändern", "en": "Changing"}
+            ]
+          }
+        ]
       }
     ],
     "MULTI_MODE_INPUT_TRANSMITTER_4": [
@@ -733,7 +803,18 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Öffnen", "en": "Opening"},
+              {"de": "Schließen", "en": "Closing"}
+            ]
+          }
+        ]
       },
       {
         "id": 2,
@@ -751,7 +832,18 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 2},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Offen - ein / Zu - aus", "en": "Open - on / Closed - off"},
+              {"de": "Offen - aus / Zu - ein", "en": "Open - off / Closed - on"}
+            ]
+          }
+        ]
       },
       {
         "id": 3,
@@ -769,7 +861,19 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 1},
           "SHORT_JT_ON": {"kind": "fixed", "value": 1},
           "SHORT_PROFILE_ACTION_TYPE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [3, 4, 5],
+            "label": {"de": "Änderungssignal", "en": "Change signal"},
+            "names": [
+              {"de": "Öffnen", "en": "Opening"},
+              {"de": "Schließen", "en": "Closing"},
+              {"de": "Ändern", "en": "Changing"}
+            ]
+          }
+        ]
       }
     ],
     "SWITCH_TRANSCEIVER": [

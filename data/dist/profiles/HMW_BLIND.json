@@ -39,7 +39,22 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -71,7 +86,22 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -103,7 +133,35 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -135,7 +193,56 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {"kind": "param", "param": "SHORT_ON_LEVEL", "label": {"de": "Hochgefahren-Position", "en": "Up position"}},
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          }
+        ]
       }
     ],
     "INPUT_OUTPUT_1": [
@@ -197,7 +304,22 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -250,7 +372,22 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -303,7 +440,35 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -356,7 +521,56 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {"kind": "param", "param": "SHORT_ON_LEVEL", "label": {"de": "Hochgefahren-Position", "en": "Up position"}},
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          }
+        ]
       }
     ],
     "KEY_0": [
@@ -397,7 +611,22 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -429,7 +658,22 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -461,7 +705,35 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -493,7 +765,56 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {"kind": "param", "param": "SHORT_ON_LEVEL", "label": {"de": "Hochgefahren-Position", "en": "Up position"}},
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          }
+        ]
       }
     ],
     "KEY_1": [
@@ -555,7 +876,22 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -608,7 +944,22 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -661,7 +1012,35 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -714,7 +1093,56 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {"kind": "param", "param": "SHORT_ON_LEVEL", "label": {"de": "Hochgefahren-Position", "en": "Up position"}},
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          }
+        ]
       }
     ],
     "TEMPLATE": [
@@ -787,7 +1215,22 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -840,7 +1283,22 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -893,7 +1351,35 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -946,7 +1432,56 @@
           "SHORT_ON_TIME": {"kind": "fixed", "value": 16383000},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 1},
           "SHORT_TOGGLE_USE": {"kind": "fixed", "value": 1}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Oben\"", "en": "Duration for status \"Up\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_TIME",
+            "also": ["LONG_OFF_TIME"],
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"Unten\"", "en": "Duration for status \"down\""}
+          },
+          {"kind": "param", "param": "SHORT_ON_LEVEL", "label": {"de": "Hochgefahren-Position", "en": "Up position"}},
+          {
+            "kind": "param",
+            "param": "SHORT_OFF_LEVEL",
+            "label": {"de": "Heruntergefahren-Position", "en": "Down position"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay time"}
+          },
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3],
+            "label": {"de": "Zielposition", "en": "Target position"},
+            "names": [
+              {"de": "hochgefahren", "en": "moved up"},
+              {"de": "heruntergefahren", "en": "moved down"},
+              {"de": "hoch- / heruntergefahren im Wechsel", "en": "changing between moved up and moved down"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_DRIVING_MODE",
+            "label": {"de": "Referenzfahrtvariante", "en": "Type of reference movement"}
+          }
+        ]
       }
     ]
   },

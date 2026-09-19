@@ -54,7 +54,44 @@
           "SHORT_RAMPOFF_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0.5},
           "SHORT_RAMPON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0.5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_TIME",
+            "option": "RAMPTIME",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Ausschaltverzögerung", "en": "Off delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_TIME",
+            "option": "RAMPTIME",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -101,7 +138,44 @@
           "SHORT_RAMPOFF_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 20},
           "SHORT_RAMPON_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0.5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPON_TIME",
+            "option": "RAMPTIME",
+            "label": {"de": "Rampenzeit beim Einschalten", "en": "Switch-on ramp time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Ausschaltverzögerung", "en": "Off delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_TIME",
+            "option": "RAMPTIME",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -148,7 +222,27 @@
           "SHORT_RAMPOFF_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 1800},
           "SHORT_RAMPON_TIME": {"kind": "fixed", "value": 0.5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "option": "LENGTH_OF_STAY",
+            "label": {"de": "Verweildauer im Zustand \"ein\"", "en": "Switch-on time (duration in status \"on\")"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ON_LEVEL",
+            "option": "DIM_ONLEVEL",
+            "label": {"de": "Pegel im Zustand \"ein\"", "en": "Level in status \"on\""}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_TIME",
+            "option": "RAMPTIME",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -195,7 +289,26 @@
           "SHORT_RAMPOFF_TIME": {"kind": "range", "min": 0, "max": 111600, "default": 0.5},
           "SHORT_RAMPON_TIME": {"kind": "fixed", "value": 0.5},
           "SHORT_RAMP_START_STEP": {"kind": "fixed", "value": 0.05}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Ausschaltverzögerung", "en": "Off delay time"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_OFFDELAY_BLINK",
+            "label": {"de": "Blinken in der Ausschaltverzögerung", "en": "Flashing during off-delay"}
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_RAMPOFF_TIME",
+            "option": "RAMPTIME",
+            "label": {"de": "Rampenzeit beim Ausschalten", "en": "Switch-off ramp time"}
+          }
+        ]
       }
     ]
   },

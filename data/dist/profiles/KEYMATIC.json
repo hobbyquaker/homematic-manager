@@ -33,7 +33,16 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
           "SHORT_JT_ON": {"kind": "fixed", "value": 3},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "DOOR_LOCK_TIME",
+            "label": {"de": "Automatisch wieder verriegeln", "en": "Lock automatically"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -85,7 +94,16 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 7},
           "SHORT_JT_ON": {"kind": "fixed", "value": 7},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "DOOR_LOCK_TIME",
+            "label": {"de": "Automatisch wieder verriegeln", "en": "Lock automatically"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -111,7 +129,16 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
           "SHORT_JT_ON": {"kind": "fixed", "value": 6},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "DOOR_LOCK_TIME",
+            "label": {"de": "Automatisch wieder verriegeln", "en": "Lock automatically"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -137,7 +164,16 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
           "SHORT_JT_ON": {"kind": "fixed", "value": 6},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "DOOR_LOCK_TIME",
+            "label": {"de": "Automatisch wieder verriegeln", "en": "Lock automatically"}
+          }
+        ]
       },
       {
         "id": 6,
@@ -163,7 +199,16 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
           "SHORT_JT_ON": {"kind": "fixed", "value": 3},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "DOOR_LOCK_TIME",
+            "label": {"de": "Automatisch wieder verriegeln", "en": "Lock automatically"}
+          }
+        ]
       },
       {
         "id": 7,
@@ -279,7 +324,16 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 7},
           "SHORT_JT_ON": {"kind": "fixed", "value": 7},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "DOOR_LOCK_TIME",
+            "label": {"de": "Automatisch wieder verriegeln", "en": "Lock automatically"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -294,7 +348,16 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
           "SHORT_JT_ON": {"kind": "fixed", "value": 3},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "DOOR_LOCK_TIME",
+            "label": {"de": "Automatisch wieder verriegeln", "en": "Lock automatically"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -366,7 +429,16 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
           "SHORT_JT_ON": {"kind": "fixed", "value": 3},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "DOOR_LOCK_TIME",
+            "label": {"de": "Automatisch wieder verriegeln", "en": "Lock automatically"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -418,7 +490,16 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 7},
           "SHORT_JT_ON": {"kind": "fixed", "value": 7},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "DOOR_LOCK_TIME",
+            "label": {"de": "Automatisch wieder verriegeln", "en": "Lock automatically"}
+          }
+        ]
       },
       {
         "id": 4,
@@ -444,7 +525,16 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
           "SHORT_JT_ON": {"kind": "fixed", "value": 6},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "DOOR_LOCK_TIME",
+            "label": {"de": "Automatisch wieder verriegeln", "en": "Lock automatically"}
+          }
+        ]
       },
       {
         "id": 5,
@@ -470,7 +560,16 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 6},
           "SHORT_JT_ON": {"kind": "fixed", "value": 6},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "DOOR_LOCK_TIME",
+            "label": {"de": "Automatisch wieder verriegeln", "en": "Lock automatically"}
+          }
+        ]
       },
       {
         "id": 6,
@@ -496,7 +595,16 @@
           "SHORT_JT_OFF": {"kind": "fixed", "value": 3},
           "SHORT_JT_ON": {"kind": "fixed", "value": 3},
           "SHORT_ON_TIME": {"kind": "fixed", "value": 111600}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ON_TIME",
+            "also": ["LONG_ON_TIME"],
+            "option": "DOOR_LOCK_TIME",
+            "label": {"de": "Automatisch wieder verriegeln", "en": "Lock automatically"}
+          }
+        ]
       },
       {
         "id": 7,

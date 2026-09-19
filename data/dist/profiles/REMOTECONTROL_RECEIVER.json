@@ -23,7 +23,11 @@
           "LONG_TEMPERATUR_RC": {"kind": "range", "min": 4.5, "max": 30.5, "default": 17},
           "SHORT_CONTROL_RC": {"kind": "range", "min": 0, "max": 6, "default": 1},
           "SHORT_TEMPERATUR_RC": {"kind": "range", "min": 4.5, "max": 30.5, "default": 17}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_CONTROL_RC", "also": ["LONG_CONTROL_RC"]},
+          {"kind": "param", "param": "SHORT_TEMPERATUR_RC", "also": ["LONG_TEMPERATUR_RC"]}
+        ]
       }
     ],
     "VIRTUAL_KEY": [
@@ -44,7 +48,11 @@
           "LONG_TEMPERATUR_RC": {"kind": "range", "min": 4.5, "max": 30.5, "default": 17},
           "SHORT_CONTROL_RC": {"kind": "range", "min": 0, "max": 6, "default": 1},
           "SHORT_TEMPERATUR_RC": {"kind": "range", "min": 4.5, "max": 30.5, "default": 17}
-        }
+        },
+        "controls": [
+          {"kind": "param", "param": "SHORT_CONTROL_RC", "also": ["LONG_CONTROL_RC"]},
+          {"kind": "param", "param": "SHORT_TEMPERATUR_RC", "also": ["LONG_TEMPERATUR_RC"]}
+        ]
       }
     ]
   }

@@ -37,7 +37,15 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 5, 6]},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -83,7 +91,15 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 5, 6]},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -129,7 +145,15 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 5, 6]},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -175,7 +199,15 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 5, 6]},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -242,7 +274,25 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2],
+            "label": {"de": "Schaltmodus", "en": "Switch mode"},
+            "names": [
+              {"de": "ein", "en": "on"},
+              {"de": "ein / aus", "en": "on / off"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "also": ["LONG_ONDELAY_TIME"],
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -363,7 +413,16 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "also": ["LONG_ONDELAY_TIME"],
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 3,
@@ -413,7 +472,16 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 300, 5]},
           "SHORT_ON_TIME_MODE": {"kind": "list", "values": [0, 1]}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "also": ["LONG_ONDELAY_TIME"],
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -464,7 +532,16 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 5, 6]},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "also": ["LONG_ONDELAY_TIME"],
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -512,7 +589,27 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 5, 6]},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3, 4, 5],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Offen - ein / Zu - aus", "en": "Open - on / Closed - off"},
+              {"de": "Offen - aus / Zu - ein", "en": "Open - off / Closed - on"},
+              {"de": "Offen - ein", "en": "Open - on"},
+              {"de": "Zu - ein", "en": "Closed - on"},
+              {"de": "Änderung - ein", "en": "Change - on"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -569,7 +666,27 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 5, 6]},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3, 4, 5],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Offen - ein / Zu - aus", "en": "Open - on / Closed - off"},
+              {"de": "Offen - aus / Zu - ein", "en": "Open - off / Closed - on"},
+              {"de": "Offen - ein", "en": "Open - on"},
+              {"de": "Zu - ein", "en": "Closed - on"},
+              {"de": "Änderung - ein", "en": "Change - on"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -721,7 +838,25 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2],
+            "label": {"de": "Schaltmodus", "en": "Switch mode"},
+            "names": [
+              {"de": "ein / aus", "en": "on / off"},
+              {"de": "ein", "en": "on"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "also": ["LONG_ONDELAY_TIME"],
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -773,7 +908,27 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2, 3, 4, 5],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Offen - ein / Zu - aus", "en": "Open - on / Closed - off"},
+              {"de": "Offen - aus / Zu - ein", "en": "Open - off / Closed - on"},
+              {"de": "Öffnen", "en": "Open"},
+              {"de": "Schließen", "en": "Close"},
+              {"de": "Ändern", "en": "Change"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -840,7 +995,16 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "also": ["LONG_ONDELAY_TIME"],
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,
@@ -893,7 +1057,24 @@
           "SHORT_ONDELAY_TIME": {"kind": "fixed", "value": 0},
           "SHORT_ON_TIME": {"kind": "list", "values": [111600, 6]},
           "SHORT_ON_TIME_MODE": {"kind": "fixed", "value": 0}
-        }
+        },
+        "controls": [
+          {
+            "kind": "subset",
+            "subsets": [1, 2],
+            "label": {"de": "Richtung", "en": "Direction"},
+            "names": [
+              {"de": "Feuchtigkeit - ein / Trocken - aus", "en": "Humidity - on / dry - off"},
+              {"de": "Feuchtigkeit - aus / Trocken - ein", "en": "Humidity - off / dry - on"}
+            ]
+          },
+          {
+            "kind": "param",
+            "param": "SHORT_ONDELAY_TIME",
+            "option": "DELAY",
+            "label": {"de": "Einschaltverzögerung", "en": "On delay time"}
+          }
+        ]
       },
       {
         "id": 2,

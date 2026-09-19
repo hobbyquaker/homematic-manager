@@ -333,12 +333,10 @@ test('5: exactly two globals of ours reach the page, and no Node', async () => {
     }
 });
 
-test('6: the image protocol answers 200 for a bundled type and 404 for an unknown one', async () => {
+test('6: the image protocol answers a bundled type, the unknown-device picture for an unknown one, 400 for a stray URL', async () => {
     const {app, page} = await launch();
     try {
-        // Not the README's `HmIP-BSM`: the bundled webp subset (D-10) covers 121 files and every
-        // one of them is a BidCos type - an HmIP picture only ever comes from a connected CCU.
-        // `HM-CC-RT-DN` maps to `83_hm-cc-rt-dn.png`, which the subset has as `.webp`.
+        // `HM-CC-RT-DN` maps to `83_hm-cc-rt-dn.png`, which the bundled set (D-10, D-51) has as `.webp`.
         const bundled = await page.evaluate(async () => {
             const response = await fetch('hmm-image://device/HM-CC-RT-DN');
             return {status: response.status, type: response.headers.get('content-type')};
@@ -346,11 +344,21 @@ test('6: the image protocol answers 200 for a bundled type and 404 for an unknow
         expect(bundled.status).toBe(200);
         expect(bundled.type).toMatch(/^image\//);
 
-        const missing = await page.evaluate(async () => {
-            const response = await fetch('hmm-image://device/NO-SUCH-DEVICE-TYPE');
-            return response.status;
+        // B-57: the bundled set carries `unknown_device` since it was rebuilt from the CCU's
+        // thumbnails, so a type nobody knows gets that picture (the `DEVICE` entry) instead of a 404.
+        const [unknown, fallback] = await page.evaluate(async () => {
+            const bytes = async (url: string): Promise<{status: number; size: number}> => {
+                const response = await fetch(url);
+                return {status: response.status, size: (await response.arrayBuffer()).byteLength};
+            };
+            return Promise.all([bytes('hmm-image://device/NO-SUCH-DEVICE-TYPE'), bytes('hmm-image://device/DEVICE')]);
         });
-        expect(missing).toBe(404);
+        expect(unknown.status).toBe(200);
+        expect(unknown.size).toBeGreaterThan(0);
+        expect(unknown.size).toBe(fallback.size);
+
+        const stray = await page.evaluate(async () => (await fetch('hmm-image://other/HM-CC-RT-DN')).status);
+        expect(stray).toBe(400);
     } finally {
         await closeApp(app);
     }

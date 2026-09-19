@@ -40,7 +40,56 @@ export interface LinkProfile {
     description: Localized;
     /** Parameters this profile sets or restricts; everything else keeps its current value. */
     params: Record<string, ProfileConstraint>;
+    /**
+     * Task 62 (D-54): the controls the CCU's own easy mode draws for this profile, in its order,
+     * extracted from the WebUI's easymode TCL. Absent where the extraction found no form; the
+     * dialog then shows every parameter.
+     */
+    controls?: EasyControl[];
 }
+
+/**
+ * One control of the CCU easy mode's form of a profile (task 62). `requires` lists parameters the
+ * WebUI checks with `info exists` before drawing it; `label` is the WebUI's own row text where it
+ * could be resolved, otherwise the dialog uses the parameter's name.
+ */
+export type EasyControl =
+    | {
+          /** One duration over `<prefix>_BASE` / `<prefix>_FACTOR`, e.g. `SHORT_ON_TIME`. */
+          kind: 'time';
+          prefix: string;
+          /** The preset list, a key of the time selector file (`timeOnOff`, `rampOnOff`, ...). */
+          selector: string;
+          label?: Localized;
+          requires?: string[];
+      }
+    | {
+          kind: 'param';
+          param: string;
+          /** Further parameters the WebUI writes the same value to (`SHORT_ON_LEVEL|LONG_ON_LEVEL`). */
+          also?: string[];
+          /** The WebUI's option set for the combo box, an `OptionPreset.id`. */
+          option?: string;
+          label?: Localized;
+          requires?: string[];
+      }
+    | {
+          /** One choice among `LinkSenderMetadata.subsets`, by id. */
+          kind: 'subset';
+          subsets: number[];
+          label?: Localized;
+          /** The choices' names, in the order of `subsets`. */
+          names?: Array<Localized | null>;
+          requires?: string[];
+      };
+
+/**
+ * One entry of a time selector: a duration in seconds, or `notActive` (0), `permanent` (the pair's
+ * maximum) or `enterValue` (show the raw base and factor).
+ */
+export type TimeSelectorOption = ({seconds: number} | {special: 'notActive' | 'permanent' | 'enterValue'}) & {
+    label?: Localized;
+};
 
 /**
  * One group of link parameters the WebUI offers as a preset value, e.g. "switch on immediately"
@@ -155,6 +204,8 @@ export interface DataSource {
     crossValidations(): Promise<CrossValidationRule[]>;
     translations(language: Language): Promise<Translations | undefined>;
     deviceIcons(): Promise<DeviceIcons>;
+    /** Task 62: the presets of each easy-mode time selector type; empty when the file is missing. */
+    timeSelectors(): Promise<Record<string, TimeSelectorOption[]>>;
 }
 
 /**
@@ -168,6 +219,7 @@ export interface DataSource {
  *   cross-validations.json             CrossValidationRule[]
  *   translations/<language>.json       Translations
  *   device-icons.json                  DeviceIcons
+ *   easymode-time-selectors.json       {source, types: Record<type, TimeSelectorOption[]>}
  */
 export const DATA_FILES = {
     manifest: 'manifest.json',
@@ -178,4 +230,5 @@ export const DATA_FILES = {
     crossValidations: 'cross-validations.json',
     translations: (language: Language) => `translations/${language}.json`,
     deviceIcons: 'device-icons.json',
+    timeSelectors: 'easymode-time-selectors.json',
 } as const;

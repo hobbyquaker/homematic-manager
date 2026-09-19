@@ -8,6 +8,7 @@ import type {
     OptionPreset,
     ReceiverProfiles,
     ReceiverTypeAliases,
+    TimeSelectorOption,
     Transport,
     Translations,
 } from '@homematic-manager/core';
@@ -73,5 +74,10 @@ export class TransportDataSource implements DataSource {
 
     async deviceIcons(): Promise<DeviceIcons> {
         return (await this.#file<DeviceIcons>(DATA_FILES.deviceIcons)) ?? {};
+    }
+
+    async timeSelectors(): Promise<Record<string, TimeSelectorOption[]>> {
+        const file = await this.#file<{types?: Record<string, TimeSelectorOption[]>}>(DATA_FILES.timeSelectors);
+        return file?.types ?? {};
     }
 }

@@ -34,6 +34,7 @@ export * from './paramset/multiApply.js';
 
 // Easy modes and the MASTER metadata layer
 export * from './easymodes/engine.js';
+export * from './easymodes/form.js';
 
 // State the tabs show
 export * from './serviceMessages/index.js';

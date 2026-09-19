@@ -529,6 +529,218 @@ describe('the link paramset dialog', () => {
     });
 });
 
+describe('the CCU easy mode form (task 62, D-54)', () => {
+    // An HmIP link as the WebUI sees it: no UI_HINT, the on time as a base/factor pair, and a
+    // profile whose extracted form shows the on time and the level - nothing of the jump table.
+    const RECEIVER = '000A1B2C3D4E5F:4';
+    const SENDER = '0001D8A9B7C6D5:1';
+    const baseList = [
+        'BASE_100_MS',
+        'BASE_1_S',
+        'BASE_5_S',
+        'BASE_10_S',
+        'BASE_1_M',
+        'BASE_5_M',
+        'BASE_10_M',
+        'BASE_1_H',
+    ];
+    const linkDescription: ParamsetDescription = {
+        SHORT_ACTION_TYPE: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['INACTIVE', 'JUMP_TO_TARGET'], TAB_ORDER: 1},
+        SHORT_JT_ON: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['NOP', 'ON_DELAY', 'RAMP_ON', 'ON'], TAB_ORDER: 2},
+        SHORT_ON_LEVEL: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 1, UNIT: '100%', TAB_ORDER: 3},
+        SHORT_ON_TIME_BASE: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: baseList, TAB_ORDER: 4},
+        SHORT_ON_TIME_FACTOR: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 31, TAB_ORDER: 5},
+    };
+    const profiles = {
+        receiverType: 'SWITCH_VIRTUAL_RECEIVER',
+        senders: {
+            KEY_TRANSCEIVER: [
+                {
+                    id: 1,
+                    key: 'switch_on',
+                    name: {de: 'Einschalten', en: 'Switch on'},
+                    description: {de: 'Schaltet ein', en: 'Switches on'},
+                    params: {
+                        SHORT_ACTION_TYPE: {kind: 'fixed', value: 1},
+                        SHORT_JT_ON: {kind: 'fixed', value: 3},
+                        SHORT_ON_LEVEL: {kind: 'range', min: 0, max: 1, default: 1},
+                        SHORT_ON_TIME_BASE: {kind: 'range', min: 0, max: 7, default: 7},
+                        SHORT_ON_TIME_FACTOR: {kind: 'range', min: 0, max: 31, default: 31},
+                    },
+                    controls: [
+                        {kind: 'time', prefix: 'SHORT_ON_TIME', selector: 'timeOnOff', label: {de: 'Einschaltdauer'}},
+                        {kind: 'param', param: 'SHORT_ON_LEVEL', option: 'DIM_ONLEVEL'},
+                        // an optical-signal control: not on this device's form
+                        {kind: 'param', param: 'SHORT_OPTICAL_SIGNAL_COLOR', requires: ['SHORT_OPTICAL_SIGNAL_COLOR']},
+                    ],
+                },
+                {
+                    id: 2,
+                    key: 'switch_off',
+                    name: {de: 'Ausschalten', en: 'Switch off'},
+                    description: {de: 'Schaltet aus', en: 'Switches off'},
+                    params: {SHORT_ACTION_TYPE: {kind: 'fixed', value: 1}, SHORT_JT_ON: {kind: 'fixed', value: 0}},
+                },
+            ],
+        },
+    };
+    const timeSelectors = {
+        source: 'test',
+        types: {
+            timeOnOff: [
+                {special: 'notActive', label: {de: 'Nicht aktiv'}},
+                {seconds: 60, label: {de: '1 Minute'}},
+                {special: 'permanent', label: {de: 'dauerhaft'}},
+                {special: 'enterValue', label: {de: 'Wert eingeben'}},
+            ],
+        },
+    };
+    let transport: MockTransport;
+
+    async function openLink(): Promise<void> {
+        const {stores} = await mountApp({transport, hash: '#/HmIP-RF/links'});
+        await waitFor(() => {
+            expect(stores.links.of('HmIP-RF').length).toBeGreaterThan(0);
+        });
+        await fireEvent.dblClick(document.querySelector(`[data-row-id="${SENDER}->${RECEIVER}"]`)!);
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLSelectElement>('link-profile').value).toBe('1');
+        });
+    }
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+        const demoFile = transport.handlerFor('data.file');
+        transport.respond('data.file', (path) => {
+            if (path === 'data/profiles/SWITCH_VIRTUAL_RECEIVER.json') return profiles;
+            if (path === 'data/easymode-time-selectors.json') return timeSelectors;
+            if (path === 'data/option-presets.json') {
+                return {
+                    ...(demoFile(path) as object),
+                    DIM_ONLEVEL: {
+                        id: 'DIM_ONLEVEL',
+                        allowCustom: true,
+                        presets: [
+                            {label: '50%', value: 0.5},
+                            {label: '100%', value: 1},
+                        ],
+                    },
+                };
+            }
+            return demoFile(path);
+        });
+        const demoDescription = transport.handlerFor('paramset.description');
+        transport.respond('paramset.description', (interfaceName, address, paramset) =>
+            address === RECEIVER && paramset === 'LINK'
+                ? linkDescription
+                : demoDescription(interfaceName, address, paramset),
+        );
+        const demoGet = transport.handlerFor('paramset.get');
+        transport.respond('paramset.get', (interfaceName, address, paramset) =>
+            address === RECEIVER
+                ? {
+                      SHORT_ACTION_TYPE: 1,
+                      SHORT_JT_ON: 3,
+                      SHORT_ON_LEVEL: 1,
+                      SHORT_ON_TIME_BASE: 7,
+                      SHORT_ON_TIME_FACTOR: 31,
+                  }
+                : demoGet(interfaceName, address, paramset),
+        );
+    });
+
+    it('shows only the controls of the CCU form, the time as one selector', async () => {
+        await openLink();
+        const form = await waitFor(() => screen.getByTestId('link-easy-form'));
+        expect(within(form).getByTestId('easy-time-SHORT_ON')).toBeTruthy();
+        // the level as the WebUI's combo box, on its current preset; no free field
+        expect(
+            within(form).getByTestId<HTMLSelectElement>('easy-preset-select-SHORT_ON_LEVEL').selectedOptions[0]
+                ?.textContent,
+        ).toBe('100%');
+        expect(screen.queryByTestId('param-SHORT_ON_LEVEL')).toBeNull();
+        // what the profile writes by itself, and what this device lacks, are not on the form
+        expect(screen.queryByTestId('param-SHORT_ACTION_TYPE')).toBeNull();
+        expect(screen.queryByTestId('param-SHORT_JT_ON')).toBeNull();
+        expect(screen.queryByTestId('param-SHORT_ON_TIME_BASE')).toBeNull();
+        expect(screen.queryByTestId('param-SHORT_OPTICAL_SIGNAL_COLOR')).toBeNull();
+        // BASE_1_H x 31 is "for ever"
+        const select = screen.getByTestId<HTMLSelectElement>('easy-time-select-SHORT_ON');
+        expect(select.selectedOptions[0]?.textContent).toBe('dauerhaft');
+        expect(within(screen.getByTestId('easy-time-SHORT_ON')).getByText('Einschaltdauer')).toBeTruthy();
+    });
+
+    it('writes a preset as base and factor, and "enter value" opens the raw pair', async () => {
+        await openLink();
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('easy-time-select-SHORT_ON'));
+        await fireEvent.change(select, {target: {value: '1'}});
+        await fireEvent.click(screen.getByTestId('link-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('write-preview')).toBeTruthy();
+        });
+        // 60 s = BASE_5_S (index 2) x 12, the smallest base that hits it exactly
+        expect(screen.getByTestId('preview-SHORT_ON_TIME_FACTOR').textContent).toContain('12');
+        expect(screen.getByTestId('preview-SHORT_ON_TIME_BASE').textContent).toContain('BASE_5_S');
+    });
+
+    it('opens the free field of a combo box for "enter value", and a preset writes its value', async () => {
+        await openLink();
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('easy-preset-select-SHORT_ON_LEVEL'));
+        await fireEvent.change(select, {target: {value: '0'}});
+        await fireEvent.change(select, {target: {value: '-1'}});
+        await waitFor(() => {
+            expect(screen.getByTestId('param-SHORT_ON_LEVEL')).toBeTruthy();
+        });
+        await fireEvent.click(screen.getByTestId('link-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('preview-SHORT_ON_LEVEL').textContent).toContain('0.5');
+        });
+    });
+
+    it('opens base and factor raw for "enter value"', async () => {
+        await openLink();
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('easy-time-select-SHORT_ON'));
+        expect(screen.queryByTestId('param-SHORT_ON_TIME_BASE')).toBeNull();
+        await fireEvent.change(select, {target: {value: '3'}});
+        await waitFor(() => {
+            expect(screen.getByTestId('param-SHORT_ON_TIME_BASE')).toBeTruthy();
+            expect(screen.getByTestId('param-SHORT_ON_TIME_FACTOR')).toBeTruthy();
+        });
+    });
+
+    it('shows every parameter raw in the expert view, the easy-mode ones marked', async () => {
+        await openLink();
+        await waitFor(() => screen.getByTestId('link-easy-form'));
+        await fireEvent.click(screen.getByTestId('link-expert'));
+        await waitFor(() => {
+            expect(screen.getByTestId('param-SHORT_ACTION_TYPE')).toBeTruthy();
+        });
+        expect(screen.queryByTestId('link-easy-form')).toBeNull();
+        expect(screen.getByTestId('link-easy-legend')).toBeTruthy();
+        const marked = (param: string): boolean =>
+            screen.getByTestId(`param-${param}`).parentElement?.classList.contains('hmm-link-easy-marked') ?? false;
+        expect(marked('SHORT_ON_TIME_BASE')).toBe(true);
+        expect(marked('SHORT_ON_TIME_FACTOR')).toBe(true);
+        expect(marked('SHORT_ON_LEVEL')).toBe(true);
+        expect(marked('SHORT_ACTION_TYPE')).toBe(false);
+        expect(marked('SHORT_JT_ON')).toBe(false);
+        // raw: the time is two fields again, nothing greyed out
+        expect(
+            (within(screen.getByTestId('param-SHORT_ACTION_TYPE')).getByRole('combobox') as HTMLSelectElement).disabled,
+        ).toBe(false);
+    });
+
+    it('falls back to every parameter, with a hint, for a profile without a form', async () => {
+        await openLink();
+        await fireEvent.change(screen.getByTestId('link-profile'), {target: {value: '2'}});
+        await waitFor(() => {
+            expect(screen.getByTestId('link-easy-unknown')).toBeTruthy();
+        });
+        expect(screen.queryByTestId('link-easy-form')).toBeNull();
+        expect(screen.getByTestId('param-SHORT_ACTION_TYPE')).toBeTruthy();
+    });
+});
+
 describe('link profile templates (#21)', () => {
     let transport: MockTransport;
 

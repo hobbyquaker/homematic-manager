@@ -8,7 +8,7 @@
         ParamsetValue,
         WriteResult,
     } from '@homematic-manager/core';
-    import {EXPERT_PROFILE_ID, paramsetIdentity} from '@homematic-manager/core';
+    import {EXPERT_PROFILE_ID, easyForm, easyFormParams, paramsetIdentity} from '@homematic-manager/core';
 
     import Dialog from '../../lib/components/Dialog.svelte';
     import MultiSelect from '../../lib/components/MultiSelect.svelte';
@@ -23,6 +23,8 @@
     } from '../../lib/util/paramsetForm.js';
     import ParameterRow from '../paramset/ParameterRow.svelte';
     import WritePreviewDialog from '../paramset/WritePreviewDialog.svelte';
+
+    import LinkEasyForm from './LinkEasyForm.svelte';
 
     interface Props {
         open?: boolean;
@@ -107,6 +109,29 @@
             : [],
     );
     const senderFields = $derived<LinkField[]>(senderDescription ? linkFields(senderDescription, {expert: true}) : []);
+
+    /**
+     * Task 62 (D-54): the CCU easy mode's form of the chosen profile on this device. With it, the
+     * easy mode shows only those controls; without it (no extracted form, the expert profile) every
+     * parameter, as before. In the expert view every parameter is shown raw, and the rows the easy
+     * mode covers are marked.
+     */
+    const profileForm = $derived(
+        receiverDescription && profile && profile.id !== EXPERT_PROFILE_ID
+            ? easyForm(profile, receiverDescription)
+            : undefined,
+    );
+    const form = $derived(expert ? undefined : profileForm);
+    const easyParams = $derived(expert ? easyFormParams(profileForm, metadata?.subsets) : new Set<string>());
+    const fieldsByName = $derived(
+        new Map(
+            (receiverDescription
+                ? linkFields(receiverDescription, {metadata, presets: stores.meta.presets, profile})
+                : []
+            ).map((field) => [field.name, field]),
+        ),
+    );
+    const current = $derived.by(() => merged());
 
     /** Other links of the same sender and receiver channel types - the 2.x multi-select. */
     const targetOptions = $derived<MultiSelectOption[]>(
@@ -571,19 +596,49 @@
                 </div>
             </div>
 
+            {#if expert && easyParams.size > 0}
+                <p class="hmm-link-hint" data-testid="link-easy-legend">
+                    <span class="hmm-link-easy-swatch" aria-hidden="true"></span>{t(
+                        'Marked: the parameters the easy mode of this profile shows',
+                    )}
+                </p>
+            {:else if !expert && !form && profile && profile.id !== EXPERT_PROFILE_ID}
+                <p class="hmm-link-hint" data-testid="link-easy-unknown">
+                    {t(
+                        "The CCU's form for this profile is not known here: every parameter is shown, the ones the profile fixes greyed out.",
+                    )}
+                </p>
+            {/if}
             <div class="hmm-link-list" data-testid="link-receiver-params">
-                {#each fields as field (field.name)}
-                    <ParameterRow
-                        {field}
-                        value={valueOf(field, receiverValues, edited)}
-                        label={stores.meta.parameterLabel(field.name, receiverType)}
-                        help={stores.meta.parameterHelp(field.name, receiverType)}
-                        changed={Object.prototype.hasOwnProperty.call(edited, field.name)}
-                        disabled={field.fixedByProfile}
-                        valueLabel={(entry) => stores.meta.valueLabel(field.name, entry, receiverType)}
-                        onchange={(value) => (edited = {...edited, [field.name]: value})}
+                {#if form && receiverDescription}
+                    <LinkEasyForm
+                        {form}
+                        fields={fieldsByName}
+                        values={current}
+                        changed={(param) => Object.prototype.hasOwnProperty.call(edited, param)}
+                        description={receiverDescription}
+                        {receiverType}
+                        subsets={metadata?.subsets}
+                        presets={stores.meta.presets}
+                        timeSelectors={stores.meta.timeSelectors}
+                        onchange={(changes) => (edited = {...edited, ...changes})}
                     />
-                {/each}
+                {:else}
+                    {#each fields as field (field.name)}
+                        <div class="hmm-link-easy-mark" class:hmm-link-easy-marked={easyParams.has(field.name)}>
+                            <ParameterRow
+                                {field}
+                                value={valueOf(field, receiverValues, edited)}
+                                label={stores.meta.parameterLabel(field.name, receiverType)}
+                                help={stores.meta.parameterHelp(field.name, receiverType)}
+                                changed={Object.prototype.hasOwnProperty.call(edited, field.name)}
+                                disabled={field.fixedByProfile}
+                                valueLabel={(entry) => stores.meta.valueLabel(field.name, entry, receiverType)}
+                                onchange={(value) => (edited = {...edited, [field.name]: value})}
+                            />
+                        </div>
+                    {/each}
+                {/if}
             </div>
         </section>
 
@@ -623,6 +678,30 @@
 />
 
 <style>
+    .hmm-link-hint {
+        margin: 4px 0;
+        font-size: var(--hmm-font-size-small);
+        color: var(--hmm-fg-muted);
+    }
+
+    /* Task 62: in the expert view, the rows the easy mode shows - a bar and a tinted background,
+       unlike the accent background of a changed row */
+    .hmm-link-easy-marked {
+        background: var(--hmm-bg-sunken);
+        box-shadow: inset 3px 0 0 var(--hmm-accent);
+    }
+
+    .hmm-link-easy-swatch {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin-right: 6px;
+        vertical-align: -1px;
+        background: var(--hmm-bg-sunken);
+        box-shadow: inset 3px 0 0 var(--hmm-accent);
+        border: 1px solid var(--hmm-border-muted);
+    }
+
     .hmm-link-info {
         display: flex;
         flex-wrap: wrap;

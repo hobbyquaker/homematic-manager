@@ -90,6 +90,18 @@ export class MockTransport implements Transport {
         return this;
     }
 
+    /**
+     * The handler registered for a method, so a test can answer a few calls itself and hand every
+     * other one to the demo data. Throws when there is none, like an unanswered request.
+     */
+    handlerFor<M extends ApiMethodName>(method: M): MockHandler<M> {
+        const handler = this.#handlers.get(method);
+        if (!handler) {
+            throw new ApiRequestError({message: `no mock handler for ${method}`, kind: 'internal'});
+        }
+        return handler as unknown as MockHandler<M>;
+    }
+
     /** Registers a constant answer - the common case in a component test. */
     result<M extends ApiMethodName>(method: M, value: ApiResult<M>): this {
         return this.respond(method, (() => value) as MockHandler<M>);

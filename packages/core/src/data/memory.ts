@@ -15,6 +15,7 @@ import type {
     OptionPreset,
     ReceiverProfiles,
     ReceiverTypeAliases,
+    TimeSelectorOption,
     Translations,
 } from './types.js';
 
@@ -29,6 +30,7 @@ export interface MemoryData {
     readonly crossValidations?: readonly CrossValidationRule[];
     readonly translations?: Partial<Record<Language, Translations>>;
     readonly deviceIcons?: DeviceIcons;
+    readonly timeSelectors?: Readonly<Record<string, TimeSelectorOption[]>>;
 }
 
 /** A `DataSource` over data that is already in memory. */
@@ -69,5 +71,9 @@ export class MemoryDataSource implements DataSource {
 
     deviceIcons(): Promise<DeviceIcons> {
         return Promise.resolve({...this.#data.deviceIcons});
+    }
+
+    timeSelectors(): Promise<Record<string, TimeSelectorOption[]>> {
+        return Promise.resolve({...this.#data.timeSelectors});
     }
 }

@@ -6,6 +6,20 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### New
+
+- **The link dialog's easy mode looks like the CCU's.** With a profile chosen and the expert view off, the dialog now
+  shows only what the CCU's own easy mode shows for that profile, in its order: for "Dimmer - ein/heller" on an HmIP
+  dimmer that is the ramp time, the on time, the on level and the minimum level for a short press, and the on time,
+  the maximum level and the step for a long one - instead of all 84 parameters. A time is one selector with the CCU's
+  presets ("500 ms", "dauerhaft", "Wert eingeben"), a level one with its option set ("100%", "Wert eingeben"); "Wert
+  eingeben" opens the raw fields. What the profile sets by itself is still written, as the CCU does. With the expert
+  view ticked every parameter is shown raw, and the ones the easy mode shows are marked. The forms were read out of
+  the CCU's own easy mode files (OpenCCU 3.89.8) for about 2200 profiles; a profile without one keeps the full list,
+  with a hint.
+
 ## [3.0.0-beta.20] — 2026-09-19
 
 ### Fixed

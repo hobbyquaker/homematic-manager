@@ -445,6 +445,21 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Defective link': {de: 'Defekte Verknüpfung', en: 'Defective link'},
     Profile: {de: 'Profil', en: 'Profile'},
     'Expert view': {de: 'Expertenansicht', en: 'Expert view'},
+    // Task 62 (D-54): the CCU easy mode's form in the link dialog.
+    'Short key press': {de: 'Kurzer Tastendruck', en: 'Short key press'},
+    'Long key press': {de: 'Langer Tastendruck', en: 'Long key press'},
+    'Not active': {de: 'Nicht aktiv', en: 'Not active'},
+    Permanent: {de: 'dauerhaft', en: 'permanent'},
+    'Enter value': {de: 'Wert eingeben', en: 'Enter value'},
+    'Marked: the parameters the easy mode of this profile shows': {
+        de: 'Markiert: die Parameter, die der Easy-Mode dieses Profils zeigt',
+        en: 'Marked: the parameters the easy mode of this profile shows',
+    },
+    "The CCU's form for this profile is not known here: every parameter is shown, the ones the profile fixes greyed out.":
+        {
+            de: 'Die Maske der CCU für dieses Profil ist hier nicht bekannt: alle Parameter werden gezeigt, die vom Profil festgelegten ausgegraut.',
+            en: "The CCU's form for this profile is not known here: every parameter is shown, the ones the profile fixes greyed out.",
+        },
 
     // What the lab measured about CONFIG_PENDING and the repair (task 6, docs/config-pending.md).
     'Repair configuration': {de: 'Konfiguration reparieren', en: 'Repair configuration'},

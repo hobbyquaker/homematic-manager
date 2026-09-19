@@ -6,6 +6,7 @@ import type {
     LinkSenderMetadata,
     MasterView,
     OptionPreset,
+    TimeSelectorOption,
     Paramset,
     ParamsetDescription,
     Transport,
@@ -38,6 +39,8 @@ export class MetaStore {
     available = $state(false);
     /** The WebUI's dropdowns of typical values, by id; loaded on the first link dialog. */
     presets = $state<Record<string, OptionPreset>>({});
+    /** Task 62: the easy mode's time selector presets, by selector type; loaded with the presets. */
+    timeSelectors = $state<Record<string, TimeSelectorOption[]>>({});
 
     readonly source: DataSource;
     readonly engine: EasyModeEngine;
@@ -76,7 +79,12 @@ export class MetaStore {
     /** The option presets, loaded once. The link dialog needs them before it can draw a row. */
     async loadPresets(): Promise<Record<string, OptionPreset>> {
         if (Object.keys(this.presets).length === 0) {
-            this.presets = await this.source.optionPresets();
+            const [presets, timeSelectors] = await Promise.all([
+                this.source.optionPresets(),
+                this.source.timeSelectors(),
+            ]);
+            this.presets = presets;
+            this.timeSelectors = timeSelectors;
         }
         return this.presets;
     }

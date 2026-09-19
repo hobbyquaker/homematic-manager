@@ -15,6 +15,11 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   now only counts as one when it is one; a page already stored is thrown away and fetched again. And the pictures the
   app ships for exactly this case cover every device type now, HomematicIP included (278 pictures, 238 KiB, from the
   CCU's own thumbnails), where they used to cover the BidCos types only.
+- **The link dialog shows the profile the link really follows.** Opening a second link with the same kinds of sender
+  and receiver channel - two buttons of one remote to the same dimmer, say - showed the profile of the link opened
+  before, because the profile was read off the values still on screen from that link. On HomematicIP, which stores no
+  profile number with the link, choosing the profile the link actually had then changed nothing, and the preview had
+  nothing to write. The profile is now read only from the values of the link that is open.
 
 ## [3.0.0-beta.19] — 2026-09-16
 

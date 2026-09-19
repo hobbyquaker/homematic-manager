@@ -246,8 +246,9 @@ describe('link profiles', () => {
 });
 
 describe('master metadata, presets and cross validations', () => {
-    it('matches MasterMetadata for all 54 channel types', () => {
-        expect(Object.keys(masterMetadata)).toHaveLength(54);
+    // 54 channel types from openccu-data, and 9 more that only the CCU's MASTER forms cover (task 63)
+    it('matches MasterMetadata for all 63 channel types', () => {
+        expect(Object.keys(masterMetadata)).toHaveLength(63);
         for (const [channelType, entry] of Object.entries(masterMetadata)) {
             expect(entry.channelType).toBe(channelType);
             for (const key of Object.keys(entry)) {
@@ -257,7 +258,13 @@ describe('master metadata, presets and cross validations', () => {
                     'conditionalVisibility',
                     'optionPresets',
                     'parameterGroups',
+                    'controls',
                 ]).toContain(key);
+            }
+            for (const control of entry.controls ?? []) {
+                expect(['time', 'param', 'subset']).toContain(control.kind);
+                if (control.kind === 'time') expect(typeof control.selector).toBe('string');
+                else if (control.kind === 'param') expect(typeof control.param).toBe('string');
             }
             for (const rule of entry.conditionalVisibility ?? []) {
                 expect(typeof rule.trigger).toBe('string');

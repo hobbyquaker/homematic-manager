@@ -27,11 +27,89 @@
       "NOTIFICATION_SOUND_TYPE_HIGH_TO_LOW": "_INLINE_ACCELERATION_TRANSCEIVER_NOTIFICATION_SOUND_TYPE_HIGH_TO_LOW",
       "NOTIFICATION_SOUND_TYPE_LOW_TO_HIGH": "_INLINE_ACCELERATION_TRANSCEIVER_NOTIFICATION_SOUND_TYPE_LOW_TO_HIGH",
       "SENSOR_SENSITIVITY": "_INLINE_ACCELERATION_TRANSCEIVER_SENSOR_SENSITIVITY"
-    }
+    },
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {"kind": "param", "param": "CHANNEL_OPERATION_MODE", "requires": ["CHANNEL_OPERATION_MODE"]},
+      {"kind": "param", "param": "EVENT_FILTER_PERIOD", "requires": ["EVENT_FILTER_PERIOD"]},
+      {"kind": "param", "param": "MSG_FOR_POS_A", "requires": ["MSG_FOR_POS_A"]},
+      {"kind": "param", "param": "MSG_FOR_POS_B", "requires": ["MSG_FOR_POS_B"]},
+      {"kind": "param", "param": "MSG_FOR_POS_C", "requires": ["MSG_FOR_POS_C"]},
+      {
+        "kind": "param",
+        "param": "NOTIFICATION_SOUND_TYPE_LOW_TO_HIGH",
+        "requires": ["NOTIFICATION_SOUND_TYPE_LOW_TO_HIGH"]
+      },
+      {
+        "kind": "param",
+        "param": "NOTIFICATION_SOUND_TYPE_HIGH_TO_LOW",
+        "requires": ["NOTIFICATION_SOUND_TYPE_HIGH_TO_LOW"]
+      },
+      {
+        "kind": "param",
+        "param": "SENSOR_SENSITIVITY",
+        "requires": ["SENSOR_SENSITIVITY"],
+        "label": {"de": "Sensor-Empfindlichkeit", "en": "Sensor sensitivity"}
+      },
+      {"kind": "param", "param": "TRIGGER_ANGLE", "requires": ["TRIGGER_ANGLE"]},
+      {"kind": "param", "param": "TRIGGER_ANGLE_HYSTERESIS", "requires": ["TRIGGER_ANGLE_HYSTERESIS"]},
+      {"kind": "param", "param": "TRIGGER_ANGLE_2", "requires": ["TRIGGER_ANGLE_2"]},
+      {
+        "kind": "param",
+        "param": "LED_DISABLE_CHANNELSTATE",
+        "requires": ["LED_DISABLE_CHANNELSTATE"],
+        "label": {"de": "Geräte-LED deaktivieren", "en": "Deactivate device LED"}
+      },
+      {
+        "kind": "param",
+        "param": "EVENT_TIMEOUT_VALUE",
+        "requires": ["EVENT_TIMEOUT_BASE"],
+        "label": {"de": "Wert der Zeitspanne", "en": "Time interval value"}
+      },
+      {
+        "kind": "param",
+        "param": "EVENT_FILTER_PERIOD",
+        "requires": ["EVENT_FILTER_NUMBER"],
+        "label": {"de": "Meldungen bei", "en": "Messages for"}
+      },
+      {
+        "kind": "param",
+        "param": "SENSOR_SENSITIVITY",
+        "requires": ["SENSOR_SENSITIVITY"],
+        "label": {"de": "Erschütterungs-Empfindlichkeit", "en": "Vibration sensitivity"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Meldeverzögerung für Lageerkennung", "en": "Message delay for position detection"}
+      },
+      {
+        "kind": "param",
+        "param": "TRIGGER_ANGLE",
+        "requires": ["TRIGGER_ANGLE"],
+        "label": {"de": "Lagetoleranz", "en": "Position tolerance"}
+      }
+    ]
   },
   "ACCESS_TRANSCEIVER": {
     "channelType": "ACCESS_TRANSCEIVER",
-    "parameterOrder": ["NUMERIC_PIN_CODE", "INPUT_SELECT_FIELD", "ABORT_EVENT_SENDING_CHANNELS"]
+    "parameterOrder": ["NUMERIC_PIN_CODE", "INPUT_SELECT_FIELD", "ABORT_EVENT_SENDING_CHANNELS"],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "NUMERIC_PIN_CODE",
+        "requires": ["NUMERIC_PIN_CODE"],
+        "label": {"de": "PIN-Code", "en": "PIN code"}
+      }
+    ]
   },
   "ACOUSTIC_SIGNAL_TRANSMITTER": {
     "channelType": "ACOUSTIC_SIGNAL_TRANSMITTER",
@@ -39,11 +117,36 @@
     "conditionalVisibility": [
       {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
       {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      }
     ]
   },
   "ACOUSTIC_SIGNAL_VIRTUAL_RECEIVER": {
     "channelType": "ACOUSTIC_SIGNAL_VIRTUAL_RECEIVER",
-    "parameterOrder": ["POWERUP_JUMPTARGET"]
+    "parameterOrder": ["POWERUP_JUMPTARGET"],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "LOGIC_COMBINATION",
+        "option": "LOGIC_COMBINATION",
+        "requires": ["LOGIC_COMBINATION"],
+        "label": {"de": "Verknüpfungsregel", "en": "Connection rule"}
+      }
+    ]
   },
   "ALARM_ACTUATOR_RECEIVER": {
     "channelType": "ALARM_ACTUATOR_RECEIVER",
@@ -51,6 +154,22 @@
     "conditionalVisibility": [
       {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
       {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      }
     ]
   },
   "ALARM_SWITCH_VIRTUAL_RECEIVER": {
@@ -66,12 +185,59 @@
     "conditionalVisibility": [
       {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
       {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      }
     ]
   },
-  "ANALOG_INPUT_TRANSMITTER": {"channelType": "ANALOG_INPUT_TRANSMITTER", "parameterOrder": ["FILTER_SIZE"]},
+  "ANALOG_INPUT_TRANSMITTER": {
+    "channelType": "ANALOG_INPUT_TRANSMITTER",
+    "parameterOrder": ["FILTER_SIZE"],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "FILTER_SIZE",
+        "label": {
+          "de": "Anzahl der Messungen, die für die Mittelwertbildungder Eingangsspannung genutzt werden",
+          "en": "Number of measurements used for the average valueof the input voltage."
+        }
+      }
+    ]
+  },
   "ANALOG_OUTPUT_TRANSCEIVER": {
     "channelType": "ANALOG_OUTPUT_TRANSCEIVER",
-    "parameterOrder": ["VOLTAGE_0", "VOLTAGE_100"]
+    "parameterOrder": ["VOLTAGE_0", "VOLTAGE_100"],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "VOLTAGE_0",
+        "label": {
+          "de": "Wert (relativ) für die Steuerspannung bei 0%",
+          "en": "Value (relative) for control voltage at 0%"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "VOLTAGE_100",
+        "label": {
+          "de": "Wert (relativ) für die Steuerspannung bei 100%",
+          "en": "Value (relative) for control voltage at 100%"
+        }
+      }
+    ]
   },
   "AUTO_RELOCK_TRANSCEIVER": {
     "channelType": "AUTO_RELOCK_TRANSCEIVER",
@@ -80,7 +246,27 @@
       "POWERUP_JUMPTARGET": "_INLINE_AUTO_RELOCK_TRANSCEIVER_POWERUP_JUMPTARGET",
       "SPEED_SELECT_1": "_INLINE_AUTO_RELOCK_TRANSCEIVER_SPEED_SELECT_1",
       "SPEED_SELECT_2": "_INLINE_AUTO_RELOCK_TRANSCEIVER_SPEED_SELECT_2"
-    }
+    },
+    "controls": [
+      {
+        "kind": "param",
+        "param": "POWERUP_JUMPTARGET",
+        "requires": ["POWERUP_JUMPTARGET"],
+        "label": {"de": "Aktion bei Spannungszufuhr", "en": "Activity on power supply"}
+      },
+      {
+        "kind": "param",
+        "param": "SPEED_SELECT_1",
+        "requires": ["SPEED_SELECT_1"],
+        "label": {"de": "Geschwindigkeit für fremdausgelöste Fahrten", "en": "Speed for externally triggered drive"}
+      },
+      {
+        "kind": "param",
+        "param": "SPEED_SELECT_2",
+        "requires": ["SPEED_SELECT_2"],
+        "label": {"de": "Geschwindigkeit für selbstausgelöste Fahrten", "en": "Speed for self-triggered drive"}
+      }
+    ]
   },
   "BACKLIGHTING_RECEIVER": {
     "channelType": "BACKLIGHTING_RECEIVER",
@@ -120,6 +306,34 @@
         "id": "group_3",
         "labelKey": "stringtableactivatelevelontime",
         "parameters": ["ACTIVATE_LEVEL_VALUE", "_ACTIVATE_LEVEL_ONTIME_UNIT", "ACTIVATE_LEVEL_ONTIME_VALUE"]
+      }
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "param",
+        "param": "LED_DISABLE_CHANNELSTATE",
+        "requires": ["LED_DISABLE_CHANNELSTATE"],
+        "label": {"de": "Geräte-LED deaktivieren", "en": "Deactivate device LED"}
+      },
+      {
+        "kind": "param",
+        "param": "POWERUP_ON_LEVEL",
+        "requires": ["POWERUP_ON_LEVEL"],
+        "label": {"de": "Dimmwert", "en": "Dimming value"}
       }
     ]
   },
@@ -191,6 +405,198 @@
         ]
       },
       {"id": "group_2", "labelKey": "stringtableblinddelaycompensation", "parameters": ["DELAY_COMPENSATION"]}
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "param",
+        "param": "CHANGE_OVER_DELAY",
+        "requires": ["CHANGE_OVER_DELAY"],
+        "label": {"de": "Motorrichtungsumschaltzeit", "en": "Blind direction switch-over time"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUN_COUNTER",
+        "requires": ["REFERENCE_RUN_COUNTER"],
+        "label": {
+          "de": "Anzahl der Fahrten bis zur automatischen Referenzfahrt",
+          "en": "Number of runs until automatic reference drive"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "POSITION_SAVE_TIME",
+        "requires": ["POSITION_SAVE_TIME"],
+        "label": {"de": "Position Übernahmezeit", "en": "Position saving time"}
+      },
+      {
+        "kind": "param",
+        "param": "ENDPOSITION_AUTO_DETECT",
+        "requires": ["ENDPOSITION_AUTO_DETECT"],
+        "label": {"de": "Automatische Erkennung der Endposition", "en": "Automatic detection of the end position"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUNNING_TIME_BOTTOM_TOP_VALUE",
+        "requires": ["REFERENCE_RUNNING_TIME_BOTTOM_TOP_UNIT"],
+        "label": {"de": "Wert der Fahrzeit", "en": "Value movement time"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE",
+        "requires": ["REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT"],
+        "label": {"de": "Wert der Fahrzeit", "en": "Value movement time"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUNNING_TIME_SLATS_VALUE",
+        "requires": ["REFERENCE_RUNNING_TIME_SLATS_UNIT"],
+        "label": {"de": "Wert der Lamellenverstellzeit", "en": "Value slat adjustment time"}
+      },
+      {
+        "kind": "param",
+        "param": "DELAY_COMPENSATION",
+        "requires": ["DELAY_COMPENSATION"],
+        "label": {"de": "Zeitverzögerung", "en": "Time delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "param",
+        "param": "CHANGE_OVER_DELAY",
+        "requires": ["CHANGE_OVER_DELAY"],
+        "label": {"de": "Motorrichtungsumschaltzeit", "en": "Blind direction switch-over time"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUN_COUNTER",
+        "requires": ["REFERENCE_RUN_COUNTER"],
+        "label": {
+          "de": "Anzahl der Fahrten bis zur automatischen Referenzfahrt",
+          "en": "Number of runs until automatic reference drive"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "POSITION_SAVE_TIME",
+        "requires": ["POSITION_SAVE_TIME"],
+        "label": {"de": "Position Übernahmezeit", "en": "Position saving time"}
+      },
+      {
+        "kind": "param",
+        "param": "SENSOR_SENSITIVITY",
+        "requires": ["SENSOR_SENSITIVITY"],
+        "label": {"de": "Sensorempfindlichkeit Hinderniserkennung", "en": "Sensor sensitivity obstacle detection"}
+      },
+      {
+        "kind": "param",
+        "param": "ENDPOSITION_AUTO_DETECT",
+        "requires": ["ENDPOSITION_AUTO_DETECT"],
+        "label": {"de": "Automatische Erkennung der Endposition", "en": "Automatic detection of the end position"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUNNING_TIME_BOTTOM_TOP_VALUE",
+        "requires": ["REFERENCE_RUNNING_TIME_BOTTOM_TOP_UNIT"],
+        "label": {"de": "Wert der Fahrzeit", "en": "Value movement time"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE",
+        "requires": ["REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT"],
+        "label": {"de": "Wert der Fahrzeit", "en": "Value movement time"}
+      },
+      {"kind": "param", "param": "DELAY_COMPENSATION", "label": {"de": "Zeitverzögerung", "en": "Time delay"}},
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "param",
+        "param": "CHANGE_OVER_DELAY",
+        "requires": ["CHANGE_OVER_DELAY"],
+        "label": {"de": "Motorrichtungsumschaltzeit", "en": "Blind direction switch-over time"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUN_COUNTER",
+        "requires": ["REFERENCE_RUN_COUNTER"],
+        "label": {
+          "de": "Anzahl der Fahrten bis zur automatischen Referenzfahrt",
+          "en": "Number of runs until automatic reference drive"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "POSITION_SAVE_TIME",
+        "requires": ["POSITION_SAVE_TIME"],
+        "label": {"de": "Position Übernahmezeit", "en": "Position saving time"}
+      },
+      {
+        "kind": "param",
+        "param": "ENDPOSITION_AUTO_DETECT",
+        "requires": ["ENDPOSITION_AUTO_DETECT"],
+        "label": {"de": "Automatische Erkennung der Endposition", "en": "Automatic detection of the end position"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUNNING_TIME_BOTTOM_TOP_VALUE",
+        "requires": ["REFERENCE_RUNNING_TIME_BOTTOM_TOP_UNIT"],
+        "label": {"de": "Wert der Fahrzeit", "en": "Value movement time"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE",
+        "requires": ["REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT"],
+        "label": {"de": "Wert der Fahrzeit", "en": "Value movement time"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUNNING_TIME_SLATS_VALUE",
+        "requires": ["REFERENCE_RUNNING_TIME_SLATS_UNIT"],
+        "label": {"de": "Wert der Lamellenverstellzeit", "en": "Value slat adjustment time"}
+      },
+      {
+        "kind": "param",
+        "param": "DELAY_COMPENSATION",
+        "requires": ["DELAY_COMPENSATION"],
+        "label": {"de": "Zeitverzögerung", "en": "Time delay"}
+      }
     ]
   },
   "BLIND_VIRTUAL_RECEIVER": {
@@ -199,11 +605,80 @@
     "parameterGroups": [
       {"id": "group_0", "labelKey": "stringtablepositionsavetime", "parameters": ["POSITION_SAVE_TIME"]},
       {"id": "group_1", "labelKey": "virtualhelptxtdimmer", "parameters": ["POWERUP_JUMPTARGET"]}
+    ],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "LOGIC_COMBINATION",
+        "option": "LOGIC_COMBINATION",
+        "requires": ["LOGIC_COMBINATION"],
+        "label": {"de": "Verknüpfungsregel Jalousiesteuerung", "en": "Connection rule blind"}
+      },
+      {
+        "kind": "param",
+        "param": "LOGIC_COMBINATION_2",
+        "option": "LOGIC_COMBINATION",
+        "requires": ["LOGIC_COMBINATION"],
+        "label": {"de": "Verknüpfungsregel Lamellensteuerung", "en": "Connection rule slat"}
+      },
+      {
+        "kind": "param",
+        "param": "POSITION_SAVE_TIME",
+        "requires": ["POSITION_SAVE_TIME"],
+        "label": {"de": "Position Übernahmezeit", "en": "Position saving time"}
+      },
+      {
+        "kind": "param",
+        "param": "LOGIC_COMBINATION",
+        "option": "LOGIC_COMBINATION",
+        "requires": ["LOGIC_COMBINATION"],
+        "label": {"de": "Verknüpfungsregel", "en": "Connection rule"}
+      },
+      {
+        "kind": "param",
+        "param": "POSITION_SAVE_TIME",
+        "requires": ["POSITION_SAVE_TIME"],
+        "label": {"de": "Position Übernahmezeit", "en": "Position saving time"}
+      },
+      {
+        "kind": "param",
+        "param": "LOGIC_COMBINATION",
+        "option": "LOGIC_COMBINATION",
+        "requires": ["LOGIC_COMBINATION"],
+        "label": {"de": "Verknüpfungsregel Jalousiesteuerung", "en": "Connection rule blind"}
+      },
+      {
+        "kind": "param",
+        "param": "LOGIC_COMBINATION_2",
+        "option": "LOGIC_COMBINATION",
+        "requires": ["LOGIC_COMBINATION"],
+        "label": {"de": "Verknüpfungsregel Lamellensteuerung", "en": "Connection rule slat"}
+      },
+      {
+        "kind": "param",
+        "param": "POSITION_SAVE_TIME",
+        "requires": ["POSITION_SAVE_TIME"],
+        "label": {"de": "Position Übernahmezeit", "en": "Position saving time"}
+      }
     ]
   },
   "CARBON_DIOXIDE_RECEIVER": {
     "channelType": "CARBON_DIOXIDE_RECEIVER",
-    "parameterOrder": ["INTERVAL_UNIT", "CALIBRATION_PPM_VAL", "CALIBRATION_PPM_EXP", "INTERVAL_VALUE"]
+    "parameterOrder": ["INTERVAL_UNIT", "CALIBRATION_PPM_VAL", "CALIBRATION_PPM_EXP", "INTERVAL_VALUE"],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "CALIBRATION_PPM_VAL",
+        "requires": ["INTERVAL_UNIT", "CALIBRATION_PPM_VAL"],
+        "label": {"de": "Kalibrierwert", "en": "Calibration value"}
+      },
+      {
+        "kind": "param",
+        "param": "INTERVAL_VALUE",
+        "requires": ["INTERVAL_UNIT"],
+        "label": {"de": "Wert des Kalibrierungsintervalls", "en": "Value calibration interval"}
+      }
+    ]
   },
   "CLIMATECONTROL_FLOOR_DIRECT_TRANSMITTER": {
     "channelType": "CLIMATECONTROL_FLOOR_DIRECT_TRANSMITTER",
@@ -260,16 +735,116 @@
         "labelKey": "stringtableswitchingintervalvalue",
         "parameters": ["SWITCHING_INTERVAL_BASE", "SWITCHING_INTERVAL_FACTOR", "ON_TIME_BASE", "ON_TIME_FACTOR"]
       }
+    ],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "COOLING_DISABLE",
+        "option": "OPTION_DISABLE_ENABLE",
+        "requires": ["COOLING_DISABLE"],
+        "label": {"de": "Kühlen im Kühlmode", "en": "Cooling in cooling mode"}
+      },
+      {
+        "kind": "param",
+        "param": "HEATING_DISABLE",
+        "option": "OPTION_DISABLE_ENABLE",
+        "requires": ["HEATING_DISABLE"],
+        "label": {"de": "Heizen im Heizmode", "en": "Heating in heating mode"}
+      },
+      {
+        "kind": "param",
+        "param": "FLOOR_HEATING_MODE",
+        "option": "FLOOR_HEATING_MODE",
+        "requires": ["FLOOR_HEATING_MODE"],
+        "label": {"de": "Art/Typ der Anlage", "en": "Kind/type of system"}
+      },
+      {
+        "kind": "param",
+        "param": "HEATING_MODE_SELECTION",
+        "option": "HEATING_MODE_SELECTION",
+        "requires": ["HEATING_MODE_SELECTION"],
+        "label": {"de": "Art des Raumes", "en": "Kind of room"}
+      },
+      {
+        "kind": "param",
+        "param": "HEATING_VALVE_TYPE",
+        "option": "NORMALLY_CLOSE_OPEN",
+        "requires": ["HEATING_VALVE_TYPE"],
+        "label": {"de": "Ventiltyp", "en": "Valve type"}
+      },
+      {
+        "kind": "param",
+        "param": "HUMIDITY_LIMIT_DISABLE",
+        "option": "OPTION_DISABLE_ENABLE",
+        "requires": ["HUMIDITY_LIMIT_DISABLE"],
+        "label": {
+          "de": "Luftfeuchtigkeits-Schwellwert im Kühlbetrieb",
+          "en": "Humidity threshold value in cooling mode"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "HUMIDITY_LIMIT_VALUE",
+        "requires": ["HUMIDITY_LIMIT_VALUE"],
+        "label": {"de": "Luftfeuchtigkeitsschwelle", "en": "Humidity threshold"}
+      },
+      {
+        "kind": "param",
+        "param": "MINIMAL_FLOOR_TEMPERATURE",
+        "requires": ["MINIMAL_FLOOR_TEMPERATURE"],
+        "label": {"de": "Minimale Bodentemperatur", "en": "Minimum floor temperature"}
+      },
+      {"kind": "param", "param": "CLIMATE_CONTROL_TYPE", "requires": ["CLIMATE_CONTROL_TYPE"]},
+      {
+        "kind": "param",
+        "param": "TWO_POINT_HYSTERESIS",
+        "requires": ["TWO_POINT_HYSTERESIS"],
+        "label": {"de": "Hysterese", "en": "Hysteresis"}
+      },
+      {
+        "kind": "param",
+        "param": "SWITCHING_INTERVAL_FACTOR",
+        "label": {"de": "Wert des Intervalls", "en": "Value interval"}
+      },
+      {"kind": "param", "param": "ON_TIME_FACTOR", "label": {"de": "Wert Einschaltdauer", "en": "Value switch-on time"}}
     ]
   },
   "CLIMATECONTROL_HEAT_DEMAND_BOILER_TRANSMITTER": {
     "channelType": "CLIMATECONTROL_HEAT_DEMAND_BOILER_TRANSMITTER",
-    "parameterOrder": ["ONDELAY_TIME_BASE", "ONDELAY_TIME_FACTOR", "OFFDELAY_TIME_BASE", "OFFDELAY_TIME_FACTOR"]
+    "parameterOrder": ["ONDELAY_TIME_BASE", "ONDELAY_TIME_FACTOR", "OFFDELAY_TIME_BASE", "OFFDELAY_TIME_FACTOR"],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "ONDELAY_TIME_FACTOR",
+        "requires": ["ONDELAY_TIME_BASE"],
+        "label": {"de": "Wert Einschaltverzögerung", "en": "Value switch on delay"}
+      },
+      {
+        "kind": "param",
+        "param": "OFFDELAY_TIME_FACTOR",
+        "requires": ["ONDELAY_TIME_BASE"],
+        "label": {"de": "Wert der Ausschaltverzögerung", "en": "Value switch off delay"}
+      }
+    ]
   },
   "CLIMATE_TRANSCEIVER": {
     "channelType": "CLIMATE_TRANSCEIVER",
     "parameterOrder": ["TEMPERATURE_OFFSET", "TX_MINDELAY_UNIT", "TX_MINDELAY_VALUE"],
-    "conditionalVisibility": [{"trigger": "TX_MINDELAY_UNIT", "triggerValue": "custom", "show": ["TX_MINDELAY_VALUE"]}]
+    "conditionalVisibility": [{"trigger": "TX_MINDELAY_UNIT", "triggerValue": "custom", "show": ["TX_MINDELAY_VALUE"]}],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "TEMPERATURE_OFFSET",
+        "requires": ["TEMPERATURE_OFFSET"],
+        "label": {"de": "Temperatur-Offset", "en": "Temperature offset"}
+      },
+      {
+        "kind": "time",
+        "prefix": "TX_MINDELAY",
+        "selector": "txMinDelay",
+        "label": {"de": "Mindestsendeabstand", "en": "Minimum transmission interval"}
+      }
+    ]
   },
   "COND_SWITCH_TRANSMITTER": {
     "channelType": "COND_SWITCH_TRANSMITTER",
@@ -290,6 +865,40 @@
     "conditionalVisibility": [
       {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
       {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ],
+    "controls": [
+      {"kind": "param", "param": "COND_TX_FALLING", "requires": ["COND_TX_FALLING"]},
+      {"kind": "param", "param": "COND_TX_CYCLIC_BELOW", "requires": ["COND_TX_CYCLIC_BELOW"]},
+      {"kind": "param", "param": "COND_TX_RISING", "requires": ["COND_TX_RISING"]},
+      {"kind": "param", "param": "COND_TX_CYCLIC_ABOVE", "requires": ["COND_TX_CYCLIC_ABOVE"]},
+      {"kind": "param", "param": "COND_TX_DECISION_BELOW", "requires": ["COND_TX_DECISION_BELOW"]},
+      {"kind": "param", "param": "COND_TX_DECISION_ABOVE", "requires": ["COND_TX_DECISION_ABOVE"]},
+      {
+        "kind": "param",
+        "param": "COND_TX_THRESHOLD_LO",
+        "requires": ["COND_TX_THRESHOLD_LO"],
+        "label": {"de": "Unterer Grenzwert für bedingtes Senden", "en": "Lower limit for conditional transmitting"}
+      },
+      {
+        "kind": "param",
+        "param": "COND_TX_THRESHOLD_HI",
+        "requires": ["COND_TX_THRESHOLD_HI"],
+        "label": {"de": "Oberer Grenzwert für bedingtes Senden", "en": "Upper limit for conditional transmitting"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      }
     ]
   },
   "DIMMER_TRANSMITTER": {
@@ -312,9 +921,98 @@
     "conditionalVisibility": [
       {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
       {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "DIM_LEVEL_LOWEST",
+        "requires": ["DIM_LEVEL_LOWEST"],
+        "label": {"de": "Untere Grenze desangepassten Dimmbereichs", "en": "Lower limit of the adjusted dimming range"}
+      },
+      {
+        "kind": "param",
+        "param": "DIM_LEVEL_HIGHEST",
+        "requires": ["DIM_LEVEL_HIGHEST"],
+        "label": {"de": "Obere Grenze desangepassten Dimmbereichs", "en": "Upper limit of the adjusted dimming range"}
+      },
+      {
+        "kind": "param",
+        "param": "VOLTAGE_0",
+        "requires": ["VOLTAGE_0"],
+        "label": {
+          "de": "Wert (relativ) für die Steuerspannung bei 0%",
+          "en": "Value (relative) for control voltage at 0%"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "VOLTAGE_100",
+        "requires": ["VOLTAGE_100"],
+        "label": {
+          "de": "Wert (relativ) für die Steuerspannung bei 100%",
+          "en": "Value (relative) for control voltage at 100%"
+        }
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "param",
+        "param": "ON_MIN_LEVEL",
+        "requires": ["ON_MIN_LEVEL"],
+        "label": {"de": "Minimaler Pegelim Zustand EIN", "en": "Minimum levelin ON state"}
+      },
+      {
+        "kind": "param",
+        "param": "UDI_DIMMING_MODE",
+        "requires": ["UDI_DIMMING_MODE"],
+        "label": {"de": "Modus", "en": "Mode"}
+      },
+      {
+        "kind": "param",
+        "param": "FUSE_DELAY",
+        "requires": ["FUSE_DELAY"],
+        "label": {"de": "Trägheit Überstromerkennung", "en": "Inertia overcurrent detection"}
+      },
+      {
+        "kind": "param",
+        "param": "OVERTEMP_LEVEL",
+        "requires": ["OVERTEMP_LEVEL"],
+        "label": {"de": "Abschaltschwelle Übertemperatur", "en": "Switch-off threshold for over temperature"}
+      }
     ]
   },
-  "DIMMER_VIRTUAL_RECEIVER": {"channelType": "DIMMER_VIRTUAL_RECEIVER", "parameterOrder": ["POWERUP_JUMPTARGET"]},
+  "DIMMER_VIRTUAL_RECEIVER": {
+    "channelType": "DIMMER_VIRTUAL_RECEIVER",
+    "parameterOrder": ["POWERUP_JUMPTARGET"],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "LOGIC_COMBINATION",
+        "option": "LOGIC_COMBINATION",
+        "requires": ["LOGIC_COMBINATION"],
+        "label": {"de": "Verknüpfungsregel", "en": "Connection rule"}
+      },
+      {
+        "kind": "param",
+        "param": "LOGIC_COMBINATION_2",
+        "option": "LOGIC_COMBINATION",
+        "requires": ["LOGIC_COMBINATION_2"],
+        "label": {"de": "Verknüpfungsregel", "en": "Connection rule"}
+      }
+    ]
+  },
   "DISTANCE_TRANSMITTER": {
     "channelType": "DISTANCE_TRANSMITTER",
     "parameterOrder": [
@@ -329,7 +1027,34 @@
     "optionPresets": {
       "CHANNEL_OPERATION_MODE": "_INLINE_DISTANCE_TRANSMITTER_CHANNEL_OPERATION_MODE",
       "FILTER_SELECT": "_INLINE_DISTANCE_TRANSMITTER_FILTER_SELECT"
-    }
+    },
+    "controls": [
+      {
+        "kind": "param",
+        "param": "CHANNEL_OPERATION_MODE",
+        "requires": ["CHANNEL_OPERATION_MODE"],
+        "label": {"de": "Betriebsspannung", "en": "Operating voltage"}
+      },
+      {
+        "kind": "param",
+        "param": "FILTER_SELECT",
+        "requires": ["FILTER_SELECT"],
+        "label": {"de": "Filter", "en": "Filter"}
+      },
+      {
+        "kind": "time",
+        "prefix": "INTERVAL",
+        "selector": "timeMin_1_5_10_15_30_60",
+        "requires": ["INTERVAL_UNIT"],
+        "label": {"de": "Messintervall", "en": "Measurement interval"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_HEIGHT",
+        "requires": ["REFERENCE_HEIGHT"],
+        "label": {"de": "Referenzhöhe", "en": "Reference height"}
+      }
+    ]
   },
   "DOOR_LOCK_STATE_TRANSCEIVER": {
     "channelType": "DOOR_LOCK_STATE_TRANSCEIVER",
@@ -368,6 +1093,40 @@
           "MSG_FOR_POS_A",
           "MSG_FOR_POS_B"
         ]
+      }
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_LOCK_DIRECTION",
+        "requires": ["DOOR_LOCK_DIRECTION"],
+        "label": {"de": "Drehrichtung zum Verriegeln", "en": "Rotation direction for locking"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_LOCK_TURNS",
+        "requires": ["DOOR_LOCK_TURNS"],
+        "label": {"de": "Anzahl der Umdrehungen zum Verriegeln", "en": "Number of rotations for locking"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_LOCK_NEUTRAL_POS",
+        "requires": ["DOOR_LOCK_NEUTRAL_POS"],
+        "label": {"de": "Neutrale Position", "en": "Neutral position"}
       }
     ]
   },
@@ -426,6 +1185,73 @@
           "HOLD_TIME",
           "DISABLE_ACOUSTIC_CHANNELSTATE"
         ]
+      }
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "time",
+        "prefix": "POWERUP_ONTIME",
+        "selector": "timeOnOff",
+        "requires": ["POWERUP_ONTIME_UNIT"],
+        "label": {"de": "Wartezeit vor Auto Relock", "en": "Delay time before Auto Relock"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_LOCK_DIRECTION",
+        "requires": ["DOOR_LOCK_DIRECTION"],
+        "label": {"de": "Drehrichtung zum Verriegeln", "en": "Rotation direction for locking"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_LOCK_TURNS",
+        "requires": ["DOOR_LOCK_TURNS"],
+        "label": {"de": "Anzahl der Umdrehungen zum Verriegeln", "en": "Number of rotations for locking"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_LOCK_NEUTRAL_POS",
+        "requires": ["DOOR_LOCK_NEUTRAL_POS"],
+        "label": {"de": "Neutrale Position", "en": "Neutral position"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_LOCK_END_STOP_OFFSET_LOCKED",
+        "option": "DOOR_LOCK_ANGLE_RANGE",
+        "requires": ["DOOR_LOCK_END_STOP_OFFSET_LOCKED"],
+        "label": {"de": "Winkelbereich Endanschlag verriegelt", "en": "Rotation angle final position locked"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_LOCK_END_STOP_OFFSET_OPEN",
+        "option": "DOOR_LOCK_ANGLE_RANGE",
+        "requires": ["DOOR_LOCK_END_STOP_OFFSET_OPEN"],
+        "label": {"de": "Winkelbereich Endanschlag entriegelt", "en": "Rotation angle final position unlocked"}
+      },
+      {
+        "kind": "param",
+        "param": "HOLD_TIME",
+        "requires": ["HOLD_TIME"],
+        "label": {"de": "Haltezeit beim Öffnen", "en": "Holding time when opening"}
+      },
+      {
+        "kind": "param",
+        "param": "DISABLE_ACOUSTIC_CHANNELSTATE",
+        "requires": ["DISABLE_ACOUSTIC_CHANNELSTATE"],
+        "label": {"de": "Akustische Rückmeldung deaktivieren", "en": "Deactivate acoustic feedback"}
       }
     ]
   },
@@ -495,6 +1321,91 @@
         "labelKey": "lblautomaticlock",
         "parameters": ["CHANNEL_OPERATION_MODE", "DOOR_OPENING_DIRECTION", "SENSOR_SENSITIVITY"]
       }
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "time",
+        "prefix": "POWERUP_ONTIME",
+        "selector": "timeOnOff_autorelock",
+        "requires": ["POWERUP_ONTIME_UNIT"],
+        "label": {"de": "Wartezeit vor Auto Relock", "en": "Delay time before Auto Relock"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_LOCK_DIRECTION",
+        "requires": ["DOOR_LOCK_DIRECTION"],
+        "label": {"de": "Drehrichtung zum Verriegeln", "en": "Rotation direction for locking"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_LOCK_TURNS",
+        "requires": ["DOOR_LOCK_TURNS"],
+        "label": {"de": "Anzahl der Umdrehungen zum Verriegeln", "en": "Number of rotations for locking"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_LOCK_NEUTRAL_POS",
+        "requires": ["DOOR_LOCK_NEUTRAL_POS"],
+        "label": {"de": "Neutrale Position", "en": "Neutral position"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_LOCK_END_STOP_OFFSET_LOCKED",
+        "option": "DOOR_LOCK_ANGLE_RANGE",
+        "requires": ["DOOR_LOCK_END_STOP_OFFSET_LOCKED"],
+        "label": {"de": "Winkelbereich Endanschlag verriegelt", "en": "Rotation angle final position locked"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_LOCK_END_STOP_OFFSET_OPEN",
+        "option": "DOOR_LOCK_ANGLE_RANGE",
+        "requires": ["DOOR_LOCK_END_STOP_OFFSET_OPEN"],
+        "label": {"de": "Winkelbereich Endanschlag entriegelt", "en": "Rotation angle final position unlocked"}
+      },
+      {
+        "kind": "param",
+        "param": "HOLD_TIME",
+        "requires": ["HOLD_TIME"],
+        "label": {"de": "Haltezeit beim Öffnen", "en": "Holding time when opening"}
+      },
+      {
+        "kind": "param",
+        "param": "DISABLE_ACOUSTIC_CHANNELSTATE",
+        "requires": ["DISABLE_ACOUSTIC_CHANNELSTATE"],
+        "label": {"de": "Akustische Rückmeldung deaktivieren", "en": "Deactivate acoustic feedback"}
+      },
+      {
+        "kind": "param",
+        "param": "CHANNEL_OPERATION_MODE",
+        "requires": ["CHANNEL_OPERATION_MODE"],
+        "label": {"de": "Reaktion auf Türzustandssensor", "en": "Response to door status sensor"}
+      },
+      {
+        "kind": "param",
+        "param": "DOOR_OPENING_DIRECTION",
+        "requires": ["DOOR_OPENING_DIRECTION"],
+        "label": {"de": "Öffnungsrichtung", "en": "Opening direction"}
+      },
+      {
+        "kind": "param",
+        "param": "SENSOR_SENSITIVITY",
+        "requires": ["SENSOR_SENSITIVITY"],
+        "label": {"de": "Schlosslast-Empfindlichkeit", "en": "Pre-load sensitivity"}
+      }
     ]
   },
   "DOOR_RECEIVER": {
@@ -503,12 +1414,48 @@
     "conditionalVisibility": [
       {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
       {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      }
     ]
   },
   "DOOR_STATE_TRANSCEIVER": {
     "channelType": "DOOR_STATE_TRANSCEIVER",
     "parameterOrder": ["CHANNEL_OPERATION_MODE", "SAMPLE_INTERVAL", "SENSOR_SENSITIVITY"],
-    "optionPresets": {"CHANNEL_OPERATION_MODE": "_INLINE_DOOR_STATE_TRANSCEIVER_CHANNEL_OPERATION_MODE"}
+    "optionPresets": {"CHANNEL_OPERATION_MODE": "_INLINE_DOOR_STATE_TRANSCEIVER_CHANNEL_OPERATION_MODE"},
+    "controls": [
+      {
+        "kind": "param",
+        "param": "CHANNEL_OPERATION_MODE",
+        "requires": ["CHANNEL_OPERATION_MODE"],
+        "label": {"de": "Türzustands-Erkennung", "en": "Door status detection"}
+      },
+      {
+        "kind": "param",
+        "param": "SAMPLE_INTERVAL",
+        "requires": ["SAMPLE_INTERVAL"],
+        "label": {"de": "Zeitspanne zwischen den einzelnen Messungen", "en": "Time between the single measurements"}
+      },
+      {
+        "kind": "param",
+        "param": "SENSOR_SENSITIVITY",
+        "requires": ["SENSOR_SENSITIVITY"],
+        "label": {"de": "Magnetfeld-Empfindlichkeit", "en": "Magnetic field sensitivity"}
+      }
+    ]
   },
   "ENERGIE_METER_TRANSMITTER": {
     "channelType": "ENERGIE_METER_TRANSMITTER",
@@ -524,6 +1471,60 @@
         "id": "group_1",
         "labelKey": "stringtablepowermeterconstantvolume",
         "parameters": ["METER_CONSTANT_VOLUME", "METER_CONSTANT_ENERGY", "METER_OBIS_SEARCH_STRING"]
+      }
+    ],
+    "controls": [
+      {"kind": "param", "param": "METER_CONSTANT_VOLUME", "label": {"de": "Gerätekonstante", "en": "Device constant"}},
+      {"kind": "param", "param": "METER_CONSTANT_ENERGY", "label": {"de": "Gerätekonstante", "en": "Device constant"}},
+      {"kind": "param", "param": "METER_OBIS_SEARCH_STRING", "label": {"de": "OBIS String", "en": "OBIS string"}},
+      {"kind": "param", "param": "METER_OBIS_SEARCH_STRING", "label": {"de": "OBIS String", "en": "OBIS string"}},
+      {
+        "kind": "param",
+        "param": "METER_CONSTANT_VOLUME",
+        "requires": ["METER_CONSTANT_VOLUME"],
+        "label": {"de": "Gerätekonstante", "en": "Device constant"}
+      },
+      {
+        "kind": "time",
+        "prefix": "INTERVAL",
+        "selector": "autoIntervalA",
+        "requires": ["INTERVAL_UNIT"],
+        "label": {"de": "Messintervall", "en": "Measurement interval"}
+      },
+      {"kind": "param", "param": "METER_OBIS_SEARCH_STRING", "label": {"de": "OBIS String", "en": "OBIS string"}},
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "time",
+        "prefix": "TX_MINDELAY",
+        "selector": "txMinDelay",
+        "requires": ["TX_MINDELAY_UNIT"],
+        "label": {"de": "Mindestsendeabstand", "en": "Minimum transmission interval"}
+      },
+      {
+        "kind": "param",
+        "param": "AVERAGING",
+        "requires": ["AVERAGING"],
+        "label": {"de": "Mittelwertbildung über", "en": "Averaging via"}
+      },
+      {"kind": "param", "param": "TX_THRESHOLD_POWER", "requires": ["TX_THRESHOLD_POWER"]},
+      {
+        "kind": "param",
+        "param": "TX_THRESHOLD_ENERGY",
+        "requires": ["TX_THRESHOLD_POWER"],
+        "label": {"de": "der Energieverbrauch um", "en": "the energy consumption by"}
       }
     ]
   },
@@ -547,7 +1548,100 @@
         "show": ["REPEATED_LONG_PRESS_TIMEOUT_VALUE"]
       }
     ],
-    "optionPresets": {"MIOB_DIN_CONFIG": "MIOB_DIN_CONFIG", "MIOB_DIN_MODE": "NORMALLY_OPEN_CLOSE"}
+    "optionPresets": {"MIOB_DIN_CONFIG": "MIOB_DIN_CONFIG", "MIOB_DIN_MODE": "NORMALLY_OPEN_CLOSE"},
+    "controls": [
+      {
+        "kind": "param",
+        "param": "MIOB_DIN_CONFIG",
+        "option": "MIOB_DIN_CONFIG",
+        "requires": ["MIOB_DIN_CONFIG"],
+        "label": {"de": "Betriebsart digitaler Eingang", "en": "Digital input operating mode"}
+      },
+      {
+        "kind": "param",
+        "param": "MIOB_DIN_MODE",
+        "option": "NORMALLY_OPEN_CLOSE",
+        "requires": ["MIOB_DIN_MODE"],
+        "label": {"de": "Modus digitaler Eingang", "en": "Digital input mode"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "param",
+        "param": "DBL_PRESS_TIME",
+        "requires": ["DBL_PRESS_TIME"],
+        "label": {"de": "Doppelklick-Zeit (Tastensperre)", "en": "Double-click time (keypad lock)"}
+      },
+      {
+        "kind": "param",
+        "param": "LONG_PRESS_TIME",
+        "requires": ["DBL_PRESS_TIME"],
+        "label": {"de": "Mindestdauer für langen Tastendruck", "en": "Minimum duration for long button press"}
+      },
+      {
+        "kind": "time",
+        "prefix": "REPEATED_LONG_PRESS_TIMEOUT",
+        "selector": "delayShort",
+        "requires": ["REPEATED_LONG_PRESS_TIMEOUT_UNIT"],
+        "label": {"de": "Timeout für langen Tastendruck", "en": "Time-out for long button press"}
+      }
+    ]
+  },
+  "HEATING_CLIMATECONTROL_SWITCH_TRANSMITTER": {
+    "channelType": "HEATING_CLIMATECONTROL_SWITCH_TRANSMITTER",
+    "controls": [
+      {"kind": "param", "param": "CLIMATE_FUNCTION", "requires": ["CLIMATE_FUNCTION"]},
+      {
+        "kind": "param",
+        "param": "HUMIDITY_LIMIT_VALUE",
+        "requires": ["HUMIDITY_LIMIT_VALUE"],
+        "label": {"de": "Luftfeuchtigkeitsschwelle", "en": "Humidity threshold"}
+      },
+      {
+        "kind": "param",
+        "param": "TWO_POINT_HYSTERESIS",
+        "requires": ["TWO_POINT_HYSTERESIS"],
+        "label": {"de": "Hysterese", "en": "Hysteresis"}
+      },
+      {"kind": "param", "param": "HEATING_COOLING", "requires": ["HEATING_COOLING"]},
+      {"kind": "param", "param": "COOLING_ENABLE", "label": {"de": "Im Kühlmodus", "en": "In cooling mode"}},
+      {"kind": "param", "param": "HEATING_ENABLE", "label": {"de": "Im Heizmodus", "en": "In heating mode"}}
+    ]
+  },
+  "HEATING_CLIMATECONTROL_TRANSCEIVER": {
+    "channelType": "HEATING_CLIMATECONTROL_TRANSCEIVER",
+    "controls": [
+      {
+        "kind": "param",
+        "param": "BUTTON_RESPONSE_WITHOUT_BACKLIGHT",
+        "requires": ["BUTTON_RESPONSE_WITHOUT_BACKLIGHT"],
+        "label": {"de": "Anzeige im Display", "en": "Information in display"}
+      },
+      {"kind": "param", "param": "TEMPERATURE_LOWERING_COOLING", "requires": ["TEMPERATURE_LOWERING_COOLING"]},
+      {"kind": "param", "param": "TEMPERATURE_LOWERING", "requires": ["TEMPERATURE_LOWERING_COOLING"]},
+      {"kind": "param", "param": "TEMPERATURE_MINIMUM"},
+      {"kind": "param", "param": "TEMPERATURE_MAXIMUM"},
+      {
+        "kind": "param",
+        "param": "MIN_MAX_VALUE_NOT_RELEVANT_FOR_MANU_MODE",
+        "requires": ["MIN_MAX_VALUE_NOT_RELEVANT_FOR_MANU_MODE"]
+      },
+      {"kind": "param", "param": "OPTIMUM_START_STOP", "requires": ["OPTIMUM_START_STOP"]},
+      {"kind": "param", "param": "DURATION_5MIN", "requires": ["DURATION_5MIN"]},
+      {"kind": "param", "param": "TEMPERATUREFALL_VALUE", "requires": ["TEMPERATUREFALL_VALUE"]},
+      {
+        "kind": "param",
+        "param": "TEMPERATUREFALL_WINDOW_OPEN_TIME_PERIOD",
+        "requires": ["TEMPERATUREFALL_WINDOW_OPEN_TIME_PERIOD"]
+      },
+      {"kind": "param", "param": "BOOST_AFTER_WINDOW_OPEN", "requires": ["BOOST_AFTER_WINDOW_OPEN"]},
+      {"kind": "param", "param": "ACOUSTIC_ALARM_SIGNAL", "requires": ["ACOUSTIC_ALARM_SIGNAL"]}
+    ]
   },
   "KEY_TRANSCEIVER": {
     "channelType": "KEY_TRANSCEIVER",
@@ -594,6 +1688,136 @@
           "ABORT_EVENT_SENDING_CHANNELS"
         ]
       }
+    ],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "CHANNEL_OPERATION_MODE",
+        "requires": ["CHANNEL_OPERATION_MODE"],
+        "label": {"de": "Kanal aktiv / inaktiv:", "en": "Channel active / inactive:"}
+      },
+      {
+        "kind": "param",
+        "param": "DISABLE_ACOUSTIC_SENDSTATE",
+        "requires": ["DISABLE_ACOUSTIC_SENDSTATE"],
+        "label": {
+          "de": "Akustische Bestätigung des Tastendrucks deaktivieren",
+          "en": "Deactivate acoustic confirmation of button press"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "LED_DISABLE_CHANNELSTATE",
+        "requires": ["LED_DISABLE_CHANNELSTATE"],
+        "label": {"de": "Geräte-LED deaktivieren", "en": "Deactivate device LED"}
+      },
+      {
+        "kind": "param",
+        "param": "LED_DISABLE_SENDSTATE",
+        "requires": ["LED_DISABLE_SENDSTATE"],
+        "label": {
+          "de": "Visuelle Bestätigung des Tastendrucks deaktivieren",
+          "en": "Deactivate visual confirmation of button press"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "DBL_PRESS_TIME",
+        "requires": ["DBL_PRESS_TIME"],
+        "label": {"de": "Doppelklick-Zeit (Tastensperre)", "en": "Double-click time (keypad lock)"}
+      },
+      {
+        "kind": "param",
+        "param": "LONG_PRESS_TIME",
+        "requires": ["LONG_PRESS_TIME"],
+        "label": {"de": "Mindestdauer für langen Tastendruck", "en": "Minimum duration for long button press"}
+      },
+      {
+        "kind": "time",
+        "prefix": "REPEATED_LONG_PRESS_TIMEOUT",
+        "selector": "timeOnOffShort",
+        "requires": ["REPEATED_LONG_PRESS_TIMEOUT_UNIT"],
+        "label": {"de": "Timeout für langen Tastendruck", "en": "Time-out for long button press"}
+      }
+    ]
+  },
+  "LEVEL_COMMAND_TRANSMITTER_CO2": {
+    "channelType": "LEVEL_COMMAND_TRANSMITTER_CO2",
+    "controls": [
+      {"kind": "param", "param": "COND_TX_FALLING", "requires": ["COND_TX_FALLING"]},
+      {"kind": "param", "param": "COND_TX_CYCLIC_BELOW", "requires": ["COND_TX_CYCLIC_BELOW"]},
+      {"kind": "param", "param": "COND_TX_RISING", "requires": ["COND_TX_RISING"]},
+      {"kind": "param", "param": "COND_TX_CYCLIC_ABOVE", "requires": ["COND_TX_CYCLIC_ABOVE"]},
+      {"kind": "param", "param": "COND_TX_DECISION_BELOW", "requires": ["COND_TX_DECISION_BELOW"]},
+      {"kind": "param", "param": "COND_TX_DECISION_ABOVE", "requires": ["COND_TX_DECISION_ABOVE"]},
+      {
+        "kind": "param",
+        "param": "COND_TX_THRESHOLD_LO",
+        "requires": ["COND_TX_THRESHOLD_LO"],
+        "label": {"de": "Unterer Grenzwert für bedingtes Senden", "en": "Lower limit for conditional transmitting"}
+      },
+      {
+        "kind": "param",
+        "param": "COND_TX_THRESHOLD_HI",
+        "requires": ["COND_TX_THRESHOLD_HI"],
+        "label": {"de": "Oberer Grenzwert für bedingtes Senden", "en": "Upper limit for conditional transmitting"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      }
+    ]
+  },
+  "LEVEL_COMMAND_TRANSMITTER_HUMIDITY": {
+    "channelType": "LEVEL_COMMAND_TRANSMITTER_HUMIDITY",
+    "controls": [
+      {"kind": "param", "param": "CLIMATE_FUNCTION", "requires": ["CLIMATE_FUNCTION"]},
+      {
+        "kind": "param",
+        "param": "HUMIDITY_LIMIT_VALUE",
+        "requires": ["HUMIDITY_LIMIT_VALUE"],
+        "label": {"de": "Luftfeuchtigkeitsschwelle", "en": "Humidity threshold"}
+      },
+      {
+        "kind": "param",
+        "param": "TWO_POINT_HYSTERESIS",
+        "requires": ["TWO_POINT_HYSTERESIS"],
+        "label": {"de": "Hysterese", "en": "Hysteresis"}
+      },
+      {"kind": "param", "param": "HEATING_COOLING", "requires": ["HEATING_COOLING"]},
+      {"kind": "param", "param": "COOLING_ENABLE", "label": {"de": "Im Kühlmodus", "en": "In cooling mode"}},
+      {"kind": "param", "param": "HEATING_ENABLE", "label": {"de": "Im Heizmodus", "en": "In heating mode"}}
+    ]
+  },
+  "LEVEL_COMMAND_TRANSMITTER_TEMPERATURE": {
+    "channelType": "LEVEL_COMMAND_TRANSMITTER_TEMPERATURE",
+    "controls": [
+      {"kind": "param", "param": "CLIMATE_FUNCTION", "requires": ["CLIMATE_FUNCTION"]},
+      {
+        "kind": "param",
+        "param": "HUMIDITY_LIMIT_VALUE",
+        "requires": ["HUMIDITY_LIMIT_VALUE"],
+        "label": {"de": "Luftfeuchtigkeitsschwelle", "en": "Humidity threshold"}
+      },
+      {
+        "kind": "param",
+        "param": "TWO_POINT_HYSTERESIS",
+        "requires": ["TWO_POINT_HYSTERESIS"],
+        "label": {"de": "Hysterese", "en": "Hysteresis"}
+      },
+      {"kind": "param", "param": "HEATING_COOLING", "requires": ["HEATING_COOLING"]},
+      {"kind": "param", "param": "COOLING_ENABLE", "label": {"de": "Im Kühlmodus", "en": "In cooling mode"}},
+      {"kind": "param", "param": "HEATING_ENABLE", "label": {"de": "Im Heizmodus", "en": "In heating mode"}}
     ]
   },
   "MAINTENANCE": {
@@ -691,6 +1915,184 @@
         "labelKey": "stringtablesabotagecontacttype",
         "parameters": ["BLOCKING_ON_SABOTAGE", "SABOTAGE_CONTACT_TYPE", "BLOCKING_TEMPORARY", "BLOCKING_PERMANENT"]
       }
+    ],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "CYCLIC_INFO_MSG_DIS",
+        "requires": ["CYCLIC_INFO_MSG_DIS"],
+        "label": {"de": "Anzahl der auszulassenden Statusmeldungen", "en": "Number of messages that are left out"}
+      },
+      {
+        "kind": "param",
+        "param": "CYCLIC_INFO_MSG_DIS_UNCHANGED",
+        "requires": ["CYCLIC_INFO_MSG_DIS_UNCHANGED"],
+        "label": {
+          "de": "Anzahl der auszulassenden,unveränderten Statusmeldungen",
+          "en": "Number of unchanged status messages that are left out"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "OVERTEMP_LEVEL",
+        "requires": ["OVERTEMP_LEVEL"],
+        "label": {"de": "Abschaltschwelle Übertemperatur", "en": "Switch-off threshold for over temperature"}
+      },
+      {
+        "kind": "param",
+        "param": "DEVICE_OPERATION_MODE",
+        "requires": ["DEVICE_OPERATION_MODE"],
+        "label": {"de": "Modus", "en": "Mode"}
+      },
+      {
+        "kind": "param",
+        "param": "LOW_BAT_LIMIT",
+        "requires": ["LOW_BAT_LIMIT"],
+        "label": {"de": "Low-Bat.-Schwelle", "en": "Low. bat. threshold"}
+      },
+      {
+        "kind": "param",
+        "param": "LOCAL_RESET_DISABLED",
+        "requires": ["LOCAL_RESET_DISABLED"],
+        "label": {"de": "Reset per Gerätetaste sperren", "en": "Lock reset via device button"}
+      },
+      {
+        "kind": "param",
+        "param": "GLOBAL_BUTTON_LOCK",
+        "requires": ["GLOBAL_BUTTON_LOCK"],
+        "label": {"de": "Globale Bediensperre", "en": "Global operating lock"}
+      },
+      {
+        "kind": "param",
+        "param": "ROUTER_MODULE_ENABLED",
+        "requires": ["ROUTER_MODULE_ENABLED"],
+        "label": {"de": "Gerät dient als Router", "en": "Device serves as router"}
+      },
+      {
+        "kind": "param",
+        "param": "MULTICAST_ROUTER_MODULE_ENABLED",
+        "requires": ["MULTICAST_ROUTER_MODULE_ENABLED"],
+        "label": {"de": "MultiCast-Routing", "en": "MultiCast Routing"}
+      },
+      {
+        "kind": "param",
+        "param": "ENABLE_ROUTING",
+        "requires": ["ENABLE_ROUTING"],
+        "label": {"de": "Routing aktiv", "en": "Routing active"}
+      },
+      {
+        "kind": "param",
+        "param": "DEVICE_INPUT_LAYOUT_MODE",
+        "requires": ["DEVICE_INPUT_LAYOUT_MODE"],
+        "label": {"de": "Anzeigelayout", "en": "Display layout"}
+      },
+      {
+        "kind": "param",
+        "param": "BUTTON_RESPONSE_WITHOUT_BACKLIGHT",
+        "requires": ["BUTTON_RESPONSE_WITHOUT_BACKLIGHT"]
+      },
+      {"kind": "param", "param": "INPUT_"},
+      {
+        "kind": "param",
+        "param": "DISABLE_DEVICE_ALIVE_SIGNAL",
+        "requires": ["DISABLE_DEVICE_ALIVE_SIGNAL"],
+        "label": {"de": "Überwachungssignal deaktivieren", "en": "Deactivate monitoring signal"}
+      },
+      {
+        "kind": "param",
+        "param": "DISPLAY_CONTRAST",
+        "requires": ["DISPLAY_CONTRAST"],
+        "label": {"de": "Displaykontrast", "en": "Display contrast"}
+      },
+      {
+        "kind": "param",
+        "param": "BACKLIGHT_ON_TIME",
+        "requires": ["BACKLIGHT_ON_TIME"],
+        "label": {"de": "Beleuchtungsdauer Display", "en": "Illumination time display"}
+      },
+      {
+        "kind": "param",
+        "param": "ALTITUDE",
+        "requires": ["ALTITUDE"],
+        "label": {"de": "Höhe über NN", "en": "Height above sea level"}
+      },
+      {
+        "kind": "param",
+        "param": "SIGNAL_BRIGHTNESS",
+        "option": "RAW_0_100Percent_1",
+        "requires": ["SIGNAL_BRIGHTNESS"],
+        "label": {"de": "Helligkeit der Systemtaste", "en": "Brightness of the system button"}
+      },
+      {
+        "kind": "param",
+        "param": "MOUNTING_ORIENTATION",
+        "requires": ["MOUNTING_ORIENTATION"],
+        "label": {"de": "Displayausrichtung", "en": "Display orientation"}
+      },
+      {
+        "kind": "param",
+        "param": "DISPLAY_MODE",
+        "requires": ["DISPLAY_MODE"],
+        "label": {"de": "Displaymodus", "en": "Display mode"}
+      },
+      {
+        "kind": "param",
+        "param": "DISPLAY_INVERTED_COLORS",
+        "requires": ["DISPLAY_INVERTED_COLORS"],
+        "label": {"de": "Displayfarbe", "en": "Display colour"}
+      },
+      {
+        "kind": "param",
+        "param": "LONGITUDE",
+        "requires": ["LONGITUDE"],
+        "label": {"de": "Wohnort", "en": "Place of residence"}
+      },
+      {
+        "kind": "param",
+        "param": "LATITUDE",
+        "requires": ["LONGITUDE"],
+        "label": {"de": "Wohnort", "en": "Place of residence"}
+      },
+      {
+        "kind": "param",
+        "param": "BLOCKING_ON_SABOTAGE",
+        "requires": ["BLOCKING_ON_SABOTAGE"],
+        "label": {"de": "Bei Sabotage sperren", "en": "Lock in case of sabotage"}
+      },
+      {
+        "kind": "param",
+        "param": "SABOTAGE_CONTACT_TYPE",
+        "option": "NORMALLY_CLOSE_OPEN",
+        "requires": ["SABOTAGE_CONTACT_TYPE"],
+        "label": {"de": "Typ des Sabotagekontaktes", "en": "Type of sabotage contact"}
+      }
+    ]
+  },
+  "MOTIONDETECTOR_TRANSCEIVER": {
+    "channelType": "MOTIONDETECTOR_TRANSCEIVER",
+    "controls": [
+      {"kind": "param", "param": "EVENT_FILTER_NUMBER"},
+      {"kind": "param", "param": "EVENT_FILTER_PERIOD"},
+      {"kind": "param", "param": "MIN_INTERVAL"},
+      {"kind": "param", "param": "MOTION_ACTIVE_TIME"},
+      {"kind": "param", "param": "BRIGHTNESS_FILTER"},
+      {"kind": "param", "param": "COND_TX_THRESHOLD_LO"}
+    ]
+  },
+  "MOTIONDETECTOR_VIRTUAL_TRANSCEIVER": {
+    "channelType": "MOTIONDETECTOR_VIRTUAL_TRANSCEIVER",
+    "controls": [
+      {
+        "kind": "param",
+        "param": "EVENT_FILTER_NUMBER",
+        "requires": ["EVENT_FILTER_NUMBER"],
+        "label": {"de": "Erfassungszonen", "en": "Detection zones"}
+      },
+      {"kind": "param", "param": "EVENT_FILTER_PERIOD", "requires": ["EVENT_FILTER_NUMBER"]},
+      {"kind": "param", "param": "MIN_INTERVAL"},
+      {"kind": "param", "param": "MOTION_ACTIVE_TIME"},
+      {"kind": "param", "param": "BRIGHTNESS_FILTER"},
+      {"kind": "param", "param": "COND_TX_THRESHOLD_LO"}
     ]
   },
   "MULTI_MODE_INPUT_TRANSMITTER": {
@@ -722,7 +2124,74 @@
       "CHANNEL_OPERATION_MODE": "_INLINE_MULTI_MODE_INPUT_TRANSMITTER_CHANNEL_OPERATION_MODE",
       "MSG_FOR_POS_A": "_INLINE_MULTI_MODE_INPUT_TRANSMITTER_MSG_FOR_POS_A",
       "MSG_FOR_POS_B": "_INLINE_MULTI_MODE_INPUT_TRANSMITTER_MSG_FOR_POS_B"
-    }
+    },
+    "controls": [
+      {
+        "kind": "param",
+        "param": "LED_DISABLE_CHANNELSTATE",
+        "requires": ["LED_DISABLE_CHANNELSTATE"],
+        "label": {"de": "Geräte-LED deaktivieren", "en": "Deactivate device LED"}
+      },
+      {
+        "kind": "param",
+        "param": "LED_DISABLE_SENDSTATE",
+        "requires": ["LED_DISABLE_SENDSTATE"],
+        "label": {
+          "de": "Visuelle Bestätigung des Tastendrucks deaktivieren",
+          "en": "Deactivate visual confirmation of button press"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "CHANNEL_OPERATION_MODE",
+        "requires": ["CHANNEL_OPERATION_MODE"],
+        "label": {"de": "Kanalverhalten", "en": "Channel behaviour"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "param",
+        "param": "DBL_PRESS_TIME",
+        "requires": ["DBL_PRESS_TIME"],
+        "label": {"de": "Doppelklick-Zeit (Tastensperre)", "en": "Double-click time (keypad lock)"}
+      },
+      {
+        "kind": "param",
+        "param": "LONG_PRESS_TIME",
+        "requires": ["LONG_PRESS_TIME"],
+        "label": {"de": "Mindestdauer für langen Tastendruck", "en": "Minimum duration for long button press"}
+      },
+      {
+        "kind": "time",
+        "prefix": "REPEATED_LONG_PRESS_TIMEOUT",
+        "selector": "timeOnOffShort",
+        "requires": ["REPEATED_LONG_PRESS_TIMEOUT_UNIT"],
+        "label": {"de": "Timeout für langen Tastendruck", "en": "Time-out for long button press"}
+      },
+      {
+        "kind": "param",
+        "param": "MSG_FOR_POS_A",
+        "requires": ["MSG_FOR_POS_A"],
+        "label": {"de": "Meldung in Position offen", "en": "Message in position open"}
+      },
+      {
+        "kind": "param",
+        "param": "MSG_FOR_POS_B",
+        "requires": ["MSG_FOR_POS_B"],
+        "label": {"de": "Meldung in Position geschlossen", "en": "Message in position closed"}
+      },
+      {
+        "kind": "param",
+        "param": "CONTACT_BOOST",
+        "requires": ["CONTACT_BOOST"],
+        "label": {"de": "Korrosionsschutz", "en": "Corrosion protection"}
+      }
+    ]
   },
   "OPTICAL_SIGNAL_RECEIVER": {
     "channelType": "OPTICAL_SIGNAL_RECEIVER",
@@ -749,6 +2218,22 @@
           "POWERUP_JUMPTARGET"
         ]
       }
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      }
     ]
   },
   "PASSAGE_DETECTOR": {
@@ -762,6 +2247,33 @@
       "EVENT_TIMEOUT_VALUE",
       "LED_DISABLE_CHANNELSTATE",
       "SENSOR_SENSITIVITY"
+    ],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "EVENT_BLINDTIME_VALUE",
+        "requires": ["EVENT_BLINDTIME_BASE"],
+        "label": {"de": "Wert der Zeitspanne", "en": "Time interval value"}
+      },
+      {
+        "kind": "param",
+        "param": "EVENT_TIMEOUT_VALUE",
+        "requires": ["EVENT_TIMEOUT_BASE"],
+        "label": {"de": "Wert der Zeitspanne", "en": "Time interval value"}
+      },
+      {
+        "kind": "param",
+        "param": "LED_DISABLE_CHANNELSTATE",
+        "requires": ["LED_DISABLE_CHANNELSTATE"],
+        "label": {"de": "Geräte-LED deaktivieren", "en": "Deactivate device LED"}
+      },
+      {
+        "kind": "param",
+        "param": "SENSOR_SENSITIVITY",
+        "option": "RAW_0_100Percent",
+        "requires": ["SENSOR_SENSITIVITY"],
+        "label": {"de": "Sensorempfindlichkeit", "en": "Sensor sensitivity"}
+      }
     ]
   },
   "PASSAGE_DETECTOR_COUNTER_TRANSMITTER": {
@@ -772,11 +2284,53 @@
       "COND_TX_DECISION_BELOW",
       "COND_TX_THRESHOLD_HI",
       "COND_TX_THRESHOLD_LO"
+    ],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "COND_TX_DECISION_ABOVE",
+        "requires": ["COND_TX_DECISION_ABOVE"],
+        "label": {"de": "Betriebsart", "en": "Operating mode"}
+      },
+      {"kind": "param", "param": "COND_TX_DECISION_BELOW", "requires": ["COND_TX_DECISION_BELOW"]},
+      {"kind": "param", "param": "COND_TX_THRESHOLD_HI", "requires": ["COND_TX_THRESHOLD_HI"]},
+      {"kind": "param", "param": "COND_TX_THRESHOLD_LO", "requires": ["COND_TX_THRESHOLD_LO"]}
     ]
   },
   "PASSAGE_DETECTOR_DIRECTION_TRANSMITTER": {
     "channelType": "PASSAGE_DETECTOR_DIRECTION_TRANSMITTER",
-    "parameterOrder": ["CHANNEL_OPERATION_MODE", "COND_TX_DECISION_ABOVE", "COND_TX_DECISION_BELOW"]
+    "parameterOrder": ["CHANNEL_OPERATION_MODE", "COND_TX_DECISION_ABOVE", "COND_TX_DECISION_BELOW"],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "COND_TX_DECISION_ABOVE",
+        "requires": ["COND_TX_DECISION_ABOVE"],
+        "label": {
+          "de": "Gesendeter Entscheidungswertbei Durchgang von rechts nach links",
+          "en": "Decision value sentwhen passing from right to left"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "COND_TX_DECISION_BELOW",
+        "requires": ["COND_TX_DECISION_BELOW"],
+        "label": {
+          "de": "Gesendeter Entscheidungswertbei Durchgang von links nach rechts",
+          "en": "Decision value sentwhen passing from left to right"
+        }
+      }
+    ]
+  },
+  "PRESENCEDETECTOR_TRANSCEIVER": {
+    "channelType": "PRESENCEDETECTOR_TRANSCEIVER",
+    "controls": [
+      {"kind": "param", "param": "EVENT_FILTER_NUMBER"},
+      {"kind": "param", "param": "EVENT_FILTER_PERIOD"},
+      {"kind": "param", "param": "MIN_INTERVAL"},
+      {"kind": "param", "param": "MOTION_ACTIVE_TIME"},
+      {"kind": "param", "param": "BRIGHTNESS_FILTER"},
+      {"kind": "param", "param": "COND_TX_THRESHOLD_LO"}
+    ]
   },
   "RAIN_DETECTION_TRANSMITTER": {
     "channelType": "RAIN_DETECTION_TRANSMITTER",
@@ -786,6 +2340,47 @@
       "EVENT_TIMEOUT_VALUE",
       "SAMPLE_INTERVAL",
       "SENSOR_SENSITIVITY"
+    ],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "LED_DISABLE_CHANNELSTATE",
+        "requires": ["LED_DISABLE_CHANNELSTATE"],
+        "label": {"de": "Geräte-LED deaktivieren", "en": "Deactivate device LED"}
+      },
+      {
+        "kind": "param",
+        "param": "EVENT_TIMEOUT_VALUE",
+        "requires": ["EVENT_TIMEOUT_BASE"],
+        "label": {"de": "Wert der Zeitspanne", "en": "Time interval value"}
+      },
+      {
+        "kind": "param",
+        "param": "SAMPLE_INTERVAL",
+        "requires": ["SAMPLE_INTERVAL"],
+        "label": {
+          "de": "Zeitspanne zwischen den einzelnen Messungen(Regenerkennungsintervall)",
+          "en": "Time between the single measurements(rain detection interval)"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "SENSOR_SENSITIVITY",
+        "option": "RAW_0_100Percent",
+        "requires": ["SENSOR_SENSITIVITY"],
+        "label": {"de": "Sensorempfindlichkeit", "en": "Sensor sensitivity"}
+      }
+    ]
+  },
+  "ROTARY_HANDLE_TRANSCEIVER": {
+    "channelType": "ROTARY_HANDLE_TRANSCEIVER",
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      }
     ]
   },
   "SERVO_TRANSMITTER": {
@@ -817,9 +2412,44 @@
         "labelKey": "lblrotationswap",
         "parameters": ["OUTPUT_SWAP", "POWER_OFFDELAY_UNIT", "POWER_OFFDELAY_VALUE"]
       }
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "time",
+        "prefix": "POWER_OFFDELAY",
+        "selector": "timeOnOff",
+        "requires": ["POWER_OFFDELAY_UNIT"],
+        "label": {"de": "Einschaltdauer Servo", "en": "Servo switch-on time"}
+      }
     ]
   },
-  "SERVO_VIRTUAL_RECEIVER": {"channelType": "SERVO_VIRTUAL_RECEIVER", "parameterOrder": ["POWERUP_JUMPTARGET"]},
+  "SERVO_VIRTUAL_RECEIVER": {
+    "channelType": "SERVO_VIRTUAL_RECEIVER",
+    "parameterOrder": ["POWERUP_JUMPTARGET"],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "LOGIC_COMBINATION",
+        "option": "LOGIC_COMBINATION",
+        "requires": ["LOGIC_COMBINATION"],
+        "label": {"de": "Verknüpfungsregel", "en": "Connection rule"}
+      }
+    ]
+  },
   "SHUTTER_CONTACT": {
     "channelType": "SHUTTER_CONTACT",
     "parameterOrder": [
@@ -831,7 +2461,28 @@
       "MSG_FOR_POS_A",
       "MSG_FOR_POS_B"
     ],
-    "conditionalVisibility": [{"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]}]
+    "conditionalVisibility": [{"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]}],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "param",
+        "param": "EVENT_FILTER_PERIOD",
+        "requires": ["EVENT_FILTER_NUMBER"],
+        "label": {"de": "Filterbasis", "en": "Filter base"}
+      },
+      {
+        "kind": "param",
+        "param": "SAMPLE_INTERVAL",
+        "requires": ["SAMPLE_INTERVAL"],
+        "label": {"de": "Zeitspanne zwischen den einzelnen Messungen", "en": "Time between the single measurements"}
+      }
+    ]
   },
   "SHUTTER_TRANSMITTER": {
     "channelType": "SHUTTER_TRANSMITTER",
@@ -895,6 +2546,68 @@
           "DELAY_COMPENSATION"
         ]
       }
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "param",
+        "param": "CHANGE_OVER_DELAY",
+        "requires": ["CHANGE_OVER_DELAY"],
+        "label": {"de": "Motorrichtungsumschaltzeit", "en": "Blind direction switch-over time"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUN_COUNTER",
+        "requires": ["REFERENCE_RUN_COUNTER"],
+        "label": {
+          "de": "Anzahl der Fahrten bis zur automatischen Referenzfahrt",
+          "en": "Number of runs until automatic reference drive"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "POSITION_SAVE_TIME",
+        "requires": ["POSITION_SAVE_TIME"],
+        "label": {"de": "Position Übernahmezeit", "en": "Position saving time"}
+      },
+      {
+        "kind": "param",
+        "param": "SENSOR_SENSITIVITY",
+        "requires": ["SENSOR_SENSITIVITY"],
+        "label": {"de": "Sensorempfindlichkeit Hinderniserkennung", "en": "Sensor sensitivity obstacle detection"}
+      },
+      {
+        "kind": "param",
+        "param": "ENDPOSITION_AUTO_DETECT",
+        "requires": ["ENDPOSITION_AUTO_DETECT"],
+        "label": {"de": "Automatische Erkennung der Endposition", "en": "Automatic detection of the end position"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUNNING_TIME_BOTTOM_TOP_VALUE",
+        "requires": ["REFERENCE_RUNNING_TIME_BOTTOM_TOP_UNIT"],
+        "label": {"de": "Wert der Fahrzeit", "en": "Value movement time"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE",
+        "requires": ["REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT"],
+        "label": {"de": "Wert der Fahrzeit", "en": "Value movement time"}
+      },
+      {"kind": "param", "param": "DELAY_COMPENSATION", "label": {"de": "Zeitverzögerung", "en": "Time delay"}}
     ]
   },
   "SHUTTER_VIRTUAL_RECEIVER": {
@@ -974,6 +2687,21 @@
           "EFFECT_ADAPTION_FADE_OUT_TIME_FACTOR"
         ]
       }
+    ],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "LOGIC_COMBINATION",
+        "option": "LOGIC_COMBINATION",
+        "requires": ["LOGIC_COMBINATION"],
+        "label": {"de": "Verknüpfungsregel", "en": "Connection rule"}
+      },
+      {
+        "kind": "param",
+        "param": "POSITION_SAVE_TIME",
+        "requires": ["POSITION_SAVE_TIME"],
+        "label": {"de": "Position Übernahmezeit", "en": "Position saving time"}
+      }
     ]
   },
   "SIMPLE_SWITCH_RECEIVER": {
@@ -982,19 +2710,76 @@
     "conditionalVisibility": [
       {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
       {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      }
     ]
   },
-  "SMOKE_DETECTOR": {"channelType": "SMOKE_DETECTOR", "parameterOrder": ["GROUP_1"]},
+  "SMOKE_DETECTOR": {
+    "channelType": "SMOKE_DETECTOR",
+    "parameterOrder": ["GROUP_1"],
+    "controls": [
+      {"kind": "param", "param": "GROUP_", "label": {"de": "Gruppe", "en": "Group"}},
+      {
+        "kind": "param",
+        "param": "REPEAT_ENABLE",
+        "requires": ["REPEAT_ENABLE"],
+        "label": {"de": "Weiterleiten von empfangenen Datentelegrammen", "en": "Forwarding of received data telegrams"}
+      }
+    ]
+  },
   "SOIL_MOISTURE_TRANSMITTER": {
     "channelType": "SOIL_MOISTURE_TRANSMITTER",
     "parameterOrder": ["FILTER_SIZE", "INTERVAL_UNIT", "INTERVAL_VALUE", "REFERENCE_16BIT_MIN", "REFERENCE_16BIT_MAX"],
-    "conditionalVisibility": [{"trigger": "INTERVAL_UNIT", "triggerValue": "custom", "show": ["INTERVAL_VALUE"]}]
+    "conditionalVisibility": [{"trigger": "INTERVAL_UNIT", "triggerValue": "custom", "show": ["INTERVAL_VALUE"]}],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "INTERVAL",
+        "selector": "autoIntervalA",
+        "requires": ["INTERVAL_UNIT"],
+        "label": {"de": "Messintervall", "en": "Measurement interval"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_16BIT_MIN",
+        "requires": ["REFERENCE_16BIT_MIN"],
+        "label": {"de": "Referenzwert 0 % Bodenfeuchte", "en": "Reference value 0% soil moisture"}
+      },
+      {
+        "kind": "param",
+        "param": "REFERENCE_16BIT_MAX",
+        "requires": ["REFERENCE_16BIT_MAX"],
+        "label": {"de": "Referenzwert 100 % Bodenfeuchte", "en": "Reference value 100% soil moisture"}
+      }
+    ]
   },
   "STATE_RESET_RECEIVER": {
     "channelType": "STATE_RESET_RECEIVER",
     "parameterOrder": ["BLOCKING_PERIOD_UNIT", "BLOCKING_PERIOD_VALUE"],
     "conditionalVisibility": [
       {"trigger": "BLOCKING_PERIOD_UNIT", "triggerValue": "custom", "show": ["BLOCKING_PERIOD_VALUE"]}
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "BLOCKING_PERIOD",
+        "selector": "delayShort",
+        "label": {"de": "Blockierzeitraum", "en": "Time interval blockage"}
+      }
     ]
   },
   "STATE_RESET_VIRTUAL_RECEIVER": {
@@ -1002,6 +2787,14 @@
     "parameterOrder": ["BLOCKING_PERIOD_UNIT", "BLOCKING_PERIOD_VALUE"],
     "conditionalVisibility": [
       {"trigger": "BLOCKING_PERIOD_UNIT", "triggerValue": "custom", "show": ["BLOCKING_PERIOD_VALUE"]}
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "BLOCKING_PERIOD",
+        "selector": "delayShort",
+        "label": {"de": "Blockierzeitraum", "en": "Time interval blockage"}
+      }
     ]
   },
   "SWITCH_TRANSCEIVER": {
@@ -1016,6 +2809,22 @@
     "conditionalVisibility": [
       {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
       {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      }
     ]
   },
   "SWITCH_TRANSMITTER": {
@@ -1031,9 +2840,49 @@
     "conditionalVisibility": [
       {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
       {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "CURRENTDETECTION_BEHAVIOR",
+        "requires": ["CURRENTDETECTION_BEHAVIOR"],
+        "label": {"de": "Verhalten", "en": "Response"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "param",
+        "param": "LED_DISABLE_CHANNELSTATE",
+        "requires": ["LED_DISABLE_CHANNELSTATE"],
+        "label": {"de": "Geräte-LED deaktivieren", "en": "Deactivate device LED"}
+      }
     ]
   },
-  "SWITCH_VIRTUAL_RECEIVER": {"channelType": "SWITCH_VIRTUAL_RECEIVER", "parameterOrder": ["POWERUP_JUMPTARGET"]},
+  "SWITCH_VIRTUAL_RECEIVER": {
+    "channelType": "SWITCH_VIRTUAL_RECEIVER",
+    "parameterOrder": ["POWERUP_JUMPTARGET"],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "LOGIC_COMBINATION",
+        "option": "LOGIC_COMBINATION_SWITCH",
+        "requires": ["LOGIC_COMBINATION"],
+        "label": {"de": "Verknüpfungsregel", "en": "Connection rule"}
+      }
+    ]
+  },
   "VALVE_ACTUATOR_RECEIVER": {
     "channelType": "VALVE_ACTUATOR_RECEIVER",
     "parameterOrder": [
@@ -1053,7 +2902,43 @@
       {"trigger": "POWERUP_ONTIME_UNIT", "triggerValue": "custom", "show": ["POWERUP_ONTIME_VALUE"]},
       {"trigger": "POWERUP_OFFTIME_UNIT", "triggerValue": "custom", "show": ["POWERUP_OFFTIME_VALUE"]}
     ],
-    "optionPresets": {"POWERUP_JUMPTARGET": "_INLINE_VALVE_ACTUATOR_RECEIVER_POWERUP_JUMPTARGET"}
+    "optionPresets": {"POWERUP_JUMPTARGET": "_INLINE_VALVE_ACTUATOR_RECEIVER_POWERUP_JUMPTARGET"},
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "param",
+        "param": "POWERUP_JUMPTARGET",
+        "requires": ["POWERUP_JUMPTARGET"],
+        "label": {"de": "Aktion bei Spannungszufuhr", "en": "Activity on power supply"}
+      },
+      {
+        "kind": "time",
+        "prefix": "POWERUP_ONTIME",
+        "selector": "timeOnOff",
+        "requires": ["POWERUP_ONTIME_UNIT"],
+        "label": {"de": "Einschaltdauer", "en": "Switch-on time"}
+      },
+      {
+        "kind": "time",
+        "prefix": "POWERUP_OFFTIME",
+        "selector": "timeOnOff",
+        "requires": ["POWERUP_OFFTIME_UNIT"],
+        "label": {"de": "Ausschaltdauer", "en": "Switch-off time"}
+      }
+    ]
   },
   "WATER_DETECTION_TRANSMITTER": {
     "channelType": "WATER_DETECTION_TRANSMITTER",
@@ -1067,7 +2952,18 @@
       "ACOUSTIC_ALARM_TRIGGER",
       "TRIGGER_ANGLE"
     ],
-    "conditionalVisibility": [{"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]}]
+    "conditionalVisibility": [{"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]}],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {"kind": "param", "param": "EVENT_FILTER_PERIOD", "requires": ["EVENT_FILTER_PERIOD"]},
+      {"kind": "param", "param": "TRIGGER_ANGLE", "requires": ["TRIGGER_ANGLE"]}
+    ]
   },
   "WATER_FLOW_TRANSMITTER": {
     "channelType": "WATER_FLOW_TRANSMITTER",
@@ -1103,17 +2999,69 @@
         "labelKey": "lblcondthresholdhi_wss",
         "parameters": ["EVENT_BLINDTIME_VALUE", "EVENT_BLINDTIME_BASE", "COND_TX_THRESHOLD_HI"]
       }
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "param",
+        "param": "CHANNEL_OPERATION_MODE",
+        "requires": ["CHANNEL_OPERATION_MODE"],
+        "label": {"de": "Sensor", "en": "Sensor"}
+      },
+      {
+        "kind": "time",
+        "prefix": "INTERVAL",
+        "selector": "autoIntervalA",
+        "requires": ["INTERVAL_UNIT"],
+        "label": {"de": "Messintervall", "en": "Measurement interval"}
+      },
+      {
+        "kind": "param",
+        "param": "COND_TX_THRESHOLD_HI",
+        "requires": ["COND_TX_THRESHOLD_HI"],
+        "label": {"de": "Durchflussmenge Überwachung", "en": "Flow rate monitoring"}
+      }
     ]
   },
   "WATER_PRESSURE_TRANSMITTER": {
     "channelType": "WATER_PRESSURE_TRANSMITTER",
     "parameterOrder": ["EVENT_DELAY_UNIT", "EVENT_DELAY_VALUE", "CHANNEL_OPERATION_MODE"],
     "conditionalVisibility": [{"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]}],
-    "optionPresets": {"CHANNEL_OPERATION_MODE": "_INLINE_WATER_PRESSURE_TRANSMITTER_CHANNEL_OPERATION_MODE"}
+    "optionPresets": {"CHANNEL_OPERATION_MODE": "_INLINE_WATER_PRESSURE_TRANSMITTER_CHANNEL_OPERATION_MODE"},
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "param",
+        "param": "CHANNEL_OPERATION_MODE",
+        "requires": ["CHANNEL_OPERATION_MODE"],
+        "label": {"de": "Sensor", "en": "Sensor"}
+      }
+    ]
   },
   "WATER_SWITCH_VIRTUAL_RECEIVER": {
     "channelType": "WATER_SWITCH_VIRTUAL_RECEIVER",
-    "parameterOrder": ["POWERUP_JUMPTARGET"]
+    "parameterOrder": ["POWERUP_JUMPTARGET"],
+    "controls": [
+      {
+        "kind": "param",
+        "param": "LOGIC_COMBINATION",
+        "option": "LOGIC_COMBINATION_SWITCH",
+        "requires": ["LOGIC_COMBINATION"],
+        "label": {"de": "Verknüpfungsregel", "en": "Connection rule"}
+      }
+    ]
   },
   "WINDOW_DRIVE_RECEIVER": {
     "channelType": "WINDOW_DRIVE_RECEIVER",
@@ -1127,6 +3075,22 @@
     "conditionalVisibility": [
       {"trigger": "EVENT_DELAY_UNIT", "triggerValue": "custom", "show": ["EVENT_DELAY_VALUE"]},
       {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
+    ],
+    "controls": [
+      {
+        "kind": "time",
+        "prefix": "EVENT_DELAY",
+        "selector": "eventDelay",
+        "requires": ["EVENT_DELAY_UNIT"],
+        "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "time",
+        "prefix": "EVENT_RANDOMTIME",
+        "selector": "eventRandomTime",
+        "requires": ["EVENT_RANDOMTIME_UNIT"],
+        "label": {"de": "Zufallsanteil", "en": "Random part"}
+      }
     ]
   }
 }

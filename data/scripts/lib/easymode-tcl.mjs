@@ -285,15 +285,19 @@ export function timeOptionMeaning(key) {
 
 /**
  * The `"key" : "value",` lines of a WebUI localization file, with the HTML wrapper and the entities
- * the WebUI uses taken out.
+ * the WebUI uses taken out; `percent` also decodes the %XX escapes of `/www/webui/js/lang`.
  *
  * @returns {Record<string, string>}
  */
-export function parseLocalization(text) {
+export function parseLocalization(text, {percent = false} = {}) {
     /** @type {Record<string, string>} */
     const result = {};
     for (const match of text.matchAll(/^\s*"([A-Za-z0-9_]+)"\s*:\s*"((?:[^"\\]|\\.)*)"/gmu)) {
-        const value = decodeEntities(match[2].replace(/\\"/gu, '"').replace(/<[^>]+>/gu, ''))
+        // the WebUI's own language files escape ISO-8859-1 as %XX ("%FCr" is "für")
+        const raw = percent
+            ? match[2].replace(/%([0-9A-F]{2})/gu, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+            : match[2];
+        const value = decodeEntities(raw.replace(/\\"/gu, '"').replace(/<[^>]+>/gu, ''))
             .replace(/\s+/gu, ' ')
             .trim();
         if (value !== '') {
@@ -321,4 +325,179 @@ const ENTITIES = {
 
 function decodeEntities(text) {
     return text.replace(/&[a-zA-Z]+;/gu, (entity) => ENTITIES[entity] ?? entity);
+}
+
+// ------------------------------------------------------------------ MASTER forms (task 63, D-55)
+
+/**
+ * The procedures of a Tcl file by name: `proc name {args} {` up to the last `}` in column 0 before
+ * the next procedure.
+ *
+ * @returns {Map<string, string>}
+ */
+export function parseProcs(source) {
+    /** @type {Map<string, string>} */
+    const procs = new Map();
+    const starts = [...source.matchAll(/^proc (\w+) /gmu)];
+    for (const [index, start] of starts.entries()) {
+        const from = start.index ?? 0;
+        const to = starts[index + 1]?.index ?? source.length;
+        const chunk = source.slice(from, to);
+        // the last `}` in column 0: a `set comment {` block closes in column 0 as well
+        const end = chunk.lastIndexOf('\n}');
+        procs.set(start[1], end < 0 ? chunk : chunk.slice(0, end + 2));
+    }
+    return procs;
+}
+
+/** The WebUI helpers that draw one control for the parameter they are given. */
+const MASTER_PARAM_ELEMENTS =
+    /\[\s*(getOptionBox|getCheckBox|_getCheckBox|getTextField|getPowerUpSelector\w*|getSelect\w+Element|getRepetitionSelector|getOutputBehaviourElement|getSoundSelector)\s+'?(\$param|[A-Z][A-Z0-9_]+)'?/u;
+
+/**
+ * The controls of one MASTER form, in the order the WebUI draws them: the body of an HmIP
+ * `set_htmlParams` (`/www/config/easymodes/hmip/<CHANNEL_TYPE>.tcl`) and whatever procedure of
+ * `etc/hmipChannelConfigDialogs.tcl` it calls (`getKeyTransceiver $chn ps psDescr`).
+ *
+ * The shapes, besides those of the link forms:
+ * - `set param X` names the parameter the next lines draw, `if {[info exists ps($param)] == 1}`
+ *   asks for it (`requires`);
+ * - `getOptionBox '$param'`, `getCheckBox '$param'`, `getTextField $param` and the selector helpers
+ *   are one control for it;
+ * - a time is `getComboBox $chn $prn "$specialID" "<type>"` (the preset list) followed by
+ *   `getTimeUnitComboBox* $param` for `X_UNIT` - one control over the `X_UNIT` / `X_VALUE` pair,
+ *   whose `X_VALUE` text field is then part of it;
+ * - `set comment { ... }` is how the WebUI comments out a block: skipped.
+ *
+ * @param {string} body
+ * @param {Map<string, string>} procs the procedures a call may go to
+ * @returns {EasyControl[]}
+ */
+export function extractMasterControls(body, procs, seen = new Set()) {
+    /** @type {EasyControl[]} */
+    const controls = [];
+    /** @type {Array<{depth: number, requires?: string}>} */
+    const blocks = [];
+    let depth = 0;
+    let param;
+    let option;
+    let labelKey;
+    /** @type {{selector: string, labelKey?: string} | undefined} */
+    let pending;
+    let skipping = 0;
+
+    const requiresNow = () => [...new Set(blocks.map((block) => block.requires).filter((name) => name !== undefined))];
+    const add = (control) => {
+        const exists = controls.some((entry) =>
+            entry.kind === 'time' && control.kind === 'time'
+                ? entry.prefix === control.prefix
+                : entry.kind === 'param' && control.kind === 'param'
+                  ? entry.param === control.param
+                  : false,
+        );
+        if (exists) return;
+        const requires = requiresNow();
+        let entry = control;
+        if (control.kind !== 'time' && labelKey !== undefined && entry.labelKey === undefined)
+            entry = {...entry, labelKey};
+        if (requires.length > 0) entry = {...entry, requires};
+        controls.push(entry);
+        labelKey = undefined;
+    };
+    const covered = (name) =>
+        controls.some((c) => c.kind === 'time' && (name === `${c.prefix}_VALUE` || name === `${c.prefix}_UNIT`));
+
+    for (const raw of body.split('\n')) {
+        const line = raw.trim().startsWith('#') ? '' : raw;
+        const braces = line
+            .replace(/\\?\$\{[^}]*\}/gu, '')
+            .replace(/\\[{}]/gu, '')
+            .replace(/"[^"]*"/gu, '""');
+        const opened = (braces.match(/\{/gu) ?? []).length - (braces.match(/\}/gu) ?? []).length;
+        if (skipping > 0) {
+            skipping += opened;
+            continue;
+        }
+        if (/^\s*set comment \{/u.test(line)) {
+            skipping = Math.max(1, opened);
+            continue;
+        }
+        if (line.trim() === '') continue;
+
+        const exists = /if\s*\{\s*\[\s*info exists ps\((\$param|[A-Z][A-Z0-9_]+)\)\s*\]/u.exec(line);
+        if (/^\s*\}/u.test(braces)) {
+            const closing = depth - 1;
+            while (blocks.length > 0 && blocks[blocks.length - 1].depth >= closing) blocks.pop();
+        }
+        if (/\{\s*$/u.test(braces)) {
+            const requires = exists ? (exists[1] === '$param' ? param : exists[1]) : undefined;
+            blocks.push(requires === undefined || /\belse\b/u.test(line) ? {depth} : {depth, requires});
+        }
+        depth = Math.max(0, depth + opened);
+
+        let match;
+        if ((match = /^\s*set param\s+"?([A-Z][A-Z0-9_]+)"?\s*$/u.exec(line))) {
+            param = match[1];
+            continue;
+        }
+        if ((match = /^\s*option\s+(\w+)/u.exec(line))) {
+            option = match[1];
+            continue;
+        }
+        if (!/\bappend\s+(?:html|HTML_PARAMS)/u.test(line)) continue;
+
+        const rowLabel = /<td>\\?\$\{([A-Za-z0-9_]+)\}/u.exec(line)?.[1];
+        if (rowLabel !== undefined) labelKey = rowLabel;
+
+        if ((match = /\[\s*getComboBox\s+\$chn\s+\$prn\s+"?[^"\s]*"?\s+"(\w+)"/u.exec(line))) {
+            pending = {selector: match[1], ...(labelKey === undefined ? {} : {labelKey})};
+            labelKey = undefined;
+            continue;
+        }
+        if ((match = /\[\s*getTimeUnitComboBox\w*\s+(\$param|[A-Z][A-Z0-9_]+)/u.exec(line))) {
+            const unit = match[1] === '$param' ? param : match[1];
+            if (unit?.endsWith('_UNIT')) {
+                const prefix = unit.slice(0, -'_UNIT'.length);
+                add({
+                    kind: 'time',
+                    prefix,
+                    selector: pending?.selector ?? 'none',
+                    ...(pending?.labelKey === undefined ? {} : {labelKey: pending.labelKey}),
+                });
+            }
+            pending = undefined;
+            continue;
+        }
+        if ((match = /get_ComboBox options\s+([A-Z][A-Z0-9_|]*)/u.exec(line))) {
+            const [first, ...also] = match[1].split('|');
+            add({
+                kind: 'param',
+                param: first,
+                ...(also.length > 0 ? {also} : {}),
+                ...(option === undefined ? {} : {option}),
+            });
+            option = undefined;
+            continue;
+        }
+        if ((match = MASTER_PARAM_ELEMENTS.exec(line))) {
+            const name = match[2] === '$param' ? param : match[2];
+            // `option X` before a getOptionBox fills its list from the WebUI's option set X
+            const withOption = match[1] === 'getOptionBox' && option !== undefined ? {option} : {};
+            if (name !== undefined && !covered(name)) add({kind: 'param', param: name, ...withOption});
+            option = undefined;
+            continue;
+        }
+        // a call into another procedure of the dialogs file draws its controls here
+        for (const call of line.matchAll(/\[\s*(get\w+)\s+\$chn\b/gu)) {
+            const name = call[1];
+            const inner = procs.get(name);
+            if (inner !== undefined && !seen.has(name)) {
+                for (const control of extractMasterControls(inner, procs, new Set([...seen, name]))) {
+                    const requires = [...new Set([...requiresNow(), ...(control.requires ?? [])])];
+                    controls.push(requires.length > 0 ? {...control, requires} : control);
+                }
+            }
+        }
+    }
+    return controls;
 }

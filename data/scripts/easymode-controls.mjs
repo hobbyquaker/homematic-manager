@@ -1,6 +1,8 @@
 /**
- * Task 62 (D-54): extract the CCU easy mode's form of every link profile from a WebUI easymode tree
- * into `extracted/easymode_controls.json.gz`, which `convert.mjs` merges into `dist/profiles/`.
+ * Tasks 62 and 63 (D-54, D-55): extract the CCU easy mode's forms from a WebUI easymode tree into
+ * `extracted/easymode_controls.json.gz`, which `convert.mjs` merges into `dist/`: every link
+ * profile's form (into `profiles/`), and every HmIP channel type's MASTER form (into
+ * `master-metadata.json`).
  *
  * Like `icons-subset.mjs --ccu`, this is a tool, not part of `npm run update`: it needs the WebUI's
  * `/www/config/easymodes` directory, which is not published anywhere this repository could pin a
@@ -8,21 +10,37 @@
  * firmware it came from. Unlike `upstream/` (downloaded, git-ignored), `extracted/` is committed,
  * since nobody could download it again; it is under the same HMSL notice (D-6).
  *
+ * The MASTER forms' labels are mostly `stringTable...` keys of the WebUI's own language files
+ * (`/www/webui/js/lang/<de|en>/translate.lang*.js`); `--webui-lang` names that `lang` directory.
+ *
  * Usage: node scripts/easymode-controls.mjs <easymodes directory> --source "OpenCCU 3.89.8.20260719"
+ *            [--webui-lang <www/webui/js/lang directory>]
  */
 import {readFileSync, readdirSync, statSync, writeFileSync} from 'node:fs';
 import path from 'node:path';
 import {gzipSync} from 'node:zlib';
 
-import {extractForms, extractTimeSelectorOptions, parseLocalization, timeOptionMeaning} from './lib/easymode-tcl.mjs';
+import {
+    extractForms,
+    extractMasterControls,
+    extractTimeSelectorOptions,
+    htmlParamsBody,
+    parseLocalization,
+    parseProcs,
+    timeOptionMeaning,
+} from './lib/easymode-tcl.mjs';
 import {dataDir, sortKeys} from './lib/paths.mjs';
 
 const LANGUAGES = ['de', 'en'];
 
 const args = process.argv.slice(2);
-const sourceAt = args.indexOf('--source');
-const source = sourceAt >= 0 ? args[sourceAt + 1] : undefined;
-const root = args.find((arg, index) => !arg.startsWith('--') && index !== sourceAt + 1);
+const option = (name) => {
+    const at = args.indexOf(name);
+    return at >= 0 ? args[at + 1] : undefined;
+};
+const source = option('--source');
+const webuiLang = option('--webui-lang');
+const root = args.find((arg, index) => !arg.startsWith('--') && !args[index - 1]?.startsWith('--'));
 if (!root || !source) {
     console.error('usage: node scripts/easymode-controls.mjs <easymodes directory> --source "<firmware and version>"');
     process.exit(2);
@@ -148,15 +166,54 @@ for (const receiverType of readdirSync(root).sort()) {
     }
 }
 
+// ------------------------------------------------------------------ the MASTER forms (task 63)
+// The WebUI's own strings: `stringTable...`, `lbl...`, `option...` keys, which the MASTER forms
+// use and the easymode localization files mostly do not have.
+/** @type {Record<string, Record<string, string>>} */
+const webuiStrings = {};
+for (const language of LANGUAGES) {
+    const dir = webuiLang === undefined ? undefined : path.join(webuiLang, language);
+    webuiStrings[language] = {};
+    if (dir === undefined || !isDir(dir)) continue;
+    for (const file of readdirSync(dir)
+        .filter((name) => name.endsWith('.js'))
+        .sort()) {
+        Object.assign(webuiStrings[language], parseLocalization(read(path.join(dir, file)), {percent: true}));
+    }
+}
+const masterLabel = (key) => labelFor(key, webuiStrings);
+
+const dialogs = parseProcs(read(path.join(root, 'etc', 'hmipChannelConfigDialogs.tcl')));
+/** @type {Record<string, object[]>} */
+const master = {};
+let masterControls = 0;
+const hmipDir = path.join(root, 'hmip');
+for (const file of isDir(hmipDir) ? readdirSync(hmipDir).sort() : []) {
+    // `hmip/<CHANNEL_TYPE>.tcl`; the lower-case files are keyed by a paramset id the app does not know
+    if (!/^[A-Z][A-Z0-9_]*\.tcl$/u.test(file)) continue;
+    const text = read(path.join(hmipDir, file));
+    const body = htmlParamsBody(text);
+    if (body === undefined) continue;
+    const controls = extractMasterControls(body, new Map([...dialogs, ...parseProcs(text)]));
+    if (controls.length === 0) continue;
+    master[file.slice(0, -'.tcl'.length)] = controls.map(({labelKey, ...control}) => {
+        const label = masterLabel(labelKey);
+        return {...control, ...(label === undefined ? {} : {label})};
+    });
+    masterControls += controls.length;
+}
+
 const out = {
     $comment:
         'The CCU easy mode forms (task 62, D-54), extracted by scripts/easymode-controls.mjs from the WebUI easymode TCL; HMSL, see NOTICE.md.',
     source,
     timeSelectors: sortKeys(timeSelectors),
     receivers: sortKeys(receivers),
+    master: sortKeys(master),
 };
 const target = path.join(dataDir, 'extracted', 'easymode_controls.json.gz');
 writeFileSync(target, gzipSync(`${JSON.stringify(out)}\n`, {level: 9}));
 console.log(
-    `${files} easymodes, ${profiles} profile forms, ${controls} controls, ${Object.keys(timeSelectors).length} time selector types -> ${path.relative(process.cwd(), target)}`,
+    `${files} easymodes, ${profiles} profile forms, ${controls} controls, ${Object.keys(timeSelectors).length} time selector types; ` +
+        `${Object.keys(master).length} MASTER forms, ${masterControls} controls -> ${path.relative(process.cwd(), target)}`,
 );

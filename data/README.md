@@ -87,6 +87,15 @@ for (`requires`). The time selectors' presets go to `easymode-time-selectors.jso
 extract is from OpenCCU 3.89.8.20260719: 609 easymodes, 2205 profiles with a form; the rest keep the
 dialog's full list. Unlike `upstream/`, `extracted/` is committed, because it cannot be downloaded.
 
+The same script reads the **MASTER forms** of the HmIP channel types (task 63, D-55): the
+`set_htmlParams` of `hmip/<CHANNEL_TYPE>.tcl` and the procedure of `etc/hmipChannelConfigDialogs.tcl`
+it calls (`getKeyTransceiver`, `getDimmerVirtualReceiver`, ...), into `master-metadata.json` as
+`controls` for that channel type - 63 channel types, 339 controls, a time being the `X_UNIT` /
+`X_VALUE` pair behind `getComboBox ... "<type>"` + `getTimeUnitComboBox*`. Their labels are mostly
+the WebUI's own `stringTable...` keys, so the script also takes `--webui-lang` (the
+`/www/webui/js/lang` directory, whose strings are %XX-escaped ISO-8859-1). The BidCos MASTER forms
+are keyed by a paramset id (`getParamsetId`) the app does not ask for, and are not extracted yet.
+
 ### Translations
 
 **`translation_custom/*.json` over `translation_extract.json.gz`.** openccu-data's `NOTICE.md` calls
@@ -148,7 +157,7 @@ committed.
 | `npm run convert` | write `dist/` from `upstream/` |
 | `npm run update` | fetch + convert |
 | `npm run compare-legacy` | write `COMPARISON.md` from `dist/` and `legacy/www/easymodes/` |
-| `node scripts/easymode-controls.mjs <easymodes dir> --source "<firmware>"` | rebuild `extracted/easymode_controls.json.gz` from a WebUI easymode tree (task 62); `npm run convert` afterwards |
+| `node scripts/easymode-controls.mjs <easymodes dir> --source "<firmware>" --webui-lang <lang dir>` | rebuild `extracted/easymode_controls.json.gz` from a WebUI easymode tree and its language files (tasks 62, 63); `npm run convert` afterwards |
 | `npm run icons-subset -- --ccu <dir>` | rebuild `dist/icons/` from a CCU's `www/config/img/devices` (its `50/` thumbnails, `250/` scaled down where a thumbnail is missing; D-51); without `--ccu` from `legacy/`, BidCos only (`--height 40 --quality 75` to shrink it) |
 | `npm test` | validate `dist/` against the contract and against the facts in `docs/analysis-2026-09.md` |
 

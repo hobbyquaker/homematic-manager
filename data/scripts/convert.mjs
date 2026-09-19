@@ -52,7 +52,7 @@ const aliases = readUpstreamJson('profiles/_receiver_type_aliases.json');
 // task 62 (D-54): the CCU easy mode's forms, extracted from the WebUI by scripts/easymode-controls.mjs
 const easymodeControlsFile = path.join(dataDir, 'extracted', 'easymode_controls.json.gz');
 const easymodeControls = existsSync(easymodeControlsFile)
-    ? /** @type {{source: string, timeSelectors: Record<string, object[]>, receivers: Record<string, Record<string, Record<string, object[]>>>}} */ (
+    ? /** @type {{source: string, timeSelectors: Record<string, object[]>, receivers: Record<string, Record<string, Record<string, object[]>>>, master?: Record<string, object[]>}} */ (
           JSON.parse(gunzipSync(readFileSync(easymodeControlsFile)).toString('utf8'))
       )
     : undefined;
@@ -295,6 +295,13 @@ for (const [channelType, meta] of Object.entries(easymode.channel_metadata)) {
     masterMetadata[channelType] = entry;
 }
 
+// task 63 (D-55): the CCU's MASTER form of each HmIP channel type, extracted from the WebUI
+let masterForms = 0;
+for (const [channelType, controls] of Object.entries(easymodeControls?.master ?? {})) {
+    masterMetadata[channelType] = {...(masterMetadata[channelType] ?? {channelType}), controls};
+    masterForms += 1;
+}
+
 /** @type {Record<string, object>} */
 const optionPresets = {};
 for (const [id, preset] of Object.entries(easymode.option_presets)) {
@@ -513,7 +520,7 @@ console.log(
     `dist/: ${files} files, ${(bytes / 1024).toFixed(0)} KiB, ${receiverTypes.length} receiver types, ` +
         `${profileCount} link profiles (${profilesFromEasymodeOnly} only in easymode_extract, ` +
         `${profilesWithControls} with the CCU easy mode's form), ` +
-        `${Object.keys(masterMetadata).length} MASTER metadata entries, ` +
+        `${Object.keys(masterMetadata).length} MASTER metadata entries (${masterForms} with the CCU's form), ` +
         `${Object.keys(optionPresets).length} option presets, ${crossValidations.length} cross validations`,
 );
 if (warnings.length > 0) {

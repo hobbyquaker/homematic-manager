@@ -1,5 +1,5 @@
 {
-  "source": "OpenCCU 3.89.8.20260719 (/www/config/easymodes)",
+  "source": "OpenCCU 3.89.8.20260719 (/www/config/easymodes, /www/webui/js/lang)",
   "types": {
     "alarmTimeMax10Min": [
       {"seconds": 1, "label": {"de": "1 Sekunde", "en": "1 s"}},

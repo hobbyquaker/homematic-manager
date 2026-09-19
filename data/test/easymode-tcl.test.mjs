@@ -5,8 +5,11 @@ import {describe, expect, it} from 'vitest';
 
 import {
     extractForms,
+    extractMasterControls,
     extractTimeSelectorOptions,
+    htmlParamsBody,
     parseLocalization,
+    parseProcs,
     timeOptionMeaning,
 } from '../scripts/lib/easymode-tcl.mjs';
 import {distDir} from '../scripts/lib/paths.mjs';
@@ -205,5 +208,107 @@ describe('the committed forms in dist/', () => {
         expect(selectors.timeOnOff[0]).toMatchObject({special: 'notActive'});
         expect(selectors.timeOnOff.at(-1)).toMatchObject({special: 'enterValue'});
         expect(selectors.rampOnOff.length).toBeGreaterThan(3);
+    });
+});
+
+describe('the MASTER forms (task 63)', () => {
+    // In the shape of etc/hmipChannelConfigDialogs.tcl and hmip/KEY_TRANSCEIVER.tcl.
+    const DIALOGS = String.raw`
+proc getKeyTransceiver {chn p descr} {
+  set param CHANNEL_OPERATION_MODE
+  if { [info exists ps($param)] == 1 } {
+    append html "<tr>"
+      append html "<td>\${lblChannelActivInactiv}</td>"
+      option LOGIC_COMBINATION
+      append html  "<td>[getOptionBox '$param' options $ps($param) $chn $prn]</td>"
+    append html "</tr>"
+  }
+
+set comment {
+  set param DISABLE_ACOUSTIC_CHANNELSTATE
+  if { [info exists ps($param)] == 1 } {
+      append html  "<td>[getCheckBox '$param' $ps($param) $chn $prn]</td>"
+  }
+}
+
+  set param "LED_DISABLE_CHANNELSTATE"
+  if { [info exists ps($param)] == 1 } {
+      append html "<td>\${stringTableLEDDisableChannelState}</td>"
+      append html  "<td>[getCheckBox '$param' $ps($param) $chn $prn]</td>"
+  }
+
+  set param REPEATED_LONG_PRESS_TIMEOUT_UNIT
+  if { [info exists ps($param)] == 1  } {
+      append html "<td>\${stringTableKeyLongPressTimeOut}</td>"
+      append html [getComboBox $chn $prn "$specialID" "timeOnOffShort"]
+      append html [getTimeUnitComboBoxShort $param $ps($param) $chn $prn $special_input_id]
+      set param REPEATED_LONG_PRESS_TIMEOUT_VALUE
+      append html "<td>[getTextField $param $ps($param) $chn $prn]&nbsp;[getMinMaxValueDescr $param]</td>"
+  }
+  append html "[getHelper $chn ps psDescr]"
+}
+
+proc getHelper {chn p descr} {
+  set param DBL_PRESS_TIME
+  append html "<td>[getTextField $param $ps($param) $chn $prn]</td>"
+}
+`;
+    const FORM = String.raw`
+proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
+  append HTML_PARAMS(separate_1) "<table class=\"ProfileTbl\">"
+  append HTML_PARAMS(separate_1) "[getKeyTransceiver $chn ps psDescr]"
+  append HTML_PARAMS(separate_1) "</table>"
+}
+`;
+
+    it('reads a procedure to its last closing brace, past a commented-out block', () => {
+        const procs = parseProcs(DIALOGS);
+        expect([...procs.keys()]).toEqual(['getKeyTransceiver', 'getHelper']);
+        expect(procs.get('getKeyTransceiver')).toContain('REPEATED_LONG_PRESS_TIMEOUT_VALUE');
+    });
+
+    it('lists the controls of the form through the procedures it calls', () => {
+        const controls = extractMasterControls(htmlParamsBody(FORM) ?? '', parseProcs(DIALOGS));
+        expect(controls).toEqual([
+            {
+                kind: 'param',
+                param: 'CHANNEL_OPERATION_MODE',
+                option: 'LOGIC_COMBINATION',
+                labelKey: 'lblChannelActivInactiv',
+                requires: ['CHANNEL_OPERATION_MODE'],
+            },
+            {
+                kind: 'param',
+                param: 'LED_DISABLE_CHANNELSTATE',
+                labelKey: 'stringTableLEDDisableChannelState',
+                requires: ['LED_DISABLE_CHANNELSTATE'],
+            },
+            {
+                kind: 'time',
+                prefix: 'REPEATED_LONG_PRESS_TIMEOUT',
+                selector: 'timeOnOffShort',
+                labelKey: 'stringTableKeyLongPressTimeOut',
+                requires: ['REPEATED_LONG_PRESS_TIMEOUT_UNIT'],
+            },
+            {kind: 'param', param: 'DBL_PRESS_TIME'},
+        ]);
+    });
+
+    it('decodes the %XX escapes of the WebUI language files', () => {
+        const text = '    "stringTableKeyLongPressTimeOut" :  "Timeout f%FCr langen Tastendruck",\n';
+        expect(parseLocalization(text, {percent: true})).toEqual({
+            stringTableKeyLongPressTimeOut: 'Timeout für langen Tastendruck',
+        });
+    });
+
+    it('carries the CCU form of an HmIP button channel in dist/master-metadata.json', () => {
+        const master = JSON.parse(readFileSync(path.join(distDir, 'master-metadata.json'), 'utf8'));
+        const controls = master.KEY_TRANSCEIVER.controls;
+        expect(controls.map((c) => (c.kind === 'time' ? c.prefix : c.param))).toContain('LED_DISABLE_CHANNELSTATE');
+        expect(controls.find((c) => c.kind === 'time')).toMatchObject({
+            prefix: 'REPEATED_LONG_PRESS_TIMEOUT',
+            selector: 'timeOnOffShort',
+        });
+        expect(controls.find((c) => c.param === 'LED_DISABLE_CHANNELSTATE').label.de).toBe('Geräte-LED deaktivieren');
     });
 });

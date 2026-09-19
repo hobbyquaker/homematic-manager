@@ -6,6 +6,15 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **The easy form's dropdowns show the CCU's words, not its internal keys.** A preset named by one of the WebUI's
+  labels - the logic combination of a dimmer's virtual channel, say - showed the key ("stringtablelogicor") in the
+  easy form and in the preset list next to a parameter, where the expert view already said "OR (höherer Pegel hat
+  Priorität)".
+
 ## [3.0.0-beta.21] — 2026-09-19
 
 ### New

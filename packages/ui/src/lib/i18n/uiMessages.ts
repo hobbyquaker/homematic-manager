@@ -594,6 +594,18 @@ export const UI_MESSAGES: MessageCatalogue = {
             de: 'Lernt das nächste Gerät im Werkszustand an, das sich meldet. Ohne Schlüssel fragt die Schnittstelle den Key Server von eQ-3, die Zentrale braucht also Internetzugang, sofern keine lokale Schlüsselzuordnung eingerichtet ist.',
             en: "Pairs the next device in factory state that asks to join. Without a key the interface asks eQ-3's key server, so the box needs internet access unless a local key mapping is configured.",
         },
+    // Task 66: on a system whose key mode never asks the key server, the third way pairs only a device whose key is stored there.
+    "Pairs the next device in factory state that asks to join, if its key is on the system: the system's key mode never asks eQ-3's key server. {count} device keys are stored on the system.":
+        {
+            de: {
+                one: 'Lernt das nächste Gerät im Werkszustand an, das sich meldet, sofern sein Schlüssel auf dem System liegt: Der Schlüsselmodus des Systems fragt den Key Server von eQ-3 nie. Auf dem System ist {count} Geräteschlüssel gespeichert.',
+                other: 'Lernt das nächste Gerät im Werkszustand an, das sich meldet, sofern sein Schlüssel auf dem System liegt: Der Schlüsselmodus des Systems fragt den Key Server von eQ-3 nie. Auf dem System sind {count} Geräteschlüssel gespeichert.',
+            },
+            en: {
+                one: "Pairs the next device in factory state that asks to join, if its key is on the system: the system's key mode never asks eQ-3's key server. {count} device key is stored on the system.",
+                other: "Pairs the next device in factory state that asks to join, if its key is on the system: the system's key mode never asks eQ-3's key server. {count} device keys are stored on the system.",
+            },
+        },
     'The install mode has ended and no device has joined. A device that is still paired with another central sends no inclusion request: reset it to factory state and start again.':
         {
             de: 'Der Anlernmodus ist abgelaufen, und kein Gerät hat sich angemeldet. Ein Gerät, das noch an einer anderen Zentrale angelernt ist, sendet keine Anlernanfrage: Gerät auf Werkseinstellungen zurücksetzen und erneut starten.',

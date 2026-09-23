@@ -5,7 +5,10 @@
  * a name right there.
  */
 
-import {expect, simulatorReady, test} from './fixtures.js';
+import {startForTest} from 'homematic-manager';
+
+import {BIDCOS_SWITCH, SIMULATOR_FIXTURE, expect, simulatorReady, test} from './fixtures.js';
+import {STUB_TOKEN, startOcculiteStub} from './occuliteStub.js';
 import {expectPrimaryToolbarButton} from './primaryButton.js';
 
 const NEW_DEVICE = 'LEQ0000009';
@@ -178,4 +181,53 @@ test('"Pair device" is disabled with its reason where there is no install mode (
 
     await page.goto(`${host.url}#/HmIP-RF/devices`);
     await expect(page.getByTestId('devices-add')).toBeEnabled();
+});
+
+/**
+ * Task 66: the system's key mode decides which of the three HmIP ways can work. On a CCU - the
+ * ordinary fixture, nothing answers `/api/meta/v1/version` - all three are offered, as always.
+ */
+test('a CCU offers all three HmIP pairing modes (task 66)', async ({page, host}) => {
+    await page.goto(`${host.url}#/HmIP-RF/devices`);
+    await page.getByTestId('devices-add').click();
+    const select = page.getByTestId('add-device-hmip-mode');
+    await expect(select).toBeVisible();
+    await expect(select.locator('option')).toHaveText([
+        'With SGTIN and key',
+        'With SGTIN only (key server)',
+        'Any device (no SGTIN)',
+    ]);
+});
+
+/**
+ * Task 66, the other half: an openccu-lite system whose key mode is `LOCAL` never asks eQ-3's key
+ * server, so "SGTIN only" is not offered there and "any device" says that it pairs only a device
+ * whose key is on the system - with the count the system reports, never a key.
+ */
+test('a LOCAL openccu-lite system offers two HmIP pairing modes and counts its device keys (task 66)', async ({
+    page,
+}) => {
+    const stub = await startOcculiteStub({
+        devices: [{address: BIDCOS_SWITCH, type: 'HM-LC-Sw1-Pl', name: 'Steckdose'}],
+        hmip: {keyserver_mode: 'LOCAL', device_keys: 4, offline_pairing: false},
+    });
+    const box = await startForTest({
+        simulator: true,
+        simulatorOptions: structuredClone(SIMULATOR_FIXTURE),
+        connection: {rega: true, language: 'en', metaUrl: stub.url, metaToken: STUB_TOKEN},
+    });
+    try {
+        await page.goto(`${box.url}#/HmIP-RF/devices`);
+        await page.getByTestId('devices-add').click();
+        const select = page.getByTestId('add-device-hmip-mode');
+        await expect(select.locator('option')).toHaveText(['With SGTIN and key', 'Any device (no SGTIN)']);
+        await select.selectOption('ANY');
+        const hint = page.getByTestId('add-device-hmip-hint');
+        await expect(hint).toContainText("never asks eQ-3's key server");
+        await expect(hint).toContainText('4 device keys are stored on the system');
+        await expect(hint).not.toContainText('internet access');
+    } finally {
+        await box.close();
+        await stub.close();
+    }
 });

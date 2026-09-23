@@ -100,6 +100,39 @@ describe('detection', () => {
         const client = new MetaApiClient({baseUrl: 'http://box', fetch: recorder([json({hello: true})]).fetch});
         await expect(client.version()).resolves.toBeUndefined();
     });
+
+    /**
+     * Task 66: the pairing fact of openccu-lite task 192 comes along in `hmip`, and only in its
+     * defined shape - a system from before has no key at all, and anything malformed counts as
+     * "the system does not say", never as a broken dialog.
+     */
+    it('keeps the hmip pairing fact in its defined shape and drops anything else', async () => {
+        const base = {api: 'meta', version: 1, format: 1, revision: 3};
+        const fact = {keyserver_mode: 'LOCAL', device_keys: 2, offline_pairing: false};
+        const kept = new MetaApiClient({baseUrl: 'http://box', fetch: recorder([json({...base, hmip: fact})]).fetch});
+        await expect(kept.version()).resolves.toEqual({...base, hmip: fact});
+
+        const older = new MetaApiClient({baseUrl: 'http://box', fetch: recorder([json(base)]).fetch});
+        const answer = await older.version();
+        expect(answer).toEqual(base);
+        expect(answer !== undefined && 'hmip' in answer).toBe(false);
+
+        for (const broken of [
+            {},
+            {keyserver_mode: 'CLOUD', device_keys: 1, offline_pairing: true},
+            {keyserver_mode: 'LOCAL', device_keys: '2', offline_pairing: false},
+            {keyserver_mode: 'LOCAL', device_keys: -1, offline_pairing: false},
+            {keyserver_mode: 'LOCAL', device_keys: 1},
+            'LOCAL',
+            null,
+        ]) {
+            const client = new MetaApiClient({
+                baseUrl: 'http://box',
+                fetch: recorder([json({...base, hmip: broken})]).fetch,
+            });
+            expect(await client.version(), JSON.stringify(broken)).toEqual(base);
+        }
+    });
 });
 
 describe('reads', () => {

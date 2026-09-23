@@ -529,6 +529,11 @@ export class Backend {
                 await meta.refresh();
                 return meta.state();
             }
+            case 'meta.pairing': {
+                // task 66: no store yet, or a store that is not the system's, is "nothing to say"
+                await this.#metaReady?.catch(() => undefined);
+                return (await this.#meta?.hmipPairing()) ?? null;
+            }
             case 'meta.export':
                 return (await this.#requireMeta()).document();
             case 'meta.import':
@@ -1981,6 +1986,7 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'meta.node.update',
     'meta.node.delete',
     'meta.refresh',
+    'meta.pairing',
     'meta.export',
     'meta.import',
     'paramset.get',

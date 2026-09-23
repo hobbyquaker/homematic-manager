@@ -251,6 +251,111 @@ describe('the add-device dialog', () => {
     });
 
     /**
+     * Task 66: the system's key mode decides which of the three ways can work. `LOCAL` never asks
+     * eQ-3's key server, so "SGTIN only" is not offered there and "any device" says that it pairs
+     * only a device whose key is on the system, with the count. The other two modes, an older
+     * system and a CCU (no answer) change nothing.
+     */
+    const modeOptions = (): string[] =>
+        [...screen.getByTestId<HTMLSelectElement>('add-device-hmip-mode').options].map((option) => option.value);
+
+    it('does not offer "SGTIN only" on a system whose key mode is LOCAL, and says what "any device" does there (task 66)', async () => {
+        transport.result('meta.pairing', {keyserver_mode: 'LOCAL', device_keys: 3, offline_pairing: false});
+        await openOnHmip();
+        await waitFor(() => {
+            expect(modeOptions()).toEqual(['KEY', 'ANY']);
+        });
+        expect(transport.lastCall('meta.pairing')).toEqual([]);
+
+        const hint = (): string => screen.getByTestId('add-device-hmip-hint').textContent;
+        await fireEvent.change(screen.getByTestId('add-device-hmip-mode'), {target: {value: 'ANY'}});
+        await waitFor(() => {
+            expect(hint()).toContain('fragt den Key Server von eQ-3 nie');
+        });
+        expect(hint()).toContain('3 Geräteschlüssel gespeichert');
+        expect(hint()).not.toContain('Internetzugang');
+
+        // the way that always works is untouched
+        await fireEvent.change(screen.getByTestId('add-device-hmip-mode'), {target: {value: 'KEY'}});
+        await waitFor(() => {
+            expect(hint()).toContain('Funktioniert offline');
+        });
+    });
+
+    it('says "one key" in the singular on a LOCAL system with one stored key (task 66)', async () => {
+        transport.result('meta.pairing', {keyserver_mode: 'LOCAL', device_keys: 1, offline_pairing: false});
+        await openOnHmip();
+        await waitFor(() => {
+            expect(modeOptions()).toEqual(['KEY', 'ANY']);
+        });
+        await fireEvent.change(screen.getByTestId('add-device-hmip-mode'), {target: {value: 'ANY'}});
+        await waitFor(() => {
+            expect(screen.getByTestId('add-device-hmip-hint').textContent).toContain(
+                'ist 1 Geräteschlüssel gespeichert',
+            );
+        });
+    });
+
+    it('falls back from a chosen "SGTIN only" to "SGTIN and key" when the system turns out to be LOCAL (task 66)', async () => {
+        // the system's answer arrives after the user has already chosen
+        let answer: (value: {keyserver_mode: 'LOCAL'; device_keys: number; offline_pairing: false}) => void = () =>
+            undefined;
+        transport.respond(
+            'meta.pairing',
+            () =>
+                new Promise((resolve) => {
+                    answer = resolve;
+                }),
+        );
+        await openOnHmip();
+        expect(modeOptions()).toEqual(['KEY', 'SGTIN', 'ANY']);
+        await fireEvent.change(screen.getByTestId('add-device-hmip-mode'), {target: {value: 'SGTIN'}});
+        await waitFor(() => {
+            expect(screen.queryByTestId('add-device-key')).toBeNull();
+        });
+
+        answer({keyserver_mode: 'LOCAL', device_keys: 0, offline_pairing: false});
+        await waitFor(() => {
+            expect(modeOptions()).toEqual(['KEY', 'ANY']);
+        });
+        expect(screen.getByTestId<HTMLSelectElement>('add-device-hmip-mode').value).toBe('KEY');
+        expect(screen.getByTestId('add-device-key')).toBeTruthy();
+        expect(screen.getByTestId('add-device-hmip-hint').textContent).toContain('Funktioniert offline');
+    });
+
+    it('offers all three ways on KEYSERVER and KEYSERVER_LOCAL systems, and where nothing answers (task 66)', async () => {
+        for (const fact of [
+            {keyserver_mode: 'KEYSERVER' as const, device_keys: 0, offline_pairing: true},
+            {keyserver_mode: 'KEYSERVER_LOCAL' as const, device_keys: 5, offline_pairing: true},
+            null,
+        ]) {
+            transport = new MockTransport({demo: true});
+            transport.result('meta.pairing', fact);
+            await openOnHmip();
+            expect(modeOptions()).toEqual(['KEY', 'SGTIN', 'ANY']);
+            await fireEvent.change(screen.getByTestId('add-device-hmip-mode'), {target: {value: 'ANY'}});
+            await waitFor(() => {
+                expect(screen.getByTestId('add-device-hmip-hint').textContent).toContain('lokale Schlüsselzuordnung');
+            });
+            // one more turn of the wheel: the answer has long arrived and changed nothing
+            await new Promise((resolve) => setTimeout(resolve, 0));
+            expect(modeOptions()).toEqual(['KEY', 'SGTIN', 'ANY']);
+            document.body.innerHTML = '';
+        }
+    });
+
+    it('offers everything as before when the pairing request fails (task 66)', async () => {
+        transport.fail('meta.pairing', 'the system is down');
+        await openOnHmip();
+        await waitFor(() => {
+            expect(transport.lastCall('meta.pairing')).toEqual([]);
+        });
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        expect(modeOptions()).toEqual(['KEY', 'SGTIN', 'ANY']);
+        expect(screen.queryByRole('alert')).toBeNull();
+    });
+
+    /**
      * Task 28's second trap: hmipserver matches the whitelist as an exact string, so a lower-case
      * SGTIN would silently never match. What reaches the contract is upper case, however it was typed.
      */

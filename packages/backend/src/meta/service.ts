@@ -27,6 +27,7 @@ import {
     type ConnectionConfig,
     type MetaDocument,
     type MetaEnum,
+    type MetaHmipPairing,
     type MetaImportMode,
     type MetaNodePatch,
     type MetaObjectView,
@@ -469,6 +470,22 @@ export class MetaService {
     /** The version the box answered with, for the settings dialog and the log. */
     get version(): MetaVersion | undefined {
         return this.#version;
+    }
+
+    /**
+     * Task 66: what the system says about HmIP pairing, read afresh - the system derives it from
+     * its files on every call, so a key-mode switch or a scanned key shows in the next answer.
+     * `undefined` on every connection without a system (a CCU, ReGa, the profile's own store), on
+     * a system from before openccu-lite task 192 and on one that does not answer right now: the
+     * pairing dialog then offers what it always offered. Never throws.
+     */
+    async hmipPairing(): Promise<MetaHmipPairing | undefined> {
+        const baseUrl = this.boxUrl;
+        if (baseUrl === undefined || baseUrl === '') {
+            return undefined;
+        }
+        const version = await this.#client(baseUrl).version(this.#options.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
+        return version?.hmip;
     }
 
     /**

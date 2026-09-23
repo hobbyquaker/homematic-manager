@@ -478,6 +478,8 @@ export class MockTransport implements Transport {
             changed();
             return state();
         });
+        // task 66: the demo is a CCU as far as pairing goes; a test that wants a system's answer overrides this
+        this.result('meta.pairing', null);
         this.respond('meta.export', () => store.document());
         this.respond('meta.import', (document, mode) => {
             store.import(document, mode ?? 'replace');

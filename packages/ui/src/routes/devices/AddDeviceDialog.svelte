@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {renameEntries, type InstallModeOptions} from '@homematic-manager/core';
+    import {renameEntries, type InstallModeOptions, type MetaHmipPairing} from '@homematic-manager/core';
 
     import Dialog from '../../lib/components/Dialog.svelte';
     import {getStores} from '../../lib/stores/context.js';
@@ -32,6 +32,12 @@
      * always offered.
      */
     let hmipMode = $state<'KEY' | 'SGTIN' | 'ANY'>('KEY');
+    /**
+     * Task 66: what the system says about HmIP pairing - asked when the dialog opens on an HmIP
+     * interface, `undefined` wherever nothing says anything (a CCU, an older system, no answer),
+     * and then the three ways stay as they always were.
+     */
+    let pairing = $state<MetaHmipPairing | undefined>(undefined);
     let sgtin = $state('');
     let deviceKey = $state('');
     let scanning = $state(false);
@@ -65,18 +71,55 @@
         hmipMode === 'ANY' ? true : hmipMode === 'SGTIN' ? isSgtin(sgtin) : isSgtin(sgtin) && isDeviceKey(deviceKey),
     );
     /**
+     * Task 66: on a system whose key mode is `LOCAL` the key server is never asked, so "SGTIN only"
+     * cannot work there and is not offered - hidden, not disabled. `KEY` is never touched: the
+     * printed key is what the interface gets, key server or not.
+     */
+    const localKeysOnly = $derived(pairing?.keyserver_mode === 'LOCAL');
+    /**
      * Task 28: the one practical difference between the three ways is whether the box needs the
      * internet - only SGTIN and key works offline, the other two take the key from eQ-3's key server.
+     * Task 66: on a `LOCAL` system the third way pairs only a device whose key is stored there, and
+     * the line says how many keys that is.
      */
     const hmipHint = $derived(
         hmipMode === 'KEY'
             ? t('Works offline: the key from the sticker is all the interface needs.')
             : hmipMode === 'SGTIN'
               ? t("The key comes from eQ-3's key server: the box needs internet access.")
-              : t(
-                    "Pairs the next device in factory state that asks to join. Without a key the interface asks eQ-3's key server, so the box needs internet access unless a local key mapping is configured.",
-                ),
+              : localKeysOnly
+                ? t(
+                      "Pairs the next device in factory state that asks to join, if its key is on the system: the system's key mode never asks eQ-3's key server. {count} device keys are stored on the system.",
+                      {},
+                      pairing?.device_keys ?? 0,
+                  )
+                : t(
+                      "Pairs the next device in factory state that asks to join. Without a key the interface asks eQ-3's key server, so the box needs internet access unless a local key mapping is configured.",
+                  ),
     );
+
+    /** Task 66: the system's answer, fresh on every open - a key-mode switch there shows at the next one. */
+    $effect(() => {
+        if (!open || !isHmip) {
+            return;
+        }
+        let current = true;
+        void stores.devices.hmipPairing().then((answer) => {
+            if (current) {
+                pairing = answer;
+            }
+        });
+        return () => {
+            current = false;
+        };
+    });
+
+    /** Task 66: a choice the system cannot do falls back to the one that always works. */
+    $effect(() => {
+        if (localKeysOnly && hmipMode === 'SGTIN') {
+            hmipMode = 'KEY';
+        }
+    });
 
     $effect(() => {
         if (open) {
@@ -233,7 +276,9 @@
             <span>{t('Mode')}</span>
             <select class="hmm-select" bind:value={hmipMode} data-testid="add-device-hmip-mode">
                 <option value="KEY">{t('With SGTIN and key')}</option>
-                <option value="SGTIN">{t('With SGTIN only (key server)')}</option>
+                {#if !localKeysOnly}
+                    <option value="SGTIN">{t('With SGTIN only (key server)')}</option>
+                {/if}
                 <option value="ANY">{t('Any device (no SGTIN)')}</option>
             </select>
         </label>

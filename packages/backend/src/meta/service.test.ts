@@ -205,6 +205,31 @@ describe('the detection', () => {
         expect(notices.join('\n')).not.toContain('openccu-lite detected');
     });
 
+    /**
+     * Task 66: the pairing fact is asked of the system afresh each time, not taken from the probe -
+     * the system derives it from its files on every call, so a key-mode switch there shows at the
+     * next dialog. A connection without a system has nothing to say and asks nothing.
+     */
+    it('reads the HmIP pairing fact from the system afresh, and has none without a system', async () => {
+        const fact = {keyserver_mode: 'LOCAL', device_keys: 1, offline_pairing: false};
+        const box = fakeBox({version: {...VERSION, hmip: fact}});
+        const meta = await service({metaUrl: 'http://box'}, box.fetch);
+        const probes = (): number => box.calls.filter((call) => call.url.endsWith('/version')).length;
+        expect(probes()).toBe(1);
+        expect(meta.version?.hmip).toEqual(fact);
+        await expect(meta.hmipPairing()).resolves.toEqual(fact);
+        expect(probes()).toBe(2);
+
+        // a system from before task 192: detected, but nothing to say about pairing
+        const older = fakeBox();
+        await expect((await service({metaUrl: 'http://box'}, older.fetch)).hmipPairing()).resolves.toBeUndefined();
+
+        const ccu = fakeBox({status: 404});
+        const local = await service({metaUrl: 'http://ccu'}, ccu.fetch);
+        await expect(local.hmipPairing()).resolves.toBeUndefined();
+        expect(ccu.calls.length).toBe(1);
+    });
+
     it('stays local when the answer is JSON but not this API', async () => {
         const box = fakeBox({version: {hello: 'world'}});
         expect((await service({metaUrl: 'http://ccu'}, box.fetch)).kind).toBe('local');

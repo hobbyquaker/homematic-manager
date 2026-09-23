@@ -19,6 +19,7 @@ import {
     type MetaEnum,
     type MetaErrorCode,
     type MetaEvent,
+    type MetaHmipPairing,
     type MetaImportMode,
     type MetaNodePatch,
     type MetaObjectPatch,
@@ -64,6 +65,27 @@ export interface MetaWriteAnswer {
     readonly changed: boolean;
 }
 
+const KEYSERVER_MODES: readonly MetaHmipPairing['keyserver_mode'][] = ['LOCAL', 'KEYSERVER', 'KEYSERVER_LOCAL'];
+
+/** The `hmip` object of the version answer when it has the defined shape, else `undefined`. */
+export function hmipPairingOf(value: unknown): MetaHmipPairing | undefined {
+    if (typeof value !== 'object' || value === null) {
+        return undefined;
+    }
+    const {keyserver_mode, device_keys, offline_pairing} = value as Record<string, unknown>;
+    if (
+        typeof keyserver_mode !== 'string' ||
+        !(KEYSERVER_MODES as readonly string[]).includes(keyserver_mode) ||
+        typeof device_keys !== 'number' ||
+        !Number.isInteger(device_keys) ||
+        device_keys < 0 ||
+        typeof offline_pairing !== 'boolean'
+    ) {
+        return undefined;
+    }
+    return {keyserver_mode: keyserver_mode as MetaHmipPairing['keyserver_mode'], device_keys, offline_pairing};
+}
+
 /** Thin, typed access to one box's metadata API. */
 export class MetaApiClient {
     readonly #options: MetaApiClientOptions;
@@ -98,7 +120,14 @@ export class MetaApiClient {
                 return undefined;
             }
             const answer = body as Partial<MetaVersion>;
-            return answer.api === 'meta' && typeof answer.version === 'number' ? (answer as MetaVersion) : undefined;
+            if (answer.api !== 'meta' || typeof answer.version !== 'number') {
+                return undefined;
+            }
+            // task 66: the pairing fact is kept only in the shape openccu-lite task 192 defines;
+            // anything else is treated as "the system does not say", never as a broken dialog
+            const {hmip, ...rest} = answer;
+            const pairing = hmipPairingOf(hmip);
+            return {...(rest as MetaVersion), ...(pairing === undefined ? {} : {hmip: pairing})};
         } catch {
             // a box that is off, a CCU that answers HTML, a DNS name that does not resolve: all of
             // them mean the same thing here, and none of them is worth an exception

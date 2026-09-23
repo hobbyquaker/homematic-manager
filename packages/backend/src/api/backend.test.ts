@@ -951,6 +951,72 @@ describe('interfaces and rega', () => {
     });
 });
 
+/**
+ * Task 66: what the system says about HmIP pairing reaches the dialog as `meta.pairing`, read
+ * afresh from the system's `/version` each time, and is `null` wherever nothing says anything.
+ */
+describe('the HmIP pairing fact of openccu-lite (task 66)', () => {
+    it('is null before a connection and on a CCU', async () => {
+        const backend = await Backend.open({dataDir: dir, importLegacy: false});
+        expect(await backend.request('meta.pairing')).toBeNull();
+        await backend.stop();
+
+        const h = await harness({
+            backend: {metaOptions: {fetch: () => Promise.resolve(new Response('not found', {status: 404}))}},
+        });
+        expect(await h.backend.request('meta.pairing')).toBeNull();
+        await h.backend.stop();
+    });
+
+    it('relays the fact of a system that says it, asked of the system each time', async () => {
+        const json = (body: unknown): Response =>
+            new Response(JSON.stringify(body), {status: 200, headers: {'Content-Type': 'application/json'}});
+        let mode = 'LOCAL';
+        let probes = 0;
+        const fetchImpl = ((input: string | URL) => {
+            const url = new URL(String(input));
+            switch (url.pathname) {
+                case '/api/meta/v1/version':
+                    probes += 1;
+                    return Promise.resolve(
+                        json({
+                            api: 'meta',
+                            version: 1,
+                            format: 1,
+                            revision: 3,
+                            hmip: {keyserver_mode: mode, device_keys: 2, offline_pairing: mode !== 'LOCAL'},
+                        }),
+                    );
+                case '/api/meta/v1/snapshot':
+                    return Promise.resolve(json({format: 1, revision: 3, objects: {}, enums: {}}));
+                case '/api/meta/v1/events/sse':
+                    return Promise.resolve(
+                        new Response(new ReadableStream({start: () => undefined}), {
+                            headers: {'Content-Type': 'text/event-stream'},
+                        }),
+                    );
+                default:
+                    return Promise.resolve(new Response('not found', {status: 404}));
+            }
+        }) as unknown as typeof globalThis.fetch;
+        const h = await harness({
+            connection: {metaUrl: 'http://box', metaToken: 'olt_0123456789abcdef0123456789abcdef'},
+            backend: {metaOptions: {fetch: fetchImpl}},
+        });
+        expect(await h.backend.request('meta.pairing')).toEqual({
+            keyserver_mode: 'LOCAL',
+            device_keys: 2,
+            offline_pairing: false,
+        });
+        const before = probes;
+        // the system was switched back to the key server in between: the next dialog sees it
+        mode = 'KEYSERVER_LOCAL';
+        expect(await h.backend.request('meta.pairing')).toMatchObject({keyserver_mode: 'KEYSERVER_LOCAL'});
+        expect(probes).toBe(before + 1);
+        await h.backend.stop();
+    });
+});
+
 describe('rooms and functions through ReGa (task 27)', () => {
     /**
      * A CCU: no metadata API, and the detection answered at once rather than by a timeout. The

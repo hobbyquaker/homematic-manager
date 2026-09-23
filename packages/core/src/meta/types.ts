@@ -176,6 +176,20 @@ export interface MetaEvent {
     readonly enums?: number;
 }
 
+/**
+ * What the system says about HmIP pairing (openccu-lite task 192, this side task 66): which of the
+ * three ways to admit a device can work. `KEYSERVER_LOCAL` is the shipped default. It carries no
+ * key and no SGTIN - the count is all a pairing dialog needs.
+ */
+export interface MetaHmipPairing {
+    /** `LOCAL` never asks eQ-3's key server; the other two do, `KEYSERVER_LOCAL` after the system's own keys. */
+    readonly keyserver_mode: 'LOCAL' | 'KEYSERVER' | 'KEYSERVER_LOCAL';
+    /** How many device keys the system holds - a count, never the list. */
+    readonly device_keys: number;
+    /** Whether a device without its key on the system can be paired at all: false on `LOCAL`. */
+    readonly offline_pairing: boolean;
+}
+
 /** What `GET /api/meta/v1/version` answers - the runtime detection of the porting kit. */
 export interface MetaVersion {
     readonly api: string;
@@ -183,6 +197,8 @@ export interface MetaVersion {
     readonly format: number;
     readonly revision: number;
     readonly implementation?: string;
+    /** Absent on a system from before openccu-lite task 192 - `undefined`, never an empty object. */
+    readonly hmip?: MetaHmipPairing;
 }
 
 /**

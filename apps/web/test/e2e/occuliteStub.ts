@@ -60,7 +60,18 @@ function serial(id: number): string {
     return `INT${String(id).padStart(7, '0')}`;
 }
 
-export async function startOcculiteStub(options: {devices: StubDevice[]; groups?: StubGroup[]}): Promise<OcculiteStub> {
+/** What the stub's `/version` says about HmIP pairing (openccu-lite task 192); absent = a system from before it. */
+export interface StubPairing {
+    keyserver_mode: 'LOCAL' | 'KEYSERVER' | 'KEYSERVER_LOCAL';
+    device_keys: number;
+    offline_pairing: boolean;
+}
+
+export async function startOcculiteStub(options: {
+    devices: StubDevice[];
+    groups?: StubGroup[];
+    hmip?: StubPairing;
+}): Promise<OcculiteStub> {
     const groups: StubGroup[] = structuredClone(options.groups ?? []);
     const requests: string[] = [];
     const sockets = new Set<Socket>();
@@ -139,6 +150,7 @@ export async function startOcculiteStub(options: {devices: StubDevice[]; groups?
                         format: 1,
                         revision,
                         implementation: 'occulite-stub',
+                        ...(options.hmip === undefined ? {} : {hmip: options.hmip}),
                     });
                 } else if (route === '/snapshot') {
                     json(response, 200, snapshot());

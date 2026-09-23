@@ -1,6 +1,7 @@
 import type {
     DeviceDescription,
     InstallModeOptions,
+    MetaHmipPairing,
     RepairConfigOptions,
     RepairConfigResult,
     Transport,
@@ -333,6 +334,20 @@ export class DevicesStore {
         } catch (error) {
             this.#notices.fromError(error, 'setInstallMode');
             return false;
+        }
+    }
+
+    /**
+     * Task 66: what the system says about HmIP pairing - the key-server mode and how many device
+     * keys it holds - or `undefined` where nothing says anything (a CCU, an older system, a system
+     * that does not answer). The dialog then offers what it always offered, so a failure here is
+     * no notice: there is nothing the user could do about it, and nothing is broken.
+     */
+    async hmipPairing(): Promise<MetaHmipPairing | undefined> {
+        try {
+            return (await this.#transport.request('meta.pairing')) ?? undefined;
+        } catch {
+            return undefined;
         }
     }
 

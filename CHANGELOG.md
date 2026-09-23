@@ -21,6 +21,13 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   still pending are named beside the count, as the WebUI's popup named them. Only an administrator changes groups
   on the system; the buttons say so. The tab reads the system's API and not the group process, so it works from
   the desktop as well - even while the `VirtualDevices` interface itself shows as not connected there.
+- **The pairing dialog offers only the HmIP modes the system can do.** An openccu-lite system whose key mode is
+  _local_ never asks eQ-3's key server, so _With SGTIN only (key server)_ cannot work there: the dialog leaves it
+  out (a choice already made falls back to _With SGTIN and key_), and _Any device (no SGTIN)_ says that it pairs
+  only a device whose key is stored on the system, with the number of stored keys. The system says so in the same
+  answer the application already reads to detect it (`GET /api/meta/v1/version`, its `hmip` object), asked afresh
+  each time the dialog opens; a CCU, an older system and a system that does not answer keep all three modes, and
+  no key ever leaves the system. _With SGTIN and key_ is never touched.
 
 ### Changed
 

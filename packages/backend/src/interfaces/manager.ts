@@ -881,7 +881,7 @@ export class InterfaceManager {
             } else if (waited > 0) {
                 this.#options.onNotice(
                     'info',
-                    `${interfaceName}: answering after ${String(waited)} attempts at the start`,
+                    `${interfaceName}: answering, attempt ${String(waited + 1)} at the start`,
                     interfaceName,
                 );
             }

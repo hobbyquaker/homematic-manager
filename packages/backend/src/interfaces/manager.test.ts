@@ -1335,7 +1335,7 @@ describe('the quick retries at the start (task 56, D-52)', () => {
                     message: 'HmIP-RF: nothing is listening on ccu.lan:2010 yet - waiting for it',
                     interfaceName: 'HmIP-RF',
                 },
-                {level: 'info', message: 'HmIP-RF: answering after 7 attempts at the start', interfaceName: 'HmIP-RF'},
+                {level: 'info', message: 'HmIP-RF: answering, attempt 8 at the start', interfaceName: 'HmIP-RF'},
             ]);
             expect(notices.filter((entry) => entry.level === 'debug')).toHaveLength(6);
             expect(h.notices.some((entry) => entry.level === 'warn' || entry.level === 'error')).toBe(false);

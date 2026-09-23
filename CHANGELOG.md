@@ -49,10 +49,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 - **An interface that is not up yet at the start is waited for, not given up on.** In the first two minutes after the
   start, an interface whose port refuses or does not answer is tried again after 1, 2, 4 and 8 seconds and then every
-  15 seconds, instead of on the 15-second watchdog with a back-off of up to five minutes. It shows as _waiting_, says
+  2 seconds, instead of on the 15-second watchdog with a back-off of up to five minutes. It shows as _waiting_, says
   so in one line of the log (the retries are at debug level), and connects as soon as its process answers. This is
-  what lets the addon start before the interface processes on openccu-lite: measured there, HmIP-RF was asked again
-  only 17 seconds after hmipserver answered. After the two minutes, an interface that still refuses is _not present_
+  what lets the addon start before the interface processes on openccu-lite: measured there, HmIP-RF used to be asked
+  again only 17 seconds after hmipserver answered, and now connects before the addon would otherwise even have started. After the two minutes, an interface that still refuses is _not present_
   as before - BidCos-Wired on a CCU without a wired gateway.
 - **Naming a newly paired device names its channels too.** The _New_ section of the pairing dialog has the rename
   dialog's _Overwrite channel names_ box, and in both dialogs it is ticked whenever they open: a device's name

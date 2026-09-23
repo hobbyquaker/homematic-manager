@@ -1294,7 +1294,7 @@ describe('the quick retries at the start (task 56, D-52)', () => {
 
     it('waits 1, 2, 4 and 8 s and then 15 s between the attempts', () => {
         expect([1, 2, 3, 4, 5, 6, 20].map((attempt) => startRetryDelay(attempt))).toEqual([
-            1000, 2000, 4000, 8000, 15_000, 15_000, 15_000,
+            1000, 2000, 4000, 8000, 2000, 2000, 2000,
         ]);
     });
 
@@ -1309,19 +1309,19 @@ describe('the quick retries at the start (task 56, D-52)', () => {
             const started = h.clock.value;
             await h.manager.start();
             const times: number[] = [0];
-            for (let second = 0; second < 45; second += 1) {
+            for (let second = 0; second < 21; second += 1) {
                 await advance(h, 1000);
                 initTimes(h, 'HmIP-RF', started, times);
             }
-            // 1, 2, 4, 8 s apart, then every 15 s: at +1, +3, +7, +15, +30, +45
-            expect(times).toEqual([0, 1000, 3000, 7000, 15_000, 30_000, 45_000]);
+            // 1, 2, 4, 8 s apart, then every 2 s (D-57): at +1, +3, +7, +15, +17, +19, +21
+            expect(times).toEqual([0, 1000, 3000, 7000, 15_000, 17_000, 19_000, 21_000]);
             const waiting = h.manager.states()[1];
             expect(waiting).toMatchObject({name: 'HmIP-RF', connected: false, waiting: true});
             expect(waiting?.absent).toBeUndefined();
             expect(waiting?.unreachable).toBeUndefined();
 
             up = true;
-            await advance(h, 15_000);
+            await advance(h, 2000);
             const state = h.manager.states()[1];
             expect(state?.connected).toBe(true);
             expect(state?.waiting).toBeUndefined();
@@ -1335,9 +1335,9 @@ describe('the quick retries at the start (task 56, D-52)', () => {
                     message: 'HmIP-RF: nothing is listening on ccu.lan:2010 yet - waiting for it',
                     interfaceName: 'HmIP-RF',
                 },
-                {level: 'info', message: 'HmIP-RF: answering, attempt 8 at the start', interfaceName: 'HmIP-RF'},
+                {level: 'info', message: 'HmIP-RF: answering, attempt 9 at the start', interfaceName: 'HmIP-RF'},
             ]);
-            expect(notices.filter((entry) => entry.level === 'debug')).toHaveLength(6);
+            expect(notices.filter((entry) => entry.level === 'debug')).toHaveLength(7);
             expect(h.notices.some((entry) => entry.level === 'warn' || entry.level === 'error')).toBe(false);
         } finally {
             vi.useRealTimers();

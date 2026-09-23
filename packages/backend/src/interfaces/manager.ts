@@ -11,7 +11,7 @@
  *    hmipserver answers pings but sends events rarely (eq-3/occu#42); an interface that answers no
  *    ping at all (VirtualDevices) is watched by events only.
  *    At the start (task 56, D-52) an `init` that is refused or times out is not left to the watchdog:
- *    it is tried again after 1, 2, 4 and 8 s and then every 15 s, and the interface shows *waiting*.
+ *    it is tried again after 1, 2, 4 and 8 s and then every 2 s, and the interface shows *waiting*.
  * 3. `init(url, '')` on shutdown, so the CCU stops calling a process that is gone - with a hard
  *    timeout, because 2.x's `stop()` waited for an unreachable CCU and only a second `stop()` (or
  *    the 15 s fallback timer) got the app closed.
@@ -98,8 +98,15 @@ export const MAX_INIT_BACKOFF_MS = 300_000;
  */
 export const START_RETRY_DELAYS_MS: readonly number[] = [1000, 2000, 4000, 8000];
 
-/** Task 56: the wait between two start attempts after {@link START_RETRY_DELAYS_MS}. */
-export const START_RETRY_INTERVAL_MS = 15_000;
+/**
+ * Task 56 (D-57): the wait between two start attempts after {@link START_RETRY_DELAYS_MS}.
+ *
+ * D-52 had 15 s here. Measured on openccu-lite with the addon started early, that made HmIP-RF on a
+ * Raspberry Pi 4 connect 2-3 s *later* than when the addon waits for hmipserver, because hmipserver
+ * came up between two attempts 15 s apart; with 2 s it connected 9.6 s earlier. A refused
+ * connection on the loopback every 2 s for at most the start window costs nothing.
+ */
+export const START_RETRY_INTERVAL_MS = 2000;
 
 /**
  * Task 56: how long after `start()` (or a D-31 resubscribe) an interface that has not answered yet

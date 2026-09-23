@@ -271,7 +271,7 @@ export interface InterfaceState {
     subscribing?: boolean;
     /**
      * Task 56 (D-52): the interface refused or did not answer its `init` at the start, and is tried
-     * again within seconds (1, 2, 4, 8 s, then every 15 s) for the first two minutes. On
+     * again within seconds (1, 2, 4, 8 s, then every 2 s) for the first two minutes. On
      * openccu-lite that is the interface process not having started yet, so the UI shows "waiting"
      * rather than "not present" or "not answering". Present only when true.
      */

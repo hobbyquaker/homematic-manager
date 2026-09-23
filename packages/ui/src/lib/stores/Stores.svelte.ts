@@ -10,6 +10,7 @@ import {ChangeSetStore} from './ChangeSetStore.svelte.js';
 import {ConsoleStore} from './ConsoleStore.svelte.js';
 import {DevicesStore} from './DevicesStore.svelte.js';
 import {EventsStore} from './EventsStore.svelte.js';
+import {GroupsStore} from './GroupsStore.svelte.js';
 import {HostStore} from './HostStore.svelte.js';
 import {InterfacesStore} from './InterfacesStore.svelte.js';
 import {MetaStore} from './MetaStore.svelte.js';
@@ -60,6 +61,8 @@ export class Stores {
     readonly meta: MetaStore;
     /** D-40, task 25: rooms, functions and the state of the store they come from. */
     readonly taxonomy: TaxonomyStore;
+    /** Task 57: the heating groups of openccu-lite, and whether this connection has them. */
+    readonly groups: GroupsStore;
     readonly paramsets: ParamsetStore;
     readonly radio: RadioStore;
     readonly console: ConsoleStore;
@@ -85,6 +88,7 @@ export class Stores {
             ...(options.dataSource === undefined ? {} : {source: options.dataSource}),
         });
         this.taxonomy = new TaxonomyStore(transport, this.notices);
+        this.groups = new GroupsStore(transport, this.notices);
         this.paramsets = new ParamsetStore(transport, this.notices);
         this.radio = new RadioStore(transport, this.notices);
         this.console = new ConsoleStore(transport, this.notices);
@@ -103,7 +107,9 @@ export class Stores {
         if (this.app.storeSelected) {
             return storeTabs(this.taxonomy.state);
         }
-        return tabsForInterface(this.interfaces.typeOf(this.app.selectedInterface));
+        return tabsForInterface(this.interfaces.typeOf(this.app.selectedInterface), {
+            heatingGroups: this.groups.offered,
+        });
     }
 
     /** The friendly name of an address, or the address - the Name column of every grid. */
@@ -122,6 +128,11 @@ export class Stores {
         // The host is optional and must never hold up the CCU work, so its failure is swallowed.
         void this.host.load().catch(() => undefined);
         await Promise.all([this.interfaces.load(), this.names.load(), this.rpcLog.load(), this.taxonomy.load()]);
+        // Task 57: whether VirtualDevices gets its Groups tab is known only once the store has said
+        // what kind of connection this is - and it has to be known before the route below decides
+        // whether `#/VirtualDevices/groups` is a tab this interface has. One request on a system
+        // with a store, none anywhere else.
+        await this.groups.follow(this.taxonomy.state);
         // A bookmark of the store's pages (`#/%23store/rooms`) on a host that has no store, or
         // whose store does not answer: the first interface, as an unknown name in the hash gets.
         const selected =
@@ -184,6 +195,7 @@ export class Stores {
         this.rpcLog.dispose();
         this.events.dispose();
         this.serviceMessages.dispose();
+        this.groups.dispose();
         this.taxonomy.dispose();
         this.names.dispose();
         this.devices.dispose();

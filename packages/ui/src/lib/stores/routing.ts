@@ -12,7 +12,14 @@ import type {MetaState} from '@homematic-manager/core';
 /** The six tabs of 2.7, in the order the tab bar shows them. */
 export const TAB_IDS = ['devices', 'links', 'rssi', 'console', 'messages', 'events'] as const;
 
-export type InterfaceTabId = (typeof TAB_IDS)[number];
+/**
+ * Task 57: the one tab 2.7 never had. The heating groups of the `VirtualDevices` interface are
+ * created, changed and deleted here - on openccu-lite only, through the box's system API, so the
+ * tab exists only while the connection has that API ({@link tabsForInterface}'s option).
+ */
+export const GROUPS_TAB = 'groups';
+
+export type InterfaceTabId = (typeof TAB_IDS)[number] | typeof GROUPS_TAB;
 
 /**
  * The tabs of the metadata store when it is the selection (the maintainer, 2026-09-10: "mach
@@ -63,7 +70,7 @@ export interface Route {
 }
 
 export function isTabId(value: string): value is TabId {
-    return (TAB_IDS as readonly string[]).includes(value) || isStoreTabId(value);
+    return (TAB_IDS as readonly string[]).includes(value) || value === GROUPS_TAB || isStoreTabId(value);
 }
 
 /** `#/BidCos-RF/links` -> `{interfaceName: 'BidCos-RF', tab: 'links'}`. */
@@ -82,13 +89,23 @@ export function formatHash(interfaceName: string, tab: TabId): string {
     return `#/${encodeURIComponent(interfaceName)}/${tab}`;
 }
 
+export interface TabOptions {
+    /**
+     * Task 57: the connection has openccu-lite's groups API. The `VirtualDevices` interface then
+     * gets the Groups tab, right after its devices - whether or not its RPC connection is up, because
+     * the tab reads the box's API and not the group process (openccu-lite B-169: remotely the
+     * process cannot be reached yet, and the groups can still be edited).
+     */
+    readonly heatingGroups?: boolean;
+}
+
 /**
  * Which tabs an interface offers. 2.x hid the tabs an interface cannot serve through the `dselect`
  * classes: links only for BidCos, RSSI only for BidCos-RF, service messages not for BidCos-Wired.
  * HmIP got everything, which is why the class list on the `#links` tab reads BidCos-only but
  * `initDaemon` showed all of them again for HmIP.
  */
-export function tabsForInterface(interfaceType: string): InterfaceTabId[] {
+export function tabsForInterface(interfaceType: string, options: TabOptions = {}): InterfaceTabId[] {
     switch (interfaceType) {
         case 'BidCos-Wired':
             return ['devices', 'links', 'console', 'events'];
@@ -96,6 +113,10 @@ export function tabsForInterface(interfaceType: string): InterfaceTabId[] {
             return ['devices', 'console', 'events'];
         case 'BidCos-RF':
             return [...TAB_IDS];
+        case 'VirtualDevices':
+            return options.heatingGroups === true
+                ? ['devices', GROUPS_TAB, 'links', 'console', 'messages', 'events']
+                : ['devices', 'links', 'console', 'messages', 'events'];
         default:
             // #155: HmIP has no `rssiInfo`, but it has the levels - they arrive as `RSSI_DEVICE`
             // and `RSSI_PEER` of the maintenance channel, which is what 2.x showed in its Funk tab

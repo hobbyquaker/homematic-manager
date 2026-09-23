@@ -39,6 +39,53 @@ export const UI_MESSAGES: MessageCatalogue = {
     Team: {de: 'Team', en: 'Team'},
     'Own team': {de: 'Eigenes Team', en: 'Own team'},
     Members: {de: 'Mitglieder', en: 'Members'},
+    // Task 57: the heating groups of openccu-lite - the Groups tab of VirtualDevices and its two
+    // dialogs. The words are the CCU WebUI's where it has them (Settings → Groups).
+    Groups: {de: 'Gruppen', en: 'Groups'},
+    Loading: {de: 'Wird geladen', en: 'Loading'},
+    'Heating groups': {de: 'Heizungsgruppen', en: 'Heating groups'},
+    'New group': {de: 'Neue Gruppe', en: 'New group'},
+    'Edit group': {de: 'Gruppe bearbeiten', en: 'Edit group'},
+    'Delete group': {de: 'Gruppe löschen', en: 'Delete group'},
+    'Group name': {de: 'Gruppenname', en: 'Group name'},
+    'Group type': {de: 'Gruppentyp', en: 'Group type'},
+    'Virtual device': {de: 'Virtuelles Gerät', en: 'Virtual device'},
+    'No groups yet': {de: 'Noch keine Gruppen', en: 'No groups yet'},
+    '{count} groups': {
+        de: {one: '{count} Gruppe', other: '{count} Gruppen'},
+        en: {one: '{count} group', other: '{count} groups'},
+    },
+    'Select a group': {de: 'Eine Gruppe auswählen', en: 'Select a group'},
+    'Addable devices': {de: 'Hinzufügbare Geräte', en: 'Addable devices'},
+    'Already connected devices': {de: 'Bereits verknüpfte Geräte', en: 'Already connected devices'},
+    'There are no other devices available': {
+        de: 'Es sind keine weiteren Geräte vorhanden',
+        en: 'There are no other devices available',
+    },
+    'There are no devices in the group': {
+        de: 'Es sind keine Geräte in der Gruppe',
+        en: 'There are no devices in the group',
+    },
+    'Configuration pending: {list}': {de: 'Konfiguration ausstehend: {list}', en: 'Configuration pending: {list}'},
+    'The direct device connections of these devices are still being configured': {
+        de: 'Die direkten Verknüpfungen dieser Geräte werden noch konfiguriert',
+        en: 'The direct device connections of these devices are still being configured',
+    },
+    'The members leave the group and the virtual device {device} is removed': {
+        de: 'Die Mitglieder verlassen die Gruppe, das virtuelle Gerät {device} wird entfernt',
+        en: 'The members leave the group and the virtual device {device} is removed',
+    },
+    'Needs the administrator role on the system': {
+        de: 'Erfordert die Administratorrolle auf dem System',
+        en: 'Needs the administrator role on the system',
+    },
+    'Heating groups are not available here': {
+        de: 'Heizungsgruppen sind hier nicht verfügbar',
+        en: 'Heating groups are not available here',
+    },
+    // the group types as the system labels them - the WebUI's own keys, and its own words for them
+    Heating_Control: {de: 'Heizungssteuerung', en: 'Heating control'},
+    'HmIP-Heizungssteuerung': {de: 'HmIP-Heizungssteuerung', en: 'HmIP heating control'},
     'This channel does not belong to a team': {
         de: 'Dieser Kanal gehört zu keinem Team',
         en: 'This channel does not belong to a team',

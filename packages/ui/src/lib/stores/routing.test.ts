@@ -53,6 +53,29 @@ describe('tabsForInterface', () => {
         expect(tabsForInterface('CUxD')).toEqual(['devices', 'console', 'events']);
         expect(tabsForInterface('')).not.toContain('rssi');
     });
+
+    /**
+     * Task 57: the heating groups live on VirtualDevices and only on openccu-lite, whose system API
+     * makes them. Without that API the interface keeps the set it always had; with it the Groups tab
+     * follows the devices - and only there: no other interface has groups to edit.
+     */
+    it('gives VirtualDevices the Groups tab when the connection has the groups API, and nobody else', () => {
+        expect(tabsForInterface('VirtualDevices')).toEqual(['devices', 'links', 'console', 'messages', 'events']);
+        expect(tabsForInterface('VirtualDevices', {heatingGroups: false})).not.toContain('groups');
+        expect(tabsForInterface('VirtualDevices', {heatingGroups: true})).toEqual([
+            'devices',
+            'groups',
+            'links',
+            'console',
+            'messages',
+            'events',
+        ]);
+        expect(tabsForInterface('BidCos-RF', {heatingGroups: true})).toEqual([...TAB_IDS]);
+        expect(tabsForInterface('HmIP-RF', {heatingGroups: true})).not.toContain('groups');
+        // the hash `#/VirtualDevices/groups` parses, so a bookmark of the tab works
+        expect(isTabId('groups')).toBe(true);
+        expect(parseHash('#/VirtualDevices/groups')).toEqual({interfaceName: 'VirtualDevices', tab: 'groups'});
+    });
 });
 
 describe('the metadata store as a selection (2026-09-10)', () => {

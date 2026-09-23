@@ -26,6 +26,7 @@
     import ConsolePage from './routes/ConsolePage.svelte';
     import DevicesPage from './routes/DevicesPage.svelte';
     import EventsPage from './routes/EventsPage.svelte';
+    import GroupsPage from './routes/GroupsPage.svelte';
     import LinksPage from './routes/LinksPage.svelte';
     import MetadataPage from './routes/MetadataPage.svelte';
     import RadioPage from './routes/RadioPage.svelte';
@@ -80,6 +81,8 @@
 
     const TAB_LABELS: Record<TabId, string> = {
         devices: 'Devices',
+        // task 57: VirtualDevices on openccu-lite, the heating groups
+        groups: 'Groups',
         links: 'Links',
         rssi: 'RSSI',
         console: 'RPC Console',
@@ -370,6 +373,8 @@
                         {/if}
                     {:else if app.tab === 'devices'}
                         <DevicesPage />
+                    {:else if app.tab === 'groups'}
+                        <GroupsPage />
                     {:else if app.tab === 'links'}
                         <LinksPage />
                     {:else if app.tab === 'rssi'}

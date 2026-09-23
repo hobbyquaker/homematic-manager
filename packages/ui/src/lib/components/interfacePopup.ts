@@ -29,7 +29,8 @@ export const MARK_GLYPH: Readonly<Record<InterfaceMark, string>> = {
 };
 
 export function markOf(state: InterfaceState): InterfaceMark {
-    if (state.subscribing === true) {
+    // task 56: waiting at the start for an interface process that is not up yet is on its way too
+    if (state.subscribing === true || (state.waiting === true && !state.connected)) {
         return 'busy';
     }
     if (state.connected) {

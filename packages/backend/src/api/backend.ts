@@ -1826,7 +1826,7 @@ export class Backend {
         return methods;
     }
 
-    #notice(level: 'info' | 'warn' | 'error', message: string, interfaceName?: string): void {
+    #notice(level: 'debug' | 'info' | 'warn' | 'error', message: string, interfaceName?: string): void {
         this.events.emit('notice', {
             level,
             message,

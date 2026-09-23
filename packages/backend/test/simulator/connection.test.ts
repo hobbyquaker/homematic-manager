@@ -343,6 +343,8 @@ describe.skipIf(!simulatorAvailable)('connecting to hm-simulator', () => {
                     idleUnsubscribeMs: 40,
                     interfaceManagerOptions: {
                         watchdogIntervalMs: 0,
+                        // past the start window (task 56): refused means "not present", with its warning
+                        startWindowMs: 0,
                         portOverride: (name: string) =>
                             name === 'BidCos-Wired' ? closed : (sim.ports.rfd as number | undefined),
                     },

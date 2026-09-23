@@ -270,6 +270,13 @@ export interface InterfaceState {
      */
     subscribing?: boolean;
     /**
+     * Task 56 (D-52): the interface refused or did not answer its `init` at the start, and is tried
+     * again within seconds (1, 2, 4, 8 s, then every 15 s) for the first two minutes. On
+     * openccu-lite that is the interface process not having started yet, so the UI shows "waiting"
+     * rather than "not present" or "not answering". Present only when true.
+     */
+    waiting?: boolean;
+    /**
      * D-31: no UI session was connected for the grace period, so the backend sent `init('')` and
      * the interface pushes nothing at us. Caches, names and the configuration are untouched; the
      * next session that connects subscribes again. Never set in Electron.
@@ -1023,7 +1030,11 @@ export interface ApiEvents {
     'unreach.changed': UnreachCounter[];
     'config.changed': AppConfig;
     /** Backend-side problem the user should see (ReGa down, port in use, ...). */
-    notice: {level: 'info' | 'warn' | 'error'; message: string; interfaceName?: string};
+    /**
+     * `debug` is for the host's log only (task 56: the start retries of an interface that is not
+     * there yet); the UI shows no toast for it.
+     */
+    notice: {level: 'debug' | 'info' | 'warn' | 'error'; message: string; interfaceName?: string};
 }
 
 export type ApiEventName = keyof ApiEvents;

@@ -16,7 +16,13 @@ import {normaliseConnection} from '../config/defaults.js';
 import {RpcClient, type RpcClientOptions} from '../rpc/client.js';
 import type {CallbackHandler, CallbackServerSet} from '../rpc/server.js';
 import type {CallbackNetwork, LocalIPv4, PortProbe} from '../util/net.js';
-import {InterfaceManager, callbackBindHost, firstBidcosInterfaceAddress} from './manager.js';
+import {
+    InterfaceManager,
+    START_WINDOW_MS,
+    callbackBindHost,
+    firstBidcosInterfaceAddress,
+    startRetryDelay,
+} from './manager.js';
 
 /** A callback server set that binds nothing. */
 function fakeServers(): CallbackServerSet & {stopped: boolean; started: RpcProtocol[]} {
@@ -120,6 +126,8 @@ function harness(
         answers?: Record<string, Answer>;
         probe?: (host: string, port: number) => Promise<PortProbe>;
         initBackoffMs?: number;
+        /** Task 56: off unless a test asks, so the others see what happens after the start window. */
+        startWindowMs?: number;
         network?: CallbackNetwork;
         keepConfiguredCallbackIp?: boolean;
     } = {},
@@ -151,6 +159,7 @@ function harness(
         createClient: clients.create,
         createCallbackServers: () => servers,
         ...(options.initBackoffMs === undefined ? {} : {initBackoffMs: options.initBackoffMs}),
+        startWindowMs: options.startWindowMs ?? 0,
         network: options.network ?? fakeNetwork(),
         ...(options.keepConfiguredCallbackIp === undefined
             ? {}
@@ -1261,5 +1270,196 @@ describe('the background port probe', () => {
         const on = harness({connection: {autoDetect: true}, probe});
         await on.manager.start();
         expect(probe).toHaveBeenCalled();
+    });
+});
+
+describe('the quick retries at the start (task 56, D-52)', () => {
+    const refused = () => Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:32010'), {code: 'ECONNREFUSED'});
+
+    /** Moves the injected clock and the fake timers together, one second at a time. */
+    async function advance(h: Harness, ms: number): Promise<void> {
+        for (let passed = 0; passed < ms; passed += 1000) {
+            h.clock.value += 1000;
+            await vi.advanceTimersByTimeAsync(1000);
+        }
+    }
+
+    function initTimes(h: Harness, name: string, since: number, times: number[]): void {
+        const count = h.clients.calls.filter((call) => call.name === name && call.method === 'init').length;
+        while (times.length < count) {
+            times.push(h.clock.value - since);
+        }
+    }
+
+    it('waits 1, 2, 4 and 8 s and then 15 s between the attempts', () => {
+        expect([1, 2, 3, 4, 5, 6, 20].map((attempt) => startRetryDelay(attempt))).toEqual([
+            1000, 2000, 4000, 8000, 15_000, 15_000, 15_000,
+        ]);
+    });
+
+    it('tries a refused interface again within seconds and connects as soon as it answers', async () => {
+        vi.useFakeTimers();
+        try {
+            let up = false;
+            const h = harness({
+                answers: {'HmIP-RF': () => (up ? '' : refused())},
+                startWindowMs: START_WINDOW_MS,
+            });
+            const started = h.clock.value;
+            await h.manager.start();
+            const times: number[] = [0];
+            for (let second = 0; second < 45; second += 1) {
+                await advance(h, 1000);
+                initTimes(h, 'HmIP-RF', started, times);
+            }
+            // 1, 2, 4, 8 s apart, then every 15 s: at +1, +3, +7, +15, +30, +45
+            expect(times).toEqual([0, 1000, 3000, 7000, 15_000, 30_000, 45_000]);
+            const waiting = h.manager.states()[1];
+            expect(waiting).toMatchObject({name: 'HmIP-RF', connected: false, waiting: true});
+            expect(waiting?.absent).toBeUndefined();
+            expect(waiting?.unreachable).toBeUndefined();
+
+            up = true;
+            await advance(h, 15_000);
+            const state = h.manager.states()[1];
+            expect(state?.connected).toBe(true);
+            expect(state?.waiting).toBeUndefined();
+            expect(h.connected).toEqual(['BidCos-RF', 'HmIP-RF']);
+
+            // one line when it starts waiting, the retries at debug level, one when it answers
+            const notices = h.notices.filter((entry) => entry.interfaceName === 'HmIP-RF');
+            expect(notices.filter((entry) => entry.level !== 'debug')).toEqual([
+                {
+                    level: 'info',
+                    message: 'HmIP-RF: nothing is listening on ccu.lan:2010 yet - waiting for it',
+                    interfaceName: 'HmIP-RF',
+                },
+                {level: 'info', message: 'HmIP-RF: answering after 7 attempts at the start', interfaceName: 'HmIP-RF'},
+            ]);
+            expect(notices.filter((entry) => entry.level === 'debug')).toHaveLength(6);
+            expect(h.notices.some((entry) => entry.level === 'warn' || entry.level === 'error')).toBe(false);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('treats an init that times out at the start the same way, and not as an error', async () => {
+        vi.useFakeTimers();
+        try {
+            const h = harness({
+                answers: {
+                    'HmIP-RF': () => new BackendError({message: 'init timed out after 10000 ms', kind: 'connection'}),
+                },
+                startWindowMs: START_WINDOW_MS,
+            });
+            await h.manager.start();
+            await advance(h, 3000);
+            expect(h.clients.calls.filter((call) => call.name === 'HmIP-RF')).toHaveLength(3);
+            expect(h.manager.states()[1]?.waiting).toBe(true);
+            expect(h.notices.filter((entry) => entry.level === 'error')).toEqual([]);
+            expect(h.notices.find((entry) => entry.interfaceName === 'HmIP-RF')?.message).toBe(
+                'HmIP-RF: ccu.lan:2010 does not answer yet - waiting for it',
+            );
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('says "not present" once and falls back to the back-off when the window is over (task 13)', async () => {
+        vi.useFakeTimers();
+        try {
+            const h = harness({
+                answers: {'HmIP-RF': () => refused()},
+                startWindowMs: 60_000,
+                initBackoffMs: 15_000,
+            });
+            await h.manager.start();
+            await advance(h, 75_000);
+            const state = h.manager.states()[1];
+            expect(state?.waiting).toBeUndefined();
+            expect(state?.absent).toBe(true);
+            const warnings = h.notices.filter((entry) => entry.level === 'warn');
+            expect(warnings).toHaveLength(1);
+            expect(warnings[0]?.message).toContain('treated as not present');
+
+            // no timer any more: only the watchdog tries it, with the back-off
+            const before = h.clients.calls.length;
+            await advance(h, 60_000);
+            expect(h.clients.calls.length).toBe(before);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('leaves a waiting interface to its timer, not to the watchdog, and to the user when asked', async () => {
+        vi.useFakeTimers();
+        try {
+            let up = false;
+            const h = harness({
+                answers: {'HmIP-RF': () => (up ? '' : refused())},
+                startWindowMs: START_WINDOW_MS,
+            });
+            await h.manager.start();
+            h.clock.value += 60_000;
+            await h.manager.tick();
+            // the tick found its timer and left it alone
+            expect(h.clients.calls.filter((call) => call.name === 'HmIP-RF')).toHaveLength(1);
+            up = true;
+            await h.manager.reconnect('HmIP-RF');
+            expect(h.manager.states()[1]?.connected).toBe(true);
+            await vi.advanceTimersByTimeAsync(60_000);
+            expect(h.clients.calls.filter((call) => call.name === 'HmIP-RF')).toHaveLength(2);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('does not report a waiting interface from the background probe', async () => {
+        const h = harness({
+            connection: {interfaces: ['BidCos-RF', 'HmIP-RF'], autoDetect: false},
+            answers: {'HmIP-RF': () => refused()},
+            probe: (_host, port) => Promise.resolve(port === 2001 ? 'open' : 'refused'),
+            startWindowMs: START_WINDOW_MS,
+        });
+        await h.manager.start();
+        await h.manager.probeInterfaces();
+        expect(h.notices.filter((entry) => entry.level === 'warn')).toEqual([]);
+        expect(h.manager.states()[1]?.waiting).toBe(true);
+        await h.manager.stop();
+    });
+
+    it('treats a failure after the interface once answered as an outage, not a start', async () => {
+        let up = true;
+        const h = harness({
+            answers: {'HmIP-RF': (method) => (method === 'init' && !up ? refused() : '')},
+            startWindowMs: START_WINDOW_MS,
+        });
+        await h.manager.start();
+        up = false;
+        await h.manager.reconnect('HmIP-RF');
+        expect(h.manager.states()[1]?.absent).toBe(true);
+        expect(h.manager.states()[1]?.waiting).toBeUndefined();
+        expect(h.notices.find((entry) => entry.interfaceName === 'HmIP-RF')?.level).toBe('warn');
+    });
+
+    it('stops the timers on stop and on unsubscribe, and waits again after a resubscribe', async () => {
+        vi.useFakeTimers();
+        try {
+            const h = harness({answers: {'HmIP-RF': () => refused()}, startWindowMs: START_WINDOW_MS});
+            await h.manager.start();
+            await h.manager.unsubscribe();
+            const afterUnsubscribe = h.clients.calls.length;
+            await advance(h, 30_000);
+            expect(h.clients.calls.length).toBe(afterUnsubscribe);
+
+            await h.manager.subscribe();
+            expect(h.manager.states()[1]?.waiting).toBe(true);
+            await h.manager.stop();
+            const afterStop = h.clients.calls.length;
+            await advance(h, 30_000);
+            expect(h.clients.calls.length).toBe(afterStop);
+        } finally {
+            vi.useRealTimers();
+        }
     });
 });

@@ -36,6 +36,8 @@
         /** B-28: without it there is no retry button; called with the names of the interfaces not answering. */
         onretry?: ((interfaceNames: string[]) => void) | undefined;
         subscribingText?: string;
+        /** Task 56: a `busy` interface that is waiting for its process at the start says this. */
+        waitingText?: string;
         allConnectedText?: string;
         someNotConnectedText?: string;
         portLabel?: string;
@@ -81,6 +83,7 @@
         retryText = 'Retry now',
         onretry = undefined,
         subscribingText = 'Subscribing',
+        waitingText = 'Waiting',
         allConnectedText = 'All interfaces are connected',
         someNotConnectedText = 'Not every interface is connected',
         portLabel = 'Port',
@@ -145,7 +148,7 @@
                 return connectedText;
             }
             case 'busy': {
-                return subscribingText;
+                return state.subscribing === true ? subscribingText : waitingText;
             }
             case 'absent': {
                 return notPresentText;
@@ -333,6 +336,7 @@
             {someNotConnectedText}
             {notPresentText}
             {subscribingText}
+            {waitingText}
             testId={testId === undefined ? undefined : `${testId}-summary`}
         />
         {#if callbackWarning !== undefined}

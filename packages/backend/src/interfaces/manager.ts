@@ -10,6 +10,8 @@
  *    `ping`, whose answer arrives as an event and resets the clock. HmIP-RF gets 600 s because
  *    hmipserver answers pings but sends events rarely (eq-3/occu#42); an interface that answers no
  *    ping at all (VirtualDevices) is watched by events only.
+ *    At the start (task 56, D-52) an `init` that is refused or times out is not left to the watchdog:
+ *    it is tried again after 1, 2, 4 and 8 s and then every 15 s, and the interface shows *waiting*.
  * 3. `init(url, '')` on shutdown, so the CCU stops calling a process that is gone - with a hard
  *    timeout, because 2.x's `stop()` waited for an unreachable CCU and only a second `stop()` (or
  *    the 15 s fallback timer) got the app closed.
@@ -87,6 +89,33 @@ export const SHUTDOWN_TIMEOUT_MS = 5000;
 export const MAX_INIT_BACKOFF_MS = 300_000;
 
 /**
+ * Task 56 (D-52): the waits between the `init` attempts of an interface that refuses or does not
+ * answer at the start, before {@link START_RETRY_INTERVAL_MS} takes over.
+ *
+ * On openccu-lite the addon may start before the interface processes (`runtime.start: "early"`):
+ * a Raspberry Pi 3 measured the first `init` 45 s before hmipserver answered, and on the 15 s watchdog
+ * ticks with the doubling back-off below HmIP-RF was asked again only 17 s after it was there.
+ */
+export const START_RETRY_DELAYS_MS: readonly number[] = [1000, 2000, 4000, 8000];
+
+/** Task 56: the wait between two start attempts after {@link START_RETRY_DELAYS_MS}. */
+export const START_RETRY_INTERVAL_MS = 15_000;
+
+/**
+ * Task 56: how long after `start()` (or a D-31 resubscribe) an interface that has not answered yet
+ * is *waiting* rather than missing. Two minutes cover a Raspberry Pi 3 booting with the addon
+ * started early, where the interface processes come up about 50 s after it. After the window the
+ * interface is treated as before: "not present" or "not answering", said once, and tried with the
+ * back-off up to {@link MAX_INIT_BACKOFF_MS} - a CCU without a wired gateway never runs `hs485d`.
+ */
+export const START_WINDOW_MS = 120_000;
+
+/** Task 56: the wait before start attempt number `attempt` (1 for the first retry). */
+export function startRetryDelay(attempt: number): number {
+    return START_RETRY_DELAYS_MS[attempt - 1] ?? START_RETRY_INTERVAL_MS;
+}
+
+/**
  * D-31: the grace period a server install waits, with no UI session connected, before it drops its
  * event subscriptions. Five minutes; `0` turns the whole thing off, which is what Electron uses.
  */
@@ -103,6 +132,12 @@ export interface ManagedInterface {
     failures: number;
     /** Milliseconds since epoch before which the watchdog does not try `init` again. */
     retryAt: number;
+    /** Task 56: failed `init` attempts while waiting at the start; 0 once it answered. */
+    waitingAttempts: number;
+    /** Task 56: the timer of the next start attempt, which the watchdog then leaves alone. */
+    retryTimer: ReturnType<typeof setTimeout> | undefined;
+    /** Task 56: `init` succeeded since the last start - its failures are an outage, not a start. */
+    answered: boolean;
 }
 
 export interface InterfaceManagerOptions {
@@ -110,7 +145,7 @@ export interface InterfaceManagerOptions {
     /** What the callback servers do with an incoming call. */
     readonly handler: CallbackHandler;
     readonly onStateChanged: (states: InterfaceState[]) => void;
-    readonly onNotice: (level: 'info' | 'warn' | 'error', message: string, interfaceName?: string) => void;
+    readonly onNotice: (level: 'debug' | 'info' | 'warn' | 'error', message: string, interfaceName?: string) => void;
     /** Called after a successful `init`; the backend fills its caches there. */
     readonly onConnected?: (interfaceName: string) => void | Promise<void>;
     readonly onCall?: (record: RpcCallRecord) => void;
@@ -125,6 +160,11 @@ export interface InterfaceManagerOptions {
      * interface that fails once and then works.
      */
     readonly initBackoffMs?: number;
+    /**
+     * Task 56: how long after the start a refused or unanswered `init` means *waiting*; defaults to
+     * {@link START_WINDOW_MS}. `0` turns the quick start retries off.
+     */
+    readonly startWindowMs?: number;
     /** Address to bind the callback servers to; left out, {@link callbackBindHost} decides. */
     readonly callbackHost?: string;
     /**
@@ -219,6 +259,8 @@ export class InterfaceManager {
     #detected: string[] = [];
     #stopping = false;
     #idle = false;
+    /** Task 56: when the current start (or D-31 resubscribe) began. */
+    #startedAt = 0;
 
     constructor(options: InterfaceManagerOptions) {
         this.#options = options;
@@ -437,6 +479,7 @@ export class InterfaceManager {
             }
         }
 
+        this.#startedAt = this.#now();
         for (const target of targets) {
             this.#interfaces.set(target.resolved.name, this.#create(target));
         }
@@ -470,15 +513,19 @@ export class InterfaceManager {
         }
         await Promise.all([...this.#interfaces.values()].map((entry) => this.#deregister(entry)));
         for (const entry of this.#interfaces.values()) {
+            this.#clearRetryTimer(entry);
             entry.lastEvent = 0;
             entry.failures = 0;
             entry.retryAt = 0;
+            entry.waitingAttempts = 0;
+            entry.answered = false;
             this.#update(entry, {
                 connected: false,
                 error: undefined,
                 idle: true,
                 subscribing: false,
                 unreachable: false,
+                waiting: false,
             });
         }
         this.#options.onStateChanged(this.states());
@@ -490,6 +537,8 @@ export class InterfaceManager {
             return;
         }
         this.#idle = false;
+        // task 56: a resubscribe is a start too - the interface processes may have gone meanwhile
+        this.#startedAt = this.#now();
         for (const entry of this.#interfaces.values()) {
             this.#update(entry, {idle: false});
         }
@@ -510,8 +559,9 @@ export class InterfaceManager {
             const elapsed = now - entry.lastEvent;
             if (elapsed > timeout) {
                 this.#update(entry, {connected: false});
-                // an interface that is not there at all is not asked again on every round
-                if (entry.retryAt <= now) {
+                // an interface that is not there at all is not asked again on every round, and one
+                // waiting at the start has a timer of its own (task 56)
+                if (entry.retryAt <= now && entry.retryTimer === undefined) {
                     work.push(this.#init(entry.name));
                 }
             } else if (entry.target.resolved.ping && elapsed > timeout / 1.5 - 1000) {
@@ -548,6 +598,7 @@ export class InterfaceManager {
                 // failure count is not: it is what makes a success say "answering again", and a
                 // reconnect that fails again must not produce a second notice either.
                 entry.retryAt = 0;
+                this.#clearRetryTimer(entry);
             }
         }
         await Promise.all(names.map((name) => this.#init(name)));
@@ -565,6 +616,9 @@ export class InterfaceManager {
         if (this.#watchdog !== undefined) {
             clearInterval(this.#watchdog);
             this.#watchdog = undefined;
+        }
+        for (const entry of this.#interfaces.values()) {
+            this.#clearRetryTimer(entry);
         }
         await Promise.all([...this.#interfaces.values()].map((entry) => this.#deregister(entry)));
         for (const entry of this.#interfaces.values()) {
@@ -610,10 +664,11 @@ export class InterfaceManager {
 
         for (const name of connection.interfaces) {
             const result = results.get(name);
-            if (this.isConnected(name) || result === undefined || result === 'open') {
+            const known = this.#interfaces.get(name);
+            // task 56: an interface waiting at the start is expected not to answer yet
+            if (this.isConnected(name) || result === undefined || result === 'open' || known?.state.waiting === true) {
                 continue;
             }
-            const known = this.#interfaces.get(name);
             const where = known === undefined ? connection.host : `${known.state.host}:${String(known.state.port)}`;
             if (result === 'refused') {
                 // an interface whose `init` already refused says the same thing; one notice is enough
@@ -680,6 +735,9 @@ export class InterfaceManager {
             lastEvent: 0,
             failures: 0,
             retryAt: 0,
+            waitingAttempts: 0,
+            retryTimer: undefined,
+            answered: false,
             state: {
                 name: resolved.name,
                 type: isKnownInterface(resolved.name) ? resolved.name : 'custom',
@@ -794,8 +852,11 @@ export class InterfaceManager {
             await entry.client.call('init', [url, resolved.ident], BACKGROUND);
             entry.lastEvent = this.#now();
             const wasFailing = entry.failures > 0;
+            const waited = entry.waitingAttempts;
             entry.failures = 0;
             entry.retryAt = 0;
+            entry.waitingAttempts = 0;
+            entry.answered = true;
             // hmipserver re-sends every device on `init` (occu#45), so the grids are not complete
             // until the sweep below is through; the UI shows "subscribing" until then
             this.#update(entry, {
@@ -804,9 +865,16 @@ export class InterfaceManager {
                 absent: false,
                 unreachable: false,
                 subscribing: true,
+                waiting: false,
             });
             if (wasFailing) {
                 this.#options.onNotice('info', `${interfaceName}: answering again`, interfaceName);
+            } else if (waited > 0) {
+                this.#options.onNotice(
+                    'info',
+                    `${interfaceName}: answering after ${String(waited)} attempts at the start`,
+                    interfaceName,
+                );
             }
             this.#options.onStateChanged(this.states());
             try {
@@ -833,12 +901,23 @@ export class InterfaceManager {
         const message = errorMessage(error);
         const absent = isConnectionRefused(error);
         const unreachable = !absent && isNotAnswering(error);
+        if ((absent || unreachable) && this.#inStartWindow(entry)) {
+            this.#noteWaiting(entry, message, absent);
+            return;
+        }
         const first = entry.failures === 0;
         entry.failures += 1;
         const base = this.#options.initBackoffMs ?? WATCHDOG_INTERVAL_MS;
         const wait = Math.min(base * 2 ** (entry.failures - 1), MAX_INIT_BACKOFF_MS);
         entry.retryAt = this.#now() + wait;
-        this.#update(entry, {connected: false, error: message, absent, unreachable, subscribing: false});
+        this.#update(entry, {
+            connected: false,
+            error: message,
+            absent,
+            unreachable,
+            subscribing: false,
+            waiting: false,
+        });
         if (!first) {
             return;
         }
@@ -851,6 +930,70 @@ export class InterfaceManager {
                 : `${entry.name}: ${message}`,
             entry.name,
         );
+    }
+
+    /**
+     * Task 56: is a failure of this interface part of the start? Only until it answered once, and
+     * only within the window: a process that goes away later is an outage, not a slow boot.
+     */
+    #inStartWindow(entry: ManagedInterface): boolean {
+        const window = this.#options.startWindowMs ?? START_WINDOW_MS;
+        return !entry.answered && window > 0 && this.#now() - this.#startedAt < window;
+    }
+
+    /**
+     * Task 56 (D-52): the interface refused or did not answer at the start. On openccu-lite that
+     * only means its process has not started yet, so it is *waiting*, not missing: one info line,
+     * the retries at debug level, and the next attempt on a timer of its own after
+     * {@link startRetryDelay} rather than at a watchdog tick after the back-off.
+     */
+    #noteWaiting(entry: ManagedInterface, message: string, refused: boolean): void {
+        entry.waitingAttempts += 1;
+        const delay = startRetryDelay(entry.waitingAttempts);
+        entry.retryAt = this.#now() + delay;
+        this.#update(entry, {
+            connected: false,
+            error: message,
+            absent: false,
+            unreachable: false,
+            subscribing: false,
+            waiting: true,
+        });
+        const where = `${entry.state.host}:${String(entry.state.port)}`;
+        if (entry.waitingAttempts === 1) {
+            this.#options.onNotice(
+                'info',
+                refused
+                    ? `${entry.name}: nothing is listening on ${where} yet - waiting for it`
+                    : `${entry.name}: ${where} does not answer yet - waiting for it`,
+                entry.name,
+            );
+        } else {
+            this.#options.onNotice(
+                'debug',
+                `${entry.name}: still waiting (attempt ${String(entry.waitingAttempts)}: ${message})`,
+                entry.name,
+            );
+        }
+        this.#clearRetryTimer(entry);
+        if (this.#stopping || this.#idle) {
+            return;
+        }
+        const timer = setTimeout(() => {
+            entry.retryTimer = undefined;
+            void this.#init(entry.name);
+        }, delay);
+        if (typeof timer.unref === 'function') {
+            timer.unref();
+        }
+        entry.retryTimer = timer;
+    }
+
+    #clearRetryTimer(entry: ManagedInterface): void {
+        if (entry.retryTimer !== undefined) {
+            clearTimeout(entry.retryTimer);
+            entry.retryTimer = undefined;
+        }
     }
 
     async #ping(entry: ManagedInterface): Promise<void> {
@@ -872,6 +1015,7 @@ export class InterfaceManager {
             unreachable?: boolean;
             subscribing?: boolean;
             idle?: boolean;
+            waiting?: boolean;
             callbackUrl?: string | undefined;
             callbackFailure?: {port: number; inUse: boolean} | undefined;
             callbackWarning?: CallbackWarning | undefined;
@@ -886,6 +1030,7 @@ export class InterfaceManager {
         setFlag(state, 'unreachable', changes.unreachable);
         setFlag(state, 'subscribing', changes.subscribing);
         setFlag(state, 'idle', changes.idle);
+        setFlag(state, 'waiting', changes.waiting);
         if ('error' in changes) {
             if (changes.error === undefined) {
                 delete (state as {error?: string}).error;
@@ -935,7 +1080,7 @@ export class InterfaceManager {
 /** A boolean that is present when true and absent otherwise, so a state stays small on the wire. */
 function setFlag(
     state: InterfaceState,
-    key: 'absent' | 'unreachable' | 'subscribing' | 'idle',
+    key: 'absent' | 'unreachable' | 'subscribing' | 'idle' | 'waiting',
     value: boolean | undefined,
 ): void {
     if (value === true) {

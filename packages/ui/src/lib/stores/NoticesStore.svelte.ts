@@ -4,7 +4,7 @@ import {toApiRequestError} from '../transport/error.js';
 
 export interface Notice {
     readonly id: number;
-    readonly level: ApiEvents['notice']['level'];
+    readonly level: Exclude<ApiEvents['notice']['level'], 'debug'>;
     readonly message: string;
     readonly interfaceName?: string;
     /** Milliseconds since epoch. */
@@ -71,7 +71,10 @@ export class NoticesStore {
         this.#infoTtlMs = options.infoTtlMs ?? INFO_TTL_MS;
         this.#warnTtlMs = options.warnTtlMs ?? WARN_TTL_MS;
         this.#unsubscribe = transport.on('notice', (notice) => {
-            this.push(notice.level, notice.message, notice.interfaceName);
+            // task 56: `debug` is for the host's log (the start retries), never a toast
+            if (notice.level !== 'debug') {
+                this.push(notice.level, notice.message, notice.interfaceName);
+            }
         });
     }
 

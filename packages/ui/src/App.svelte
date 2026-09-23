@@ -211,6 +211,7 @@
                 }
             }}
             subscribingText={t('Subscribing')}
+            waitingText={t('Waiting')}
             allConnectedText={t('All interfaces are connected')}
             someNotConnectedText={t('Not every interface is connected')}
             portLabel={t('Port')}

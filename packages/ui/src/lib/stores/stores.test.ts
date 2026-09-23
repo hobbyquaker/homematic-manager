@@ -74,6 +74,13 @@ describe('NoticesStore', () => {
         ]);
     });
 
+    it('keeps debug notices out of the toasts (task 56)', () => {
+        const transport = new MockTransport();
+        const notices = new NoticesStore(transport);
+        transport.emit('notice', {level: 'debug', message: 'HmIP-RF: still waiting', interfaceName: 'HmIP-RF'});
+        expect(notices.items).toEqual([]);
+    });
+
     it('turns a rejected request into an error notice, with the fault code', () => {
         const notices = new NoticesStore(new MockTransport());
         notices.fromError({message: 'Unknown parameter', kind: 'rpc', faultCode: -5, faultString: 'no such param'});

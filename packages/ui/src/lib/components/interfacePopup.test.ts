@@ -60,6 +60,10 @@ describe('the mark of an interface', () => {
         expect(markOf(state('HmIP-RF', {connected: false, subscribing: true}))).toBe('busy');
     });
 
+    it('is busy while it waits for its process at the start (task 56)', () => {
+        expect(markOf(state('HmIP-RF', {connected: false, waiting: true, error: 'connect ECONNREFUSED'}))).toBe('busy');
+    });
+
     it('separates "not there" from "broken" (task 13)', () => {
         expect(markOf(state('BidCos-Wired', {connected: false, absent: true}))).toBe('absent');
         expect(markOf(state('VirtualDevices', {connected: false}))).toBe('bad');
@@ -267,6 +271,20 @@ describe('InterfacePopup', () => {
         const line = (name: string): string => item(name).querySelector('.hmm-interface-item-line')!.textContent!;
         expect(line('BidCos-RF')).toBe('xmlrpc · Port 2001 · 12 Geräte · Duty Cycle 3 %');
         expect(line('CUxD')).toBe('binrpc · Port 8701');
+    });
+
+    it('says "waiting" for an interface waiting for its process at the start, and offers no retry (task 56)', async () => {
+        const interfaces = [
+            state('BidCos-RF'),
+            state('HmIP-RF', {port: 2010, connected: false, waiting: true, error: 'connect ECONNREFUSED'}),
+        ];
+        const onretry = vi.fn();
+        mount({interfaces, waitingText: 'Wartet', retryText: 'Erneut', onretry});
+        await openPopup();
+        const item = screen.getByTestId('interface-item-HmIP-RF');
+        expect(item.querySelector('.hmm-interface-mark')!.getAttribute('data-mark')).toBe('busy');
+        expect(item.textContent).toContain('Wartet');
+        expect(screen.queryByText('Erneut')).toBeNull();
     });
 
     it('B-28: tells an interface that answers, one that refuses and one that times out apart, and retries the last', async () => {

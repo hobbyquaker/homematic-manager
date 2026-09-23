@@ -13,6 +13,8 @@
         notPresentText?: string;
         /** While `init` is through and the first device sweep is still running (D-31). */
         subscribingText?: string;
+        /** Task 56: nothing is subscribing, but an interface waits for its process at the start. */
+        waitingText?: string;
         testId?: string | undefined;
     }
 
@@ -23,6 +25,7 @@
         someNotConnectedText = 'Not connected',
         notPresentText = 'Not present',
         subscribingText = 'Subscribing',
+        waitingText = 'Waiting',
         testId = undefined,
     }: Props = $props();
 
@@ -36,7 +39,7 @@
                 return allConnectedText;
             }
             case 'busy': {
-                return subscribingText;
+                return interfaces.some((state) => state.subscribing === true) ? subscribingText : waitingText;
             }
             case 'absent': {
                 return notPresentText;

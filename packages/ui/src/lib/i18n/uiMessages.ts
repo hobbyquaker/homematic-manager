@@ -32,6 +32,8 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Not answering': {de: 'Antwortet nicht', en: 'Not answering'},
     'Retry now': {de: 'Jetzt erneut versuchen', en: 'Retry now'},
     Subscribing: {de: 'Anmeldung läuft', en: 'Subscribing'},
+    // Task 56: an interface whose process is not up yet at the start, tried again within seconds
+    Waiting: {de: 'Wartet', en: 'Waiting'},
     'Pending changes': {de: 'Offene Änderungen', en: 'Pending changes'},
     // D-32: shown only where the host has a login at all - the CCU addon in --auth-mode rega
     'Logged in as {user}': {de: 'Angemeldet als {user}', en: 'Logged in as {user}'},

@@ -25,7 +25,7 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   of the older channel type, which has no `GROUP_n`, is listed in the dialog and cannot be ticked. Those writes go
   to battery devices and stay _configuration pending_ until the detector wakes up or is pressed; the group row's
   Msgs column shows its members' marks, and the row shows what the interface reports, not what was sent. Both sides
-  are plain XML-RPC to the interface processes, so they work on a CCU and on openccu-lite alike [#97].
+  are plain XML-RPC to the interface processes, so they work on a CCU and on openccu-lite alike (#97, @pvizeli).
 - **Heating groups on openccu-lite.** The `VirtualDevices` interface has a Groups tab there: the heating groups
   (the group devices `INT000000N` - BidCos `HM-CC-VG-1` and the HmIP heating groups) are listed with their type,
   their virtual device and their members, and a group is created, renamed, given or relieved of members and deleted

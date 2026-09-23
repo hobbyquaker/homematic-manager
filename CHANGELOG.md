@@ -10,6 +10,22 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### New
 
+- **Smoke groups in the device list.** Which smoke detectors alarm together is now shown and changed where the
+  detectors are: each group is a row of the device list that expands to its detectors, a _Smoke group_ column on
+  every detector names its group, and the members are added and removed from the group's row (the pencil in that
+  column, or _Members…_ in its context menu). On BidCos these are the teams rfd lists as pseudo devices
+  (`HM-Sec-SD-Team`, `HM-Sec-SD-2-Team`, address `*` plus a detector's serial) - their rows were there before, but
+  expanded to their own two channels instead of their members; a member moves with `setTeam`, and leaving a team is
+  `setTeam` with an empty team, which puts the detector back into a team of its own. On HmIP the groups are the eight
+  MASTER parameters `GROUP_1` … `GROUP_8` of the smoke channel of an HmIP-SWSD - what the WebUI shows as checkboxes
+  in the channel settings - and there is no group object anywhere: the rows `*GROUP_n` are synthesised from the
+  detectors' values (one `getParamset MASTER` per smoke channel), a group exists while a detector is in it, and _New
+  smoke group_ in the toolbar takes the lowest free number. A change is one MASTER write per detector carrying exactly
+  the one `GROUP_n` that changed, validated against the channel's description as every paramset write is; a detector
+  of the older channel type, which has no `GROUP_n`, is listed in the dialog and cannot be ticked. Those writes go
+  to battery devices and stay _configuration pending_ until the detector wakes up or is pressed; the group row's
+  Msgs column shows its members' marks, and the row shows what the interface reports, not what was sent. Both sides
+  are plain XML-RPC to the interface processes, so they work on a CCU and on openccu-lite alike [#97].
 - **Heating groups on openccu-lite.** The `VirtualDevices` interface has a Groups tab there: the heating groups
   (the group devices `INT000000N` - BidCos `HM-CC-VG-1` and the HmIP heating groups) are listed with their type,
   their virtual device and their members, and a group is created, renamed, given or relieved of members and deleted
@@ -1070,9 +1086,10 @@ This is the change with the largest consequence, and it comes out of a measureme
   sub-grid [#25].
 - An **unreach counter per device**, edge-triggered and persisted per CCU, plus an opt-in automatic
   `STICKY_UNREACH` acknowledgement [#26].
-- **Smoke-detector teams** on BidCos through `listTeams` / `setTeam` [#97]. HmIP smoke groups are
-  built through the group process on `/groups`, outside the RPC catalogue, and are therefore out of
-  scope by D-1.
+- **Smoke-detector teams** on BidCos through `listTeams` / `setTeam` [#97]. (This entry once said
+  HmIP smoke groups were built through the group process on `/groups`, outside the RPC catalogue.
+  That was wrong: they are eight MASTER parameters of the detector's smoke channel, and the
+  _Unreleased_ section above has them.)
 
 ### Paramset editor
 
@@ -1243,8 +1260,9 @@ This is the change with the largest consequence, and it comes out of a measureme
 ### Not in this rebuild yet
 
 Automatic best-interface assignment [#69 shows the information, it does not act on it]; HmIP
-smoke-detector groups [#97 — they are built through the group process on `/groups`, outside the RPC
-catalogue, and are out of scope by D-1]; CCU-Jack as a pre-defined interface [#135 — it serves
+smoke-detector groups [#97 — this once claimed they are built through the group process on
+`/groups`, outside the RPC catalogue; they are MASTER parameters of the smoke channel, and the
+_Unreleased_ section above has them]; CCU-Jack as a pre-defined interface [#135 — it serves
 XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no CCU-Jack was
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).

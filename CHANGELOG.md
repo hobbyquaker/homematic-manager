@@ -82,6 +82,13 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   subscribed again at once, and while hmipserver is still starting it is tried every few seconds as at the start of
   the app. An interface that never sent anything since it was subscribed - a callback address the CCU cannot reach -
   is not subscribed again over and over.
+- **The addon no longer fails its start at boot for a backend that was alive.** On a fast openccu-lite system the
+  service script's check right after the start - is the new process still there? - read the process's command line
+  while it was still being exec'd (sh, then systemd-cat, then node) and found nothing of the addon in it; two such
+  looks a few milliseconds apart said "exited right after the start", the unit failed, and the system stopped the
+  backend before it had logged a line. A restart by hand always worked. The check now asks whether the process is
+  alive and leaves the command line to the status and stop paths, where it tells a stale pidfile from a running
+  addon; a real crash at start is still reported, now with what was found.
 - **No ReGa calls on an openccu-lite system, and an unreachable ReGa says so once.** On a system without ReGaHSS the
   Homematic Manager asked ReGa for its names at every connect, after every pairing and every acknowledgement, and
   warned each time that it did not answer. It now asks the system itself first (its `/api/meta/v1/version`, the same

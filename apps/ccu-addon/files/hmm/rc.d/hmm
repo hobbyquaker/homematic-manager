@@ -63,6 +63,18 @@ Running() {
     tr '\0' ' ' < /proc/$pid/cmdline 2>/dev/null | grep -q "$ADDON_DIR/app/"
 }
 
+# B-46: is the process of the pidfile alive - there, and not a zombie waiting to be reaped? What
+# Start watches right after the start, where the pid is its own fresh one and its cmdline is in flux
+# (see there). kill -0 answers yes for a zombie, so the state is read as well.
+Alive() {
+    pid="$(cat $PIDFILE 2>/dev/null)"
+    case "$pid" in
+        '' | *[!0-9]*) return 1 ;;
+    esac
+    kill -0 "$pid" 2>/dev/null || return 1
+    ! grep -q '^State:[[:space:]]*Z' /proc/$pid/status 2>/dev/null
+}
+
 # The token the UI's browser has to present on the API socket. settings.cgi hands it out as a
 # cookie after the WebUI session check; nobody else ever sees it, so it is root-only and lives in
 # the profile directory, where it survives an update (and with it the open browser tab).
@@ -353,19 +365,33 @@ Start() {
     # A backend that cannot run (no runtime, a log it cannot write, an exception at start) is gone
     # within a moment, so three seconds of watching turn that into FAILED instead of OK - and the
     # exit code the unit and the WebUI's service page go by.
+    # B-46: watched with Alive, not Running. The pid start-stop-daemon recorded is sh's, which execs
+    # systemd-cat, which execs node - and during each of those execs /proc/<pid>/cmdline reads empty,
+    # so Running's grep for the app's path said "gone" for a live backend; two such misses within the
+    # few milliseconds between the loop's check and the verdict below made FAILED, and on openccu-lite
+    # the failing unit then killed the backend before it had logged a line. Seen on the fast x86 lab
+    # box at its first boot after an image update, when the page cache is cold and every exec reads
+    # from disk; measured there with a dropped page cache. The pid is fresh - this function removed
+    # the pidfile before the start - so whether it is alive is the whole question here; Running's
+    # look at the cmdline is for the other callers, where a pid recycled after a reboot is the point.
     i=0
-    while [ $i -lt 3 ] && Running; do
+    while [ $i -lt 3 ] && Alive; do
         sleep 1
         i=$((i + 1))
     done
-    if ! Running; then
+    if ! Alive; then
+        pid="$(cat $PIDFILE 2>/dev/null)"
+        case "$pid" in
+            '' | *[!0-9]*) why="no pid was recorded" ;;
+            *) why="pid $pid is gone" ;;
+        esac
         if [ "$LOG_TARGET" = journal ]; then
-            echo "FAILED (the backend exited right after the start; see journalctl -t $JOURNAL_TAG)"
-            logger -t $ADDON -p daemon.err "homematic-manager exited right after the start; see journalctl -t $JOURNAL_TAG"
+            echo "FAILED (the backend exited right after the start: $why; see journalctl -t $JOURNAL_TAG)"
+            logger -t $ADDON -p daemon.err "homematic-manager exited right after the start ($why); see journalctl -t $JOURNAL_TAG"
         else
-            echo "FAILED (the backend exited right after the start; see $LOG)"
+            echo "FAILED (the backend exited right after the start: $why; see $LOG)"
             tail -n 5 $LOG 2>/dev/null
-            logger -t $ADDON -p daemon.err "homematic-manager exited right after the start; see $LOG"
+            logger -t $ADDON -p daemon.err "homematic-manager exited right after the start ($why); see $LOG"
         fi
         rm -f $PIDFILE 2>/dev/null
         return 1

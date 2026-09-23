@@ -60,12 +60,35 @@ describe('rc.d/hmm reports a start that started nothing (B-25)', () => {
 
     it('checks that the backend still runs after start-stop-daemon returned, before it says OK', () => {
         const daemon = start.indexOf('if ! start-stop-daemon -S');
-        const check = start.indexOf('if ! Running; then', daemon);
+        const check = start.indexOf('if ! Alive; then', daemon);
         const ok = start.lastIndexOf('echo "OK"');
         expect(daemon).toBeGreaterThan(0);
         expect(check).toBeGreaterThan(daemon);
         expect(ok).toBeGreaterThan(check);
         expect(start.slice(check, ok)).toContain('return 1');
+    });
+
+    // B-46: the fresh pid is sh → systemd-cat → node, and its cmdline reads empty during each exec;
+    // Running()'s grep for the app's path took a live backend for a crashed one, twice in a row at a
+    // fast box's boot. The watch after the start asks whether the pid is alive and nothing else.
+    it('watches the fresh pid by its liveness, not by its cmdline (B-46)', () => {
+        const daemon = start.indexOf('if ! start-stop-daemon -S');
+        const ok = start.lastIndexOf('echo "OK"');
+        const watch = start.slice(daemon, ok);
+        expect(watch).toContain('while [ $i -lt 3 ] && Alive; do');
+        // the code, not the comments that explain why Running is not used here
+        const code = watch
+            .split('\n')
+            .filter((line) => !line.trim().startsWith('#'))
+            .join('\n');
+        expect(code).not.toMatch(/\bRunning\b/);
+        const alive = /\nAlive\(\) \{\n([\s\S]*?)\n\}\n/.exec(file('../files/hmm/rc.d/hmm'))?.[1] ?? '';
+        expect(alive).toContain('kill -0 "$pid"');
+        expect(alive).toContain("grep -q '^State:[[:space:]]*Z' /proc/$pid/status");
+        expect(alive).not.toContain('cmdline');
+        // a real crash still fails the start, and says which pid is gone
+        expect(watch).toContain('why="pid $pid is gone"');
+        expect(watch).toContain('exited right after the start: $why');
     });
 });
 

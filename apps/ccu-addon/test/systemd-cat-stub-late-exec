@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# B-46: the systemd-cat stand-in with the exec window stretched. Like systemd-cat-stub it ends up
+# exec'ing the command with its output in /tmp/journal-<identifier>.log, but first the pid spends a
+# second and a half in a shell whose cmdline names neither node nor the addon's app directory - the
+# arguments travel in the environment. That is what the fresh pid looks like to the rc.d script's
+# Running() while sh, systemd-cat and node exec one after the other on a box with a cold page cache:
+# alive, but not yet "the backend" by its cmdline. The rc.d script's start check must not take that
+# for a crash. The arguments of the addon's start have no spaces, so a plain word split brings them back.
+
+tag=
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -t)
+            tag=$2
+            shift 2
+            ;;
+        --identifier=*)
+            tag=${1#--identifier=}
+            shift
+            ;;
+        -*) shift ;;
+        *) break ;;
+    esac
+done
+B46_ARGS="$*" B46_LOG="/tmp/journal-${tag:-unknown}.log" exec /bin/sh -c 'sleep 1.5; exec $B46_ARGS >> "$B46_LOG" 2>&1'

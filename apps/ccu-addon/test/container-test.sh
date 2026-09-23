@@ -299,6 +299,32 @@ check "and the restarted backend logs to the journal too" "twice" \
     "$(dex 'n=$(grep -c "homematic-manager-web" /tmp/journal-addon-hmm.log); [ "$n" -ge 2 ] && echo twice || echo "$n"')"
 check "still without a log file" "gone" "$(dex 'test -e /usr/local/addons/hmm/var/hmm.log || echo gone')"
 check "and nothing in /var/log either (task 43)" "gone" "$(dex 'test -e /var/log/hmm.log || echo gone')"
+
+echo
+echo "a fresh pid whose cmdline is not yet the backend's is not a crash (B-46)"
+# On the fast x86 lab box the start check right after start-stop-daemon read the new pid's cmdline
+# while sh, systemd-cat and node were exec'ing one after the other - empty, or the previous
+# program's - and took the live backend for one that had exited; the unit failed and killed it. This
+# systemd-cat keeps the pid in a shell without the app's path on its cmdline for a second and a half
+# before the exec: the same picture, stretched so the check meets it for sure.
+dex 'cp /opt/systemd-cat-stub-late-exec /usr/bin/systemd-cat && chmod 755 /usr/bin/systemd-cat' >/dev/null
+out="$(dex '/usr/local/etc/config/rc.d/hmm restart; echo "exit $?"')"
+check "the start says OK although the pid spent its first seconds as a plain shell" "Starting hmm: OK" "$out"
+check "with exit 0" "exit 0" "$out"
+check "the pidfile is still there" "hmm.pid" "$(dex 'ls /usr/local/addons/hmm/var/hmm.pid')"
+wait_for_backend
+check "and the backend behind that pid came up" "/usr/local/addons/hmm/bin/node" "$(cmdline_of_backend)"
+check "so status says running" "running" "$(dex '/usr/local/etc/config/rc.d/hmm status')"
+# a backend that really dies at once is still FAILED, and the line says what was found
+out="$(dex 'cp /usr/local/addons/hmm/app/dist/cli.js /tmp/cli.js.b46 && printf "process.exit(3);\n" > /usr/local/addons/hmm/app/dist/cli.js \
+    && /usr/local/etc/config/rc.d/hmm restart; echo "exit $?"; cp /tmp/cli.js.b46 /usr/local/addons/hmm/app/dist/cli.js')"
+check "a backend that exits at once is still FAILED" "FAILED (the backend exited right after the start: pid " "$out"
+check "naming the pid that is gone" " is gone; see journalctl -t addon-hmm)" "$out"
+check "with exit 1" "exit 1" "$out"
+check "and no pidfile is left" "gone" "$(dex 'test -e /usr/local/addons/hmm/var/hmm.pid || echo gone')"
+dex 'cp /opt/systemd-cat-stub /usr/bin/systemd-cat && chmod 755 /usr/bin/systemd-cat && /usr/local/etc/config/rc.d/hmm restart' >/dev/null
+wait_for_backend
+check "the backend runs again with the plain systemd-cat" "running" "$(dex '/usr/local/etc/config/rc.d/hmm status')"
 out="$(dex "curl -si 'http://127.0.0.1/addons/hmm/service.cgi?sid=%40${SID}%40&cmd=log'")"
 check "service.cgi's log view sends the browser to the box's Log page with the addon's unit" \
     "Location: /log?unit=addon-hmm" "$out"

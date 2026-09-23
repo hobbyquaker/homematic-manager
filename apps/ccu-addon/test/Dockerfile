@@ -53,8 +53,10 @@ COPY lighttpd-ccu.conf /etc/lighttpd/lighttpd-ccu.conf
 # cp_software.cgi that runs both from inside a request - which is how the WebUI does it, and what
 # an addon that restarts lighttpd during its install breaks (#141).
 COPY S50lighttpd /etc/init.d/S50lighttpd
-# task 41: installed as /usr/bin/systemd-cat only by the openccu-lite part of the container test
+# task 41: installed as /usr/bin/systemd-cat only by the openccu-lite part of the container test;
+# B-46: the second one holds the fresh pid in a foreign cmdline before it execs, a stretched exec window
 COPY systemd-cat-stub /opt/systemd-cat-stub
+COPY systemd-cat-stub-late-exec /opt/systemd-cat-stub-late-exec
 COPY install_addon /bin/install_addon
 COPY webui-install.cgi /www/config/webui-install.cgi
 RUN chmod 755 /etc/init.d/S50lighttpd /bin/install_addon /www/config/webui-install.cgi \

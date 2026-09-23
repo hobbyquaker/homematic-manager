@@ -152,6 +152,13 @@ export interface InterfaceManagerOptions {
     /** Task 48: the origin of a call that names none, handed to every client (the backend's request context). */
     readonly originOf?: RpcClientOptions['originOf'];
     readonly now?: () => number;
+    /**
+     * Task 56: a clock that only moves forward, for the start window. The wall clock is no use
+     * there: a box without a real-time clock boots with a date months old and NTP moves it forward
+     * a few seconds after the start (seen on a Raspberry Pi 4, where the jump ended the window at
+     * once). Defaults to `performance.now()`.
+     */
+    readonly monotonicNow?: () => number;
     readonly rpcTimeoutMs?: number;
     readonly watchdogIntervalMs?: number;
     /**
@@ -240,6 +247,7 @@ export function callbackBindHost(connection: ConnectionConfig): string | undefin
 export class InterfaceManager {
     readonly #options: InterfaceManagerOptions;
     readonly #now: () => number;
+    readonly #monotonicNow: () => number;
     readonly #interfaces = new Map<string, ManagedInterface>();
     readonly #servers: CallbackServerSet;
     /**
@@ -259,12 +267,13 @@ export class InterfaceManager {
     #detected: string[] = [];
     #stopping = false;
     #idle = false;
-    /** Task 56: when the current start (or D-31 resubscribe) began. */
+    /** Task 56: when the current start (or D-31 resubscribe) began, on {@link InterfaceManagerOptions.monotonicNow}. */
     #startedAt = 0;
 
     constructor(options: InterfaceManagerOptions) {
         this.#options = options;
         this.#now = options.now ?? (() => Date.now());
+        this.#monotonicNow = options.monotonicNow ?? (() => performance.now());
         this.#servers = (options.createCallbackServers ?? ((handler) => this.#defaultServers(handler)))(
             options.handler,
         );
@@ -479,7 +488,7 @@ export class InterfaceManager {
             }
         }
 
-        this.#startedAt = this.#now();
+        this.#startedAt = this.#monotonicNow();
         for (const target of targets) {
             this.#interfaces.set(target.resolved.name, this.#create(target));
         }
@@ -538,7 +547,7 @@ export class InterfaceManager {
         }
         this.#idle = false;
         // task 56: a resubscribe is a start too - the interface processes may have gone meanwhile
-        this.#startedAt = this.#now();
+        this.#startedAt = this.#monotonicNow();
         for (const entry of this.#interfaces.values()) {
             this.#update(entry, {idle: false});
         }
@@ -938,7 +947,7 @@ export class InterfaceManager {
      */
     #inStartWindow(entry: ManagedInterface): boolean {
         const window = this.#options.startWindowMs ?? START_WINDOW_MS;
-        return !entry.answered && window > 0 && this.#now() - this.#startedAt < window;
+        return !entry.answered && window > 0 && this.#monotonicNow() - this.#startedAt < window;
     }
 
     /**

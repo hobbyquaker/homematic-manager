@@ -155,6 +155,7 @@ function harness(
             connected.push(name);
         },
         now: () => clock.value,
+        monotonicNow: () => clock.value,
         watchdogIntervalMs: 0,
         createClient: clients.create,
         createCallbackServers: () => servers,
@@ -1386,6 +1387,43 @@ describe('the quick retries at the start (task 56, D-52)', () => {
             const before = h.clients.calls.length;
             await advance(h, 60_000);
             expect(h.clients.calls.length).toBe(before);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('keeps waiting when the wall clock jumps at boot (a box without a real-time clock)', async () => {
+        vi.useFakeTimers();
+        try {
+            let wall = 1_000_000;
+            let mono = 0;
+            const clients = fakeClients({'HmIP-RF': () => refused()});
+            const notices: {level: string; message: string}[] = [];
+            const manager = new InterfaceManager({
+                connection: normaliseConnection({
+                    host: 'ccu.lan',
+                    interfaces: ['HmIP-RF'],
+                    callback: {ip: '192.168.1.5', xmlrpcPort: 0, binrpcPort: 0},
+                    autoDetect: false,
+                }),
+                handler: {} as CallbackHandler,
+                onStateChanged: () => undefined,
+                onNotice: (level, message) => notices.push({level, message}),
+                now: () => wall,
+                monotonicNow: () => mono,
+                watchdogIntervalMs: 0,
+                createClient: clients.create,
+                createCallbackServers: () => fakeServers(),
+                network: fakeNetwork(),
+            });
+            await manager.start();
+            // NTP moves the date six months forward a second after the start
+            wall += 183 * 24 * 3600 * 1000;
+            mono += 1000;
+            await vi.advanceTimersByTimeAsync(1000);
+            expect(manager.states()[0]?.waiting).toBe(true);
+            expect(notices.filter((entry) => entry.level === 'warn')).toEqual([]);
+            await manager.stop();
         } finally {
             vi.useRealTimers();
         }

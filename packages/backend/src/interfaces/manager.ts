@@ -138,11 +138,21 @@ export interface ManagedInterface {
     readonly target: InterfaceTarget;
     readonly client: RpcClient;
     state: InterfaceState;
-    /** Milliseconds since epoch of the last event, ping answer or successful `init`. */
+    /**
+     * Milliseconds since epoch of the last event, ping answer or successful `init` - for the state
+     * the UI shows, never for a timeout (B-65: see {@link lastSeenMono}).
+     */
     lastEvent: number;
+    /**
+     * B-65: the same moment on the monotonic clock, which the watchdog measures the silence
+     * against. On the wall clock a box without a real-time clock, whose date NTP moves months
+     * forward a few seconds after the start, made every interface look silent once and re-`init`ed
+     * it. `-Infinity` until the first one, so an interface never heard of is due at once.
+     */
+    lastSeenMono: number;
     /** Consecutive failed `init` calls; 0 as soon as one succeeds. */
     failures: number;
-    /** Milliseconds since epoch before which the watchdog does not try `init` again. */
+    /** On the monotonic clock (B-65): the moment before which the watchdog does not try `init` again. */
     retryAt: number;
     /** Task 56: failed `init` attempts while waiting at the start; 0 once it answered. */
     waitingAttempts: number;
@@ -563,6 +573,7 @@ export class InterfaceManager {
             this.#clearLivenessTimer(entry);
             entry.reconnecting = false;
             entry.lastEvent = 0;
+            entry.lastSeenMono = Number.NEGATIVE_INFINITY;
             entry.failures = 0;
             entry.retryAt = 0;
             entry.waitingAttempts = 0;
@@ -602,11 +613,12 @@ export class InterfaceManager {
         if (this.#idle) {
             return;
         }
-        const now = this.#now();
+        // B-65: silence and back-off are measured on the monotonic clock, never on the date
+        const now = this.#monotonicNow();
         const work: Promise<void>[] = [];
         for (const entry of this.#interfaces.values()) {
             const timeout = entry.target.resolved.pingTimeoutSeconds * 1000;
-            const elapsed = now - entry.lastEvent;
+            const elapsed = now - entry.lastSeenMono;
             if (elapsed > timeout) {
                 this.#update(entry, {connected: false});
                 // an interface that is not there at all is not asked again on every round, and one
@@ -637,6 +649,7 @@ export class InterfaceManager {
             return;
         }
         entry.lastEvent = this.#now();
+        entry.lastSeenMono = this.#monotonicNow();
         if (kind === 'event') {
             entry.lastEventMono = this.#monotonicNow();
             entry.heardSinceInit = true;
@@ -798,6 +811,7 @@ export class InterfaceManager {
             target,
             client,
             lastEvent: 0,
+            lastSeenMono: Number.NEGATIVE_INFINITY,
             failures: 0,
             retryAt: 0,
             waitingAttempts: 0,
@@ -881,7 +895,7 @@ export class InterfaceManager {
     #noteNoCallbackServer(entry: ManagedInterface, failure: {port: number; inUse: boolean; message: string}): void {
         entry.failures += 1;
         const base = this.#options.initBackoffMs ?? WATCHDOG_INTERVAL_MS;
-        entry.retryAt = this.#now() + Math.min(base * 2 ** (entry.failures - 1), MAX_INIT_BACKOFF_MS);
+        entry.retryAt = this.#monotonicNow() + Math.min(base * 2 ** (entry.failures - 1), MAX_INIT_BACKOFF_MS);
         this.#update(entry, {
             connected: false,
             error: failure.message,
@@ -904,6 +918,7 @@ export class InterfaceManager {
             // an interface that wants no subscription counts as connected as soon as it answers
             this.#update(entry, {connected: true, error: undefined});
             entry.lastEvent = this.#now();
+            entry.lastSeenMono = this.#monotonicNow();
             return;
         }
         const failure = this.#callbackFailures.get(resolved.protocol);
@@ -922,7 +937,8 @@ export class InterfaceManager {
         try {
             await entry.client.call('init', [url, resolved.ident], BACKGROUND);
             entry.lastEvent = this.#now();
-            entry.lastEventMono = this.#monotonicNow();
+            entry.lastSeenMono = this.#monotonicNow();
+            entry.lastEventMono = entry.lastSeenMono;
             entry.heardSinceInit = false;
             const wasFailing = entry.failures > 0;
             const waited = entry.waitingAttempts;
@@ -995,7 +1011,7 @@ export class InterfaceManager {
         entry.reconnecting = false;
         const base = this.#options.initBackoffMs ?? WATCHDOG_INTERVAL_MS;
         const wait = Math.min(base * 2 ** (entry.failures - 1), MAX_INIT_BACKOFF_MS);
-        entry.retryAt = this.#now() + wait;
+        entry.retryAt = this.#monotonicNow() + wait;
         this.#update(entry, {
             connected: false,
             error: message,
@@ -1037,7 +1053,7 @@ export class InterfaceManager {
     #noteWaiting(entry: ManagedInterface, message: string, refused: boolean): void {
         entry.waitingAttempts += 1;
         const delay = startRetryDelay(entry.waitingAttempts);
-        entry.retryAt = this.#now() + delay;
+        entry.retryAt = this.#monotonicNow() + delay;
         this.#update(entry, {
             connected: false,
             error: message,

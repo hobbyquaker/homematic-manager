@@ -74,6 +74,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Fixed
 
+- **No re-subscription of every interface when the date jumps at boot.** A system without a real-time clock - a
+  Raspberry Pi - starts with an old date, and the time server moves it months forward a few seconds later. The
+  watchdog measured the silence of an interface on the date, so every interface looked silent for months at once
+  and was subscribed again. Silence and waiting times are now measured on a clock that only moves forward.
 - **HomematicIP events come back by themselves after hmipserver restarts.** A restarted hmipserver reads its list of
   subscribers back, but sends them nothing until they subscribe again - and the Homematic Manager kept showing
   HmIP-RF as connected and received no events for up to ten minutes, until its watchdog gave up on the silence. It

@@ -1077,6 +1077,76 @@ describe('the watchdog', () => {
         expect(h.clients.calls).toEqual([]);
     });
 
+    /**
+     * B-65: a box without a real-time clock boots with an old date, and NTP moves it months forward
+     * a few seconds after the start. On the wall clock every interface then looked silent once and
+     * was re-`init`ed; the silence and the back-off are measured on the monotonic clock now.
+     */
+    it('measures silence and back-off on the monotonic clock, not on the date (B-65)', async () => {
+        let wall = 1_000_000;
+        let mono = 5000;
+        let bidcosUp = false;
+        const clients = fakeClients({
+            'BidCos-Wired': (method) =>
+                method === 'init' && !bidcosUp
+                    ? Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:32000'), {code: 'ECONNREFUSED'})
+                    : '',
+        });
+        const manager = new InterfaceManager({
+            connection: normaliseConnection({
+                host: 'ccu.lan',
+                interfaces: ['BidCos-RF', 'HmIP-RF', 'BidCos-Wired'],
+                callback: {ip: '192.168.1.5', xmlrpcPort: 0, binrpcPort: 0},
+                autoDetect: false,
+            }),
+            handler: {} as CallbackHandler,
+            onStateChanged: () => undefined,
+            onNotice: () => undefined,
+            now: () => wall,
+            monotonicNow: () => mono,
+            watchdogIntervalMs: 0,
+            startWindowMs: 0,
+            pingIntervalMs: 0,
+            initBackoffMs: 15_000,
+            createClient: clients.create,
+            createCallbackServers: () => fakeServers(),
+            network: fakeNetwork(),
+        });
+        await manager.start();
+        clients.calls.length = 0;
+
+        // NTP moves the date six months forward two seconds after the start
+        wall += 183 * 24 * 3600 * 1000;
+        mono += 2000;
+        await manager.tick();
+        expect(clients.calls).toEqual([]);
+        expect(manager.isConnected('BidCos-RF')).toBe(true);
+        expect(manager.isConnected('HmIP-RF')).toBe(true);
+
+        // the back-off of the missing wired interface was not used up by the jump either ...
+        bidcosUp = true;
+        mono += 5000;
+        await manager.tick();
+        expect(clients.calls.filter((call) => call.name === 'BidCos-Wired')).toEqual([]);
+        // ... and runs out 15 s after the failure, whatever the date says
+        wall -= 365 * 24 * 3600 * 1000;
+        mono += 10_000;
+        await manager.tick();
+        expect(clients.calls.filter((call) => call.method === 'init').map((call) => call.name)).toEqual([
+            'BidCos-Wired',
+        ]);
+
+        // and 61 s of real silence still means the subscription is gone, a date jump back or not
+        mono += 61_000;
+        clients.calls.length = 0;
+        await manager.tick();
+        expect(clients.calls.filter((call) => call.method === 'init').map((call) => call.name)).toEqual([
+            'BidCos-RF',
+            'BidCos-Wired',
+        ]);
+        await manager.stop();
+    });
+
     it('ignores an event of an interface it does not manage', async () => {
         const h = harness();
         await h.manager.start();

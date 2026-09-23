@@ -306,6 +306,26 @@ export const UI_MESSAGES: MessageCatalogue = {
     },
     // Task 38: a callback field the host was started with; `{option}` is `HMM_CALLBACK_IP / --callback-ip`
     'Set at start ({option})': {de: 'Beim Start festgelegt ({option})', en: 'Set at start ({option})'},
+    // B-70 (D-31): the idle time of a host that drops its subscriptions with no page open
+    'Unsubscribe when idle': {de: 'Abmelden bei Inaktivität', en: 'Unsubscribe when idle'},
+    'Default ({time})': {de: 'Voreinstellung ({time})', en: 'Default ({time})'},
+    'Never unsubscribe': {de: 'Nie abmelden', en: 'Never unsubscribe'},
+    '{count} seconds': {
+        de: {one: '{count} Sekunde', other: '{count} Sekunden'},
+        en: {one: '{count} second', other: '{count} seconds'},
+    },
+    '{count} minutes': {
+        de: {one: '{count} Minute', other: '{count} Minuten'},
+        en: {one: '{count} minute', other: '{count} minutes'},
+    },
+    '{count} hours': {
+        de: {one: '{count} Stunde', other: '{count} Stunden'},
+        en: {one: '{count} hour', other: '{count} hours'},
+    },
+    'With no page open, the event subscriptions are dropped after this time and taken up again when a page is opened': {
+        de: 'Ist keine Seite geöffnet, werden die Event-Anmeldungen nach dieser Zeit beendet und beim Öffnen einer Seite wieder aufgenommen',
+        en: 'With no page open, the event subscriptions are dropped after this time and taken up again when a page is opened',
+    },
     Dismiss: {de: 'Ausblenden', en: 'Dismiss'},
     // The toast stack collapses everything past the fifth into this counter (D-34).
     '{count} more': {

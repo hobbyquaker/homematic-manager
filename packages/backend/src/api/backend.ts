@@ -81,6 +81,7 @@ import {
     validationError,
 } from '../errors.js';
 import {
+    DEFAULT_IDLE_UNSUBSCRIBE_MS,
     InterfaceManager,
     LOOPBACK_IP,
     callbackBindHost,
@@ -156,8 +157,16 @@ export interface BackendOptions extends Omit<ConfigStoreOptions, 'version'> {
      * `0` or omitted turns it off, which is the Electron case: `InProcessTransport` never reports
      * a session, so the count is always zero and a grace period would unsubscribe a running window.
      * Only a transport that really counts sessions - `ApiWebSocketServer` - may switch this on.
+     *
+     * B-70: given at all, this is the host's default, and the profile's `idleUnsubscribeMs`
+     * replaces it unless {@link idleUnsubscribePinned} says the host was started with it.
      */
     readonly idleUnsubscribeMs?: number;
+    /**
+     * B-70: `idleUnsubscribeMs` was set when the host was started (`HMM_IDLE_UNSUBSCRIBE`,
+     * `--idle-unsubscribe`, the addon's settings page) and wins over the profile.
+     */
+    readonly idleUnsubscribePinned?: boolean;
     readonly hmipSweepDelayMs?: number;
     readonly cacheWriteDelayMs?: number;
     readonly now?: () => number;
@@ -372,8 +381,37 @@ export class Backend {
             }
             return;
         }
-        const grace = this.#options.idleUnsubscribeMs ?? 0;
-        if (grace <= 0 || this.#stopped) {
+        this.#armIdleTimer();
+    }
+
+    /**
+     * B-70 (D-31): the grace period in force - the host's pinned value, else the profile's, else the
+     * host's default. `0` when the host never goes idle (Electron) or the choice is "never".
+     */
+    #idleGraceMs(): number {
+        const host = this.#options.idleUnsubscribeMs;
+        if (host === undefined) {
+            return 0;
+        }
+        if (this.#options.idleUnsubscribePinned === true) {
+            return host;
+        }
+        return this.#config.connection.idleUnsubscribeMs ?? host;
+    }
+
+    /**
+     * Starts the grace period when there is no session. Called when the count drops to zero and -
+     * B-70 - when a connection has just been made with nobody looking: an addon nobody opens after
+     * its start used to stay subscribed for good, because only a count *dropping* to zero started
+     * the timer, and a count that never rose never dropped.
+     */
+    #armIdleTimer(): void {
+        if (this.#idleTimer !== undefined) {
+            clearTimeout(this.#idleTimer);
+            this.#idleTimer = undefined;
+        }
+        const grace = this.#idleGraceMs();
+        if (grace <= 0 || this.#stopped || this.#sessions > 0) {
             return;
         }
         const timer = setTimeout(() => {
@@ -776,6 +814,8 @@ export class Backend {
         }
         this.#metaReady = this.#startMeta(connection, {answer: hostVersion});
         this.#startServiceMessagePolling();
+        // B-70: counted from the start (or the reconnect of a save) when no page is open
+        this.#armIdleTimer();
     }
 
     /**
@@ -1143,11 +1183,22 @@ export class Backend {
         // Task 38: a container whose callback servers listen on the loopback only has nothing to publish
         const bindHost = this.#options.callbackHost ?? callbackBindHost(config.connection);
         const publish = this.#options.inContainer === true && bindHost !== LOOPBACK_IP;
+        const idle = this.#options.idleUnsubscribeMs;
         return {
             ...config,
             ...(ports === undefined ? {} : {callbackDefaultPorts: {xmlrpc: ports.xmlrpc, binrpc: ports.binrpc}}),
             ...(pins === undefined ? {} : {callbackPinned: {...pins}}),
             ...(publish ? {publishCallbackPorts: true} : {}),
+            // B-70: only a host that goes idle offers the time; the default of an unpinned host is
+            // D-31's five minutes, whatever it was started with, so "the default" means one thing
+            ...(idle === undefined
+                ? {}
+                : {
+                      idleUnsubscribe:
+                          this.#options.idleUnsubscribePinned === true
+                              ? {defaultMs: DEFAULT_IDLE_UNSUBSCRIBE_MS, pinnedMs: idle}
+                              : {defaultMs: idle},
+                  }),
         };
     }
 

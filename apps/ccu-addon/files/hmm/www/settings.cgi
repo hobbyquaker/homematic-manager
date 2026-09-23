@@ -140,6 +140,36 @@ if {[string equal $cmd "config"]} {
         }
     }
 
+    # B-70 (D-31): how long the backend stays subscribed with no page open, written into hmm.env as
+    # HMM_IDLE_UNSUBSCRIBE like the two settings above. `default` comments the line out again: the
+    # host's five minutes then apply, or the time chosen in the app's own settings dialog, which a
+    # line here overrides. Only these values are written - the host refuses a duration it cannot
+    # parse, and a typo here would keep the service from starting.
+    set idle_choices {15m 30m 1h 4h 0}
+    set idlechoice [read_env HMM_IDLE_UNSUBSCRIBE ""]
+    if {[info exists params(idle)]} {
+        set wanted $params(idle)
+        if {[string equal $wanted "default"] || [lsearch -exact $idle_choices $wanted] >= 0} {
+            if {[string equal $wanted "default"]} {
+                set target ""
+            } else {
+                set target $wanted
+            }
+            if {![string equal $target $idlechoice]} {
+                if {[string equal $target ""]} {
+                    write_env HMM_IDLE_UNSUBSCRIBE 5m 1
+                } else {
+                    write_env HMM_IDLE_UNSUBSCRIBE $target
+                }
+                set idlechoice $target
+                catch {exec $RC_SCRIPT restart} output
+                set message "Gespeichert, der Dienst wurde neu gestartet. / Saved, the service was restarted."
+            }
+        } else {
+            set message "Unbekannter Wert. / Unknown value."
+        }
+    }
+
     set query ""
     if {![string equal $sid ""]} {
         set query "&sid=$sid"
@@ -241,6 +271,34 @@ if {[string equal $cmd "config"]} {
             puts "<p class=\"note\">(kein Log vorhanden - der Dienst lief noch nicht / no log yet)</p>"
         }
     }
+    puts "<h2>Abmelden bei Inaktivität / Unsubscribe when idle</h2>"
+    puts "<p>Ist keine Seite des Homematic Managers geöffnet, beendet er nach dieser Zeit seine"
+    puts "Event-Anmeldungen bei den Schnittstellenprozessen und nimmt sie beim Öffnen einer Seite wieder"
+    puts "auf. Die Zeit läuft auch ab dem Start, wenn danach keine Seite geöffnet wird."
+    puts "<br>With no page of the Homematic Manager open, it drops its event subscriptions at the"
+    puts "interface processes after this time and takes them up again when a page is opened. The time"
+    puts "also runs from the start when no page is opened after it.</p>"
+    if {[string equal $idlechoice ""]} {
+        set idleshown "default"
+    } else {
+        set idleshown $idlechoice
+    }
+    puts "<p>Aktuell / current: <b>[html_escape $idleshown]</b></p>"
+    set entries [list]
+    foreach {value de en} {default "Voreinstellung" "default" 15m "15 Minuten" "15 minutes" 30m "30 Minuten" "30 minutes" 1h "1 Stunde" "1 hour" 4h "4 Stunden" "4 hours" 0 "nie" "never"} {
+        if {[string equal $value $idleshown]} {
+            lappend entries "<b>$de / $en</b>"
+        } else {
+            lappend entries "<a href=\"settings.cgi?cmd=config&amp;idle=$value[html_escape $query]\">$de / $en</a>"
+        }
+    }
+    puts "<p>[join $entries { &middot; }]</p>"
+    puts "<p class=\"note\">Voreinstellung: 5 Minuten, oder die Zeit aus den Einstellungen der App."
+    puts "Eine Wahl hier schreibt HMM_IDLE_UNSUBSCRIBE nach /usr/local/addons/hmm/etc/hmm.env, gilt"
+    puts "vor der Einstellung der App und startet den Dienst neu."
+    puts "<br>Default: 5 minutes, or the time from the app's settings. A choice here writes"
+    puts "HMM_IDLE_UNSUBSCRIBE to /usr/local/addons/hmm/etc/hmm.env, wins over the app's setting and"
+    puts "restarts the service.</p>"
     if {![string equal $sid ""]} {
         puts "<p><a href=\"settings.cgi?sid=[html_escape $sid]\">Homematic Manager öffnen / open</a></p>"
     } else {

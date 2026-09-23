@@ -384,9 +384,12 @@ one — and cost the UI, not the callback.
 With no browser page open for five minutes the backend de-registers from `rfd`, `hmipserver` and
 the rest with `init('')` and stops polling for service messages; the next page load subscribes
 again and the header shows "subscribing" until the first device sweep is through. That is the
-host's default (D-31) and the addon does not override it - `HMM_IDLE_UNSUBSCRIBE` in
-`etc/hmm.env` changes the grace period, `0` disables it. Caches, names and `config.json` are not
-touched by it.
+host's default (D-31) and the addon does not override it. The time also runs from the start when
+no page is opened after it (B-70). It is a setting in two places: the app's settings dialog
+(*Unsubscribe when idle*, saved in the profile) and the addon's settings page, which writes
+`HMM_IDLE_UNSUBSCRIBE` into `etc/hmm.env` (15 minutes to 4 hours, or `0` for never) and restarts
+the service; a line there wins over the dialog, which then shows it read-only. Caches, names and
+`config.json` are not touched by it.
 
 ## Memory
 

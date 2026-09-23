@@ -259,6 +259,11 @@ export interface WebOptions {
     readonly demo: boolean;
     /** D-31, in milliseconds; `0` disables the idle unsubscribe. */
     readonly idleUnsubscribeMs: number;
+    /**
+     * B-70: `--idle-unsubscribe` or `HMM_IDLE_UNSUBSCRIBE` was given. Then it wins over the time the
+     * settings dialog saves; without it the five minutes are only the default the dialog changes.
+     */
+    readonly idleUnsubscribePinned: boolean;
     readonly logLevel: LogLevel;
     readonly help: boolean;
     readonly version: boolean;
@@ -424,6 +429,7 @@ export function parseOptions(argv: readonly string[], env: NodeJS.ProcessEnv = p
         inContainer: boolean('in-container') ?? false,
         demo: boolean('demo') as boolean,
         idleUnsubscribeMs: parseDuration(string('idle-unsubscribe') as string, '--idle-unsubscribe'),
+        idleUnsubscribePinned: raw['idle-unsubscribe'] !== undefined,
         logLevel: isLogLevel(logLevel) ? logLevel : 'info',
         help: boolean('help') ?? false,
         version: boolean('version') ?? false,

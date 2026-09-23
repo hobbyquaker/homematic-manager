@@ -20,6 +20,7 @@
     import {getStores} from '../lib/stores/context.js';
     import {isHmipInterface} from '../lib/stores/suppression.js';
     import {interfaceChoices, removeExtraTick, renameExtraTick} from './extraInterfaceTicks.js';
+    import {IDLE_DEFAULT, idleChoices, idleDuration, idleSelectValue} from './idleChoices.js';
     import StickyUnreachQuestion from './StickyUnreachQuestion.svelte';
 
     interface Props {
@@ -59,6 +60,34 @@
 
     function pinHint(field: keyof CallbackPins): string {
         return t('Set at start ({option})', {option: callbackPinOption(field)});
+    }
+
+    /**
+     * B-70 (D-31): the idle time, on a host that goes idle - the addon, npm, Docker; never
+     * Electron, whose window is the session. A time the host was started with is shown read-only.
+     */
+    const idleHost = $derived(stores.app.config?.idleUnsubscribe);
+
+    function idleTime(ms: number): string {
+        if (ms === 0) {
+            return t('Never unsubscribe');
+        }
+        const {unit, count} = idleDuration(ms);
+        if (unit === 'hours') {
+            return t('{count} hours', {}, count);
+        }
+        return unit === 'minutes' ? t('{count} minutes', {}, count) : t('{count} seconds', {}, count);
+    }
+
+    function setIdle(value: string): void {
+        if (!draft) {
+            return;
+        }
+        if (value === IDLE_DEFAULT) {
+            delete draft.idleUnsubscribeMs;
+        } else {
+            draft.idleUnsubscribeMs = Number(value);
+        }
     }
     const dirty = $derived(
         clearCaches ||
@@ -864,6 +893,45 @@
                                     {/if}
                                 </span>
                             </label>
+
+                            {#if idleHost !== undefined}
+                                <label class="hmm-config-row">
+                                    <span class="hmm-config-label">{t('Unsubscribe when idle')}</span>
+                                    <span class="hmm-config-field">
+                                        {#if idleHost.pinnedMs !== undefined}
+                                            <select class="hmm-select" disabled data-testid="config-idle">
+                                                <option>{idleTime(idleHost.pinnedMs)}</option>
+                                            </select>
+                                            <small class="hmm-config-help" data-testid="config-idle-pinned"
+                                                >{t('Set at start ({option})', {
+                                                    option: 'HMM_IDLE_UNSUBSCRIBE / --idle-unsubscribe',
+                                                })}</small
+                                            >
+                                        {:else}
+                                            <select
+                                                class="hmm-select"
+                                                value={idleSelectValue(draft.idleUnsubscribeMs, idleHost.defaultMs)}
+                                                data-testid="config-idle"
+                                                onchange={(event) => setIdle(event.currentTarget.value)}
+                                            >
+                                                <option value={IDLE_DEFAULT}
+                                                    >{t('Default ({time})', {
+                                                        time: idleTime(idleHost.defaultMs),
+                                                    })}</option
+                                                >
+                                                {#each idleChoices(idleHost.defaultMs, draft.idleUnsubscribeMs) as ms (ms)}
+                                                    <option value={String(ms)}>{idleTime(ms)}</option>
+                                                {/each}
+                                            </select>
+                                            <small class="hmm-config-help"
+                                                >{t(
+                                                    'With no page open, the event subscriptions are dropped after this time and taken up again when a page is opened',
+                                                )}</small
+                                            >
+                                        {/if}
+                                    </span>
+                                </label>
+                            {/if}
 
                             <label class="hmm-config-row">
                                 <span class="hmm-config-label">{t('RPC Log Folder')}</span>

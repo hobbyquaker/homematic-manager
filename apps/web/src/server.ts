@@ -142,6 +142,8 @@ export interface WebHostOptions {
      * interface processes. `0` (the default here; the CLI's default is five minutes) is off.
      */
     readonly idleUnsubscribeMs?: number;
+    /** B-70: `idleUnsubscribeMs` was given at start and wins over the settings dialog's time. */
+    readonly idleUnsubscribePinned?: boolean;
     /** `http://127.0.0.1:5173` - proxy everything that is not the API to a vite dev server. */
     readonly uiDevServer?: string | undefined;
     /** The token clients have to present. Generated when auth is on and none is given. */
@@ -309,6 +311,7 @@ export async function createWebHost(options: WebHostOptions = {}): Promise<WebHo
             // reports them, and Electron's in-process transport reports none - so an Electron
             // window can never be idled out however the backend is configured.
             ...(options.idleUnsubscribeMs === undefined ? {} : {idleUnsubscribeMs: options.idleUnsubscribeMs}),
+            ...(options.idleUnsubscribePinned === true ? {idleUnsubscribePinned: true} : {}),
             ...(defaultCallbackPorts === undefined ? {} : {defaultCallbackPorts}),
             ...(pinnedCallback === undefined ? {} : {pinnedCallback}),
             ...(options.inContainer === true ? {inContainer: true} : {}),

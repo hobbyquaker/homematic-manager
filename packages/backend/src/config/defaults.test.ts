@@ -82,6 +82,14 @@ describe('normaliseConnection', () => {
         expect(connection.language).toBeUndefined();
     });
 
+    it('keeps an idle time the profile chose, "never" included, and drops nonsense (B-70)', () => {
+        expect(normaliseConnection({host: 'ccu', idleUnsubscribeMs: 900_000}).idleUnsubscribeMs).toBe(900_000);
+        expect(normaliseConnection({host: 'ccu', idleUnsubscribeMs: 0}).idleUnsubscribeMs).toBe(0);
+        expect('idleUnsubscribeMs' in normaliseConnection({host: 'ccu'})).toBe(false);
+        expect('idleUnsubscribeMs' in normaliseConnection({host: 'ccu', idleUnsubscribeMs: -1})).toBe(false);
+        expect('idleUnsubscribeMs' in normaliseConnection({host: 'ccu', idleUnsubscribeMs: '5m'})).toBe(false);
+    });
+
     it('keeps auth only when there is a user', () => {
         expect(normaliseConnection({auth: {user: 'Admin', password: 'secret'}}).auth).toEqual({
             user: 'Admin',

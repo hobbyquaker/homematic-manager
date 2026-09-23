@@ -112,6 +112,13 @@ export interface ConnectionConfig {
      * configuration dialog, rather than have happen behind their back.
      */
     autoConfirmRegaInbox?: boolean;
+    /**
+     * B-70 (D-31): how long the host waits with no UI session before it drops its event
+     * subscriptions, in milliseconds; `0` is "never". Absent means the host's default
+     * ({@link AppConfig.idleUnsubscribe}). Only a host that goes idle reads it - never Electron,
+     * whose window is the session - and a value the host was started with wins over it.
+     */
+    idleUnsubscribeMs?: number;
 }
 
 export interface AppConfig {
@@ -140,6 +147,14 @@ export interface AppConfig {
      * interface popup says so beside each callback URL. Absent everywhere else.
      */
     publishCallbackPorts?: boolean;
+    /**
+     * B-70 (D-31): this host drops its event subscriptions after a while with no UI session, and
+     * the settings dialog offers the time. `defaultMs` is what an unset profile gets; `pinnedMs`
+     * is the value the host was started with (`HMM_IDLE_UNSUBSCRIBE`, `--idle-unsubscribe`, the
+     * addon's settings page), which wins over the profile and is shown read-only. `0` is "never".
+     * Absent on a host that never goes idle (Electron).
+     */
+    idleUnsubscribe?: {defaultMs: number; pinnedMs?: number};
 }
 
 /**

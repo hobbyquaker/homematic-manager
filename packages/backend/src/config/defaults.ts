@@ -147,6 +147,12 @@ export function normaliseConnection(input: unknown): ConnectionConfig {
         ...(metaProvider === undefined ? {} : {metaProvider}),
         ...(metaToken === '' ? {} : {metaToken}),
         ...(metaUrl === '' ? {} : {metaUrl}),
+        // B-70: a time the profile chose, or nothing - the host's default then applies
+        ...(typeof raw.idleUnsubscribeMs === 'number' &&
+        Number.isFinite(raw.idleUnsubscribeMs) &&
+        raw.idleUnsubscribeMs >= 0
+            ? {idleUnsubscribeMs: Math.round(raw.idleUnsubscribeMs)}
+            : {}),
     };
 
     const auth = normaliseAuth(raw.auth);

@@ -471,6 +471,50 @@ case "$out" in
 esac
 rm -f "$HMM_SYSTEM_LOG_DIR/hmm.log"
 
+echo "the idle time on the addon settings page (B-70)"
+cp -a "$ADDON_SRC/files/hmm/etc/default.env" "$TREE/etc/hmm.env"
+: > "$RC_CALLS"
+out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config')"
+case "$out" in
+    *'Unsubscribe when idle'*'current: <b>default</b>'*) pass "the page offers the idle time, unset meaning the default" ;;
+    *) fail "the page offers the idle time, unset meaning the default" "$out" ;;
+esac
+case "$out" in
+    *'settings.cgi?cmd=config&amp;idle=0&amp;sid=@1234567890@'*'nie / never'*) pass "with never among the choices" ;;
+    *) fail "with never among the choices" "$out" ;;
+esac
+out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&idle=0')"
+if [ "$(grep -E '^ *#? *HMM_IDLE_UNSUBSCRIBE=' "$TREE/etc/hmm.env")" = 'HMM_IDLE_UNSUBSCRIBE=0' ] && [ "$(cat "$RC_CALLS")" = restart ]; then
+    pass "never writes HMM_IDLE_UNSUBSCRIBE=0 as the one line and restarts"
+else
+    fail "never writes HMM_IDLE_UNSUBSCRIBE=0 as the one line and restarts" "$(grep -n 'HMM_IDLE_UNSUBSCRIBE' "$TREE/etc/hmm.env"; cat "$RC_CALLS")"
+fi
+case "$out" in
+    *'current: <b>0</b>'*'<b>nie / never</b>'*) pass "and the page shows it" ;;
+    *) fail "and the page shows it" "$out" ;;
+esac
+: > "$RC_CALLS"
+out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&idle=5d')"
+if [ "$(grep -E '^ *#? *HMM_IDLE_UNSUBSCRIBE=' "$TREE/etc/hmm.env")" = 'HMM_IDLE_UNSUBSCRIBE=0' ] && [ ! -s "$RC_CALLS" ]; then
+    pass "a time that is not offered is refused, nothing written or restarted"
+else
+    fail "a time that is not offered is refused, nothing written or restarted" "$(grep -n 'HMM_IDLE_UNSUBSCRIBE' "$TREE/etc/hmm.env"; cat "$RC_CALLS")"
+fi
+case "$out" in
+    *'Unbekannter Wert'*) pass "and the page says so" ;;
+    *) fail "and the page says so" "$out" ;;
+esac
+out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&idle=default')"
+if [ "$(grep -E '^ *#? *HMM_IDLE_UNSUBSCRIBE=' "$TREE/etc/hmm.env")" = '#HMM_IDLE_UNSUBSCRIBE=5m' ] && [ "$(cat "$RC_CALLS")" = restart ]; then
+    pass "the default comments the line out again and restarts"
+else
+    fail "the default comments the line out again and restarts" "$(grep -n 'HMM_IDLE_UNSUBSCRIBE' "$TREE/etc/hmm.env"; cat "$RC_CALLS")"
+fi
+case "$out" in
+    *'current: <b>default</b>'*) pass "and the page is back on the default" ;;
+    *) fail "and the page is back on the default" "$out" ;;
+esac
+
 echo "the addon settings page on openccu-lite (D-40)"
 # The firmware's own file, with the extra line openccu-lite identifies itself by (their D-17). The
 # CGI reads it at every request, so the same package shows the mode that fits the box it is on.

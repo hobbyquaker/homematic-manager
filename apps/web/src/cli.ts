@@ -154,9 +154,14 @@ export async function runCli(options: RunCliOptions = {}): Promise<CliRun> {
         log.info(`development mode: everything but the api is proxied to ${parsed.uiDevServer}`);
     }
     if (!parsed.demo) {
+        // B-70: a time given at start is the one in force; without it the settings dialog's time
+        // (saved in the profile) replaces the default, and the backend logs nothing more about it
         log.info(
             parsed.idleUnsubscribeMs > 0
-                ? `idle unsubscribe after ${String(Math.round(parsed.idleUnsubscribeMs / 1000))} s without an open page`
+                ? `idle unsubscribe after ${String(Math.round(parsed.idleUnsubscribeMs / 1000))} s without an open page` +
+                      (parsed.idleUnsubscribePinned
+                          ? ', set at start'
+                          : ' unless the settings dialog chose another time')
                 : 'idle unsubscribe is off: the interfaces stay subscribed with no page open',
         );
     }
@@ -218,6 +223,7 @@ function startHost(values: WebOptions, log: Logger, version: string): Promise<We
             ? {}
             : {callbackBinrpcDefaultPort: values.callbackBinrpcDefaultPort}),
         idleUnsubscribeMs: values.idleUnsubscribeMs,
+        ...(values.idleUnsubscribePinned ? {idleUnsubscribePinned: true} : {}),
     });
 }
 

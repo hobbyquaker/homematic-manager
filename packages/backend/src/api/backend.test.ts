@@ -777,6 +777,86 @@ describe('idle unsubscribe (D-31)', () => {
         await h.backend.stop();
     });
 
+    it('counts the grace period from the start when no session was ever opened (B-70)', async () => {
+        const h = await harness({backend: {idleUnsubscribeMs: 60_000}});
+        await vi.advanceTimersByTimeAsync(59_000);
+        expect(inits(h)).toEqual(['hmm_HmIP-RF']);
+        await vi.advanceTimersByTimeAsync(2000);
+        expect(inits(h)).toEqual(['hmm_HmIP-RF', '']);
+        // the first page to open subscribes, as after any idle period
+        h.backend.noteSessions(1);
+        await vi.advanceTimersByTimeAsync(10);
+        expect(inits(h)).toEqual(['hmm_HmIP-RF', '', 'hmm_HmIP-RF']);
+        await h.backend.stop();
+    });
+
+    it('does not go idle at the start while a session is open (B-70)', async () => {
+        const h = await harness({backend: {idleUnsubscribeMs: 60_000}});
+        h.backend.noteSessions(1);
+        await vi.advanceTimersByTimeAsync(600_000);
+        expect(inits(h)).toEqual(['hmm_HmIP-RF']);
+        await h.backend.stop();
+    });
+
+    it("takes the profile's time over the host's default (B-70)", async () => {
+        const h = await harness({backend: {idleUnsubscribeMs: 60_000}, connection: {idleUnsubscribeMs: 120_000}});
+        await vi.advanceTimersByTimeAsync(61_000);
+        expect(inits(h)).toEqual(['hmm_HmIP-RF']);
+        await vi.advanceTimersByTimeAsync(60_000);
+        expect(inits(h)).toEqual(['hmm_HmIP-RF', '']);
+        await h.backend.stop();
+    });
+
+    it('never goes idle when the profile says never (B-70)', async () => {
+        const h = await harness({backend: {idleUnsubscribeMs: 60_000}, connection: {idleUnsubscribeMs: 0}});
+        h.backend.noteSessions(1);
+        h.backend.noteSessions(0);
+        await vi.advanceTimersByTimeAsync(24 * 3_600_000);
+        expect(inits(h)).toEqual(['hmm_HmIP-RF']);
+        await h.backend.stop();
+    });
+
+    it("keeps a time the host was started with over the profile's (B-70)", async () => {
+        const h = await harness({
+            backend: {idleUnsubscribeMs: 60_000, idleUnsubscribePinned: true},
+            connection: {idleUnsubscribeMs: 0},
+        });
+        await vi.advanceTimersByTimeAsync(61_000);
+        expect(inits(h)).toEqual(['hmm_HmIP-RF', '']);
+        await h.backend.stop();
+    });
+
+    it('offers the time in config.get only on a host that goes idle, with the pinned value (B-70)', async () => {
+        const plain = await harness({backend: {idleUnsubscribeMs: 60_000}});
+        expect((await plain.backend.request('config.get')).idleUnsubscribe).toEqual({defaultMs: 60_000});
+        await plain.backend.stop();
+        const pinned = await harness({backend: {idleUnsubscribeMs: 0, idleUnsubscribePinned: true}});
+        expect((await pinned.backend.request('config.get')).idleUnsubscribe).toEqual({
+            defaultMs: 300_000,
+            pinnedMs: 0,
+        });
+        await pinned.backend.stop();
+        const electron = await harness();
+        expect((await electron.backend.request('config.get')).idleUnsubscribe).toBeUndefined();
+        await electron.backend.stop();
+    });
+
+    it('starts the grace period again after a save reconnects with no page open (B-70)', async () => {
+        const h = await harness({backend: {idleUnsubscribeMs: 60_000}});
+        await vi.advanceTimersByTimeAsync(30_000);
+        const connection = (await h.backend.request('config.get')).connection;
+        await h.backend.request('config.set', {...connection, idleUnsubscribeMs: 900_000});
+        // the save itself de-registers and registers again
+        const afterSave = inits(h).length;
+        expect(inits(h).at(-1)).toBe('hmm_HmIP-RF');
+        await vi.advanceTimersByTimeAsync(600_000);
+        expect(inits(h)).toHaveLength(afterSave);
+        await vi.advanceTimersByTimeAsync(301_000);
+        expect(inits(h)).toHaveLength(afterSave + 1);
+        expect(inits(h).at(-1)).toBe('');
+        await h.backend.stop();
+    });
+
     it('reports the interface as subscribing until the device sweep is through', async () => {
         const h = await harness({backend: {idleUnsubscribeMs: 60_000}});
         h.backend.noteSessions(1);

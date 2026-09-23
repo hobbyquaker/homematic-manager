@@ -253,4 +253,10 @@ describe('parseDuration and --idle-unsubscribe (D-31)', () => {
             parseOptions(['--idle-unsubscribe', '0'], {...noEnv, HMM_IDLE_UNSUBSCRIBE: '9m'}).idleUnsubscribeMs,
         ).toBe(0);
     });
+
+    it('says whether the time was given at start, which then wins over the settings dialog (B-70)', () => {
+        expect(parseOptions([], noEnv).idleUnsubscribePinned).toBe(false);
+        expect(parseOptions(['--idle-unsubscribe', '5m'], noEnv).idleUnsubscribePinned).toBe(true);
+        expect(parseOptions([], {...noEnv, HMM_IDLE_UNSUBSCRIBE: '0'}).idleUnsubscribePinned).toBe(true);
+    });
 });

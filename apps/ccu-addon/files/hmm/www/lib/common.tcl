@@ -115,8 +115,16 @@ proc read_env {name default} {
 # Writes one value into etc/hmm.env: replaces the line that sets it - commented out or not - and
 # appends it when there is none. Everything else in the file is kept byte for byte, because a user
 # may have put their own HMM_* lines there and an update never overwrites the file either.
-proc write_env {name value} {
+#
+# B-70: with `commented` set, the line is written commented out (`#NAME=value`), which is how a
+# setting goes back to the host's default while the file still shows the variable.
+proc write_env {name value {commented 0}} {
     global ADDON_DIR
+    if {$commented} {
+        set entry "#$name=$value"
+    } else {
+        set entry "$name=$value"
+    }
     set file $ADDON_DIR/etc/hmm.env
     set lines [list]
     set replaced 0
@@ -127,7 +135,7 @@ proc write_env {name value} {
         foreach line [split $content "\n"] {
             if {[regexp "^ *#? *$name=" $line]} {
                 if {$replaced == 0} {
-                    lappend lines "$name=$value"
+                    lappend lines $entry
                     set replaced 1
                 }
             } else {
@@ -136,7 +144,7 @@ proc write_env {name value} {
         }
     }
     if {$replaced == 0} {
-        lappend lines "$name=$value"
+        lappend lines $entry
         lappend lines ""
     }
     set fd [open $file w]

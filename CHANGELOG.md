@@ -74,6 +74,15 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Fixed
 
+- **The addon lets go of the interfaces also when nobody opened it after its start, and the time is a setting.**
+  With no browser connected for five minutes, the addon (and the npm and Docker installs) drops its event
+  subscriptions - but the five minutes only started when the last browser disconnected, so an addon nobody opened
+  after a restart of the system stayed subscribed for good. The time now also runs from the start. It is a setting
+  now: _Unsubscribe when idle_ in the settings dialog of the addon, npm and Docker installs (the default of five
+  minutes, 15 or 30 minutes, 1 or 4 hours, or _never_), and on the addon's own settings page as well, which writes
+  `HMM_IDLE_UNSUBSCRIBE` into `etc/hmm.env` and then wins over the dialog; a time given at start
+  (`--idle-unsubscribe`, `HMM_IDLE_UNSUBSCRIBE`) is shown read-only in the dialog. The desktop app never drops its
+  subscriptions and offers no such setting.
 - **An interface that is not there stays quiet when a browser connects again.** The addon drops its subscriptions
   when no browser has been connected for five minutes, and subscribes again when one connects. Each time, an
   interface that does not exist on the system - BidCos-Wired without a wired gateway - was waited for again for two

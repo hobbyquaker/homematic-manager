@@ -85,9 +85,11 @@ subscribes again with one `init` per interface. That page sees the interfaces ma
 until their first `listDevices` sweep is through, because `hmipserver` re-sends every device on
 `init` (occu#45).
 
-`--idle-unsubscribe <duration>` / `HMM_IDLE_UNSUBSCRIBE` changes the grace period (`5m`, `300s`,
-`90`), and `0` switches it off. It is on by default for every server install type - npm, Docker and
-the CCU addon all run unattended for days. The Electron app never does this: its in-process
+The time also runs from the start when no page is opened after it (B-70). The settings dialog
+offers it (*Unsubscribe when idle*: the default, 15 minutes to 4 hours, or never), saved in the
+profile. `--idle-unsubscribe <duration>` / `HMM_IDLE_UNSUBSCRIBE` sets it at start instead (`5m`,
+`300s`, `90`, `0` for never) and then wins over the dialog, which shows it read-only. It is on by
+default for every server install type - npm, Docker and the CCU addon all run unattended for days. The Electron app never does this: its in-process
 transport reports no sessions at all, so nothing there can ever be counted as idle.
 
 What is **not** replayed after a resubscribe are the events and service messages of the idle

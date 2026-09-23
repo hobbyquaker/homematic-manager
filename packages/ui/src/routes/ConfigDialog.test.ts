@@ -505,6 +505,62 @@ describe('ConfigDialog', () => {
         });
     });
 
+    it('offers no idle time where the host never goes idle, the Electron case (B-70)', async () => {
+        await open(transport);
+        expect(screen.queryByTestId('config-idle')).toBeNull();
+    });
+
+    it('offers the idle time with the default first and "never" last, and saves the choice (B-70)', async () => {
+        transport.result('config.get', {...DEMO_CONFIG, idleUnsubscribe: {defaultMs: 300_000}});
+        await open(transport);
+        const select = screen.getByTestId<HTMLSelectElement>('config-idle');
+        expect(select.disabled).toBe(false);
+        expect(select.value).toBe('default');
+        expect([...select.options].map((option) => option.textContent)).toEqual([
+            'Voreinstellung (5 Minuten)',
+            '15 Minuten',
+            '30 Minuten',
+            '1 Stunde',
+            '4 Stunden',
+            'Nie abmelden',
+        ]);
+        await fireEvent.change(select, {target: {value: '0'}});
+        await fireEvent.click(screen.getByTestId('config-save'));
+        await waitFor(() => {
+            expect(transport.lastCall('config.set')?.[0]?.idleUnsubscribeMs).toBe(0);
+        });
+    });
+
+    it('drops the saved time again when the default is chosen (B-70)', async () => {
+        transport.result('config.get', {
+            ...DEMO_CONFIG,
+            connection: {...DEMO_CONFIG.connection, idleUnsubscribeMs: 90_000},
+            idleUnsubscribe: {defaultMs: 300_000},
+        });
+        await open(transport);
+        const select = screen.getByTestId<HTMLSelectElement>('config-idle');
+        // a time chosen elsewhere is offered as it is, so a save never changes it by accident
+        expect(select.value).toBe('90000');
+        expect([...select.options].map((option) => option.textContent)).toContain('90 Sekunden');
+        await fireEvent.change(select, {target: {value: 'default'}});
+        await fireEvent.click(screen.getByTestId('config-save'));
+        await waitFor(() => {
+            expect(transport.lastCall('config.set')).toBeDefined();
+        });
+        expect('idleUnsubscribeMs' in (transport.lastCall('config.set')?.[0] ?? {})).toBe(false);
+    });
+
+    it('shows a time the host was started with read-only (B-70)', async () => {
+        transport.result('config.get', {...DEMO_CONFIG, idleUnsubscribe: {defaultMs: 300_000, pinnedMs: 0}});
+        await open(transport);
+        const select = screen.getByTestId<HTMLSelectElement>('config-idle');
+        expect(select.disabled).toBe(true);
+        expect(select.value).toBe('Nie abmelden');
+        expect(screen.getByTestId('config-idle-pinned').textContent).toBe(
+            'Beim Start festgelegt (HMM_IDLE_UNSUBSCRIBE / --idle-unsubscribe)',
+        );
+    });
+
     it('words the read-only hint in English as well (task 38)', async () => {
         transport.result('config.get', {
             ...DEMO_CONFIG,

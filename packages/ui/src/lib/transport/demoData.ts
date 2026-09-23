@@ -125,8 +125,11 @@ const BIDCOS_DEVICES: DeviceDescription[] = [
         FLAGS: 1,
         VERSION: 8,
     },
-    // Issue #97: two smoke detectors, each in a team of its own - which is exactly the state the
-    // report describes ("im Moment hat jeder Melder seine eigene Gruppe").
+    // Issue #97, task 58: two smoke detectors in one team. rfd lists the team as a pseudo device of
+    // its own (`*` plus the serial of the detector it came from, type `HM-Sec-SD-2-Team`) whose
+    // `:1` channel carries the members in TEAM_CHANNELS; each detector channel carries TEAM, the
+    // team channel it is in. Every detector starts in a team of its own ("im Moment hat jeder
+    // Melder seine eigene Gruppe"); here the second one has been moved into the first one's team.
     {
         ADDRESS: 'NEQ1000001',
         TYPE: 'HM-Sec-SD-2',
@@ -160,8 +163,8 @@ const BIDCOS_DEVICES: DeviceDescription[] = [
         DIRECTION: 1,
         FLAGS: 1,
         VERSION: 1,
-        TEAM: 'NEQ1000001-TEAM:1',
-        TEAM_TAG: 'SMOKE_DETECTOR',
+        TEAM: '*NEQ1000001:1',
+        TEAM_TAG: 'smoke_detector',
     },
     {
         ADDRESS: 'NEQ1000002',
@@ -196,8 +199,43 @@ const BIDCOS_DEVICES: DeviceDescription[] = [
         DIRECTION: 1,
         FLAGS: 1,
         VERSION: 1,
-        TEAM: 'NEQ1000002-TEAM:1',
-        TEAM_TAG: 'SMOKE_DETECTOR',
+        TEAM: '*NEQ1000001:1',
+        TEAM_TAG: 'smoke_detector',
+    },
+    {
+        ADDRESS: '*NEQ1000001',
+        TYPE: 'HM-Sec-SD-2-Team',
+        PARENT: '',
+        CHILDREN: ['*NEQ1000001:0', '*NEQ1000001:1'],
+        PARAMSETS: ['MASTER'],
+        FIRMWARE: '1.0',
+        VERSION: 3,
+        FLAGS: 9,
+        RX_MODE: 0,
+    },
+    {
+        ADDRESS: '*NEQ1000001:0',
+        TYPE: 'MAINTENANCE',
+        PARENT: '*NEQ1000001',
+        PARENT_TYPE: 'HM-Sec-SD-2-Team',
+        PARAMSETS: ['MASTER', 'VALUES'],
+        INDEX: 0,
+        DIRECTION: 0,
+        FLAGS: 3,
+        VERSION: 3,
+    },
+    {
+        ADDRESS: '*NEQ1000001:1',
+        TYPE: 'SMOKE_DETECTOR_TEAM_V2',
+        PARENT: '*NEQ1000001',
+        PARENT_TYPE: 'HM-Sec-SD-2-Team',
+        PARAMSETS: ['MASTER', 'VALUES'],
+        INDEX: 1,
+        DIRECTION: 0,
+        FLAGS: 1,
+        VERSION: 3,
+        TEAM_TAG: 'smoke_detector',
+        TEAM_CHANNELS: ['NEQ1000001:1', 'NEQ1000002:1'],
     },
     {
         ADDRESS: 'JEQ0234567',
@@ -574,6 +612,45 @@ const HMIP_DEVICES: DeviceDescription[] = [
         FLAGS: 1,
         VERSION: 10,
     },
+    // Task 58: three HmIP smoke detectors. Their smoke channel's MASTER carries GROUP_1 … GROUP_8;
+    // the first two share GROUP_1, the third is in no group. The rows `*GROUP_n` the device list
+    // draws for them are synthesised from these values - hmipserver has no group object.
+    ...['0001D3C9000001', '0001D3C9000002', '0001D3C9000003'].flatMap((serial): DeviceDescription[] => [
+        {
+            ADDRESS: serial,
+            TYPE: 'HmIP-SWSD',
+            PARENT: '',
+            CHILDREN: [`${serial}:0`, `${serial}:1`],
+            PARAMSETS: ['MASTER'],
+            FIRMWARE: '1.0.12',
+            VERSION: 1,
+            FLAGS: 1,
+            RX_MODE: 12,
+            INTERFACE: 'HmIP-RF',
+        },
+        {
+            ADDRESS: `${serial}:0`,
+            TYPE: 'MAINTENANCE',
+            PARENT: serial,
+            PARENT_TYPE: 'HmIP-SWSD',
+            PARAMSETS: ['MASTER', 'VALUES'],
+            INDEX: 0,
+            DIRECTION: 0,
+            FLAGS: 3,
+            VERSION: 1,
+        },
+        {
+            ADDRESS: `${serial}:1`,
+            TYPE: 'SMOKE_DETECTOR',
+            PARENT: serial,
+            PARENT_TYPE: 'HmIP-SWSD',
+            PARAMSETS: ['MASTER', 'VALUES'],
+            INDEX: 1,
+            DIRECTION: 1,
+            FLAGS: 1,
+            VERSION: 1,
+        },
+    ]),
 ];
 
 /** The devices of one demo interface, as `devices.list` would answer. */
@@ -601,6 +678,17 @@ export const DEMO_NAMES: NameMap = {
     '0011D3C9A1B2C3': 'Fenster Arbeitszimmer',
     '3014F711A0001F': 'Heizung Arbeitszimmer',
     '0001D8A9B7C6D5': 'Wandtaster Diele',
+    NEQ1000001: 'Rauchmelder Flur',
+    'NEQ1000001:1': 'Rauchmelder Flur:1',
+    NEQ1000002: 'Rauchmelder Küche',
+    'NEQ1000002:1': 'Rauchmelder Küche:1',
+    '*NEQ1000001': 'Rauchmelder Gruppe',
+    '0001D3C9000001': 'Rauchmelder Schlafzimmer',
+    '0001D3C9000001:1': 'Rauchmelder Schlafzimmer:1',
+    '0001D3C9000002': 'Rauchmelder Kinderzimmer',
+    '0001D3C9000002:1': 'Rauchmelder Kinderzimmer:1',
+    '0001D3C9000003': 'Rauchmelder Keller',
+    '0001D3C9000003:1': 'Rauchmelder Keller:1',
 };
 
 export const DEMO_LINKS: Readonly<Record<DemoInterfaceName, LinkRecord[]>> = {
@@ -779,31 +867,12 @@ export const DEMO_UNREACH: UnreachCounter[] = [
 ];
 
 /**
- * Issue #97: what `listTeams` answers - one team pseudo device per detector, which is what a
- * BidCos interface process reports until somebody puts them into one team.
+ * Issue #97: what `listTeams` answers - the team channels rfd also lists with `listDevices`
+ * (task 58: the device list reads the members from there and never needs `listTeams`).
  */
-export const DEMO_TEAMS: DeviceDescription[] = [
-    {
-        ADDRESS: 'NEQ1000001-TEAM:1',
-        TYPE: 'SMOKE_DETECTOR_TEAM',
-        PARENT: 'NEQ1000001-TEAM',
-        PARENT_TYPE: 'HM-Sec-SD-2-Team',
-        PARAMSETS: ['MASTER'],
-        VERSION: 1,
-        TEAM_TAG: 'SMOKE_DETECTOR',
-        TEAM_CHANNELS: ['NEQ1000001:1'],
-    },
-    {
-        ADDRESS: 'NEQ1000002-TEAM:1',
-        TYPE: 'SMOKE_DETECTOR_TEAM',
-        PARENT: 'NEQ1000002-TEAM',
-        PARENT_TYPE: 'HM-Sec-SD-2-Team',
-        PARAMSETS: ['MASTER'],
-        VERSION: 1,
-        TEAM_TAG: 'SMOKE_DETECTOR',
-        TEAM_CHANNELS: ['NEQ1000002:1'],
-    },
-];
+export const DEMO_TEAMS: DeviceDescription[] = BIDCOS_DEVICES.filter(
+    (description) => (description.TEAM_CHANNELS ?? []).length > 0,
+);
 
 /**
  * D-40, task 25: the metadata store of the demo - a house with two floors, a few rooms and three
@@ -1092,6 +1161,15 @@ export function isDemoInterface(name: string): name is DemoInterfaceName {
  * the editor has to render (bool, enum, integer with bounds, float with a unit, a `SPECIAL` value,
  * a read-only datapoint) are all here.
  */
+/** The MASTER description of an HmIP-SWSD smoke channel: REPEAT_ENABLE and the eight group booleans. */
+const SWSD_MASTER_DESCRIPTION: ParamsetDescription = Object.fromEntries([
+    ['REPEAT_ENABLE', {TYPE: 'BOOL', OPERATIONS: 3, FLAGS: 1, DEFAULT: true, TAB_ORDER: 0}],
+    ...Array.from({length: 8}, (_, i) => [
+        `GROUP_${String(i + 1)}`,
+        {TYPE: 'BOOL', OPERATIONS: 3, FLAGS: 1, DEFAULT: false, TAB_ORDER: i + 1},
+    ]),
+]) as ParamsetDescription;
+
 export const DEMO_DESCRIPTIONS: Readonly<Record<string, ParamsetDescription>> = {
     'SWITCH|MASTER': {
         LOGGING: {TYPE: 'ENUM', OPERATIONS: 3, FLAGS: 1, VALUE_LIST: ['OFF', 'ON'], DEFAULT: 1, TAB_ORDER: 1},
@@ -1187,6 +1265,23 @@ export const DEMO_DESCRIPTIONS: Readonly<Record<string, ParamsetDescription>> = 
     '|MASTER': {
         ARR_TIMEOUT: {TYPE: 'INTEGER', OPERATIONS: 3, FLAGS: 1, MIN: 1, MAX: 20, DEFAULT: 10},
     },
+    // Task 58: the HmIP-SWSD smoke channel, by address (see DEMO_PARAMSET_VALUES)
+    '0001D3C9000001:1|MASTER': SWSD_MASTER_DESCRIPTION,
+    '0001D3C9000002:1|MASTER': SWSD_MASTER_DESCRIPTION,
+    '0001D3C9000003:1|MASTER': SWSD_MASTER_DESCRIPTION,
+};
+
+/** An HmIP-SWSD smoke channel's MASTER with no group set, as hmipserver answers it. */
+const SWSD_MASTER: Paramset = {
+    REPEAT_ENABLE: true,
+    GROUP_1: false,
+    GROUP_2: false,
+    GROUP_3: false,
+    GROUP_4: false,
+    GROUP_5: false,
+    GROUP_6: false,
+    GROUP_7: false,
+    GROUP_8: false,
 };
 
 /** Current values per channel type and paramset; anything absent falls back to the DEFAULTs. */
@@ -1206,6 +1301,11 @@ export const DEMO_PARAMSET_VALUES: Readonly<Record<string, Paramset>> = {
     'KEY_TRANSCEIVER|LINK': {LONG_PRESS_TIME: 0.4},
     'MAINTENANCE|VALUES': {UNREACH: false, STICKY_UNREACH: false, LOWBAT: false},
     '|MASTER': {ARR_TIMEOUT: 10},
+    // Task 58: the HmIP-SWSD smoke channels - by address, because the BidCos detectors' channel is
+    // a SMOKE_DETECTOR too and has no GROUP_n
+    '0001D3C9000001:1|MASTER': {...SWSD_MASTER, GROUP_1: true},
+    '0001D3C9000002:1|MASTER': {...SWSD_MASTER, GROUP_1: true},
+    '0001D3C9000003:1|MASTER': SWSD_MASTER,
 };
 
 /** Every demo description by address, so the mock can answer without a device index. */
@@ -1221,12 +1321,20 @@ export function demoChannelType(address: string): string {
 
 /** What `getParamsetDescription` answers in demo mode; `{}` for a combination nothing describes. */
 export function demoDescription(address: string, paramset: string): ParamsetDescription {
-    return DEMO_DESCRIPTIONS[`${demoChannelType(address)}|${paramset}`] ?? {};
+    return (
+        DEMO_DESCRIPTIONS[`${address}|${paramset}`] ??
+        DEMO_DESCRIPTIONS[`${demoChannelType(address)}|${paramset}`] ??
+        {}
+    );
 }
 
-/** What `getParamset` answers in demo mode. */
+/** What `getParamset` answers in demo mode: the address's own values first, then its channel type's. */
 export function demoParamset(address: string, paramset: string): Paramset {
-    return DEMO_PARAMSET_VALUES[`${demoChannelType(address)}|${paramset}`] ?? {};
+    return (
+        DEMO_PARAMSET_VALUES[`${address}|${paramset}`] ??
+        DEMO_PARAMSET_VALUES[`${demoChannelType(address)}|${paramset}`] ??
+        {}
+    );
 }
 
 /**

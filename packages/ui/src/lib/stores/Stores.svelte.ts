@@ -20,6 +20,7 @@ import {NoticesStore} from './NoticesStore.svelte.js';
 import {ParamsetStore} from './ParamsetStore.svelte.js';
 import {RadioStore} from './RadioStore.svelte.js';
 import {ServiceMessagesStore} from './ServiceMessagesStore.svelte.js';
+import {SmokeGroupsStore} from './SmokeGroupsStore.svelte.js';
 import {TaxonomyStore} from './TaxonomyStore.svelte.js';
 import {UnreachStore} from './UnreachStore.svelte.js';
 import {isStoreTabId, storeTabs, tabsForInterface, type TabId} from './routing.js';
@@ -63,6 +64,8 @@ export class Stores {
     readonly taxonomy: TaxonomyStore;
     /** Task 57: the heating groups of openccu-lite, and whether this connection has them. */
     readonly groups: GroupsStore;
+    /** Task 58: the HmIP smoke groups (`GROUP_n`) of every visited HmIP interface's detectors. */
+    readonly smokeGroups: SmokeGroupsStore;
     readonly paramsets: ParamsetStore;
     readonly radio: RadioStore;
     readonly console: ConsoleStore;
@@ -89,6 +92,7 @@ export class Stores {
         });
         this.taxonomy = new TaxonomyStore(transport, this.notices);
         this.groups = new GroupsStore(transport, this.notices);
+        this.smokeGroups = new SmokeGroupsStore(transport, this.notices);
         this.paramsets = new ParamsetStore(transport, this.notices);
         this.radio = new RadioStore(transport, this.notices);
         this.console = new ConsoleStore(transport, this.notices);

@@ -494,12 +494,13 @@ describe('the context menu', () => {
         expect(items.slice(6).every((item) => item.disabled)).toBe(true);
     });
 
-    it('puts a smoke detector into the other detector team (#97)', async () => {
+    it('puts a smoke detector back into a team of its own (#97)', async () => {
         // "Im Moment hat jeder Melder seine eigene Gruppe": each detector starts in a team of its
-        // own, and joining one is `setTeam(channel, teamAddress)` - the detectors are never linked.
+        // own, and moving one is `setTeam(channel, teamAddress)` - the detectors are never linked.
+        // The demo's two detectors share one team (task 58); the empty address leaves it.
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
-        await select('NEQ1000001:1');
-        await fireEvent.contextMenu(rowOf('NEQ1000001:1'));
+        await select('NEQ1000002:1');
+        await fireEvent.contextMenu(rowOf('NEQ1000002:1'));
 
         const team = (within(screen.getByTestId('devices-menu')).getAllByRole('menuitem') as HTMLButtonElement[]).find(
             (item) => item.textContent.trim() === 'Team',
@@ -508,17 +509,15 @@ describe('the context menu', () => {
         await fireEvent.click(team as HTMLButtonElement);
 
         const select_ = (await screen.findByTestId('team-select')) as HTMLSelectElement;
-        // its own team is preselected, and the other detector's team is on offer
-        expect(select_.value).toBe('NEQ1000001-TEAM:1');
-        expect([...select_.options].map((option) => option.value)).toContain('NEQ1000002-TEAM:1');
+        // its team is preselected, and the members of that team are named
+        expect(select_.value).toBe('*NEQ1000001:1');
+        expect([...select_.options].map((option) => option.value)).toEqual(['', '*NEQ1000001:1']);
+        expect(screen.getByTestId('team-members').textContent).toContain('Rauchmelder Küche:1');
 
-        await fireEvent.change(select_, {target: {value: 'NEQ1000002-TEAM:1'}});
-        await waitFor(() => {
-            expect(screen.getByTestId('team-members').textContent).toContain('NEQ1000002:1');
-        });
+        await fireEvent.change(select_, {target: {value: ''}});
         await fireEvent.click(screen.getByTestId('team-apply'));
         await waitFor(() => {
-            expect(transport.lastCall('teams.set')).toEqual(['BidCos-RF', 'NEQ1000001:1', 'NEQ1000002-TEAM:1']);
+            expect(transport.lastCall('teams.set')).toEqual(['BidCos-RF', 'NEQ1000002:1', '']);
         });
     });
 

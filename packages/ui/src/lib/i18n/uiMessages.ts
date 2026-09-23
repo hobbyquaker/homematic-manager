@@ -94,6 +94,40 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Die Schnittstelle kennt noch kein anderes Team',
         en: 'The interface knows no other team yet',
     },
+    // Task 58: smoke groups in the device list - BidCos teams and the HmIP GROUP_n
+    'Smoke group': {de: 'Rauchmeldergruppe', en: 'Smoke group'},
+    'Smoke group {n}': {de: 'Rauchmeldergruppe {n}', en: 'Smoke group {n}'},
+    '{count} detectors': {
+        de: {one: '{count} Melder', other: '{count} Melder'},
+        en: {one: '{count} detector', other: '{count} detectors'},
+    },
+    'New smoke group': {de: 'Neue Rauchmeldergruppe', en: 'New smoke group'},
+    'Only available on HmIP interfaces': {
+        de: 'Nur auf HmIP-Schnittstellen verfügbar',
+        en: 'Only available on HmIP interfaces',
+    },
+    'This interface has no smoke detector': {
+        de: 'Diese Schnittstelle hat keinen Rauchmelder',
+        en: 'This interface has no smoke detector',
+    },
+    'All eight smoke groups are in use': {
+        de: 'Alle acht Rauchmeldergruppen sind belegt',
+        en: 'All eight smoke groups are in use',
+    },
+    'in {team}': {de: 'in {team}', en: 'in {team}'},
+    'also in {groups}': {de: 'auch in {groups}', en: 'also in {groups}'},
+    'A new group takes the lowest free number.': {
+        de: 'Eine neue Gruppe bekommt die niedrigste freie Nummer.',
+        en: 'A new group takes the lowest free number.',
+    },
+    'Changes are written to the detectors and take effect once each detector has picked them up.': {
+        de: 'Änderungen werden in die Melder geschrieben und gelten, sobald jeder Melder sie übernommen hat.',
+        en: 'Changes are written to the detectors and take effect once each detector has picked them up.',
+    },
+    'cannot be grouped - no GROUP parameters': {
+        de: 'nicht gruppierbar - keine GROUP-Parameter',
+        en: 'cannot be grouped - no GROUP parameters',
+    },
     'Confirm the ReGa inbox': {de: 'ReGa-Posteingang bestätigen', en: 'Confirm the ReGa inbox'},
     'Confirm the ReGa inbox automatically': {
         de: 'ReGa-Posteingang automatisch bestätigen',

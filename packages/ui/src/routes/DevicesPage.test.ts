@@ -31,6 +31,8 @@ describe('the device grid columns', () => {
             'ADDRESS',
             'Räume',
             'Gewerke',
+            // task 58: only because the demo's BidCos-RF has a smoke detector team
+            'Rauchmeldergruppe',
             'Msgs',
             'TYPE',
             'FIRMWARE',

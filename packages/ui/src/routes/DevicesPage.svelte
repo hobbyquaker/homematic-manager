@@ -1,18 +1,29 @@
 <script lang="ts">
-    import type {DeviceDescription} from '@homematic-manager/core';
+    import type {DeviceDescription, SmokeGroup} from '@homematic-manager/core';
     import {
         canPairDevices,
         decodeDeviceFlags,
         decodeDirection,
         decodeRxMode,
+        deviceAddress,
+        hmipSmokeGroups,
         isChannelAddress,
         isChannelDescription,
         isDeviceAddress,
         isMaintenanceAddress,
         isRoaming,
+        isSmokeDetectorChannel,
+        isSmokeGroupAddress,
+        lowestFreeSmokeGroup,
         parseRoles,
         receiverLabel,
+        smokeGroupAddress,
+        smokeGroupDescription,
+        smokeTeams,
+        teamDeviceOf,
     } from '@homematic-manager/core';
+
+    import {untrack} from 'svelte';
 
     import ContextMenu from '../lib/components/ContextMenu.svelte';
     import type {ContextMenuItem} from '../lib/components/contextMenu.js';
@@ -34,6 +45,7 @@
         serviceMarks,
         serviceMessageExplanation,
         type OfferedParamsets,
+        type ServiceMark,
     } from '../lib/util/deviceGrid.js';
     import {
         channelVisible,
@@ -46,6 +58,7 @@
     import type {AssignTarget} from '../lib/util/assignment.js';
 
     import AddLinkDialog from './links/AddLinkDialog.svelte';
+    import SmokeGroupDialog from './devices/SmokeGroupDialog.svelte';
     import TeamDialog from './devices/TeamDialog.svelte';
     import ParamsetDialog from './paramset/ParamsetDialog.svelte';
 
@@ -82,6 +95,10 @@
     let linkReceivers = $state<string[]>([]);
     /** #97: the team dialog, for a channel that carries a TEAM_TAG. */
     let teamOpen = $state(false);
+    /** Task 58: the members dialog of a smoke group row; `smokeGroupNew` is *New* on HmIP. */
+    let smokeGroupOpen = $state(false);
+    let smokeGroupAddressOpen = $state('');
+    let smokeGroupNew = $state<SmokeGroup | undefined>(undefined);
 
     let paramsetOpen = $state(false);
     let paramsetAddress = $state('');
@@ -97,8 +114,151 @@
 
     const interfaceName = $derived(stores.app.selectedInterface);
     const interfaceType = $derived(stores.interfaces.typeOf(interfaceName));
-    const allDevices = $derived(stores.devices.devices(interfaceName));
     const index = $derived(stores.devices.index(interfaceName));
+    // ---------------------------------------------------------------- smoke groups (task 58)
+
+    const isHmip = $derived(isHmipInterface(interfaceName, interfaceType));
+    /** The smoke channels of an HmIP interface; their MASTER carries `GROUP_1` … `GROUP_8`. */
+    const smokeChannels = $derived(
+        isHmip && index !== undefined
+            ? index
+                  .channels()
+                  .filter((channel) => isSmokeDetectorChannel(channel))
+                  .map((channel) => channel.ADDRESS)
+            : [],
+    );
+
+    // the memberships follow the index: a detector that arrived is read, one that left is forgotten,
+    // and nothing is asked for while the set of detectors is the one already known. The call is
+    // untracked: `sync` reads the store's memberships to see what is missing and writes them when
+    // the answers arrive, and an effect that depends on what it writes is a loop Svelte refuses
+    // (effect_update_depth_exceeded, found by the demo's three HmIP-SWSD).
+    $effect(() => {
+        if (interfaceName === '' || index === undefined || !isHmip) {
+            return;
+        }
+        const name = interfaceName;
+        const channels = smokeChannels;
+        untrack(() => void stores.smokeGroups.sync(name, channels));
+    });
+
+    const memberships = $derived(stores.smokeGroups.of(interfaceName));
+    /** Every smoke group of this interface: the BidCos teams, then the HmIP groups with a member. */
+    const smokeGroups = $derived<SmokeGroup[]>(
+        index === undefined ? [] : [...smokeTeams(index), ...(isHmip ? hmipSmokeGroups(memberships) : [])],
+    );
+    const smokeGroupByAddress = $derived<Record<string, SmokeGroup>>(
+        Object.fromEntries(smokeGroups.map((group) => [group.address, group])),
+    );
+    /** The HmIP groups have no device of their own; the teams are in `listDevices` already. */
+    const smokeGroupRows = $derived(
+        smokeGroups.filter((group) => group.kind === 'hmip').map((group) => smokeGroupDescription(group.number ?? 0)),
+    );
+    const freeSmokeGroup = $derived(lowestFreeSmokeGroup(memberships));
+
+    function isSmokeGroupRow(address: string): boolean {
+        return address in smokeGroupByAddress;
+    }
+
+    /** The member channels of a group row, the ones the index knows. */
+    function smokeGroupMembers(address: string): DeviceDescription[] {
+        return (smokeGroupByAddress[address]?.members ?? [])
+            .map((member) => index?.get(member))
+            .filter((channel): channel is DeviceDescription => channel !== undefined);
+    }
+
+    /** The groups a detector channel is in, by name: its team, its `GROUP_n`. */
+    function smokeGroupNamesOf(channel: string): string[] {
+        const names: string[] = [];
+        const team = index === undefined ? undefined : teamDeviceOf(index, channel);
+        if (team !== undefined) {
+            names.push(stores.nameOf(team));
+        }
+        for (const number of memberships[channel] ?? []) {
+            names.push(t('Smoke group {n}', {n: number}));
+        }
+        return names;
+    }
+
+    /** The Group column: a group row counts its detectors, a detector names its groups. */
+    function smokeGroupText(row: DeviceDescription): string {
+        const group = smokeGroupByAddress[row.ADDRESS];
+        if (group !== undefined) {
+            return t('{count} detectors', {}, group.members.length);
+        }
+        const channels = isDeviceAddress(row.ADDRESS)
+            ? stores.devices.channels(interfaceName, row.ADDRESS).map((channel) => channel.ADDRESS)
+            : [row.ADDRESS];
+        return [...new Set(channels.flatMap((channel) => smokeGroupNamesOf(channel)))].join(', ');
+    }
+
+    /** The Name column: an HmIP group has no name anywhere, so it is its number. */
+    function nameOfRow(address: string): string {
+        const number = smokeGroupByAddress[address]?.number;
+        return isSmokeGroupAddress(address) && number !== undefined
+            ? t('Smoke group {n}', {n: number})
+            : stores.nameOf(address);
+    }
+
+    /**
+     * The Msgs marks of a row. A synthesised HmIP group row has no messages of its own; it shows
+     * its members' - a `GROUP_n` written to a battery device is *configuration pending* until the
+     * detector has picked it up, and that belongs beside the group.
+     */
+    function marksOf(row: DeviceDescription): ServiceMark[] {
+        if (!isSmokeGroupAddress(row.ADDRESS)) {
+            return serviceMarks(row.ADDRESS, messages);
+        }
+        const marks: Record<string, ServiceMark> = {};
+        for (const member of smokeGroupMembers(row.ADDRESS)) {
+            for (const mark of serviceMarks(deviceAddress(member.ADDRESS), messages, 99)) {
+                marks[mark.datapoint] = mark;
+            }
+        }
+        return Object.values(marks);
+    }
+
+    /** A synthesised group row wears its detectors' picture; there is no device to show. */
+    function smokeGroupImageType(address: string): string {
+        return smokeGroupMembers(address)[0]?.PARENT_TYPE ?? 'HmIP-SWSD';
+    }
+
+    function openSmokeGroup(address: string): void {
+        smokeGroupNew = undefined;
+        smokeGroupAddressOpen = address;
+        smokeGroupOpen = true;
+    }
+
+    /** *New* on HmIP: the lowest free number, with nobody in it yet. */
+    function newSmokeGroup(): void {
+        if (freeSmokeGroup === undefined) {
+            return;
+        }
+        smokeGroupNew = {
+            address: smokeGroupAddress(freeSmokeGroup),
+            kind: 'hmip',
+            number: freeSmokeGroup,
+            members: [],
+        };
+        smokeGroupAddressOpen = '';
+        smokeGroupOpen = true;
+    }
+
+    const smokeGroupDialogTarget = $derived(
+        smokeGroupNew ?? (smokeGroupAddressOpen === '' ? undefined : smokeGroupByAddress[smokeGroupAddressOpen]),
+    );
+
+    const canNewSmokeGroup = $derived(isHmip && smokeChannels.length > 0 && freeSmokeGroup !== undefined);
+    const newSmokeGroupReason = $derived(
+        !isHmip
+            ? t('Only available on HmIP interfaces')
+            : smokeChannels.length === 0
+              ? t('This interface has no smoke detector')
+              : t('All eight smoke groups are in use'),
+    );
+
+    /** Task 58: the smoke group rows come first, as rfd's `*` team devices sort first anyway. */
+    const allDevices = $derived([...smokeGroupRows, ...stores.devices.devices(interfaceName)]);
     const messages = $derived(stores.serviceMessages.of(interfaceName));
     /** The BidCos interfaces of this process, for the names of the receivers (B-2). */
     const gateways = $derived(stores.radio.gateways(interfaceName));
@@ -171,10 +331,18 @@
             ? allDevices
             : allDevices.filter((device) =>
                   filterTargets.every((target) =>
-                      deviceMatches(viewOf(device.ADDRESS), channelViewsOf(device), target),
+                      isSmokeGroupAddress(device.ADDRESS)
+                          ? // task 58: a synthesised group row is where its detectors are
+                            smokeGroupMembers(device.ADDRESS).some((member) => memberVisible(member, target))
+                          : deviceMatches(viewOf(device.ADDRESS), channelViewsOf(device), target),
                   ),
               ),
     );
+
+    /** A member channel under a group row follows its own device through the filter. */
+    function memberVisible(member: DeviceDescription, target: string): boolean {
+        return channelVisible(viewOf(member.ADDRESS), viewOf(deviceAddress(member.ADDRESS)), target);
+    }
 
     /** #25: the link count in the channel grid needs the links of this interface to be loaded. */
     $effect(() => {
@@ -214,9 +382,12 @@
     const channelSelection = $derived(
         selected.filter((address) => !isDeviceAddress(address) && !isMaintenanceAddress(address)),
     );
-    /** The `:0` maintenance channel has no name of its own to change; 2.x greyed rename out there. */
+    /**
+     * The `:0` maintenance channel has no name of its own to change; 2.x greyed rename out there.
+     * A synthesised HmIP smoke group row (task 58) has nowhere to keep a name either.
+     */
     function renamable(address: string): boolean {
-        return address !== '' && !isMaintenanceAddress(address);
+        return address !== '' && !isMaintenanceAddress(address) && !isSmokeGroupAddress(address);
     }
     const canRename = $derived(renamable(one));
     /**
@@ -224,7 +395,9 @@
      * to remove; 2.x greyed delete, replace and rename out for those rows.
      */
     const dontDelete = $derived(oneDevice !== '' && decodeDeviceFlags(index?.get(oneDevice)?.FLAGS).dontDelete);
-    const canDelete = $derived(oneDevice !== '' && !dontDelete);
+    /** Task 58: a synthesised smoke group row is no device the interface could delete or replace. */
+    const realDevice = $derived(oneDevice !== '' && !isSmokeGroupAddress(oneDevice) ? oneDevice : '');
+    const canDelete = $derived(realDevice !== '' && !dontDelete);
     /** `restoreConfigToDevice` and `clearConfigCache` are BidCos-only, as the 2.x menu classes said. */
     const isBidcos = $derived(interfaceType.startsWith('BidCos'));
     /** Task 28: VirtualDevices and CUxD have no install mode, so there is nothing to pair there. */
@@ -262,11 +435,24 @@
             value: () => '',
         },
         // Task 47: both carry the copy button, the full name and the address whatever the cell shows
-        {key: 'name', label: t('Name'), width: 170, copy: 'name', value: (device) => stores.nameOf(device.ADDRESS)},
+        {key: 'name', label: t('Name'), width: 170, copy: 'name', value: (device) => nameOfRow(device.ADDRESS)},
         {key: 'ADDRESS', label: 'ADDRESS', width: 150, mono: true, copy: 'address'},
         // Task 25: the taxonomy of the store, as the arrays of names ReGa's rooms always were
         {key: 'rooms', label: t('Rooms'), width: 120, value: (device) => taxonomyText(device, 'room')},
         {key: 'functions', label: t('Functions'), width: 110, value: (device) => taxonomyText(device, 'function')},
+        // Task 58: which smoke group a detector is in, and how many detectors a group has. Only
+        // where the interface has a smoke group at all - a BidCos team or an HmIP GROUP_n in use.
+        {
+            key: 'smokeGroup',
+            label: t('Smoke group'),
+            width: 150,
+            // the members button of a group row must stay clickable however the window squeezes
+            // the grid (B-35): not narrower than the button and a two-digit count
+            minWidth: 70,
+            keepMinWidth: true,
+            hidden: smokeGroups.length === 0,
+            value: (device) => smokeGroupText(device),
+        },
         {
             // B-34: two marks and the repair button fit, and it can be dragged wider. Not narrower than
             // they are, like PARAMSETS (B-35): a squeezed repair button slides under the next cell,
@@ -280,7 +466,7 @@
             filterable: false,
             sortable: false,
             value: (device) =>
-                serviceMarks(device.ADDRESS, messages)
+                marksOf(device)
                     .map((mark) => mark.datapoint)
                     .join(' '),
         },
@@ -342,6 +528,13 @@
         {key: 'ADDRESS', label: 'ADDRESS', width: 150, mono: true, copy: 'address'},
         {key: 'rooms', label: t('Rooms'), width: 120, value: (channel) => taxonomyText(channel, 'room')},
         {key: 'functions', label: t('Functions'), width: 110, value: (channel) => taxonomyText(channel, 'function')},
+        {
+            key: 'smokeGroup',
+            label: t('Smoke group'),
+            width: 150,
+            hidden: smokeGroups.length === 0,
+            value: (channel) => smokeGroupText(channel),
+        },
         {key: 'TYPE', label: 'TYPE', width: 150},
         {key: 'DIRECTION', label: 'DIRECTION', width: 100, value: (channel) => decodeDirection(channel.DIRECTION)},
         {
@@ -418,15 +611,24 @@
         };
     }
 
+    /**
+     * The sub-rows of a device: its channels. A smoke group row (task 58) also lists its member
+     * channels - the detectors of a BidCos team below the team's own `:0` and `:1`, the detectors
+     * of an HmIP group on their own, the synthesised row having no channels.
+     */
     function channelsOf(device: DeviceDescription): DeviceDescription[] {
         const channels = stores.devices.channels(interfaceName, device.ADDRESS);
+        const members = isSmokeGroupRow(device.ADDRESS) ? smokeGroupMembers(device.ADDRESS) : [];
         if (filterTargets.length === 0) {
-            return channels;
+            return [...channels, ...members];
         }
         const deviceView = viewOf(device.ADDRESS);
-        return channels.filter((channel) =>
-            filterTargets.every((target) => channelVisible(viewOf(channel.ADDRESS), deviceView, target)),
-        );
+        return [
+            ...channels.filter((channel) =>
+                filterTargets.every((target) => channelVisible(viewOf(channel.ADDRESS), deviceView, target)),
+            ),
+            ...members.filter((member) => filterTargets.every((target) => memberVisible(member, target))),
+        ];
     }
 
     /**
@@ -579,58 +781,68 @@
      * the paramsets are the ones the row offers, not a fixed set per kind of row.
      */
     const menuItems = $derived<ContextMenuItem[]>(
-        isDeviceAddress(menuAddress)
-            ? [
-                  {id: 'rename', label: t('Rename')},
-                  ...menuParamsets,
-                  {id: 'sep1', separator: true},
-                  {
-                      id: 'restore',
-                      label: t('restoreConfigToDevice'),
-                      disabled: !isBidcos,
-                  },
-                  {id: 'clear', label: t('clearConfigCache'), disabled: !isBidcos},
-                  {id: 'repair', label: t('Repair configuration')},
-                  {id: 'sep2', separator: true},
-                  // Task 25: the selection into a room or a function - one entry each
-                  {id: 'assign:room', label: `${t('Assign to room')}…`, disabled: !taxonomy.writable},
-                  {id: 'assign:function', label: `${t('Assign to function')}…`, disabled: !taxonomy.writable},
-                  {id: 'sep3', separator: true},
-                  {id: 'replace', label: t('Replace'), disabled: dontDeleteOf(menuAddress)},
-                  {id: 'delete', label: t('Delete'), danger: true, disabled: dontDeleteOf(menuAddress)},
-              ]
-            : [
-                  {id: 'rename', label: t('Rename'), disabled: !renamable(menuAddress)},
-                  {id: 'usage1', label: 'reportValueUsage 1', disabled: isMaintenanceAddress(menuAddress)},
-                  {id: 'usage0', label: 'reportValueUsage 0', disabled: isMaintenanceAddress(menuAddress)},
-                  {id: 'sep1', separator: true},
-                  ...(menuParamsets.length === 0 ? [] : [...menuParamsets, {id: 'sep2', separator: true}]),
-                  {id: 'assign:room', label: `${t('Assign to room')}…`, disabled: !taxonomy.writable},
-                  {id: 'assign:function', label: `${t('Assign to function')}…`, disabled: !taxonomy.writable},
-                  {id: 'sep3', separator: true},
-                  // Issue #25: create a link from here, with this channel already chosen
-                  {
-                      id: 'link:sender',
-                      label: t('Create link as sender'),
-                      disabled: !linkRolesOf(menuAddress).canSend,
-                  },
-                  {
-                      id: 'link:receiver',
-                      label: t('Create link as receiver'),
-                      disabled: !linkRolesOf(menuAddress).canReceive,
-                  },
-                  {
-                      id: 'link:show',
-                      label: `${t('Show links')} (${String(linkRolesOf(menuAddress).links)})`,
-                      disabled: linkRolesOf(menuAddress).links === 0,
-                  },
-                  // Issue #97: smoke detectors are not linked, they are in a team
-                  {
-                      id: 'team',
-                      label: t('Team'),
-                      disabled: (index?.get(menuAddress)?.TEAM_TAG ?? '') === '',
-                  },
-              ],
+        isSmokeGroupAddress(menuAddress)
+            ? // task 58: the synthesised HmIP group row does nothing but hold its members
+              [{id: 'smokeGroup', label: `${t('Members')}…`}]
+            : isDeviceAddress(menuAddress)
+              ? [
+                    // task 58: a BidCos team is a device of its own; its members come first
+                    ...(isSmokeGroupRow(menuAddress)
+                        ? [
+                              {id: 'smokeGroup', label: `${t('Members')}…`},
+                              {id: 'sep0', separator: true},
+                          ]
+                        : []),
+                    {id: 'rename', label: t('Rename')},
+                    ...menuParamsets,
+                    {id: 'sep1', separator: true},
+                    {
+                        id: 'restore',
+                        label: t('restoreConfigToDevice'),
+                        disabled: !isBidcos,
+                    },
+                    {id: 'clear', label: t('clearConfigCache'), disabled: !isBidcos},
+                    {id: 'repair', label: t('Repair configuration')},
+                    {id: 'sep2', separator: true},
+                    // Task 25: the selection into a room or a function - one entry each
+                    {id: 'assign:room', label: `${t('Assign to room')}…`, disabled: !taxonomy.writable},
+                    {id: 'assign:function', label: `${t('Assign to function')}…`, disabled: !taxonomy.writable},
+                    {id: 'sep3', separator: true},
+                    {id: 'replace', label: t('Replace'), disabled: dontDeleteOf(menuAddress)},
+                    {id: 'delete', label: t('Delete'), danger: true, disabled: dontDeleteOf(menuAddress)},
+                ]
+              : [
+                    {id: 'rename', label: t('Rename'), disabled: !renamable(menuAddress)},
+                    {id: 'usage1', label: 'reportValueUsage 1', disabled: isMaintenanceAddress(menuAddress)},
+                    {id: 'usage0', label: 'reportValueUsage 0', disabled: isMaintenanceAddress(menuAddress)},
+                    {id: 'sep1', separator: true},
+                    ...(menuParamsets.length === 0 ? [] : [...menuParamsets, {id: 'sep2', separator: true}]),
+                    {id: 'assign:room', label: `${t('Assign to room')}…`, disabled: !taxonomy.writable},
+                    {id: 'assign:function', label: `${t('Assign to function')}…`, disabled: !taxonomy.writable},
+                    {id: 'sep3', separator: true},
+                    // Issue #25: create a link from here, with this channel already chosen
+                    {
+                        id: 'link:sender',
+                        label: t('Create link as sender'),
+                        disabled: !linkRolesOf(menuAddress).canSend,
+                    },
+                    {
+                        id: 'link:receiver',
+                        label: t('Create link as receiver'),
+                        disabled: !linkRolesOf(menuAddress).canReceive,
+                    },
+                    {
+                        id: 'link:show',
+                        label: `${t('Show links')} (${String(linkRolesOf(menuAddress).links)})`,
+                        disabled: linkRolesOf(menuAddress).links === 0,
+                    },
+                    // Issue #97: smoke detectors are not linked, they are in a team
+                    {
+                        id: 'team',
+                        label: t('Team'),
+                        disabled: (index?.get(menuAddress)?.TEAM_TAG ?? '') === '',
+                    },
+                ],
     );
 
     function dontDeleteOf(address: string): boolean {
@@ -661,6 +873,9 @@
             case 'team':
                 actionAddress = address;
                 teamOpen = true;
+                break;
+            case 'smokeGroup':
+                openSmokeGroup(address);
                 break;
             case 'link:show':
                 stores.app.linksFilter = address;
@@ -800,10 +1015,19 @@
                 <ToolbarButton
                     title={t('Repair configuration')}
                     icon="⚒"
-                    disabled={oneDevice === ''}
+                    disabled={realDevice === ''}
                     reason={reasonFor('device')}
                     testId="devices-repair"
-                    onclick={() => openRepair(oneDevice)}
+                    onclick={() => openRepair(realDevice)}
+                />
+                <!-- Task 58: an HmIP smoke group is born when its first detector gets GROUP_n -->
+                <ToolbarButton
+                    title={t('New smoke group')}
+                    icon="◎"
+                    disabled={!canNewSmokeGroup}
+                    reason={newSmokeGroupReason}
+                    testId="devices-smoke-group-new"
+                    onclick={newSmokeGroup}
                 />
                 <ToolbarButton
                     title={t('Replace device')}
@@ -825,7 +1049,11 @@
                     title={t('Refresh')}
                     icon="⟳"
                     testId="devices-refresh"
-                    onclick={() => void stores.devices.load(interfaceName, {refresh: true})}
+                    onclick={() => {
+                        void stores.devices.load(interfaceName, {refresh: true});
+                        // task 58: the detectors' GROUP_n are read again with the list
+                        void stores.smokeGroups.refresh(interfaceName, smokeChannels);
+                    }}
                 />
             {/snippet}
 
@@ -862,13 +1090,28 @@
 
             {#snippet cell(row, column, flatRow)}
                 {#if column.key === 'icon'}
+                    {@const imageType = isSmokeGroupAddress(row.ADDRESS) ? smokeGroupImageType(row.ADDRESS) : row.TYPE}
                     <DeviceImage
-                        deviceType={row.TYPE}
-                        src={stores.host.deviceImageUrl(row.TYPE)}
+                        deviceType={imageType}
+                        src={stores.host.deviceImageUrl(imageType)}
                         testId={`device-image-${row.ADDRESS}`}
                     />
+                {:else if column.key === 'smokeGroup' && isSmokeGroupRow(row.ADDRESS) && flatRow.depth === 0}
+                    <!-- task 58: the members are changed from the group's row. The button comes first
+                         so a squeezed column cuts the count, never the button (B-35's lesson). -->
+                    <button
+                        type="button"
+                        class="hmm-inline-button hmm-inline-button-first"
+                        data-testid={`smoke-group-members-${row.ADDRESS}`}
+                        title={t('Members')}
+                        onclick={(event) => {
+                            event.stopPropagation();
+                            openSmokeGroup(row.ADDRESS);
+                        }}>✎</button
+                    >
+                    <span data-testid={`smoke-group-${row.ADDRESS}`}>{smokeGroupText(row)}</span>
                 {:else if column.key === 'msgs' && flatRow.depth === 0}
-                    {#each serviceMarks(row.ADDRESS, messages) as mark (mark.datapoint)}
+                    {#each marksOf(row) as mark (mark.datapoint)}
                         {@const explanation = serviceMessageExplanation(mark.datapoint, !isBidcos)}
                         <span
                             class="hmm-msg-mark"
@@ -965,6 +1208,7 @@
 <AddDeviceDialog bind:open={addOpen} />
 <AddLinkDialog bind:open={addLinkOpen} presetSenders={linkSenders} presetReceivers={linkReceivers} />
 <TeamDialog bind:open={teamOpen} address={actionAddress} />
+<SmokeGroupDialog bind:open={smokeGroupOpen} group={smokeGroupDialogTarget} isNew={smokeGroupNew !== undefined} />
 <RepairConfigDialog bind:open={repairOpen} address={actionAddress} />
 <AssignDialog bind:open={assignOpen} enumId={assignEnum} targets={assignRefs} />
 <ParamsetDialog bind:open={paramsetOpen} {interfaceName} address={paramsetAddress} paramset={paramsetName} />
@@ -1025,6 +1269,11 @@
         font-size: var(--hmm-font-size-small);
         line-height: 1;
         vertical-align: middle;
+    }
+
+    .hmm-inline-button-first {
+        margin-left: 0;
+        margin-right: 4px;
     }
 
     .hmm-inline-button:hover {

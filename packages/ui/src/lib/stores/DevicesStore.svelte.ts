@@ -105,14 +105,32 @@ export class DevicesStore {
 
     /** `setTeam`: puts a channel into a team, or back into its own with an empty address. */
     async setTeam(interfaceName: string, address: string, teamAddress: string): Promise<boolean> {
-        try {
-            await this.#transport.request('teams.set', interfaceName, address, teamAddress);
-            await this.load(interfaceName, {refresh: true});
-            return true;
-        } catch (error) {
-            this.#notices.fromError(error, `setTeam ${address}`);
-            return false;
+        return (await this.setTeams(interfaceName, [{address, teamAddress}])) === 1;
+    }
+
+    /**
+     * Task 58: `setTeam` for several channels, then one re-read of the device list - the team
+     * rows and the detectors' `TEAM` come from `listDevices`, and rfd creates and deletes the team
+     * devices by itself. Returns how many calls went through; a failure is a notice, and the rest
+     * are still done.
+     */
+    async setTeams(
+        interfaceName: string,
+        changes: ReadonlyArray<{address: string; teamAddress: string}>,
+    ): Promise<number> {
+        let done = 0;
+        for (const {address, teamAddress} of changes) {
+            try {
+                await this.#transport.request('teams.set', interfaceName, address, teamAddress);
+                done += 1;
+            } catch (error) {
+                this.#notices.fromError(error, `setTeam ${address}`);
+            }
         }
+        if (changes.length > 0) {
+            await this.load(interfaceName, {refresh: true});
+        }
+        return done;
     }
 
     /**

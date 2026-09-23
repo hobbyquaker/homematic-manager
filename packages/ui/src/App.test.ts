@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, waitFor} from '@testing-library/svelte';
+import {fireEvent, render, screen, waitFor, within} from '@testing-library/svelte';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import App from './App.svelte';
@@ -106,7 +106,8 @@ describe('App shell', () => {
         const line = screen
             .getByTestId('interface-item-BidCos-RF')
             .querySelector('.hmm-interface-item-line')!.textContent;
-        expect(line).toBe('xmlrpc · Port 2001 · 8 Geräte · Duty Cycle 1 %');
+        // nine: the smoke detector team `*NEQ1000001` is a device rfd lists (task 58)
+        expect(line).toBe('xmlrpc · Port 2001 · 9 Geräte · Duty Cycle 1 %');
         expect(screen.getByTestId('interface-item-CUxD').querySelector('.hmm-interface-item-line')!.textContent).toBe(
             'binrpc · Port 8701',
         );
@@ -136,8 +137,9 @@ describe('App shell', () => {
 
     it('expands a device into its channels', async () => {
         await mountApp(transport);
-        const expanders = screen.getAllByRole('button', {name: 'Expand row'});
-        await fireEvent.click(expanders[0]!);
+        // the CCU's own device; the first row is a smoke detector team since task 58
+        const ccu = document.querySelector<HTMLElement>('[data-row-id="BidCoS-RF"]')!;
+        await fireEvent.click(within(ccu).getByRole('button', {name: 'Expand row'}));
         // The channel has no friendly name, so its address shows in the Name column too.
         expect(screen.getAllByText('BidCoS-RF:0').length).toBeGreaterThan(0);
     });

@@ -470,6 +470,25 @@ export class MetaService {
     get version(): MetaVersion | undefined {
         return this.#version;
     }
+
+    /**
+     * Task 57: the box's base URL while the store is the box's - where its other APIs live too.
+     * `undefined` on every connection without a box, which is what keeps the heating groups off a
+     * CCU: nothing there is ever asked.
+     */
+    get boxUrl(): string | undefined {
+        return this.#provider.kind === 'occulite' ? metaBaseUrl(this.#options.connection) : undefined;
+    }
+
+    /**
+     * Task 57: the credential a call to the box's system API goes out with. The same order as a
+     * write to the store: the person's session first, then the token the profile configured, then
+     * the local token - which the box refuses there, as it should: an addon's local token reads
+     * metadata and nothing else, and a group is changed by a person.
+     */
+    boxCredential(): string | undefined {
+        return this.#writeCredential();
+    }
 }
 
 /** The ids already taken among the siblings a new node would join. */

@@ -2068,3 +2068,138 @@ describe('InProcessTransport', () => {
         await h.backend.stop();
     });
 });
+
+describe('the heating groups of openccu-lite (task 57)', () => {
+    const TOKEN = 'olt_0123456789abcdef0123456789abcdef';
+    const SEC_SC = {id: 'KEQ0165114', serial: 'KEQ0165114', type: 'HM-Sec-SC'};
+
+    /**
+     * A box made of a function: the metadata API the provider probes and follows, and the groups
+     * API the client speaks - one `fetch` for both, which is how the backend injects it.
+     */
+    function box(): {fetch: typeof globalThis.fetch; calls: string[]; credentials: (string | undefined)[]} {
+        const calls: string[] = [];
+        const credentials: (string | undefined)[] = [];
+        const json = (body: unknown, status = 200): Response =>
+            new Response(JSON.stringify(body), {status, headers: {'Content-Type': 'application/json'}});
+        const detail = {
+            id: 1,
+            name: 'Bad',
+            type: 'HomeMatic.heating',
+            device: 'INT0000001',
+            ref: 'VirtualDevices.INT0000001',
+            device_name: '',
+            forbid_single_operation: false,
+            members: [SEC_SC],
+            assignable: [],
+            leftover: [],
+            types: [{id: 'HomeMatic.heating', label: 'Heating_Control'}],
+        };
+        const fetchImpl = ((input: string | URL, init?: RequestInit) => {
+            const url = new URL(String(input));
+            const method = init?.method ?? 'GET';
+            const headers = (init?.headers ?? {}) as Record<string, string>;
+            const route = `${method} ${url.pathname}`;
+            if (url.pathname.startsWith('/api/system/')) {
+                calls.push(typeof init?.body === 'string' ? `${route} ${init.body}` : route);
+                credentials.push(headers['Authorization']);
+            }
+            switch (route) {
+                case 'GET /api/meta/v1/version':
+                    return Promise.resolve(
+                        json({api: 'meta', version: 1, format: 1, revision: 3, implementation: 'test'}),
+                    );
+                case 'GET /api/meta/v1/snapshot':
+                    return Promise.resolve(json({format: 1, revision: 3, objects: {}, enums: {}}));
+                case 'GET /api/meta/v1/events/sse':
+                    return Promise.resolve(
+                        new Response(new ReadableStream({start: () => undefined}), {
+                            headers: {'Content-Type': 'text/event-stream'},
+                        }),
+                    );
+                case 'GET /api/system/v1/groups':
+                    return Promise.resolve(
+                        json({
+                            groups: [
+                                {
+                                    id: 1,
+                                    name: 'Bad',
+                                    type: 'HomeMatic.heating',
+                                    type_label: 'Heating_Control',
+                                    device: 'INT0000001',
+                                    ref: 'VirtualDevices.INT0000001',
+                                },
+                            ],
+                            devices_to_configure: [],
+                        }),
+                    );
+                case 'GET /api/system/v1/groups/1':
+                    return Promise.resolve(json(detail));
+                case 'PUT /api/system/v1/groups/1':
+                    return Promise.resolve(json({...detail, members: [], devices_to_configure: [SEC_SC]}));
+                default:
+                    return Promise.resolve(json({error: 'unknown-path', message: route}, 404));
+            }
+        }) as unknown as typeof globalThis.fetch;
+        return {fetch: fetchImpl, calls, credentials};
+    }
+
+    it('answers the state, the list and a change through the box, every call with the configured token', async () => {
+        const b = box();
+        const h = await harness({
+            connection: {metaUrl: 'http://box', metaToken: TOKEN},
+            backend: {metaOptions: {fetch: b.fetch}},
+        });
+        // `groups.state` waits for the detection; `meta.state` does not, so it comes second
+        expect(await h.backend.request('groups.state')).toEqual({available: true});
+        expect(await h.backend.request('meta.state')).toMatchObject({provider: 'occulite', reachable: true});
+
+        const list = await h.backend.request('groups.list');
+        expect(list.groups).toEqual([
+            expect.objectContaining({id: 1, name: 'Bad', typeLabel: 'Heating_Control', members: [SEC_SC]}),
+        ]);
+
+        // the members as a whole, the name left out because it did not change
+        const change = await h.backend.request('groups.update', 1, undefined, []);
+        expect(change).toMatchObject({id: 1, members: [], devicesToConfigure: [SEC_SC]});
+        expect(b.calls).toContain('PUT /api/system/v1/groups/1 {"members":[]}');
+        // over the WebSocket an omitted argument arrives as `null`, and that keeps the field as well
+        // (the e2e suite found the box being sent `"name":null`)
+        await h.backend.request('groups.update', 1, null as never, ['KEQ0165114']);
+        expect(b.calls.at(-1)).toBe('PUT /api/system/v1/groups/1 {"members":["KEQ0165114"]}');
+        expect(new Set(b.credentials)).toEqual(new Set([`Bearer ${TOKEN}`]));
+        await h.backend.stop();
+    });
+
+    it('sends the person’s session once the host has noted one - the token is the fallback, never the local token', async () => {
+        const b = box();
+        const h = await harness({
+            connection: {metaUrl: 'http://box', metaToken: TOKEN},
+            backend: {metaOptions: {fetch: b.fetch}},
+        });
+        await h.backend.request('groups.state');
+        h.backend.noteMetaSession('@QL5IGTZSCJSV4H4AHCVOX4MQVC@');
+        await h.backend.request('groups.state');
+        expect(b.credentials).toEqual([`Bearer ${TOKEN}`, 'Bearer QL5IGTZSCJSV4H4AHCVOX4MQVC']);
+        await h.backend.stop();
+    });
+
+    it('says no-box on a CCU, and refuses the list with a config error rather than asking anybody', async () => {
+        let asked = 0;
+        const h = await harness({
+            backend: {
+                metaOptions: {
+                    fetch: () => {
+                        asked += 1;
+                        return Promise.resolve(new Response('not found', {status: 404}));
+                    },
+                },
+            },
+        });
+        expect(await h.backend.request('groups.state')).toEqual({available: false, reason: 'no-box'});
+        await expect(h.backend.request('groups.list')).rejects.toMatchObject({kind: 'config'});
+        // the one call was the metadata probe; the groups never went near the network
+        expect(asked).toBe(1);
+        await h.backend.stop();
+    });
+});

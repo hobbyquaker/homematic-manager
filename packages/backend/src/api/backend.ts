@@ -40,6 +40,7 @@ import {
     type EventRecord,
     type InstallModeOptions,
     type Language,
+    type HeatingGroupsState,
     type LinkRecord,
     type MetaEnum,
     type MetaImportMode,
@@ -85,6 +86,7 @@ import {
     firstBidcosInterfaceAddress,
     type InterfaceManagerOptions,
 } from '../interfaces/manager.js';
+import {HeatingGroupsClient} from '../groups/client.js';
 import {MetaService, type MetaServiceOptions} from '../meta/service.js';
 import {RegaService, type RegaServiceOptions} from '../rega/client.js';
 import type {RpcCallRecord, RpcOutValue} from '../rpc/client.js';
@@ -532,6 +534,26 @@ export class Backend {
             case 'meta.import':
                 await (await this.#requireMeta()).import(p[0], (params[1] as MetaImportMode | undefined) ?? 'replace');
                 return null;
+
+            case 'groups.state':
+                return this.#groupsState();
+            case 'groups.list':
+                return (await this.#requireGroups()).list();
+            case 'groups.types':
+                return (await this.#requireGroups()).types();
+            case 'groups.get':
+                return (await this.#requireGroups()).get(p[0]);
+            case 'groups.create':
+                return (await this.#requireGroups()).create(p[0], p[1], p[2]);
+            case 'groups.update':
+                // `undefined` keeps a field, so these two are read from `params`, like `meta.node.create`'s -
+                // and a `null`, which is what the WebSocket makes of an omitted argument, means the same
+                return (await this.#requireGroups()).update(p[0], {
+                    name: (params[1] as string | null | undefined) ?? undefined,
+                    members: (params[2] as string[] | null | undefined) ?? undefined,
+                });
+            case 'groups.delete':
+                return (await this.#requireGroups()).remove(p[0]);
 
             case 'paramset.get':
                 return this.#getParamset(p[0], p[1], p[2]);
@@ -1345,6 +1367,48 @@ export class Backend {
     }
 
     /*
+     * the heating groups of openccu-lite (task 57)
+     */
+
+    /**
+     * The client for the box's groups API, or `undefined` where there is no box. Built per call: it
+     * is a handful of closures over the store's URL and credential, and the credential changes
+     * when the person's session arrives (`noteMetaSession`).
+     */
+    async #groupsClient(): Promise<HeatingGroupsClient | undefined> {
+        await this.#metaReady?.catch(() => undefined);
+        const meta = this.#meta;
+        const baseUrl = meta?.boxUrl;
+        if (meta === undefined || baseUrl === undefined) {
+            return undefined;
+        }
+        return new HeatingGroupsClient({
+            baseUrl,
+            credential: () => meta.boxCredential(),
+            ...(this.#options.metaOptions?.fetch === undefined ? {} : {fetch: this.#options.metaOptions.fetch}),
+        });
+    }
+
+    /** `groups.state`: no box is an answer, not an error - it is what every CCU says. */
+    async #groupsState(): Promise<HeatingGroupsState> {
+        const client = await this.#groupsClient();
+        if (client === undefined) {
+            return {available: false, reason: 'no-box'};
+        }
+        return client.probe();
+    }
+
+    async #requireGroups(): Promise<HeatingGroupsClient> {
+        const client = await this.#groupsClient();
+        if (client === undefined) {
+            throw configError(
+                'heating groups are edited on openccu-lite only: this connection is not to such a system',
+            );
+        }
+        return client;
+    }
+
+    /*
      * paramsets
      */
 
@@ -1897,6 +1961,13 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'devices.replaceable',
     'names.get',
     'names.set',
+    'groups.state',
+    'groups.list',
+    'groups.types',
+    'groups.get',
+    'groups.create',
+    'groups.update',
+    'groups.delete',
     'meta.state',
     'meta.get',
     'meta.enums',

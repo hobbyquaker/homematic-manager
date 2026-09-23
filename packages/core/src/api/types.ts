@@ -422,6 +422,85 @@ export interface MetaSnapshot {
     objects: Record<string, MetaObjectView>;
 }
 
+/*
+ * Task 57: the heating groups of openccu-lite - the `VirtualDevices` group devices `INT000000N`.
+ *
+ * They are made, changed and deleted through the box's system API (`/api/system/v1/groups`), not
+ * through RPC: the group process has no method for any of it. On a CCU there is no such API, and
+ * the WebUI's own way needs a WebUI session, which D-1 rules out - so the feature exists on
+ * openccu-lite only, and the state below says whether it does.
+ */
+
+/** A device or channel as the group process knows it. On openccu-lite `id` is the address. */
+export interface HeatingGroupMember {
+    id: string;
+    serial: string;
+    /** The device type, or the channel role (`REMOTE_CONTROL`) for an HmIP channel. */
+    type: string;
+}
+
+/** One of the group types the editor offers, with what a new group of it could take right now. */
+export interface HeatingGroupType {
+    /** `HomeMatic.heating`, `hmip.heating.group`. */
+    id: string;
+    /** The label as the box reports it (`Heating_Control`, `HmIP-Heizungssteuerung`). */
+    label: string;
+    /** The devices a new group of this type could take. */
+    assignable: HeatingGroupMember[];
+    /** The devices that fit the type but are already connected elsewhere - shown, never offered. */
+    leftover: HeatingGroupMember[];
+}
+
+/** A group as the list shows it. */
+export interface HeatingGroup {
+    id: number;
+    name: string;
+    type: string;
+    typeLabel: string;
+    /** The group device's address on VirtualDevices, `INT0000001`. */
+    device: string;
+    /** The group device's metadata ref, `VirtualDevices.INT0000001`. */
+    ref: string;
+    /** The members; the list reads every group once for them. */
+    members: HeatingGroupMember[];
+}
+
+/** One group as the editor needs it: its members, what it could take, what fits no more. */
+export interface HeatingGroupDetail extends HeatingGroup {
+    /** The name the group device carries in the group store; the metadata store's name wins. */
+    deviceName: string;
+    forbidSingleOperation: boolean;
+    assignable: HeatingGroupMember[];
+    leftover: HeatingGroupMember[];
+    types: Array<{id: string; label: string}>;
+}
+
+export interface HeatingGroupList {
+    groups: HeatingGroup[];
+    /** The members whose configuration is still pending from the last change. */
+    devicesToConfigure: HeatingGroupMember[];
+}
+
+/** What a create or a change answers with: the group, and who still has to be configured. */
+export interface HeatingGroupChange extends HeatingGroupDetail {
+    devicesToConfigure: HeatingGroupMember[];
+}
+
+/**
+ * Whether this connection has heating groups at all.
+ *
+ * `available` is true when the box answered the group list. The reason says why not otherwise:
+ * `no-box` on a CCU, Homegear or a bare interface process; `unsupported` on a box without the
+ * group process (a development root); `not-offered` on an older box whose API has no groups;
+ * `forbidden` when the credential may not read them (the addon's local token only reads metadata,
+ * so the person's session is what lets the tab in); `error` for anything else, with the message.
+ */
+export interface HeatingGroupsState {
+    available: boolean;
+    reason?: 'no-box' | 'unsupported' | 'not-offered' | 'forbidden' | 'error';
+    message?: string;
+}
+
 export interface LinkRecord {
     SENDER: string;
     RECEIVER: string;
@@ -778,6 +857,32 @@ export interface ApiMethods {
     /** The whole document, for a backup or a move between installations. */
     'meta.export': {params: []; result: MetaDocument};
     'meta.import': {params: [document: unknown, mode?: MetaImportMode]; result: null};
+
+    /*
+     * Task 57: the heating groups of openccu-lite, through the box's system API. Every one of these
+     * answers `kind: 'config'` with the reason where there is no box, and the API's own message
+     * (`kind: 'validation'` for a refused body, `'config'` for a credential without the right,
+     * `'connection'` for a box that does not answer) otherwise.
+     */
+    /** Is there a groups API behind this connection? Asked once per connect, and after a reconnect. */
+    'groups.state': {params: []; result: HeatingGroupsState};
+    /** The groups with their members, and the devices whose configuration is still pending. */
+    'groups.list': {params: []; result: HeatingGroupList};
+    /** The types a new group can have, each with the devices it could take now. */
+    'groups.types': {params: []; result: HeatingGroupType[]};
+    'groups.get': {params: [id: number]; result: HeatingGroupDetail};
+    /** A new group: its name, its type and its members (the box's member ids). */
+    'groups.create': {params: [name: string, type: string, members: string[]]; result: HeatingGroupChange};
+    /**
+     * The name and the members **as a whole**: adding and removing a member is one change with
+     * the new list, as the WebUI did it. A field left `undefined` keeps its value.
+     */
+    'groups.update': {
+        params: [id: number, name: string | undefined, members: string[] | undefined];
+        result: HeatingGroupChange;
+    };
+    /** The group goes; its former members lose the group membership. */
+    'groups.delete': {params: [id: number]; result: HeatingGroupMember[]};
 
     'paramset.get': {params: [interfaceName: string, address: string, paramset: string]; result: Paramset};
     'paramset.description': {

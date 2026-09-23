@@ -43,6 +43,9 @@ export * from './cache/store.js';
 // the metadata store: names, rooms and functions, local or from an openccu-lite box (task 24)
 export * from './meta/index.js';
 
+// the heating groups of openccu-lite, through the box's system API (task 57)
+export * from './groups/client.js';
+
 // the write path (task 6)
 export * from './write/queue.js';
 export * from './write/paramset.js';

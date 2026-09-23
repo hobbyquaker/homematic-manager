@@ -169,6 +169,8 @@ export interface ManagedInterface {
     livenessTimer: ReturnType<typeof setTimeout> | undefined;
     /** B-56: lost its subscription (no PONG) and is being subscribed again. */
     reconnecting: boolean;
+    /** B-56: a liveness ping is out and its PONG is being waited for. */
+    awaitingPong: boolean;
 }
 
 export interface InterfaceManagerOptions {
@@ -620,15 +622,27 @@ export class InterfaceManager {
         this.#options.onStateChanged(this.states());
     }
 
-    /** A callback arrived; the interface is alive. */
-    noteEvent(interfaceName: string): void {
+    /**
+     * A callback arrived; the interface is alive.
+     *
+     * B-56: only an `event` proves that the subscription delivers. A device callback (`newDevices`,
+     * `deleteDevices`, …) does not: a restarted hmipserver announces its devices to the handler it
+     * read back, and then sends it no event at all (measured on a Raspberry Pi 4, 16 s after the
+     * restart). Such a callback that nobody asked for is the moment to check, so the liveness ping
+     * goes out at once.
+     */
+    noteEvent(interfaceName: string, kind: 'event' | 'device' = 'event'): void {
         const entry = this.#interfaces.get(interfaceName);
         if (!entry) {
             return;
         }
         entry.lastEvent = this.#now();
-        entry.lastEventMono = this.#monotonicNow();
-        entry.heardSinceInit = true;
+        if (kind === 'event') {
+            entry.lastEventMono = this.#monotonicNow();
+            entry.heardSinceInit = true;
+        } else if (!entry.awaitingPong && entry.livenessTimer !== undefined && entry.state.subscribing !== true) {
+            this.#armLiveness(entry, 0, true);
+        }
         if (!entry.state.connected) {
             this.#update(entry, {connected: true, error: undefined, unreachable: false});
             this.#options.onStateChanged(this.states());
@@ -794,6 +808,7 @@ export class InterfaceManager {
             heardSinceInit: false,
             livenessTimer: undefined,
             reconnecting: false,
+            awaitingPong: false,
             state: {
                 name: resolved.name,
                 type: isKnownInterface(resolved.name) ? resolved.name : 'custom',
@@ -1070,7 +1085,7 @@ export class InterfaceManager {
      * last `init`, the subscription is lost. A ping that fails outright (the process is gone) is
      * the same thing - the timer decides, not the call.
      */
-    #armLiveness(entry: ManagedInterface, delay?: number): void {
+    #armLiveness(entry: ManagedInterface, delay?: number, now = false): void {
         this.#clearLivenessTimer(entry);
         const interval = this.#options.pingIntervalMs ?? entry.target.resolved.pingIntervalSeconds * 1000;
         if (interval <= 0 || this.#stopping || this.#idle) {
@@ -1078,15 +1093,17 @@ export class InterfaceManager {
         }
         this.#setLivenessTimer(entry, delay ?? interval, () => {
             const silent = this.#monotonicNow() - entry.lastEventMono;
-            if (silent < interval) {
+            if (!now && silent < interval) {
                 this.#armLiveness(entry, interval - silent);
                 return;
             }
             const sentAt = this.#monotonicNow();
+            entry.awaitingPong = true;
             entry.client.call('ping', ['hmm'], BACKGROUND).catch(() => {
                 // no PONG will come either; the timer below says what that means
             });
             this.#setLivenessTimer(entry, this.#options.pongTimeoutMs ?? PONG_TIMEOUT_SECONDS * 1000, () => {
+                entry.awaitingPong = false;
                 if (entry.lastEventMono >= sentAt) {
                     // the next ping is due 30 s after the PONG, not after this check
                     this.#armLiveness(entry, Math.max(0, interval - (this.#monotonicNow() - entry.lastEventMono)));
@@ -1116,6 +1133,7 @@ export class InterfaceManager {
     }
 
     #clearLivenessTimer(entry: ManagedInterface): void {
+        entry.awaitingPong = false;
         if (entry.livenessTimer !== undefined) {
             clearTimeout(entry.livenessTimer);
             entry.livenessTimer = undefined;

@@ -1627,6 +1627,52 @@ describe('the liveness ping of HmIP-RF (B-56, D-53)', () => {
         }
     });
 
+    it('pings at once on a device callback nobody asked for, which a restarted hmipserver sends', async () => {
+        vi.useFakeTimers();
+        try {
+            const {h, process} = hmip();
+            await h.manager.start();
+            h.manager.noteEvent('HmIP-RF');
+            await advance(h, 5000);
+            h.clients.calls.length = 0;
+            // the restart: hmipserver announces its devices to the handler it read back, and sends no PONG
+            process.pong = false;
+            h.manager.noteEvent('HmIP-RF', 'device');
+            await vi.advanceTimersByTimeAsync(0);
+            expect(methods(h)).toEqual(['ping']);
+            // a second one while the PONG is awaited sends no second ping
+            h.manager.noteEvent('HmIP-RF', 'device');
+            await vi.advanceTimersByTimeAsync(0);
+            expect(methods(h)).toEqual(['ping']);
+            await advance(h, 10_000);
+            expect(methods(h)).toEqual(['ping', 'init']);
+            expect(h.notices.map((entry) => entry.message)).toContain('HmIP-RF: subscribed again');
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('does not take a device callback for a delivered event', async () => {
+        vi.useFakeTimers();
+        try {
+            const {h, process} = hmip();
+            await h.manager.start();
+            h.manager.noteEvent('HmIP-RF');
+            process.pong = false;
+            await advance(h, 20_000);
+            h.clients.calls.length = 0;
+            // it pings at once (+20 s) and, with no PONG, subscribes again 10 s later - it is not
+            // counted as an event that would have put the next ping off to +50 s
+            h.manager.noteEvent('HmIP-RF', 'device');
+            await advance(h, 10_000);
+            expect(methods(h)).toEqual(['ping', 'init']);
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
     it('bridges an hmipserver restart on the quick schedule, and is back within 45 s', async () => {
         vi.useFakeTimers();
         try {

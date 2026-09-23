@@ -1095,7 +1095,8 @@ export class Backend {
     }
 
     #recordDeviceEvent(interfaceName: string, method: EventRecord['method'], payload: RpcValue): void {
-        this.#manager?.noteEvent(interfaceName);
+        // B-56: a device callback shows that the interface calls us, not that its events reach us
+        this.#manager?.noteEvent(interfaceName, 'device');
         const record: EventRecord = {timestamp: this.#now(), interfaceName, method, payload};
         this.#caches.events.push(record);
         this.events.emit('rpc.event', record);

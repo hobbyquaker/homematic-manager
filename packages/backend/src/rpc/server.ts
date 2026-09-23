@@ -12,8 +12,7 @@
  *
  * `listDevices` is answered from our own device cache, in the reduced shape 2.x sent for HmIP
  * (`main.js:494-545`): hmipserver compares the list it gets with its own and re-sends what is
- * missing, and sending back the full description of 400 channels over XML-RPC is both slow and, for
- * the `HmIP-RCV-50` pseudo-device, wrong.
+ * missing, and sending back the full description of 400 channels over XML-RPC is slow.
  */
 
 import binrpc from 'binrpc';
@@ -65,7 +64,12 @@ export const CALLBACK_METHODS: readonly string[] = [
 
 /**
  * The subset of a device description hmipserver needs in the `listDevices` answer, exactly as 2.x
- * built it. Falsy fields are dropped, and the CCU's own `HmIP-RCV-50` never appears.
+ * built it. Falsy fields are dropped.
+ *
+ * The CCU's own virtual remote control (`HmIP-RCV-1`, type `HmIP-RCV-50`) is listed like any other
+ * device. 2.x left it out since CCU3 firmware 3.43.15 (2019), whose hmipserver failed on an answer
+ * that held it; current hmipservers do not, and without it every `init` makes hmipserver log a
+ * `handleIDMigration` warning and send the whole virtual remote again with `newDevices` (task 59).
  */
 const HMIP_LIST_DEVICES_FIELDS: readonly (keyof DeviceDescription)[] = [
     'ADDRESS',
@@ -92,11 +96,8 @@ const HMIP_LIST_DEVICES_FIELDS: readonly (keyof DeviceDescription)[] = [
     'TYPE',
 ];
 
-/** The reduced HmIP shape of one description; `undefined` for a device that must not be listed. */
-export function hmipListDevicesEntry(description: DeviceDescription): Record<string, RpcValue> | undefined {
-    if (description.TYPE === 'HmIP-RCV-50' || description.PARENT_TYPE === 'HmIP-RCV-50') {
-        return undefined;
-    }
+/** The reduced HmIP shape of one description. */
+export function hmipListDevicesEntry(description: DeviceDescription): Record<string, RpcValue> {
     const entry: Record<string, RpcValue> = {};
     for (const field of HMIP_LIST_DEVICES_FIELDS) {
         const value = description[field] as unknown;
@@ -113,14 +114,7 @@ export function listDevicesAnswer(interfaceName: string, descriptions: readonly 
     if (interfaceName !== 'HmIP-RF') {
         return descriptions.map((description) => ({ADDRESS: description.ADDRESS, VERSION: description.VERSION ?? 0}));
     }
-    const answer: RpcValue[] = [];
-    for (const description of descriptions) {
-        const entry = hmipListDevicesEntry(description);
-        if (entry) {
-            answer.push(entry);
-        }
-    }
-    return answer;
+    return descriptions.map((description) => hmipListDevicesEntry(description));
 }
 
 export interface CallbackServerOptions {

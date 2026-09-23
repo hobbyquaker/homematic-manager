@@ -78,10 +78,27 @@ describe('listDevicesAnswer', () => {
         ]);
     });
 
-    it('never lists the CCU pseudo device or its channels', () => {
-        expect(hmipListDevicesEntry(device({TYPE: 'HmIP-RCV-50'}))).toBeUndefined();
-        expect(hmipListDevicesEntry(device({TYPE: 'MAINTENANCE', PARENT_TYPE: 'HmIP-RCV-50'}))).toBeUndefined();
-        expect(listDevicesAnswer('HmIP-RF', [device({TYPE: 'HmIP-RCV-50'})])).toEqual([]);
+    it('lists the virtual remote control and its channels like any other device', () => {
+        // Leaving it out makes hmipserver warn and re-send all of it with newDevices at every init.
+        const answer = listDevicesAnswer('HmIP-RF', [
+            device({ADDRESS: 'HmIP-RCV-1', TYPE: 'HmIP-RCV-50', CHILDREN: ['HmIP-RCV-1:0', 'HmIP-RCV-1:1']}),
+            device({ADDRESS: 'HmIP-RCV-1:0', TYPE: 'MAINTENANCE', PARENT: 'HmIP-RCV-1', PARENT_TYPE: 'HmIP-RCV-50'}),
+            device({
+                ADDRESS: 'HmIP-RCV-1:1',
+                TYPE: 'KEY_TRANSCEIVER',
+                PARENT: 'HmIP-RCV-1',
+                PARENT_TYPE: 'HmIP-RCV-50',
+            }),
+        ]);
+        expect(answer.map((entry) => (entry as Record<string, RpcValue>)['ADDRESS'])).toEqual([
+            'HmIP-RCV-1',
+            'HmIP-RCV-1:0',
+            'HmIP-RCV-1:1',
+        ]);
+        expect(hmipListDevicesEntry(device({ADDRESS: 'HmIP-RCV-1', TYPE: 'HmIP-RCV-50'}))).toMatchObject({
+            ADDRESS: 'HmIP-RCV-1',
+            TYPE: 'HmIP-RCV-50',
+        });
     });
 });
 

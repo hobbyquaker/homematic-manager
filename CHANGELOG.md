@@ -47,6 +47,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Fixed
 
+- **No more warning from hmipserver at every connect.** The answer to hmipserver's `listDevices` left out the
+  CCU's virtual remote control (`HmIP-RCV-1`) - a workaround for CCU3 firmware 3.43.15 from 2019. Without it,
+  current hmipservers logged a `handleIDMigration` warning and sent all 52 descriptions of the virtual remote
+  again with `newDevices` at every start of the Homematic Manager. It is listed again, like every other device.
 - **The easy form's dropdowns show the CCU's words, not its internal keys.** A preset named by one of the WebUI's
   labels - the logic combination of a dimmer's virtual channel, say - showed the key ("stringtablelogicor") in the
   easy form and in the preset list next to a parameter, where the expert view already said "OR (höherer Pegel hat

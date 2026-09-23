@@ -24,6 +24,11 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Changed
 
+- **Naming a newly paired device names its channels too.** The _New_ section of the pairing dialog has the rename
+  dialog's _Overwrite channel names_ box, and in both dialogs it is ticked whenever they open: a device's name
+  becomes `<name>:<index>` on each of its channels. The maintenance channel `:0` is always `<name>:0` and is never
+  renamed on its own. The channels a device has are read when _Apply_ is pressed; one whose channels have not
+  arrived yet gets its name and `:0`.
 - **The MASTER paramset dialog has one scrollbar.** The parameter list was a box with a scroller of its own under
   the options, so the expert view of a long channel scrolled inside the dialog; now the dialog's content scrolls as
   a whole, the option row stays at its top and the buttons at its bottom. The expert view shows only the raw

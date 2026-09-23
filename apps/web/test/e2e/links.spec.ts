@@ -198,6 +198,8 @@ test('the channel lists show two-line entries that the filter finds by address',
     await page.locator(`[data-row-id="${HMIP_DIMMER}"]`).click();
     await page.getByTestId('devices-rename').click();
     await page.getByTestId('rename-input').fill(LONG);
+    // the device alone: its channels keep the short names the list shows (task 65 ticks the box by default)
+    await page.getByTestId('rename-children').uncheck();
     await page.getByTestId('rename-save').click();
     await expect(page.getByTestId('rename-dialog')).not.toHaveAttribute('open');
 

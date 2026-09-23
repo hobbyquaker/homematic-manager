@@ -10,6 +10,7 @@ describe('@homematic-manager/core', () => {
     it('exports the CCU model', () => {
         expect(core.INTERFACE_NAMES).toContain('HmIP-RF');
         expect(core.parseAddress('A:1').index).toBe(1);
+        expect(core.renameEntries('A:0', 'x', [], {channels: true})).toEqual([]);
         expect(new core.DeviceIndex('BidCos-RF').size).toBe(0);
         expect(core.decodeLinkFlags(0).broken).toBe(false);
     });

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {channelIndex, isDeviceAddress} from '@homematic-manager/core';
+    import {isDeviceAddress, renameEntries} from '@homematic-manager/core';
 
     import Dialog from '../../lib/components/Dialog.svelte';
     import {getStores} from '../../lib/stores/context.js';
@@ -16,7 +16,8 @@
     const t = stores.i18n.t;
 
     let name = $state('');
-    let renameChildren = $state(false);
+    /** Task 65: ticked at every opening - renaming a device names its channels too, unless unticked. */
+    let renameChildren = $state(true);
     let saving = $state(false);
 
     const isDevice = $derived(address !== '' && isDeviceAddress(address));
@@ -27,36 +28,19 @@
     $effect(() => {
         if (open) {
             name = stores.names.name(address) ?? '';
-            renameChildren = false;
+            renameChildren = true;
         }
     });
 
     /**
-     * The 2.x rule, unchanged: a device also renames its `:0` channel, and "overwrite channels"
-     * renames every child to `<name>:<channel index>`. 2.x took the index from the position in
-     * `CHILDREN`; the channel's own index is the same number and survives a gap in the list.
+     * The 2.x rule with the `:0` convention (task 65), in core so the inclusion dialog writes the
+     * same: a device renames its `:0` with it, "overwrite channels" every other child to
+     * `<name>:<channel index>`, and `:0` on its own is never renamed.
      */
-    function entries(): Array<{address: string; name: string}> {
-        if (name.trim() === '') {
-            return [];
-        }
-        if (!isDevice) {
-            return [{address, name}];
-        }
-        const list = [{address, name}];
-        for (const child of children) {
-            const index = channelIndex(child);
-            if (index === 0) {
-                list.push({address: child, name: `${name}:0`});
-            } else if (renameChildren && index !== undefined) {
-                list.push({address: child, name: `${name}:${String(index)}`});
-            }
-        }
-        return list;
-    }
+    const planned = $derived(renameEntries(address, name, children, {channels: renameChildren}));
 
     async function save(): Promise<void> {
-        const list = entries();
+        const list = planned;
         if (list.length === 0) {
             return;
         }
@@ -94,7 +78,7 @@
         <button
             type="button"
             class="hmm-button"
-            disabled={saving || name.trim() === ''}
+            disabled={saving || planned.length === 0}
             data-testid="rename-save"
             onclick={() => void save()}>{t('Apply')}</button
         >

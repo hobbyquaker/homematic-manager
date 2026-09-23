@@ -17,6 +17,7 @@ export * from './data/memory.js';
 // The CCU model
 export * from './interfaces/table.js';
 export * from './address/address.js';
+export * from './address/names.js';
 export * from './devices/index.js';
 export * from './links/roles.js';
 

@@ -403,8 +403,11 @@ export interface Simulator {
      * is written back - a real pending message, not only an event.
      */
     api: {emit(event: 'setValue', iface: string, address: string, datapoint: string, value: unknown): void};
-    /** The ReGa mock; `renames` is every `dom.GetObject(id).Name(...)` script it was sent. */
-    regaSim: {renames: {id: number; name: string; script: string}[]};
+    /**
+     * The ReGa mock; `renames` is every `dom.GetObject(id).Name(...)` script it was sent - read from
+     * the script's first line only, so a script renaming several objects is in `scripts` in full.
+     */
+    regaSim: {renames: {id: number; name: string; script: string}[]; scripts: string[]};
 }
 
 export interface E2eFixtures {

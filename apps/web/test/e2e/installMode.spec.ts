@@ -102,13 +102,20 @@ test('a device paired while the dialog is open can be named right there (#24)', 
     await expect(paired).toContainText(NEW_DEVICE);
     await expect(paired).not.toContainText(`${NEW_DEVICE}:1`);
 
+    // task 65: one box for the section, ticked when the dialog opens - the channels are named too
+    await expect(page.getByTestId('add-device-rename-children')).toBeChecked();
     await paired.getByLabel(`Name ${NEW_DEVICE}`).fill('New socket');
     await page.getByTestId('add-device-name-save').click();
+    await expect(paired).toHaveCount(0);
 
     // The modal is in the top layer and swallows every click behind it.
     await page.getByTestId('add-device-dialog').getByRole('button', {name: 'Close'}).first().click();
     await page.getByTestId('devices-refresh').click();
-    await expect(page.locator(`[data-row-id="${NEW_DEVICE}"]`)).toContainText('New socket');
+    const row = page.locator(`[data-row-id="${NEW_DEVICE}"]`);
+    await expect(row).toContainText('New socket');
+    await row.getByRole('button', {name: 'Expand row'}).click();
+    await expect(page.locator(`[data-row-id="${NEW_DEVICE}:0"]`)).toContainText('New socket:0');
+    await expect(page.locator(`[data-row-id="${NEW_DEVICE}:1"]`)).toContainText('New socket:1');
 });
 
 /**

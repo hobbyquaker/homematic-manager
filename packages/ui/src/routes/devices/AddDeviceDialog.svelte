@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type {InstallModeOptions} from '@homematic-manager/core';
+    import {renameEntries, type InstallModeOptions} from '@homematic-manager/core';
 
     import Dialog from '../../lib/components/Dialog.svelte';
     import {getStores} from '../../lib/stores/context.js';
@@ -41,6 +41,8 @@
     /** Devices that arrived while this dialog was open - the ones #24 wants named straight away. */
     let paired = $state<string[]>([]);
     let names = $state<Record<string, string>>({});
+    /** Task 65: one box for the whole *New* section, ticked at every opening, as in the rename dialog. */
+    let renameChannels = $state(true);
     /** #54: what the last inbox confirmation did, as one line under the button. */
     let inboxConfirmed = $state('');
     /**
@@ -84,6 +86,7 @@
         remaining = 0;
         paired = [];
         names = {};
+        renameChannels = true;
         inboxConfirmed = '';
         nothingJoined = false;
     });
@@ -192,10 +195,20 @@
             confirmed.length === 0 ? t('The ReGa inbox is empty') : `${t('Confirmed')}: ${confirmed.join(', ')}`;
     }
 
+    /**
+     * Task 65: the rename dialog's rule (core's `renameEntries`) for every named device - its `:0`
+     * always, its other channels with the box. The channel list is read now, at Apply, so a device
+     * whose channels have not arrived gets its name and `:0` and nothing half-done.
+     */
     async function saveNames(): Promise<void> {
-        const entries = paired
-            .filter((address) => (names[address] ?? '').trim() !== '')
-            .map((address) => ({address, name: (names[address] ?? '').trim()}));
+        const entries = paired.flatMap((address) =>
+            renameEntries(
+                address,
+                names[address] ?? '',
+                stores.devices.channels(interfaceName, address).map((channel) => channel.ADDRESS),
+                {channels: renameChannels},
+            ),
+        );
         if (entries.length === 0) {
             return;
         }
@@ -412,6 +425,10 @@
                     />
                 </label>
             {/each}
+            <label class="hmm-add-channels">
+                <input type="checkbox" bind:checked={renameChannels} data-testid="add-device-rename-children" />
+                <span>{t('Overwrite channel names')}</span>
+            </label>
             <button type="button" class="hmm-button" data-testid="add-device-name-save" onclick={() => void saveNames()}
                 >{t('Apply')}</button
             >
@@ -494,5 +511,12 @@
 
     .hmm-add-paired h4 {
         margin: 0 0 6px;
+    }
+
+    .hmm-add-channels {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
     }
 </style>

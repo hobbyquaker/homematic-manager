@@ -163,15 +163,16 @@ describe('the rename dialog', () => {
         transport = new MockTransport({demo: true});
     });
 
-    it('renames a device, its :0 channel, and on request every channel', async () => {
+    // task 65: the box is ticked at every opening, so a device renames its channels by default
+    it('renames a device, its :0 channel and every channel, with the box ticked from the start', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         await select('MEQ0123456');
         await fireEvent.click(screen.getByTestId('devices-rename'));
 
         const input = screen.getByTestId<HTMLInputElement>('rename-input');
         expect(input.value).toBe('Licht Küche');
+        expect(screen.getByTestId<HTMLInputElement>('rename-children').checked).toBe(true);
         await fireEvent.input(input, {target: {value: 'Küche Decke'}});
-        await fireEvent.click(screen.getByTestId('rename-children'));
         await fireEvent.click(screen.getByTestId('rename-save'));
 
         await waitFor(() => {
@@ -186,11 +187,12 @@ describe('the rename dialog', () => {
         expect(screen.queryByTestId('rename-dialog')?.hasAttribute('open')).toBe(false);
     });
 
-    it('leaves the other channels alone when the box is not ticked', async () => {
+    it('leaves the other channels alone when the box is unticked, and ticks it again at the next opening', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         await select('MEQ0123456');
         await fireEvent.click(screen.getByTestId('devices-rename'));
         await fireEvent.input(screen.getByTestId('rename-input'), {target: {value: 'X'}});
+        await fireEvent.click(screen.getByTestId('rename-children'));
         await fireEvent.click(screen.getByTestId('rename-save'));
 
         await waitFor(() => {
@@ -200,6 +202,13 @@ describe('the rename dialog', () => {
                     {address: 'MEQ0123456:0', name: 'X:0'},
                 ],
             ]);
+        });
+        await waitFor(() => {
+            expect(screen.queryByTestId('rename-dialog')?.hasAttribute('open')).toBe(false);
+        });
+        await fireEvent.click(screen.getByTestId('devices-rename'));
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLInputElement>('rename-children').checked).toBe(true);
         });
     });
 

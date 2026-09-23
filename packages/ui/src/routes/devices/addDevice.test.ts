@@ -1,3 +1,4 @@
+import type {DeviceDescription} from '@homematic-manager/core';
 import {fireEvent, screen, waitFor} from '@testing-library/svelte';
 import {beforeEach, describe, expect, it} from 'vitest';
 
@@ -355,8 +356,103 @@ describe('the add-device dialog', () => {
         await fireEvent.input(screen.getByLabelText('Name NEQ0000001'), {target: {value: 'Neue Lampe'}});
         await fireEvent.click(screen.getByTestId('add-device-name-save'));
 
+        // task 65: the demo does not know the device, so no channels: its name and `:0`, nothing half-done
         await waitFor(() => {
-            expect(transport.lastCall('names.set')).toEqual([[{address: 'NEQ0000001', name: 'Neue Lampe'}]]);
+            expect(transport.lastCall('names.set')).toEqual([
+                [
+                    {address: 'NEQ0000001', name: 'Neue Lampe'},
+                    {address: 'NEQ0000001:0', name: 'Neue Lampe:0'},
+                ],
+            ]);
+        });
+    });
+
+    /** Task 65: the rename dialog's box and rule in the *New* section - ticked at every opening. */
+    describe('names the channels of a paired device too (task 65)', () => {
+        const device = (address: string, channels: number[]): DeviceDescription[] => [
+            {ADDRESS: address, TYPE: 'HM-LC-Sw2-FM', CHILDREN: channels.map((index) => `${address}:${String(index)}`)},
+            ...channels.map((index) => ({
+                ADDRESS: `${address}:${String(index)}`,
+                PARENT: address,
+                TYPE: index === 0 ? 'MAINTENANCE' : 'SWITCH',
+                INDEX: index,
+            })),
+        ];
+
+        async function pairTwo(): Promise<void> {
+            const demoList = transport.handlerFor('devices.list');
+            transport.respond('devices.list', (interfaceName) =>
+                interfaceName === 'BidCos-RF'
+                    ? [
+                          ...(demoList(interfaceName) as DeviceDescription[]),
+                          ...device('NEQ0000001', [0, 1, 2]),
+                          ...device('NEQ0000002', [0, 1]),
+                      ]
+                    : demoList(interfaceName),
+            );
+            const {stores} = await mountApp({transport, hash: '#/BidCos-RF/devices'});
+            await fireEvent.click(screen.getByTestId('devices-add'));
+            expect(screen.queryByTestId('add-device-rename-children')).toBeNull();
+            transport.emit('devices.changed', {
+                interfaceName: 'BidCos-RF',
+                kind: 'new',
+                addresses: ['NEQ0000001', 'NEQ0000002'],
+            });
+            await waitFor(() => {
+                expect(stores.devices.channels('BidCos-RF', 'NEQ0000002')).toHaveLength(2);
+            });
+            await waitFor(() => screen.getByTestId('add-device-paired'));
+        }
+
+        it('renames the named device with every channel, and leaves the unnamed one alone', async () => {
+            await pairTwo();
+            expect(screen.getByTestId<HTMLInputElement>('add-device-rename-children').checked).toBe(true);
+            await fireEvent.input(screen.getByLabelText('Name NEQ0000001'), {target: {value: 'Flur'}});
+            await fireEvent.click(screen.getByTestId('add-device-name-save'));
+
+            await waitFor(() => {
+                expect(transport.lastCall('names.set')).toEqual([
+                    [
+                        {address: 'NEQ0000001', name: 'Flur'},
+                        {address: 'NEQ0000001:0', name: 'Flur:0'},
+                        {address: 'NEQ0000001:1', name: 'Flur:1'},
+                        {address: 'NEQ0000001:2', name: 'Flur:2'},
+                    ],
+                ]);
+            });
+            // the named one leaves the list, the other one waits for its name
+            await waitFor(() => {
+                expect(screen.queryByLabelText('Name NEQ0000001')).toBeNull();
+            });
+            expect(screen.getByLabelText('Name NEQ0000002')).toBeTruthy();
+        });
+
+        it('renames the device and :0 only with the box unticked, and ticks it again at the next opening', async () => {
+            await pairTwo();
+            await fireEvent.click(screen.getByTestId('add-device-rename-children'));
+            await fireEvent.input(screen.getByLabelText('Name NEQ0000001'), {target: {value: 'Flur'}});
+            await fireEvent.input(screen.getByLabelText('Name NEQ0000002'), {target: {value: 'Bad'}});
+            await fireEvent.click(screen.getByTestId('add-device-name-save'));
+
+            await waitFor(() => {
+                expect(transport.lastCall('names.set')).toEqual([
+                    [
+                        {address: 'NEQ0000001', name: 'Flur'},
+                        {address: 'NEQ0000001:0', name: 'Flur:0'},
+                        {address: 'NEQ0000002', name: 'Bad'},
+                        {address: 'NEQ0000002:0', name: 'Bad:0'},
+                    ],
+                ]);
+            });
+
+            await fireEvent.click(
+                screen.getByTestId('add-device-dialog').querySelector<HTMLElement>('.hmm-dialog-close')!,
+            );
+            await fireEvent.click(screen.getByTestId('devices-add'));
+            transport.emit('devices.changed', {interfaceName: 'BidCos-RF', kind: 'new', addresses: ['NEQ0000001']});
+            await waitFor(() => {
+                expect(screen.getByTestId<HTMLInputElement>('add-device-rename-children').checked).toBe(true);
+            });
         });
     });
 

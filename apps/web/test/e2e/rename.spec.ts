@@ -9,7 +9,7 @@ test.beforeAll(async () => {
     test.skip(!(await simulatorReady()), 'hm-simulator is not installed');
 });
 
-test('renaming a device changes the name in the grid', async ({page, host, sim}) => {
+test('renaming a device changes the name in the grid, its channels with it', async ({page, host, sim}) => {
     await page.goto(`${host.url}#/BidCos-RF/devices`);
     const row = page.locator(`[data-row-id="${BIDCOS_SWITCH}"]`);
     await expect(row).toContainText('Steckdose');
@@ -22,15 +22,40 @@ test('renaming a device changes the name in the grid', async ({page, host, sim})
     const dialog = page.getByTestId('rename-dialog');
     await expect(dialog).toHaveAttribute('open', '');
     await expect(page.getByTestId('rename-input')).toHaveValue('Steckdose');
+    // task 65: "Overwrite channel names" is ticked when the dialog opens
+    await expect(page.getByTestId('rename-children')).toBeChecked();
 
     await page.getByTestId('rename-input').fill('Kitchen socket');
     await page.getByTestId('rename-save').click();
 
     await expect(dialog).not.toHaveAttribute('open');
     await expect(row).toContainText('Kitchen socket');
+    // the channels were renamed without touching the box: `:0` always, `:1` by the default
+    await row.getByRole('button', {name: 'Expand row'}).click();
+    const table = page.getByTestId('devices-table');
+    await expect(table.locator(`[data-row-id="${BIDCOS_SWITCH}:0"]`)).toContainText('Kitchen socket:0');
+    await expect(table.locator(`[data-row-id="${BIDCOS_SWITCH}:1"]`)).toContainText('Kitchen socket:1');
 
     // and the ReGa mock really saw the script, rather than the name only living in the local map
     expect(sim.regaSim.renames.some((entry) => entry.name === 'Kitchen socket')).toBe(true);
+    // the mock records the first line of a script only; the channel is in the same script
+    expect(sim.regaSim.scripts.some((script) => script.includes('.Name("Kitchen socket:1")'))).toBe(true);
+});
+
+/** Task 65, the `:0` convention: the maintenance channel follows the device's name and is never renamed alone. */
+test('the maintenance channel offers no rename of its own', async ({page, host}) => {
+    await page.goto(`${host.url}#/BidCos-RF/devices`);
+    const table = page.getByTestId('devices-table');
+    const row = table.locator(`[data-row-id="${BIDCOS_SWITCH}"]`);
+    await expect(row).toContainText('Steckdose');
+    await row.getByRole('button', {name: 'Expand row'}).click();
+
+    const maintenance = table.locator(`[data-row-id="${BIDCOS_SWITCH}:0"]`);
+    await maintenance.click();
+    await expect(maintenance).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByTestId('devices-rename')).toBeDisabled();
+    await maintenance.locator('[data-column-key="name"]').dblclick();
+    await expect(page.getByTestId('rename-dialog')).not.toHaveAttribute('open');
 });
 
 test('a double click on a device or a channel name opens the rename dialog for it (task 46)', async ({page, host}) => {
@@ -49,7 +74,7 @@ test('a double click on a device or a channel name opens the rename dialog for i
     await deviceName.dblclick();
     await expect(dialog).toHaveAttribute('open', '');
     await expect(page.getByTestId('rename-input')).toHaveValue('Steckdose');
-    await expect(page.getByTestId('rename-children')).toBeVisible();
+    await expect(page.getByTestId('rename-children')).toBeChecked();
     // the word the double click selected in the grid is let go again
     expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).toBe('');
     // B-38: Escape closes it, and the focus is back in the grid, on the row the double click came from

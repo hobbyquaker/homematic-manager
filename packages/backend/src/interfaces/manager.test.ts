@@ -1553,6 +1553,75 @@ describe('the quick retries at the start (task 56, D-52)', () => {
         expect(h.notices.find((entry) => entry.interfaceName === 'HmIP-RF')?.level).toBe('warn');
     });
 
+    /**
+     * B-68: after an idle period (D-31) a resubscribe is a start for the interfaces that were there,
+     * but not for one already found not present - BidCos-Wired on a box without a wired gateway got
+     * two more minutes of retries every 2 s and one more warning at every session connect.
+     */
+    it('sends an interface found not present before the idle period straight back to the back-off', async () => {
+        vi.useFakeTimers();
+        try {
+            const h = harness({
+                connection: {interfaces: ['BidCos-RF', 'BidCos-Wired'], autoDetect: false},
+                answers: {'BidCos-Wired': (method) => (method === 'init' ? refused() : '')},
+                startWindowMs: 60_000,
+                initBackoffMs: 15_000,
+            });
+            await h.manager.start();
+            await advance(h, 75_000);
+            expect(h.manager.states()[1]?.absent).toBe(true);
+            const warnings = () => h.notices.filter((entry) => entry.level === 'warn');
+            expect(warnings()).toHaveLength(1);
+
+            await h.manager.unsubscribe();
+            await advance(h, 10_000);
+            h.clients.calls.length = 0;
+            const noticesBefore = h.notices.length;
+            await h.manager.subscribe();
+
+            // one init at the resubscribe, then nothing on a timer: no waiting, no new warning
+            await advance(h, 30_000);
+            const wired = h.clients.calls.filter((call) => call.name === 'BidCos-Wired' && call.method === 'init');
+            expect(wired).toHaveLength(1);
+            const state = h.manager.states()[1];
+            expect(state?.absent).toBe(true);
+            expect(state?.waiting).toBeUndefined();
+            expect(warnings()).toHaveLength(1);
+            expect(h.notices.slice(noticesBefore).filter((entry) => entry.interfaceName === 'BidCos-Wired')).toEqual(
+                [],
+            );
+            // the interface that was there is subscribed again as before
+            expect(h.manager.isConnected('BidCos-RF')).toBe(true);
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('still waits at a resubscribe for an interface that was there before the idle period', async () => {
+        vi.useFakeTimers();
+        try {
+            let up = true;
+            const h = harness({
+                connection: {interfaces: ['BidCos-RF', 'HmIP-RF'], autoDetect: false},
+                answers: {'HmIP-RF': (method) => (method === 'init' && !up ? refused() : '')},
+                startWindowMs: START_WINDOW_MS,
+            });
+            await h.manager.start();
+            await h.manager.unsubscribe();
+            up = false; // hmipserver restarts while nobody is looking
+            await h.manager.subscribe();
+            expect(h.manager.states()[1]?.waiting).toBe(true);
+            up = true;
+            await advance(h, 1000);
+            expect(h.manager.isConnected('HmIP-RF')).toBe(true);
+            expect(h.notices.filter((entry) => entry.level === 'warn')).toEqual([]);
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
     it('stops the timers on stop and on unsubscribe, and waits again after a resubscribe', async () => {
         vi.useFakeTimers();
         try {

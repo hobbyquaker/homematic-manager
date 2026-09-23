@@ -74,6 +74,11 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Fixed
 
+- **An interface that is not there stays quiet when a browser connects again.** The addon drops its subscriptions
+  when no browser has been connected for five minutes, and subscribes again when one connects. Each time, an
+  interface that does not exist on the system - BidCos-Wired without a wired gateway - was waited for again for two
+  minutes, tried every 2 s, and then reported as not present once more. It now goes straight back to the slow
+  retry it had before, without a new message.
 - **No re-subscription of every interface when the date jumps at boot.** A system without a real-time clock - a
   Raspberry Pi - starts with an old date, and the time server moves it months forward a few seconds later. The
   watchdog measured the silence of an interface on the date, so every interface looked silent for months at once

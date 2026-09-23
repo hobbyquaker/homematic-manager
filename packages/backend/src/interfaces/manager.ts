@@ -574,7 +574,11 @@ export class InterfaceManager {
             entry.reconnecting = false;
             entry.lastEvent = 0;
             entry.lastSeenMono = Number.NEGATIVE_INFINITY;
-            entry.failures = 0;
+            // B-68: an interface found not present keeps its failures - and the `absent` flag, which
+            // the update below leaves alone - so the resubscribe knows it and says nothing new
+            if (entry.state.absent !== true) {
+                entry.failures = 0;
+            }
             entry.retryAt = 0;
             entry.waitingAttempts = 0;
             entry.answered = false;
@@ -597,10 +601,13 @@ export class InterfaceManager {
             return;
         }
         this.#idle = false;
-        // task 56: a resubscribe is a start too - the interface processes may have gone meanwhile
+        // task 56: a resubscribe is a start too - the interface processes may have gone meanwhile.
+        // B-68: except for one that was already found not present before the idle period (BidCos-Wired
+        // on a box without a wired gateway): it goes straight back to the back-off, instead of two
+        // minutes of retries every 2 s and one more "not present" warning at every session connect
         const now = this.#monotonicNow();
         for (const entry of this.#interfaces.values()) {
-            entry.windowStart = now;
+            entry.windowStart = entry.state.absent === true ? Number.NEGATIVE_INFINITY : now;
             this.#update(entry, {idle: false});
         }
         await Promise.all([...this.#interfaces.keys()].map((name) => this.#init(name)));

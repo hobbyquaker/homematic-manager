@@ -54,6 +54,22 @@
         return `${message.address}/${message.datapoint}`;
     }
 
+    /**
+     * Task 55 (#164): what the row's button does, naming the parameter and eQ-3's call - the
+     * tooltip and the button's accessible description.
+     */
+    function suppressHelp(message: ServiceMessage, suppressed: boolean): string {
+        return suppressed
+            ? t(
+                  'The CCU reports {datapoint} for this channel again: lifts the suppression (suppressServiceMessages with suppress=false).',
+                  {datapoint: message.datapoint},
+              )
+            : t(
+                  "The CCU stops reporting {datapoint} for this channel: the HmIP interface reports a value that raises no message (suppressServiceMessages). The device's other messages are not affected. Undo with “Unsuppress”.",
+                  {datapoint: message.datapoint},
+              );
+    }
+
     function deviceTypeOf(address: string): string {
         return stores.devices.index(interfaceName)?.get(deviceAddress(address))?.TYPE ?? '';
     }
@@ -246,20 +262,28 @@
                     >
                 {:else if column.key === 'suppress'}
                     {@const suppressed = stores.serviceMessages.isSuppressed(row)}
-                    <!-- task 26: the suppression of this one parameter on its channel, HmIP only -->
-                    <button
-                        type="button"
-                        class="hmm-inline-button"
-                        disabled={busy}
-                        title={t(
-                            'A suppressed one reports a value that raises no message; the CCU shows it as inactive.',
-                        )}
-                        data-testid={`suppress-${row.address}-${row.datapoint}`}
-                        onclick={(event) => {
-                            event.stopPropagation();
-                            void suppress(row, !suppressed);
-                        }}>{suppressed ? t('Unsuppress') : t('Suppress')}</button
-                    >
+                    {@const help = suppressHelp(row, suppressed)}
+                    {@const helpId = `suppress-help-${row.address}-${row.datapoint}`}
+                    <!--
+                        task 26: the suppression of this one parameter on its channel, HmIP only.
+                        Task 55 (#164): the button says what it does - in the app's tooltip, on
+                        pointer and keyboard focus alike, and as the button's accessible
+                        description (a hidden element still describes through aria-describedby).
+                    -->
+                    <Tooltip text={help} testId={`suppress-tooltip-${row.address}-${row.datapoint}`}>
+                        <button
+                            type="button"
+                            class="hmm-inline-button"
+                            disabled={busy}
+                            aria-describedby={helpId}
+                            data-testid={`suppress-${row.address}-${row.datapoint}`}
+                            onclick={(event) => {
+                                event.stopPropagation();
+                                void suppress(row, !suppressed);
+                            }}>{suppressed ? t('Unsuppress') : t('Suppress')}</button
+                        >
+                        <span id={helpId} hidden>{help}</span>
+                    </Tooltip>
                 {:else}
                     {column.value
                         ? (column.value(row) ?? '')

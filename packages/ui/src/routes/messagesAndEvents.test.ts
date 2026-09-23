@@ -296,6 +296,78 @@ describe('the service messages tab', () => {
     });
 
     /**
+     * Task 55 (#164): "what does Suppress do?" - the button says it, in the app's tooltip (pointer
+     * and keyboard focus) and as its accessible description, naming the parameter and the call,
+     * in German and English, and the text follows the button once the suppression is set.
+     */
+    it('explains the suppress button in a tooltip and as its accessible description', async () => {
+        const lowbat: ServiceMessage = {
+            interfaceName: 'HmIP-RF',
+            address: '000A1B2C3D4E5F:0',
+            datapoint: 'LOWBAT',
+            value: true,
+            since: 0,
+        };
+        transport.result('serviceMessages.list', [lowbat]);
+        const suppressedNow: string[] = [];
+        transport.respond('rpc.call', (_interfaceName, method, params) => {
+            if (method === 'suppressServiceMessages') {
+                const parameter = params[1];
+                suppressedNow.push(typeof parameter === 'string' ? parameter : '');
+                return true;
+            }
+            return method === 'getSuppressedServiceMessages' ? [...suppressedNow] : '';
+        });
+        const {stores} = await mountApp({transport, hash: '#/HmIP-RF/messages'});
+        stores.i18n.language = 'en';
+
+        const anchor = (): HTMLElement => screen.getByTestId('suppress-tooltip-000A1B2C3D4E5F:0-LOWBAT');
+        const button = await waitFor(() => screen.getByTestId<HTMLButtonElement>('suppress-000A1B2C3D4E5F:0-LOWBAT'));
+        const description = (): string =>
+            document.getElementById(button.getAttribute('aria-describedby') ?? '')?.textContent ?? '';
+        await waitFor(() => {
+            expect(anchor().getAttribute('data-tooltip')).toContain('stops reporting LOWBAT for this channel');
+        });
+        expect(anchor().getAttribute('data-tooltip')).toContain('suppressServiceMessages');
+        expect(anchor().getAttribute('data-tooltip')).toContain('“Unsuppress”');
+        expect(description()).toBe(anchor().getAttribute('data-tooltip'));
+        // no browser `title` any more: its delay is the browser's (#145)
+        expect(button.getAttribute('title')).toBeNull();
+
+        // keyboard focus shows it at once
+        button.focus();
+        await fireEvent.focusIn(anchor());
+        expect((await screen.findByRole('tooltip')).textContent).toBe(anchor().getAttribute('data-tooltip'));
+        await fireEvent.focusOut(anchor());
+
+        stores.i18n.language = 'de';
+        await waitFor(() => {
+            expect(anchor().getAttribute('data-tooltip')).toContain(
+                'Die Zentrale meldet LOWBAT für diesen Kanal nicht mehr',
+            );
+        });
+        expect(anchor().getAttribute('data-tooltip')).toContain('„Unterdrückung aufheben“');
+        expect(description()).toBe(anchor().getAttribute('data-tooltip'));
+
+        // once suppressed, the button lifts it, and says so
+        await fireEvent.click(button);
+        await waitFor(() => {
+            expect(stores.serviceMessages.isSuppressed(lowbat)).toBe(true);
+        });
+        await waitFor(() => {
+            expect(anchor().getAttribute('data-tooltip')).toContain(
+                'Die Zentrale meldet LOWBAT für diesen Kanal wieder',
+            );
+        });
+        expect(anchor().getAttribute('data-tooltip')).toContain('suppress=false');
+        expect(
+            document.getElementById(
+                screen.getByTestId('suppress-000A1B2C3D4E5F:0-LOWBAT').getAttribute('aria-describedby') ?? '',
+            )?.textContent,
+        ).toBe(anchor().getAttribute('data-tooltip'));
+    });
+
+    /**
      * B-35 (#157): the suppress column was fixed at 150 px, which could not be dragged and cut off the
      * German "Unterdrückung aufheben". It is resizable now, down to that button and not below it.
      */

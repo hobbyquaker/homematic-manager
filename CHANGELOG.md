@@ -44,6 +44,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   answer the application already reads to detect it (`GET /api/meta/v1/version`, its `hmip` object), asked afresh
   each time the dialog opens; a CCU, an older system and a system that does not answer keep all three modes, and
   no key ever leaves the system. _With SGTIN and key_ is never touched.
+- **The _Suppress_ button on the HmIP service messages says what it does.** Its tooltip - on pointer and keyboard
+  focus, and as the button's accessible description - names the message and the call: the CCU stops reporting that
+  service message for this channel (`suppressServiceMessages`; the interface reports a value that raises no message),
+  the device's other messages are not affected, and _Unsuppress_ undoes it. (#164, @Herbert-Testmann)
 
 ### Changed
 

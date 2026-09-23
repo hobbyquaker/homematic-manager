@@ -504,6 +504,16 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Eine unterdrückte meldet einen Wert, der keine Meldung auslöst; die CCU zeigt sie als inaktiv.',
         en: 'A suppressed one reports a value that raises no message; the CCU shows it as inactive.',
     },
+    "The CCU stops reporting {datapoint} for this channel: the HmIP interface reports a value that raises no message (suppressServiceMessages). The device's other messages are not affected. Undo with “Unsuppress”.":
+        {
+            de: 'Die Zentrale meldet {datapoint} für diesen Kanal nicht mehr: die HmIP-Schnittstelle liefert dafür einen Wert, der keine Meldung auslöst (suppressServiceMessages). Andere Meldungen des Geräts sind nicht betroffen. Rückgängig mit „Unterdrückung aufheben“.',
+            en: "The CCU stops reporting {datapoint} for this channel: the HmIP interface reports a value that raises no message (suppressServiceMessages). The device's other messages are not affected. Undo with “Unsuppress”.",
+        },
+    'The CCU reports {datapoint} for this channel again: lifts the suppression (suppressServiceMessages with suppress=false).':
+        {
+            de: 'Die Zentrale meldet {datapoint} für diesen Kanal wieder: hebt die Unterdrückung auf (suppressServiceMessages mit suppress=false).',
+            en: 'The CCU reports {datapoint} for this channel again: lifts the suppression (suppressServiceMessages with suppress=false).',
+        },
     'other firmware or device type': {
         de: 'andere Firmware oder anderer Gerätetyp',
         en: 'other firmware or device type',

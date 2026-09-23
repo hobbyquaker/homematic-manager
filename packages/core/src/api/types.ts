@@ -352,6 +352,11 @@ export interface RegaState {
     /** Name count loaded from ReGa. */
     names: number;
     error?: string;
+    /**
+     * B-62: why ReGa is off although the profile has it on. `openccu-lite`: the connected system is
+     * an openccu-lite, which has no ReGaHSS - nothing is called, and the settings say so.
+     */
+    reason?: 'openccu-lite';
 }
 
 /** Friendly names: address -> name (devices and channels), from ReGa or the local store. */

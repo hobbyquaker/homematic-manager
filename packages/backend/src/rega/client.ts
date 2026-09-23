@@ -44,6 +44,12 @@ export interface RegaServiceOptions {
     readonly host: string;
     /** D-2: when this is off, `state.enabled` is false and nothing is ever called. */
     readonly enabled: boolean;
+    /**
+     * B-62: the host has no ReGaHSS - it is an openccu-lite system. Overrides `enabled`: nothing is
+     * built and nothing is called, and the state carries this as its reason so the settings can
+     * say why the switch is greyed out.
+     */
+    readonly reason?: 'openccu-lite';
     readonly tls?: boolean;
     readonly auth?: {readonly user: string; readonly password: string} | undefined;
     readonly language?: Language;
@@ -96,8 +102,19 @@ export class RegaService {
 
     constructor(options: RegaServiceOptions) {
         this.#options = options;
-        this.#state = {enabled: options.enabled, reachable: false, names: 0};
-        this.#client = options.enabled ? (options.createClient ?? createClient)(options) : undefined;
+        const enabled = options.enabled && options.reason === undefined;
+        this.#state = enabled ? {enabled, reachable: false, names: 0} : this.#off();
+        this.#client = enabled ? (options.createClient ?? createClient)(options) : undefined;
+    }
+
+    /** The state of a ReGa that is off: by the profile, or because the host has none (B-62). */
+    #off(): RegaState {
+        return {
+            enabled: false,
+            reachable: false,
+            names: 0,
+            ...(this.#options.reason === undefined ? {} : {reason: this.#options.reason}),
+        };
     }
 
     get state(): RegaState {
@@ -115,7 +132,7 @@ export class RegaService {
      */
     async refreshNames(): Promise<boolean> {
         if (!this.#client) {
-            this.#setState({enabled: false, reachable: false, names: 0});
+            this.#setState(this.#off());
             return false;
         }
         try {
@@ -168,9 +185,7 @@ export class RegaService {
         }
         try {
             await this.#client.exec(script);
-            if (this.#state.error !== undefined) {
-                this.#setState({enabled: true, reachable: true, names: this.#state.names});
-            }
+            this.#answered();
         } catch (error) {
             this.#fail(`renaming through ReGa failed: ${errorMessage(error)}`);
         }
@@ -189,6 +204,7 @@ export class RegaService {
         }
         try {
             const answer = await this.#client.exec(CONFIRM_INBOX_SCRIPT);
+            this.#answered();
             const confirmed = parseConfirmedDevices(answer.output);
             if (confirmed.length > 0) {
                 this.#options.onNotice(
@@ -223,19 +239,35 @@ export class RegaService {
         }
         try {
             await this.#client.exec(script);
+            this.#answered();
             return true;
         } catch (error) {
-            this.#options.onNotice(
-                'info',
+            this.#fail(
                 `${address}: the service message was acknowledged on the interface but not in ReGa: ${errorMessage(error)}`,
+                'info',
             );
             return false;
         }
     }
 
-    #fail(message: string): void {
+    /**
+     * A failure becomes the state, and a notice **once**: a ReGa that does not answer says so on the
+     * first call that finds out and stays quiet on every later one, until it answers again (B-62 -
+     * before this every rename, acknowledgement and reconnect repeated the same warning).
+     */
+    #fail(message: string, level: 'warn' | 'info' = 'warn'): void {
+        const known = this.#state.error !== undefined;
         this.#setState({enabled: true, reachable: false, names: this.#options.names.size, error: message});
-        this.#options.onNotice('warn', message);
+        if (!known) {
+            this.#options.onNotice(level, message);
+        }
+    }
+
+    /** A call succeeded: an earlier failure is over, and the next one may be reported again. */
+    #answered(): void {
+        if (this.#state.error !== undefined) {
+            this.#setState({enabled: true, reachable: true, names: this.#state.names});
+        }
     }
 
     #setState(state: RegaState): void {

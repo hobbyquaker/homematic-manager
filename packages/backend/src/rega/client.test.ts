@@ -64,6 +64,81 @@ describe('RegaService when it is switched off (D-2)', () => {
         expect(rega.available).toBe(false);
         expect(states.at(-1)).toEqual({enabled: false, reachable: false, names: 0});
     });
+
+    it('is off with its reason on a host without ReGaHSS, whatever the profile says (B-62)', async () => {
+        const getChannels = vi.fn();
+        const exec = vi.fn();
+        const {rega, states, notices} = service({getChannels, exec}, {enabled: true, reason: 'openccu-lite'});
+        const off = {enabled: false, reachable: false, names: 0, reason: 'openccu-lite'};
+        expect(rega.state).toEqual(off);
+        await expect(rega.refreshNames()).resolves.toBe(false);
+        await rega.rename([{address: 'A', name: 'x'}]);
+        await expect(rega.confirmInbox()).resolves.toEqual([]);
+        await expect(rega.acknowledgeAlarm('BidCos-RF', 'ABC1:0', 'STICKY_UNREACH')).resolves.toBe(false);
+        await expect(rega.exec('x')).rejects.toThrow('switched off');
+        expect(getChannels).not.toHaveBeenCalled();
+        expect(exec).not.toHaveBeenCalled();
+        expect(notices).toEqual([]);
+        expect(states.at(-1)).toEqual(off);
+    });
+});
+
+describe('an unreachable ReGa says so once (B-62)', () => {
+    it('warns on the first failure and stays quiet until it answers again', async () => {
+        const names = new NameStore();
+        names.set([{address: 'ABC1:1', name: 'Lamp'}]);
+        names.applyRega([{id: 4711, address: 'ABC1:1', name: 'Lamp'}]);
+        let down = true;
+        const call = (): Promise<never> => Promise.reject(new Error('ECONNREFUSED'));
+        const {rega, states, notices} = service(
+            {
+                getChannels: () => (down ? call() : Promise.resolve([{id: 4711, address: 'ABC1:1', name: 'Lamp'}])),
+                exec: () => (down ? call() : Promise.resolve({output: '', objects: {}})),
+            },
+            {names},
+        );
+        await rega.refreshNames();
+        await rega.rename([{address: 'ABC1:1', name: 'Light'}]);
+        await rega.confirmInbox();
+        await rega.acknowledgeAlarm('BidCos-RF', 'ABC1:0', 'STICKY_UNREACH');
+        await rega.refreshNames();
+        // one notice for five failing calls; the state still carries every failure
+        expect(notices).toEqual(['ReGa is not answering: ECONNREFUSED']);
+        expect(states.at(-1)).toMatchObject({reachable: false, error: 'ReGa is not answering: ECONNREFUSED'});
+        expect(states.every((state) => state.error !== undefined)).toBe(true);
+
+        // it answers again: the state clears, and the next failure is news again
+        down = false;
+        await rega.acknowledgeAlarm('BidCos-RF', 'ABC1:0', 'STICKY_UNREACH');
+        expect(states.at(-1)).toEqual({enabled: true, reachable: true, names: 1});
+        expect(notices).toHaveLength(1);
+        down = true;
+        await rega.confirmInbox();
+        expect(notices).toEqual([
+            'ReGa is not answering: ECONNREFUSED',
+            'confirming the ReGa inbox failed: ECONNREFUSED',
+        ]);
+    });
+
+    it('keeps the acknowledgement notice at info level, once', async () => {
+        const {rega, notices} = service({exec: () => Promise.reject(new Error('500'))});
+        const levels: string[] = [];
+        const {rega: withLevels} = service(
+            {exec: () => Promise.reject(new Error('500'))},
+            {
+                onNotice: (level, message) => {
+                    levels.push(level);
+                    notices.push(message);
+                },
+            },
+        );
+        await expect(withLevels.acknowledgeAlarm('BidCos-RF', 'ABC1:0', 'STICKY_UNREACH')).resolves.toBe(false);
+        await expect(withLevels.acknowledgeAlarm('BidCos-RF', 'ABC1:0', 'STICKY_UNREACH')).resolves.toBe(false);
+        expect(levels).toEqual(['info']);
+        expect(notices).toHaveLength(1);
+        expect(notices[0]).toContain('acknowledged on the interface but not in ReGa');
+        expect(rega.state.error).toBeUndefined();
+    });
 });
 
 describe('RegaService.refreshNames', () => {

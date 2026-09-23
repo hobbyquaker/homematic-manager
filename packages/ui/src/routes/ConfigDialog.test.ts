@@ -281,6 +281,25 @@ describe('ConfigDialog', () => {
         });
     });
 
+    it('says why ReGa is off on a system without ReGaHSS, and does not offer the inbox (B-62)', async () => {
+        transport.result('rega.state', {enabled: false, reachable: false, names: 0, reason: 'openccu-lite'});
+        await open(transport);
+
+        // greyed out with the reason, not hidden (D-2's pattern); the profile's own value is not touched
+        const rega = screen.getByTestId<HTMLInputElement>('config-rega');
+        expect(rega.disabled).toBe(true);
+        expect(rega.checked).toBe(false);
+        expect(screen.getByText('Abgeschaltet: das System hat kein ReGaHSS')).toBeTruthy();
+        expect(screen.queryByTestId('config-auto-confirm-inbox')).toBeNull();
+
+        // another address is another system: the switch is a switch again
+        await fireEvent.input(screen.getByTestId('config-host'), {target: {value: 'other.lan'}});
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLInputElement>('config-rega').disabled).toBe(false);
+        });
+        expect(screen.getByTestId('config-auto-confirm-inbox')).toBeTruthy();
+    });
+
     /** The demo list minus its one STICKY_UNREACH, so nothing is there to ask about. */
     function withoutSticky(): void {
         transport.result('serviceMessages.list', [

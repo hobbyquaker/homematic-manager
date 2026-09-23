@@ -76,6 +76,13 @@ export interface MetaServiceOptions {
     readonly onChanged: () => void;
     readonly onStateChanged: (state: MetaState) => void;
     readonly onNotice: (level: 'info' | 'warn' | 'error', message: string) => void;
+    /**
+     * B-62: what the connection's own host answered to `GET /api/meta/v1/version`, when the connect
+     * has already asked it (to know whether the host is an openccu-lite system, which has no
+     * ReGa). `answer` is undefined for a CCU. Reused here when the store is that host, so the
+     * common case probes once; a store at another `metaUrl` is still probed on its own.
+     */
+    readonly hostProbe?: {readonly answer: MetaVersion | undefined} | undefined;
     /** Injected by the tests. */
     readonly localTokenFile?: string | undefined;
     readonly fetch?: typeof globalThis.fetch;
@@ -83,17 +90,15 @@ export interface MetaServiceOptions {
 }
 
 /**
- * The base URL of the box.
+ * The base URL of the connection's own host: `http://127.0.0.1` for the addon on the box itself
+ * (`local`, where everything is behind the loopback lighttpd), else the configured host with the
+ * scheme the profile uses for the CCU; `''` without a host.
  *
- * `local` means "we are the addon on the box itself", where everything is behind the loopback
- * lighttpd; otherwise it is the configured host with the scheme the profile uses for the CCU.
- * `metaUrl` overrides both, for a reverse proxy on a strange port and for the integration tests.
+ * B-62 asks this URL whether the host is an openccu-lite system. Never `metaUrl`: that names the
+ * store, which may be another system altogether (a CCU3 with ReGa whose rooms live on an
+ * openccu-lite, D-40).
  */
-export function metaBaseUrl(connection: ConnectionConfig): string {
-    const configured = (connection.metaUrl ?? '').trim();
-    if (configured !== '') {
-        return configured.replace(/\/$/, '');
-    }
+export function hostBaseUrl(connection: ConnectionConfig): string {
     if (connection.local === true) {
         return 'http://127.0.0.1';
     }
@@ -102,6 +107,20 @@ export function metaBaseUrl(connection: ConnectionConfig): string {
         return '';
     }
     return `${connection.tls ? 'https' : 'http'}://${host}`;
+}
+
+/**
+ * The base URL of the box.
+ *
+ * The connection's own host (`hostBaseUrl`) unless `metaUrl` overrides it, for a store on another
+ * system, a reverse proxy on a strange port and for the integration tests.
+ */
+export function metaBaseUrl(connection: ConnectionConfig): string {
+    const configured = (connection.metaUrl ?? '').trim();
+    if (configured !== '') {
+        return configured.replace(/\/$/, '');
+    }
+    return hostBaseUrl(connection);
 }
 
 /** Everything the metadata store is, for one connection. */
@@ -154,7 +173,9 @@ export class MetaService {
         const version =
             baseUrl === ''
                 ? undefined
-                : await service.#client(baseUrl).version(options.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
+                : options.hostProbe !== undefined && baseUrl === hostBaseUrl(options.connection)
+                  ? options.hostProbe.answer
+                  : await service.#client(baseUrl).version(options.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
         if (version === undefined) {
             if (choice === 'occulite') {
                 options.onNotice(

@@ -638,6 +638,13 @@ describe('the ReGa inbox (#54)', () => {
         await fireEvent.click(screen.getByTestId('devices-add'));
         expect(screen.queryByTestId('add-device-confirm-inbox')).toBeNull();
     });
+
+    it('nor on a system without ReGaHSS, where there is no inbox (B-62)', async () => {
+        transport.result('rega.state', {enabled: false, reachable: false, names: 0, reason: 'openccu-lite'});
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await fireEvent.click(screen.getByTestId('devices-add'));
+        expect(screen.queryByTestId('add-device-confirm-inbox')).toBeNull();
+    });
 });
 
 /**

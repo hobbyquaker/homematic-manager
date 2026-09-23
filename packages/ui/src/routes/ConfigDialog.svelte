@@ -365,6 +365,17 @@
         acknowledgeExisting = false;
     }
 
+    /**
+     * B-62: ReGa is off because the connected system has no ReGaHSS (it is an openccu-lite), which
+     * the backend reports as the state's reason. Only while the draft still names that host: a
+     * user typing another address is configuring another system.
+     */
+    const regaOffByHost = $derived(
+        stores.interfaces.rega?.reason === 'openccu-lite' &&
+            draft !== undefined &&
+            draft.host.trim() === (stored?.host ?? '').trim(),
+    );
+
     /** #54: the same for the ReGa inbox, which only means anything while ReGa is on (D-2). */
     function setAutoConfirmInbox(value: boolean): void {
         if (draft) {
@@ -738,32 +749,49 @@
                     <section class="hmm-config-section">
                         <h3 class="hmm-config-title">ReGa</h3>
                         <div class="hmm-config-grid">
+                            <!--
+                                B-62: on an openccu-lite system there is no ReGaHSS, and the backend
+                                keeps ReGa off whatever the profile says. The switch is greyed out
+                                with that reason rather than hidden (D-2's pattern, as #54's row
+                                below), and the profile's own value is left alone: the same profile
+                                moved to a CCU has ReGa again.
+                            -->
                             <label class="hmm-config-row">
                                 <span class="hmm-config-label">{t('Use ReGa')}</span>
                                 <span class="hmm-config-field">
-                                    <input type="checkbox" bind:checked={draft.rega} />
-                                    <small class="hmm-config-help">{t('ReGa supplies the friendly names')}</small>
+                                    {#if regaOffByHost}
+                                        <input type="checkbox" disabled checked={false} data-testid="config-rega" />
+                                        <small class="hmm-config-help"
+                                            >{t('Switched off: the system has no ReGaHSS')}</small
+                                        >
+                                    {:else}
+                                        <input type="checkbox" bind:checked={draft.rega} data-testid="config-rega" />
+                                        <small class="hmm-config-help">{t('ReGa supplies the friendly names')}</small>
+                                    {/if}
                                 </span>
                             </label>
 
                             <!--
                                 Issue #54. Greyed out without ReGa rather than hidden: a user who
                                 wonders where the option went should see that it is the ReGa switch
-                                above that turns it off (D-2).
+                                above that turns it off (D-2). Not shown at all where the system has
+                                no ReGa (B-62): there is no inbox there, a paired device is simply there.
                             -->
-                            <label class="hmm-config-row">
-                                <span class="hmm-config-label">{t('Confirm the ReGa inbox automatically')}</span>
-                                <span class="hmm-config-field">
-                                    <input
-                                        type="checkbox"
-                                        disabled={!draft.rega}
-                                        checked={draft.autoConfirmRegaInbox === true}
-                                        data-testid="config-auto-confirm-inbox"
-                                        onchange={(event) => setAutoConfirmInbox(event.currentTarget.checked)}
-                                    />
-                                    <small class="hmm-config-help">{t('Only possible with ReGa')}</small>
-                                </span>
-                            </label>
+                            {#if !regaOffByHost}
+                                <label class="hmm-config-row">
+                                    <span class="hmm-config-label">{t('Confirm the ReGa inbox automatically')}</span>
+                                    <span class="hmm-config-field">
+                                        <input
+                                            type="checkbox"
+                                            disabled={!draft.rega}
+                                            checked={draft.autoConfirmRegaInbox === true}
+                                            data-testid="config-auto-confirm-inbox"
+                                            onchange={(event) => setAutoConfirmInbox(event.currentTarget.checked)}
+                                        />
+                                        <small class="hmm-config-help">{t('Only possible with ReGa')}</small>
+                                    </span>
+                                </label>
+                            {/if}
                         </div>
                     </section>
 

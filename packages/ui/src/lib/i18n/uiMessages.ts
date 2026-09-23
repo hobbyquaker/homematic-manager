@@ -734,6 +734,11 @@ export const UI_MESSAGES: MessageCatalogue = {
         en: 'ReGa supplies the friendly names',
     },
     'Only possible with ReGa': {de: 'Nur mit ReGa möglich', en: 'Only possible with ReGa'},
+    // B-62: the connected system is an openccu-lite, which has no ReGaHSS
+    'Switched off: the system has no ReGaHSS': {
+        de: 'Abgeschaltet: das System hat kein ReGaHSS',
+        en: 'Switched off: the system has no ReGaHSS',
+    },
     'Shortest pause between two writes': {
         de: 'Kürzeste Pause zwischen zwei Schreibzugriffen',
         en: 'Shortest pause between two writes',

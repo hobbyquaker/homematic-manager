@@ -813,16 +813,22 @@ describe('config', () => {
         // as an ENOTEMPTY in the simulator suite, which has nothing to do with metadata at all.
         const order: string[] = [];
         const h = await harness({
+            // B-62: the connect asks the CCU itself whether it is an openccu-lite (alongside the
+            // interface start), so the store that must not be awaited is one on another system
+            connection: {metaUrl: 'http://box'},
             backend: {
                 metaOptions: {
-                    // a box that takes its time - a LAN, a busy lighttpd, or the host that swallows
-                    // the packet altogether and is answered by the detection timeout
-                    fetch: async () => {
+                    fetch: (async (input: string | URL) => {
+                        if (new URL(String(input)).host !== 'box') {
+                            // the CCU: no metadata API here, and it says so at once
+                            return new Response('not found', {status: 404});
+                        }
+                        // a box that takes its time - a LAN, a busy lighttpd, or the host that
+                        // swallows the packet altogether and is answered by the detection timeout
                         await new Promise((resolve) => setTimeout(resolve, 150));
                         order.push('detected');
-                        // a CCU: no metadata API here
                         return new Response('not found', {status: 404});
-                    },
+                    }) as unknown as typeof globalThis.fetch,
                 },
             },
         });
@@ -948,6 +954,107 @@ describe('interfaces and rega', () => {
         const backend = await Backend.open({dataDir: dir, importLegacy: false});
         expect(await backend.request('rega.state')).toEqual({enabled: true, reachable: false, names: 0});
         await backend.stop();
+    });
+});
+
+/**
+ * B-62: ReGa is switched off when the *host* is an openccu-lite system - decided by what exists,
+ * `GET /api/meta/v1/version` on the connection's own host - and not merely because an openccu-lite
+ * is the metadata store: a CCU3 that keeps its rooms on another system keeps its ReGa (D-40).
+ */
+describe('ReGa on an openccu-lite host (B-62)', () => {
+    const json = (body: unknown): Response =>
+        new Response(JSON.stringify(body), {status: 200, headers: {'Content-Type': 'application/json'}});
+    const version = {api: 'meta', version: 1, format: 1, revision: 3, implementation: 'occulited'};
+
+    /** A fetch that is an openccu-lite on `boxes` and a CCU (404) everywhere else. */
+    function fetchOf(boxes: readonly string[], probes: string[]): typeof globalThis.fetch {
+        return ((input: string | URL) => {
+            const url = new URL(String(input));
+            if (url.pathname === '/api/meta/v1/version') {
+                probes.push(url.host);
+            }
+            if (!boxes.includes(url.host)) {
+                return Promise.resolve(new Response('not found', {status: 404}));
+            }
+            switch (url.pathname) {
+                case '/api/meta/v1/version':
+                    return Promise.resolve(json(version));
+                case '/api/meta/v1/snapshot':
+                    return Promise.resolve(json({format: 1, revision: 3, objects: {}, enums: {}}));
+                case '/api/meta/v1/events/sse':
+                    return Promise.resolve(
+                        new Response(new ReadableStream({start: () => undefined}), {
+                            headers: {'Content-Type': 'text/event-stream'},
+                        }),
+                    );
+                default:
+                    return Promise.resolve(new Response('not found', {status: 404}));
+            }
+        }) as unknown as typeof globalThis.fetch;
+    }
+
+    it('leaves ReGa alone: no call, no notice, and the state says why', async () => {
+        const probes: string[] = [];
+        const h = await harness({backend: {metaOptions: {fetch: fetchOf(['ccu.lan'], probes)}}});
+        await h.backend.request('meta.objects');
+        expect(await h.backend.request('rega.state')).toEqual({
+            enabled: false,
+            reachable: false,
+            names: 0,
+            reason: 'openccu-lite',
+        });
+        expect(await h.backend.request('meta.state')).toMatchObject({provider: 'occulite', reachable: true});
+        // the host was asked once; the store reused the answer instead of asking again
+        expect(probes).toEqual(['ccu.lan']);
+
+        // nothing that uses ReGa reaches it: neither the names at connect nor the inbox
+        expect(await h.backend.request('rega.confirmInbox')).toEqual([]);
+        expect(h.rega.getChannels).not.toHaveBeenCalled();
+        expect(h.rega.exec).not.toHaveBeenCalled();
+        const regaNotices = h.events
+            .filter((event) => event.name === 'notice')
+            .map((event) => (event.payload as {message: string}).message)
+            .filter((message) => /rega/i.test(message));
+        expect(regaNotices).toEqual([]);
+        await h.backend.stop();
+    });
+
+    it('keeps the ReGa of a CCU whose metadata store is another openccu-lite system (D-40)', async () => {
+        const probes: string[] = [];
+        const h = await harness({
+            connection: {metaUrl: 'http://box', metaToken: 'olt_0123456789abcdef0123456789abcdef'},
+            backend: {metaOptions: {fetch: fetchOf(['box'], probes)}},
+        });
+        await h.backend.request('meta.objects');
+        expect(await h.backend.request('rega.state')).toEqual({enabled: true, reachable: true, names: 1});
+        expect(await h.backend.request('meta.state')).toMatchObject({provider: 'occulite', reachable: true});
+        expect(h.rega.getChannels).toHaveBeenCalledTimes(1);
+        // the host and the store are two systems, and each was asked once
+        expect(probes.sort()).toEqual(['box', 'ccu.lan']);
+        await h.backend.stop();
+    });
+
+    it('is decided by the host, not by the profile: the store may be this profile and ReGa still off', async () => {
+        const probes: string[] = [];
+        const h = await harness({
+            connection: {metaProvider: 'local'},
+            backend: {metaOptions: {fetch: fetchOf(['ccu.lan'], probes)}},
+        });
+        await h.backend.request('meta.objects');
+        expect(await h.backend.request('rega.state')).toMatchObject({enabled: false, reason: 'openccu-lite'});
+        expect(await h.backend.request('meta.state')).toMatchObject({provider: 'local'});
+        expect(h.rega.getChannels).not.toHaveBeenCalled();
+        await h.backend.stop();
+    });
+
+    it('asks a CCU once and uses its ReGa as before', async () => {
+        const probes: string[] = [];
+        const h = await harness({backend: {metaOptions: {fetch: fetchOf([], probes)}}});
+        await h.backend.request('meta.objects');
+        expect(await h.backend.request('rega.state')).toEqual({enabled: true, reachable: true, names: 1});
+        expect(probes).toEqual(['ccu.lan']);
+        await h.backend.stop();
     });
 });
 

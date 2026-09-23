@@ -70,6 +70,14 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Fixed
 
+- **No ReGa calls on an openccu-lite system, and an unreachable ReGa says so once.** On a system without ReGaHSS the
+  Homematic Manager asked ReGa for its names at every connect, after every pairing and every acknowledgement, and
+  warned each time that it did not answer. It now asks the system itself first (its `/api/meta/v1/version`, the same
+  question that finds its metadata store) and, where it is an openccu-lite, leaves ReGa alone: nothing is called,
+  nothing is logged, _Use ReGa_ in the settings is greyed out with that reason, and the ReGa inbox - its button in
+  the pairing dialog and its row in the settings - is not offered, as there is none. A CCU that only keeps its rooms
+  on an openccu-lite keeps its ReGa. Everywhere, a ReGa that stops answering is reported once and stays quiet until
+  it answers again, instead of repeating the same warning at every rename and acknowledgement.
 - **No more warning from hmipserver at every connect.** The answer to hmipserver's `listDevices` left out the
   CCU's virtual remote control (`HmIP-RCV-1`) - a workaround for CCU3 firmware 3.43.15 from 2019. Without it,
   current hmipservers logged a `handleIDMigration` warning and sent all 52 descriptions of the virtual remote

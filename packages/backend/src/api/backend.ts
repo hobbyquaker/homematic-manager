@@ -47,6 +47,7 @@ import {
     type MetaNodePatch,
     type MetaSnapshot,
     type MetaState,
+    type MetaVersion,
     type NameMap,
     type Paramset,
     type ParamsetDescription,
@@ -87,7 +88,8 @@ import {
     type InterfaceManagerOptions,
 } from '../interfaces/manager.js';
 import {HeatingGroupsClient} from '../groups/client.js';
-import {MetaService, type MetaServiceOptions} from '../meta/service.js';
+import {DETECT_TIMEOUT_MS, MetaApiClient} from '../meta/client.js';
+import {MetaService, hostBaseUrl, type MetaServiceOptions} from '../meta/service.js';
 import {RegaService, type RegaServiceOptions} from '../rega/client.js';
 import type {RpcCallRecord, RpcOutValue} from '../rpc/client.js';
 import {listDevicesAnswer, type CallbackHandler} from '../rpc/server.js';
@@ -725,9 +727,31 @@ export class Backend {
         });
         this.#manager = manager;
 
+        // B-62: is the host an openccu-lite system? Asked alongside the interface start, so that a
+        // host which swallows the packet holds up the names, never the interfaces (D-40's rule).
+        const hostProbe = this.#probeHost(connection);
+
+        try {
+            await manager.start();
+        } catch (error) {
+            this.#manager = undefined;
+            this.#notice('error', errorMessage(error));
+            return;
+        }
+
+        const hostVersion = await hostProbe;
+        if (this.#manager !== manager) {
+            // disconnected while the host was being asked
+            return;
+        }
+
         this.#rega = (this.#options.createRega ?? ((options) => new RegaService(options)))({
             host: connection.host,
             enabled: connection.rega,
+            // B-62: an openccu-lite system has no ReGaHSS. Nothing is called and nothing is logged;
+            // the state says why, and the profile's own switch is left as it is - the same profile
+            // moved to a CCU has ReGa again.
+            ...(hostVersion === undefined ? {} : {reason: 'openccu-lite' as const}),
             tls: connection.tls,
             auth: connection.auth,
             // ReGa's client takes a language for the WebUI placeholder translation, which is off
@@ -746,20 +770,31 @@ export class Backend {
             ...this.#options.regaOptions,
         });
 
-        try {
-            await manager.start();
-        } catch (error) {
-            this.#manager = undefined;
-            this.#notice('error', errorMessage(error));
-            return;
-        }
-
         if (await this.#rega.refreshNames()) {
             this.#caches.saveNames();
             this.events.emit('names.changed', this.#caches.names.all());
         }
-        this.#metaReady = this.#startMeta(connection);
+        this.#metaReady = this.#startMeta(connection, {answer: hostVersion});
         this.#startServiceMessagePolling();
+    }
+
+    /**
+     * B-62: whether the connection's own host is an openccu-lite system - decided from what exists,
+     * openccu-lite's own rule (D-40): `GET /api/meta/v1/version` on the host itself answers
+     * `{"api":"meta",…}` there and 404 or HTML on a CCU. Never `metaUrl`, which names the store and
+     * may be another system. Never throws; a host that is off is "not openccu-lite" for this
+     * connect, and its ReGa is asked as before.
+     */
+    async #probeHost(connection: AppConfig['connection']): Promise<MetaVersion | undefined> {
+        const baseUrl = hostBaseUrl(connection);
+        if (baseUrl === '') {
+            return undefined;
+        }
+        const client = new MetaApiClient({
+            baseUrl,
+            ...(this.#options.metaOptions?.fetch === undefined ? {} : {fetch: this.#options.metaOptions.fetch}),
+        });
+        return client.version(this.#options.metaOptions?.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
     }
 
     async #disconnect(): Promise<void> {
@@ -785,7 +820,10 @@ export class Backend {
      * connect. Before that the store's names are still applied - they are keyed by ref, and the
      * address half of a ref never needs an interface to be readable.
      */
-    async #startMeta(connection: AppConfig['connection']): Promise<void> {
+    async #startMeta(
+        connection: AppConfig['connection'],
+        hostProbe: {readonly answer: MetaVersion | undefined},
+    ): Promise<void> {
         try {
             const meta = await MetaService.create({
                 connection,
@@ -793,10 +831,12 @@ export class Backend {
                 cacheDir: this.#config.cacheDir,
                 names: this.#caches.names,
                 interfaceOf: (address) => this.#interfaceOf(address),
+                hostProbe,
                 // task 27: ReGa as the store of rooms and functions on a CCU. Read through the
-                // service that is current at call time - a reconnect replaces it.
+                // service that is current at call time - a reconnect replaces it. Off by the
+                // profile or by the host (B-62): no ReGa store either way.
                 rega:
-                    this.#rega === undefined || !connection.rega
+                    this.#rega === undefined || !this.#rega.state.enabled
                         ? undefined
                         : {
                               available: this.#rega.available,

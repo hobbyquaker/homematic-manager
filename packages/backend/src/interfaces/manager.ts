@@ -234,6 +234,14 @@ export interface InterfaceManagerOptions {
      * line of a fixed port that cannot be opened.
      */
     readonly callbackPins?: CallbackPins;
+    /**
+     * B-69: whether the interface lists any device now - the backend's device cache. An interface
+     * that answers no ping (VirtualDevices) is watched by its events alone, and with no device it
+     * has nothing to send: on a system without virtual groups the group process was subscribed
+     * again every time its event timeout ran out, about every 75 s. Left out, every such interface
+     * is judged by its events, as before.
+     */
+    readonly listsDevices?: (interfaceName: string) => boolean;
     /** Injected by the tests. */
     readonly createClient?: (options: RpcClientOptions) => RpcClient;
     readonly createCallbackServers?: (handler: CallbackHandler) => CallbackServerSet;
@@ -625,6 +633,12 @@ export class InterfaceManager {
         const work: Promise<void>[] = [];
         for (const entry of this.#interfaces.values()) {
             const timeout = entry.target.resolved.pingTimeoutSeconds * 1000;
+            if (this.#quietByNature(entry)) {
+                // B-69: its silence says nothing, so it is not counted; the timeout runs from the
+                // moment the interface lists a device again
+                entry.lastSeenMono = now;
+                continue;
+            }
             const elapsed = now - entry.lastSeenMono;
             if (elapsed > timeout) {
                 this.#update(entry, {connected: false});
@@ -639,6 +653,21 @@ export class InterfaceManager {
         }
         await Promise.all(work);
         this.#options.onStateChanged(this.states());
+    }
+
+    /**
+     * B-69: an interface that answers no ping, is subscribed, and lists no device. The maintainer's
+     * decision (2026-09-23): its event timeout is skipped only while it lists no devices; with
+     * devices - virtual groups exist - it is judged by its events as before.
+     */
+    #quietByNature(entry: ManagedInterface): boolean {
+        const listsDevices = this.#options.listsDevices;
+        return (
+            listsDevices !== undefined &&
+            !entry.target.resolved.ping &&
+            entry.state.connected &&
+            !listsDevices(entry.name)
+        );
     }
 
     /**

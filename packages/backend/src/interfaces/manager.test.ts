@@ -132,6 +132,8 @@ function harness(
         liveness?: boolean;
         network?: CallbackNetwork;
         keepConfiguredCallbackIp?: boolean;
+        /** B-69: the backend's device cache, per interface. */
+        listsDevices?: (interfaceName: string) => boolean;
     } = {},
 ): Harness {
     const states: InterfaceState[][] = [];
@@ -169,6 +171,7 @@ function harness(
             ? {}
             : {keepConfiguredCallbackIp: options.keepConfiguredCallbackIp}),
         ...(options.probe ? {probe: options.probe} : {probe: () => Promise.resolve<PortProbe>('open')}),
+        ...(options.listsDevices === undefined ? {} : {listsDevices: options.listsDevices}),
     });
     return {manager, states, notices, connected, servers, clients, clock};
 }
@@ -1047,6 +1050,69 @@ describe('the watchdog', () => {
         await h.manager.tick();
         expect(h.clients.calls).toEqual([]);
         h.clock.value += 20_000;
+        await h.manager.tick();
+        expect(h.clients.calls.map((call) => call.method)).toEqual(['init']);
+    });
+
+    it('leaves VirtualDevices alone while it lists no device (B-69)', async () => {
+        const h = harness({connection: {interfaces: ['VirtualDevices']}, listsDevices: () => false});
+        await h.manager.start();
+        h.clients.calls.length = 0;
+        // the Pi 4 without groups was subscribed again at about 116 s, 191 s, ... - now at none
+        for (let round = 0; round < 40; round += 1) {
+            h.clock.value += 15_000;
+            await h.manager.tick();
+        }
+        expect(h.clients.calls).toEqual([]);
+        expect(h.manager.states()[0]?.connected).toBe(true);
+    });
+
+    it('judges VirtualDevices by its events again once it lists a device, from that moment (B-69)', async () => {
+        let groups = false;
+        const h = harness({connection: {interfaces: ['VirtualDevices']}, listsDevices: () => groups});
+        await h.manager.start();
+        h.clients.calls.length = 0;
+        h.clock.value += 300_000;
+        await h.manager.tick();
+        expect(h.clients.calls).toEqual([]);
+        // a group is created: its silence counts from here, not from the start
+        groups = true;
+        h.clock.value += 50_000;
+        await h.manager.tick();
+        expect(h.clients.calls).toEqual([]);
+        h.clock.value += 20_000;
+        await h.manager.tick();
+        expect(h.clients.calls.map((call) => call.method)).toEqual(['init']);
+    });
+
+    it('re-inits VirtualDevices with devices after its timeout, as before (B-69)', async () => {
+        const h = harness({connection: {interfaces: ['VirtualDevices']}, listsDevices: () => true});
+        await h.manager.start();
+        h.clients.calls.length = 0;
+        h.clock.value += 61_000;
+        await h.manager.tick();
+        expect(h.clients.calls.map((call) => call.method)).toEqual(['init']);
+    });
+
+    it('still retries a VirtualDevices without devices that never answered its init (B-69)', async () => {
+        const h = harness({
+            connection: {interfaces: ['VirtualDevices']},
+            listsDevices: () => false,
+            answers: {VirtualDevices: () => new Error('connect ECONNREFUSED')},
+        });
+        await h.manager.start();
+        expect(h.manager.states()[0]?.connected).toBe(false);
+        h.clients.calls.length = 0;
+        h.clock.value += 61_000;
+        await h.manager.tick();
+        expect(h.clients.calls.map((call) => call.method)).toContain('init');
+    });
+
+    it('judges an interface that answers pings by its events whether or not it lists devices (B-69)', async () => {
+        const h = harness({connection: {interfaces: ['BidCos-RF']}, listsDevices: () => false});
+        await h.manager.start();
+        h.clients.calls.length = 0;
+        h.clock.value += 61_000;
         await h.manager.tick();
         expect(h.clients.calls.map((call) => call.method)).toEqual(['init']);
     });

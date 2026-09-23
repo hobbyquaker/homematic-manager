@@ -753,6 +753,8 @@ export class Backend {
                 ? {}
                 : {defaultCallbackPorts: this.#options.defaultCallbackPorts}),
             ...(this.#config.callbackPins === undefined ? {} : {callbackPins: this.#config.callbackPins}),
+            // B-69: read at every watchdog round - the cache is replaced when the host changes
+            listsDevices: (interfaceName) => this.#caches.devices.size(interfaceName) > 0,
             ...(this.#options.rpcTimeoutMs === undefined ? {} : {rpcTimeoutMs: this.#options.rpcTimeoutMs}),
             ...(this.#options.watchdogIntervalMs === undefined
                 ? {}

@@ -875,6 +875,24 @@ describe('idle unsubscribe (D-31)', () => {
     });
 });
 
+describe('the device list the watchdog reads (B-69)', () => {
+    it('tells the interface manager which interfaces list devices, from the device cache', async () => {
+        let listsDevices: ((name: string) => boolean) | undefined;
+        const h = await harness({
+            backend: {
+                createInterfaceManager: (managerOptions) => {
+                    listsDevices = managerOptions.listsDevices;
+                    return new InterfaceManager(managerOptions);
+                },
+            },
+        });
+        await h.backend.request('devices.list', 'HmIP-RF');
+        expect(listsDevices?.('HmIP-RF')).toBe(true);
+        expect(listsDevices?.('VirtualDevices')).toBe(false);
+        await h.backend.stop();
+    });
+});
+
 describe('config', () => {
     it('answers config.get with the defaults on a fresh profile', async () => {
         const backend = await Backend.open({dataDir: dir, importLegacy: false, localAddresses: () => ['10.0.0.2']});

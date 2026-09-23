@@ -83,6 +83,11 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   `HMM_IDLE_UNSUBSCRIBE` into `etc/hmm.env` and then wins over the dialog; a time given at start
   (`--idle-unsubscribe`, `HMM_IDLE_UNSUBSCRIBE`) is shown read-only in the dialog. The desktop app never drops its
   subscriptions and offers no such setting.
+- **VirtualDevices without virtual groups is no longer subscribed again every 75 seconds.** The group process answers
+  no ping, so it is watched by its events alone - and on a system without heating groups it has nothing to send, so
+  its 60 s timeout ran out over and over and the Homematic Manager sent it a new `init` about every 75 s. While it
+  lists no device its silence is not counted any more; once it lists one (a group was created) it is judged by its
+  events as before.
 - **An interface that is not there stays quiet when a browser connects again.** The addon drops its subscriptions
   when no browser has been connected for five minutes, and subscribes again when one connects. Each time, an
   interface that does not exist on the system - BidCos-Wired without a wired gateway - was waited for again for two

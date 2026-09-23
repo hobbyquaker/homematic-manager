@@ -90,6 +90,21 @@ describe('normaliseConnection', () => {
         expect('idleUnsubscribeMs' in normaliseConnection({host: 'ccu', idleUnsubscribeMs: '5m'})).toBe(false);
     });
 
+    it('keeps the certificates the profile trusts in one spelling, and nothing else (B-67)', () => {
+        const pem = '-----BEGIN CERTIFICATE-----\nQUJD\n-----END CERTIFICATE-----';
+        const hex = 'ab'.repeat(32);
+        const connection = normaliseConnection({
+            host: 'ccu',
+            systemTrust: {certificates: [hex, hex.toUpperCase(), 'AB:CD', 7], cas: [pem, `  ${pem}\n`, 'not a pem']},
+        });
+        expect(connection.systemTrust).toEqual({
+            certificates: [Array.from({length: 32}, () => 'AB').join(':')],
+            cas: [`${pem}\n`],
+        });
+        expect('systemTrust' in normaliseConnection({host: 'ccu', systemTrust: {certificates: ['x']}})).toBe(false);
+        expect('systemTrust' in normaliseConnection({host: 'ccu', systemTrust: 'yes'})).toBe(false);
+    });
+
     it('keeps auth only when there is a user', () => {
         expect(normaliseConnection({auth: {user: 'Admin', password: 'secret'}}).auth).toEqual({
             user: 'Admin',

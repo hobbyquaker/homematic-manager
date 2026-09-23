@@ -47,7 +47,6 @@ import {
     type MetaNodePatch,
     type MetaSnapshot,
     type MetaState,
-    type MetaVersion,
     type NameMap,
     type Paramset,
     type ParamsetDescription,
@@ -90,7 +89,8 @@ import {
 } from '../interfaces/manager.js';
 import {HeatingGroupsClient} from '../groups/client.js';
 import {DETECT_TIMEOUT_MS, MetaApiClient} from '../meta/client.js';
-import {MetaService, hostBaseUrl, type MetaServiceOptions} from '../meta/service.js';
+import {MetaService, hostBaseUrl, type HostProbe, type MetaServiceOptions} from '../meta/service.js';
+import {createSystemFetch} from '../meta/systemFetch.js';
 import {RegaService, type RegaServiceOptions} from '../rega/client.js';
 import type {RpcCallRecord, RpcOutValue} from '../rpc/client.js';
 import {listDevicesAnswer, type CallbackHandler} from '../rpc/server.js';
@@ -779,7 +779,8 @@ export class Backend {
             return;
         }
 
-        const hostVersion = await hostProbe;
+        const probe = await hostProbe;
+        const hostVersion = probe.answer;
         if (this.#manager !== manager) {
             // disconnected while the host was being asked
             return;
@@ -814,7 +815,7 @@ export class Backend {
             this.#caches.saveNames();
             this.events.emit('names.changed', this.#caches.names.all());
         }
-        this.#metaReady = this.#startMeta(connection, {answer: hostVersion});
+        this.#metaReady = this.#startMeta(connection, probe);
         this.#startServiceMessagePolling();
         // B-70: counted from the start (or the reconnect of a save) when no page is open
         this.#armIdleTimer();
@@ -827,16 +828,27 @@ export class Backend {
      * may be another system. Never throws; a host that is off is "not openccu-lite" for this
      * connect, and its ReGa is asked as before.
      */
-    async #probeHost(connection: AppConfig['connection']): Promise<MetaVersion | undefined> {
+    async #probeHost(connection: AppConfig['connection']): Promise<HostProbe> {
         const baseUrl = hostBaseUrl(connection);
         if (baseUrl === '') {
-            return undefined;
+            return {answer: undefined};
         }
-        const client = new MetaApiClient({
-            baseUrl,
-            ...(this.#options.metaOptions?.fetch === undefined ? {} : {fetch: this.#options.metaOptions.fetch}),
-        });
-        return client.version(this.#options.metaOptions?.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
+        const client = new MetaApiClient({baseUrl, fetch: this.#systemFetch(connection)});
+        // B-67: the redirect to https:// is followed, and a certificate nothing trusts is said
+        const found = await client.detect(this.#options.metaOptions?.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
+        return {
+            answer: found.version,
+            baseUrl: found.baseUrl,
+            ...(found.certificate === undefined ? {} : {certificate: found.certificate}),
+        };
+    }
+
+    /**
+     * B-67: the `fetch` for the system's own APIs - with the certificates the profile trusts. The
+     * tests inject theirs through `metaOptions.fetch`, which wins.
+     */
+    #systemFetch(connection: AppConfig['connection']): typeof globalThis.fetch {
+        return this.#options.metaOptions?.fetch ?? createSystemFetch(connection.systemTrust);
     }
 
     async #disconnect(): Promise<void> {
@@ -862,10 +874,7 @@ export class Backend {
      * connect. Before that the store's names are still applied - they are keyed by ref, and the
      * address half of a ref never needs an interface to be readable.
      */
-    async #startMeta(
-        connection: AppConfig['connection'],
-        hostProbe: {readonly answer: MetaVersion | undefined},
-    ): Promise<void> {
+    async #startMeta(connection: AppConfig['connection'], hostProbe: HostProbe): Promise<void> {
         try {
             const meta = await MetaService.create({
                 connection,
@@ -893,6 +902,7 @@ export class Backend {
                 onNotice: (level, message) => {
                     this.#notice(level, message);
                 },
+                fetch: this.#systemFetch(connection),
                 ...this.#options.metaOptions,
             });
             if (this.#stopped) {
@@ -1484,7 +1494,8 @@ export class Backend {
         return new HeatingGroupsClient({
             baseUrl,
             credential: () => meta.boxCredential(),
-            ...(this.#options.metaOptions?.fetch === undefined ? {} : {fetch: this.#options.metaOptions.fetch}),
+            // B-67: the same trust as the store's, on the https:// URL the detection found
+            fetch: this.#systemFetch(this.#config.connection),
         });
     }
 

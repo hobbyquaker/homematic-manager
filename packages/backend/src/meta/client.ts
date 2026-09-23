@@ -24,7 +24,10 @@ import {
     type MetaNodePatch,
     type MetaObjectPatch,
     type MetaVersion,
+    type SystemCertificateProblem,
 } from '@homematic-manager/core';
+
+import {certificateProblemOf} from './systemFetch.js';
 
 /** How long a plain request may take. The box is on the LAN or on the loopback. */
 export const DEFAULT_TIMEOUT_MS = 10_000;
@@ -57,6 +60,67 @@ export interface MetaApiClientOptions {
     readonly timeoutMs?: number;
     /** Injected by the tests. */
     readonly fetch?: typeof globalThis.fetch;
+}
+
+/**
+ * B-67: what the detection found - the version answer when there is an openccu-lite system, the
+ * base URL every later call goes to (the `https://` one when the system redirected there), and
+ * the certificate problem when its `https://` could not be trusted.
+ */
+export interface MetaDetection {
+    readonly version?: MetaVersion;
+    readonly baseUrl: string;
+    readonly certificate?: SystemCertificateProblem;
+}
+
+const VERSION_PATH = '/api/meta/v1/version';
+
+/**
+ * B-67: where a redirect of the version request points, when it is the one to follow - the same
+ * resource on `https://`, which is what openccu-lite answers `http://` with. Its base URL is the
+ * redirect target less the API path. Anything else (a login page, another path, back to `http`)
+ * is not followed: it is not the metadata API.
+ */
+export function httpsRedirectTarget(
+    location: string | null,
+    requested: string,
+): {url: string; baseUrl: string} | undefined {
+    if (location === null || location === '') {
+        return undefined;
+    }
+    let target: URL;
+    try {
+        target = new URL(location, requested);
+    } catch {
+        return undefined;
+    }
+    if (target.protocol !== 'https:' || !target.pathname.endsWith(VERSION_PATH)) {
+        return undefined;
+    }
+    const prefix = target.pathname.slice(0, -VERSION_PATH.length);
+    return {url: target.href, baseUrl: `${target.origin}${prefix}`};
+}
+
+const REDIRECTS = new Set([301, 302, 303, 307, 308]);
+
+/** The version answer in a response, when it is one; see {@link MetaApiClient.version}. */
+async function versionOf(response: Response): Promise<MetaVersion | undefined> {
+    if (!response.ok) {
+        return undefined;
+    }
+    const body: unknown = await response.json();
+    if (typeof body !== 'object' || body === null) {
+        return undefined;
+    }
+    const answer = body as Partial<MetaVersion>;
+    if (answer.api !== 'meta' || typeof answer.version !== 'number') {
+        return undefined;
+    }
+    // task 66: the pairing fact is kept only in the shape openccu-lite task 192 defines;
+    // anything else is treated as "the system does not say", never as a broken dialog
+    const {hmip, ...rest} = answer;
+    const pairing = hmipPairingOf(hmip);
+    return {...(rest as MetaVersion), ...(pairing === undefined ? {} : {hmip: pairing})};
 }
 
 /** What a mutating call answers with. */
@@ -107,31 +171,37 @@ export class MetaApiClient {
      * names, no ports. `undefined` means "this is not an openccu-lite box".
      */
     async version(timeoutMs = DETECT_TIMEOUT_MS): Promise<MetaVersion | undefined> {
+        return (await this.detect(timeoutMs)).version;
+    }
+
+    /**
+     * B-67: `GET /version`, following the one redirect an openccu-lite system answers `http://`
+     * with - to the same resource on `https://` - and saying where it led and what went wrong with
+     * the certificate there. Never throws.
+     */
+    async detect(timeoutMs = DETECT_TIMEOUT_MS): Promise<MetaDetection> {
+        const signal = AbortSignal.timeout(timeoutMs);
+        const init: RequestInit = {signal, headers: {Accept: 'application/json'}, redirect: 'manual'};
+        const requested = this.#url('/version');
+        let baseUrl = this.#options.baseUrl;
         try {
-            const response = await this.#fetch(this.#url('/version'), {
-                signal: AbortSignal.timeout(timeoutMs),
-                headers: {Accept: 'application/json'},
-            });
-            if (!response.ok) {
-                return undefined;
+            let response = await this.#fetch(requested, init);
+            if (REDIRECTS.has(response.status)) {
+                const target = httpsRedirectTarget(response.headers.get('location'), requested);
+                if (target === undefined) {
+                    return {baseUrl};
+                }
+                baseUrl = target.baseUrl;
+                response = await this.#fetch(target.url, init);
             }
-            const body: unknown = await response.json();
-            if (typeof body !== 'object' || body === null) {
-                return undefined;
-            }
-            const answer = body as Partial<MetaVersion>;
-            if (answer.api !== 'meta' || typeof answer.version !== 'number') {
-                return undefined;
-            }
-            // task 66: the pairing fact is kept only in the shape openccu-lite task 192 defines;
-            // anything else is treated as "the system does not say", never as a broken dialog
-            const {hmip, ...rest} = answer;
-            const pairing = hmipPairingOf(hmip);
-            return {...(rest as MetaVersion), ...(pairing === undefined ? {} : {hmip: pairing})};
-        } catch {
+            const version = await versionOf(response);
+            return version === undefined ? {baseUrl} : {version, baseUrl};
+        } catch (error) {
             // a box that is off, a CCU that answers HTML, a DNS name that does not resolve: all of
-            // them mean the same thing here, and none of them is worth an exception
-            return undefined;
+            // them mean "no metadata API here" and none of them is worth an exception. A certificate
+            // nothing trusts is said, though (B-67): the system may well be openccu-lite.
+            const certificate = certificateProblemOf(error);
+            return certificate === undefined ? {baseUrl} : {baseUrl, certificate};
         }
     }
 

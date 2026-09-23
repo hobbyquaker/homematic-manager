@@ -505,6 +505,73 @@ describe('ConfigDialog', () => {
         });
     });
 
+    /** B-67: what the system presented, and the two ways to trust it. */
+    const PROBLEM = {
+        url: 'https://10.0.0.5',
+        code: 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
+        certificate: {
+            subject: 'lite.lan',
+            issuer: 'LAN CA',
+            fingerprint256: 'AA:BB:CC',
+            validTo: 'Jan  1 00:00:00 2027 GMT',
+            altNames: 'DNS:lite.lan',
+        },
+        ca: {
+            subject: 'LAN CA',
+            issuer: 'LAN Root',
+            fingerprint256: 'DD:EE',
+            validTo: 'Jan  1 00:00:00 2036 GMT',
+            pem: '-----BEGIN CERTIFICATE-----\nQUJD\n-----END CERTIFICATE-----\n',
+        },
+    };
+
+    it('shows an untrusted certificate of the system and trusts it or its CA on save (B-67)', async () => {
+        const stores = await open(transport);
+        expect(screen.queryByTestId('config-certificate')).toBeNull();
+        stores.taxonomy.state = {
+            provider: 'local',
+            reachable: true,
+            writable: true,
+            revision: 0,
+            objects: 0,
+            certificate: PROBLEM,
+        };
+        await waitFor(() => expect(screen.getByTestId('config-certificate')).toBeTruthy());
+        expect(screen.getByTestId('config-certificate-problem').textContent).toContain(
+            'Dem Zertifikat von https://10.0.0.5 wird nicht vertraut (UNABLE_TO_GET_ISSUER_CERT_LOCALLY)',
+        );
+        const details = screen.getByTestId('config-certificate-details').textContent;
+        expect(details).toContain('lite.lan, ausgestellt von LAN CA');
+        expect(details).toContain('DNS:lite.lan');
+        expect(details).toContain('AA:BB:CC');
+
+        await fireEvent.click(screen.getByTestId('config-trust-certificate'));
+        expect(screen.getByTestId<HTMLButtonElement>('config-trust-certificate').disabled).toBe(true);
+        await fireEvent.click(screen.getByTestId('config-trust-ca'));
+        expect(screen.getByTestId('config-trusted-count').textContent).toContain('2');
+        await fireEvent.click(screen.getByTestId('config-save'));
+        await waitFor(() => {
+            expect(transport.lastCall('config.set')?.[0]?.systemTrust).toEqual({
+                certificates: ['AA:BB:CC'],
+                cas: [PROBLEM.ca.pem],
+            });
+        });
+    });
+
+    it('forgets what the profile trusts (B-67)', async () => {
+        transport.result('config.get', {
+            ...DEMO_CONFIG,
+            connection: {...DEMO_CONFIG.connection, systemTrust: {certificates: ['AA:BB:CC']}},
+        });
+        await open(transport);
+        expect(screen.getByTestId('config-trusted-count').textContent).toContain('1');
+        await fireEvent.click(screen.getByTestId('config-forget-trust'));
+        expect(screen.queryByTestId('config-trusted')).toBeNull();
+        await fireEvent.click(screen.getByTestId('config-save'));
+        await waitFor(() => expect(transport.lastCall('config.set')).toBeDefined());
+        expect('systemTrust' in (transport.lastCall('config.set')?.[0] ?? {})).toBe(false);
+    });
+
     it('offers no idle time where the host never goes idle, the Electron case (B-70)', async () => {
         await open(transport);
         expect(screen.queryByTestId('config-idle')).toBeNull();

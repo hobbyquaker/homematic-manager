@@ -117,6 +117,8 @@
                 writable: t('Writable'),
                 detail: (entry) =>
                     t('revision {revision}, {count} objects', {revision: entry.revision, count: entry.objects}),
+                certificate: (problem) =>
+                    t('The certificate of {url} is not trusted ({code})', {url: problem.url, code: problem.code}),
             }),
             selectable: state.reachable,
             provider: state.provider,

@@ -12,7 +12,8 @@ import {describe, expect, it} from 'vitest';
 
 import {MetaError} from '@homematic-manager/core';
 
-import {MetaApiClient, encodeRef, nodeUrl, readEvents} from './client.js';
+import {MetaApiClient, encodeRef, httpsRedirectTarget, nodeUrl, readEvents} from './client.js';
+import {SystemCertificateError} from './systemFetch.js';
 
 interface Call {
     url: string;
@@ -132,6 +133,65 @@ describe('detection', () => {
             });
             expect(await client.version(), JSON.stringify(broken)).toEqual(base);
         }
+    });
+});
+
+describe('the redirect to https:// (B-67)', () => {
+    const redirect = (location: string, status = 301): Response =>
+        new Response(null, {status, headers: {Location: location}});
+    const VERSION = {api: 'meta', version: 1, implementation: 'occulited 1.0'};
+
+    it('follows the system to https:// and hands back the base URL there', async () => {
+        const {fetch, calls} = recorder([redirect('https://10.0.0.5/api/meta/v1/version'), json(VERSION)]);
+        const found = await new MetaApiClient({baseUrl: 'http://10.0.0.5', fetch}).detect();
+        expect(found).toEqual({version: VERSION, baseUrl: 'https://10.0.0.5'});
+        expect(calls.map((call) => call.url)).toEqual([
+            'http://10.0.0.5/api/meta/v1/version',
+            'https://10.0.0.5/api/meta/v1/version',
+        ]);
+    });
+
+    it('asks fetch not to follow redirects itself', async () => {
+        let redirectMode: RequestInit['redirect'];
+        const fetch = ((_input: string | URL | Request, init?: RequestInit) => {
+            redirectMode = init?.redirect;
+            return Promise.resolve(json(VERSION));
+        }) as typeof globalThis.fetch;
+        await new MetaApiClient({baseUrl: 'http://ccu', fetch}).detect();
+        expect(redirectMode).toBe('manual');
+    });
+
+    it('does not follow a redirect anywhere else - a login page is not the API', async () => {
+        const {fetch, calls} = recorder([redirect('https://ccu/login.htm')]);
+        expect(await new MetaApiClient({baseUrl: 'http://ccu', fetch}).detect()).toEqual({baseUrl: 'http://ccu'});
+        expect(calls).toHaveLength(1);
+    });
+
+    it('says what was wrong with the certificate at the https:// end', async () => {
+        const problem = {
+            url: 'https://10.0.0.5',
+            code: 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
+            certificate: {subject: 'lite.lan', issuer: 'LAN CA', fingerprint256: 'AA:BB', validTo: 'Jan 1 2027'},
+        };
+        const fetch = ((input: string | URL | Request) =>
+            (input instanceof Request ? input.url : input.toString()).startsWith('http:')
+                ? Promise.resolve(redirect('https://10.0.0.5/api/meta/v1/version', 308))
+                : Promise.reject(
+                      new TypeError('fetch failed', {cause: new SystemCertificateError(problem)}),
+                  )) as typeof globalThis.fetch;
+        expect(await new MetaApiClient({baseUrl: 'http://10.0.0.5', fetch}).detect()).toEqual({
+            baseUrl: 'https://10.0.0.5',
+            certificate: problem,
+        });
+    });
+
+    it('keeps a path prefix of a proxy in the base URL', () => {
+        expect(
+            httpsRedirectTarget('https://proxy/lite/api/meta/v1/version', 'http://proxy/lite/api/meta/v1/version'),
+        ).toEqual({url: 'https://proxy/lite/api/meta/v1/version', baseUrl: 'https://proxy/lite'});
+        expect(httpsRedirectTarget('/api/meta/v1/version', 'http://ccu/api/meta/v1/version')).toBeUndefined();
+        expect(httpsRedirectTarget(null, 'http://ccu/api/meta/v1/version')).toBeUndefined();
+        expect(httpsRedirectTarget('http://[', 'http://ccu/api/meta/v1/version')).toBeUndefined();
     });
 });
 

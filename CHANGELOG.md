@@ -83,6 +83,15 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   `HMM_IDLE_UNSUBSCRIBE` into `etc/hmm.env` and then wins over the dialog; a time given at start
   (`--idle-unsubscribe`, `HMM_IDLE_UNSUBSCRIBE`) is shown read-only in the dialog. The desktop app never drops its
   subscriptions and offers no such setting.
+- **An openccu-lite system given by its IP address is found again, and a certificate it is not trusted with is
+  shown.** The system answers `http://` with a redirect to `https://`, and its certificate is usually one of a LAN
+  CA the computer does not know; the Homematic Manager then took it for a CCU, asked ReGa for names and kept the
+  rooms in its own profile. It now follows the redirect and talks to the system over `https://` from then on (the
+  metadata store, the heating groups, the pairing modes). A certificate it cannot check is shown in the settings
+  under _Names and rooms_ - who it is for, who issued it, until when, its fingerprint and the error - with _Trust
+  this certificate_ (holds under any name, an IP address included, until the certificate is renewed) and _Trust the
+  CA_ (covers renewals too, but the name has to fit the certificate); the store's tooltip says it as well. Nothing
+  is sent to a system whose certificate did not pass, not even the request.
 - **VirtualDevices without virtual groups is no longer subscribed again every 75 seconds.** The group process answers
   no ping, so it is watched by its events alone - and on a system without heating groups it has nothing to send, so
   its 60 s timeout ran out over and over and the Homematic Manager sent it a new `init` about every 75 s. While it

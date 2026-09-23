@@ -20,6 +20,7 @@ import {
     type LanguageChoice,
     type MetaProviderChoice,
     type ResolvedInterface,
+    type SystemTrust,
     type UserDefinedInterface,
 } from '@homematic-manager/core';
 
@@ -153,10 +154,50 @@ export function normaliseConnection(input: unknown): ConnectionConfig {
         raw.idleUnsubscribeMs >= 0
             ? {idleUnsubscribeMs: Math.round(raw.idleUnsubscribeMs)}
             : {}),
+        ...systemTrustOf(raw.systemTrust),
     };
 
     const auth = normaliseAuth(raw.auth);
     return auth === undefined ? connection : {...connection, auth};
+}
+
+/**
+ * B-67: the certificates the profile trusts on the system. A fingerprint is 32 bytes of hex in
+ * any spelling, stored as `AB:CD:…`; a CA is kept only as a PEM certificate. Nothing else, and
+ * nothing twice - this is what decides whose certificate the app believes.
+ */
+function systemTrustOf(value: unknown): {systemTrust?: SystemTrust} {
+    if (typeof value !== 'object' || value === null) {
+        return {};
+    }
+    const raw = value as Record<string, unknown>;
+    const certificates = [
+        ...new Set(
+            (Array.isArray(raw['certificates']) ? raw['certificates'] : [])
+                .filter((entry): entry is string => typeof entry === 'string')
+                .map((entry) => entry.replace(/[^0-9a-f]/gi, '').toUpperCase())
+                .filter((hex) => hex.length === 64)
+                .map((hex) => hex.match(/.{2}/g)?.join(':') ?? ''),
+        ),
+    ];
+    const cas = [
+        ...new Set(
+            (Array.isArray(raw['cas']) ? raw['cas'] : [])
+                .filter((entry): entry is string => typeof entry === 'string')
+                .map((entry) => entry.trim())
+                .filter((pem) => /^-----BEGIN CERTIFICATE-----[\s\S]+-----END CERTIFICATE-----$/.test(pem))
+                .map((pem) => `${pem}\n`),
+        ),
+    ];
+    if (certificates.length === 0 && cas.length === 0) {
+        return {};
+    }
+    return {
+        systemTrust: {
+            ...(certificates.length === 0 ? {} : {certificates}),
+            ...(cas.length === 0 ? {} : {cas}),
+        },
+    };
 }
 
 function normaliseAuth(value: unknown): {user: string; password: string} | undefined {

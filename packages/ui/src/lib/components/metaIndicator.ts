@@ -25,6 +25,8 @@ export interface MetaTitleLabels {
     readonly writable: string;
     /** `revision {revision}, {count} objects` */
     readonly detail: (state: MetaState) => string;
+    /** B-67: `the certificate of {url} is not trusted ({code})`; left out, the code alone is said. */
+    readonly certificate?: (problem: NonNullable<MetaState['certificate']>) => string;
 }
 
 /** The tooltip: name, state, revision and objects, the implementation and the error - what exists. */
@@ -39,6 +41,10 @@ export function metaTitle(state: MetaState | undefined, labels: MetaTitleLabels)
         labels.detail(state),
         state.implementation,
         state.error,
+        // B-67: the system redirected to https:// and its certificate is trusted by nothing yet
+        state.certificate === undefined
+            ? undefined
+            : (labels.certificate?.(state.certificate) ?? state.certificate.code),
     ];
     return parts.filter((part): part is string => part !== undefined && part !== '').join(' · ');
 }

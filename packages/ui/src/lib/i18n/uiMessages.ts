@@ -306,6 +306,40 @@ export const UI_MESSAGES: MessageCatalogue = {
     },
     // Task 38: a callback field the host was started with; `{option}` is `HMM_CALLBACK_IP / --callback-ip`
     'Set at start ({option})': {de: 'Beim Start festgelegt ({option})', en: 'Set at start ({option})'},
+    // B-67: a system that redirects to https:// with a certificate nothing trusts
+    Certificate: {de: 'Zertifikat', en: 'Certificate'},
+    'The certificate of {url} is not trusted ({code})': {
+        de: 'Dem Zertifikat von {url} wird nicht vertraut ({code})',
+        en: 'The certificate of {url} is not trusted ({code})',
+    },
+    'The certificate of {url} is not trusted ({code}). Until it is, whether this is an openccu-lite system is not known.':
+        {
+            de: 'Dem Zertifikat von {url} wird nicht vertraut ({code}). Bis dahin ist unbekannt, ob dies ein openccu-lite-System ist.',
+            en: 'The certificate of {url} is not trusted ({code}). Until it is, whether this is an openccu-lite system is not known.',
+        },
+    '{subject}, issued by {issuer}, valid until {validTo}': {
+        de: '{subject}, ausgestellt von {issuer}, gültig bis {validTo}',
+        en: '{subject}, issued by {issuer}, valid until {validTo}',
+    },
+    'Trust this certificate': {de: 'Diesem Zertifikat vertrauen', en: 'Trust this certificate'},
+    'Trust the CA {name}': {de: 'Der CA {name} vertrauen', en: 'Trust the CA {name}'},
+    'A trusted certificate holds whatever name the system is reached by, until it is renewed; a trusted CA also covers its renewals, but the name must match the certificate.':
+        {
+            de: 'Ein vertrautes Zertifikat gilt unter jedem Namen des Systems, bis es erneuert wird; eine vertraute CA gilt auch für Erneuerungen, aber der Name muss zum Zertifikat passen.',
+            en: 'A trusted certificate holds whatever name the system is reached by, until it is renewed; a trusted CA also covers its renewals, but the name must match the certificate.',
+        },
+    'Trusted certificates': {de: 'Vertraute Zertifikate', en: 'Trusted certificates'},
+    '{count} certificates or CAs of the system are trusted': {
+        de: {
+            one: '{count} Zertifikat oder CA des Systems wird vertraut',
+            other: '{count} Zertifikaten oder CAs des Systems wird vertraut',
+        },
+        en: {
+            one: '{count} certificate or CA of the system is trusted',
+            other: '{count} certificates or CAs of the system are trusted',
+        },
+    },
+    'Forget them': {de: 'Vergessen', en: 'Forget them'},
     // B-70 (D-31): the idle time of a host that drops its subscriptions with no page open
     'Unsubscribe when idle': {de: 'Abmelden bei Inaktivität', en: 'Unsubscribe when idle'},
     'Default ({time})': {de: 'Voreinstellung ({time})', en: 'Default ({time})'},

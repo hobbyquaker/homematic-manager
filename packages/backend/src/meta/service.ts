@@ -33,11 +33,12 @@ import {
     type MetaObjectView,
     type MetaState,
     type MetaVersion,
+    type SystemCertificateProblem,
 } from '@homematic-manager/core';
 
 import type {NameStore} from '../cache/names.js';
 import {validationError} from '../errors.js';
-import {MetaApiClient, DETECT_TIMEOUT_MS} from './client.js';
+import {MetaApiClient, DETECT_TIMEOUT_MS, type MetaDetection} from './client.js';
 import {normaliseSid, readLocalToken} from './credentials.js';
 import {LocalMetaProvider} from './localProvider.js';
 import {OcculiteProvider} from './occuliteProvider.js';
@@ -82,11 +83,21 @@ export interface MetaServiceOptions {
      * ReGa). `answer` is undefined for a CCU. Reused here when the store is that host, so the
      * common case probes once; a store at another `metaUrl` is still probed on its own.
      */
-    readonly hostProbe?: {readonly answer: MetaVersion | undefined} | undefined;
+    readonly hostProbe?: HostProbe | undefined;
     /** Injected by the tests. */
     readonly localTokenFile?: string | undefined;
     readonly fetch?: typeof globalThis.fetch;
     readonly detectTimeoutMs?: number;
+}
+
+/**
+ * B-62, B-67: what the connect found at the host - the version answer (undefined for a CCU), the
+ * base URL after the system's redirect to `https://`, and the certificate problem there.
+ */
+export interface HostProbe {
+    readonly answer: MetaVersion | undefined;
+    readonly baseUrl?: string;
+    readonly certificate?: SystemCertificateProblem;
 }
 
 /**
@@ -130,6 +141,10 @@ export class MetaService {
     /** `auto` chose ReGa: the first read decides whether it stays (found by the e2e suite). */
     #autoRega = false;
     #version: MetaVersion | undefined;
+    /** B-67: where the box answered - the `https://` URL when the configured one redirected there. */
+    #boxUrl: string | undefined;
+    /** B-67: the host's `https://` presented a certificate nothing trusts. */
+    #certificate: SystemCertificateProblem | undefined;
     /** The session of the person looking at the page; writes go out as this one. */
     #sessionCredential: string | undefined;
     #localToken: string | undefined;
@@ -169,13 +184,31 @@ export class MetaService {
             service.#provider = service.#buildRega(options.rega);
             return service;
         }
-        const baseUrl = metaBaseUrl(options.connection);
-        const version =
-            baseUrl === ''
+        const configuredUrl = metaBaseUrl(options.connection);
+        const detection: MetaDetection | undefined =
+            configuredUrl === ''
                 ? undefined
-                : options.hostProbe !== undefined && baseUrl === hostBaseUrl(options.connection)
-                  ? options.hostProbe.answer
-                  : await service.#client(baseUrl).version(options.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
+                : options.hostProbe !== undefined && configuredUrl === hostBaseUrl(options.connection)
+                  ? {
+                        baseUrl: options.hostProbe.baseUrl ?? configuredUrl,
+                        ...(options.hostProbe.answer === undefined ? {} : {version: options.hostProbe.answer}),
+                        ...(options.hostProbe.certificate === undefined
+                            ? {}
+                            : {certificate: options.hostProbe.certificate}),
+                    }
+                  : await service.#client(configuredUrl).detect(options.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
+        const version = detection?.version;
+        // B-67: the system answered at the https:// URL it redirected to; every later call goes there
+        const baseUrl = detection?.baseUrl ?? configuredUrl;
+        if (detection?.certificate !== undefined) {
+            service.#certificate = detection.certificate;
+            options.onNotice(
+                'warn',
+                `${configuredUrl} redirects to ${detection.certificate.url}, whose certificate is not trusted ` +
+                    `(${detection.certificate.code}): whether it is an openccu-lite system is not known until ` +
+                    'its certificate or CA is trusted in the settings',
+            );
+        }
         if (version === undefined) {
             if (choice === 'occulite') {
                 options.onNotice(
@@ -194,6 +227,7 @@ export class MetaService {
             return service;
         }
         service.#version = version;
+        service.#boxUrl = baseUrl;
         options.onNotice(
             'info',
             `openccu-lite detected at ${baseUrl} (${version.implementation ?? 'metadata API v1'}): ` +
@@ -213,8 +247,17 @@ export class MetaService {
     }
 
     state(): MetaState {
-        return this.#provider.state();
+        return this.#decorate(this.#provider.state());
     }
+
+    /** B-67: every state that leaves the service carries the certificate problem, while there is one. */
+    #decorate(state: MetaState): MetaState {
+        return this.#certificate === undefined ? state : {...state, certificate: this.#certificate};
+    }
+
+    #stateChanged = (state: MetaState): void => {
+        this.#options.onStateChanged(this.#decorate(state));
+    };
 
     document(): MetaDocument {
         return this.#provider.document();
@@ -255,7 +298,7 @@ export class MetaService {
             );
             this.#provider = this.#buildLocal();
             await this.#provider.start();
-            this.#options.onStateChanged(this.#provider.state());
+            this.#options.onStateChanged(this.state());
         }
         this.applyNames();
     }
@@ -452,7 +495,7 @@ export class MetaService {
                 this.applyNames();
                 this.#options.onChanged();
             },
-            onStateChanged: this.#options.onStateChanged,
+            onStateChanged: this.#stateChanged,
             onNotice: this.#options.onNotice,
         });
     }
@@ -469,7 +512,7 @@ export class MetaService {
                 this.applyNames();
                 this.#options.onChanged();
             },
-            onStateChanged: this.#options.onStateChanged,
+            onStateChanged: this.#stateChanged,
             onNotice: this.#options.onNotice,
         });
     }
@@ -483,7 +526,7 @@ export class MetaService {
                 this.applyNames();
                 this.#options.onChanged();
             },
-            onStateChanged: this.#options.onStateChanged,
+            onStateChanged: this.#stateChanged,
             onNotice: this.#options.onNotice,
         });
     }
@@ -515,7 +558,7 @@ export class MetaService {
      * CCU: nothing there is ever asked.
      */
     get boxUrl(): string | undefined {
-        return this.#provider.kind === 'occulite' ? metaBaseUrl(this.#options.connection) : undefined;
+        return this.#provider.kind === 'occulite' ? (this.#boxUrl ?? metaBaseUrl(this.#options.connection)) : undefined;
     }
 
     /**

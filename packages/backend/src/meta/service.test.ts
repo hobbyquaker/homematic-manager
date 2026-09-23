@@ -198,6 +198,72 @@ describe('the detection', () => {
         expect(notices.join('\n')).toContain('openccu-lite detected');
     });
 
+    it('talks to the https:// URL the system redirected to, for the store and its other APIs (B-67)', async () => {
+        const box = fakeBox();
+        const redirecting = ((url: string | URL, init?: RequestInit) =>
+            String(url).startsWith('http://')
+                ? Promise.resolve(
+                      new Response(null, {
+                          status: 301,
+                          headers: {Location: String(url).replace('http://', 'https://')},
+                      }),
+                  )
+                : box.fetch(url, init)) as typeof globalThis.fetch;
+        const meta = await service({host: '10.0.0.5'}, redirecting);
+        await meta.start();
+        expect(meta.kind).toBe('occulite');
+        expect(meta.boxUrl).toBe('https://10.0.0.5');
+        expect(box.calls.map((call) => call.url)).toContain('https://10.0.0.5/api/meta/v1/snapshot');
+        expect(box.calls.every((call) => call.url.startsWith('https://'))).toBe(true);
+        await meta.stop();
+    });
+
+    it("takes the connect's probe of the host, with the URL it found (B-67)", async () => {
+        const box = fakeBox();
+        const meta = await MetaService.create({
+            connection: connection({host: '10.0.0.5'}),
+            dataDir,
+            cacheDir,
+            names,
+            interfaceOf: () => 'BidCos-RF',
+            onChanged: () => undefined,
+            onStateChanged: (state) => states.push(state),
+            onNotice: (level, message) => notices.push(`${level}: ${message}`),
+            localTokenFile: path.join(dataDir, 'no-local-token'),
+            fetch: box.fetch,
+            hostProbe: {answer: VERSION, baseUrl: 'https://10.0.0.5'},
+        });
+        expect(meta.boxUrl).toBe('https://10.0.0.5');
+        // the probe was taken as it was: nothing asked /version again
+        expect(box.calls).toEqual([]);
+    });
+
+    it('says so when the https:// certificate is not trusted, and keeps saying it in the state (B-67)', async () => {
+        const certificate = {
+            url: 'https://10.0.0.5',
+            code: 'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
+            certificate: {subject: 'lite.lan', issuer: 'LAN CA', fingerprint256: 'AA:BB', validTo: 'Jan 1 2027'},
+        };
+        const meta = await MetaService.create({
+            connection: connection({host: '10.0.0.5'}),
+            dataDir,
+            cacheDir,
+            names,
+            interfaceOf: () => 'BidCos-RF',
+            onChanged: () => undefined,
+            onStateChanged: (state) => states.push(state),
+            onNotice: (level, message) => notices.push(`${level}: ${message}`),
+            localTokenFile: path.join(dataDir, 'no-local-token'),
+            hostProbe: {answer: undefined, baseUrl: 'https://10.0.0.5', certificate},
+        });
+        expect(meta.kind).toBe('local');
+        expect(meta.state().certificate).toEqual(certificate);
+        expect(notices.join('\n')).toContain('whose certificate is not trusted (UNABLE_TO_GET_ISSUER_CERT_LOCALLY)');
+        await meta.start();
+        expect(states.at(-1)?.certificate).toEqual(certificate);
+        await meta.stop();
+    });
+
     it('stays local when a CCU answers 404', async () => {
         const box = fakeBox({status: 404});
         const meta = await service({metaUrl: 'http://ccu'}, box.fetch);

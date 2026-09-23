@@ -119,6 +119,49 @@ export interface ConnectionConfig {
      * whose window is the session - and a value the host was started with wins over it.
      */
     idleUnsubscribeMs?: number;
+    /**
+     * B-67: the certificates of the system this profile trusts beyond the platform's CAs, for the
+     * system's own HTTP APIs (the metadata store, the groups). Added from the settings dialog, where
+     * a certificate error shows what the system presented.
+     */
+    systemTrust?: SystemTrust;
+}
+
+/** B-67: what a profile trusts on the system's `https://` besides the platform's CAs. */
+export interface SystemTrust {
+    /**
+     * SHA-256 fingerprints (`AB:CD:…`) of certificates trusted as they are - whatever name the
+     * system is reached by, an IP address included. A renewed certificate is a new one.
+     */
+    certificates?: string[];
+    /** CA certificates (PEM) trusted for the chain; the name must still fit the host. */
+    cas?: string[];
+}
+
+/** B-67: one certificate as the settings dialog shows it. */
+export interface SystemCertificate {
+    /** The common name, else the organisation. */
+    subject: string;
+    issuer: string;
+    /** SHA-256, `AB:CD:…`. */
+    fingerprint256: string;
+    /** As OpenSSL prints it (`Dec 24 12:00:00 2026 GMT`). */
+    validTo: string;
+    /** `DNS:lab.example, IP Address:10.0.0.2`, when the certificate has any. */
+    altNames?: string;
+}
+
+/**
+ * B-67: the system answered on `https://` with a certificate nothing trusts. `code` is Node's
+ * (`UNABLE_TO_GET_ISSUER_CERT_LOCALLY`, `DEPTH_ZERO_SELF_SIGNED_CERT`, `CERT_HAS_EXPIRED`,
+ * `ERR_TLS_CERT_ALTNAME_INVALID`, …); `ca` is the topmost CA of the chain it sent, when it sent one.
+ */
+export interface SystemCertificateProblem {
+    /** The `https://` origin that presented it. */
+    url: string;
+    code: string;
+    certificate: SystemCertificate;
+    ca?: SystemCertificate & {pem: string};
 }
 
 export interface AppConfig {
@@ -427,6 +470,12 @@ export interface MetaState {
     /** The base URL the provider talks to, for the settings dialog and the log. */
     url?: string;
     error?: string;
+    /**
+     * B-67: the host (or `metaUrl`) redirected to `https://` and its certificate is not trusted, so
+     * whether it is an openccu-lite system is not known. The provider is the fallback meanwhile;
+     * the settings dialog shows this and offers to trust the certificate or its CA.
+     */
+    certificate?: SystemCertificateProblem;
 }
 
 /**

@@ -36,6 +36,16 @@ beside the interface mark says which one it is. A profile that is moved from one
 edit — which is the point, because moving between OpenCCU and openccu-lite in both directions is a
 supported operation of that project (its D-17).
 
+An openccu-lite system answers `http://` with a redirect to `https://`. The Homematic Manager follows
+it and uses the `https://` address for everything it asks the system from then on. When the
+system's certificate is not one the machine trusts — a LAN CA, or one the system made itself, the
+common case — the settings dialog shows it under _Names and rooms_ (subject, issuer, validity,
+SHA-256 fingerprint and the error) and offers _Trust this certificate_ and, where the system sent
+its CA, _Trust the CA_. Until then it is not known whether the system is an openccu-lite, and the
+store is this profile's. A trusted certificate holds under any name, an IP address included, until
+it is renewed; a trusted CA covers renewals too, but then the host must be given by a name the
+certificate carries.
+
 ## What has no replacement
 
 Copied from openccu-lite's own porting guide rather than paraphrased, because these are the

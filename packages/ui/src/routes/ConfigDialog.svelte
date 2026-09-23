@@ -439,6 +439,37 @@
         return parts.filter((part): part is string => part !== undefined && part !== '').join(' · ');
     });
 
+    /**
+     * B-67: the system redirected to `https://` and presented a certificate nothing trusts. Until
+     * the profile trusts it (or its CA) whether this is an openccu-lite system is not known; the
+     * choice goes into the draft and takes effect with "Save & Restart", like every other setting.
+     */
+    const certificateProblem = $derived(metaState?.certificate);
+    const trustedCount = $derived(
+        (draft?.systemTrust?.certificates?.length ?? 0) + (draft?.systemTrust?.cas?.length ?? 0),
+    );
+
+    function trust(kind: 'certificates' | 'cas', value: string): void {
+        if (!draft) {
+            return;
+        }
+        const current = draft.systemTrust ?? {};
+        const list = current[kind] ?? [];
+        if (!list.includes(value)) {
+            draft.systemTrust = {...current, [kind]: [...list, value]};
+        }
+    }
+
+    function trusts(kind: 'certificates' | 'cas', value: string): boolean {
+        return draft?.systemTrust?.[kind]?.includes(value) === true;
+    }
+
+    function forgetTrust(): void {
+        if (draft) {
+            delete draft.systemTrust;
+        }
+    }
+
     function setMetaProvider(value: string): void {
         if (draft && META_PROVIDERS.some((choice) => choice === value)) {
             draft.metaProvider = value as MetaProviderChoice;
@@ -714,6 +745,85 @@
                                     >
                                 </span>
                             </label>
+
+                            {#if certificateProblem !== undefined}
+                                <!-- B-67: what the system presented, and the two ways to trust it -->
+                                <div class="hmm-config-row" data-testid="config-certificate">
+                                    <span class="hmm-config-label">{t('Certificate')}</span>
+                                    <span class="hmm-config-field">
+                                        <small class="hmm-config-warning" data-testid="config-certificate-problem"
+                                            >{t(
+                                                'The certificate of {url} is not trusted ({code}). Until it is, whether this is an openccu-lite system is not known.',
+                                                {url: certificateProblem.url, code: certificateProblem.code},
+                                            )}</small
+                                        >
+                                        <small
+                                            class="hmm-config-help hmm-config-certificate"
+                                            data-testid="config-certificate-details"
+                                            >{t('{subject}, issued by {issuer}, valid until {validTo}', {
+                                                subject: certificateProblem.certificate.subject,
+                                                issuer: certificateProblem.certificate.issuer,
+                                                validTo: certificateProblem.certificate.validTo,
+                                            })}{certificateProblem.certificate.altNames === undefined
+                                                ? ''
+                                                : ` \u00b7 ${certificateProblem.certificate.altNames}`} \u00b7 SHA-256
+                                            {certificateProblem.certificate.fingerprint256}</small
+                                        >
+                                        <span class="hmm-config-buttons">
+                                            <button
+                                                type="button"
+                                                class="hmm-button"
+                                                data-testid="config-trust-certificate"
+                                                disabled={trusts(
+                                                    'certificates',
+                                                    certificateProblem.certificate.fingerprint256,
+                                                )}
+                                                onclick={() =>
+                                                    trust(
+                                                        'certificates',
+                                                        certificateProblem.certificate.fingerprint256,
+                                                    )}>{t('Trust this certificate')}</button
+                                            >
+                                            {#if certificateProblem.ca !== undefined}
+                                                {@const ca = certificateProblem.ca}
+                                                <button
+                                                    type="button"
+                                                    class="hmm-button"
+                                                    data-testid="config-trust-ca"
+                                                    disabled={trusts('cas', ca.pem)}
+                                                    onclick={() => trust('cas', ca.pem)}
+                                                    >{t('Trust the CA {name}', {name: ca.subject})}</button
+                                                >
+                                            {/if}
+                                        </span>
+                                        <small class="hmm-config-help"
+                                            >{t(
+                                                'A trusted certificate holds whatever name the system is reached by, until it is renewed; a trusted CA also covers its renewals, but the name must match the certificate.',
+                                            )}</small
+                                        >
+                                    </span>
+                                </div>
+                            {/if}
+                            {#if trustedCount > 0}
+                                <div class="hmm-config-row" data-testid="config-trusted">
+                                    <span class="hmm-config-label">{t('Trusted certificates')}</span>
+                                    <span class="hmm-config-field">
+                                        <small class="hmm-config-help" data-testid="config-trusted-count"
+                                            >{t(
+                                                '{count} certificates or CAs of the system are trusted',
+                                                {},
+                                                trustedCount,
+                                            )}</small
+                                        >
+                                        <button
+                                            type="button"
+                                            class="hmm-button"
+                                            data-testid="config-forget-trust"
+                                            onclick={forgetTrust}>{t('Forget them')}</button
+                                        >
+                                    </span>
+                                </div>
+                            {/if}
 
                             <label class="hmm-config-row">
                                 <span class="hmm-config-label">{t('API token')}</span>
@@ -1231,6 +1341,17 @@
         gap: 4px 8px;
         color: var(--hmm-warn);
         font-size: var(--hmm-font-size-small);
+    }
+
+    /* B-67: the trust buttons side by side, wrapping on a narrow dialog; a fingerprint breaks anywhere. */
+    .hmm-config-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 8px;
+    }
+
+    .hmm-config-certificate {
+        overflow-wrap: anywhere;
     }
 
     /* Task 34: what "Save & Restart" will also do, in the accent so it is not read past as help. */

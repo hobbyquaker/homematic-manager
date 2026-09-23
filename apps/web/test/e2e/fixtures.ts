@@ -302,8 +302,27 @@ const PARAMSET_DESCRIPTIONS: Record<string, unknown> = {
     // not seen in the lab, but the other half of the rule: a SERVICE that is listed and empty
     'HmIP-RF/HmIP-WRC2/1.4.8/1//SERVICE': {},
     'HmIP-RF/HmIP-WRC2/1.4.8/1/KEY_TRANSCEIVER/SERVICE': HMIP_SERVICE,
+    // task 67: a button channel with the CCU's MASTER form (the LED switch and the long-press timeout, which task 10's
+    // duration editor also recognises) and a long tail of parameters, so the expert view is a long raw list
     'HmIP-RF/HmIP-WRC2/1.4.8/1/KEY_TRANSCEIVER/MASTER': {
         LOGGING: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true},
+        LED_DISABLE_CHANNELSTATE: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true},
+        REPEATED_LONG_PRESS_TIMEOUT_UNIT: {
+            TYPE: 'ENUM',
+            OPERATIONS: 7,
+            FLAGS: 1,
+            DEFAULT: 0,
+            MIN: 0,
+            MAX: 2,
+            VALUE_LIST: ['S', 'M', 'H'],
+        },
+        REPEATED_LONG_PRESS_TIMEOUT_VALUE: {TYPE: 'INTEGER', OPERATIONS: 7, FLAGS: 1, DEFAULT: 0, MIN: 0, MAX: 15},
+        ...Object.fromEntries(
+            Array.from({length: 60}, (_, index) => [
+                `TEST_PARAMETER_${String(index).padStart(2, '0')}`,
+                {TYPE: 'INTEGER', OPERATIONS: 7, FLAGS: 1, DEFAULT: 0, MIN: 0, MAX: 100},
+            ]),
+        ),
     },
     'HmIP-RF/HmIP-WRC2/1.4.8/1/KEY_TRANSCEIVER/VALUES': {
         PRESS_SHORT: {TYPE: 'ACTION', OPERATIONS: 6, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true},

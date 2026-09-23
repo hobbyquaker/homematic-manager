@@ -655,10 +655,23 @@ describe('the CCU MASTER form (task 63, D-55)', () => {
         expect(screen.queryByTestId('param-REPEATED_LONG_PRESS_TIMEOUT_UNIT')).toBeNull();
         // the duration editor of task 10 would edit the same pair a second time: not in the easy mode
         expect(screen.queryByTestId('duration-REPEATED_LONG_PRESS_TIMEOUT')).toBeNull();
+    });
+
+    // task 67: the expert view is the raw values and nothing else - no form, no device editor, and
+    // the list is no scroller of its own, the dialog's body is the one that scrolls
+    it('shows no editor in the expert view, and the list does not scroll on its own', async () => {
+        await openButton();
+        await screen.findByTestId('paramset-easy-form');
         await fireEvent.click(screen.getByTestId('paramset-expert'));
         await waitFor(() => {
-            expect(screen.getByTestId('duration-REPEATED_LONG_PRESS_TIMEOUT')).toBeTruthy();
+            expect(screen.getByTestId('param-REPEATED_LONG_PRESS_TIMEOUT_UNIT')).toBeTruthy();
         });
+        expect(screen.queryByTestId('duration-REPEATED_LONG_PRESS_TIMEOUT')).toBeNull();
+        expect(screen.queryByTestId('paramset-easy-form')).toBeNull();
+        // "as well" means beside an editor; with none shown the box is not offered
+        expect(screen.queryByTestId('paramset-show-covered')).toBeNull();
+        const list = screen.getByTestId('paramset-dialog').querySelector<HTMLElement>('.hmm-paramset-list')!;
+        expect(getComputedStyle(list).overflowY).toBe('visible');
     });
 
     // a preset's label key is one of the WebUI's labels (uiLabels), not an enum name: the easy form

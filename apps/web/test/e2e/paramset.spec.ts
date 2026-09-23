@@ -84,3 +84,58 @@ test('nothing changed means nothing is written', async ({page, host, sim}) => {
     await expect(page.getByTestId('write-confirm')).toBeDisabled();
     expect(sim.getWriteLog()).toEqual([]);
 });
+
+/**
+ * Task 67, the maintainer: the raw rows of the expert view were a box with its own scroller under the options - "just
+ * list them and grow the dialog content so we only have one vertical scroller", and in the raw mode only the raw
+ * values. The dialog's body is the one scroller; the option row stays at its top and the buttons at the bottom, at
+ * 1280x800 and on a 412 px phone.
+ */
+for (const size of [
+    {width: 1280, height: 800},
+    {width: 412, height: 915},
+]) {
+    test(`the expert view is one scroller with the options and buttons in reach at ${size.width} px (task 67)`, async ({
+        page,
+        host,
+    }) => {
+        await page.setViewportSize(size);
+        await page.goto(`${host.url}#/HmIP-RF/devices`);
+        await page.locator(`[data-row-id="${HMIP_BUTTON}"]`).getByRole('button', {name: 'Expand row'}).click();
+        await page.getByTestId(`paramset-${HMIP_BUTTON}:1-MASTER`).click();
+
+        const dialog = page.getByTestId('paramset-dialog');
+        await expect(page.getByTestId('paramset-easy-form')).toBeVisible();
+        // the duration editor of task 10 is not shown beside the form that edits the same pair
+        await expect(page.getByTestId('duration-REPEATED_LONG_PRESS_TIMEOUT')).toHaveCount(0);
+        await page.getByTestId('paramset-expert').check();
+        await expect(page.getByTestId('param-TEST_PARAMETER_59')).toBeAttached();
+        // raw only: no form, no device editor
+        await expect(page.getByTestId('paramset-easy-form')).toHaveCount(0);
+        await expect(page.getByTestId('duration-REPEATED_LONG_PRESS_TIMEOUT')).toHaveCount(0);
+
+        const scrollers = await dialog.evaluate((element) =>
+            [element, ...element.querySelectorAll('*')]
+                .filter(
+                    (node) =>
+                        ['auto', 'scroll'].includes(getComputedStyle(node).overflowY) &&
+                        node.scrollHeight > node.clientHeight,
+                )
+                .map((node) => node.className),
+        );
+        expect(scrollers).toHaveLength(1);
+        expect(scrollers[0]).toContain('hmm-dialog-body');
+
+        const body = dialog.locator('.hmm-dialog-body');
+        for (const where of ['middle', 'end'] as const) {
+            await body.evaluate((element, to) => {
+                element.scrollTop = to === 'end' ? element.scrollHeight : element.scrollHeight / 2;
+            }, where);
+            await expect(page.getByTestId('paramset-expert')).toBeInViewport();
+            await expect(page.getByTestId('paramset-preview')).toBeInViewport();
+        }
+        await expect(page.getByTestId('param-TEST_PARAMETER_59')).toBeInViewport();
+        const sideways = await body.evaluate((element) => element.scrollWidth > element.clientWidth);
+        expect(sideways).toBe(false);
+    });
+}

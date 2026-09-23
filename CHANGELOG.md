@@ -24,6 +24,11 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Changed
 
+- **The MASTER paramset dialog has one scrollbar.** The parameter list was a box with a scroller of its own under
+  the options, so the expert view of a long channel scrolled inside the dialog; now the dialog's content scrolls as
+  a whole, the option row stays at its top and the buttons at its bottom. The expert view shows only the raw
+  values: the CCU's form and the device editors (duration pairs, week profile, ...) are gone there, the marks of the
+  easy-mode parameters stay. _Show the raw parameters as well_ still shows the raw rows beside the editors.
 - **openccu-lite: the addon no longer writes lighttpd's configuration directory.** Its proxy rule is rendered into
   the addon's own directory (`etc/lighttpd.conf`), and the system makes its own checked copy of it for lighttpd; a
   port changed in `etc/hmm.env` reaches the rule with a restart of the addon. On a CCU and OpenCCU nothing changes.

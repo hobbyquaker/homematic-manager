@@ -37,8 +37,11 @@ const SWITCH = 'MEQ0123456';
 const SWITCH_CHANNEL = `${SWITCH}:1`;
 const LINK_ROW = '0001D8A9B7C6D5:1->000A1B2C3D4E5F:4';
 
-/** Nothing sticks out sideways, and the whole dialog is inside the window. */
-function expectNoOverflow(dialog: HTMLElement): void {
+/**
+ * Nothing sticks out sideways, and the whole dialog is inside the window. `page` off for a phone,
+ * where the devices grid behind the dialog is wider than the window by design.
+ */
+function expectNoOverflow(dialog: HTMLElement, page = true): void {
     const body = dialog.querySelector<HTMLElement>('.hmm-dialog-body');
     expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth);
     expect(body).not.toBeNull();
@@ -52,8 +55,10 @@ function expectNoOverflow(dialog: HTMLElement): void {
     expect(Math.round(box.bottom)).toBeLessThanOrEqual(window.innerHeight);
 
     // And the page behind it stays where it was.
-    const page = document.documentElement;
-    expect(page.scrollWidth).toBeLessThanOrEqual(page.clientWidth);
+    if (page) {
+        const root = document.documentElement;
+        expect(root.scrollWidth).toBeLessThanOrEqual(root.clientWidth);
+    }
 }
 
 /** `inner` is drawn entirely inside `outer`, and `outer` did not have to scroll to show it. */
@@ -422,6 +427,122 @@ describe.skipIf(!hasLayout)('the add-link dialog on a 360x640 phone', () => {
 });
 
 /**
+ * Task 67 (D-34 as amended on 2026-09-20): the paramset editor has one vertical scroller, its body.
+ * The parameter list used to be a box of its own under the options, so the expert view of a long
+ * channel was a second scrollbar inside the dialog. Now the list is as tall as its rows and the
+ * body scrolls; the option row sticks to its top and the buttons are the dialog's footer, so
+ * neither leaves the screen however far down the reader goes - at 1280x800 and on a 412 px phone.
+ */
+describe.skipIf(!hasLayout)('the paramset editor with a long expert view (task 67)', () => {
+    const CHANNEL = '0001D8A9B7C6D5:1';
+    const FILLERS = Array.from({length: 90}, (_, index) => `FILLER_PARAMETER_${String(index).padStart(2, '0')}`);
+
+    beforeEach(() => {
+        forgetDialogGeometry();
+    });
+
+    function longTransport(): MockTransport {
+        const transport = new MockTransport({demo: true});
+        const demoFile = transport.handlerFor('data.file');
+        transport.respond('data.file', (path) =>
+            path === 'data/master-metadata.json'
+                ? {
+                      ...(demoFile(path) as object),
+                      KEY_TRANSCEIVER: {
+                          channelType: 'KEY_TRANSCEIVER',
+                          controls: [{kind: 'param', param: 'LED_DISABLE_CHANNELSTATE'}],
+                      },
+                  }
+                : demoFile(path),
+        );
+        const description = {
+            LED_DISABLE_CHANNELSTATE: {TYPE: 'BOOL', OPERATIONS: 3, DEFAULT: false},
+            REPEATED_LONG_PRESS_TIMEOUT_UNIT: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['S', 'M', 'H']},
+            REPEATED_LONG_PRESS_TIMEOUT_VALUE: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 15},
+            ...Object.fromEntries(FILLERS.map((name) => [name, {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 100}])),
+        };
+        const demoDescription = transport.handlerFor('paramset.description');
+        transport.respond('paramset.description', (interfaceName, address, paramset) =>
+            address === CHANNEL && paramset === 'MASTER'
+                ? description
+                : demoDescription(interfaceName, address, paramset),
+        );
+        const demoGet = transport.handlerFor('paramset.get');
+        transport.respond('paramset.get', (interfaceName, address, paramset) =>
+            address === CHANNEL && paramset === 'MASTER'
+                ? {LED_DISABLE_CHANNELSTATE: false}
+                : demoGet(interfaceName, address, paramset),
+        );
+        return transport;
+    }
+
+    async function openExpert(): Promise<HTMLElement> {
+        await mountApp({transport: longTransport(), hash: '#/HmIP-RF/devices'});
+        const parent = document.querySelector<HTMLElement>('[data-row-id="0001D8A9B7C6D5"]')!;
+        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(await screen.findByTestId(`paramset-${CHANNEL}-MASTER`));
+        await screen.findByTestId('paramset-easy-form');
+        await fireEvent.click(screen.getByTestId('paramset-expert'));
+        return waitFor(() => {
+            expect(screen.getByTestId(`param-${FILLERS.at(-1)!}`)).toBeTruthy();
+            return screen.getByTestId('paramset-dialog');
+        });
+    }
+
+    /** The one vertical scroller, its option row on top and its buttons, wherever the body is scrolled to. */
+    function expectOneScroller(dialog: HTMLElement, phone = false): void {
+        const body = dialog.querySelector<HTMLElement>('.hmm-dialog-body')!;
+        expect(body.scrollHeight).toBeGreaterThan(body.clientHeight);
+        const scrollers = [...dialog.querySelectorAll<HTMLElement>('*')].filter(
+            (element) =>
+                ['auto', 'scroll'].includes(getComputedStyle(element).overflowY) &&
+                element.scrollHeight > element.clientHeight,
+        );
+        expect(scrollers).toEqual([body]);
+        expect(dialog.scrollHeight).toBeLessThanOrEqual(dialog.clientHeight);
+        expectNoOverflow(dialog, !phone);
+
+        const frame = dialog.getBoundingClientRect();
+        const top = dialog.querySelector<HTMLElement>('.hmm-paramset-top')!;
+        const buttons = dialog.querySelector<HTMLElement>('.hmm-dialog-buttons')!;
+        for (const scrollTop of [0, body.scrollHeight / 2, body.scrollHeight]) {
+            body.scrollTop = scrollTop;
+            const bodyBox = body.getBoundingClientRect();
+            const option = screen.getByTestId('paramset-expert').getBoundingClientRect();
+            expect(Math.round(option.top)).toBeGreaterThanOrEqual(Math.round(bodyBox.top));
+            expect(Math.round(option.bottom)).toBeLessThanOrEqual(Math.round(top.getBoundingClientRect().bottom));
+            expect(Math.round(top.getBoundingClientRect().top)).toBeGreaterThanOrEqual(Math.round(bodyBox.top));
+            const buttonBox = buttons.getBoundingClientRect();
+            expect(Math.round(buttonBox.top)).toBeGreaterThanOrEqual(Math.round(bodyBox.bottom));
+            expect(Math.round(buttonBox.bottom)).toBeLessThanOrEqual(Math.round(frame.bottom));
+            expect(Math.round(buttonBox.bottom)).toBeLessThanOrEqual(window.innerHeight);
+        }
+        // the last row can be reached, under the sticky options
+        const last = screen.getByTestId(`param-${FILLERS.at(-1)!}`).getBoundingClientRect();
+        expect(Math.round(last.bottom)).toBeLessThanOrEqual(Math.round(body.getBoundingClientRect().bottom));
+        expect(Math.round(last.top)).toBeGreaterThanOrEqual(Math.round(top.getBoundingClientRect().bottom));
+    }
+
+    it('scrolls only its body at 1280x800, the options and the buttons staying put', async () => {
+        expect(window.innerWidth).toBe(1280);
+        const dialog = await openExpert();
+        expect(box(dialog)).toEqual({width: 900, height: 640});
+        expectOneScroller(dialog);
+    });
+
+    it('does the same on a 412 px phone', async () => {
+        await page.viewport(412, 915);
+        try {
+            const dialog = await openExpert();
+            expect(box(dialog).width).toBe(412 - 32);
+            expectOneScroller(dialog, true);
+        } finally {
+            await page.viewport(1280, 800);
+        }
+    });
+});
+
+/**
  * Task 20, the third point: the user moves and resizes a dialog, and nothing else does.
  *
  * The paramset editor is the one measured here because it is the dialog with the most inside it -
@@ -634,8 +755,9 @@ describe.skipIf(!hasLayout)('a dialog the user has moved or resized', () => {
         expect(dialog.scrollWidth).toBeLessThanOrEqual(dialog.clientWidth);
         expect(body.scrollWidth).toBeLessThanOrEqual(body.clientWidth);
         expect(list.scrollWidth).toBeLessThanOrEqual(list.clientWidth);
-        expect(getComputedStyle(list).overflowX).toBe('hidden');
-        expect(getComputedStyle(list).overflowY).toBe('auto');
+        // task 67: clipped sideways, and no scroller of its own - the body is the one that scrolls
+        expect(getComputedStyle(list).overflowX).toBe('clip');
+        expect(getComputedStyle(list).overflowY).toBe('visible');
     });
 
     /**

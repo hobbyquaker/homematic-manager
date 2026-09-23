@@ -164,6 +164,10 @@ describe('the duration picker in the dialog', () => {
             expect(screen.getByTestId('param-POWERUP_ONTIME_UNIT')).toBeTruthy();
         });
         expect(screen.getByTestId('duration-POWERUP_ONTIME')).toBeTruthy();
+        // task 67: beside the editor in the same list, which is no scroller of its own
+        const list = screen.getByTestId('paramset-dialog').querySelector<HTMLElement>('.hmm-paramset-list')!;
+        expect(list.contains(screen.getByTestId('param-POWERUP_ONTIME_UNIT'))).toBe(true);
+        expect(getComputedStyle(list).overflowY).toBe('visible');
     });
 
     it('writes both halves of the pair through the generic changed-only preview', async () => {

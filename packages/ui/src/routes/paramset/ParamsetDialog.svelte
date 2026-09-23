@@ -197,11 +197,16 @@
     /**
      * The device editors of task 10 in the easy mode: one whose parameters the CCU's form already
      * edits is left out there (the duration pairs of a button channel, say, are the form's time
-     * selector); the expert view shows every editor, as before.
+     * selector). The expert view shows none of them (task 67): it is the raw values and nothing
+     * else, so what a reader sees there is exactly what the paramset holds.
      */
     const formParams = $derived(easyFormParams(masterForm));
     const shownEditors = $derived(
-        form ? editors.filter((spec) => !spec.covers.every((param) => formParams.has(param))) : editors,
+        expertView
+            ? []
+            : form
+              ? editors.filter((spec) => !spec.covers.every((param) => formParams.has(param)))
+              : editors,
     );
     $effect(() => {
         if (open && paramset === 'MASTER') {
@@ -449,10 +454,12 @@
 </script>
 
 <!--
-    A fixed box (D-34): 900 x 720, bounded by the viewport, so the dialog is the same size whether
-    the channel has three parameters or ninety, and the only thing that scrolls is the parameter
-    list. It used to be as tall as its content with three nested scrolling boxes - the dialog, its
-    body and the list - which is what the maintainer saw at 1280x800.
+    A fixed box (D-34): 900 x 640, bounded by the viewport, so the dialog is the same size whether
+    the channel has three parameters or ninety. It used to be as tall as its content with three
+    nested scrolling boxes - the dialog, its body and the list - which is what the maintainer saw at
+    1280x800. Since task 67 (D-34 as amended on 2026-09-20) the one scroller is the dialog's body:
+    the parameter list is a plain block as tall as its rows, the option row sticks to the top of the
+    body, and the title bar and the buttons are the dialog's own, outside what scrolls.
 -->
 <Dialog
     bind:open
@@ -492,7 +499,8 @@
                     <span>{t('Expert view')}</span>
                 </label>
             {/if}
-            {#if editors.length > 0 && !form}
+            <!-- "as well" means beside the editors; the expert view has none, so the box is not offered there -->
+            {#if editors.length > 0 && !masterForm}
                 <label class="hmm-paramset-option">
                     <input type="checkbox" bind:checked={showCovered} data-testid="paramset-show-covered" />
                     <span>{t('Show the raw parameters as well')}</span>
@@ -687,7 +695,15 @@
         border: 1px solid var(--hmm-border-muted);
     }
 
+    /* Task 67: the body scrolls as a whole, the options stay in reach at its top. The row reaches
+       up over the body's 10 px padding and sticks there, so no row shows above it while scrolling. */
     .hmm-paramset-top {
+        position: sticky;
+        top: -10px;
+        margin-top: -10px;
+        padding-top: 10px;
+        z-index: 1;
+        background: var(--hmm-bg);
         display: flex;
         align-items: center;
         gap: 12px;
@@ -728,13 +744,13 @@
         color: var(--hmm-warn);
     }
 
+    /* Task 67: no scroller of its own - the rows make it as tall as it is and the dialog's body
+       scrolls. `clip` rather than `hidden` sideways, because `hidden` would turn the other axis
+       into `auto` and bring the second scrollbar back. */
     .hmm-paramset-list {
-        flex: 1 1 auto;
-        /* Shrinks, but never away: a tall device editor above it makes the body scroll
-           instead of squeezing the list to nothing. */
-        min-height: 120px;
-        overflow-y: auto;
-        overflow-x: hidden;
+        flex: 0 0 auto;
+        overflow-x: clip;
+        overflow-y: visible;
     }
 
     .hmm-paramset-results {

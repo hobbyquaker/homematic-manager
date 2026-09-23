@@ -4,6 +4,7 @@ import {
     canPairDevices,
     DEFAULT_INTERFACES,
     DEFAULT_PING_TIMEOUT_SECONDS,
+    PONG_TIMEOUT_SECONDS,
     INTERFACE_NAMES,
     INTERFACES,
     interfaceDefinition,
@@ -142,6 +143,7 @@ describe('resolveInterface', () => {
             ident: 'hmm_BidCos-RF',
             ping: true,
             pingTimeoutSeconds: 60,
+            pingIntervalSeconds: 0,
             dutyCycle: true,
             serviceMessages: true,
         });
@@ -153,6 +155,15 @@ describe('resolveInterface', () => {
         expect(resolved.tls).toBe(true);
         expect(resolved.pingTimeoutSeconds).toBe(600);
         expect(resolved.dutyCycle).toBe(true);
+    });
+
+    // B-56 (D-53): only HmIP-RF gets the liveness ping, 30 s of silence and a 10 s PONG timeout
+    it('gives HmIP-RF, and only HmIP-RF, the 30 s liveness ping', () => {
+        expect(resolveInterface('HmIP-RF').pingIntervalSeconds).toBe(30);
+        expect(PONG_TIMEOUT_SECONDS).toBe(10);
+        for (const name of ['BidCos-RF', 'BidCos-Wired', 'VirtualDevices', 'CUxD']) {
+            expect(resolveInterface(name).pingIntervalSeconds).toBe(0);
+        }
     });
 
     it('keeps the /groups path and the missing ping of VirtualDevices', () => {
@@ -213,6 +224,7 @@ describe('user-defined interfaces (D-13)', () => {
             ident: 'hmm_second-rfd',
             ping: true,
             pingTimeoutSeconds: 60,
+            pingIntervalSeconds: 0,
             dutyCycle: false,
             serviceMessages: true,
         });

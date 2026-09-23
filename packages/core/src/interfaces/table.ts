@@ -45,6 +45,13 @@ export interface InterfaceDefinition {
     readonly ping: boolean;
     /** Seconds without an event after which the connection counts as dead. */
     readonly pingTimeout?: number;
+    /**
+     * B-56 (D-53): seconds of silence after which the interface is pinged and, when no PONG comes
+     * back within {@link PONG_TIMEOUT_SECONDS}, subscribed again. Only HmIP-RF: after a restart
+     * hmipserver reads its handler list back but sends nothing to it until the client calls `init`
+     * again, and its 600 s {@link pingTimeout} left the app deaf for ten minutes meanwhile.
+     */
+    readonly pingInterval?: number;
     /** Reports a duty cycle (relevant for the radio tab). */
     readonly dutyCycle?: boolean;
     /**
@@ -80,6 +87,9 @@ export interface InterfaceDefinition {
  */
 export const DEFAULT_PING_TIMEOUT_SECONDS = 60;
 
+/** B-56 (D-53): how long the PONG to a liveness ping may take before the subscription counts as lost. */
+export const PONG_TIMEOUT_SECONDS = 10;
+
 export const INTERFACES = {
     'BidCos-RF': {
         name: 'BidCos-RF',
@@ -112,6 +122,8 @@ export const INTERFACES = {
         init: true,
         ping: true,
         pingTimeout: 600,
+        // B-56 (D-53): a restarted hmipserver is noticed by its missing PONG within 40 s
+        pingInterval: 30,
         dutyCycle: true,
         // hmipserver has none; the HmIP sweep reads the :0 channels instead (see `sweepHmip`)
         serviceMessages: false,
@@ -181,6 +193,8 @@ export interface ResolvedInterface {
     readonly ident: string;
     readonly ping: boolean;
     readonly pingTimeoutSeconds: number;
+    /** B-56: see {@link InterfaceDefinition.pingInterval}; 0 where the interface has no liveness ping. */
+    readonly pingIntervalSeconds: number;
     readonly dutyCycle: boolean;
     /** Takes part in the service-message sweep. */
     readonly serviceMessages: boolean;
@@ -305,6 +319,7 @@ export function resolveInterface(name: string, mode: ConnectionMode = {}): Resol
         ident: interfaceIdent(definition.name),
         ping: definition.ping,
         pingTimeoutSeconds: definition.pingTimeout ?? DEFAULT_PING_TIMEOUT_SECONDS,
+        pingIntervalSeconds: definition.pingInterval ?? 0,
         dutyCycle: definition.dutyCycle ?? false,
         serviceMessages: definition.serviceMessages ?? true,
     };
@@ -326,6 +341,7 @@ export function resolveUserDefinedInterface(definition: UserDefinedInterface): R
         ident: interfaceIdent(definition.name),
         ping: true,
         pingTimeoutSeconds: DEFAULT_PING_TIMEOUT_SECONDS,
+        pingIntervalSeconds: 0,
         dutyCycle: false,
         // what a hand-configured process implements is not knowable from here; the backend asks its
         // `system.listMethods`, or tries the method once

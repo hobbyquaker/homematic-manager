@@ -64,6 +64,13 @@ describe('the mark of an interface', () => {
         expect(markOf(state('HmIP-RF', {connected: false, waiting: true, error: 'connect ECONNREFUSED'}))).toBe('busy');
     });
 
+    it('is busy while it is subscribed again after a lost PONG (B-56)', () => {
+        expect(markOf(state('HmIP-RF', {connected: false, reconnecting: true}))).toBe('busy');
+        expect(markOf(state('HmIP-RF', {connected: false, reconnecting: true, error: 'connect ECONNREFUSED'}))).toBe(
+            'busy',
+        );
+    });
+
     it('separates "not there" from "broken" (task 13)', () => {
         expect(markOf(state('BidCos-Wired', {connected: false, absent: true}))).toBe('absent');
         expect(markOf(state('VirtualDevices', {connected: false}))).toBe('bad');
@@ -285,6 +292,22 @@ describe('InterfacePopup', () => {
         expect(item.querySelector('.hmm-interface-mark')!.getAttribute('data-mark')).toBe('busy');
         expect(item.textContent).toContain('Wartet');
         expect(screen.queryByText('Erneut')).toBeNull();
+    });
+
+    it('says "reconnecting" for an interface subscribed again after a lost PONG, and offers no retry (B-56)', async () => {
+        const interfaces = [
+            state('BidCos-RF'),
+            state('HmIP-RF', {port: 2010, connected: false, reconnecting: true, error: 'connect ECONNREFUSED'}),
+        ];
+        const onretry = vi.fn();
+        mount({interfaces, waitingText: 'Wartet', reconnectingText: 'Verbindet neu', retryText: 'Erneut', onretry});
+        await openPopup();
+        const item = screen.getByTestId('interface-item-HmIP-RF');
+        expect(item.querySelector('.hmm-interface-mark')!.getAttribute('data-mark')).toBe('busy');
+        expect(item.textContent).toContain('Verbindet neu');
+        expect(item.textContent).not.toContain('Wartet');
+        expect(screen.queryByText('Erneut')).toBeNull();
+        expect(screen.getByTestId('interface-select-summary').getAttribute('title')).toBe('Verbindet neu');
     });
 
     it('B-28: tells an interface that answers, one that refuses and one that times out apart, and retries the last', async () => {

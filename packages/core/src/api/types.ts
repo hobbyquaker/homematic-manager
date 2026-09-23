@@ -277,6 +277,13 @@ export interface InterfaceState {
      */
     waiting?: boolean;
     /**
+     * B-56 (D-53): the interface was connected, stopped answering its liveness ping (HmIP-RF: no
+     * PONG within 10 s after 30 s of silence), and is being subscribed again - on the quick
+     * schedule of {@link waiting}. After an hmipserver restart this is what bridges the time until
+     * the process answers `init` again. The UI shows "reconnecting". Present only when true.
+     */
+    reconnecting?: boolean;
+    /**
      * D-31: no UI session was connected for the grace period, so the backend sent `init('')` and
      * the interface pushes nothing at us. Caches, names and the configuration are untouched; the
      * next session that connects subscribes again. Never set in Electron.

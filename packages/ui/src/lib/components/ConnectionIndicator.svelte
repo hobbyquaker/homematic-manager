@@ -15,6 +15,8 @@
         subscribingText?: string;
         /** Task 56: nothing is subscribing, but an interface waits for its process at the start. */
         waitingText?: string;
+        /** B-56: nothing is subscribing, but an interface lost its subscription and is being subscribed again. */
+        reconnectingText?: string;
         testId?: string | undefined;
     }
 
@@ -26,6 +28,7 @@
         notPresentText = 'Not present',
         subscribingText = 'Subscribing',
         waitingText = 'Waiting',
+        reconnectingText = 'Reconnecting',
         testId = undefined,
     }: Props = $props();
 
@@ -39,7 +42,12 @@
                 return allConnectedText;
             }
             case 'busy': {
-                return interfaces.some((state) => state.subscribing === true) ? subscribingText : waitingText;
+                if (interfaces.some((state) => state.subscribing === true)) {
+                    return subscribingText;
+                }
+                return interfaces.some((state) => state.reconnecting === true && !state.connected)
+                    ? reconnectingText
+                    : waitingText;
             }
             case 'absent': {
                 return notPresentText;

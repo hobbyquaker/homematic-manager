@@ -128,6 +128,8 @@ function harness(
         initBackoffMs?: number;
         /** Task 56: off unless a test asks, so the others see what happens after the start window. */
         startWindowMs?: number;
+        /** B-56: the liveness ping is off unless a test asks for the table's interval with `true`. */
+        liveness?: boolean;
         network?: CallbackNetwork;
         keepConfiguredCallbackIp?: boolean;
     } = {},
@@ -161,6 +163,7 @@ function harness(
         createCallbackServers: () => servers,
         ...(options.initBackoffMs === undefined ? {} : {initBackoffMs: options.initBackoffMs}),
         startWindowMs: options.startWindowMs ?? 0,
+        ...(options.liveness === true ? {} : {pingIntervalMs: 0}),
         network: options.network ?? fakeNetwork(),
         ...(options.keepConfiguredCallbackIp === undefined
             ? {}
@@ -1496,6 +1499,231 @@ describe('the quick retries at the start (task 56, D-52)', () => {
             const afterStop = h.clients.calls.length;
             await advance(h, 30_000);
             expect(h.clients.calls.length).toBe(afterStop);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+});
+
+describe('the liveness ping of HmIP-RF (B-56, D-53)', () => {
+    const refused = () => Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:32010'), {code: 'ECONNREFUSED'});
+
+    /** Moves the injected clock and the fake timers together, one second at a time. */
+    async function advance(h: Harness, ms: number): Promise<void> {
+        for (let passed = 0; passed < ms; passed += 1000) {
+            h.clock.value += 1000;
+            await vi.advanceTimersByTimeAsync(1000);
+        }
+    }
+
+    const methods = (h: Harness, name = 'HmIP-RF'): string[] =>
+        h.clients.calls.filter((call) => call.name === name).map((call) => call.method);
+
+    /**
+     * An HmIP-RF whose PONG arrives as an event while `pong` is true, and which refuses every call
+     * while `down` is true - hmipserver restarting.
+     */
+    function hmip(options: {startWindowMs?: number} = {}) {
+        const process = {pong: true, down: false};
+        const box: {h?: Harness} = {};
+        const h = harness({
+            connection: {interfaces: ['BidCos-RF', 'HmIP-RF'], autoDetect: false},
+            liveness: true,
+            startWindowMs: options.startWindowMs ?? START_WINDOW_MS,
+            answers: {
+                'HmIP-RF': (method) => {
+                    if (process.down) {
+                        return refused();
+                    }
+                    if (method === 'ping' && process.pong) {
+                        queueMicrotask(() => {
+                            box.h?.manager.noteEvent('HmIP-RF');
+                        });
+                    }
+                    return method === 'ping' ? true : '';
+                },
+            },
+        });
+        box.h = h;
+        return {h, process};
+    }
+
+    it('pings after 30 s of silence and stays connected while the PONG comes back', async () => {
+        vi.useFakeTimers();
+        try {
+            const {h} = hmip();
+            await h.manager.start();
+            h.manager.noteEvent('HmIP-RF');
+            h.clients.calls.length = 0;
+
+            await advance(h, 29_000);
+            expect(methods(h)).toEqual([]);
+            await advance(h, 1000);
+            expect(methods(h)).toEqual(['ping']);
+            // the PONG was an event: the next ping is 30 s after it, and nothing is re-subscribed
+            await advance(h, 60_000);
+            expect(methods(h)).toEqual(['ping', 'ping', 'ping']);
+            expect(h.manager.states()[1]).toMatchObject({connected: true});
+            expect(h.manager.states()[1]?.reconnecting).toBeUndefined();
+            // BidCos-RF has no liveness ping
+            expect(methods(h, 'BidCos-RF')).toEqual([]);
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('does not ping while events arrive', async () => {
+        vi.useFakeTimers();
+        try {
+            const {h} = hmip();
+            await h.manager.start();
+            h.clients.calls.length = 0;
+            for (let second = 0; second < 90; second += 20) {
+                h.manager.noteEvent('HmIP-RF');
+                await advance(h, 20_000);
+            }
+            expect(methods(h)).toEqual([]);
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('subscribes again when the PONG does not come within 10 s, and says so', async () => {
+        vi.useFakeTimers();
+        try {
+            const {h, process} = hmip();
+            await h.manager.start();
+            h.manager.noteEvent('HmIP-RF');
+            h.clients.calls.length = 0;
+            // hmipserver restarted between two pings: it answers calls, but sends us nothing
+            process.pong = false;
+            await advance(h, 30_000);
+            expect(methods(h)).toEqual(['ping']);
+            await advance(h, 9000);
+            expect(h.manager.states()[1]?.connected).toBe(true);
+
+            await advance(h, 1000);
+            expect(methods(h)).toEqual(['ping', 'init']);
+            expect(h.connected).toEqual(['BidCos-RF', 'HmIP-RF', 'HmIP-RF']);
+            expect(h.manager.states()[1]).toMatchObject({connected: true});
+            expect(h.manager.states()[1]?.reconnecting).toBeUndefined();
+            // it was "reconnecting" in between
+            expect(
+                h.states.some((states) => states.some((state) => state.name === 'HmIP-RF' && state.reconnecting)),
+            ).toBe(true);
+            expect(h.notices.filter((entry) => entry.interfaceName === 'HmIP-RF')).toEqual([
+                {
+                    level: 'info',
+                    message: 'HmIP-RF: no answer to a ping within 10 s - subscribing again',
+                    interfaceName: 'HmIP-RF',
+                },
+                {level: 'info', message: 'HmIP-RF: subscribed again', interfaceName: 'HmIP-RF'},
+            ]);
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('bridges an hmipserver restart on the quick schedule, and is back within 45 s', async () => {
+        vi.useFakeTimers();
+        try {
+            const {h, process} = hmip();
+            await h.manager.start();
+            await advance(h, 200_000); // well past the start window
+            h.manager.noteEvent('HmIP-RF');
+            const lastEvent = h.clock.value;
+            h.clients.calls.length = 0;
+
+            // the restart: gone for 25 s, then back without sending us anything
+            process.down = true;
+            process.pong = false;
+            await advance(h, 25_000);
+            expect(methods(h)).toEqual([]);
+            await advance(h, 5000); // the ping at +30 s is refused
+            expect(methods(h)).toEqual(['ping']);
+            await advance(h, 10_000); // no PONG by +40 s: reconnecting, init refused
+            expect(h.manager.states()[1]).toMatchObject({connected: false, reconnecting: true});
+            expect(h.manager.states()[1]?.waiting).toBeUndefined();
+            expect(h.manager.states()[1]?.absent).toBeUndefined();
+
+            process.down = false;
+            let back = 0;
+            for (let second = 0; second < 20 && back === 0; second += 1) {
+                await advance(h, 1000);
+                if (h.manager.isConnected('HmIP-RF')) {
+                    back = h.clock.value - lastEvent;
+                }
+            }
+            expect(back).toBeGreaterThan(0);
+            expect(back).toBeLessThanOrEqual(45_000);
+            expect(h.manager.states()[1]?.reconnecting).toBeUndefined();
+            // quick retries, not the back-off: nothing "not present", no warning
+            expect(h.notices.filter((entry) => entry.level === 'warn' || entry.level === 'error')).toEqual([]);
+            expect(h.notices.filter((entry) => entry.level === 'info').map((entry) => entry.message)).toContain(
+                'HmIP-RF: subscribed again, attempt 2',
+            );
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('falls back to "not present" and the back-off when hmipserver stays away past the window', async () => {
+        vi.useFakeTimers();
+        try {
+            const {h, process} = hmip({startWindowMs: 60_000});
+            await h.manager.start();
+            h.manager.noteEvent('HmIP-RF');
+            process.down = true;
+            await advance(h, 40_000 + 61_000);
+            const state = h.manager.states()[1];
+            expect(state?.reconnecting).toBeUndefined();
+            expect(state?.absent).toBe(true);
+            expect(h.notices.filter((entry) => entry.level === 'warn')).toHaveLength(1);
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('never re-subscribes an interface that has not reached us since its init (a callback the CCU cannot reach)', async () => {
+        vi.useFakeTimers();
+        try {
+            const {h, process} = hmip();
+            process.pong = false;
+            await h.manager.start();
+            h.clients.calls.length = 0;
+            await advance(h, 120_000);
+            expect(methods(h)).toEqual(['ping', 'ping', 'ping']);
+            expect(h.manager.states()[1]?.reconnecting).toBeUndefined();
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('stops pinging on unsubscribe and on stop, and starts again after a resubscribe', async () => {
+        vi.useFakeTimers();
+        try {
+            const {h} = hmip();
+            await h.manager.start();
+            await h.manager.unsubscribe();
+            h.clients.calls.length = 0;
+            await advance(h, 90_000);
+            expect(methods(h)).toEqual([]);
+
+            await h.manager.subscribe();
+            h.clients.calls.length = 0;
+            await advance(h, 30_000);
+            expect(methods(h)).toEqual(['ping']);
+
+            await h.manager.stop();
+            h.clients.calls.length = 0;
+            await advance(h, 90_000);
+            expect(methods(h)).toEqual([]);
         } finally {
             vi.useRealTimers();
         }

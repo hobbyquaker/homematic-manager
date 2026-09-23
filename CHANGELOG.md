@@ -74,6 +74,13 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Fixed
 
+- **HomematicIP events come back by themselves after hmipserver restarts.** A restarted hmipserver reads its list of
+  subscribers back, but sends them nothing until they subscribe again - and the Homematic Manager kept showing
+  HmIP-RF as connected and received no events for up to ten minutes, until its watchdog gave up on the silence. It
+  now pings HmIP-RF after 30 s without an event; when the answer (an event of its own) does not arrive within 10 s,
+  the interface shows _Reconnecting_ and is subscribed again at once, and while hmipserver is still starting it is
+  tried every few seconds as at the start of the app. An interface that never sent anything since it was subscribed -
+  a callback address the CCU cannot reach - is not subscribed again over and over.
 - **No ReGa calls on an openccu-lite system, and an unreachable ReGa says so once.** On a system without ReGaHSS the
   Homematic Manager asked ReGa for its names at every connect, after every pairing and every acknowledgement, and
   warned each time that it did not answer. It now asks the system itself first (its `/api/meta/v1/version`, the same

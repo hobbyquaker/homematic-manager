@@ -38,6 +38,8 @@
         subscribingText?: string;
         /** Task 56: a `busy` interface that is waiting for its process at the start says this. */
         waitingText?: string;
+        /** B-56: a `busy` interface that lost its subscription and is being subscribed again says this. */
+        reconnectingText?: string;
         allConnectedText?: string;
         someNotConnectedText?: string;
         portLabel?: string;
@@ -84,6 +86,7 @@
         onretry = undefined,
         subscribingText = 'Subscribing',
         waitingText = 'Waiting',
+        reconnectingText = 'Reconnecting',
         allConnectedText = 'All interfaces are connected',
         someNotConnectedText = 'Not every interface is connected',
         portLabel = 'Port',
@@ -148,7 +151,10 @@
                 return connectedText;
             }
             case 'busy': {
-                return state.subscribing === true ? subscribingText : waitingText;
+                if (state.subscribing === true) {
+                    return subscribingText;
+                }
+                return state.reconnecting === true ? reconnectingText : waitingText;
             }
             case 'absent': {
                 return notPresentText;
@@ -337,6 +343,7 @@
             {notPresentText}
             {subscribingText}
             {waitingText}
+            {reconnectingText}
             testId={testId === undefined ? undefined : `${testId}-summary`}
         />
         {#if callbackWarning !== undefined}

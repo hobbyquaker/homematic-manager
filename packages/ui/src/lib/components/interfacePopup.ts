@@ -29,8 +29,9 @@ export const MARK_GLYPH: Readonly<Record<InterfaceMark, string>> = {
 };
 
 export function markOf(state: InterfaceState): InterfaceMark {
-    // task 56: waiting at the start for an interface process that is not up yet is on its way too
-    if (state.subscribing === true || (state.waiting === true && !state.connected)) {
+    // task 56: waiting at the start for an interface process that is not up yet is on its way too,
+    // and so is one that lost its subscription and is being subscribed again (B-56)
+    if (state.subscribing === true || ((state.waiting === true || state.reconnecting === true) && !state.connected)) {
         return 'busy';
     }
     if (state.connected) {

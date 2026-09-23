@@ -12,6 +12,10 @@
  *    ping at all (VirtualDevices) is watched by events only.
  *    At the start (task 56, D-52) an `init` that is refused or times out is not left to the watchdog:
  *    it is tried again after 1, 2, 4 and 8 s and then every 2 s, and the interface shows *waiting*.
+ *    HmIP-RF has a liveness ping of its own besides (B-56, D-53): after 30 s of silence it is
+ *    pinged, and a missing PONG 10 s later means hmipserver has restarted - it reads its handler
+ *    list back but sends nothing until the client calls `init` again - so the interface shows
+ *    *reconnecting* and is subscribed again on the quick schedule of the start.
  * 3. `init(url, '')` on shutdown, so the CCU stops calling a process that is gone - with a hard
  *    timeout, because 2.x's `stop()` waited for an unreachable CCU and only a second `stop()` (or
  *    the 15 s fallback timer) got the app closed.
@@ -32,6 +36,7 @@ import type {
 } from '@homematic-manager/core';
 import {
     INTERFACE_NAMES,
+    PONG_TIMEOUT_SECONDS,
     callbackPinOption,
     interfaceDefinition,
     interfacePort,
@@ -145,6 +150,25 @@ export interface ManagedInterface {
     retryTimer: ReturnType<typeof setTimeout> | undefined;
     /** Task 56: `init` succeeded since the last start - its failures are an outage, not a start. */
     answered: boolean;
+    /**
+     * Task 56, B-56: when the current window of quick retries began, on the monotonic clock - the
+     * start (or a D-31 resubscribe) for every interface, or the moment a liveness ping went
+     * unanswered for this one.
+     */
+    windowStart: number;
+    /** B-56: the last event on the monotonic clock, for the liveness ping. */
+    lastEventMono: number;
+    /**
+     * B-56: an event arrived since the last successful `init`. Only then does a missing PONG mean
+     * that the subscription was lost: an interface that never reached us - a callback address the
+     * CCU cannot reach - would otherwise be re-`init`ed every 40 s, and hmipserver re-sends every
+     * device at each `init` (occu#45).
+     */
+    heardSinceInit: boolean;
+    /** B-56: the timer of the next liveness check, and the one waiting for its PONG. */
+    livenessTimer: ReturnType<typeof setTimeout> | undefined;
+    /** B-56: lost its subscription (no PONG) and is being subscribed again. */
+    reconnecting: boolean;
 }
 
 export interface InterfaceManagerOptions {
@@ -179,6 +203,13 @@ export interface InterfaceManagerOptions {
      * {@link START_WINDOW_MS}. `0` turns the quick start retries off.
      */
     readonly startWindowMs?: number;
+    /**
+     * B-56: overrides the liveness ping interval of every interface that has one (HmIP-RF, 30 s in
+     * the table); `0` turns the liveness ping off. The PONG timeout is {@link pongTimeoutMs}.
+     */
+    readonly pingIntervalMs?: number;
+    /** B-56: how long the PONG may take; defaults to {@link PONG_TIMEOUT_SECONDS}. */
+    readonly pongTimeoutMs?: number;
     /** Address to bind the callback servers to; left out, {@link callbackBindHost} decides. */
     readonly callbackHost?: string;
     /**
@@ -274,8 +305,6 @@ export class InterfaceManager {
     #detected: string[] = [];
     #stopping = false;
     #idle = false;
-    /** Task 56: when the current start (or D-31 resubscribe) began, on {@link InterfaceManagerOptions.monotonicNow}. */
-    #startedAt = 0;
 
     constructor(options: InterfaceManagerOptions) {
         this.#options = options;
@@ -495,7 +524,6 @@ export class InterfaceManager {
             }
         }
 
-        this.#startedAt = this.#monotonicNow();
         for (const target of targets) {
             this.#interfaces.set(target.resolved.name, this.#create(target));
         }
@@ -530,6 +558,8 @@ export class InterfaceManager {
         await Promise.all([...this.#interfaces.values()].map((entry) => this.#deregister(entry)));
         for (const entry of this.#interfaces.values()) {
             this.#clearRetryTimer(entry);
+            this.#clearLivenessTimer(entry);
+            entry.reconnecting = false;
             entry.lastEvent = 0;
             entry.failures = 0;
             entry.retryAt = 0;
@@ -542,6 +572,7 @@ export class InterfaceManager {
                 subscribing: false,
                 unreachable: false,
                 waiting: false,
+                reconnecting: false,
             });
         }
         this.#options.onStateChanged(this.states());
@@ -554,8 +585,9 @@ export class InterfaceManager {
         }
         this.#idle = false;
         // task 56: a resubscribe is a start too - the interface processes may have gone meanwhile
-        this.#startedAt = this.#monotonicNow();
+        const now = this.#monotonicNow();
         for (const entry of this.#interfaces.values()) {
+            entry.windowStart = now;
             this.#update(entry, {idle: false});
         }
         await Promise.all([...this.#interfaces.keys()].map((name) => this.#init(name)));
@@ -595,6 +627,8 @@ export class InterfaceManager {
             return;
         }
         entry.lastEvent = this.#now();
+        entry.lastEventMono = this.#monotonicNow();
+        entry.heardSinceInit = true;
         if (!entry.state.connected) {
             this.#update(entry, {connected: true, error: undefined, unreachable: false});
             this.#options.onStateChanged(this.states());
@@ -635,6 +669,7 @@ export class InterfaceManager {
         }
         for (const entry of this.#interfaces.values()) {
             this.#clearRetryTimer(entry);
+            this.#clearLivenessTimer(entry);
         }
         await Promise.all([...this.#interfaces.values()].map((entry) => this.#deregister(entry)));
         for (const entry of this.#interfaces.values()) {
@@ -754,6 +789,11 @@ export class InterfaceManager {
             waitingAttempts: 0,
             retryTimer: undefined,
             answered: false,
+            windowStart: this.#monotonicNow(),
+            lastEventMono: 0,
+            heardSinceInit: false,
+            livenessTimer: undefined,
+            reconnecting: false,
             state: {
                 name: resolved.name,
                 type: isKnownInterface(resolved.name) ? resolved.name : 'custom',
@@ -867,12 +907,16 @@ export class InterfaceManager {
         try {
             await entry.client.call('init', [url, resolved.ident], BACKGROUND);
             entry.lastEvent = this.#now();
+            entry.lastEventMono = this.#monotonicNow();
+            entry.heardSinceInit = false;
             const wasFailing = entry.failures > 0;
             const waited = entry.waitingAttempts;
+            const wasReconnecting = entry.reconnecting;
             entry.failures = 0;
             entry.retryAt = 0;
             entry.waitingAttempts = 0;
             entry.answered = true;
+            entry.reconnecting = false;
             // hmipserver re-sends every device on `init` (occu#45), so the grids are not complete
             // until the sweep below is through; the UI shows "subscribing" until then
             this.#update(entry, {
@@ -882,9 +926,19 @@ export class InterfaceManager {
                 unreachable: false,
                 subscribing: true,
                 waiting: false,
+                reconnecting: false,
             });
+            this.#armLiveness(entry);
             if (wasFailing) {
                 this.#options.onNotice('info', `${interfaceName}: answering again`, interfaceName);
+            } else if (wasReconnecting) {
+                this.#options.onNotice(
+                    'info',
+                    waited > 0
+                        ? `${interfaceName}: subscribed again, attempt ${String(waited + 1)}`
+                        : `${interfaceName}: subscribed again`,
+                    interfaceName,
+                );
             } else if (waited > 0) {
                 this.#options.onNotice(
                     'info',
@@ -923,6 +977,7 @@ export class InterfaceManager {
         }
         const first = entry.failures === 0;
         entry.failures += 1;
+        entry.reconnecting = false;
         const base = this.#options.initBackoffMs ?? WATCHDOG_INTERVAL_MS;
         const wait = Math.min(base * 2 ** (entry.failures - 1), MAX_INIT_BACKOFF_MS);
         entry.retryAt = this.#now() + wait;
@@ -933,6 +988,7 @@ export class InterfaceManager {
             unreachable,
             subscribing: false,
             waiting: false,
+            reconnecting: false,
         });
         if (!first) {
             return;
@@ -954,7 +1010,7 @@ export class InterfaceManager {
      */
     #inStartWindow(entry: ManagedInterface): boolean {
         const window = this.#options.startWindowMs ?? START_WINDOW_MS;
-        return !entry.answered && window > 0 && this.#monotonicNow() - this.#startedAt < window;
+        return !entry.answered && window > 0 && this.#monotonicNow() - entry.windowStart < window;
     }
 
     /**
@@ -973,7 +1029,9 @@ export class InterfaceManager {
             absent: false,
             unreachable: false,
             subscribing: false,
-            waiting: true,
+            // B-56: an interface that lost its subscription keeps saying so while it waits
+            waiting: !entry.reconnecting,
+            reconnecting: entry.reconnecting,
         });
         const where = `${entry.state.host}:${String(entry.state.port)}`;
         if (entry.waitingAttempts === 1) {
@@ -1005,6 +1063,88 @@ export class InterfaceManager {
         entry.retryTimer = timer;
     }
 
+    /**
+     * B-56 (D-53): the liveness ping of an interface that has one (HmIP-RF). After
+     * `pingIntervalSeconds` without an event it is pinged; the PONG is an event, and when none has
+     * arrived {@link PONG_TIMEOUT_SECONDS} later although the interface did reach us since its
+     * last `init`, the subscription is lost. A ping that fails outright (the process is gone) is
+     * the same thing - the timer decides, not the call.
+     */
+    #armLiveness(entry: ManagedInterface, delay?: number): void {
+        this.#clearLivenessTimer(entry);
+        const interval = this.#options.pingIntervalMs ?? entry.target.resolved.pingIntervalSeconds * 1000;
+        if (interval <= 0 || this.#stopping || this.#idle) {
+            return;
+        }
+        this.#setLivenessTimer(entry, delay ?? interval, () => {
+            const silent = this.#monotonicNow() - entry.lastEventMono;
+            if (silent < interval) {
+                this.#armLiveness(entry, interval - silent);
+                return;
+            }
+            const sentAt = this.#monotonicNow();
+            entry.client.call('ping', ['hmm'], BACKGROUND).catch(() => {
+                // no PONG will come either; the timer below says what that means
+            });
+            this.#setLivenessTimer(entry, this.#options.pongTimeoutMs ?? PONG_TIMEOUT_SECONDS * 1000, () => {
+                if (entry.lastEventMono >= sentAt) {
+                    // the next ping is due 30 s after the PONG, not after this check
+                    this.#armLiveness(entry, Math.max(0, interval - (this.#monotonicNow() - entry.lastEventMono)));
+                    return;
+                }
+                if (!entry.heardSinceInit) {
+                    // it never reached us since the `init`, which a new one would not change
+                    this.#armLiveness(entry);
+                    return;
+                }
+                this.#noteLost(entry);
+            });
+        });
+    }
+
+    #setLivenessTimer(entry: ManagedInterface, delay: number, action: () => void): void {
+        const timer = setTimeout(() => {
+            entry.livenessTimer = undefined;
+            if (!this.#stopping && !this.#idle && this.#interfaces.get(entry.name) === entry) {
+                action();
+            }
+        }, delay);
+        if (typeof timer.unref === 'function') {
+            timer.unref();
+        }
+        entry.livenessTimer = timer;
+    }
+
+    #clearLivenessTimer(entry: ManagedInterface): void {
+        if (entry.livenessTimer !== undefined) {
+            clearTimeout(entry.livenessTimer);
+            entry.livenessTimer = undefined;
+        }
+    }
+
+    /**
+     * B-56: the liveness ping went unanswered. The subscription is gone - after an hmipserver
+     * restart the process is back (or on its way) but sends nothing to us - so the interface is
+     * *reconnecting* and subscribed again at once, and while `init` is refused or does not answer
+     * it is tried on the quick schedule of the start, for as long as the start window.
+     */
+    #noteLost(entry: ManagedInterface): void {
+        const seconds = Math.round((this.#options.pongTimeoutMs ?? PONG_TIMEOUT_SECONDS * 1000) / 1000);
+        entry.reconnecting = true;
+        entry.answered = false;
+        entry.waitingAttempts = 0;
+        entry.windowStart = this.#monotonicNow();
+        this.#clearRetryTimer(entry);
+        this.#update(entry, {connected: false, reconnecting: true, waiting: false, subscribing: false});
+        this.#options.onNotice(
+            'info',
+            `${entry.name}: no answer to a ping within ${String(seconds)} s - subscribing again`,
+            entry.name,
+        );
+        this.#options.onStateChanged(this.states());
+        void this.#init(entry.name);
+    }
+
     #clearRetryTimer(entry: ManagedInterface): void {
         if (entry.retryTimer !== undefined) {
             clearTimeout(entry.retryTimer);
@@ -1032,6 +1172,7 @@ export class InterfaceManager {
             subscribing?: boolean;
             idle?: boolean;
             waiting?: boolean;
+            reconnecting?: boolean;
             callbackUrl?: string | undefined;
             callbackFailure?: {port: number; inUse: boolean} | undefined;
             callbackWarning?: CallbackWarning | undefined;
@@ -1047,6 +1188,7 @@ export class InterfaceManager {
         setFlag(state, 'subscribing', changes.subscribing);
         setFlag(state, 'idle', changes.idle);
         setFlag(state, 'waiting', changes.waiting);
+        setFlag(state, 'reconnecting', changes.reconnecting);
         if ('error' in changes) {
             if (changes.error === undefined) {
                 delete (state as {error?: string}).error;
@@ -1096,7 +1238,7 @@ export class InterfaceManager {
 /** A boolean that is present when true and absent otherwise, so a state stays small on the wire. */
 function setFlag(
     state: InterfaceState,
-    key: 'absent' | 'unreachable' | 'subscribing' | 'idle' | 'waiting',
+    key: 'absent' | 'unreachable' | 'subscribing' | 'idle' | 'waiting' | 'reconnecting',
     value: boolean | undefined,
 ): void {
     if (value === true) {

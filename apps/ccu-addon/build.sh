@@ -64,6 +64,8 @@ PREFIX="$PREFIX" "$ADDON_SRC/build-runtime.sh" "$ARCH" "$TREE"
 cp -a "$ADDON_SRC/files/$ADDON/." "$TREE/"
 cp -a "$ADDON_SRC/files/update_script" "$WORK/update_script"
 cp -a "$ADDON_SRC/files/$ADDON.cfg" "$WORK/$ADDON.cfg"
+# the openccu-lite manifest at the root of the archive (the CCU3 and OpenCCU ignore it)
+cp -a "$ADDON_SRC/files/openccu-lite.json" "$WORK/openccu-lite.json"
 # run-parts ignores files with a dot in the name, and the WebUI calls the rc script through a symlink
 chmod +x "$WORK/update_script" "$TREE/rc.d/$ADDON" "$TREE/bin/update_addon" "$TREE"/www/*.cgi
 mkdir -p "$TREE/var"
@@ -161,10 +163,10 @@ PKG="$OUT/hmm-ccu-$ARCH-$VERSION.tar.gz"
 # GNU tar writes the root ownership the CCU installer expects; bsdtar (macOS, local builds) has no
 # --owner, which only matters for a package that is actually shipped - CI runs on Linux
 if tar --owner=root --group=root --version >/dev/null 2>&1; then
-    tar --owner=root --group=root --exclude=.DS_Store -czf "$PKG" -C "$WORK" "$ADDON" update_script "$ADDON.cfg"
+    tar --owner=root --group=root --exclude=.DS_Store -czf "$PKG" -C "$WORK" "$ADDON" update_script "$ADDON.cfg" openccu-lite.json
 else
     echo "note: GNU tar not available, package ownership will not be root"
-    tar --exclude=.DS_Store -czf "$PKG" -C "$WORK" "$ADDON" update_script "$ADDON.cfg"
+    tar --exclude=.DS_Store -czf "$PKG" -C "$WORK" "$ADDON" update_script "$ADDON.cfg" openccu-lite.json
 fi
 (cd "$OUT" && sha256sum "$(basename "$PKG")" > "$(basename "$PKG").sha256")
 

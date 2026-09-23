@@ -1,0 +1,32 @@
+{
+  "format": 1,
+  "id": "hmm",
+  "name": "Homematic Manager",
+  "description": {
+    "de": "Geräte anlernen, Paramsets bearbeiten, Direktverknüpfungen, Namen und Räume — das Frontend für ein openccu-lite-System.",
+    "en": "Pair devices, edit paramsets, direct links, names and rooms — the frontend for an openccu-lite system."
+  },
+  "homepage": "https://github.com/hobbyquaker/homematic-manager",
+  "licence": "AGPL-3.0-or-later",
+  "release": {
+    "github": "hobbyquaker/homematic-manager",
+    "asset": "hmm-ccu-{arch}-{version}.tar.gz",
+    "prerelease": true
+  },
+  "requires": {
+    "architectures": ["armv7l", "aarch64", "x86_64"]
+  },
+  "ui": {
+    "settings_url": "/addons/hmm/settings.cgi?cmd=config",
+    "session_header": true
+  },
+  "runtime": {
+    "needs": ["rfd", "hmipserver"],
+    "start": "early",
+    "data_dirs": ["/usr/local/hmm"],
+    "note": {
+      "de": "Das Profil (config.json, Caches, Gerätebilder) liegt in /usr/local/hmm, außerhalb des Addon-Verzeichnisses, damit es Updates und eine Deinstallation überlebt; das System übergibt es dem Addon-Benutzer.",
+      "en": "The profile (config.json, caches, device images) lives in /usr/local/hmm, outside the addon directory, so it survives updates and an uninstall; the system hands it to the addon user."
+    }
+  }
+}

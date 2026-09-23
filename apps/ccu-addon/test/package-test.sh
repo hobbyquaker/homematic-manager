@@ -61,7 +61,7 @@ tar tzf "$PKG" > "$LISTING"
 for entry in hmm/rc.d/hmm hmm/bin/node hmm/bin/update_addon hmm/www/settings.cgi hmm/www/service.cgi \
     hmm/www/update_check.cgi hmm/www/lib/session.tcl hmm/etc/lighttpd.conf.in hmm/etc/monit.cfg \
     hmm/etc/default.env hmm/app/dist/cli.js hmm/app/ui/index.html hmm/app/data/manifest.json \
-    hmm/app/node_modules/ws/package.json hmm/versions update_script hmm.cfg; do
+    hmm/app/node_modules/ws/package.json hmm/versions update_script hmm.cfg openccu-lite.json; do
     if grep -qxF "$entry" "$LISTING"; then
         pass "contains $entry"
     else

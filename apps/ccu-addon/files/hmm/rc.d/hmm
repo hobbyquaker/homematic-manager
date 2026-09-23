@@ -11,6 +11,9 @@ ADDON_DIR=/usr/local/addons/hmm
 CONF_DIR=/usr/local/etc/config
 WWW_DIR=$CONF_DIR/addons/www/$ADDON
 LIGHTTPD_CONF=$CONF_DIR/lighttpd/$ADDON.conf
+# task 69: the lighttpd rule rendered into the addon's own tree, and its template
+RULE=$ADDON_DIR/etc/lighttpd.conf
+RULE_TEMPLATE=$ADDON_DIR/etc/lighttpd.conf.in
 MONIT_CONF=/usr/local/etc/monit-$ADDON.cfg
 
 # The profile: config.json (the CCU address, interfaces, ReGa, pacing - everything the settings
@@ -97,6 +100,38 @@ LighttpdReload() {
     [ -x /etc/init.d/S50lighttpd ] || return 0
     if ! /etc/init.d/S50lighttpd reload >/dev/null 2>&1; then
         nohup sh -c 'sleep 5; /etc/init.d/S50lighttpd restart' >/dev/null 2>&1 &
+    fi
+}
+
+# Task 69: on openccu-lite, the lighttpd rule in the addon's own tree follows HMM_PORT at every start.
+# The system reads only its own validated copy of etc/lighttpd.conf (openccu-lite B-120) and takes it
+# at every lighttpd start and reload, so a port moved in etc/hmm.env needs nothing but a restart of
+# the addon and a reload of lighttpd - no reinstall. The reload is asked for only as root: in its
+# unit this runs as addon-hmm, which may not reload lighttpd, and then the syslog says the rule waits
+# for the next reload (a reinstall, any addon install, a restart of lighttpd, the next boot).
+# Called after hmm.env was sourced. Never fatal: the backend starts either way.
+LiteRule() {
+    [ -f $RULE_TEMPLATE ] || return 0
+    if ! sed "s/@PORT@/$HMM_PORT/g" $RULE_TEMPLATE > $RULE.new 2>/dev/null; then
+        rm -f $RULE.new 2>/dev/null
+        logger -t $ADDON -p daemon.warn "cannot write $RULE as $(id -un): the lighttpd rule keeps its port"
+        return 0
+    fi
+    if cmp -s $RULE.new $RULE; then
+        rm -f $RULE.new
+    else
+        mv $RULE.new $RULE
+    fi
+    # what lighttpd reads: the system's copy, without the header line it puts on top
+    if [ -f $LIGHTTPD_CONF ] \
+        && [ "$(awk 'NR == 1 && /^# written by occulited from /{next} {print}' $LIGHTTPD_CONF 2>/dev/null)" = "$(cat $RULE)" ]; then
+        return 0
+    fi
+    if [ "$(id -u)" = 0 ]; then
+        logger -t $ADDON -p daemon.info "the lighttpd rule changed (port $HMM_PORT): reloading lighttpd"
+        LighttpdReload
+    else
+        logger -t $ADDON -p daemon.notice "the lighttpd rule changed (port $HMM_PORT): it takes effect at lighttpd's next reload or start"
     fi
 }
 
@@ -232,6 +267,7 @@ Start() {
     if grep -q '^VARIANT=lite$' /VERSION 2>/dev/null; then
         HMM_AUTH_MODE="$(LiteAuthMode)"
         logger -t $ADDON -p daemon.info "openccu-lite detected (VARIANT=lite): --auth-mode $HMM_AUTH_MODE"
+        LiteRule
     fi
     [ -n "$HMM_AUTH_MODE" ] && export HMM_AUTH_MODE
 
@@ -443,8 +479,14 @@ case "$1" in
             rm -f $MONIT_CONF
             [ -x /usr/bin/monit ] && /usr/bin/monit reload >/dev/null 2>&1
         fi
-        if [ -f $LIGHTTPD_CONF ]; then
-            rm -f $LIGHTTPD_CONF
+        # The rendered rule first: on openccu-lite the reload below runs the system's sync, which
+        # must not find it and copy it back. The drop-in is a CCU's and OpenCCU's rule; on
+        # openccu-lite it is the system's copy, which the system removes by itself once
+        # etc/lighttpd.conf is gone (task 69), and an older rendering an earlier version left there
+        # goes here while this still runs as root. As the addon's user (B-119) the rm fails quietly
+        # and the system's sync after the uninstall does it.
+        rm -f $RULE 2>/dev/null
+        if [ -f $LIGHTTPD_CONF ] && rm -f $LIGHTTPD_CONF 2>/dev/null; then
             LighttpdReload
         fi
         rm -f $CONF_DIR/rc.d/$ADDON

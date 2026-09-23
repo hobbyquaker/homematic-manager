@@ -5,7 +5,7 @@
 #
 # Everything happens inside /usr/local/addons/hmm, /usr/local/hmm (the profile) plus four links the
 # platform provides for exactly this: rc.d, addons/www, hm_addons.cfg and the lighttpd config
-# directory. No system file is patched, no binary is placed in /usr/local/bin, no profile or PATH is
+# directory (not on openccu-lite, where that directory is the system's - task 69). No system file is patched, no binary is placed in /usr/local/bin, no profile or PATH is
 # touched - another addon's Node.js (RedMatic ships one too) stays untouched and this one's runtime
 # is invisible to it.
 #
@@ -19,6 +19,9 @@ WWW_DIR=$CONF_DIR/addons/www/$ADDON
 STATE_DIR=/usr/local/hmm
 LIGHTTPD_DIR=$CONF_DIR/lighttpd
 LIGHTTPD_CONF=$LIGHTTPD_DIR/$ADDON.conf
+# task 69: the rule rendered into the addon's own tree, from the template beside it
+RULE=$ADDON_DIR/etc/lighttpd.conf
+RULE_TEMPLATE=$ADDON_DIR/etc/lighttpd.conf.in
 PIDFILE=$ADDON_DIR/var/$ADDON.pid
 # where installations from before 2026-09-06 keep it, and where this script cannot see it on the
 # CCU3 firmware: that install runs in a chroot which binds /usr/local, /dev, /proc and /sys only
@@ -43,7 +46,13 @@ if [ -n "$PKG_ARCH" ] && [ "$PKG_ARCH" != "$MACHINE" ]; then
     exit 13
 fi
 
-mkdir -p $ADDONS_DIR $CONF_DIR/rc.d $CONF_DIR/addons/www $LIGHTTPD_DIR $STATE_DIR
+# openccu-lite (its /VERSION says VARIANT=lite; the CCU3's install chroot has no /VERSION and is a
+# CCU). Read once here, like rc.d/hmm reads it at every start.
+LITE=0
+grep -q '^VARIANT=lite$' /VERSION 2>/dev/null && LITE=1
+
+mkdir -p $ADDONS_DIR $CONF_DIR/rc.d $CONF_DIR/addons/www $STATE_DIR
+[ "$LITE" = 1 ] || mkdir -p $LIGHTTPD_DIR
 chmod 755 $ADDONS_DIR
 
 # Every pid that is this addon's backend. The pid files first - the one inside the addon tree, which
@@ -216,7 +225,7 @@ touch $CONF_DIR/hm_addons.cfg
 # page - for a box whose catalogue entry does not say so itself. rc.d/hmm's ConfigUrl says the same
 # in `info`. /VERSION as rc.d/hmm reads it; a firmware without one (the CCU3's install chroot) is a CCU.
 ADDON_CFG=$ADDON.cfg
-if grep -q '^VARIANT=lite$' /VERSION 2>/dev/null; then
+if [ "$LITE" = 1 ]; then
     ADDON_CFG=$ADDON-lite.cfg
     sed "s|{CONFIG_URL /addons/$ADDON/settings.cgi |{CONFIG_URL /addons/$ADDON/settings.cgi?cmd=config |" \
         $ADDON.cfg > $ADDON_CFG
@@ -224,19 +233,29 @@ fi
 $ADDON_DIR/bin/update_addon $ADDON $ADDON_CFG
 
 # The lighttpd rule that puts the UI (and its WebSocket) under /addons/hmm/. The port is the one in
-# etc/hmm.env, so a user who moves the port and re-runs this gets a matching rule. Rendered next to
-# the installed file and compared: on an update it is nearly always the same file, and then lighttpd
-# is not told anything at all (see LighttpdReload below - #141).
+# etc/hmm.env, so a user who moves the port and re-runs this gets a matching rule. Task 69: rendered
+# into the addon's own tree, etc/lighttpd.conf from the template etc/lighttpd.conf.in, and compared
+# with what lighttpd reads: on an update it is nearly always the same, and then lighttpd is not told
+# anything at all (see LighttpdReload below - #141).
+#   - A CCU and OpenCCU read /usr/local/etc/config/lighttpd/hmm.conf, and this copies the rule there.
+#   - openccu-lite reads only the system's own validated copy of etc/lighttpd.conf in that directory,
+#     made at every lighttpd start and reload and after every install (openccu-lite B-120), and
+#     nothing of the addon writes there: once the installer runs as the addon's user (B-119) it
+#     cannot. Its copy starts with a header line of its own, which the comparison leaves out.
 HMM_PORT=8090
 # shellcheck disable=SC1090
 . $ADDON_DIR/etc/hmm.env
-sed "s/@PORT@/$HMM_PORT/g" $ADDON_DIR/etc/lighttpd.conf > $LIGHTTPD_CONF.new
+sed "s/@PORT@/$HMM_PORT/g" $RULE_TEMPLATE > $RULE
 RULE_CHANGED=1
-if cmp -s $LIGHTTPD_CONF.new $LIGHTTPD_CONF 2>/dev/null; then
+if [ "$LITE" = 1 ]; then
+    if [ -f $LIGHTTPD_CONF ] \
+        && [ "$(awk 'NR == 1 && /^# written by occulited from /{next} {print}' $LIGHTTPD_CONF)" = "$(cat $RULE)" ]; then
+        RULE_CHANGED=0
+    fi
+elif cmp -s $RULE $LIGHTTPD_CONF 2>/dev/null; then
     RULE_CHANGED=0
-    rm -f $LIGHTTPD_CONF.new
 else
-    mv $LIGHTTPD_CONF.new $LIGHTTPD_CONF
+    cp $RULE $LIGHTTPD_CONF.new && mv $LIGHTTPD_CONF.new $LIGHTTPD_CONF
 fi
 
 # monit exists on OpenCCU, not on the CCU3 firmware
@@ -264,6 +283,9 @@ LighttpdReload() {
 }
 
 # On OpenCCU the install is live: lighttpd has to pick a new or changed rule up, and nothing else
+# (on openccu-lite the reload runs the system's sync, which takes the rendered rule; after an install
+# through its Addons page it syncs and reloads by itself as well, which is what remains once this
+# script runs as the addon's user and may not reload lighttpd)
 # would start the service - not on an update (exit code 0, the WebUI shows its "successful" popup
 # and stays up) and not on a fresh install either, where OpenCCU reboots on exit code 10 but a
 # firmware without that convention (openccu-lite asks first) may not.

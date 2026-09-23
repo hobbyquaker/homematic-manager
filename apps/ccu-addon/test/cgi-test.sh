@@ -1246,7 +1246,7 @@ case "$(cat $rc)" in
 esac
 
 echo "the lighttpd rule"
-conf=files/hmm/etc/lighttpd.conf
+conf=files/hmm/etc/lighttpd.conf.in
 case "$(cat $conf)" in
     *'proxy.header = ("upgrade" => "enable")'*) pass "enables the WebSocket upgrade (RedMatic's proven line)" ;;
     *) fail "enables the WebSocket upgrade" "$(cat $conf)" ;;

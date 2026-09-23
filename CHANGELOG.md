@@ -22,6 +22,12 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   on the system; the buttons say so. The tab reads the system's API and not the group process, so it works from
   the desktop as well - even while the `VirtualDevices` interface itself shows as not connected there.
 
+### Changed
+
+- **openccu-lite: the addon no longer writes lighttpd's configuration directory.** Its proxy rule is rendered into
+  the addon's own directory (`etc/lighttpd.conf`), and the system makes its own checked copy of it for lighttpd; a
+  port changed in `etc/hmm.env` reaches the rule with a restart of the addon. On a CCU and OpenCCU nothing changes.
+
 ### Fixed
 
 - **The easy form's dropdowns show the CCU's words, not its internal keys.** A preset named by one of the WebUI's

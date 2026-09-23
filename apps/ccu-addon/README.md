@@ -57,12 +57,12 @@ ssh root@ccu /bin/install_addon        # OpenCCU: the exact path the WebUI takes
 
 | Path                                        | What                                                        |
 | ------------------------------------------- | ----------------------------------------------------------- |
-| `/usr/local/addons/hmm/`                    | the addon: `bin/node`, `app/`, `rc.d/hmm`, `etc/`, `www/`, `var/hmm.pid`, `var/hmm.log` (only with `HMM_ADDON_LOG=addon`) |
+| `/usr/local/addons/hmm/`                    | the addon: `bin/node`, `app/`, `rc.d/hmm`, `etc/` (with the rendered `lighttpd.conf`), `www/`, `var/hmm.pid`, `var/hmm.log` (only with `HMM_ADDON_LOG=addon`) |
 | `/var/log/hmm.log`                          | the backend's log by default, on the CCU's tmpfs (not on openccu-lite; see [Troubleshooting](#troubleshooting)) |
 | `/usr/local/hmm/`                           | the **profile**: `config.json`, the caches, `images/`, `token` (mode 600) |
 | `/usr/local/etc/config/rc.d/hmm`            | symlink to the service script                                |
 | `/usr/local/etc/config/addons/www/hmm`      | symlink to `www/` — this is what serves the CGIs             |
-| `/usr/local/etc/config/lighttpd/hmm.conf`   | the proxy rule (see below)                                   |
+| `/usr/local/etc/config/lighttpd/hmm.conf`   | the proxy rule (see below); on openccu-lite the system writes it |
 | `/usr/local/etc/monit-hmm.cfg`              | symlink to `etc/monit.cfg`, OpenCCU only (the CCU3 has no monit) |
 | `/usr/local/etc/config/hm_addons.cfg`       | one entry, so the button appears                             |
 
@@ -215,8 +215,9 @@ neither `token` nor `occulite` runs `occulite`, and the syslog says so.
 
 ## The lighttpd rule
 
-`/usr/local/etc/config/lighttpd/hmm.conf`, written at install time with the port from
-`etc/hmm.env`:
+`etc/lighttpd.conf.in` in the addon directory is its template. `update_script` renders it into
+`etc/lighttpd.conf` beside it, with the port from `etc/hmm.env`, and on a CCU and OpenCCU copies that
+file to `/usr/local/etc/config/lighttpd/hmm.conf`:
 
 ```lighttpd
 $HTTP["url"] == "/addons/hmm" {
@@ -245,6 +246,16 @@ the connection the "installation successful" popup goes out on, leaving the WebU
 until an F5 (#141). An update whose rule is unchanged does not touch lighttpd at all; where an
 init script has no `reload`, the restart is detached and delayed until the answer is out. The
 uninstall removes the file and reloads the same way.
+
+**On openccu-lite the addon does not write that directory** (task 69). There lighttpd reads only
+the system's own copy of `etc/lighttpd.conf`: it checks the rule against the directives a
+frontend may use, writes the copy with a header line of its own, and does so again at every start
+and reload of lighttpd and after every install; when the addon is uninstalled and its
+`etc/lighttpd.conf` is gone, the copy goes too. `update_script` renders the file, compares it with
+the system's copy and asks for a reload when they differ; `rc.d/hmm` renders it again at every
+start, so a port moved in `etc/hmm.env` needs only a restart of the addon and the next reload of
+lighttpd (a reinstall does both). This needs an openccu-lite whose occulited takes the rule from
+the addon's directory; older ones read only what an installer wrote into the directory itself.
 
 ## Service, update, uninstall
 
@@ -418,7 +429,7 @@ takes to load there.
 | --- | --- |
 | The button opens a page saying the session is invalid | The WebUI session expired. Reload the WebUI and open the addon again. |
 | The button opens a 503 page | The service is not running: `service.cgi?…&cmd=log`, or `/var/log/hmm.log` (`/usr/local/addons/hmm/var/hmm.log` with `HMM_ADDON_LOG=addon`); on openccu-lite the box's Log page with unit `addon-hmm`, or `journalctl -t addon-hmm`. Start it with the _Neu starten_ button. |
-| The UI loads but stays disconnected | The WebSocket did not get through. `grep hmm /var/log/messages`, and check that `/usr/local/etc/config/lighttpd/hmm.conf` exists and lighttpd has read it (`/etc/init.d/S50lighttpd reload`). CCU3 firmware older than 3.61.5 does not read that directory at all. |
+| The UI loads but stays disconnected | The WebSocket did not get through. `grep hmm /var/log/messages`, and check that `/usr/local/etc/config/lighttpd/hmm.conf` exists, carries the port of `etc/hmm.env`, and lighttpd has read it (`/etc/init.d/S50lighttpd reload`). CCU3 firmware older than 3.61.5 does not read that directory at all. On openccu-lite a `hmm.conf.rejected` beside it says why the system refused the rule. |
 | No devices, interfaces marked red | The interface processes answer on the CCU's loopback only (D-28). `netstat -tlnp` should show 32001 / 32010; a CCU in safe mode or with `HM_MODE` other than `NORMAL` starts neither them nor addons. |
 | Device pictures are missing | They come from the CCU's own `/config/img/devices/`; the app falls back to the pictures that ship in `app/data/icons/`. |
 | `BidCos-Wired ... init failed` every 15 seconds in the log | `hs485d` only runs on a CCU that has a BidCos-Wired gateway. Untick BidCos-Wired in the app's settings dialog and the retries stop. |

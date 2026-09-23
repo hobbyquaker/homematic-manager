@@ -138,6 +138,9 @@ check "the rc.d link exists" "/usr/local/addons/hmm/rc.d/hmm" "$(dex 'readlink /
 check "the www symlink exists" "/usr/local/addons/hmm/www" "$(dex 'readlink /usr/local/etc/config/addons/www/hmm')"
 check "the Systemsteuerung entry was written" "/addons/hmm/settings.cgi" "$(dex 'cat /usr/local/etc/config/hm_addons.cfg')"
 check "the lighttpd rule was installed with the port" '"port" => 8090' "$(dex 'cat /usr/local/etc/config/lighttpd/hmm.conf')"
+check "rendered in the addon's tree first, and copied from there (task 69)" "same" \
+    "$(dex 'cmp -s /usr/local/addons/hmm/etc/lighttpd.conf /usr/local/etc/config/lighttpd/hmm.conf && echo same')"
+check "which keeps its template" '"port" => @PORT@' "$(dex 'cat /usr/local/addons/hmm/etc/lighttpd.conf.in')"
 check "the token is root-only" "600" "$(dex 'stat -c %a /usr/local/hmm/token')"
 check "the profile directory is root-only" "700" "$(dex 'stat -c %a /usr/local/hmm')"
 check "the image cache is excluded from the backup" "OK" "$(dex 'test -f /usr/local/hmm/images/.nobackup && echo OK')"
@@ -770,6 +773,7 @@ dex "sed -i 's/^#*HMM_PORT=.*/HMM_PORT=8091/' /usr/local/addons/hmm/etc/hmm.env"
 out="$(webui install)"
 check "the WebUI's request is answered" "installed rc=0 curl=0" "$out"
 check "the rule carries the new port" '"port" => 8091' "$(dex 'cat /usr/local/etc/config/lighttpd/hmm.conf')"
+check "and so does the one in the addon's tree (task 69)" '"port" => 8091' "$(dex 'cat /usr/local/addons/hmm/etc/lighttpd.conf')"
 check "and lighttpd was told with a reload" "reload" "$(lighttpd_actions)"
 absent "not a restart" "restart" "$(lighttpd_actions)"
 for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
@@ -835,6 +839,71 @@ check "and writes the settings page as the CONFIG_URL into hm_addons.cfg" \
 check "which keeps its description" "Ger&auml;te" "$(dex 'cat /usr/local/etc/config/hm_addons.cfg')"
 check "rc.d/hmm info names the settings page as the Config-Url" "Config-Url: /addons/hmm/settings.cgi?cmd=config" \
     "$(dex '/usr/local/etc/config/rc.d/hmm info')"
+
+echo
+echo "openccu-lite: the rule is rendered into the addon's tree, and the drop-in directory is the system's (task 69)"
+# On openccu-lite lighttpd reads only the system's validated copy of etc/lighttpd.conf, which occulited
+# writes with a header line of its own at every lighttpd start and reload and after every install; once
+# the installer runs as the addon's user it could not write there anyway. `sync_rule` stands in for
+# occulited's sync and the reload it belongs to, and the drop-in is its copy from here on.
+sync_rule() {
+    dex '{ echo "# written by occulited from /usr/local/addons/hmm/etc/lighttpd.conf: a validated copy of the addon'"'"'s lighttpd fragment, refreshed from it at every sync"; \
+        cat /usr/local/addons/hmm/etc/lighttpd.conf; } > /usr/local/etc/config/lighttpd/hmm.conf \
+        && /etc/init.d/S50lighttpd reload' >/dev/null
+    sleep 1
+    lighttpd_actions >/dev/null
+}
+sync_rule
+dropin_sum() { dex 'md5sum < /usr/local/etc/config/lighttpd/hmm.conf'; }
+DROPIN_SUM="$(dropin_sum)"
+lighttpd_actions >/dev/null
+out="$(install_addon)"
+check "an update with an unchanged rule goes through" "exit 0" "$out"
+check "the drop-in directory is left alone" "$DROPIN_SUM" "$(dropin_sum)"
+none "and so is lighttpd: the system's copy says what the tree says" "$(lighttpd_actions)"
+dex "sed -i 's/^#*HMM_PORT=.*/HMM_PORT=8093/' /usr/local/addons/hmm/etc/hmm.env" >/dev/null
+out="$(install_addon)"
+check "an update after the port was moved goes through" "exit 0" "$out"
+check "the rule in the addon's tree carries the new port" '"port" => 8093' "$(dex 'cat /usr/local/addons/hmm/etc/lighttpd.conf')"
+check "the drop-in directory is still left alone" "$DROPIN_SUM" "$(dropin_sum)"
+check "and lighttpd was asked for a reload, whose sync takes the rule" "reload" "$(lighttpd_actions)"
+sync_rule
+wait_for_port() {
+    for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+        dex "curl -s -o /dev/null http://127.0.0.1:$1/addons/hmm/" >/dev/null && break
+        sleep 1
+    done
+}
+# proxied <description> <port>: lighttpd answers /addons/hmm/ as the backend on that port does - in
+# occulite mode, without a session, that is its redirect rather than the UI - and not with the 503
+# of a proxy whose backend is not there
+proxied() {
+    direct="$(dex "curl -so /dev/null -w '%{http_code}' http://127.0.0.1:$2/addons/hmm/")"
+    via="$(dex "curl -so /dev/null -w '%{http_code}' http://127.0.0.1/addons/hmm/")"
+    if [ "$via" = "$direct" ] && [ "${via#5}" = "$via" ] && [ "$via" != 000 ]; then
+        pass "$1"
+    else
+        fail "$1" "lighttpd $via, the backend $direct"
+    fi
+}
+wait_for_port 8093
+proxied "the system's copy proxies to the backend on the new port" 8093
+# a port moved in hmm.env and the addon restarted, no reinstall: the start renders the rule again
+dex "sed -i 's/^#*HMM_PORT=.*/HMM_PORT=8090/' /usr/local/addons/hmm/etc/hmm.env" >/dev/null
+DROPIN_SUM="$(dropin_sum)"
+lighttpd_actions >/dev/null
+out="$(dex '/usr/local/etc/config/rc.d/hmm restart; echo "exit $?"')"
+check "a restart after the port was moved back says OK" "Starting hmm: OK" "$out"
+check "the start rendered the rule in the addon's tree with that port" '"port" => 8090' "$(dex 'cat /usr/local/addons/hmm/etc/lighttpd.conf')"
+check "left the drop-in directory alone" "$DROPIN_SUM" "$(dropin_sum)"
+check "and, as root, asked lighttpd for the reload" "reload" "$(lighttpd_actions)"
+check "saying so in the syslog" "the lighttpd rule changed (port 8090): reloading lighttpd" "$(syslog)"
+sync_rule
+wait_for_port 8090
+proxied "and to the old port again" 8090
+out="$(dex '/usr/local/etc/config/rc.d/hmm restart; echo "exit $?"')"
+check "a restart with the rule in place says OK" "Starting hmm: OK" "$out"
+none "and leaves lighttpd alone" "$(lighttpd_actions)"
 dex 'rm -f /VERSION' >/dev/null
 out="$(install_addon)"
 check "an update on a CCU again goes through" "exit 0" "$out"

@@ -1,6 +1,11 @@
-# Installed by update_script as /usr/local/etc/config/lighttpd/hmm.conf, which both firmwares
-# include (OpenCCU always, CCU3 firmware since 3.61.5). The port placeholder below is substituted
-# with HMM_PORT from etc/hmm.env on the way, and the file is removed again on uninstall.
+# The lighttpd rule of the Homematic Manager. etc/lighttpd.conf.in is the template, and
+# update_script renders it into etc/lighttpd.conf beside it, with HMM_PORT from etc/hmm.env in
+# place of the port placeholder (task 69). On a CCU and OpenCCU update_script then copies the
+# rendered file to /usr/local/etc/config/lighttpd/hmm.conf, which both firmwares include (OpenCCU
+# always, CCU3 firmware since 3.61.5), and the uninstall removes it again. On openccu-lite that
+# directory is the system's: it makes its own validated copy of etc/lighttpd.conf and refreshes it
+# at every lighttpd start and reload, and rc.d/hmm renders the file again at every start, so a port
+# changed in etc/hmm.env reaches it.
 #
 # The pattern is RedMatic's, which proves on CCU3 firmware and OpenCCU alike that the CCU's
 # lighttpd proxies a WebSocket: /addons/red/ to Node-RED on 1880 with

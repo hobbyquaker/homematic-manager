@@ -16,7 +16,8 @@
 #                     dist/ (the host), ui/ (the built UI), data/ (the generated metadata),
 #                     node_modules/ (ws, binrpc, homematic-xmlrpc, homematic-rega and the
 #                     bundled @homematic-manager/{backend,core} of D-29)
-#   etc/              default.env, monit.cfg, lighttpd.conf; hmm.env is created on first install
+#   etc/              default.env, monit.cfg, lighttpd.conf.in; hmm.env and the rendered
+#                     lighttpd.conf are created by update_script
 #   rc.d/hmm          service script
 #   www/              the three CGIs and the 503 page
 #   var/              log file at runtime

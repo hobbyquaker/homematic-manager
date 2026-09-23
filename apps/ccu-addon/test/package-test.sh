@@ -59,7 +59,7 @@ echo "the package as the CCU unpacks it"
 LISTING="$TMP/listing.txt"
 tar tzf "$PKG" > "$LISTING"
 for entry in hmm/rc.d/hmm hmm/bin/node hmm/bin/update_addon hmm/www/settings.cgi hmm/www/service.cgi \
-    hmm/www/update_check.cgi hmm/www/lib/session.tcl hmm/etc/lighttpd.conf hmm/etc/monit.cfg \
+    hmm/www/update_check.cgi hmm/www/lib/session.tcl hmm/etc/lighttpd.conf.in hmm/etc/monit.cfg \
     hmm/etc/default.env hmm/app/dist/cli.js hmm/app/ui/index.html hmm/app/data/manifest.json \
     hmm/app/node_modules/ws/package.json hmm/versions update_script hmm.cfg; do
     if grep -qxF "$entry" "$LISTING"; then
@@ -68,6 +68,13 @@ for entry in hmm/rc.d/hmm hmm/bin/node hmm/bin/update_addon hmm/www/settings.cgi
         fail "contains $entry" "not in the archive"
     fi
 done
+# task 69: the rule ships as its template only; update_script renders etc/lighttpd.conf. A rendered
+# file in the package would be taken by openccu-lite's sync as it is, with whatever port it says.
+if grep -qxF hmm/etc/lighttpd.conf "$LISTING"; then
+    fail "ships no rendered hmm/etc/lighttpd.conf" "it is in the archive"
+else
+    pass "ships no rendered hmm/etc/lighttpd.conf, only its template"
+fi
 mode="$(tar tvzf "$PKG" | awk '$NF == "update_script" {print $1}')"
 case "$mode" in
     *x*) pass "update_script is executable inside the archive" ;;

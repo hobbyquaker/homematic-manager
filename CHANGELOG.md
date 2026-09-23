@@ -8,6 +8,20 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ## [Unreleased]
 
+### New
+
+- **Heating groups on openccu-lite.** The `VirtualDevices` interface has a Groups tab there: the heating groups
+  (the group devices `INT000000N` - BidCos `HM-CC-VG-1` and the HmIP heating groups) are listed with their type,
+  their virtual device and their members, and a group is created, renamed, given or relieved of members and deleted
+  in the Homematic Manager - what the CCU's WebUI offers under _Settings → Groups_ and nothing else ever could,
+  because the group process has no RPC for any of it. The tab goes through the system's own HTTP API for the
+  groups (`/api/system/v1/groups`), with the login the application already has for the system's metadata store
+  (the session on the system, the API token off it), and it exists only where that API answers; on a CCU there is
+  no such API and no tab, and the CCU JSON-API stays out (D-1). After a change the members whose configuration is
+  still pending are named beside the count, as the WebUI's popup named them. Only an administrator changes groups
+  on the system; the buttons say so. The tab reads the system's API and not the group process, so it works from
+  the desktop as well - even while the `VirtualDevices` interface itself shows as not connected there.
+
 ### Fixed
 
 - **The easy form's dropdowns show the CCU's words, not its internal keys.** A preset named by one of the WebUI's

@@ -23,6 +23,7 @@ immediately.
 | Rooms, functions, floors | ReGa's own rooms and functions when ReGa is on (a flat list, no floors), else this profile's own store | the box's, as trees; shared with every other program on the box |
 | The login of the addon | the WebUI session (`settings.cgi`), optionally a CCU user (`--auth-mode rega`) | the session openccu-lite's shell hands over (`--auth-mode occulite`) |
 | Device images | fetched from the CCU | the bundled subset — the box has no `/config/img/devices/` |
+| Heating groups (the `VirtualDevices` group devices) | shown and their paramsets edited; created, changed and deleted in the WebUI only — the group process has no RPC for it and its own pages need a WebUI session (D-1) | the **Groups** tab of `VirtualDevices`: list, create, rename, add and remove members, delete — through the box's `/api/system/v1/groups`, with the same login as the metadata store; administrators only |
 | System variables, programs, HM-Script | ReGa | **not available** — see below |
 
 Nothing has to be configured for any of this. The Homematic Manager asks

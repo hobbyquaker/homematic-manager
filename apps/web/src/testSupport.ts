@@ -240,6 +240,46 @@ export async function startForTest(options: StartForTestOptions = {}): Promise<T
           }
         : {};
 
+    // B-51: the simulator's connection goes into the profile before the host opens it. The host
+    // lays `ccu` and `local` over the profile and connects with the result; on an empty profile
+    // that was the default interface list on the real loopback ports - BidCos-Wired and
+    // VirtualDevices waited out their timeouts, about 15 s per host - before the simulator's
+    // configuration arrived. With the profile seeded the host connects to the simulator at once.
+    const connection: ConnectionConfig | undefined = simulator
+        ? {
+              host: '127.0.0.1',
+              interfaces: [
+                  'BidCos-RF',
+                  'HmIP-RF',
+                  ...(ports['VirtualDevices'] === undefined ? [] : ['VirtualDevices']),
+              ],
+              autoDetect: false,
+              extraInterfaces: [],
+              tls: false,
+              // hm-simulator serves rfd over BIN-RPC only, which is what a real rfd offers on the
+              // CCU's loopback and nowhere else (D-28) - so this is the addon's `local` mode, and
+              // `portOverride` points it at the ports the simulator happened to get
+              local: true,
+              rega: false,
+              callback: {ip: '127.0.0.1', xmlrpcPort: 0, binrpcPort: 0},
+              // No language: D-36's default, "the browser decides". A test that wants a fixed one
+              // passes it through `connectionOverrides` - the e2e fixture asks for English.
+              writePaceMs: 0,
+              rpcLogFolder: '',
+              ...connectionOverrides,
+          }
+        : undefined;
+    const configFile = path.join(dataDir, 'config.json');
+    const seeded =
+        connection !== undefined &&
+        !(await fs.access(configFile).then(
+            () => true,
+            () => false,
+        ));
+    if (seeded) {
+        await fs.writeFile(configFile, `${JSON.stringify({connection}, null, 4)}\n`);
+    }
+
     const host = await createWebHost({
         port: 0,
         host: '127.0.0.1',
@@ -251,6 +291,10 @@ export async function startForTest(options: StartForTestOptions = {}): Promise<T
             serviceMessagePollMs: 0,
             cacheWriteDelayMs: 0,
             rpcTimeoutMs: 5000,
+            // B-51: the metadata detection asks the host's port 80 first (D-40, B-62). Where
+            // 127.0.0.1:80 hangs instead of refusing - WSL - its 3 s default was paid per host;
+            // the stubs of the specs answer on the loopback in far less than this
+            metaOptions: {detectTimeoutMs: 500},
             localAddresses: () => ['127.0.0.1'],
             callbackHost: '127.0.0.1',
             regaOptions: {port: (simulator?.regaSim?.port as number | undefined) ?? 1, timeoutMs: 1000},
@@ -259,26 +303,13 @@ export async function startForTest(options: StartForTestOptions = {}): Promise<T
         },
     });
 
-    if (simulator && host.backend) {
-        const connection: ConnectionConfig = {
-            host: '127.0.0.1',
-            interfaces: ['BidCos-RF', 'HmIP-RF', ...(ports['VirtualDevices'] === undefined ? [] : ['VirtualDevices'])],
-            autoDetect: false,
-            extraInterfaces: [],
-            tls: false,
-            // hm-simulator serves rfd over BIN-RPC only, which is what a real rfd offers on the
-            // CCU's loopback and nowhere else (D-28) - so this is the addon's `local` mode, and
-            // `portOverride` points it at the ports the simulator happened to get
-            local: true,
-            rega: false,
-            callback: {ip: '127.0.0.1', xmlrpcPort: 0, binrpcPort: 0},
-            // No language: D-36's default, "the browser decides". A test that wants a fixed one
-            // passes it through `connectionOverrides` - the e2e fixture asks for English.
-            writePaceMs: 0,
-            rpcLogFolder: '',
-            ...connectionOverrides,
-        };
-        await host.backend.request('config.set', connection);
+    if (connection !== undefined && host.backend) {
+        // the host connected from the seeded profile; a profile that was there already (a test
+        // reopening a data directory) is replaced here, as it always was
+        const current = (await host.backend.request('config.get')).connection;
+        if (!seeded || JSON.stringify(current) !== JSON.stringify({...current, ...connection})) {
+            await host.backend.request('config.set', connection);
+        }
     }
 
     return {

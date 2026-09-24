@@ -132,4 +132,25 @@ describe.skipIf(!withSimulator)('startForTest against hm-simulator', () => {
         const answer = await fetch(`${host.url}api`);
         expect(answer.status).toBe(426);
     }, 30_000);
+
+    it('with the addon options ccu and local connects to the simulator only, not to the real loopback ports (B-51)', async () => {
+        const logged: string[] = [];
+        const line = (message: string): void => {
+            logged.push(message);
+        };
+        const host = await startForTest({
+            simulator: true,
+            ccu: '127.0.0.1',
+            local: true,
+            log: {info: line, warn: line, error: line, debug: () => undefined},
+        });
+        hosts.push(host);
+        const states = await host.backend?.request('interfaces.list');
+        expect(states?.map((state) => [state.name, state.connected])).toEqual([
+            ['BidCos-RF', true],
+            ['HmIP-RF', true],
+        ]);
+        // the default interface list was never tried: no BidCos-Wired or VirtualDevices on 127.0.0.1
+        expect(logged.filter((message) => /BidCos-Wired|VirtualDevices/.test(message))).toEqual([]);
+    }, 30_000);
 });

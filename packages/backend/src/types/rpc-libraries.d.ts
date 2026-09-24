@@ -25,6 +25,8 @@ declare module 'homematic-xmlrpc' {
         /** Passed straight to `https.request`; a CCU's certificate is self-signed. */
         rejectUnauthorized?: boolean;
         cookies?: boolean;
+        /** Passed straight to `http.request`; `false` gives every call a connection of its own. */
+        agent?: false | import('node:http').Agent;
     }
 
     interface ServerOptions {

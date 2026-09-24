@@ -167,6 +167,13 @@ function createTransport(options: RpcClientOptions): RpcTransport {
         path: options.path ?? '/',
         responseEncoding: options.encoding ?? INTERFACE_ENCODING,
         rejectUnauthorized: options.rejectUnauthorized ?? false,
+        // B-44: one connection per call, closed after the answer. Node's agent keeps sockets alive
+        // since Node 19, and the CCU's Java interface process (VirtualDevices, HmIP on its host)
+        // closes a connection after each answer without saying so: the next call on the pooled
+        // socket failed with "socket hang up" - every listDevices after the init. 2.x ran on a
+        // Node without the pool and never reused a socket either.
+        agent: false as const,
+        headers: {Connection: 'close'},
         ...(options.auth ? {basic_auth: {user: options.auth.user, pass: options.auth.password}} : {}),
     };
     const client = options.tls === true ? xmlrpc.createSecureClient(clientOptions) : xmlrpc.createClient(clientOptions);

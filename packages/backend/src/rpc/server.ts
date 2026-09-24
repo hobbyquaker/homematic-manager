@@ -256,6 +256,13 @@ export class CallbackServer {
         return new Promise<number>((resolve, reject) => {
             const server = xmlrpc.createServer({host: this.host, port: this.#requestedPort});
             this.#xmlrpcServer = server;
+            // B-44: every answer says `Connection: close` and closes. The CCU's Java interface
+            // process asks for keep-alive and never closes its side when the idle socket is
+            // closed under it: each init left one socket in CLOSE_WAIT in that process, until
+            // it ran out of file descriptors (4063 of them on a lab OpenCCU) and stopped answering.
+            server.httpServer.prependListener('request', (_request, response) => {
+                response.shouldKeepAlive = false;
+            });
             let listening = false;
             server.on('error', (error: Error) => {
                 // a bind that fails is the rejection's to report, once; `onError` is for a server

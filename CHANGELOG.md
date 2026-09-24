@@ -23,6 +23,13 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 - **No more "rename … .tmp: ENOENT" warnings when rooms are assigned quickly.** Two saves of the metadata cache (or
   of the profile's own store) that overlapped shared one temporary file, and the second one failed; the saves of a
   file now wait for each other, and the last one is what stays on disk.
+- **VirtualDevices on a CCU or OpenCCU lists its devices again, and the interface process no longer runs out of
+  files.** Since Node 19 every XML-RPC call went out on a kept-alive connection. The CCU's Java interface process
+  closes its connection after each answer without saying so, so the call after `init` - the device list - failed with
+  _socket hang up_ every time. The other way round, it asked our callback server for keep-alive and never closed its
+  own side when we did: each subscription left it one dead socket, until a lab OpenCCU's process held 4063 of them and
+  stopped answering. Calls now use a connection each, and the callback server answers with `Connection: close`, as the
+  2.x releases effectively did.
 
 ## [3.0.0-beta.22] — 2026-09-23
 

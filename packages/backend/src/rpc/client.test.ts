@@ -1,3 +1,6 @@
+import http from 'node:http';
+import type {AddressInfo} from 'node:net';
+
 import {describe, expect, it, vi} from 'vitest';
 
 import type {RpcValue} from '@homematic-manager/core';
@@ -191,5 +194,56 @@ describe('the real transports', () => {
         const rpc = new RpcClient({name: 'CUxD', host: '127.0.0.1', port: 1, protocol: 'binrpc'});
         rpc.close();
         expect(rpc.closed).toBe(true);
+    });
+});
+
+/**
+ * B-44: the CCU's Java interface process (VirtualDevices on a lab OpenCCU) answers a request and then
+ * closes the connection without a `Connection: close`. With Node's keep-alive pool the next call
+ * went out on that socket and failed with "socket hang up".
+ */
+describe('the xmlrpc connections (B-44)', () => {
+    it('opens a connection per call and asks for it to be closed, so a server that drops it silently is fine', async () => {
+        const seen: {connection: string | undefined; socket: number}[] = [];
+        const sockets: unknown[] = [];
+        const answer =
+            '<?xml version="1.0"?><methodResponse><params><param><value><array><data></data></array></value></param></params></methodResponse>';
+        const server = http.createServer((request, response) => {
+            if (!sockets.includes(request.socket)) {
+                sockets.push(request.socket);
+            }
+            seen.push({connection: request.headers.connection, socket: sockets.indexOf(request.socket)});
+            request.resume();
+            request.on('end', () => {
+                // what HMServer does: a keep-alive answer, and the socket closed right after it
+                response.writeHead(200, {'Content-Type': 'text/xml', 'Content-Length': Buffer.byteLength(answer)});
+                response.end(answer, () => {
+                    setImmediate(() => request.socket.destroy());
+                });
+            });
+        });
+        server.keepAliveTimeout = 60_000;
+        await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+        const {port} = server.address() as AddressInfo;
+        const rpc = new RpcClient({
+            name: 'VirtualDevices',
+            host: '127.0.0.1',
+            port,
+            protocol: 'xmlrpc',
+            path: '/groups',
+        });
+        try {
+            for (let n = 0; n < 3; n += 1) {
+                await expect(rpc.call('listDevices')).resolves.toEqual([]);
+                // the answer's socket is closed a tick after it: the next call must not be on it
+                await new Promise((resolve) => setTimeout(resolve, 20));
+            }
+            expect(seen.map((entry) => entry.connection)).toEqual(['close', 'close', 'close']);
+            expect(seen.map((entry) => entry.socket)).toEqual([0, 1, 2]);
+        } finally {
+            rpc.close();
+            server.closeAllConnections();
+            await new Promise((resolve) => server.close(resolve));
+        }
     });
 });

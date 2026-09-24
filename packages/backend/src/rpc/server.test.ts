@@ -1,3 +1,5 @@
+import http from 'node:http';
+
 import {describe, expect, it, vi} from 'vitest';
 
 import binrpc from 'binrpc';
@@ -226,6 +228,49 @@ describe('the sockets', () => {
         expect(answer).toEqual([{ADDRESS: 'LEQ1', VERSION: 1}]);
         await server.stop();
         expect(server.port).toBe(0);
+    });
+
+    it('answers every xmlrpc call with Connection: close and closes the socket (B-44)', async () => {
+        const server = new CallbackServer({
+            protocol: 'xmlrpc',
+            host: '127.0.0.1',
+            port: 0,
+            handler: recordingHandler(),
+        });
+        const port = await server.start();
+        const body =
+            '<?xml version="1.0"?><methodCall><methodName>listDevices</methodName><params></params></methodCall>';
+        // the Java interface process asks for keep-alive and never closes its side on its own
+        const {header, closed} = await new Promise<{header: string | undefined; closed: boolean}>((resolve, reject) => {
+            const request = http.request(
+                {
+                    host: '127.0.0.1',
+                    port,
+                    method: 'POST',
+                    path: '/',
+                    agent: new http.Agent({keepAlive: true}),
+                    headers: {'Content-Type': 'text/xml', Connection: 'Keep-Alive'},
+                },
+                (response) => {
+                    response.resume();
+                    response.on('end', () => {
+                        const socket = response.socket;
+                        const header = response.headers.connection;
+                        socket.once('close', () => {
+                            resolve({header, closed: true});
+                        });
+                        setTimeout(() => {
+                            resolve({header, closed: socket.destroyed});
+                        }, 1000);
+                    });
+                },
+            );
+            request.on('error', reject);
+            request.end(body);
+        });
+        expect(header).toBe('close');
+        expect(closed).toBe(true);
+        await server.stop();
     });
 
     it('starts a binrpc server on a free port and answers a real call', async () => {

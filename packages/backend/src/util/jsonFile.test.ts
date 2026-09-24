@@ -47,6 +47,36 @@ describe('writeJsonFile', () => {
         await writeJsonFile(file, {a: 2});
         await expect(readJsonFile(file)).resolves.toEqual({a: 2});
     });
+
+    it('takes writes to one file that overlap one after another, and the last one wins (B-43)', async () => {
+        const file = path.join(dir, 'occulite-meta.json');
+        // what quick successive room assignments did: each saved the cache without waiting for the last
+        const writes = Array.from({length: 20}, (_, n) => writeJsonFile(file, {n}));
+        await expect(Promise.all(writes)).resolves.toHaveLength(20);
+        await expect(readJsonFile(file)).resolves.toEqual({n: 19});
+        await expect(fs.readdir(dir)).resolves.toEqual(['occulite-meta.json']);
+    });
+
+    it('writes the value as it was at the call, not as it is when the turn comes', async () => {
+        const file = path.join(dir, 'a.json');
+        const value = {a: 1};
+        const first = writeJsonFile(file, {b: 0});
+        const second = writeJsonFile(file, value);
+        value.a = 2;
+        await Promise.all([first, second]);
+        await expect(readJsonFile(file)).resolves.toEqual({a: 1});
+    });
+
+    it('goes on writing after a write that failed', async () => {
+        const file = path.join(dir, 'a.json');
+        const write = vi.spyOn(fs, 'writeFile').mockRejectedValueOnce(new Error('disk full'));
+        const failed = writeJsonFile(file, {a: 1});
+        const next = writeJsonFile(file, {a: 2});
+        await expect(failed).rejects.toThrow('disk full');
+        await next;
+        write.mockRestore();
+        await expect(readJsonFile(file)).resolves.toEqual({a: 2});
+    });
 });
 
 describe('removeFile', () => {

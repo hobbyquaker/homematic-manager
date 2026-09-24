@@ -20,6 +20,9 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   the devices, links and messages of the interface it switched to; a changed URL switched the header and left the
   Devices tab at _Loading_ until something else loaded that interface. The same held for _Open in console_ on an RPC
   log entry of another interface.
+- **No more "rename … .tmp: ENOENT" warnings when rooms are assigned quickly.** Two saves of the metadata cache (or
+  of the profile's own store) that overlapped shared one temporary file, and the second one failed; the saves of a
+  file now wait for each other, and the last one is what stays on disk.
 
 ## [3.0.0-beta.22] — 2026-09-23
 

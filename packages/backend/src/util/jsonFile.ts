@@ -30,12 +30,36 @@ export async function readJsonFile<T>(file: string): Promise<T | undefined> {
     }
 }
 
-/** Writes a JSON file atomically, creating the directory if it does not exist. */
+/**
+ * B-43: the write in progress per file. Two writes of one file that overlapped shared its `.tmp`:
+ * the first rename took it away and the second failed with ENOENT (quick successive room
+ * assignments on the metadata cache). Writes of one file now wait for each other, in call order.
+ */
+const writesInProgress = new Map<string, Promise<void>>();
+
+/**
+ * Writes a JSON file atomically, creating the directory if it does not exist. Writes of the same
+ * file run one after another in call order, so the last call's value is what stays; the value is
+ * serialised at the call.
+ */
 export async function writeJsonFile(file: string, value: unknown): Promise<void> {
-    await fs.mkdir(path.dirname(file), {recursive: true});
-    const temporary = `${file}.tmp`;
-    await fs.writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
-    await fs.rename(temporary, file);
+    const text = `${JSON.stringify(value, null, 2)}\n`;
+    const previous = writesInProgress.get(file) ?? Promise.resolve();
+    const write = previous.then(async () => {
+        await fs.mkdir(path.dirname(file), {recursive: true});
+        const temporary = `${file}.tmp`;
+        await fs.writeFile(temporary, text, 'utf8');
+        await fs.rename(temporary, file);
+    });
+    // the next write waits for this one whether it worked or not; the caller hears the error
+    const settled = write.catch(() => undefined);
+    writesInProgress.set(file, settled);
+    void settled.then(() => {
+        if (writesInProgress.get(file) === settled) {
+            writesInProgress.delete(file);
+        }
+    });
+    return write;
 }
 
 /** Removes a file; a missing file is not an error. */

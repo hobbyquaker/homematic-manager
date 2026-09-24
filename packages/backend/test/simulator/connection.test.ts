@@ -12,7 +12,14 @@ import path from 'node:path';
 import {DeviceIndex} from '@homematic-manager/core';
 import {afterEach, describe, expect, it} from 'vitest';
 
-import {simulatorAvailable, startBackend, startSimulator, VIRTUAL_DEVICES, waitFor} from './helpers.js';
+import {
+    hmipDevicesSent,
+    simulatorAvailable,
+    startBackend,
+    startSimulator,
+    VIRTUAL_DEVICES,
+    waitFor,
+} from './helpers.js';
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- hm-simulator ships no types */
 
@@ -235,7 +242,10 @@ describe.skipIf(!simulatorAvailable)('connecting to hm-simulator', () => {
         // HmIP device - it deletes them first (eq-3/occu#45), which is what the cache has to
         // survive. This is the same sequence the "sticky unreach on first connect" report of #98
         // describes, so it is worth having as a regression test.
+        // B-66: wait for the cycle's newDevices; a length check alone can pass before the delete
+        const cycle = hmipDevicesSent(harness.backend);
         await harness.backend.request('interfaces.reconnect', 'HmIP-RF');
+        await cycle.done;
         await waitFor(async () => (await harness.backend.request('devices.list', 'HmIP-RF')).length === before.length);
         const after = await harness.backend.request('devices.list', 'HmIP-RF');
         expect(after.map((device) => device.ADDRESS)).toEqual(before.map((device) => device.ADDRESS));

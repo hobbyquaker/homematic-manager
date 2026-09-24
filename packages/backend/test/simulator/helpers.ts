@@ -437,6 +437,7 @@ export async function startBackend(
     };
 
     if (options.connect !== false) {
+        const hmipSettled = hmipDevicesSent(backend);
         await backend.request('config.set', {
             host: '127.0.0.1',
             interfaces: ['BidCos-RF', 'HmIP-RF'],
@@ -449,9 +450,42 @@ export async function startBackend(
             writePaceMs: 0,
             ...options.connection,
         } as ConnectionConfig);
+        // B-66: `config.set` resolves once the interfaces are subscribed, but the simulator runs its
+        // init cycle after that - for HmIP a `deleteDevices` of everything our cache already holds,
+        // then `newDevices` (eq-3/occu#45). A test that reads the HmIP list inside that window
+        // finds it empty. Wait for the cycle's `newDevices`, where HmIP-RF did subscribe.
+        const hmip = (await backend.request('interfaces.list')).find((entry) => entry.name === 'HmIP-RF');
+        if (hmip?.connected === true) {
+            await hmipSettled.done;
+        }
+        hmipSettled.cancel();
     }
 
     return {backend, dataDir, notices, close};
+}
+
+/**
+ * Resolves on the next `newDevices` the HmIP-RF interface sends - the end of hmipserver's
+ * delete/add cycle after an `init` - or after `timeoutMs` without it; `cancel` stops listening.
+ * Subscribe before the `init` (connect, reconnect): the cycle can be through before it returns.
+ */
+export function hmipDevicesSent(backend: Backend, timeoutMs = 5000): {done: Promise<void>; cancel: () => void} {
+    let cancel = (): void => undefined;
+    const done = new Promise<void>((resolve) => {
+        const timer = setTimeout(finish, timeoutMs);
+        const off = backend.events.on('devices.changed', (change) => {
+            if (change.interfaceName === 'HmIP-RF' && change.kind === 'new') {
+                finish();
+            }
+        });
+        function finish(): void {
+            clearTimeout(timer);
+            off();
+            resolve();
+        }
+        cancel = finish;
+    });
+    return {done, cancel};
 }
 
 /** Waits until a predicate holds, or fails after `timeoutMs`. */

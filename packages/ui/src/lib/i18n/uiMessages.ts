@@ -106,6 +106,17 @@ export const UI_MESSAGES: MessageCatalogue = {
         en: {one: '{count} detector', other: '{count} detectors'},
     },
     'New smoke group': {de: 'Neue Rauchmeldergruppe', en: 'New smoke group'},
+    // B-59: one line on a link profile change, instead of a warning per parameter
+    'The profile names {count} parameters this firmware does not have': {
+        de: {
+            one: 'Das Profil nennt {count} Parameter, den diese Firmware nicht hat',
+            other: 'Das Profil nennt {count} Parameter, die diese Firmware nicht hat',
+        },
+        en: {
+            one: 'The profile names {count} parameter this firmware does not have',
+            other: 'The profile names {count} parameters this firmware does not have',
+        },
+    },
     'Only available on HmIP interfaces': {
         de: 'Nur auf HmIP-Schnittstellen verfügbar',
         en: 'Only available on HmIP interfaces',

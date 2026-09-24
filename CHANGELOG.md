@@ -34,6 +34,12 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   names before it returned; a CCU whose ReGa port swallows the requests (a firewall, a filtered network) held the
   settings dialog's save for the full 30 s script timeout. It now waits at most 3 s; the names still arrive whenever
   ReGa answers, and a new save or quitting does not wait for them either.
+- **The link profile dropdown behaves like the CCU's WebUI.** Choosing another profile kept every value it allowed
+  from the previous one - switching a dimmer link from _on/brighter_ to _off/darker_ kept the on-level of 100 %;
+  now a profile the link does not follow starts from its own presets, and the profile it does follow shows the
+  link's stored values, as the WebUI's forms do. The parameters a profile names but the device's firmware lacks (the
+  optical-signal ones of an HmIP-PDT) are one line now instead of a warning each, and they no longer keep a link
+  from being recognised as following its profile.
 
 ## [3.0.0-beta.22] — 2026-09-23
 

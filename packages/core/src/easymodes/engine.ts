@@ -87,6 +87,18 @@ export interface MasterView {
     readonly controls?: readonly EasyControl[];
 }
 
+/** B-59: how {@link EasyModeEngine.applyProfile} treats the values the link has now. */
+export interface ApplyProfileOptions {
+    /**
+     * Keep a current value that a `list` or `range` of the profile allows (the default). `false`
+     * gives every such parameter the profile's own default instead - what the CCU's WebUI shows for
+     * a profile the link does not follow: it fills only the link's current profile with the link's
+     * values (`if {$cur_profile == $prn} {array set PROFILE_$prn [array get ps]}` in every easymode
+     * TCL) and every other profile with that profile's presets.
+     */
+    readonly keepCurrent?: boolean;
+}
+
 /** Reads the easy-mode data through a `DataSource` and answers the dialogs' questions. */
 export class EasyModeEngine {
     readonly #source: DataSource;
@@ -131,7 +143,13 @@ export class EasyModeEngine {
      * A parameter the profile names but the description does not have is reported instead of
      * written - openccu-data describes a channel type, a description belongs to one firmware.
      */
-    applyProfile(profile: LinkProfile, current: Paramset, description: ParamsetDescription): AppliedProfile {
+    applyProfile(
+        profile: LinkProfile,
+        current: Paramset,
+        description: ParamsetDescription,
+        options: ApplyProfileOptions = {},
+    ): AppliedProfile {
+        const keepCurrent = options.keepCurrent ?? true;
         const values: Record<string, ParamsetValue> = {...current};
         const problems: ProfileProblem[] = [];
 
@@ -144,7 +162,7 @@ export class EasyModeEngine {
                 });
                 continue;
             }
-            const applied = applyConstraint(constraint, current[param]);
+            const applied = applyConstraint(constraint, keepCurrent ? current[param] : undefined);
             if (applied === undefined) {
                 problems.push({
                     param,
@@ -181,18 +199,25 @@ export class EasyModeEngine {
 
         let best: LinkProfile | undefined;
         let bestScore = 0;
+        let bestMissing = 0;
         for (const profile of profiles) {
-            const fixed = Object.entries(profile.params).filter(
+            const all = Object.entries(profile.params).filter(
                 (entry): entry is [string, Extract<ProfileConstraint, {kind: 'fixed'}>] => entry[1].kind === 'fixed',
             );
+            // B-59: a parameter the link does not have (this firmware lacks it) is left out, as the
+            // WebUI's get_cur_profile2 does ("Gibt es diesen Parameter im Aktor überhaupt?")
+            const fixed = all.filter(([param]) => param in linkParamset);
+            const missing = all.length - fixed.length;
             if (fixed.length === 0) {
                 continue;
             }
             if (!fixed.every(([param, constraint]) => sameProfileValue(linkParamset[param], constraint.value))) {
                 continue;
             }
-            if (fixed.length > bestScore) {
+            // the most fixed parameters matched; on a tie the profile that asks for less the link lacks
+            if (fixed.length > bestScore || (fixed.length === bestScore && missing < bestMissing)) {
                 bestScore = fixed.length;
+                bestMissing = missing;
                 best = profile;
             }
         }

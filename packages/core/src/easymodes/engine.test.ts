@@ -151,6 +151,22 @@ describe('applyProfile', () => {
         expect(engine.applyProfile(stairway, {SHORT_ON_TIME: 7}, switchLink).values['SHORT_ON_TIME']).toBe(60);
     });
 
+    it("gives a profile the link does not follow its own defaults, as the WebUI's forms do (B-59)", async () => {
+        const stairway = await profile('light_stairway');
+        // 30 is in the list and 60 is the default: kept for the link's own profile, not for another
+        expect(engine.applyProfile(stairway, {SHORT_ON_TIME: 30}, switchLink).values['SHORT_ON_TIME']).toBe(30);
+        const other = engine.applyProfile(stairway, {SHORT_ON_TIME: 30, UNRELATED: 42}, switchLink, {
+            keepCurrent: false,
+        });
+        expect(other.values['SHORT_ON_TIME']).toBe(60);
+        // what the profile does not constrain is not the profile's to change
+        expect(other.values['UNRELATED']).toBe(42);
+        const range = await profile('switch_on');
+        expect(
+            engine.applyProfile(range, {SHORT_ON_TIME: 30}, switchLink, {keepCurrent: false}).values['SHORT_ON_TIME'],
+        ).toBe(111600);
+    });
+
     it('takes the first list entry when the list has no default', () => {
         const noDefault: LinkProfile = {
             id: 8,
@@ -207,6 +223,23 @@ describe('detectProfile', () => {
         const profiles = await engine.profilesFor('SWITCH', 'KEY');
         // switch_on matches two fixed parameters, light_stairway three
         expect(engine.detectProfile({SHORT_ACTION_TYPE: 1, SHORT_JT_ON: 3}, profiles)?.key).toBe('switch_on');
+    });
+
+    it('leaves out a fixed parameter the link does not have, as the WebUI does (B-59)', () => {
+        const pdt: LinkProfile = {
+            id: 2,
+            key: 'dimmer_off',
+            name: {},
+            description: {},
+            params: {
+                SHORT_ACTION_TYPE: {kind: 'fixed', value: 1},
+                // named by the channel type's profile, missing on this firmware
+                SHORT_OPTICAL_SIGNAL_COLOR: {kind: 'fixed', value: 1},
+            },
+        };
+        expect(engine.detectProfile({SHORT_ACTION_TYPE: 1}, [pdt])?.key).toBe('dimmer_off');
+        // present and different still rules it out
+        expect(engine.detectProfile({SHORT_ACTION_TYPE: 1, SHORT_OPTICAL_SIGNAL_COLOR: 0}, [pdt])).toBeUndefined();
     });
 
     it('compares loosely, because profile data is text and the CCU sends numbers', async () => {

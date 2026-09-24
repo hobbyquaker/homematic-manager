@@ -1418,6 +1418,10 @@ export const DEMO_DATA_FILES: Readonly<Record<string, unknown>> = {
                         SHORT_ACTION_TYPE: {kind: 'fixed', value: 1},
                         SHORT_ON_LEVEL: {kind: 'fixed', value: 1},
                         SHORT_ON_TIME: {kind: 'range', min: 0, max: 8590, default: 60},
+                        // B-59: named by the channel type's profile, missing on this firmware (as on
+                        // a real HmIP-PDT): the dialog says so in one line and writes neither
+                        SHORT_OPTICAL_SIGNAL_COLOR: {kind: 'fixed', value: 1},
+                        SHORT_OPTICAL_SIGNAL_BEHAVIOUR: {kind: 'fixed', value: 1},
                     },
                 },
             ],

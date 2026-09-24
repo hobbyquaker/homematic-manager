@@ -434,6 +434,46 @@ describe('the link paramset dialog', () => {
         expect(screen.getByTestId('preview-UI_HINT').textContent).toContain('2');
     });
 
+    it('fills a profile the link does not follow with its defaults and its own profile with the link values (B-59)', async () => {
+        // the link follows the staircase profile with 30 s - inside its range, not its default of 60
+        const demo = transport.handlerFor('paramset.get');
+        transport.respond('paramset.get', (interfaceName, address, paramset) =>
+            address === '000A1B2C3D4E5F:4' && paramset === '0001D8A9B7C6D5:1'
+                ? {SHORT_ON_TIME: 30, SHORT_ON_LEVEL: 1, SHORT_ACTION_TYPE: 1, UI_HINT: '2'}
+                : demo(interfaceName, address, paramset),
+        );
+        const {stores} = await mountApp({transport, hash: '#/HmIP-RF/links'});
+        await waitFor(() => {
+            expect(stores.links.of('HmIP-RF').length).toBeGreaterThan(0);
+        });
+        await fireEvent.dblClick(document.querySelector('[data-row-id="0001D8A9B7C6D5:1->000A1B2C3D4E5F:4"]')!);
+        const select = await waitFor(() => {
+            const found = screen.getByTestId<HTMLSelectElement>('link-profile');
+            expect(found.value).toBe('2');
+            return found;
+        });
+        const time = (): string =>
+            (within(screen.getByTestId('param-SHORT_ON_TIME')).getByRole('spinbutton') as HTMLInputElement).value;
+        expect(time()).toBe('30');
+
+        // away and back: the WebUI shows the link's own values for its profile, not the last profile's
+        await fireEvent.change(select, {target: {value: '1'}});
+        await fireEvent.change(select, {target: {value: '2'}});
+        await waitFor(() => {
+            expect(time()).toBe('30');
+        });
+        const before = stores.notices.items.length;
+
+        // the two parameters this firmware lacks: one line, not a warning each
+        await fireEvent.change(select, {target: {value: '1'}});
+        await fireEvent.change(select, {target: {value: '2'}});
+        const added = stores.notices.items.slice(before);
+        expect(added.filter((notice) => notice.level === 'warn')).toEqual([]);
+        expect(added.map((notice) => notice.message)).toEqual([
+            'Das Profil nennt 2 Parameter, die diese Firmware nicht hat: SHORT_OPTICAL_SIGNAL_COLOR, SHORT_OPTICAL_SIGNAL_BEHAVIOUR',
+        ]);
+    });
+
     it('shows every LINK parameter and greys nothing out in the expert view', async () => {
         await openLink();
         await fireEvent.click(screen.getByTestId('link-expert'));

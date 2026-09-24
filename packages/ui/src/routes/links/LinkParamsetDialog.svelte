@@ -8,7 +8,7 @@
         ParamsetValue,
         WriteResult,
     } from '@homematic-manager/core';
-    import {EXPERT_PROFILE_ID, easyForm, easyFormParams, paramsetIdentity} from '@homematic-manager/core';
+    import {EXPERT_PROFILE_ID, UI_HINT, easyForm, easyFormParams, paramsetIdentity} from '@homematic-manager/core';
 
     import Dialog from '../../lib/components/Dialog.svelte';
     import MultiSelect from '../../lib/components/MultiSelect.svelte';
@@ -230,6 +230,8 @@
      * the user has picked a profile (which would put the dropdown straight back to where it was).
      */
     let detectedFor = '';
+    /** B-59: the profile the link's stored values follow, as detected on load. */
+    let followedProfileId: number | undefined;
     $effect(() => {
         if (loadedFor === '' || profilesFor !== `${receiverType}|${senderType}` || profiles.length === 0) {
             return;
@@ -240,6 +242,7 @@
         }
         detectedFor = key;
         const detected = stores.meta.engine.detectProfile(receiverValues, profiles);
+        followedProfileId = detected?.id;
         profileId = detected?.id ?? EXPERT_PROFILE_ID;
         expert = profileId === EXPERT_PROFILE_ID;
     });
@@ -320,9 +323,33 @@
         }
         // `applyProfile` also sets UI_HINT, which is what makes the CCU's WebUI recognise the
         // profile afterwards instead of calling the link "expert" (task 6, item 5a).
-        const applied = stores.meta.engine.applyProfile(chosen, merged(), receiverDescription);
-        edited = {...edited, ...applied.values};
-        for (const problem of applied.problems) {
+        //
+        // B-59, as the CCU's WebUI: the profile the link follows shows the link's own values, every
+        // other profile its own presets - not what happened to be set under the previous one.
+        const own = id === followedProfileId;
+        const applied = stores.meta.engine.applyProfile(chosen, own ? receiverValues : merged(), receiverDescription, {
+            keepCurrent: own,
+        });
+        const changes: Record<string, ParamsetValue> = {};
+        for (const param of [...Object.keys(chosen.params), UI_HINT]) {
+            const value = applied.values[param];
+            if (value !== undefined) {
+                changes[param] = value;
+            }
+        }
+        edited = {...edited, ...changes};
+        // the profile data describes a channel type, a firmware may lack some of its parameters:
+        // the WebUI leaves those out silently, here they are one line, not one warning each
+        const missing = applied.problems.filter((problem) => problem.code === 'unknown-parameter');
+        if (missing.length > 0) {
+            stores.notices.push(
+                'info',
+                `${t('The profile names {count} parameters this firmware does not have', {}, missing.length)}: ${missing
+                    .map((problem) => problem.param)
+                    .join(', ')}`,
+            );
+        }
+        for (const problem of applied.problems.filter((entry) => entry.code !== 'unknown-parameter')) {
             stores.notices.push('warn', `${problem.param}: ${problem.message}`);
         }
     }

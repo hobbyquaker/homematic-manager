@@ -30,6 +30,12 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Fixed
 
+- **HmIP pairing with SGTIN and key takes the real QR code and the printed key.** The pairing dialog expected a code
+  format no HomematicIP device has, so every scan of a sticker's QR code was refused as _not a HomematicIP device code_,
+  and the key as the sticker prints it (26 characters, `XXXXX-XXXXX-XXXXX-XXXXX-XXXXXX`) kept _Start_ disabled. The
+  dialog now reads the QR code (`EQ01SG…DLK…`, as 2.x did) and takes the printed key with or without dashes, as well as
+  the 32 hex digits of the QR code. The SGTIN's first digits are not checked: devices sold under another brand start
+  with another company prefix.
 - **A key pressed right after a dialog closed reaches the grid.** A dialog handed the focus back to the row it was
   opened from while it was still modal, so the browser dropped it and put it back a moment later on its own; an F2
   (rename) or an arrow key pressed in that moment went nowhere. The dialog now closes first and then focuses the row.

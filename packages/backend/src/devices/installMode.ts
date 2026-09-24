@@ -9,54 +9,19 @@
  * or `setInstallModeWithWhitelist(true, seconds, [{ADDRESS, KEY_MODE, KEY}])` with the SGTIN and
  * the device key from the sticker or the QR code. The key on the sticker is written in eQ-3's
  * 32-character base-32 alphabet and has to be converted to the 32 hex digits the interface wants -
- * `convertHmIPKeyBase32ToBase16()` in `homematic-manager.js:4800`, ported below.
+ * core's `hmipKeyToHex()`, the port of 2.x's `convertHmIPKeyBase32ToBase16()`.
  *
  * The whole thing is a pure function from the options to the calls, so every variant is testable
  * without a CCU; `Backend` only sends what comes out.
  */
 
-import type {InstallModeOptions} from '@homematic-manager/core';
+import {hmipKeyToHex, type InstallModeOptions} from '@homematic-manager/core';
 
 import type {RpcOutValue} from '../rpc/client.js';
-
-/** eQ-3's base-32 alphabet for the HmIP device key: no D, I, O and V. */
-export const HMIP_KEY_CHARS = '0123456789ABCEFGHJKLMNPQRSTUWXYZ';
 
 /** The default duration of the install mode, and the maximum the CCU accepts. */
 export const DEFAULT_INSTALL_SECONDS = 60;
 export const MAX_INSTALL_SECONDS = 300;
-
-/**
- * Converts an HmIP device key from the printed base-32 form to the 32 hex digits
- * `setInstallModeWithWhitelist` expects. A key that is already 32 hex digits is returned unchanged.
- */
-export function hmipKeyToHex(key: string): string {
-    const value = key.trim().toUpperCase().replace(/-/g, '');
-    if (/^[0-9A-F]{32}$/.test(value)) {
-        return value;
-    }
-    const bytes = new Uint8Array(16);
-    let accumulator = 0;
-    let bits = 0;
-    let byteIndex = bytes.length - 1;
-    for (let index = value.length - 1; index >= 0; index -= 1) {
-        const digit = HMIP_KEY_CHARS.indexOf(value.charAt(index));
-        if (digit >= 0) {
-            accumulator |= digit << bits;
-        }
-        bits += 5;
-        while (bits > 8 && byteIndex >= 0) {
-            bytes[byteIndex] = accumulator & 0xff;
-            accumulator >>= 8;
-            bits -= 8;
-            byteIndex -= 1;
-        }
-    }
-    return [...bytes]
-        .map((byte) => byte.toString(16).padStart(2, '0'))
-        .join('')
-        .toUpperCase();
-}
 
 /** An SGTIN as the interface wants it: upper case, without the grouping dashes. */
 export function normaliseSgtin(sgtin: string): string {

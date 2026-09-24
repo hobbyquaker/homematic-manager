@@ -231,3 +231,32 @@ test('a LOCAL openccu-lite system offers two HmIP pairing modes and counts its d
         await stub.close();
     }
 });
+
+/**
+ * B-72: the key as the sticker prints it (26 characters of eQ-3's alphabet, typed with its dashes)
+ * is accepted and goes out in `setInstallModeWithWhitelist` with `KEY_MODE: LOCAL`. The RPC log
+ * masks the key itself; that it is the 32 hex digits the QR code holds is the backend's unit test
+ * (`installMode.test.ts`). The key is made up.
+ */
+test('the printed HmIP key starts the whitelist pairing (B-72)', async ({page, host}) => {
+    await page.goto(`${host.url}#/HmIP-RF/devices`);
+    await page.getByTestId('devices-add').click();
+    const dialog = page.getByTestId('add-device-dialog');
+    await expect(dialog).toHaveAttribute('open', '');
+
+    await page.getByTestId('add-device-hmip-mode').selectOption('KEY');
+    await page.getByTestId('add-device-sgtin').fill('3014-F711-A000-0000-0000-1234');
+    await page.getByTestId('add-device-key').fill('1TGJ8-Y1FAE-4UW1R-1EFFF-9E9EHZ');
+    await expect(page.getByTestId('add-device-start')).toBeEnabled();
+    await page.getByTestId('add-device-start').click();
+
+    await dialog.locator('.hmm-dialog-close').click();
+    await page.getByTestId('rpclog-toggle').click();
+    const call = page
+        .getByTestId('rpclog')
+        .locator('.hmm-rpclog-entry', {hasText: 'HmIP-RF setInstallModeWithWhitelist'})
+        .locator('.hmm-rpclog-params');
+    await expect(call.first()).toContainText(
+        'true, 60, [{"ADDRESS":"3014F711A000000000001234","KEY_MODE":"LOCAL","KEY":"***"}]',
+    );
+});

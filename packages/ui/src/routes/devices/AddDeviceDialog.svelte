@@ -1,9 +1,16 @@
 <script lang="ts">
-    import {renameEntries, type InstallModeOptions, type MetaHmipPairing} from '@homematic-manager/core';
+    import {
+        isDeviceKey,
+        isSgtin,
+        normaliseKeyText,
+        parseHmipCode,
+        renameEntries,
+        type InstallModeOptions,
+        type MetaHmipPairing,
+    } from '@homematic-manager/core';
 
     import Dialog from '../../lib/components/Dialog.svelte';
     import {getStores} from '../../lib/stores/context.js';
-    import {isDeviceKey, isSgtin, normaliseKeyText, parseHmipCode} from '../../lib/util/hmipKey.js';
 
     import QrScanner from './QrScanner.svelte';
     import type {CreateQrReader} from './qrReader.js';
@@ -310,6 +317,12 @@
                         oninput={(event) => (deviceKey = normaliseKeyText(event.currentTarget.value))}
                     />
                 </label>
+                <div class="hmm-add-row">
+                    <span></span>
+                    <p class="hmm-add-hint" data-testid="add-device-key-hint">
+                        {t('The key from the sticker (26 characters, dashes optional), or scan the QR code.')}
+                    </p>
+                </div>
             {/if}
 
             <div class="hmm-add-row">

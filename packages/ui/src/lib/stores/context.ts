@@ -17,3 +17,8 @@ export function getStores(): Stores {
     }
     return getContext<Stores>(STORES_KEY);
 }
+
+/** The context `render()` takes to mount one component with the stores, without `App.svelte`. */
+export function storesContext(stores: Stores): Map<symbol, Stores> {
+    return new Map([[STORES_KEY, stores]]);
+}

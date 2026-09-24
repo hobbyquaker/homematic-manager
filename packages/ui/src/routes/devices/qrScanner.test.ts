@@ -38,8 +38,8 @@ describe('QrScanner', () => {
 
         expect(screen.getByTestId('qr')).toBeTruthy();
         await waitFor(() => {
-            reader.scan('3014F711A000000000000001ABCDEFGHJKLMNPQR');
-            expect(onscan).toHaveBeenCalledWith('3014F711A000000000000001ABCDEFGHJKLMNPQR');
+            reader.scan('EQ01SG3014F711A000000000000001DLK3A7C51E0B94D26F81C05AE7392D4B61F');
+            expect(onscan).toHaveBeenCalledWith('EQ01SG3014F711A000000000000001DLK3A7C51E0B94D26F81C05AE7392D4B61F');
         });
     });
 

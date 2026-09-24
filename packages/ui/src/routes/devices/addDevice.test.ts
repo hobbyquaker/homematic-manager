@@ -2,49 +2,8 @@ import type {DeviceDescription} from '@homematic-manager/core';
 import {fireEvent, screen, waitFor} from '@testing-library/svelte';
 import {beforeEach, describe, expect, it} from 'vitest';
 
-import {isDeviceKey, isSgtin, normaliseKeyText, parseHmipCode} from '../../lib/util/hmipKey.js';
 import {MockTransport} from '../../lib/transport/MockTransport.js';
 import {mountApp} from '../../testHarness.js';
-
-describe('the HmIP pairing data', () => {
-    it('accepts what a QR code really contains', () => {
-        // plain concatenation, the common eQ-3 form
-        expect(parseHmipCode('3014F711A000000000000001' + 'ABCDEFGHJKLMNPQR')).toEqual({
-            sgtin: '3014F711A000000000000001',
-            key: 'ABCDEFGHJKLMNPQR',
-        });
-        // with separators and lower case
-        expect(parseHmipCode('3014f711-a000-0000-0000-0001 abcdefghjklmnpqr')).toEqual({
-            sgtin: '3014F711A000000000000001',
-            key: 'ABCDEFGHJKLMNPQR',
-        });
-        // the labelled form
-        expect(parseHmipCode('S:3014F711A000000000000001,K:ABCDEFGHJKLMNPQR')).toEqual({
-            sgtin: '3014F711A000000000000001',
-            key: 'ABCDEFGHJKLMNPQR',
-        });
-        // a code that carries the SGTIN only; the key is typed from the sticker
-        expect(parseHmipCode('3014F711A000000000000001')).toEqual({
-            sgtin: '3014F711A000000000000001',
-            key: '',
-        });
-    });
-
-    it('refuses anything that is not a device code', () => {
-        expect(parseHmipCode('https://example.invalid/')).toBeUndefined();
-        expect(parseHmipCode('')).toBeUndefined();
-        expect(parseHmipCode('3014F711')).toBeUndefined();
-    });
-
-    it('validates the two fields on their own', () => {
-        expect(isSgtin('3014F711A000000000000001')).toBe(true);
-        expect(isSgtin('3014F711A00000000000000')).toBe(false);
-        expect(isSgtin('3014G711A000000000000001')).toBe(false);
-        expect(isDeviceKey('ABCDEFGHJKLMNPQR')).toBe(true);
-        expect(isDeviceKey('ABCDEFGHJKLMNPQ')).toBe(false);
-        expect(normaliseKeyText(' ab-cd ')).toBe('ABCD');
-    });
-});
 
 describe('the add-device dialog', () => {
     let transport: MockTransport;
@@ -144,7 +103,10 @@ describe('the add-device dialog', () => {
             target: {value: '3014F711A000000000000001'},
         });
         expect(screen.getByTestId<HTMLButtonElement>('add-device-start').disabled).toBe(true);
-        await fireEvent.input(screen.getByTestId('add-device-key'), {target: {value: 'ABCDEFGHJKLMNPQR'}});
+        // B-72: the key as the sticker prints it (made up), dashes and case as typed
+        await fireEvent.input(screen.getByTestId('add-device-key'), {
+            target: {value: '1TGJ8-Y1FAE-4UW1R-1EFFF-9e9ehz'},
+        });
 
         await waitFor(() => {
             expect(screen.getByTestId<HTMLButtonElement>('add-device-start').disabled).toBe(false);
@@ -157,7 +119,7 @@ describe('the add-device dialog', () => {
                 {
                     seconds: 60,
                     hmipKeyMode: 'KEY',
-                    hmipKey: {sgtin: '3014F711A000000000000001', key: 'ABCDEFGHJKLMNPQR'},
+                    hmipKey: {sgtin: '3014F711A000000000000001', key: '1TGJ8Y1FAE4UW1R1EFFF9E9EHZ'},
                 },
             ]);
         });

@@ -740,6 +740,11 @@ export const UI_MESSAGES: MessageCatalogue = {
     'QR scanner': {de: 'QR-Scanner', en: 'QR scanner'},
     Scan: {de: 'Scannen', en: 'Scan'},
     Stop: {de: 'Stoppen', en: 'Stop'},
+    // B-72: what the KEY field takes - the printed key or the QR code's.
+    'The key from the sticker (26 characters, dashes optional), or scan the QR code.': {
+        de: 'Der Schlüssel vom Aufkleber (26 Zeichen, Bindestriche optional), oder den QR-Code scannen.',
+        en: 'The key from the sticker (26 characters, dashes optional), or scan the QR code.',
+    },
     'That is not a HomematicIP device code': {
         de: 'Das ist kein HomematicIP-Gerätecode',
         en: 'That is not a HomematicIP device code',

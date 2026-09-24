@@ -1,38 +1,7 @@
+import {hmipKeyToHex} from '@homematic-manager/core';
 import {describe, expect, it} from 'vitest';
 
-import {
-    DEFAULT_INSTALL_SECONDS,
-    HMIP_KEY_CHARS,
-    hmipKeyToHex,
-    installModeCalls,
-    installSeconds,
-    normaliseSgtin,
-} from './installMode.js';
-
-describe('hmipKeyToHex', () => {
-    it('keeps a key that is already 32 hex digits', () => {
-        const hex = '0123456789ABCDEF0123456789ABCDEF';
-        expect(hmipKeyToHex(hex)).toBe(hex);
-        expect(hmipKeyToHex(hex.toLowerCase())).toBe(hex);
-    });
-
-    it('converts the printed base-32 key to 32 hex digits', () => {
-        const converted = hmipKeyToHex('AAAAAAAAAAAAAAAAAAAAAAAAAA');
-        expect(converted).toMatch(/^[0-9A-F]{32}$/);
-        expect(hmipKeyToHex('0000000000000000000000000')).toBe('0'.repeat(32));
-    });
-
-    it('ignores the grouping dashes and the case', () => {
-        expect(hmipKeyToHex('aaaa-aaaa-aaaa')).toBe(hmipKeyToHex('AAAAAAAAAAAA'));
-    });
-
-    it('skips a character the alphabet does not contain', () => {
-        // D, I, O and V are not in eQ-3's alphabet; they must not shift the result
-        expect(hmipKeyToHex('ADA')).toMatch(/^[0-9A-F]{32}$/);
-        expect(HMIP_KEY_CHARS).not.toContain('D');
-        expect(HMIP_KEY_CHARS).toHaveLength(32);
-    });
-});
+import {DEFAULT_INSTALL_SECONDS, installModeCalls, installSeconds, normaliseSgtin} from './installMode.js';
 
 describe('normaliseSgtin and installSeconds', () => {
     it('normalises an SGTIN', () => {
@@ -79,6 +48,30 @@ describe('installModeCalls', () => {
         expect(installModeCalls(true, {address: 'LEQ0123456', mode: 2})).toEqual([
             {method: 'addDevice', params: ['LEQ0123456', 2]},
         ]);
+    });
+
+    it('sends the same KEY for the printed key and the QR code of one device (B-72)', () => {
+        // a made-up key: its printed base-32 form and the 32 hex digits a QR code would hold
+        const whitelist = (key: string): unknown =>
+            installModeCalls(true, {hmipKeyMode: 'KEY', hmipKey: {sgtin: '3014F711A000000000001234', key}});
+        const expected = [
+            {
+                method: 'setInstallModeWithWhitelist',
+                params: [
+                    true,
+                    60,
+                    [
+                        {
+                            ADDRESS: '3014F711A000000000001234',
+                            KEY_MODE: 'LOCAL',
+                            KEY: '3A7C51E0B94D26F81C05AE7392D4B61F',
+                        },
+                    ],
+                ],
+            },
+        ];
+        expect(whitelist('1TGJ8-Y1FAE-4UW1R-1EFFF-9E9EHZ')).toEqual(expected);
+        expect(whitelist('3A7C51E0B94D26F81C05AE7392D4B61F')).toEqual(expected);
     });
 
     it('uses the HmIP whitelist with the SGTIN and the converted key', () => {

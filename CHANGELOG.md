@@ -43,6 +43,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 - **The parameter rows fit a phone.** In the paramset and link dialogs on a narrow screen (412 px) a row was wider
   than the dialog and its range and default were cut off at the edge; the value and then the range now move under the
   parameter's name.
+- **Names given at pairing reach the CCU.** A device that has just been paired sits in the CCU's inbox and has no ReGa
+  object yet, so the names typed in the pairing dialog stayed in this application and were replaced by the CCU's at the
+  next reconnect. They now wait, the dialog says so, and they are written to ReGa as soon as the inbox is confirmed
+  here (the button, or the automatic confirmation). The `:0` channel is no longer renamed twice in the same script.
 
 ## [3.0.0-beta.22] — 2026-09-23
 

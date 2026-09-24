@@ -60,7 +60,9 @@ export class NameStore {
             }
             this.#names.set(entry.address, name);
             written.push({address: entry.address, name});
-            if (!entry.address.includes(':')) {
+            // B-64: not when the caller names the `:0` itself (task 65's renameEntries does), or
+            // the rename script carries it twice
+            if (!entry.address.includes(':') && !entries.some((other) => other.address === `${entry.address}:0`)) {
                 const maintenance = `${entry.address}:0`;
                 const maintenanceName = `${name}:0`;
                 this.#names.set(maintenance, maintenanceName);

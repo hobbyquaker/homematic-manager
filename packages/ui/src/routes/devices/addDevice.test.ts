@@ -623,6 +623,21 @@ describe('the ReGa inbox (#54)', () => {
         });
     });
 
+    it('says that names wait for the inbox while ReGa has not got them, and not after (B-64)', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await fireEvent.click(screen.getByTestId('devices-add'));
+        expect(screen.queryByTestId('add-device-names-waiting')).toBeNull();
+
+        transport.emit('rega.changed', {enabled: true, reachable: true, names: 3, pendingNames: ['NEW0000001']});
+        await waitFor(() => {
+            expect(screen.getByTestId('add-device-names-waiting').textContent).toContain('ReGa-Posteingang');
+        });
+        transport.emit('rega.changed', {enabled: true, reachable: true, names: 5});
+        await waitFor(() => {
+            expect(screen.queryByTestId('add-device-names-waiting')).toBeNull();
+        });
+    });
+
     it('says the inbox is empty rather than nothing at all', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         await fireEvent.click(screen.getByTestId('devices-add'));

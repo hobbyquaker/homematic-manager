@@ -85,4 +85,14 @@ describe('NameStore', () => {
         store.clear();
         expect(store.all()).toEqual({});
     });
+
+    it('does not add the :0 a second time when the caller names it (B-64)', () => {
+        const store = new NameStore();
+        const written = store.set([
+            {address: 'LEQ1', name: 'Lampe'},
+            {address: 'LEQ1:0', name: 'Lampe:0'},
+            {address: 'LEQ1:1', name: 'Lampe:1'},
+        ]);
+        expect(written.map((entry) => entry.address)).toEqual(['LEQ1', 'LEQ1:0', 'LEQ1:1']);
+    });
 });

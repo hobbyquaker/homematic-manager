@@ -106,6 +106,11 @@ export const UI_MESSAGES: MessageCatalogue = {
         en: {one: '{count} detector', other: '{count} detectors'},
     },
     'New smoke group': {de: 'Neue Rauchmeldergruppe', en: 'New smoke group'},
+    // B-64: under the inbox button of the pairing dialog
+    'The names reach the CCU once the device is confirmed in the ReGa inbox.': {
+        de: 'Die Namen kommen auf der CCU an, sobald das Gerät im ReGa-Posteingang bestätigt ist.',
+        en: 'The names reach the CCU once the device is confirmed in the ReGa inbox.',
+    },
     // B-59: one line on a link profile change, instead of a warning per parameter
     'The profile names {count} parameters this firmware does not have': {
         de: {

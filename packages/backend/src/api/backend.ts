@@ -673,7 +673,7 @@ export class Backend {
                 return null;
 
             case 'rega.confirmInbox':
-                return (await (this.#rega?.confirmInbox() ?? Promise.resolve([]))).map((entry) => entry.address);
+                return this.#confirmInbox();
 
             case 'linkTemplates.list':
                 return this.#linkTemplates.list(p[0]);
@@ -1068,7 +1068,7 @@ export class Backend {
                 // somebody confirms it in the WebUI. Opt-in and ReGa-only (D-2): without ReGa the
                 // call answers with an empty list and nothing happened.
                 if (addresses.length > 0 && this.#config.connection.autoConfirmRegaInbox === true) {
-                    void this.#rega?.confirmInbox();
+                    void this.#confirmInbox();
                 }
             },
             deleteDevices: (interfaceName, addresses) => {
@@ -1433,6 +1433,19 @@ export class Backend {
     /*
      * names
      */
+
+    /**
+     * Issue #54, B-64: confirms the CCU's inbox. The service reads the ReGa ids afterwards and sends
+     * the names given here while the devices waited; the names that came with it are saved and told.
+     */
+    async #confirmInbox(): Promise<string[]> {
+        const confirmed = (await this.#rega?.confirmInbox()) ?? [];
+        if (confirmed.length > 0) {
+            this.#caches.saveNames();
+            this.events.emit('names.changed', this.#caches.names.all());
+        }
+        return confirmed.map((entry) => entry.address);
+    }
 
     async #setNames(entries: readonly {address: string; name: string}[]): Promise<NameMap> {
         const written = this.#caches.names.set(entries);

@@ -99,6 +99,8 @@ export class RegaService {
     readonly #options: RegaServiceOptions;
     readonly #client: RegaLike | undefined;
     #state: RegaState;
+    /** B-64: address -> name, set here while the device had no ReGa id (still in the inbox). */
+    readonly #pending = new Map<string, string>();
 
     constructor(options: RegaServiceOptions) {
         this.#options = options;
@@ -179,6 +181,18 @@ export class RegaService {
         if (!this.#client || entries.length === 0) {
             return;
         }
+        // B-64: a device in the CCU's inbox has no ReGa id yet; its names wait for the confirmation
+        const waiting = entries.filter((entry) => this.#options.names.regaId(entry.address) === undefined);
+        for (const entry of entries) {
+            if (this.#options.names.regaId(entry.address) === undefined) {
+                this.#pending.set(entry.address, entry.name);
+            } else {
+                this.#pending.delete(entry.address);
+            }
+        }
+        if (waiting.length > 0) {
+            this.#setState(this.#state);
+        }
         const script = renameScript(entries, (address) => this.#options.names.regaId(address));
         if (script === undefined) {
             return;
@@ -213,6 +227,7 @@ export class RegaService {
                         .map((entry) => entry.address)
                         .join(', ')}`,
                 );
+                await this.#renamePending();
             }
             return confirmed;
         } catch (error) {
@@ -251,6 +266,26 @@ export class RegaService {
     }
 
     /**
+     * B-64: after the inbox was confirmed the devices are ReGa objects: their ids are read again
+     * (with ReGa's names, which win as at every connect), and the names given here while they
+     * waited are set again and sent - so the names typed in the pairing dialog are the CCU's too.
+     */
+    async #renamePending(): Promise<void> {
+        // the ids also when nothing waits: with the auto-confirm the device leaves the inbox before
+        // anybody has named it, and a rename a moment later needs its id
+        await this.refreshNames();
+        const ready = [...this.#pending]
+            .filter(([address]) => this.#options.names.regaId(address) !== undefined)
+            .map(([address, name]) => ({address, name}));
+        if (ready.length === 0) {
+            return;
+        }
+        this.#options.names.set(ready);
+        await this.rename(ready);
+        this.#setState(this.#state);
+    }
+
+    /**
      * A failure becomes the state, and a notice **once**: a ReGa that does not answer says so on the
      * first call that finds out and stays quiet on every later one, until it answers again (B-62 -
      * before this every rename, acknowledgement and reconnect repeated the same warning).
@@ -271,7 +306,9 @@ export class RegaService {
     }
 
     #setState(state: RegaState): void {
-        this.#state = state;
-        this.#options.onStateChanged(state);
+        const rest: RegaState = {...state};
+        delete rest.pendingNames;
+        this.#state = this.#pending.size === 0 ? rest : {...rest, pendingNames: [...this.#pending.keys()]};
+        this.#options.onStateChanged(this.#state);
     }
 }

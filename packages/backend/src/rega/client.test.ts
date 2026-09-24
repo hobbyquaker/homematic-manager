@@ -268,3 +268,60 @@ describe('the real client', () => {
         expect(rega.state.enabled).toBe(true);
     });
 });
+
+/**
+ * B-64: a device in the CCU's inbox is not in ReGa's channel list, so it has no id and the rename
+ * script skipped it; the names typed at pairing then lived only here and were lost at the next
+ * reconnect, when ReGa's names win. They wait now, and are sent once the inbox is confirmed.
+ */
+describe('names of a device still in the inbox (B-64)', () => {
+    it('wait for the inbox, and are sent with the ids read after the confirmation', async () => {
+        const scripts: string[] = [];
+        let confirmed = false;
+        const {rega, names, states} = service({
+            getChannels: () =>
+                Promise.resolve(
+                    confirmed
+                        ? [
+                              {id: 5001, address: 'NEW0000001', name: 'HmIP-PDT NEW0000001'},
+                              {id: 5002, address: 'NEW0000001:0', name: 'HmIP-PDT NEW0000001:0'},
+                          ]
+                        : [],
+                ),
+            exec: (script) => {
+                scripts.push(script);
+                if (script.includes('ReadyConfig')) {
+                    confirmed = true;
+                    return Promise.resolve({output: '[{"id":5001,"address":"NEW0000001"}]', objects: {}});
+                }
+                return Promise.resolve({output: '', objects: {}});
+            },
+        });
+        const entries = names.set([
+            {address: 'NEW0000001', name: 'Dimmer'},
+            {address: 'NEW0000001:0', name: 'Dimmer:0'},
+        ]);
+        await rega.rename(entries);
+        // nothing to send yet, and the state says what waits
+        expect(scripts).toEqual([]);
+        expect(rega.state.pendingNames).toEqual(['NEW0000001', 'NEW0000001:0']);
+
+        await expect(rega.confirmInbox()).resolves.toEqual([{id: 5001, address: 'NEW0000001'}]);
+        expect(scripts.at(-1)).toBe('dom.GetObject(5001).Name("Dimmer");\ndom.GetObject(5002).Name("Dimmer:0");\n');
+        // ReGa's default names were read with the ids, and the given ones won again
+        expect(names.all()).toMatchObject({NEW0000001: 'Dimmer', 'NEW0000001:0': 'Dimmer:0'});
+        expect(rega.state.pendingNames).toBeUndefined();
+        expect(states.at(-1)?.pendingNames).toBeUndefined();
+    });
+
+    it('reads the ids after a confirmation even when nothing waits, for a rename right after it', async () => {
+        const getChannels = vi.fn(() => Promise.resolve([{id: 6001, address: 'NEW0000002', name: 'x'}]));
+        const {rega, names} = service({
+            getChannels,
+            exec: () => Promise.resolve({output: '[{"id":6001,"address":"NEW0000002"}]', objects: {}}),
+        });
+        await rega.confirmInbox();
+        expect(getChannels).toHaveBeenCalledOnce();
+        expect(names.regaId('NEW0000002')).toBe(6001);
+    });
+});

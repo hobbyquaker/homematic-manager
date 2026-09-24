@@ -422,6 +422,12 @@ export interface RegaState {
      * an openccu-lite, which has no ReGaHSS - nothing is called, and the settings say so.
      */
     reason?: 'openccu-lite';
+    /**
+     * B-64: addresses whose name was set here but has not reached ReGa - a device still in the
+     * CCU's inbox has no ReGa object id yet. They are renamed on the CCU once the inbox is
+     * confirmed through this application (the button or the auto-confirm). Absent when none wait.
+     */
+    pendingNames?: string[];
 }
 
 /** Friendly names: address -> name (devices and channels), from ReGa or the local store. */

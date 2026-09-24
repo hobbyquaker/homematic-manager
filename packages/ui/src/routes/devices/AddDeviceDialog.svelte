@@ -449,6 +449,12 @@
                 <span data-testid="add-device-inbox-result">{inboxConfirmed}</span>
             {/if}
         </div>
+        <!-- B-64: names given to a device still in the inbox are this application's until it is confirmed -->
+        {#if (stores.interfaces.rega.pendingNames?.length ?? 0) > 0}
+            <p class="hmm-add-notice" role="status" data-testid="add-device-names-waiting">
+                {t('The names reach the CCU once the device is confirmed in the ReGa inbox.')}
+            </p>
+        {/if}
     {/if}
 
     {#if paired.length > 0}

@@ -536,6 +536,22 @@ describe.skipIf(!hasLayout)('the paramset editor with a long expert view (task 6
             const dialog = await openExpert();
             expect(box(dialog).width).toBe(412 - 32);
             expectOneScroller(dialog, true);
+            // B-63: every part of a parameter row is inside the dialog's body - the range and the
+            // default move under the value instead of being clipped at the edge
+            const body = dialog.querySelector<HTMLElement>('.hmm-dialog-body')!.getBoundingClientRect();
+            for (const name of ['REPEATED_LONG_PRESS_TIMEOUT_VALUE', FILLERS[0]!]) {
+                const row = screen.getByTestId(`param-${name}`);
+                row.scrollIntoView({block: 'center'});
+                expect(row.scrollWidth).toBeLessThanOrEqual(row.clientWidth);
+                for (const part of row.querySelectorAll<HTMLElement>(
+                    '.hmm-param-label, .hmm-param-control, .hmm-param-meta',
+                )) {
+                    const rect = part.getBoundingClientRect();
+                    expect(Math.round(rect.left)).toBeGreaterThanOrEqual(Math.round(body.left));
+                    expect(Math.round(rect.right)).toBeLessThanOrEqual(Math.round(body.right));
+                }
+                expect(row.querySelector('.hmm-param-meta')?.textContent).toMatch(/0 … \d+/);
+            }
         } finally {
             await page.viewport(1280, 800);
         }

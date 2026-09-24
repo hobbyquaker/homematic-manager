@@ -219,10 +219,16 @@
 </div>
 
 <style>
+    /*
+     * B-63: a wrapping row rather than a three-column grid. Wide, it is what the grid was - the
+     * name at 240 px, the value filling the middle, range and default at 200 px on the right; in a
+     * narrow dialog (a 412 px phone) the value and then the range move under the name instead of
+     * being cut off at the dialog's edge.
+     */
     .hmm-param {
-        display: grid;
-        grid-template-columns: 240px minmax(0, 1fr) 200px;
-        gap: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px 8px;
         align-items: center;
         padding: 2px 4px;
         border-bottom: 1px solid var(--hmm-border-muted);
@@ -234,6 +240,7 @@
 
     .hmm-param-label {
         display: flex;
+        flex: 0 1 240px;
         flex-direction: column;
         min-width: 0;
     }
@@ -248,6 +255,7 @@
 
     .hmm-param-control {
         display: flex;
+        flex: 1 1 160px;
         align-items: center;
         gap: 6px;
         min-width: 0;
@@ -277,6 +285,10 @@
 
     .hmm-param-meta {
         display: flex;
+        flex: 0 0 200px;
+        max-width: 100%;
+        margin-left: auto;
+        flex-wrap: wrap;
         gap: 8px;
         justify-content: flex-end;
         color: var(--hmm-fg-muted);
@@ -296,7 +308,7 @@
     }
 
     .hmm-param-help {
-        grid-column: 1 / -1;
+        flex: 1 0 100%;
         margin: 0 0 4px;
         color: var(--hmm-fg-muted);
         font-size: var(--hmm-font-size-small);

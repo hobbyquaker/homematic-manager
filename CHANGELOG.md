@@ -40,6 +40,9 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   link's stored values, as the WebUI's forms do. The parameters a profile names but the device's firmware lacks (the
   optical-signal ones of an HmIP-PDT) are one line now instead of a warning each, and they no longer keep a link
   from being recognised as following its profile.
+- **The parameter rows fit a phone.** In the paramset and link dialogs on a narrow screen (412 px) a row was wider
+  than the dialog and its range and default were cut off at the edge; the value and then the range now move under the
+  parameter's name.
 
 ## [3.0.0-beta.22] — 2026-09-23
 

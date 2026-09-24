@@ -309,7 +309,7 @@
             expert = profileId === EXPERT_PROFILE_ID;
         }
         edited = {...edited, ...chosen.receiver};
-        if (chosen.sender) {
+        if (chosen.sender && sender !== receiver) {
             senderEdited = {...senderEdited, ...chosen.sender};
         }
     }
@@ -502,34 +502,37 @@
             </div>
         {/if}
 
-        <section class="hmm-link-section">
-            <h4>
-                <button
-                    type="button"
-                    class="hmm-link-toggle"
-                    aria-expanded={senderOpen}
-                    data-testid="link-sender-toggle"
-                    onclick={() => (senderOpen = !senderOpen)}>{senderOpen ? '−' : '+'}</button
-                >
-                {t('Sender')}: {stores.nameOf(sender)} ({sender})
-            </h4>
-            {#if senderOpen}
-                <div class="hmm-link-list" data-testid="link-sender-params">
-                    {#each senderFields as field (field.name)}
-                        <ParameterRow
-                            {field}
-                            value={valueOf(field, senderValues, senderEdited)}
-                            label={stores.meta.parameterLabel(field.name, senderType)}
-                            help={stores.meta.parameterHelp(field.name, senderType)}
-                            changed={Object.prototype.hasOwnProperty.call(senderEdited, field.name)}
-                            valueLabel={(entry) => stores.meta.valueLabel(field.name, entry, senderType)}
-                            presetLabel={(key) => stores.meta.uiLabel(key)}
-                            onchange={(value) => (senderEdited = {...senderEdited, [field.name]: value})}
-                        />
-                    {/each}
-                </div>
-            {/if}
-        </section>
+        <!-- Task 64: an internal key is the channel's link with itself; there is one paramset, the receiver's -->
+        {#if sender !== receiver}
+            <section class="hmm-link-section">
+                <h4>
+                    <button
+                        type="button"
+                        class="hmm-link-toggle"
+                        aria-expanded={senderOpen}
+                        data-testid="link-sender-toggle"
+                        onclick={() => (senderOpen = !senderOpen)}>{senderOpen ? '−' : '+'}</button
+                    >
+                    {t('Sender')}: {stores.nameOf(sender)} ({sender})
+                </h4>
+                {#if senderOpen}
+                    <div class="hmm-link-list" data-testid="link-sender-params">
+                        {#each senderFields as field (field.name)}
+                            <ParameterRow
+                                {field}
+                                value={valueOf(field, senderValues, senderEdited)}
+                                label={stores.meta.parameterLabel(field.name, senderType)}
+                                help={stores.meta.parameterHelp(field.name, senderType)}
+                                changed={Object.prototype.hasOwnProperty.call(senderEdited, field.name)}
+                                valueLabel={(entry) => stores.meta.valueLabel(field.name, entry, senderType)}
+                                presetLabel={(key) => stores.meta.uiLabel(key)}
+                                onchange={(value) => (senderEdited = {...senderEdited, [field.name]: value})}
+                            />
+                        {/each}
+                    </div>
+                {/if}
+            </section>
+        {/if}
 
         <section class="hmm-link-section">
             <h4>{t('Receiver')}: {stores.nameOf(receiver)} ({receiver})</h4>

@@ -351,8 +351,13 @@ export function parseProcs(source) {
 }
 
 /** The WebUI helpers that draw one control for the parameter they are given. */
+// Task 64: the BidCos forms (`easymodes/<paramid>.tcl`) pass the paramset's kind first -
+// `getCheckBox $DEVICE '$param' ...`, `getTextField $CHANNEL '$param' ...` - which is skipped.
 const MASTER_PARAM_ELEMENTS =
-    /\[\s*(getOptionBox|getCheckBox|_getCheckBox|getTextField|getPowerUpSelector\w*|getSelect\w+Element|getRepetitionSelector|getOutputBehaviourElement|getSoundSelector)\s+'?(\$param|[A-Z][A-Z0-9_]+)'?/u;
+    /\[\s*(getOptionBox|getCheckBox|_getCheckBox|getTextField|getPowerUpSelector\w*|getSelect\w+Element|getRepetitionSelector|getOutputBehaviourElement|getSoundSelector)\s+(?:'?\$?(?:DEVICE|CHANNEL)'?\s+)?'?(\$param|[A-Z][A-Z0-9_]+)'?/u;
+
+/** Task 64: a BidCos form's combo box of typical values, `getComboBox $param $prn $special_input_id`. */
+const BIDCOS_COMBO = /\[\s*getComboBox\s+'?(\$param|[A-Z][A-Z0-9_]+)'?\s+\$prn\b/u;
 
 /**
  * The controls of one MASTER form, in the order the WebUI draws them: the body of an HmIP
@@ -477,6 +482,11 @@ export function extractMasterControls(body, procs, seen = new Set()) {
                 ...(option === undefined ? {} : {option}),
             });
             option = undefined;
+            continue;
+        }
+        if ((match = BIDCOS_COMBO.exec(line))) {
+            const name = match[1] === '$param' ? param : match[1];
+            if (name !== undefined && !covered(name)) add({kind: 'param', param: name});
             continue;
         }
         if ((match = MASTER_PARAM_ELEMENTS.exec(line))) {

@@ -8,6 +8,18 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ## [Unreleased]
 
+### New
+
+- **The CCU's MASTER forms for BidCos devices and device-specific HmIP forms.** The MASTER dialog showed the CCU's
+  form only by channel type (HmIP). The WebUI picks a form by the paramset id the interface reports first; so does
+  the dialog now (`getParamsetId`, asked once per channel), which adds the BidCos channel and device forms (thermostats
+  HM-CC-TC and HM-CC-RT-DN, the heating group, the power meters and condition channels, motion detectors, the
+  dual-white controllers, …) and the HmIP device-specific ones (floor heating controllers, eTRV, the WGD displays,
+  switch actuators with power metering, …). A BidCos switch, dimmer, blind or dual-white channel has an _Internal
+  key…_ button there: the channel's own button, as a link profile of the channel with itself, in the link dialog -
+  what the WebUI shows on the same page. Forms that are the WebUI's own JavaScript keep the full parameter list, and
+  an interface without `getParamsetId` keeps the channel type's form.
+
 ### Fixed
 
 - **A key pressed right after a dialog closed reaches the grid.** A dialog handed the focus back to the row it was

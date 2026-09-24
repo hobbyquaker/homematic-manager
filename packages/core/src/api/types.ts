@@ -980,6 +980,11 @@ export interface ApiMethods {
     'groups.delete': {params: [id: number]; result: HeatingGroupMember[]};
 
     'paramset.get': {params: [interfaceName: string, address: string, paramset: string]; result: Paramset};
+    /**
+     * Task 64: what `getParamsetId(address, MASTER)` answers - the key the WebUI picks a MASTER form
+     * by. `''` where the interface has no such method or refuses it; cached per address.
+     */
+    'paramset.id': {params: [interfaceName: string, address: string]; result: string};
     'paramset.description': {
         params: [interfaceName: string, address: string, paramset: string];
         result: ParamsetDescription;

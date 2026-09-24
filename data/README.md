@@ -13,7 +13,7 @@ measured in [COMPARISON.md](COMPARISON.md).
 
 ## What is in `dist/`
 
-Currently 195 files, 9.2 MB, built from openccu-data **2026.7.2**.
+Currently 196 files, 9.3 MB, built from openccu-data **2026.7.2**.
 
 | File | Type | Content |
 | --- | --- | --- |
@@ -21,6 +21,7 @@ Currently 195 files, 9.2 MB, built from openccu-data **2026.7.2**.
 | `profiles/<RECEIVER_TYPE>.json` | `ReceiverProfiles` | 65 files, 7.5 MB, 3521 link profiles over 725 receiver/sender combinations; the largest is `SHUTTER_VIRTUAL_RECEIVER.json` at 624 KB, the smallest `WS_TH.json` at 435 B. The core loads one file per receiver type, lazily |
 | `receiver-type-aliases.json` | `ReceiverTypeAliases` | 3 receiver types that reuse another type's profiles |
 | `master-metadata.json` | `Record<channelType, MasterMetadata>` | 40 KB, 54 channel types: display order, conditional visibility, option-preset assignment, parameter groups |
+| `master-forms.json` | `MasterForms` | 83 KB, 71 MASTER forms keyed by paramset id (task 64), 9 of them with the channel's internal key |
 | `option-presets.json` | `Record<id, OptionPreset>` | 34 KB, 85 dropdowns of typical values (`DELAY`: none/5s/…/1h plus a free value) |
 | `cross-validations.json` | `CrossValidationRule[]` | 5 rules between parameters of one paramset (`DIM_MAX_LEVEL >= DIM_MIN_LEVEL`, …) |
 | `translations/de.json`, `en.json` | `Translations` | 767 KB / 746 KB: 253 channel types, 488 device models, 2359 parameters, ~3040 parameter values, 167 help texts, ~5470 UI labels |
@@ -93,8 +94,18 @@ it calls (`getKeyTransceiver`, `getDimmerVirtualReceiver`, ...), into `master-me
 `controls` for that channel type - 63 channel types, 339 controls, a time being the `X_UNIT` /
 `X_VALUE` pair behind `getComboBox ... "<type>"` + `getTimeUnitComboBox*`. Their labels are mostly
 the WebUI's own `stringTable...` keys, so the script also takes `--webui-lang` (the
-`/www/webui/js/lang` directory, whose strings are %XX-escaped ISO-8859-1). The BidCos MASTER forms
-are keyed by a paramset id (`getParamsetId`) the app does not ask for, and are not extracted yet.
+`/www/webui/js/lang` directory, whose strings are %XX-escaped ISO-8859-1).
+
+The forms the WebUI picks by **paramset id** go to `master-forms.json` (task 64): the app asks
+`getParamsetId(address, MASTER)` and, as `ic_deviceparameters.cgi` does, takes that id's form before
+the channel type's - the BidCos channel and device forms (`easymodes/<paramid>.tcl`: `getCheckBox
+$DEVICE '$param'`, `getTextField $CHANNEL '$param'`, `getComboBox $param $prn`) and the HmIP
+device-specific ones (`hmip/<paramid>.tcl`), each with the procedures of the `etc/` files it sources.
+A form that sets `internalKey` shows the channel's own button as a link profile (the LINK paramset of
+the channel with itself, drawn with the easymode it sources): it gets `internalKey: {receiverType}`,
+and the `<paramid>Params.tcl` beside it adds its expert parameters (a dual-white controller keeps it in `<paramid>_intkey.tcl`). 71 ids, 464 controls; the BidCos
+forms that are their own JavaScript (the pulse sensor, the smoke detector, the EM8 remote) have no
+controls and keep the dialog's full list.
 
 ### Translations
 

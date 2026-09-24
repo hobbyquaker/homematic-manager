@@ -1389,6 +1389,33 @@ describe('devices', () => {
         await h.backend.stop();
     });
 
+    it("asks getParamsetId once per address and remembers an interface's refusal (task 64)", async () => {
+        const h = await harness({
+            answers: {
+                'HmIP-RF': (method, params) => {
+                    if (method === 'getParamsetId') {
+                        if (params[0] === 'B:1') {
+                            throw Object.assign(new Error('Unknown method'), {
+                                faultCode: -1,
+                                faultString: 'Unknown method',
+                            });
+                        }
+                        expect(params).toEqual(['A:1', 'MASTER']);
+                        return 'hmip-etrv_1_master';
+                    }
+                    return (defaultAnswers['HmIP-RF'] as Answer)(method, params);
+                },
+            },
+        });
+        h.calls.length = 0;
+        expect(await h.backend.request('paramset.id', 'HmIP-RF', 'A:1')).toBe('hmip-etrv_1_master');
+        expect(await h.backend.request('paramset.id', 'HmIP-RF', 'A:1')).toBe('hmip-etrv_1_master');
+        expect(await h.backend.request('paramset.id', 'HmIP-RF', 'B:1')).toBe('');
+        expect(await h.backend.request('paramset.id', 'HmIP-RF', 'B:1')).toBe('');
+        expect(h.calls.filter((call) => call.method === 'getParamsetId')).toHaveLength(2);
+        await h.backend.stop();
+    });
+
     it('opens the install mode in every variant', async () => {
         const h = await harness();
         h.calls.length = 0;

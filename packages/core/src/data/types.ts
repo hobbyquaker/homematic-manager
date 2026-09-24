@@ -151,6 +151,27 @@ export interface MasterMetadata {
     controls?: EasyControl[];
 }
 
+/**
+ * Task 64: a MASTER form the WebUI picks by the paramset id `getParamsetId(address, MASTER)` answers
+ * - a BidCos channel or device form (`easymodes/<paramid>.tcl`), an HmIP device-specific one
+ * (`easymodes/hmip/<paramid>.tcl`). It wins over the channel type's form, as in the WebUI.
+ */
+export interface MasterFormEntry {
+    /** The controls of the form, as `MasterMetadata.controls`; absent where the WebUI's form is its own code. */
+    controls?: EasyControl[];
+    /**
+     * The form shows the channel's own button - its "internal key" - as a link profile: the LINK
+     * paramset of the channel with itself as the peer, drawn with the profiles of `receiverType`.
+     */
+    internalKey?: {receiverType: string};
+}
+
+/** `master-forms.json`. */
+export interface MasterForms {
+    source?: string;
+    byParamsetId: Record<string, MasterFormEntry>;
+}
+
 export interface OptionPresetEntry {
     /** Literal label such as `5s`; `labelKey` refers to `Translations.uiLabels`. */
     label?: string;
@@ -214,6 +235,8 @@ export interface DataSource {
     deviceIcons(): Promise<DeviceIcons>;
     /** Task 62: the presets of each easy-mode time selector type; empty when the file is missing. */
     timeSelectors(): Promise<Record<string, TimeSelectorOption[]>>;
+    /** Task 64: the MASTER forms by paramset id; empty when the file is missing. */
+    masterForms(): Promise<Record<string, MasterFormEntry>>;
 }
 
 /**
@@ -228,6 +251,7 @@ export interface DataSource {
  *   translations/<language>.json       Translations
  *   device-icons.json                  DeviceIcons
  *   easymode-time-selectors.json       {source, types: Record<type, TimeSelectorOption[]>}
+ *   master-forms.json                  MasterForms
  */
 export const DATA_FILES = {
     manifest: 'manifest.json',
@@ -239,4 +263,5 @@ export const DATA_FILES = {
     translations: (language: Language) => `translations/${language}.json`,
     deviceIcons: 'device-icons.json',
     timeSelectors: 'easymode-time-selectors.json',
+    masterForms: 'master-forms.json',
 } as const;

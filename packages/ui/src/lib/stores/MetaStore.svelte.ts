@@ -89,9 +89,22 @@ export class MetaStore {
         return this.presets;
     }
 
-    /** The MASTER view of a channel type: order, visibility, presets and the failing rules. */
-    masterView(channelType: string, description: ParamsetDescription, values: Paramset = {}): Promise<MasterView> {
-        return this.engine.masterMetadataFor(channelType, description, values);
+    /**
+     * The MASTER view of a channel type: order, visibility, presets and the failing rules; with the
+     * form of `formId` (task 64, from {@link masterFormId}) over the channel type's where there is one.
+     */
+    masterView(
+        channelType: string,
+        description: ParamsetDescription,
+        values: Paramset = {},
+        formId = '',
+    ): Promise<MasterView> {
+        return this.engine.masterMetadataFor(channelType, description, values, formId);
+    }
+
+    /** Task 64: the MASTER form a `getParamsetId` answer names, `''` when the data has none for it. */
+    masterFormId(paramsetIdAnswer: string): Promise<string> {
+        return paramsetIdAnswer === '' ? Promise.resolve('') : this.engine.masterFormId(paramsetIdAnswer);
     }
 
     profilesFor(receiverType: string, senderType: string): Promise<LinkProfile[]> {

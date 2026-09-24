@@ -4,6 +4,7 @@ import type {
     DataSource,
     DeviceIcons,
     Language,
+    MasterFormEntry,
     MasterMetadata,
     OptionPreset,
     ReceiverProfiles,
@@ -74,6 +75,11 @@ export class TransportDataSource implements DataSource {
 
     async deviceIcons(): Promise<DeviceIcons> {
         return (await this.#file<DeviceIcons>(DATA_FILES.deviceIcons)) ?? {};
+    }
+
+    async masterForms(): Promise<Record<string, MasterFormEntry>> {
+        const file = await this.#file<{byParamsetId?: Record<string, MasterFormEntry>}>(DATA_FILES.masterForms);
+        return file?.byParamsetId ?? {};
     }
 
     async timeSelectors(): Promise<Record<string, TimeSelectorOption[]>> {

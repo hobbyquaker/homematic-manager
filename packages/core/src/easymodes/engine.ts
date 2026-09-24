@@ -85,6 +85,24 @@ export interface MasterView {
     readonly problems: readonly CrossValidationProblem[];
     /** Task 63: the CCU's MASTER form of the channel type, where the data has one. */
     readonly controls?: readonly EasyControl[];
+    /** Task 64: the form of this paramset id shows the channel's internal key as a link profile. */
+    readonly internalKey?: {readonly receiverType: string};
+}
+
+/**
+ * Task 64: the paramset id of a MASTER form, from what `getParamsetId` answered - as the WebUI's
+ * `getExistingParamId` reads it: a Tcl list (whitespace-separated), an entry `x=y` meaning `y`, and
+ * the first entry the data has a form for. `''` when none has one.
+ */
+export function resolveParamsetId(answer: string, known: Readonly<Record<string, unknown>>): string {
+    for (const word of answer.trim().split(/\s+/u)) {
+        const parts = word.split('=');
+        const id = parts.length === 2 ? (parts[1] ?? '') : word;
+        if (id !== '' && Object.prototype.hasOwnProperty.call(known, id)) {
+            return id;
+        }
+    }
+    return '';
 }
 
 /** B-59: how {@link EasyModeEngine.applyProfile} treats the values the link has now. */
@@ -229,12 +247,21 @@ export class EasyModeEngine {
      * parameters a `conditionalVisibility` rule hides at the current values marked invisible, the
      * option presets resolved, and the cross-validation rules evaluated.
      */
+    /** Task 64: which MASTER form of the data a `getParamsetId` answer names; `''` for none. */
+    async masterFormId(paramsetIdAnswer: string): Promise<string> {
+        return resolveParamsetId(paramsetIdAnswer, await this.#source.masterForms());
+    }
+
     async masterMetadataFor(
         channelType: string,
         description: ParamsetDescription,
         values: Paramset = {},
+        paramsetId = '',
     ): Promise<MasterView> {
         const metadata = (await this.#source.masterMetadata())[channelType];
+        // task 64: the form the WebUI picks by paramset id wins over the channel type's
+        const byId = paramsetId === '' ? undefined : (await this.#source.masterForms())[paramsetId];
+        const controls = byId?.controls ?? metadata?.controls;
         const presets = await this.#source.optionPresets();
         const rules = await this.#source.crossValidations();
 
@@ -251,7 +278,8 @@ export class EasyModeEngine {
         return {
             channelType,
             parameters,
-            ...(metadata?.controls ? {controls: metadata.controls} : {}),
+            ...(controls ? {controls} : {}),
+            ...(byId?.internalKey ? {internalKey: byId.internalKey} : {}),
             problems: rules
                 .filter((rule) => appliesTo(rule, description))
                 .filter((rule) => !holds(rule, values))

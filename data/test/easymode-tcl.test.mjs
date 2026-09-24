@@ -294,6 +294,24 @@ proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
         ]);
     });
 
+    it('reads a BidCos form keyed by paramset id: the kind before the parameter, and getComboBox (task 64)', () => {
+        const bidcos = String.raw`
+proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
+  set param BURST_RX
+  append HTML_PARAMS(separate_1) "<td>\${stringTableBurstRx}</td><td>[getCheckBox $DEVICE '$param' $ps($param) $prn]</td>"
+  set param AVERAGING
+  append HTML_PARAMS(separate_1) "<td>[getTextField $CHANNEL '$param' $ps($param) separate_$prn]</td>"
+  set param TX_THRESHOLD_POWER
+  append HTML_PARAMS(separate_1) [getComboBox $param $prn $special_input_id]
+}
+`;
+        expect(extractMasterControls(htmlParamsBody(bidcos) ?? '', new Map())).toEqual([
+            {kind: 'param', param: 'BURST_RX', labelKey: 'stringTableBurstRx'},
+            {kind: 'param', param: 'AVERAGING'},
+            {kind: 'param', param: 'TX_THRESHOLD_POWER'},
+        ]);
+    });
+
     it('decodes the %XX escapes of the WebUI language files', () => {
         const text = '    "stringTableKeyLongPressTimeOut" :  "Timeout f%FCr langen Tastendruck",\n';
         expect(parseLocalization(text, {percent: true})).toEqual({

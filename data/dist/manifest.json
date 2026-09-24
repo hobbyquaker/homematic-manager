@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-19T17:47:23.994Z",
+  "generatedAt": "2026-09-24T12:48:33.544Z",
   "sources": [
     {
       "name": "openccu-data/easymode_extract",
@@ -29,7 +29,7 @@
       "name": "webui/easymode-controls",
       "version": "OpenCCU 3.89.8.20260719 (/www/config/easymodes, /www/webui/js/lang)",
       "url": "https://github.com/hobbyquaker/homematic-manager/blob/master/data/scripts/easymode-controls.mjs",
-      "sha256": "f4afd152667b8497b7e32a0b6870a046ef488f8d6c6d540499285a5f6973f2c0"
+      "sha256": "5a366cc962732e8e06230be0bac8c57ddb4f4685f7b032fd356d668664aeaec5"
     },
     {
       "name": "homematic-manager/legacy-easymode-localization",

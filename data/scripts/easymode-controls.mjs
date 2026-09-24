@@ -47,6 +47,13 @@ if (!root || !source) {
 }
 
 const read = (file) => readFileSync(file, 'latin1');
+const isFile = (file) => {
+    try {
+        return statSync(file).isFile();
+    } catch {
+        return false;
+    }
+};
 const isDir = (file) => {
     try {
         return statSync(file).isDirectory();
@@ -189,7 +196,7 @@ const master = {};
 let masterControls = 0;
 const hmipDir = path.join(root, 'hmip');
 for (const file of isDir(hmipDir) ? readdirSync(hmipDir).sort() : []) {
-    // `hmip/<CHANNEL_TYPE>.tcl`; the lower-case files are keyed by a paramset id the app does not know
+    // `hmip/<CHANNEL_TYPE>.tcl`; the lower-case files are keyed by a paramset id, below (task 64)
     if (!/^[A-Z][A-Z0-9_]*\.tcl$/u.test(file)) continue;
     const text = read(path.join(hmipDir, file));
     const body = htmlParamsBody(text);
@@ -203,6 +210,78 @@ for (const file of isDir(hmipDir) ? readdirSync(hmipDir).sort() : []) {
     masterControls += controls.length;
 }
 
+// ------------------------------------------------------------------ MASTER forms by paramset id (task 64)
+// The WebUI picks a MASTER form by the paramset id `getParamsetId(address, MASTER)` answers
+// (ic_deviceparameters.cgi): `hmip/<paramid>.tcl` first, then `easymodes/<paramid>.tcl` - the BidCos
+// forms and the device-level ones - and only for HmIP the channel type's `hmip/<TYPE>.tcl` above.
+// A form that sets `internalKey` shows the channel's own button as a link profile instead of (or
+// beside) its MASTER parameters: the channel's LINK paramset with itself as the peer, drawn with
+// the link easymode it sources (`easymodes/<RECEIVER>/<SENDER>.tcl`). A `<paramid>Params.tcl` is
+// the expert parameters the WebUI shows beside that internal key.
+/** Procedures of every `etc/` file a form sources, for the calls into them (`getMaintenanceFloorHeating $chn`). */
+const etcProcs = (text) => {
+    const procs = new Map(dialogs);
+    for (const match of text.matchAll(/easymodes\/etc\/(\w+)\.tcl/gu)) {
+        const file = path.join(root, 'etc', `${match[1]}.tcl`);
+        try {
+            for (const [name, proc] of parseProcs(read(file))) procs.set(name, proc);
+        } catch {
+            // a file the form sources but this tree lacks: its calls stay unresolved
+        }
+    }
+    return procs;
+};
+/** @type {Record<string, {controls?: object[], internalKey?: {receiverType: string}}>} */
+const byParamsetId = {};
+let byIdControls = 0;
+const formOf = (text) => {
+    const body = htmlParamsBody(text);
+    if (body === undefined) return [];
+    return extractMasterControls(body, new Map([...etcProcs(text), ...parseProcs(text)])).map(
+        ({labelKey, ...control}) => {
+            const label = masterLabel(labelKey);
+            return {...control, ...(label === undefined ? {} : {label})};
+        },
+    );
+};
+const paramIdFiles = [
+    // BidCos and device-level forms first, so the HmIP file of the same id wins, as in the WebUI
+    ...readdirSync(root)
+        .filter((file) => /^[a-z][A-Za-z0-9_.-]*\.tcl$/u.test(file) && !file.endsWith('Params.tcl'))
+        .sort()
+        .map((file) => path.join(root, file)),
+    ...(isDir(hmipDir) ? readdirSync(hmipDir) : [])
+        .filter((file) => /^[a-z][A-Za-z0-9_.-]*\.tcl$/u.test(file))
+        .sort()
+        .map((file) => path.join(hmipDir, file)),
+];
+for (const file of paramIdFiles) {
+    const id = path.basename(file, '.tcl');
+    // the link easymodes (`*_ch_link.tcl`, `linkHmIP_*`) and the helpers are not MASTER forms
+    if (/_link$|^linkHmIP_|^em_common$|^NO_PROFILE$|_intkey$/u.test(id)) continue;
+    const text = read(file);
+    /** @type {{controls?: object[], internalKey?: {receiverType: string}}} */
+    const entry = {};
+    const intKey = /^\s*set internalKey\b/mu.test(text)
+        ? /easymodes\/([A-Z][A-Z0-9_]*)\/[A-Za-z0-9_]+\.tcl/u.exec(text)?.[1]
+        : undefined;
+    if (intKey !== undefined) entry.internalKey = {receiverType: intKey};
+    else if (/^\s*set internalKey\b/mu.test(text)) entry.internalKey = {receiverType: ''};
+    // the dual-white controllers keep their internal key in `<paramid>_intkey.tcl`, which the WebUI
+    // sources beside the form (setInternalDeviceKey)
+    const intKeyFile = path.join(path.dirname(file), `${id}_intkey.tcl`);
+    if (entry.internalKey === undefined && isFile(intKeyFile)) {
+        const receiverType = /easymodes\/([A-Z][A-Z0-9_]*)\/[A-Za-z0-9_]+\.tcl/u.exec(read(intKeyFile))?.[1];
+        if (receiverType !== undefined) entry.internalKey = {receiverType};
+    }
+    const paramsFile = path.join(path.dirname(file), `${id}Params.tcl`);
+    const controls = [...formOf(text), ...(entry.internalKey && isFile(paramsFile) ? formOf(read(paramsFile)) : [])];
+    if (controls.length > 0) entry.controls = controls;
+    if (entry.controls === undefined && entry.internalKey === undefined) continue;
+    byParamsetId[id] = entry;
+    byIdControls += controls.length;
+}
+
 const out = {
     $comment:
         'The CCU easy mode forms (task 62, D-54), extracted by scripts/easymode-controls.mjs from the WebUI easymode TCL; HMSL, see NOTICE.md.',
@@ -210,10 +289,12 @@ const out = {
     timeSelectors: sortKeys(timeSelectors),
     receivers: sortKeys(receivers),
     master: sortKeys(master),
+    masterByParamsetId: sortKeys(byParamsetId),
 };
 const target = path.join(dataDir, 'extracted', 'easymode_controls.json.gz');
 writeFileSync(target, gzipSync(`${JSON.stringify(out)}\n`, {level: 9}));
 console.log(
     `${files} easymodes, ${profiles} profile forms, ${controls} controls, ${Object.keys(timeSelectors).length} time selector types; ` +
-        `${Object.keys(master).length} MASTER forms, ${masterControls} controls -> ${path.relative(process.cwd(), target)}`,
+        `${Object.keys(master).length} MASTER forms, ${masterControls} controls; ` +
+        `${Object.keys(byParamsetId).length} by paramset id, ${byIdControls} controls -> ${path.relative(process.cwd(), target)}`,
 );

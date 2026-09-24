@@ -89,6 +89,7 @@ describe('dist layout', () => {
         expect(json).toContain('cross-validations.json');
         expect(json).toContain('device-icons.json');
         expect(json).toContain('easymode-time-selectors.json');
+        expect(json).toContain('master-forms.json');
         expect(json).toContain('translations/de.json');
         expect(json).toContain('translations/en.json');
         expect(json).toContain('translations/tr.json');
@@ -105,6 +106,7 @@ describe('dist layout', () => {
                     'cross-validations.json',
                     'device-icons.json',
                     'easymode-time-selectors.json',
+                    'master-forms.json',
                 ].includes(file),
         );
         expect(unexpected).toEqual([]);
@@ -242,6 +244,30 @@ describe('link profiles', () => {
                 }
             }
         }
+    });
+});
+
+describe('the MASTER forms by paramset id (task 64)', () => {
+    const forms = JSON.parse(readFileSync(path.join(distDir, 'master-forms.json'), 'utf8'));
+
+    it('keys BidCos, device-level and HmIP forms by paramset id, and names the internal-key ones', () => {
+        const byId = forms.byParamsetId;
+        expect(Object.keys(byId).length).toBeGreaterThanOrEqual(70);
+        for (const [id, entry] of Object.entries(byId)) {
+            expect(id).toMatch(/^[a-z]/u);
+            expect(entry.controls !== undefined || entry.internalKey !== undefined).toBe(true);
+            for (const control of entry.controls ?? []) expect(['time', 'param', 'subset']).toContain(control.kind);
+            if (entry.internalKey !== undefined) expect(typeof entry.internalKey.receiverType).toBe('string');
+        }
+        // a BidCos channel form, a device-level form, an HmIP device-specific one
+        expect(byId.cc_tc_ch_master.controls.map((control) => control.param)).toContain('DECALCIFICATION_DAY');
+        expect(byId.cc_rt_dev_master.controls.length).toBeGreaterThan(0);
+        expect(byId['hmip-etrv_1_master'].controls.length).toBeGreaterThan(0);
+        // the internal keys: the channel's own button as a link profile of its receiver type
+        expect(byId.dimmer_ch_master.internalKey).toEqual({receiverType: 'DIMMER'});
+        expect(byId.switch_ch_master.internalKey).toEqual({receiverType: 'SWITCH'});
+        // a file that only unsets the flag has no internal key
+        expect(byId.power_ch_master.internalKey).toBeUndefined();
     });
 });
 

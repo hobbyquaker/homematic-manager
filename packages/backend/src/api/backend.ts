@@ -230,6 +230,8 @@ export class Backend {
      * swallows packets takes 30 s); a store that has not started by then never will.
      */
     #metaStarting: Promise<void> | undefined;
+    /** Task 64: `getParamsetId` answers by `<interface>|<address>`; emptied on every connect. */
+    readonly #paramsetIds = new Map<string, string>();
     #serviceMessageTimer: ReturnType<typeof setInterval> | undefined;
     #hmipSweepTimer: ReturnType<typeof setTimeout> | undefined;
     #hmipSweepRunning = false;
@@ -620,6 +622,8 @@ export class Backend {
 
             case 'paramset.get':
                 return this.#getParamset(p[0], p[1], p[2]);
+            case 'paramset.id':
+                return this.#paramsetId(p[0], p[1]);
             case 'paramset.description':
                 return this.#describe(p[0], p[1], p[2]);
             case 'paramset.put':
@@ -747,6 +751,7 @@ export class Backend {
 
     async #connectNow(): Promise<void> {
         const connection = this.#config.connection;
+        this.#paramsetIds.clear();
         this.#noServiceMessages.clear();
         this.#serviceMessageFailures.clear();
         this.#listedMethods.clear();
@@ -1376,6 +1381,32 @@ export class Backend {
     /*
      * devices
      */
+
+    /**
+     * Task 64: `getParamsetId(address, MASTER)`, once per address and connection. An interface
+     * without the method (CUxD, a custom one) or a refusal is `''`, remembered as well, so the
+     * dialog falls back to the channel type without asking again.
+     */
+    async #paramsetId(interfaceName: string, address: string): Promise<string> {
+        const key = `${interfaceName}|${address}`;
+        const known = this.#paramsetIds.get(key);
+        if (known !== undefined) {
+            return known;
+        }
+        let id: string;
+        try {
+            const answer = await this.#read(interfaceName, 'getParamsetId', [address, 'MASTER']);
+            id = typeof answer === 'string' ? answer : '';
+        } catch (error) {
+            // a fault is the interface's answer and is kept; no answer at all is asked again
+            if (error instanceof BackendError && error.kind === 'connection') {
+                return '';
+            }
+            id = '';
+        }
+        this.#paramsetIds.set(key, id);
+        return id;
+    }
 
     async #listDevices(interfaceName: string, options?: {refresh?: boolean}): Promise<DeviceDescription[]> {
         if (options?.refresh === true || !this.#caches.devices.has(interfaceName)) {
@@ -2141,6 +2172,7 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'meta.export',
     'meta.import',
     'paramset.get',
+    'paramset.id',
     'paramset.description',
     'paramset.put',
     'paramset.putLink',

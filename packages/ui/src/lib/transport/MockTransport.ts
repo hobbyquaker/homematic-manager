@@ -277,6 +277,8 @@ export class MockTransport implements Transport {
         this.respond('rpc.call', (_interfaceName, method, params) => ({method, params}));
         this.respond('paramset.description', (_interfaceName, address, paramset) => demoDescription(address, paramset));
         this.respond('paramset.get', (_interfaceName, address, paramset) => demoParamset(address, paramset));
+        // task 64: the demo's channels have no paramset id of a form the data knows
+        this.result('paramset.id', '');
         this.respond('paramset.put', (interfaceName, addresses, paramset, values) =>
             addresses.map((address) => ({
                 interfaceName,

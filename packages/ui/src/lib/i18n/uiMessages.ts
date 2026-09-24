@@ -106,6 +106,8 @@ export const UI_MESSAGES: MessageCatalogue = {
         en: {one: '{count} detector', other: '{count} detectors'},
     },
     'New smoke group': {de: 'Neue Rauchmeldergruppe', en: 'New smoke group'},
+    // Task 64: the MASTER dialog's button to the channel's own button, a link profile of the channel with itself
+    'Internal key…': {de: 'Interne Taste…', en: 'Internal key…'},
     // B-64: under the inbox button of the pairing dialog
     'The names reach the CCU once the device is confirmed in the ReGa inbox.': {
         de: 'Die Namen kommen auf der CCU an, sobald das Gerät im ReGa-Posteingang bestätigt ist.',

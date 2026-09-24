@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 
 import {describe, expect, it} from 'vitest';
 
-import {EasyModeEngine, EXPERT_PROFILE_ID, resolveAlias, UI_HINT} from './engine.js';
+import {EasyModeEngine, EXPERT_PROFILE_ID, resolveAlias, resolveParamsetId, UI_HINT} from './engine.js';
 import {MemoryDataSource, type MemoryData} from '../data/memory.js';
 import type {LinkProfile, ReceiverProfiles} from '../data/types.js';
 import type {ParamsetDescription} from '../paramset/description.js';
@@ -291,6 +291,50 @@ describe('detectProfile', () => {
 
     it('never picks the expert profile by matching, because it constrains nothing', async () => {
         expect(engine.detectProfile({}, await engine.profilesFor('DIMMER', 'KEY'))).toBeUndefined();
+    });
+});
+
+describe('MASTER forms by paramset id (task 64)', () => {
+    const description: ParamsetDescription = {
+        BURST_RX: {TYPE: 'BOOL', OPERATIONS: 3},
+        LOGGING: {TYPE: 'BOOL', OPERATIONS: 3},
+    };
+    const byId = new EasyModeEngine(
+        new MemoryDataSource({
+            masterMetadata: {
+                SWITCH: {channelType: 'SWITCH', controls: [{kind: 'param', param: 'LOGGING'}]},
+            },
+            masterForms: {
+                cc_rt_dev_master: {controls: [{kind: 'param', param: 'BURST_RX'}]},
+                switch_ch_master: {internalKey: {receiverType: 'SWITCH'}},
+            },
+        }),
+    );
+
+    it("reads getParamsetId's answer as the WebUI does: a list, x=y, the first id with a form", () => {
+        const known = {cc_rt_dev_master: {}, 'hmip-etrv_1_master': {}};
+        expect(resolveParamsetId('cc_rt_dev_master', known)).toBe('cc_rt_dev_master');
+        expect(resolveParamsetId('unknown_master cc_rt_dev_master', known)).toBe('cc_rt_dev_master');
+        expect(resolveParamsetId('HmIP-eTRV=hmip-etrv_1_master', known)).toBe('hmip-etrv_1_master');
+        expect(resolveParamsetId('', known)).toBe('');
+        expect(resolveParamsetId('nothing_known', known)).toBe('');
+        // an inherited property of the object is no form
+        expect(resolveParamsetId('toString', known)).toBe('');
+    });
+
+    it('takes the form of the paramset id over the channel type, and says where there is an internal key', async () => {
+        expect(await byId.masterFormId('cc_rt_dev_master')).toBe('cc_rt_dev_master');
+        const view = await byId.masterMetadataFor('SWITCH', description, {}, 'cc_rt_dev_master');
+        expect(view.controls).toEqual([{kind: 'param', param: 'BURST_RX'}]);
+        expect(view.internalKey).toBeUndefined();
+
+        // no id, or one with no form: the channel type's form, as before
+        expect((await byId.masterMetadataFor('SWITCH', description, {})).controls).toEqual([
+            {kind: 'param', param: 'LOGGING'},
+        ]);
+        const intKey = await byId.masterMetadataFor('SWITCH', description, {}, 'switch_ch_master');
+        expect(intKey.controls).toEqual([{kind: 'param', param: 'LOGGING'}]);
+        expect(intKey.internalKey).toEqual({receiverType: 'SWITCH'});
     });
 });
 

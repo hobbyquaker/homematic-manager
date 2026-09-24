@@ -12,6 +12,7 @@ import type {
     DeviceIcons,
     Language,
     MasterMetadata,
+    MasterFormEntry,
     OptionPreset,
     ReceiverProfiles,
     ReceiverTypeAliases,
@@ -31,6 +32,7 @@ export interface MemoryData {
     readonly translations?: Partial<Record<Language, Translations>>;
     readonly deviceIcons?: DeviceIcons;
     readonly timeSelectors?: Readonly<Record<string, TimeSelectorOption[]>>;
+    readonly masterForms?: Readonly<Record<string, MasterFormEntry>>;
 }
 
 /** A `DataSource` over data that is already in memory. */
@@ -75,5 +77,9 @@ export class MemoryDataSource implements DataSource {
 
     timeSelectors(): Promise<Record<string, TimeSelectorOption[]>> {
         return Promise.resolve({...this.#data.timeSelectors});
+    }
+
+    masterForms(): Promise<Record<string, MasterFormEntry>> {
+        return Promise.resolve({...this.#data.masterForms});
     }
 }

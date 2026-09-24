@@ -52,7 +52,7 @@ const aliases = readUpstreamJson('profiles/_receiver_type_aliases.json');
 // task 62 (D-54): the CCU easy mode's forms, extracted from the WebUI by scripts/easymode-controls.mjs
 const easymodeControlsFile = path.join(dataDir, 'extracted', 'easymode_controls.json.gz');
 const easymodeControls = existsSync(easymodeControlsFile)
-    ? /** @type {{source: string, timeSelectors: Record<string, object[]>, receivers: Record<string, Record<string, Record<string, object[]>>>, master?: Record<string, object[]>}} */ (
+    ? /** @type {{source: string, timeSelectors: Record<string, object[]>, receivers: Record<string, Record<string, Record<string, object[]>>>, master?: Record<string, object[]>, masterByParamsetId?: Record<string, object>}} */ (
           JSON.parse(gunzipSync(readFileSync(easymodeControlsFile)).toString('utf8'))
       )
     : undefined;
@@ -296,11 +296,20 @@ for (const [channelType, meta] of Object.entries(easymode.channel_metadata)) {
 }
 
 // task 63 (D-55): the CCU's MASTER form of each HmIP channel type, extracted from the WebUI
-let masterForms = 0;
+let masterFormCount = 0;
 for (const [channelType, controls] of Object.entries(easymodeControls?.master ?? {})) {
     masterMetadata[channelType] = {...(masterMetadata[channelType] ?? {channelType}), controls};
-    masterForms += 1;
+    masterFormCount += 1;
 }
+
+// task 64: the MASTER forms the WebUI picks by paramset id (`getParamsetId`), and which of them show
+// the channel's internal key; the app looks here first and at the channel type after
+const masterForms = {
+    $comment:
+        'The CCU MASTER forms keyed by paramset id (task 64), extracted by scripts/easymode-controls.mjs from the WebUI easymode TCL; HMSL, see NOTICE.md.',
+    ...(easymodeControls === undefined ? {} : {source: easymodeControls.source}),
+    byParamsetId: sortKeys(easymodeControls?.masterByParamsetId ?? {}),
+};
 
 /** @type {Record<string, object>} */
 const optionPresets = {};
@@ -485,6 +494,7 @@ for (const [receiverType, value] of Object.entries(receiverProfiles)) {
 }
 await write('receiver-type-aliases.json', sortKeys(aliases));
 await write('master-metadata.json', sortKeys(masterMetadata));
+await write('master-forms.json', masterForms);
 await write('option-presets.json', sortKeys(optionPresets));
 await write('cross-validations.json', crossValidations);
 if (easymodeControls) {
@@ -520,7 +530,8 @@ console.log(
     `dist/: ${files} files, ${(bytes / 1024).toFixed(0)} KiB, ${receiverTypes.length} receiver types, ` +
         `${profileCount} link profiles (${profilesFromEasymodeOnly} only in easymode_extract, ` +
         `${profilesWithControls} with the CCU easy mode's form), ` +
-        `${Object.keys(masterMetadata).length} MASTER metadata entries (${masterForms} with the CCU's form), ` +
+        `${Object.keys(masterMetadata).length} MASTER metadata entries (${masterFormCount} with the CCU's form), ` +
+        `${Object.keys(masterForms.byParamsetId).length} MASTER forms by paramset id, ` +
         `${Object.keys(optionPresets).length} option presets, ${crossValidations.length} cross validations`,
 );
 if (warnings.length > 0) {

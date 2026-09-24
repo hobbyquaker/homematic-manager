@@ -722,3 +722,75 @@ describe('the CCU MASTER form (task 63, D-55)', () => {
         expect(screen.queryByTestId('paramset-expert')).toBeNull();
     });
 });
+
+/**
+ * Task 64: the WebUI picks a MASTER form by the paramset id the interface reports
+ * (`getParamsetId`) before the channel type, and some BidCos forms show the channel's own button -
+ * its internal key - as a link profile of the channel with itself.
+ */
+describe('the MASTER form by paramset id (task 64)', () => {
+    let transport: MockTransport;
+    const CHANNEL = 'MEQ0123456:1';
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+        const demoFile = transport.handlerFor('data.file');
+        transport.respond('data.file', (path) =>
+            path === 'data/master-forms.json'
+                ? {
+                      byParamsetId: {
+                          switch_ch_master: {
+                              controls: [{kind: 'param', param: 'LOGGING'}],
+                              internalKey: {receiverType: 'SWITCH'},
+                          },
+                      },
+                  }
+                : demoFile(path),
+        );
+        transport.respond('paramset.id', (_interfaceName, address) => (address === CHANNEL ? 'switch_ch_master' : ''));
+    });
+
+    async function openSwitch(): Promise<void> {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
+        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(screen.getByTestId(`paramset-${CHANNEL}-MASTER`));
+    }
+
+    it("shows the form the paramset id names, and asks for the id with the channel's address", async () => {
+        await openSwitch();
+        const form = await screen.findByTestId('paramset-easy-form');
+        expect(within(form).getByTestId('param-LOGGING')).toBeTruthy();
+        expect(screen.queryByTestId('param-TRANSMIT_TRY_MAX')).toBeNull();
+        expect(
+            transport.calls.filter((call) => call.method === 'paramset.id').map((call) => call.params),
+        ).toContainEqual(['BidCos-RF', CHANNEL]);
+    });
+
+    it('opens the internal key as the link of the channel with itself, without a sender part', async () => {
+        await openSwitch();
+        const button = await screen.findByTestId('paramset-internal-key');
+        expect(button.textContent).toContain('Interne Taste');
+        await fireEvent.click(button);
+        await waitFor(() => {
+            expect(
+                transport.calls.some(
+                    (call) =>
+                        call.method === 'paramset.get' && call.params[1] === CHANNEL && call.params[2] === CHANNEL,
+                ),
+            ).toBe(true);
+        });
+        expect(screen.queryByTestId('link-sender-toggle')).toBeNull();
+    });
+
+    it('keeps the channel type and offers no internal key where the interface has no paramset id', async () => {
+        transport.result('paramset.id', '');
+        await openSwitch();
+        await waitFor(() => {
+            expect(document.querySelectorAll('[data-testid^="param-"]').length).toBeGreaterThan(0);
+        });
+        expect(screen.queryByTestId('paramset-easy-form')).toBeNull();
+        expect(screen.queryByTestId('paramset-internal-key')).toBeNull();
+        expect(screen.getByTestId('param-TRANSMIT_TRY_MAX')).toBeTruthy();
+    });
+});

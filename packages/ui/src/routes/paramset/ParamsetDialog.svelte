@@ -20,6 +20,7 @@
         type WritePreview,
     } from '../../lib/util/paramsetForm.js';
 
+    import LinkParamsetDialog from '../links/LinkParamsetDialog.svelte';
     import EasyForm from './EasyForm.svelte';
     import DeviceEditors from './editors/DeviceEditors.svelte';
     import ParameterRow from './ParameterRow.svelte';
@@ -43,6 +44,10 @@
     let original = $state<Paramset>({});
     let edited = $state<Record<string, unknown>>({});
     let view = $state<MasterView | undefined>(undefined);
+    /** Task 64: the MASTER form the paramset id names (`getParamsetId`), `''` for the channel type's. */
+    let formId = $state('');
+    /** Task 64: the channel's internal key, a link of the channel with itself, in the link dialog. */
+    let internalKeyOpen = $state(false);
     let targets = $state<string[]>([]);
     let writeAll = $state(false);
     let showHidden = $state(false);
@@ -295,9 +300,32 @@
             return;
         }
         const values = merged();
-        void stores.meta.masterView(channelType, current, values).then((result) => {
+        const id = formId;
+        void stores.meta.masterView(channelType, current, values, id).then((result) => {
             view = result;
         });
+    });
+
+    /**
+     * Task 64: the WebUI picks a MASTER form by the paramset id the interface reports, before the
+     * channel type. Asked once per opened address; an interface without `getParamsetId` answers
+     * `''`, and the channel type's form stays.
+     */
+    $effect(() => {
+        if (!open || paramset !== 'MASTER' || address === '') {
+            formId = '';
+            return;
+        }
+        const request = `${interfaceName}|${address}`;
+        formId = '';
+        void stores.paramsets
+            .paramsetId(interfaceName, address)
+            .then((answer) => stores.meta.masterFormId(answer))
+            .then((id) => {
+                if (`${interfaceName}|${address}` === request) {
+                    formId = id;
+                }
+            });
     });
 
     /** The values as they stand: what the device answered, with the edits on top. */
@@ -506,6 +534,15 @@
                     <span>{t('Show the raw parameters as well')}</span>
                 </label>
             {/if}
+            {#if view?.internalKey}
+                <!-- Task 64: the channel's own button, as the WebUI shows it - a link profile of the channel with itself -->
+                <button
+                    type="button"
+                    class="hmm-button"
+                    data-testid="paramset-internal-key"
+                    onclick={() => (internalKeyOpen = true)}>{t('Internal key…')}</button
+                >
+            {/if}
             {#if fields.some((field) => !field.visible) && !form}
                 <label class="hmm-paramset-option">
                     <input type="checkbox" bind:checked={showHidden} data-testid="paramset-show-hidden" />
@@ -669,6 +706,11 @@
         countText={t('{count} calls will be made', {}, suppressPreview?.entries.length ?? 0)}
         onconfirm={() => void applySuppression()}
     />
+{/if}
+
+<!-- Task 64: mounted while it is open only; the link dialog reads the channel's LINK paramset with itself -->
+{#if internalKeyOpen}
+    <LinkParamsetDialog bind:open={internalKeyOpen} sender={address} receiver={address} />
 {/if}
 
 <style>

@@ -159,6 +159,15 @@ export class ParamsetStore {
     }
 
     /** Loads description and values together - what opening the dialog needs. */
+    /** Task 64: `getParamsetId(address, MASTER)`; `''` where the interface has none or on a failure. */
+    async paramsetId(interfaceName: string, address: string): Promise<string> {
+        try {
+            return await this.#transport.request('paramset.id', interfaceName, address);
+        } catch {
+            return '';
+        }
+    }
+
     async open(
         interfaceName: string,
         address: string,

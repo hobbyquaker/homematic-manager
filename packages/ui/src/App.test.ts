@@ -358,6 +358,55 @@ describe('App shell', () => {
         expect(logout.getAttribute('href')).toBe('logout');
     });
 
+    /** Task 71: the page in openccu-lite's shell - a frame of the system's origin with the shell's theme on its URL. */
+    function shellFrame(theme: string): Window {
+        const parent = {location: {origin: 'http://system.local'}};
+        const fake: Record<string, unknown> = {
+            location: {origin: 'http://system.local', search: `?theme=${theme}&lang=de`},
+            parent,
+            top: parent,
+            addEventListener: () => undefined,
+            removeEventListener: () => undefined,
+        };
+        fake['self'] = fake;
+        const win = fake as unknown as Window;
+        return win;
+    }
+
+    it("leaves user, logout and theme to openccu-lite's shell around it, and follows the shell's theme (task 71)", async () => {
+        transport.result('session.info', {user: 'Admin', level: 8});
+        const router = fakeRouter('');
+        const stores = createStores(transport, {
+            location: router.location,
+            onHashChange: router.onHashChange,
+            storage: new MemoryStorage(),
+            shellWindow: shellFrame('dark'),
+        });
+        render(App, {props: {stores}});
+        await stores.start();
+        await waitFor(() => expect(stores.app.loading).toBe(false));
+
+        expect(stores.shell.embedded).toBe(true);
+        expect(screen.queryByTestId('session-user')).toBeNull();
+        expect(screen.queryByTestId('session-logout')).toBeNull();
+        expect(screen.queryByTestId('theme-switch')).toBeNull();
+        // the rest of the header stays
+        expect(screen.getByTestId('settings-button')).toBeTruthy();
+        expect(screen.getByTestId('rpclog-toggle')).toBeTruthy();
+        await waitFor(() => expect(document.documentElement.getAttribute('data-theme')).toBe('dark'));
+        // the app's own choice is left alone for the day it is opened on its own
+        expect(stores.app.theme).toBe('system');
+    });
+
+    it('keeps all three outside the shell, on openccu-lite in a tab of its own as on a CCU (task 71)', async () => {
+        transport.result('session.info', {user: 'Admin', level: 8});
+        const {stores} = await mountApp(transport);
+        expect(stores.shell.embedded).toBe(false);
+        expect(screen.getByTestId('session-user')).toBeTruthy();
+        expect(screen.getByTestId('session-logout')).toBeTruthy();
+        expect(screen.getByTestId('theme-switch')).toBeTruthy();
+    });
+
     it('degrades to no session when the host does not know the method at all', async () => {
         transport.fail('session.info', {message: 'unknown API method', kind: 'config'});
         const {stores} = await mountApp(transport);

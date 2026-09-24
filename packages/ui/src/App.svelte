@@ -167,16 +167,19 @@
         document.documentElement.lang = stores.i18n.language;
     });
 
+    /** Task 71: inside openccu-lite's shell the shell's theme applies, and the shell's toggle changes it. */
+    const theme = $derived(stores.shell.theme ?? app.theme);
+
     $effect(() => {
         const root = document.documentElement;
-        if (app.theme === 'system') {
+        if (theme === 'system') {
             root.removeAttribute('data-theme');
         } else {
-            root.setAttribute('data-theme', app.theme);
+            root.setAttribute('data-theme', theme);
         }
         // The host paints the window chrome and the native menus; it has to follow the same choice
         // (D-22). Without a host this resolves and does nothing.
-        void stores.host.setTheme(app.theme);
+        void stores.host.setTheme(theme);
     });
 
     /** The application menu cannot reach into the page, so it asks (task 11's `menu.action`). */
@@ -248,7 +251,8 @@
         <Tabs {tabs} active={app.tab} label={t('Devices')} onselect={(id) => app.setTab(id as TabId)} />
 
         <div class="hmm-header-actions">
-            {#if app.session}
+            <!-- Task 71: inside openccu-lite's shell the shell has the user, the logout and the theme -->
+            {#if app.session && !stores.shell.embedded}
                 <!--
                     D-32: only the CCU addon with `--auth-mode rega` ever has a session, and only
                     then are these two here at all. The link is relative to the page's own
@@ -281,12 +285,14 @@
                 testId="rpclog-toggle"
                 onclick={() => (app.rpcLogOpen = !app.rpcLogOpen)}
             />
-            <ThemeSwitch
-                theme={app.theme}
-                labelFor={(theme) => t(`Theme: ${theme}`)}
-                testId="theme-switch"
-                onclick={() => app.cycleTheme()}
-            />
+            {#if !stores.shell.embedded}
+                <ThemeSwitch
+                    theme={app.theme}
+                    labelFor={(choice) => t(`Theme: ${choice}`)}
+                    testId="theme-switch"
+                    onclick={() => app.cycleTheme()}
+                />
+            {/if}
             <!--
                 D-36, task 22: the language switch is not here any more. It is a setting a user
                 touches once, and it sits in the settings dialog with the rest of them; the header

@@ -19,6 +19,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   key…_ button there: the channel's own button, as a link profile of the channel with itself, in the link dialog -
   what the WebUI shows on the same page. Forms that are the WebUI's own JavaScript keep the full parameter list, and
   an interface without `getParamsetId` keeps the channel type's form.
+- **Inside openccu-lite's menu the header has no user, logout and theme buttons of its own.** Where the addon page
+  is shown in the system's own frame, the system offers all three already; the Homematic Manager follows the system's
+  light or dark theme there instead. Opened on its own - in a tab of its own, on a CCU, as the desktop app - it keeps
+  every button.
 
 ### Fixed
 

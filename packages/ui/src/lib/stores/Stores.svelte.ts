@@ -20,6 +20,7 @@ import {NoticesStore} from './NoticesStore.svelte.js';
 import {ParamsetStore} from './ParamsetStore.svelte.js';
 import {RadioStore} from './RadioStore.svelte.js';
 import {ServiceMessagesStore} from './ServiceMessagesStore.svelte.js';
+import {ShellEmbedding} from './ShellEmbedding.svelte.js';
 import {SmokeGroupsStore} from './SmokeGroupsStore.svelte.js';
 import {TaxonomyStore} from './TaxonomyStore.svelte.js';
 import {UnreachStore} from './UnreachStore.svelte.js';
@@ -35,6 +36,8 @@ export interface StoresOptions extends AppStoreOptions {
     readonly hostScope?: Record<string, unknown> | undefined;
     /** The device metadata of task 9; by default read over the transport's `data.file`. */
     readonly dataSource?: DataSource | undefined;
+    /** Task 71: the window whose frame and messages tell whether openccu-lite's shell is around it. */
+    readonly shellWindow?: Window | undefined;
 }
 
 /**
@@ -71,6 +74,8 @@ export class Stores {
     readonly console: ConsoleStore;
     /** Issue #124: what is staged and not written yet. */
     readonly changeSet: ChangeSetStore;
+    /** Task 71: inside openccu-lite's shell, and the shell's theme. */
+    readonly shell: ShellEmbedding;
     /** B-42: set once `start()` has selected the first interface. */
     #started = false;
 
@@ -107,6 +112,7 @@ export class Stores {
                 void this.#interfaceSelected(isStoreInterface(previous));
             }
         });
+        this.shell = 'shellWindow' in options ? new ShellEmbedding(options.shellWindow) : new ShellEmbedding();
         this.host = new HostStore({
             ...(options.hostBridge === undefined ? {} : {bridge: options.hostBridge}),
             ...(options.hostScope === undefined ? {} : {scope: options.hostScope}),
@@ -211,6 +217,7 @@ export class Stores {
     }
 
     dispose(): void {
+        this.shell.dispose();
         this.radio.dispose();
         this.host.dispose();
         this.rpcLog.dispose();

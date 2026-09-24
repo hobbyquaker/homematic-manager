@@ -21,6 +21,7 @@
     "session_header": true
   },
   "runtime": {
+    "daemon": true,
     "needs": ["rfd", "hmipserver"],
     "start": "early",
     "data_dirs": ["/usr/local/hmm"],

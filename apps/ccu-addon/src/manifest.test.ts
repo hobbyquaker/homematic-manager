@@ -27,6 +27,8 @@ describe('the openccu-lite manifest', () => {
         expect(manifest.ui.session_header).toBe(true);
         expect(manifest.runtime.needs).toEqual(['rfd', 'hmipserver']);
         expect(manifest.runtime.start).toBe('early');
+        // the server keeps running after the rc.d start: an empty unit is a server that ended
+        expect(manifest.runtime.daemon).toBe(true);
         expect(manifest.runtime.data_dirs).toEqual(['/usr/local/hmm']);
         expect(manifest.runtime.root).toBeUndefined();
         // user-facing text carries no internal ids

@@ -400,6 +400,18 @@
         return event.target instanceof Element && event.target.closest(CONTROL_SELECTOR) !== null;
     }
 
+    /**
+     * B-40: the fields a key edits text or picks a value in - a column filter above all. The arrow
+     * keys, Home and End move the cursor there, so the grid leaves them alone; from a button in a
+     * cell they still move the row focus.
+     */
+    const TEXT_ENTRY_SELECTOR = 'input, select, textarea, [contenteditable="true"]';
+    const NAVIGATION_KEYS = new Set(['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End']);
+
+    function fromTextEntry(event: Event): boolean {
+        return event.target instanceof Element && event.target.closest(TEXT_ENTRY_SELECTOR) !== null;
+    }
+
     function renamable(row: FlatRow<T> | undefined): row is FlatRow<T> {
         return row?.kind === 'row' && onrename !== undefined && (canRename?.(row.row) ?? true);
     }
@@ -466,6 +478,9 @@
     }
 
     function onKeyDown(event: KeyboardEvent): void {
+        if (NAVIGATION_KEYS.has(event.key) && fromTextEntry(event)) {
+            return;
+        }
         const row = flat[focusIndex];
         switch (event.key) {
             case 'ArrowDown':

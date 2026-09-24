@@ -499,6 +499,23 @@ describe('keys from a control inside the grid (task 47)', () => {
         await userEvent.type(filter, 'Device 1');
         expect((filter as HTMLInputElement).value).toBe('Device 1');
     });
+
+    it('leaves the arrow keys, Home and End to a column filter: the cursor moves, the row focus does not (B-40)', async () => {
+        render(DataTable, {props: {...base, rows: makeRows(3)}});
+        const filter = within(screen.getByRole('grid')).getAllByRole('searchbox')[0] as HTMLInputElement;
+        await userEvent.type(filter, 'Device 1');
+
+        await userEvent.keyboard('{ArrowLeft}{ArrowLeft}-');
+        expect(filter.value).toBe('Device- 1');
+        await userEvent.keyboard('{Home}<');
+        expect(filter.value).toBe('<Device- 1');
+        await userEvent.keyboard('{End}>');
+        expect(filter.value).toBe('<Device- 1>');
+        await userEvent.keyboard('{ArrowDown}{ArrowUp}{ArrowRight}');
+
+        expect(document.activeElement).toBe(filter);
+        expect(rowsInDom().filter((row) => row.getAttribute('aria-selected') === 'true')).toEqual([]);
+    });
 });
 
 /**

@@ -486,3 +486,25 @@ test('Tab onto a cut-off column label shows its full text; Escape and moving on 
     await expect(table.getByTestId('devices-table-resize-ADDRESS')).toBeFocused();
     await expect(tooltip).toHaveCount(0);
 });
+
+/** B-40: in a column filter the arrow keys, Home and End move the cursor, not the grid's row focus. */
+test('the arrow keys, Home and End edit a column filter and leave the rows alone (B-40)', async ({page, host}) => {
+    await page.goto(`${host.url}#/BidCos-RF/devices`);
+    const table = page.getByTestId('devices-table');
+    await expect(table.locator(`[data-row-id="${BIDCOS_SWITCH}"]`)).toContainText('Steckdose');
+
+    const filter = table.getByRole('searchbox').first();
+    await filter.fill('teck');
+    await filter.press('Home');
+    await page.keyboard.type('S');
+    await filter.press('End');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.type('_');
+    await expect(filter).toHaveValue('Stec_k');
+
+    // Up and Down are the field's too (start and end of the line in Chromium), not the next row
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowUp');
+    await expect(filter).toBeFocused();
+    await expect(table.locator('[aria-selected="true"]')).toHaveCount(0);
+});

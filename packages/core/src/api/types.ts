@@ -605,6 +605,11 @@ export interface ServiceMessage {
     value: RpcValue;
     /** Milliseconds since epoch when it was first seen. */
     since: number;
+    /**
+     * Task 36: `rega` when `since` is the CCU's own first report of the message (ReGa's alarm, the
+     * WebUI's *Erste Meldung*); absent when it is when this application first saw it.
+     */
+    sinceSource?: 'rega';
 }
 
 export interface EventRecord {

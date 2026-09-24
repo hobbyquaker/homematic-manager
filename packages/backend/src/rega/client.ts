@@ -28,8 +28,11 @@ import {
     CONFIRM_INBOX_SCRIPT,
     escapeRegaString,
     parseConfirmedDevices,
+    parseRegaAlarms,
+    REGA_ALARMS_SCRIPT,
     renameObjectsScript,
     type ConfirmedDevice,
+    type RegaAlarm,
 } from './scripts.js';
 
 export {escapeRegaString};
@@ -253,15 +256,35 @@ export class RegaService {
             return false;
         }
         try {
-            await this.#client.exec(script);
+            const answer = await this.#client.exec(script);
             this.#answered();
-            return true;
+            // B-61: how many alarms were receipted; none means ReGa had no alarm for the message
+            return Number.parseInt(answer.output.trim(), 10) > 0;
         } catch (error) {
             this.#fail(
                 `${address}: the service message was acknowledged on the interface but not in ReGa: ${errorMessage(error)}`,
                 'info',
             );
             return false;
+        }
+    }
+
+    /**
+     * Task 36: the CCU's pending service messages with their first and last time, from ReGa's
+     * alarms (the WebUI's *Erste Meldung*). `undefined` when ReGa is off or did not answer - the
+     * list then keeps this application's own first-seen time. Never throws.
+     */
+    async readAlarms(): Promise<RegaAlarm[] | undefined> {
+        if (!this.#client) {
+            return undefined;
+        }
+        try {
+            const answer = await this.#client.exec(REGA_ALARMS_SCRIPT);
+            this.#answered();
+            return parseRegaAlarms(answer.output);
+        } catch (error) {
+            this.#fail(`ReGa did not answer the service messages script: ${errorMessage(error)}`, 'info');
+            return undefined;
         }
     }
 

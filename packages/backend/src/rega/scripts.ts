@@ -104,23 +104,95 @@ export function parseConfirmedDevices(output: string): ConfirmedDevice[] {
 }
 
 /**
- * Issue #94: acknowledge a service message in ReGa as well.
+ * Issue #94, B-61: acknowledge a service message in ReGa as well.
  *
  * The interface process is where the datapoint is written - that is the acknowledgement that
  * matters, and it happens whether ReGa exists or not. This is the CCU's own bookkeeping on top: the
- * WebUI keeps its service-message list in ReGa alarms, and an alarm is cleared with `AlReceipt()`.
- * Without it the WebUI keeps showing a message the user has already dealt with here.
+ * WebUI keeps its service-message list in ReGa alarms and clears one with `AlReceipt()`.
  *
- * The datapoint is addressed by its ReGa name, `<interface>.<channel>.<datapoint>`, which is the
- * form the CCU uses everywhere. `if (oAlarm)` guards the case where ReGa does not know it - a
- * device that is not in the CCU's lists at all, a CUxD datapoint, or a message the WebUI has
- * already taken care of.
+ * B-61 (#166): the alarm is found the way the WebUI's service-message page finds it - over
+ * `dom.GetObject(ID_SERVICES)`, one `OT_ALARMDP` per message, whose `AlTriggerDP()` is the
+ * datapoint `<interface>.<channel>.<datapoint>` (read from `/www/rega/pages/tabs/statusviews/
+ * serviceMessages.htm` and `esp/functions.fn::ReceiptAlarm` of OpenCCU 3.89.8). The script before
+ * it called `AlReceipt()` on `dom.GetObject("<interface>.<channel>.<datapoint>")`, which is the
+ * datapoint itself and not its alarm, so nothing was receipted and nothing said so. The answer is
+ * how many alarms were receipted.
  */
 export function acknowledgeAlarmScript(interfaceName: string, address: string, datapoint: string): string | undefined {
     if (!isPlainRegaName(interfaceName) || !isPlainRegaName(address) || !isPlainRegaName(datapoint)) {
         return undefined;
     }
-    return `object oAlarm = dom.GetObject("${interfaceName}.${address}.${datapoint}");\nif (oAlarm) { oAlarm.AlReceipt(); }\n`;
+    return `integer iDone = 0;
+string sId;
+foreach (sId, dom.GetObject(ID_SERVICES).EnumIDs()) {
+    object oAlarm = dom.GetObject(sId);
+    if (oAlarm) {
+        object oTrigger = dom.GetObject(oAlarm.AlTriggerDP());
+        if (oTrigger) {
+            if (oTrigger.Name() == "${interfaceName}.${address}.${datapoint}") {
+                oAlarm.AlReceipt();
+                iDone = iDone + 1;
+            }
+        }
+    }
+}
+Write(iDone);
+`;
+}
+
+/**
+ * Task 36: the CCU's pending service messages with their times, as the WebUI's service-message page
+ * reads them: every `OT_ALARMDP` of `ID_SERVICES` that is `asOncoming`, one line per alarm with the
+ * trigger datapoint's name, `AlOccurrenceTime()` (the WebUI's *Erste Meldung*) and `Timestamp()`
+ * (*Letzte Meldung*), both as Unix seconds (`ToInteger()`, checked against `date +%s` on the lab's
+ * OpenCCU). Read-only.
+ */
+export const REGA_ALARMS_SCRIPT = `string sId;
+foreach (sId, dom.GetObject(ID_SERVICES).EnumIDs()) {
+    object oAlarm = dom.GetObject(sId);
+    if (oAlarm) {
+        if (oAlarm.IsTypeOf(OT_ALARMDP) && (oAlarm.AlState() == asOncoming)) {
+            object oTrigger = dom.GetObject(oAlarm.AlTriggerDP());
+            if (oTrigger) {
+                Write(oTrigger.Name() # "\\t" # oAlarm.AlOccurrenceTime().ToInteger() # "\\t" # oAlarm.Timestamp().ToInteger() # "\\n");
+            }
+        }
+    }
+}
+`;
+
+/** One pending ReGa service message: whose datapoint, first and last reported (epoch ms). */
+export interface RegaAlarm {
+    readonly interfaceName: string;
+    readonly address: string;
+    readonly datapoint: string;
+    readonly first: number;
+    readonly last: number;
+}
+
+/**
+ * Reads what {@link REGA_ALARMS_SCRIPT} wrote. A line whose name is not `<interface>.<channel>.<datapoint>`
+ * (a system alarm, a CUxD name with more dots) or whose time is no positive number is skipped.
+ */
+export function parseRegaAlarms(output: string): RegaAlarm[] {
+    const alarms: RegaAlarm[] = [];
+    for (const line of output.split('\n')) {
+        const [name, first, last] = line.split('\t');
+        const match = /^([^.\s]+)\.([^.\s]+)\.([^.\s]+)$/u.exec(name?.trim() ?? '');
+        const firstSeconds = Number(first);
+        const lastSeconds = Number(last);
+        if (!match || !Number.isFinite(firstSeconds) || firstSeconds <= 0) {
+            continue;
+        }
+        alarms.push({
+            interfaceName: match[1] ?? '',
+            address: match[2] ?? '',
+            datapoint: match[3] ?? '',
+            first: firstSeconds * 1000,
+            last: Number.isFinite(lastSeconds) && lastSeconds > 0 ? lastSeconds * 1000 : firstSeconds * 1000,
+        });
+    }
+    return alarms;
 }
 
 /**

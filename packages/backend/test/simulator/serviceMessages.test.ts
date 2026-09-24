@@ -178,3 +178,69 @@ describe.skipIf(!simulatorAvailable)('the service-message sweep', () => {
         expect(harness.notices.filter((notice) => notice.message.includes('getServiceMessages'))).toEqual([]);
     });
 });
+
+/**
+ * Task 36 and B-61: the CCU's own service messages are ReGa alarms. Their first report (the
+ * WebUI's *Erste Meldung*) replaces the time this application first saw a message, and an
+ * acknowledgement receipts the alarm too. The ReGa client is a stand-in here: hm-simulator's ReGa
+ * mock knows no alarms.
+ */
+describe.skipIf(!simulatorAvailable)("ReGa's alarms beside the service messages (task 36, B-61)", () => {
+    const FIRST = 1_790_000_000;
+
+    function regaWithAlarm(scripts: string[]): {
+        getChannels: () => Promise<unknown[]>;
+        exec: (script: string) => Promise<{output: string; objects: Record<string, string>}>;
+    } {
+        let receipted = false;
+        return {
+            getChannels: () => Promise.resolve([{id: 1000, address: 'LEQ0000001', name: 'Steckdose'}]),
+            exec: (script: string) => {
+                scripts.push(script);
+                if (script.includes('AlReceipt')) {
+                    receipted = true;
+                    return Promise.resolve({output: '1', objects: {}});
+                }
+                if (script.includes('AlOccurrenceTime')) {
+                    return Promise.resolve({
+                        output: receipted
+                            ? ''
+                            : `BidCos-RF.LEQ0000001:0.STICKY_UNREACH\t${String(FIRST)}\t${String(FIRST + 60)}\n`,
+                        objects: {},
+                    });
+                }
+                return Promise.resolve({output: '', objects: {}});
+            },
+        };
+    }
+
+    it("shows the CCU's first report as Since, and receipts the alarm with the acknowledgement", async () => {
+        const sim = await startSimulator({rega: false});
+        running.push({close: () => sim.close()});
+        const scripts: string[] = [];
+        const harness = await startBackend(sim, {
+            backend: {regaOptions: {createClient: () => regaWithAlarm(scripts) as never}},
+        });
+        running.unshift({close: () => harness.close()});
+        sim.setServiceMessage('rfd', 'LEQ0000001:0', 'STICKY_UNREACH', true);
+
+        const list = await harness.backend.request('serviceMessages.refresh', 'BidCos-RF');
+        const sticky = list.find((message) => message.datapoint === 'STICKY_UNREACH');
+        expect(sticky).toMatchObject({address: 'LEQ0000001:0', since: FIRST * 1000, sinceSource: 'rega'});
+
+        await harness.backend.request('serviceMessages.ack', 'BidCos-RF', 'LEQ0000001:0', 'STICKY_UNREACH');
+        await waitUntil(() => scripts.some((script) => script.includes('AlReceipt')));
+        const receipt = scripts.find((script) => script.includes('AlReceipt')) ?? '';
+        expect(receipt).toContain('"BidCos-RF.LEQ0000001:0.STICKY_UNREACH"');
+    });
+});
+
+async function waitUntil(predicate: () => boolean, timeoutMs = 3000): Promise<void> {
+    const deadline = Date.now() + timeoutMs;
+    while (!predicate()) {
+        if (Date.now() > deadline) {
+            throw new Error('condition was not met in time');
+        }
+        await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+}

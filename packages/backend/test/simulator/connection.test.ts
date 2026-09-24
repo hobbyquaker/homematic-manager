@@ -469,15 +469,16 @@ describe.skipIf(!simulatorAvailable)('connecting to hm-simulator', () => {
         expect(scripts.some((script) => script.includes('root.Devices().EnumUsedIDs()'))).toBe(true);
         expect(scripts.some((script) => script.includes('ReadyConfig(true)'))).toBe(true);
 
-        // #94: acknowledging writes the datapoint through the interface *and* clears the CCU alarm
+        // #94: acknowledging writes the datapoint through the interface *and* clears the CCU alarm -
+        // B-61: the alarm whose trigger is that datapoint, found over ID_SERVICES as the WebUI does
         sim.setServiceMessage('rfd', 'LEQ0000001:0', 'STICKY_UNREACH', true);
         await harness.backend.request('serviceMessages.ack', 'BidCos-RF', 'LEQ0000001:0', 'STICKY_UNREACH');
         await waitFor(() =>
-            (sim.regaSim.scripts as string[]).some((script) =>
-                script.includes('dom.GetObject("BidCos-RF.LEQ0000001:0.STICKY_UNREACH")'),
+            (sim.regaSim.scripts as string[]).some(
+                (script) =>
+                    script.includes('AlReceipt()') && script.includes('"BidCos-RF.LEQ0000001:0.STICKY_UNREACH"'),
             ),
         );
-        expect((sim.regaSim.scripts as string[]).some((script) => script.includes('AlReceipt()'))).toBe(true);
     });
 
     it('does all of that silently when there is no ReGa (D-2)', async () => {

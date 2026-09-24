@@ -250,6 +250,12 @@ export const UI_MESSAGES: MessageCatalogue = {
     Value: {de: 'Wert', en: 'Value'},
     Message: {de: 'Meldung', en: 'Message'},
     Since: {de: 'Seit', en: 'Since'},
+    // Task 36: the tooltip of a Since cell - the CCU's Erste Meldung, or this application's first sight
+    'First reported, from the CCU': {de: 'Erste Meldung, von der CCU', en: 'First reported, from the CCU'},
+    'First seen by the Homematic Manager': {
+        de: 'Vom Homematic Manager zuerst gesehen',
+        en: 'First seen by the Homematic Manager',
+    },
     Clear: {de: 'Leeren', en: 'Clear'},
     'No data': {de: 'Keine Daten', en: 'No data'},
     'Nothing selected': {de: 'Nichts ausgewählt', en: 'Nothing selected'},

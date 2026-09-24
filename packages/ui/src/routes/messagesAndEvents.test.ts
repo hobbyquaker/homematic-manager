@@ -116,6 +116,27 @@ describe('the service messages tab', () => {
         since: 0,
     };
 
+    it("task 36: Since says whether it is the CCU's first report or this application's first sight", async () => {
+        transport.result('serviceMessages.list', [
+            {...fault, since: Date.UTC(2026, 8, 1, 10, 0), sinceSource: 'rega'},
+            {
+                interfaceName: 'BidCos-RF',
+                address: 'KEQ0345678:0',
+                datapoint: 'STICKY_UNREACH',
+                value: true,
+                since: Date.UTC(2026, 8, 2),
+            },
+        ]);
+        await mountApp({transport, hash: '#/BidCos-RF/messages'});
+        const fromCcu = await screen.findByTestId('message-since-KEQ0345678:4-FAULT_REPORTING');
+        expect(fromCcu.getAttribute('title')).toBe('Erste Meldung, von der CCU');
+        expect(fromCcu.dataset['source']).toBe('rega');
+        expect(fromCcu.textContent).not.toBe('');
+        const local = screen.getByTestId('message-since-KEQ0345678:0-STICKY_UNREACH');
+        expect(local.getAttribute('title')).toBe('Vom Homematic Manager zuerst gesehen');
+        expect(local.dataset['source']).toBe('local');
+    });
+
     it('B-24: shows a FAULT_REPORTING with the label of its value, and cannot acknowledge it', async () => {
         transport.result('serviceMessages.list', [fault]);
         await mountApp({transport, hash: '#/BidCos-RF/messages'});

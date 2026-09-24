@@ -18,6 +18,8 @@ import {
     parseConfirmedDevices,
     parseCreatedId,
     parseMetaSnapshot,
+    parseRegaAlarms,
+    REGA_ALARMS_SCRIPT,
     renameObjectsScript,
     unescapeRegaUrl,
 } from './scripts.js';
@@ -64,10 +66,15 @@ describe('the inbox script (#54)', () => {
 
 describe('the acknowledge script (#94)', () => {
     it('addresses the datapoint the way the CCU does and guards the null case', () => {
-        expect(acknowledgeAlarmScript('BidCos-RF', 'LEQ0000001:0', 'STICKY_UNREACH')).toBe(
-            'object oAlarm = dom.GetObject("BidCos-RF.LEQ0000001:0.STICKY_UNREACH");\n' +
-                'if (oAlarm) { oAlarm.AlReceipt(); }\n',
-        );
+        // B-61: over ID_SERVICES and the alarm's trigger datapoint, as the WebUI does - not
+        // dom.GetObject(<name>), which is the datapoint itself and has no alarm to receipt
+        const script = acknowledgeAlarmScript('BidCos-RF', 'LEQ0000001:0', 'STICKY_UNREACH') ?? '';
+        expect(script).toContain('foreach (sId, dom.GetObject(ID_SERVICES).EnumIDs())');
+        expect(script).toContain('dom.GetObject(oAlarm.AlTriggerDP())');
+        expect(script).toContain('if (oTrigger.Name() == "BidCos-RF.LEQ0000001:0.STICKY_UNREACH")');
+        expect(script).toContain('oAlarm.AlReceipt();');
+        expect(script).toContain('Write(iDone);');
+        expect(script).not.toContain('dom.GetObject("BidCos-RF.LEQ0000001:0.STICKY_UNREACH")');
     });
 
     it('refuses a name that has no business in a script rather than escaping it', () => {
@@ -85,6 +92,44 @@ describe('the acknowledge script (#94)', () => {
         expect(isPlainRegaName('CUX2801001:1')).toBe(true);
         expect(isPlainRegaName('LOWBAT')).toBe(true);
         expect(isPlainRegaName('a b')).toBe(false);
+    });
+});
+
+describe("ReGa's pending service messages (task 36)", () => {
+    it('reads the oncoming alarms of ID_SERVICES with their trigger and both times', () => {
+        expect(REGA_ALARMS_SCRIPT).toContain('dom.GetObject(ID_SERVICES).EnumIDs()');
+        expect(REGA_ALARMS_SCRIPT).toContain('oAlarm.AlState() == asOncoming');
+        expect(REGA_ALARMS_SCRIPT).toContain('oAlarm.AlOccurrenceTime().ToInteger()');
+        expect(REGA_ALARMS_SCRIPT).toContain('oAlarm.Timestamp().ToInteger()');
+        // ReGa's own escapes in the script, not a raw tab
+        expect(REGA_ALARMS_SCRIPT).toContain('"\\t"');
+    });
+
+    it('parses the lines into messages with epoch milliseconds, and skips what is no datapoint', () => {
+        const output =
+            'BidCos-RF.LEQ0000001:0.STICKY_UNREACH\t1790000000\t1790000500\n' +
+            'HmIP-RF.0001D3C99ABCDE:0.LOW_BAT\t1790001000\t0\n' +
+            'Systemalarm\t1790002000\t1790002000\n' +
+            'CUxD.CUX.2801:1.STATE\t1790003000\t1790003000\n' +
+            'BidCos-RF.LEQ0000002:0.UNREACH\t0\t0\n' +
+            '\n';
+        expect(parseRegaAlarms(output)).toEqual([
+            {
+                interfaceName: 'BidCos-RF',
+                address: 'LEQ0000001:0',
+                datapoint: 'STICKY_UNREACH',
+                first: 1_790_000_000_000,
+                last: 1_790_000_500_000,
+            },
+            {
+                interfaceName: 'HmIP-RF',
+                address: '0001D3C99ABCDE:0',
+                datapoint: 'LOW_BAT',
+                first: 1_790_001_000_000,
+                last: 1_790_001_000_000,
+            },
+        ]);
+        expect(parseRegaAlarms('')).toEqual([]);
     });
 });
 

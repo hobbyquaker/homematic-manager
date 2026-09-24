@@ -230,6 +230,8 @@ export class Backend {
      * swallows packets takes 30 s); a store that has not started by then never will.
      */
     #metaStarting: Promise<void> | undefined;
+    /** Task 36: ReGa's first report per `<interface>|<address>|<datapoint>`, from its pending alarms. */
+    readonly #regaFirstSeen = new Map<string, number>();
     /** Task 64: `getParamsetId` answers by `<interface>|<address>`; emptied on every connect. */
     readonly #paramsetIds = new Map<string, string>();
     #serviceMessageTimer: ReturnType<typeof setInterval> | undefined;
@@ -836,12 +838,15 @@ export class Backend {
 
         // B-54: the names are waited for only so long; the store starts after them either way,
         // so its names still land over ReGa's as before (task 27, D-40)
+        this.#regaFirstSeen.clear();
         const names = this.#rega.refreshNames().then((changed) => {
             if (changed && this.#manager === manager) {
                 this.#caches.saveNames();
                 this.events.emit('names.changed', this.#caches.names.all());
             }
         });
+        // task 36: the CCU's first reports of its pending messages, once ReGa has answered
+        void names.then(() => (this.#manager === manager ? this.#refreshRegaAlarms() : undefined));
         this.#metaReady = names.then(() => {
             if (this.#manager !== manager) {
                 return undefined;
@@ -1131,7 +1136,7 @@ export class Backend {
                 countsAsServiceMessage(datapoint, value) &&
                 this.#caches.serviceMessages.apply(interfaceName, address, datapoint, value)
             ) {
-                this.events.emit('serviceMessages.changed', this.#caches.listServiceMessages());
+                this.events.emit('serviceMessages.changed', this.#serviceMessages());
             }
             this.#noteUnreach(interfaceName, address, datapoint, value);
             if (interfaceName === 'HmIP-RF') {
@@ -1675,7 +1680,56 @@ export class Backend {
     }
 
     #serviceMessages(interfaceName?: string): ServiceMessage[] {
-        return this.#caches.listServiceMessages(interfaceName);
+        return this.#withRegaTimes(this.#caches.listServiceMessages(interfaceName));
+    }
+
+    /**
+     * Task 36: where ReGa knows a message, its first report (the WebUI's *Erste Meldung*) replaces
+     * the time this application first saw it, and says so.
+     */
+    #withRegaTimes(messages: ServiceMessage[]): ServiceMessage[] {
+        if (this.#regaFirstSeen.size === 0) {
+            return messages;
+        }
+        return messages.map((message) => {
+            const first = this.#regaFirstSeen.get(`${message.interfaceName}|${message.address}|${message.datapoint}`);
+            return first === undefined ? message : {...message, since: first, sinceSource: 'rega' as const};
+        });
+    }
+
+    /**
+     * Task 36: reads ReGa's pending service messages (one short script, read-only) and keeps their
+     * first report per message. Run with every service-message round - the connect, the poll, an
+     * acknowledgement - since it costs one script: on the lab's OpenCCU it answered in well under
+     * the resolution of `time` (0.00 s). D-2: without ReGa, or when it does not answer, the times
+     * stay this application's own.
+     */
+    async #refreshRegaAlarms(): Promise<void> {
+        const rega = this.#rega;
+        if (!rega?.state.enabled) {
+            if (this.#regaFirstSeen.size > 0) {
+                this.#regaFirstSeen.clear();
+                this.events.emit('serviceMessages.changed', this.#serviceMessages());
+            }
+            return;
+        }
+        const alarms = await rega.readAlarms();
+        if (alarms === undefined || this.#rega !== rega) {
+            return;
+        }
+        const next = new Map(
+            alarms.map((alarm) => [`${alarm.interfaceName}|${alarm.address}|${alarm.datapoint}`, alarm.first]),
+        );
+        const changed =
+            next.size !== this.#regaFirstSeen.size ||
+            [...next].some(([key, first]) => this.#regaFirstSeen.get(key) !== first);
+        this.#regaFirstSeen.clear();
+        for (const [key, first] of next) {
+            this.#regaFirstSeen.set(key, first);
+        }
+        if (changed) {
+            this.events.emit('serviceMessages.changed', this.#serviceMessages());
+        }
     }
 
     /**
@@ -1700,6 +1754,7 @@ export class Backend {
                 await this.#refreshServiceMessages(name);
             }
         }
+        await this.#refreshRegaAlarms();
         return this.#serviceMessages(interfaceName);
     }
 
@@ -1794,7 +1849,7 @@ export class Backend {
                 }
             }
             this.#caches.serviceMessages.replaceInterface(interfaceName, tuples);
-            this.events.emit('serviceMessages.changed', this.#caches.listServiceMessages());
+            this.events.emit('serviceMessages.changed', this.#serviceMessages());
             // #26: a sticky flag can be raised while nothing was listening, so the poll counts too.
             // `note()` is edge-triggered, so the same flag on every round is one outage.
             for (const [address, datapoint, value] of tuples) {
@@ -1840,6 +1895,7 @@ export class Backend {
                 await this.#refreshServiceMessages(interfaceName);
             }
         }
+        await this.#refreshRegaAlarms();
     }
 
     /**
@@ -1885,7 +1941,7 @@ export class Backend {
             this.#hmipSweepRunning = false;
         }
         if (changed) {
-            this.events.emit('serviceMessages.changed', this.#caches.listServiceMessages());
+            this.events.emit('serviceMessages.changed', this.#serviceMessages());
         }
     }
 
@@ -1925,12 +1981,16 @@ export class Backend {
         const value: RpcWriteValue = parameter?.TYPE === 'ACTION';
         await this.#writer.setValue(interfaceName, address, datapoint, value);
         if (this.#caches.serviceMessages.clear(interfaceName, address, datapoint)) {
-            this.events.emit('serviceMessages.changed', this.#caches.listServiceMessages());
+            this.events.emit('serviceMessages.changed', this.#serviceMessages());
         }
         // Issue #94: the datapoint write above is the acknowledgement that matters, and it happened
         // whether ReGa exists or not. This clears the CCU's own alarm on top, so the WebUI stops
         // showing a message the user has already dealt with here. D-2: silent when ReGa is off.
-        void this.#rega?.acknowledgeAlarm(interfaceName, address, datapoint);
+        void this.#rega?.acknowledgeAlarm(interfaceName, address, datapoint).then(async (receipted) => {
+            if (receipted) {
+                await this.#refreshRegaAlarms();
+            }
+        });
         return null;
     }
 

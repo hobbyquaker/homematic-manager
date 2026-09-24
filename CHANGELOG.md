@@ -23,6 +23,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   is shown in the system's own frame, the system offers all three already; the Homematic Manager follows the system's
   light or dark theme there instead. Opened on its own - in a tab of its own, on a CCU, as the desktop app - it keeps
   every button.
+- **_Since_ is the CCU's own first report where there is one.** On a CCU or OpenCCU the service messages tab reads
+  the CCU's pending messages from ReGa (the WebUI's _Erste Meldung_) with every refresh and shows that time; the cell's
+  tooltip says whether the time is the CCU's or when the Homematic Manager first saw the message. Without ReGa - on
+  openccu-lite, or with ReGa switched off - it is the Homematic Manager's own time, as before (#150, @Herbert-Testmann).
 
 ### Fixed
 
@@ -63,6 +67,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   object yet, so the names typed in the pairing dialog stayed in this application and were replaced by the CCU's at the
   next reconnect. They now wait, the dialog says so, and they are written to ReGa as soon as the inbox is confirmed
   here (the button, or the automatic confirmation). The `:0` channel is no longer renamed twice in the same script.
+- **An acknowledged sticky message leaves the CCU's own list too.** Acknowledging a _STICKY_UNREACH_ (by hand, or
+  automatically, the existing ones included) cleared the datapoint and the Homematic Manager's list, but the CCU's
+  WebUI kept showing the message: the ReGa half of the acknowledgement addressed the datapoint instead of its alarm,
+  and did nothing. It now finds the alarm the way the WebUI does and receipts it (#166, @Herbert-Testmann).
 - **The addon's settings page and `service.cgi` change nothing on a plain link.** Switching the login mode, the log
   location or the idle time, and starting, stopping or restarting the service, were `GET` links - a crafted link
   opened by an administrator who was signed in could make them. They are buttons that `POST` now, and a `GET` only

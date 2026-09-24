@@ -325,3 +325,41 @@ describe('names of a device still in the inbox (B-64)', () => {
         expect(names.regaId('NEW0000002')).toBe(6001);
     });
 });
+
+/** B-61 and task 36: the CCU's own service messages, its alarms in ReGa. */
+describe("ReGa's alarms (B-61, task 36)", () => {
+    it('says whether the acknowledgement found an alarm to receipt', async () => {
+        let output = '1';
+        const exec = vi.fn(() => Promise.resolve({output, objects: {}}));
+        const {rega} = service({exec});
+        await expect(rega.acknowledgeAlarm('BidCos-RF', 'ABC1:0', 'STICKY_UNREACH')).resolves.toBe(true);
+        output = '0';
+        await expect(rega.acknowledgeAlarm('BidCos-RF', 'ABC1:0', 'STICKY_UNREACH')).resolves.toBe(false);
+        expect(exec).toHaveBeenCalledTimes(2);
+    });
+
+    it('reads the pending alarms with their first report, and nothing without ReGa', async () => {
+        const {rega} = service({
+            exec: () =>
+                Promise.resolve({output: 'BidCos-RF.ABC1:0.STICKY_UNREACH\t1790000000\t1790000100\n', objects: {}}),
+        });
+        await expect(rega.readAlarms()).resolves.toEqual([
+            {
+                interfaceName: 'BidCos-RF',
+                address: 'ABC1:0',
+                datapoint: 'STICKY_UNREACH',
+                first: 1_790_000_000_000,
+                last: 1_790_000_100_000,
+            },
+        ]);
+        const off = service({}, {enabled: false});
+        await expect(off.rega.readAlarms()).resolves.toBeUndefined();
+    });
+
+    it('fails soft: a script ReGa refuses is a state and one notice, and no list', async () => {
+        const {rega, states, notices} = service({exec: () => Promise.reject(new Error('rega http status 500'))});
+        await expect(rega.readAlarms()).resolves.toBeUndefined();
+        expect(states.at(-1)?.reachable).toBe(false);
+        expect(notices.filter((notice) => notice.includes('service messages script'))).toHaveLength(1);
+    });
+});

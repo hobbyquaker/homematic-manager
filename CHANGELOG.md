@@ -30,6 +30,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   own side when we did: each subscription left it one dead socket, until a lab OpenCCU's process held 4063 of them and
   stopped answering. Calls now use a connection each, and the callback server answers with `Connection: close`, as the
   2.x releases effectively did.
+- **Saving the settings no longer waits half a minute for a ReGa that does not answer.** A connect waited for ReGa's
+  names before it returned; a CCU whose ReGa port swallows the requests (a firewall, a filtered network) held the
+  settings dialog's save for the full 30 s script timeout. It now waits at most 3 s; the names still arrive whenever
+  ReGa answers, and a new save or quitting does not wait for them either.
 
 ## [3.0.0-beta.22] — 2026-09-23
 

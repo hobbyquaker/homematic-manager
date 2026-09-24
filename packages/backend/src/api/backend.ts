@@ -105,6 +105,15 @@ import {WriteQueue} from '../write/queue.js';
 /** How often the BidCos service messages are polled while the connection is up. */
 export const SERVICE_MESSAGE_POLL_MS = 300_000;
 
+/**
+ * B-54: how long a connect (and so `config.set`, the settings dialog's save) waits for ReGa's names
+ * before it returns. A ReGa that answers - the usual case - is through in well under a second and
+ * the names are there when the save returns; one that swallows the packets took the save to its
+ * 30 s script timeout (D-2: ReGa never holds up the application). The names still arrive with
+ * `names.changed` whenever ReGa answers.
+ */
+export const REGA_CONNECT_WAIT_MS = 3000;
+
 /** How long the HmIP `getParamset(:0, VALUES)` sweep waits for the device list to settle. */
 export const HMIP_SWEEP_DELAY_MS = 1000;
 
@@ -168,6 +177,8 @@ export interface BackendOptions extends Omit<ConfigStoreOptions, 'version'> {
      */
     readonly idleUnsubscribePinned?: boolean;
     readonly hmipSweepDelayMs?: number;
+    /** B-54: how long a connect waits for ReGa's names before it returns; {@link REGA_CONNECT_WAIT_MS}. */
+    readonly regaConnectWaitMs?: number;
     readonly cacheWriteDelayMs?: number;
     readonly now?: () => number;
     /** Injected by the tests in place of the real world. */
@@ -213,6 +224,12 @@ export class Backend {
      * store waits for this promise instead, and the UI hears about it through `meta.changed`.
      */
     #metaReady: Promise<void> | undefined;
+    /**
+     * B-54: the store's start once it has begun - what a disconnect waits for. `#metaReady` also
+     * covers the ReGa names in front of it, which a disconnect must not wait out (a ReGa that
+     * swallows packets takes 30 s); a store that has not started by then never will.
+     */
+    #metaStarting: Promise<void> | undefined;
     #serviceMessageTimer: ReturnType<typeof setInterval> | undefined;
     #hmipSweepTimer: ReturnType<typeof setTimeout> | undefined;
     #hmipSweepRunning = false;
@@ -348,7 +365,8 @@ export class Backend {
         // for a cache write and put a file back into a directory the caller has already taken
         // apart - which is how CI found this, as an ENOTEMPTY in a suite that has nothing to do
         // with metadata.
-        await this.#metaReady?.catch(() => undefined);
+        await this.#metaStarting?.catch(() => undefined);
+        this.#metaStarting = undefined;
         this.#metaReady = undefined;
         await this.#meta?.stop();
         this.#meta = undefined;
@@ -811,11 +829,25 @@ export class Backend {
             ...this.#options.regaOptions,
         });
 
-        if (await this.#rega.refreshNames()) {
-            this.#caches.saveNames();
-            this.events.emit('names.changed', this.#caches.names.all());
+        // B-54: the names are waited for only so long; the store starts after them either way,
+        // so its names still land over ReGa's as before (task 27, D-40)
+        const names = this.#rega.refreshNames().then((changed) => {
+            if (changed && this.#manager === manager) {
+                this.#caches.saveNames();
+                this.events.emit('names.changed', this.#caches.names.all());
+            }
+        });
+        this.#metaReady = names.then(() => {
+            if (this.#manager !== manager) {
+                return undefined;
+            }
+            this.#metaStarting = this.#startMeta(connection, probe);
+            return this.#metaStarting;
+        });
+        await waitAtMost(names, this.#options.regaConnectWaitMs ?? REGA_CONNECT_WAIT_MS);
+        if (this.#manager !== manager) {
+            return;
         }
-        this.#metaReady = this.#startMeta(connection, probe);
         this.#startServiceMessagePolling();
         // B-70: counted from the start (or the reconnect of a save) when no page is open
         this.#armIdleTimer();
@@ -859,7 +891,8 @@ export class Backend {
         this.#rega = undefined;
         // the detection may still be in flight; stopping a provider that is not there yet would
         // leave its event stream running behind the disconnect
-        await this.#metaReady?.catch(() => undefined);
+        await this.#metaStarting?.catch(() => undefined);
+        this.#metaStarting = undefined;
         this.#metaReady = undefined;
         await this.#meta?.stop();
         this.#meta = undefined;
@@ -2131,3 +2164,16 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'data.file',
     'session.info',
 ] satisfies readonly (keyof ApiMethods)[];
+
+/** Waits for `work` or for `ms`, whichever is first; never rejects. */
+async function waitAtMost(work: Promise<unknown>, ms: number): Promise<void> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    await Promise.race([
+        work.catch(() => undefined),
+        new Promise<void>((resolve) => {
+            timer = setTimeout(resolve, ms);
+            timer.unref();
+        }),
+    ]);
+    clearTimeout(timer);
+}

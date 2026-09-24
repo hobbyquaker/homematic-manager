@@ -266,6 +266,40 @@ describe.skipIf(!simulatorAvailable)('connecting to hm-simulator', () => {
         expect(await harness.backend.request('names.get')).toMatchObject({LEQ0000001: 'Kaffeemaschine'});
     });
 
+    it('does not hold a connect or a disconnect for a ReGa that swallows its requests (B-54)', async () => {
+        // a ReGa port that accepts and never answers - what a CCU behind a filter looks like
+        const sockets: net.Socket[] = [];
+        const silent = net.createServer((socket) => sockets.push(socket));
+        await new Promise<void>((resolve) => silent.listen(0, '127.0.0.1', resolve));
+        running.push({
+            close: async () => {
+                for (const socket of sockets) {
+                    socket.destroy();
+                }
+                await new Promise((resolve) => silent.close(resolve));
+            },
+        });
+        const sim = await startSimulator({rega: false});
+        running.push({close: () => sim.close()});
+        const started = Date.now();
+        const harness = await startBackend(sim, {
+            backend: {
+                regaOptions: {port: (silent.address() as AddressInfo).port, timeoutMs: 10_000},
+                regaConnectWaitMs: 200,
+            },
+        });
+        const took = Date.now() - started;
+        expect(took).toBeLessThan(5000);
+        expect((await harness.backend.request('interfaces.list')).every((entry) => entry.connected)).toBe(true);
+        // ReGa has not answered and is not given up on yet: the state is still the first one
+        expect(sockets.length).toBeGreaterThan(0);
+
+        // and a disconnect does not wait out ReGa's timeout either
+        const closing = Date.now();
+        await harness.close();
+        expect(Date.now() - closing).toBeLessThan(5000);
+    });
+
     it('degrades to the local names when there is no ReGa (D-2)', async () => {
         const sim = await startSimulator({rega: false});
         running.push({close: () => sim.close()});

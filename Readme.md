@@ -15,14 +15,14 @@ Eine ausführliche Beschreibung der 2.x-Oberfläche steht im
 
 <br clear="left"/>
 
-> **Stand dieser Datei: Version 3.0 ist in Entwicklung.**
-> Das letzte veröffentlichte Release ist **2.7.1** (2023-01-28), eine reine Electron-App. Version
+> **Version 3.0 gibt es als Beta.**
+> Das letzte 2.x-Release ist **2.7.1** (2023-01-28), eine reine Electron-App. Version
 > 3.0 ist ein Neubau auf aktuellem Electron, Svelte 5 und einem getesteten TypeScript-Kern und
 > läuft zusätzlich als Server und als CCU-Addon. Die Entwicklung findet auf `master` statt, der
 > 2.7.1-Stand liegt unverändert unter `legacy/`.
-> **3.0 gibt es als Beta**: die aktuelle Beta ([Releases](https://github.com/hobbyquaker/homematic-manager/releases), zurzeit 3.0.0-beta.4) ist als Pre-Release veröffentlicht, mit Installern
+> Die aktuelle Beta steht unter [Releases](https://github.com/hobbyquaker/homematic-manager/releases), mit Installern
 > für Windows, macOS und Linux, den drei CCU-Addon-Paketen, dem Docker-Image und dem npm-Paket
-> (`npm install -g homematic-manager@next`). Bekannte Probleme und was zu testen ist, stehen in den Release-Notes.
+> (`npm install -g homematic-manager`). Bekannte Probleme und was zu testen ist, stehen in den Release-Notes.
 
 | hell | dunkel (D-22) |
 | --- | --- |
@@ -51,9 +51,9 @@ Kopiervorgang — siehe [docs/moving-between-installs.md](docs/moving-between-in
 **Das npm-Paket heißt `homematic-manager`** (D-33) — derselbe Name, unter dem 2.x auf npm lag. Wer
 dort einmal `npm install -g homematic-manager` gemacht hat, bekommt damit jetzt also **den Server und
 nicht mehr die Desktop-App**; die gibt es als Installer im
-[Release](https://github.com/hobbyquaker/homematic-manager/releases/latest). Solange 3.0.0 nicht
-erschienen ist, zeigt `latest` noch auf das veraltete 1.0.14 von 2022 — Vorabversionen installiert
-man deshalb mit `npm install -g homematic-manager@next`. Das Kommando heißt `homematic-manager`,
+[Release](https://github.com/hobbyquaker/homematic-manager/releases/latest). Die Betas von 3.0 werden
+als `latest` veröffentlicht, `npm install -g homematic-manager` installiert also die aktuelle Beta. Das
+Kommando heißt `homematic-manager`,
 `homematic-manager-web` ist ein zweiter Name dafür.
 
 **Nicht mehr dabei:** 32-Bit-ARM-Desktop-Builds (`linux-armv7l`). Electron 44 veröffentlicht dafür
@@ -197,12 +197,12 @@ HomematicIP devices: pair and unpair devices, edit device and channel configurat
 create and maintain direct links, judge radio quality (RSSI), acknowledge service messages, watch
 the live event stream and call any RPC method by hand. The user interface is German and English.
 
-**Version 3.0 is under development and not released yet.** 2.7.1 (2023-01-28) is the last published
-release and is a desktop app only; 3.0 is a rebuild on current Electron, Svelte 5 and a tested
+**Version 3.0 is available as a beta.** 2.7.1 (2023-01-28) is the last 2.x release and is a
+desktop app only; 3.0 is a rebuild on current Electron, Svelte 5 and a tested
 TypeScript core that additionally runs as a server and as a CCU addon. Work happens on `master`;
-the 2.7.1 sources sit unchanged under `legacy/`. **3.0 is available as a beta**:
-the current beta ([releases](https://github.com/hobbyquaker/homematic-manager/releases), 3.0.0-beta.4 at the time of writing) is a published pre-release with the Windows, macOS and Linux installers, the
-three CCU addon packages, the Docker image and the npm package (`npm install -g homematic-manager@next`).
+the 2.7.1 sources sit unchanged under `legacy/`. The current beta is on the
+[releases](https://github.com/hobbyquaker/homematic-manager/releases) page, with the Windows, macOS and Linux
+installers, the three CCU addon packages, the Docker image and the npm package (`npm install -g homematic-manager`).
 
 Every install type runs the same backend and the same UI and shares one configuration format, so
 moving between them is a copy (D-25):
@@ -216,8 +216,8 @@ moving between them is a copy (D-25):
 
 The npm package is **`homematic-manager`** (D-33), the name 2.x had on npm — so anyone who once ran
 `npm install -g homematic-manager` gets the server now, not the desktop app; that one is an installer
-from the release. Until 3.0.0 moves the `latest` tag a plain install still gives the deprecated
-1.0.14 from 2022; since the beta the current pre-release is `latest` (D-39), so `npm install -g homematic-manager` gives it, and `@next` names the same version.
+from the release. The 3.0 betas are published as `latest` (D-39), so `npm install -g homematic-manager` installs the
+current beta.
 
 Documentation: [docs/README.md](docs/README.md) is the index;
 [docs/migration-from-2.x.md](docs/migration-from-2.x.md) is what a 2.x user should read first;

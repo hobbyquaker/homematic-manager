@@ -16,6 +16,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 - **Home, End and the arrow keys work in a column filter.** The grid took them for its row focus: Home and End jumped
   to the first and last row instead of moving the cursor in the field, and Up and Down moved the selection. They now
   stay with the field; from the grid itself they move the rows as before.
+- **Switching the interface in the address bar, or with back and forward, loads it.** Only the interface picker loaded
+  the devices, links and messages of the interface it switched to; a changed URL switched the header and left the
+  Devices tab at _Loading_ until something else loaded that interface. The same held for _Open in console_ on an RPC
+  log entry of another interface.
 
 ## [3.0.0-beta.22] — 2026-09-23
 

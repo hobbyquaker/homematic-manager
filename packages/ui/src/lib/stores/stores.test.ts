@@ -926,6 +926,38 @@ describe('Stores', () => {
         expect(transport.listenerCount('notice')).toBe(0);
     });
 
+    it('loads the interface a hash change switches to, as the picker does (B-42)', async () => {
+        const transport = new MockTransport({demo: true});
+        const router = fakeRouter('#/BidCos-RF/devices');
+        const stores = createStores(transport, {
+            location: router.location,
+            onHashChange: router.onHashChange,
+            storage: new MemoryStorage(),
+        });
+        await stores.start();
+        expect(stores.devices.index('HmIP-RF')).toBeUndefined();
+
+        // the address bar, back or forward: only the hash changes, nobody calls selectInterface
+        router.navigate('#/HmIP-RF/links');
+        expect(stores.app.selectedInterface).toBe('HmIP-RF');
+        await vi.waitFor(() => {
+            expect(stores.devices.index('HmIP-RF')?.size).toBe(DEMO_DEVICES['HmIP-RF'].length);
+        });
+        expect(stores.links.of('HmIP-RF')).toBeDefined();
+        // the hash's tab stands, and no second history entry was written over it
+        expect(stores.app.tab).toBe('links');
+        expect(router.location.hash).toBe('#/HmIP-RF/links');
+
+        // and to the store and back, which hands the interface its tab back
+        router.navigate(`#/${encodeURIComponent(STORE_INTERFACE)}/metadata`);
+        expect(stores.app.storeSelected).toBe(true);
+        router.navigate('#/BidCos-RF/links');
+        await vi.waitFor(() => {
+            expect(stores.app.tab).toBe('links');
+        });
+        stores.dispose();
+    });
+
     it('falls back to the devices tab when the new interface has no such tab', async () => {
         const transport = new MockTransport({demo: true});
         transport.result('interfaces.list', [

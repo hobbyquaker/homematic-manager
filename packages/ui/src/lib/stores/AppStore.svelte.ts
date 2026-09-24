@@ -148,6 +148,7 @@ export class AppStore {
     readonly #storage: StorageLike | undefined;
     readonly #languages: readonly string[] | undefined;
     readonly #unsubscribe: Array<() => void> = [];
+    readonly #routedListeners: Array<(previous: string) => void> = [];
 
     constructor(transport: Transport, notices: NoticesStore, options: AppStoreOptions = {}) {
         this.#transport = transport;
@@ -179,9 +180,31 @@ export class AppStore {
                 this.config = config;
             }),
             (options.onHashChange ?? defaultHashSubscribe)(() => {
+                const previous = this.selectedInterface;
                 this.readRoute();
+                // B-42: a hash that names another interface (the address bar, back, forward) is a
+                // switch like the picker's, and whoever loads an interface's data has to hear of it
+                if (this.selectedInterface !== previous) {
+                    for (const listener of [...this.#routedListeners]) {
+                        listener(previous);
+                    }
+                }
             }),
         );
+    }
+
+    /**
+     * B-42: called when a hash change - not `setInterface` - switched the interface, with the
+     * interface it switched from. Returns the unsubscribe function.
+     */
+    onInterfaceRouted(listener: (previous: string) => void): () => void {
+        this.#routedListeners.push(listener);
+        return () => {
+            const index = this.#routedListeners.indexOf(listener);
+            if (index >= 0) {
+                this.#routedListeners.splice(index, 1);
+            }
+        };
     }
 
     /** Takes interface and tab from the current hash. */
@@ -402,5 +425,6 @@ export class AppStore {
             off();
         }
         this.#unsubscribe.length = 0;
+        this.#routedListeners.length = 0;
     }
 }

@@ -65,7 +65,8 @@
     function openInConsole(entry: RpcLogEntry): void {
         stores.console.recall(entry);
         if (app.selectedInterface !== entry.interfaceName) {
-            app.setInterface(entry.interfaceName);
+            // B-42: through the stores, so the interface's devices are loaded as for the picker
+            void stores.selectInterface(entry.interfaceName);
         }
         app.setTab('console');
     }

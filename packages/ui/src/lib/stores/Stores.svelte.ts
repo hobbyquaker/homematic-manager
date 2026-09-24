@@ -23,7 +23,7 @@ import {ServiceMessagesStore} from './ServiceMessagesStore.svelte.js';
 import {SmokeGroupsStore} from './SmokeGroupsStore.svelte.js';
 import {TaxonomyStore} from './TaxonomyStore.svelte.js';
 import {UnreachStore} from './UnreachStore.svelte.js';
-import {isStoreTabId, storeTabs, tabsForInterface, type TabId} from './routing.js';
+import {isStoreInterface, isStoreTabId, storeTabs, tabsForInterface, type TabId} from './routing.js';
 import {RpcLogStore} from './RpcLogStore.svelte.js';
 
 export interface StoresOptions extends AppStoreOptions {
@@ -71,6 +71,8 @@ export class Stores {
     readonly console: ConsoleStore;
     /** Issue #124: what is staged and not written yet. */
     readonly changeSet: ChangeSetStore;
+    /** B-42: set once `start()` has selected the first interface. */
+    #started = false;
 
     constructor(transport: Transport, options: StoresOptions = {}) {
         this.transport = transport;
@@ -97,6 +99,14 @@ export class Stores {
         this.radio = new RadioStore(transport, this.notices);
         this.console = new ConsoleStore(transport, this.notices);
         this.changeSet = new ChangeSetStore(transport, this.notices, this.rpcLog);
+        // B-42: the address bar, back and forward switch the interface through the hash; the
+        // data of the new interface is loaded as for the picker. Not before `start()` has
+        // chosen the first one: that choice loads what it needs itself.
+        this.app.onInterfaceRouted((previous) => {
+            if (this.#started) {
+                void this.#interfaceSelected(isStoreInterface(previous));
+            }
+        });
         this.host = new HostStore({
             ...(options.hostBridge === undefined ? {} : {bridge: options.hostBridge}),
             ...(options.hostScope === undefined ? {} : {scope: options.hostScope}),
@@ -144,6 +154,7 @@ export class Stores {
                 ? (this.app.configuredInterfaces[0] ?? '')
                 : this.app.selectedInterface;
         await this.selectInterface(selected);
+        this.#started = true;
     }
 
     /**
@@ -156,6 +167,12 @@ export class Stores {
     async selectInterface(interfaceName: string): Promise<void> {
         const wasStore = this.app.storeSelected;
         this.app.setInterface(interfaceName);
+        await this.#interfaceSelected(wasStore);
+    }
+
+    /** What follows a switch of `app.selectedInterface`, by the picker or by the hash (B-42). */
+    async #interfaceSelected(wasStore: boolean): Promise<void> {
+        const interfaceName = this.app.selectedInterface;
         if (this.app.storeSelected) {
             if (!isStoreTabId(this.app.tab) || !this.tabs.includes(this.app.tab)) {
                 this.app.setTab(this.tabs[0] ?? 'metadata');

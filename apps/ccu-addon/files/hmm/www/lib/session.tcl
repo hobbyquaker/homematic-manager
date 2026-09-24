@@ -204,6 +204,37 @@ proc url_decode {value} {
     return [encoding convertfrom utf-8 $out]
 }
 
+# B-41: true for a POST. The settings page and service.cgi change state only on a POST; a GET only
+# shows, so a link or a redirect from a foreign site that carries the box's cookie changes nothing.
+proc request_is_post {} {
+    if {[catch {set method $::env(REQUEST_METHOD)}]} {
+        return 0
+    }
+    return [string equal [string toupper $method] "POST"]
+}
+
+# B-41: the fields of a POSTed form (application/x-www-form-urlencoded) as a name/value list,
+# decoded like the query. Empty for anything but a POST, and for a body over 64 KiB.
+proc post_params {} {
+    set params [list]
+    if {![request_is_post]} {
+        return $params
+    }
+    set length 0
+    catch {set length $::env(CONTENT_LENGTH)}
+    if {![regexp {^[0-9]+$} $length] || $length == 0 || $length > 65536} {
+        return $params
+    }
+    fconfigure stdin -translation binary
+    set body [read stdin $length]
+    foreach pair [split $body &] {
+        if {[regexp {^([^=]*)=(.*)$} $pair dummy name value]} {
+            lappend params [url_decode $name] [url_decode $value]
+        }
+    }
+    return $params
+}
+
 # Query parameters as a name/value list, decoded: `array set params [query_params]`. The WebUI
 # percent-encodes the `@` of a session id when it builds the settings URL, so a CGI that skips
 # decoding sees no valid session at all.

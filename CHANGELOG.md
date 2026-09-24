@@ -47,6 +47,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   object yet, so the names typed in the pairing dialog stayed in this application and were replaced by the CCU's at the
   next reconnect. They now wait, the dialog says so, and they are written to ReGa as soon as the inbox is confirmed
   here (the button, or the automatic confirmation). The `:0` channel is no longer renamed twice in the same script.
+- **The addon's settings page and `service.cgi` change nothing on a plain link.** Switching the login mode, the log
+  location or the idle time, and starting, stopping or restarting the service, were `GET` links - a crafted link
+  opened by an administrator who was signed in could make them. They are buttons that `POST` now, and a `GET` only
+  shows the page (the settings page says that nothing was changed; `service.cgi` answers _405_).
 
 ## [3.0.0-beta.22] — 2026-09-23
 

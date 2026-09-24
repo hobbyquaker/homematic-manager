@@ -1,13 +1,16 @@
 #!/bin/tclsh
 #
 # Service control and status for the WebUI and for a support session:
-# ?cmd=start|stop|restart|status returns JSON, ?cmd=log returns the tail of the log as plain text.
+# ?cmd=status returns JSON, ?cmd=log returns the tail of the log as plain text, and
+# cmd=start|stop|restart - only in a POST (B-41) - returns JSON.
 # Everything goes through /usr/local/etc/config/rc.d/hmm, so there is exactly one place that knows
 # how the backend is started.
 
 source [file join [file dirname [info script]] lib common.tcl]
 
 array set params [require_session]
+# B-41: a POST may carry its command in the body as well
+array set params [post_params]
 
 set cmd "status"
 if {[info exists params(cmd)]} {
@@ -89,6 +92,14 @@ switch -- $cmd {
     start -
     stop -
     restart {
+        # B-41: a change of state only on a POST; a GET - a link, a redirect - is refused
+        if {![request_is_post]} {
+            puts "Status: 405 Method Not Allowed"
+            puts "Allow: POST"
+            json_header
+            puts "{\"error\":\"start, stop and restart need a POST\"}"
+            exit 1
+        }
         json_header
         catch {exec $RC_SCRIPT $cmd} output
         set pid [pid_of]

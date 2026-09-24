@@ -351,7 +351,7 @@ check "and that the CCU's line is not read here" "HMM_AUTH_MODE=token in etc/hmm
 check "the settings page shows occulite" "current: <b>occulite</b>" "$(dex "curl -s '$LITE_SETTINGS'")"
 check "and names the CCU's line" "HMM_AUTH_MODE=token is in the file as well" "$(dex "curl -s '$LITE_SETTINGS'")"
 # the choice, written by the page
-out="$(dex "curl -s --max-time 90 '$LITE_SETTINGS&auth_mode=token'")"
+out="$(dex "curl -s --max-time 90 --data 'auth_mode=token' '$LITE_SETTINGS'")"
 check "choosing token on the page saves and restarts" "Saved, the service was restarted." "$out"
 check "as HMM_AUTH_MODE_LITE=token in etc/hmm.env" "HMM_AUTH_MODE_LITE=token" \
     "$(dex 'grep "^HMM_AUTH_MODE_LITE=" /usr/local/addons/hmm/etc/hmm.env')"
@@ -370,14 +370,14 @@ check "and the syslog says the line is no lite mode" "HMM_AUTH_MODE_LITE in etc/
 check "the settings page shows occulite" "current: <b>occulite</b>" "$(dex "curl -s '$LITE_SETTINGS'")"
 # what the page offers from there is the switch to token, and it replaces the line, whatever it held
 # (asking it for occulite writes nothing: that is what runs already)
-out="$(dex "curl -s --max-time 90 '$LITE_SETTINGS&auth_mode=token'")"
+out="$(dex "curl -s --max-time 90 --data 'auth_mode=token' '$LITE_SETTINGS'")"
 check "choosing token on the page from there saves and restarts" "Saved, the service was restarted." "$out"
 check "and replaces the rega line" "HMM_AUTH_MODE_LITE=token" \
     "$(dex 'grep "^HMM_AUTH_MODE_LITE=" /usr/local/addons/hmm/etc/hmm.env')"
 absent "with nothing of it left" "HMM_AUTH_MODE_LITE=rega" "$(dex 'cat /usr/local/addons/hmm/etc/hmm.env')"
 # and back to occulite from the page, which writes the line rather than removing it
 dex ': > /tmp/journal-addon-hmm.log' >/dev/null
-out="$(dex "curl -s --max-time 90 '$LITE_SETTINGS&auth_mode=occulite'")"
+out="$(dex "curl -s --max-time 90 --data 'auth_mode=occulite' '$LITE_SETTINGS'")"
 check "choosing occulite on the page saves and restarts" "Saved, the service was restarted." "$out"
 check "as HMM_AUTH_MODE_LITE=occulite" "HMM_AUTH_MODE_LITE=occulite" \
     "$(dex 'grep "^HMM_AUTH_MODE_LITE=" /usr/local/addons/hmm/etc/hmm.env')"
@@ -440,11 +440,11 @@ check "and in English" "Administrators only." "$out"
 absent "and not the settings page" "Anmeldung / Login" "$out"
 check "after the CGI asked the box, which named the role user" "occulite stub: GET /api/auth/v1/state user" \
     "$(dex 'cat /tmp/occulite-stub.log')"
-out="$(dex "curl -si --max-time 90 -H 'X-Occulite-Session: $USER_SID' 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config&auth_mode=token'")"
+out="$(dex "curl -si --max-time 90 -H 'X-Occulite-Session: $USER_SID' --data 'auth_mode=token' 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config'")"
 check "switching the mode with it: 403" "403 Forbidden" "$out"
 absent "and nothing saved" "Saved" "$out"
 check "etc/hmm.env is unchanged" "same" "$(dex 'cmp -s /tmp/hmm.env.b37 /usr/local/addons/hmm/etc/hmm.env && echo same')"
-out="$(dex "curl -si --max-time 90 -H 'X-Occulite-Session: $USER_SID' 'http://127.0.0.1/addons/hmm/service.cgi?cmd=restart'")"
+out="$(dex "curl -si --max-time 90 -H 'X-Occulite-Session: $USER_SID' --data 'cmd=restart' 'http://127.0.0.1/addons/hmm/service.cgi'")"
 check "service.cgi refuses a restart for it with a 403" "403 Forbidden" "$out"
 check "saying administrators only" '{"error":"administrators only"}' "$out"
 check "and the backend is the same process" "$PID_B37" "$(dex 'cat /usr/local/addons/hmm/var/hmm.pid')"
@@ -498,8 +498,14 @@ check "the settings page names the current location" "current: <b>varlog</b>" "$
 check "and shows the last lines of /var/log/hmm.log" "homematic-manager-web" "$out"
 dex 'echo t43-marker-varlog >> /var/log/hmm.log' >/dev/null
 check "service.cgi's log view reads /var/log/hmm.log" "t43-marker-varlog" "$(dex "curl -s '$LOG_VIEW'")"
+# B-41: through lighttpd as well, a GET changes nothing - a link from another site least of all
 out="$(dex "curl -s --max-time 90 '$SETTINGS&log=addon'")"
-check "settings.cgi?cmd=config&log=addon saves and restarts the service" "Saved, the service was restarted." "$out"
+check "a GET of log=addon changes nothing and says so (B-41)" "nothing was changed" "$out"
+absent "  and writes no HMM_ADDON_LOG" "HMM_ADDON_LOG=addon" "$(dex 'grep ^HMM_ADDON_LOG= /usr/local/addons/hmm/etc/hmm.env')"
+out="$(dex "curl -si '${LOG_VIEW%%&cmd=log}&cmd=restart'")"
+check "and a GET of service.cgi's restart is refused (B-41)" "405 Method Not Allowed" "$out"
+out="$(dex "curl -s --max-time 90 --data 'log=addon' '$SETTINGS'")"
+check "a POST of log=addon to settings.cgi?cmd=config saves and restarts the service" "Saved, the service was restarted." "$out"
 check "HMM_ADDON_LOG=addon is in etc/hmm.env" "HMM_ADDON_LOG=addon" \
     "$(dex 'grep ^HMM_ADDON_LOG= /usr/local/addons/hmm/etc/hmm.env')"
 check "and the service runs" "running" "$(dex '/usr/local/etc/config/rc.d/hmm status')"
@@ -516,7 +522,7 @@ dex 'dd if=/dev/zero bs=1024 count=1100 2>/dev/null >> /usr/local/addons/hmm/var
 check "a var/hmm.log over 1 MB is rotated at the start" "rotated" \
     "$(dex 'test -s /usr/local/addons/hmm/var/hmm.log.1 && echo rotated')"
 wait_for_log /usr/local/addons/hmm/var/hmm.log
-out="$(dex "curl -s --max-time 90 '$SETTINGS&log=varlog'")"
+out="$(dex "curl -s --max-time 90 --data 'log=varlog' '$SETTINGS'")"
 check "log=varlog switches back and restarts" "Saved, the service was restarted." "$out"
 check "HMM_ADDON_LOG=varlog is in etc/hmm.env" "HMM_ADDON_LOG=varlog" \
     "$(dex 'grep ^HMM_ADDON_LOG= /usr/local/addons/hmm/etc/hmm.env')"

@@ -67,8 +67,12 @@ ln -sfn "$TREE/www" "$TMP/config/addons/www/hmm"
 # cgi <script> <query>
 # Invoked the way lighttpd does: the working directory is the script's own and the script is named
 # relative to it. Passing an absolute path instead would hide whether the addon can find itself.
+# B-41: POST_BODY=<form fields> before a helper makes its call a POST with that body; without it
+# the call is a GET, which only shows.
 cgi() {
-    (cd "$TREE/www" && QUERY_STRING="$2" tclsh "$STUB" "$1" 2>&1)
+    body="${POST_BODY:-}"
+    printf '%s' "$body" | (cd "$TREE/www" && REQUEST_METHOD="${body:+POST}" CONTENT_LENGTH="${#body}" \
+        QUERY_STRING="$2" tclsh "$STUB" "$1" 2>&1)
 }
 
 # The openccu-lite box a CGI asks about a session (task 50): GET /api/auth/v1/state, answered by
@@ -248,11 +252,24 @@ else
     skip "reports resident memory and uptime" "no /proc on this host"
 fi
 rm -f "$HMM_PID_FILE"
-out="$(cgi service.cgi 'sid=@1234567890@&cmd=restart')"
+out="$(POST_BODY='-' cgi service.cgi 'sid=@1234567890@&cmd=restart')"
 case "$out" in
     *'rc.d called with restart'*) pass "passes start/stop/restart to the rc.d script" ;;
     *) fail "passes start/stop/restart to the rc.d script" "$out" ;;
 esac
+out="$(POST_BODY='cmd=stop' cgi service.cgi 'sid=@1234567890@')"
+case "$out" in
+    *'rc.d called with stop'*) pass "  the command may be a field of the POST too" ;;
+    *) fail "  the command may be a field of the POST too" "$out" ;;
+esac
+for cmd in start stop restart; do
+    out="$(cgi service.cgi "sid=@1234567890@&cmd=$cmd")"
+    case "$out" in
+        *'rc.d called'*) fail "a GET does not $cmd the service (B-41)" "$out" ;;
+        *'Status: 405 Method Not Allowed'*'Allow: POST'*'need a POST'*) pass "a GET does not $cmd the service (B-41)" ;;
+        *) fail "a GET does not $cmd the service (B-41)" "$out" ;;
+    esac
+done
 out="$(cgi service.cgi 'sid=@1234567890@&cmd=log')"
 case "$out" in
     *'line two'*) pass "returns the log" ;;
@@ -349,7 +366,7 @@ case "$out" in
     *) fail "a wrong token cookie does not" "$out" ;;
 esac
 
-out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&auth_mode=rega')"
+out="$(POST_BODY='auth_mode=rega' cgi settings.cgi 'sid=@1234567890@&cmd=config')"
 case "$out" in
     *'current: <b>rega</b>'*) pass "switching to rega is saved" ;;
     *) fail "switching to rega is saved" "$out" ;;
@@ -369,12 +386,12 @@ case "$(grep -c '^HMM_PORT=8090' "$TREE/etc/hmm.env")" in
     1) pass "and everything else in the file survived the write" ;;
     *) fail "and everything else in the file survived the write" "$(cat "$TREE/etc/hmm.env")" ;;
 esac
-out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&auth_mode=token')"
+out="$(POST_BODY='auth_mode=token' cgi settings.cgi 'sid=@1234567890@&cmd=config')"
 case "$out" in
     *'current: <b>token</b>'*) pass "and switching back works" ;;
     *) fail "and switching back works" "$out" ;;
 esac
-out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&auth_mode=oauth')"
+out="$(POST_BODY='auth_mode=oauth' cgi settings.cgi 'sid=@1234567890@&cmd=config')"
 case "$out" in
     *'Unbekannter Wert'*) pass "a mode that does not exist is refused" ;;
     *) fail "a mode that does not exist is refused" "$out" ;;
@@ -383,6 +400,26 @@ case "$(grep '^HMM_AUTH_MODE' "$TREE/etc/hmm.env")" in
     'HMM_AUTH_MODE=token') pass "and nothing was written for it" ;;
     *) fail "and nothing was written for it" "$(grep 'HMM_AUTH_MODE' "$TREE/etc/hmm.env")" ;;
 esac
+# B-41: a change only in a POST; a GET - a link, a redirect from another site - only shows the page
+: > "$RC_CALLS"
+out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&auth_mode=rega')"
+case "$out" in
+    *'nichts geändert'*'nothing was changed'*'current: <b>token</b>'*) pass "a switch in a GET is refused, and the page says so (B-41)" ;;
+    *) fail "a switch in a GET is refused, and the page says so (B-41)" "$out" ;;
+esac
+if [ "$(grep '^HMM_AUTH_MODE' "$TREE/etc/hmm.env")" = 'HMM_AUTH_MODE=token' ] && [ ! -s "$RC_CALLS" ]; then
+    pass "  nothing written, nothing restarted"
+else
+    fail "  nothing written, nothing restarted" "$(grep 'HMM_AUTH_MODE' "$TREE/etc/hmm.env"; cat "$RC_CALLS")"
+fi
+for change in 'log=addon' 'idle=0'; do
+    cgi settings.cgi "sid=@1234567890@&cmd=config&$change" >/dev/null
+done
+if grep -qE '^(HMM_ADDON_LOG|HMM_IDLE_UNSUBSCRIBE)=' "$TREE/etc/hmm.env" || [ -s "$RC_CALLS" ]; then
+    fail "  nor the log location or the idle time in a GET" "$(grep -E 'HMM_ADDON_LOG|HMM_IDLE' "$TREE/etc/hmm.env"; cat "$RC_CALLS")"
+else
+    pass "  nor the log location or the idle time in a GET"
+fi
 
 echo "the log location on the addon settings page (task 43)"
 cp -a "$ADDON_SRC/files/hmm/etc/default.env" "$TREE/etc/hmm.env"
@@ -398,8 +435,8 @@ case "$out" in
     *) fail "unset means varlog, /var/log/hmm.log" "$out" ;;
 esac
 case "$out" in
-    *'settings.cgi?cmd=config&amp;log=addon&amp;sid=@1234567890@'*) pass "and the link switches to the addon directory" ;;
-    *) fail "and the link switches to the addon directory" "$out" ;;
+    *'<form class="choice" method="post" action="settings.cgi?cmd=config&amp;sid=@1234567890@">'*'name="log" value="addon"'*) pass "and a button POSTs the switch to the addon directory" ;;
+    *) fail "and a button POSTs the switch to the addon directory" "$out" ;;
 esac
 case "$out" in
     *'keine Schreibzugriffe auf die SD-Karte'*'no writes to the SD card'*'schreibt dafür auf die SD-Karte'*'writes to the SD card'*) pass "each with its trade-off, in German and English" ;;
@@ -417,7 +454,7 @@ case "$out" in
     *'occulited'*) fail "and no journal line on a CCU" "$out" ;;
     *) pass "and no journal line on a CCU" ;;
 esac
-out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&log=addon')"
+out="$(POST_BODY='log=addon' cgi settings.cgi 'sid=@1234567890@&cmd=config')"
 case "$out" in
     *'current: <b>addon</b>'*) pass "switching to the addon directory is saved" ;;
     *) fail "switching to the addon directory is saved" "$out" ;;
@@ -435,21 +472,21 @@ case "$out" in
     *) fail "and the page says so" "$out" ;;
 esac
 case "$out" in
-    *'&amp;log=varlog'*) pass "the link now switches back to /var/log" ;;
-    *) fail "the link now switches back to /var/log" "$out" ;;
+    *'name="log" value="varlog"'*) pass "the button now switches back to /var/log" ;;
+    *) fail "the button now switches back to /var/log" "$out" ;;
 esac
 case "$out" in
     *'<pre>line one'*'line two'*'</pre>'*) pass "and the log shown follows the setting" ;;
     *) fail "and the log shown follows the setting" "$out" ;;
 esac
 : > "$RC_CALLS"
-cgi settings.cgi 'sid=@1234567890@&cmd=config&log=addon' >/dev/null
+POST_BODY='log=addon' cgi settings.cgi 'sid=@1234567890@&cmd=config' >/dev/null
 if [ -s "$RC_CALLS" ]; then
     fail "choosing the location that is already set restarts nothing" "$(cat "$RC_CALLS")"
 else
     pass "choosing the location that is already set restarts nothing"
 fi
-out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&log=syslog')"
+out="$(POST_BODY='log=syslog' cgi settings.cgi 'sid=@1234567890@&cmd=config')"
 case "$out" in
     *'Unbekannter Wert'*) pass "a location that does not exist is refused" ;;
     *) fail "a location that does not exist is refused" "$out" ;;
@@ -459,7 +496,7 @@ if [ "$(grep '^HMM_ADDON_LOG' "$TREE/etc/hmm.env")" = 'HMM_ADDON_LOG=addon' ] &&
 else
     fail "and nothing was written or restarted for it" "$(grep 'HMM_ADDON_LOG' "$TREE/etc/hmm.env"; cat "$RC_CALLS")"
 fi
-out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&log=varlog')"
+out="$(POST_BODY='log=varlog' cgi settings.cgi 'sid=@1234567890@&cmd=config')"
 if [ "$(grep '^HMM_ADDON_LOG' "$TREE/etc/hmm.env")" = 'HMM_ADDON_LOG=varlog' ] && [ "$(cat "$RC_CALLS")" = restart ]; then
     pass "switching back to /var/log writes varlog and restarts"
 else
@@ -480,10 +517,10 @@ case "$out" in
     *) fail "the page offers the idle time, unset meaning the default" "$out" ;;
 esac
 case "$out" in
-    *'settings.cgi?cmd=config&amp;idle=0&amp;sid=@1234567890@'*'nie / never'*) pass "with never among the choices" ;;
+    *'method="post" action="settings.cgi?cmd=config&amp;sid=@1234567890@"'*'name="idle" value="0">nie / never'*) pass "with never among the choices" ;;
     *) fail "with never among the choices" "$out" ;;
 esac
-out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&idle=0')"
+out="$(POST_BODY='idle=0' cgi settings.cgi 'sid=@1234567890@&cmd=config')"
 if [ "$(grep -E '^ *#? *HMM_IDLE_UNSUBSCRIBE=' "$TREE/etc/hmm.env")" = 'HMM_IDLE_UNSUBSCRIBE=0' ] && [ "$(cat "$RC_CALLS")" = restart ]; then
     pass "never writes HMM_IDLE_UNSUBSCRIBE=0 as the one line and restarts"
 else
@@ -494,7 +531,7 @@ case "$out" in
     *) fail "and the page shows it" "$out" ;;
 esac
 : > "$RC_CALLS"
-out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&idle=5d')"
+out="$(POST_BODY='idle=5d' cgi settings.cgi 'sid=@1234567890@&cmd=config')"
 if [ "$(grep -E '^ *#? *HMM_IDLE_UNSUBSCRIBE=' "$TREE/etc/hmm.env")" = 'HMM_IDLE_UNSUBSCRIBE=0' ] && [ ! -s "$RC_CALLS" ]; then
     pass "a time that is not offered is refused, nothing written or restarted"
 else
@@ -504,7 +541,7 @@ case "$out" in
     *'Unbekannter Wert'*) pass "and the page says so" ;;
     *) fail "and the page says so" "$out" ;;
 esac
-out="$(cgi settings.cgi 'sid=@1234567890@&cmd=config&idle=default')"
+out="$(POST_BODY='idle=default' cgi settings.cgi 'sid=@1234567890@&cmd=config')"
 if [ "$(grep -E '^ *#? *HMM_IDLE_UNSUBSCRIBE=' "$TREE/etc/hmm.env")" = '#HMM_IDLE_UNSUBSCRIBE=5m' ] && [ "$(cat "$RC_CALLS")" = restart ]; then
     pass "the default comments the line out again and restarts"
 else
@@ -535,7 +572,7 @@ case "$out" in
     *) fail "and the page explains the hand-over instead of the ReGa login" "$out" ;;
 esac
 case "$out" in
-    *'auth_mode=rega'*) fail "and rega is not offered there" "$out" ;;
+    *'value="rega"'*) fail "and rega is not offered there" "$out" ;;
     *) pass "and rega is not offered there" ;;
 esac
 case "$out" in
@@ -547,11 +584,11 @@ case "$out" in
     *) fail "with the journal line, in German and English (task 43)" "$out" ;;
 esac
 case "$out" in
-    *'log=addon'* | *'log=varlog'* | *'<b>varlog</b>'* | *'<pre>'*) fail "and no location to choose, no log file shown" "$out" ;;
+    *'name="log"'* | *'<b>varlog</b>'* | *'<pre>'*) fail "and no location to choose, no log file shown" "$out" ;;
     *) pass "and no location to choose, no log file shown" ;;
 esac
 : > "$RC_CALLS"
-out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config&log=addon' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
+out="$(cd "$TREE/www" && printf '%s' 'log=addon' | REQUEST_METHOD=POST CONTENT_LENGTH=9 QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
 case "$out" in
     *'nichts umzustellen'*) pass "a switch of the log location is refused on a lite box" ;;
     *) fail "a switch of the log location is refused on a lite box" "$out" ;;
@@ -567,7 +604,7 @@ case "$out" in
     *) fail "unset means token on a CCU, exactly as before" "$out" ;;
 esac
 case "$out" in
-    *'auth_mode=rega'*) pass "and rega is what is offered there" ;;
+    *'name="auth_mode" value="rega"'*) pass "and rega is what is offered there" ;;
     *) fail "and rega is what is offered there" "$out" ;;
 esac
 case "$out" in
@@ -575,7 +612,7 @@ case "$out" in
     *) pass "and no Log page link on a CCU" ;;
 esac
 # a mode that belongs to the other firmware is refused rather than written into hmm.env
-out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config&auth_mode=rega' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
+out="$(cd "$TREE/www" && printf '%s' 'auth_mode=rega' | REQUEST_METHOD=POST CONTENT_LENGTH=14 QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
 case "$out" in
     *'Unbekannter Wert'*) pass "rega is refused on a lite box" ;;
     *) fail "rega is refused on a lite box" "$out" ;;
@@ -587,13 +624,13 @@ else
 fi
 # choosing what is already the effective mode writes nothing: unset is the better state, because it
 # is the one that still fits after the same /usr/local has been moved to the other firmware
-out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config&auth_mode=occulite' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
+out="$(cd "$TREE/www" && printf '%s' 'auth_mode=occulite' | REQUEST_METHOD=POST CONTENT_LENGTH=18 QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
 if grep -q '^HMM_AUTH_MODE' "$TREE/etc/hmm.env"; then
     fail "choosing the mode that is already effective writes nothing" "$(grep '^HMM_AUTH_MODE' "$TREE/etc/hmm.env")"
 else
     pass "choosing the mode that is already effective writes nothing"
 fi
-out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config&auth_mode=token' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
+out="$(cd "$TREE/www" && printf '%s' 'auth_mode=token' | REQUEST_METHOD=POST CONTENT_LENGTH=15 QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
 case "$out" in
     *'current: <b>token</b>'*) pass "switching a lite box to token works" ;;
     *) fail "switching a lite box to token works" "$out" ;;
@@ -618,7 +655,7 @@ case "$out" in
     *'This writes HMM_AUTH_MODE_LITE to'*) pass "and the page names the line it writes" ;;
     *) fail "and the page names the line it writes" "$out" ;;
 esac
-out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config&auth_mode=occulite' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
+out="$(cd "$TREE/www" && printf '%s' 'auth_mode=occulite' | REQUEST_METHOD=POST CONTENT_LENGTH=18 QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
 case "$(grep '^HMM_AUTH_MODE_LITE=' "$TREE/etc/hmm.env")" in
     'HMM_AUTH_MODE_LITE=occulite') pass "and back to occulite, which is written this time" ;;
     *) fail "and back to occulite, which is written this time" "$(grep 'HMM_AUTH_MODE' "$TREE/etc/hmm.env")" ;;
@@ -644,7 +681,7 @@ case "$out" in
     *'HMM_AUTH_MODE=token is in the file as well'*"is a CCU's setting and is not read on openccu-lite"*) pass "and the page says the CCU's line is not read here" ;;
     *) fail "and the page says the CCU's line is not read here" "$out" ;;
 esac
-out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config&auth_mode=occulite' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
+out="$(cd "$TREE/www" && printf '%s' 'auth_mode=occulite' | REQUEST_METHOD=POST CONTENT_LENGTH=18 QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
 if grep -q '^HMM_AUTH_MODE_LITE' "$TREE/etc/hmm.env" || [ -s "$RC_CALLS" ]; then
     fail "choosing occulite there writes nothing, it is what runs" "$(grep 'HMM_AUTH_MODE' "$TREE/etc/hmm.env"; cat "$RC_CALLS")"
 else
@@ -728,7 +765,8 @@ echo "the openccu-lite session header on settings.cgi and service.cgi (task 50)"
 # unless a case says otherwise.
 # lite_cgi <script> <query> <header>: the CGI on a lite box, the header as the gate sets it
 lite_cgi() {
-    (cd "$TREE/www" && QUERY_STRING="$2" HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
+    body="${POST_BODY:-}"
+    printf '%s' "$body" | (cd "$TREE/www" && REQUEST_METHOD="${body:+POST}" CONTENT_LENGTH="${#body}" QUERY_STRING="$2" HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
         HTTP_X_OCCULITE_SESSION="$3" HMM_TEST_SESSION=invalid tclsh "$STUB" "$1" 2>&1)
 }
 # the settings pages above asked about their administrator's header
@@ -903,7 +941,8 @@ TOKEN_COOKIE='hmm_token=deadbeefcafebabe0123456789abcdef'
 UNKNOWN=UNKNOWNUNKNOWNUNKNOWNUNK22
 # b37 <script> <query> <header> [<HMM_TEST_SESSION>] [<cookie>] [<box URL>]: the CGI on a lite box
 b37() {
-    (cd "$TREE/www" && QUERY_STRING="$2" HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="${6:-$STATE_URL}" \
+    body="${POST_BODY:-}"
+    printf '%s' "$body" | (cd "$TREE/www" && REQUEST_METHOD="${body:+POST}" CONTENT_LENGTH="${#body}" QUERY_STRING="$2" HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="${6:-$STATE_URL}" \
         HTTP_X_OCCULITE_SESSION="$3" HMM_TEST_SESSION="${4:-invalid}" HTTP_COOKIE="${5:-}" tclsh "$STUB" "$1" 2>&1)
 }
 # admin_only <description> <output>: the settings page's 403 in German and English, and nothing of the page
@@ -959,27 +998,27 @@ asked "  after one question to the box" "$LIVE"
 out="$(b37 settings.cgi 'cmd=config' "$USERSID")"
 admin_only "a user's session in the header gets the administrators-only page instead" "$out"
 asked "  after one question to the box" "$USERSID"
-out="$(b37 settings.cgi 'cmd=config&auth_mode=token' "$USERSID")"
+out="$(POST_BODY='auth_mode=token' b37 settings.cgi 'cmd=config' "$USERSID")"
 admin_only "a user's session in the header cannot switch the mode" "$out"
-out="$(b37 settings.cgi 'cmd=config&log=addon' "$USERSID")"
+out="$(POST_BODY='log=addon' b37 settings.cgi 'cmd=config' "$USERSID")"
 admin_only "nor the log location" "$out"
 unchanged "  nothing written, nothing restarted"
 state_calls >/dev/null
 out="$(b37 service.cgi 'cmd=status' "$USERSID")"
 service_refused "service.cgi refuses a user's session in the header: status" "$out"
 for cmd in restart stop start log havoc; do
-    out="$(b37 service.cgi "cmd=$cmd" "$USERSID")"
+    out="$(POST_BODY='-' b37 service.cgi "cmd=$cmd" "$USERSID")"
     service_refused "  and $cmd" "$out"
 done
 unchanged "  nothing started, stopped or restarted"
 state_calls >/dev/null
-out="$(b37 service.cgi 'cmd=restart' "$LIVE")"
+out="$(POST_BODY='-' b37 service.cgi 'cmd=restart' "$LIVE")"
 case "$out" in
     *'rc.d called with restart'*) pass "an administrator's session in the header restarts the service" ;;
     *) fail "an administrator's session in the header restarts the service" "$out" ;;
 esac
 : > "$RC_CALLS"
-out="$(b37 settings.cgi 'cmd=config&auth_mode=token' "$LIVE")"
+out="$(POST_BODY='auth_mode=token' b37 settings.cgi 'cmd=config' "$LIVE")"
 if [ "$(grep '^HMM_AUTH_MODE_LITE=' "$TREE/etc/hmm.env")" = 'HMM_AUTH_MODE_LITE=token' ] && [ "$(cat "$RC_CALLS")" = restart ]; then
     pass "and switches the mode: written and restarted"
 else
@@ -1020,7 +1059,7 @@ case "$out" in
     *'Sitzung ungültig'*) pass "without any session it stays the invalid-session page, not a 403" ;;
     *) fail "without any session it stays the invalid-session page, not a 403" "$out" ;;
 esac
-out="$(b37 service.cgi 'cmd=restart' "$UNKNOWN")"
+out="$(POST_BODY='-' b37 service.cgi 'cmd=restart' "$UNKNOWN")"
 case "$out" in
     *'Status: 403'*) fail "and service.cgi says invalid session, as before" "$out" ;;
     *'{"error":"invalid session"}'*) pass "and service.cgi says invalid session, as before" ;;
@@ -1045,11 +1084,11 @@ case "$out" in
     *) fail "a header the box does not confirm falls through to an administrator's ?sid=" "$out" ;;
 esac
 asked "  after asking about both" "$UNKNOWN $OLDADMIN"
-out="$(b37 settings.cgi 'cmd=config&auth_mode=token&sid=@1234567890@' '' valid)"
+out="$(POST_BODY='auth_mode=token' b37 settings.cgi 'cmd=config&sid=@1234567890@' '' valid)"
 admin_only "?sid= with an alias the shim confirms and the box's API refuses: administrators only" "$out"
 asked "  after asking the box, which cannot tell the alias's role" "1234567890"
 unchanged "  nothing written, nothing restarted"
-out="$(b37 service.cgi 'cmd=restart&sid=@1234567890@' '' valid)"
+out="$(POST_BODY='-' b37 service.cgi 'cmd=restart&sid=@1234567890@' '' valid)"
 service_refused "service.cgi refuses the same alias" "$out"
 unchanged "  nothing restarted"
 state_calls >/dev/null
@@ -1059,7 +1098,7 @@ admin_only "the alias as the header and in ?sid=: administrators only" "$out"
 asked "  after one question about it, not two" "1234567890"
 
 # the token cookie
-out="$(b37 settings.cgi 'cmd=config&auth_mode=token' '' invalid "a=1; $TOKEN_COOKIE")"
+out="$(POST_BODY='auth_mode=token' b37 settings.cgi 'cmd=config' '' invalid "a=1; $TOKEN_COOKIE")"
 admin_only "the token cookie alone does not open the settings page on openccu-lite" "$out"
 unchanged "  nothing written, nothing restarted"
 asked "  and the box was not asked" ""
@@ -1072,7 +1111,7 @@ case "$out" in
     *'Sitzung ungültig'*) pass "a wrong token cookie gets the invalid-session page" ;;
     *) fail "a wrong token cookie gets the invalid-session page" "$out" ;;
 esac
-out="$(b37 service.cgi 'cmd=restart' '' invalid "$TOKEN_COOKIE")"
+out="$(POST_BODY='-' b37 service.cgi 'cmd=restart' '' invalid "$TOKEN_COOKIE")"
 case "$out" in
     *'{"error":"invalid session"}'*) pass "service.cgi never took the cookie, and still does not" ;;
     *) fail "service.cgi never took the cookie, and still does not" "$out" ;;
@@ -1096,7 +1135,8 @@ state_calls >/dev/null
 # a CCU and OpenCCU: any WebUI session, as before - ReGa names a user and no level, and no box is asked
 # ccu_b37 <VERSION file> <script> <query> <HMM_TEST_SESSION> [<cookie>]: with a client-sent header of a user's session
 ccu_b37() {
-    (cd "$TREE/www" && QUERY_STRING="$3" HMM_VERSION_FILE="$1" HMM_OCCULITE_URL="$STATE_URL" \
+    body="${POST_BODY:-}"
+    printf '%s' "$body" | (cd "$TREE/www" && REQUEST_METHOD="${body:+POST}" CONTENT_LENGTH="${#body}" QUERY_STRING="$3" HMM_VERSION_FILE="$1" HMM_OCCULITE_URL="$STATE_URL" \
         HTTP_X_OCCULITE_SESSION="$USERSID" HMM_TEST_SESSION="$4" HTTP_COOKIE="${5:-}" tclsh "$STUB" "$2" 2>&1)
 }
 for case in "$CCU_VERSION:a CCU" "$TMP/no-such-VERSION:a firmware without /VERSION"; do
@@ -1115,7 +1155,7 @@ for case in "$CCU_VERSION:a CCU" "$TMP/no-such-VERSION:a firmware without /VERSI
         *'Anmeldung / Login'*) pass "  and so does the token cookie" ;;
         *) fail "  and so does the token cookie" "$out" ;;
     esac
-    out="$(ccu_b37 "$file" service.cgi 'cmd=restart&sid=@1234567890@' valid)"
+    out="$(POST_BODY='-' ccu_b37 "$file" service.cgi 'cmd=restart&sid=@1234567890@' valid)"
     case "$out" in
         *'rc.d called with restart'*) pass "  and service.cgi restarts the service for it" ;;
         *) fail "  and service.cgi restarts the service for it" "$out" ;;

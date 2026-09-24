@@ -242,7 +242,8 @@ The rc.d script is the interface for everything:
 /usr/local/etc/config/rc.d/hmm uninstall purge    # deletes the profile as well
 ```
 
-The same commands are behind `service.cgi` (`?sid=…&cmd=start|stop|restart|status|log`), and the
+The same commands are behind `service.cgi` (`?sid=…&cmd=status|log`, and `start|stop|restart` only in a POST - a
+link or a plain GET cannot stop the service), and the
 _Neu starten_ and _Deinstallieren_ buttons on the Zusatzsoftware page call `restart` and
 `uninstall`. On OpenCCU monit restarts the process when it dies — passively, because starting it at
 boot is `S98StartAddons`'s job and two backends on one port would fight over the interface

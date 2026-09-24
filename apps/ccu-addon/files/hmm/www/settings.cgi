@@ -22,7 +22,7 @@
 # The second thing is `?cmd=config` (D-32): the addon's settings page, which is where the optional
 # login against ReGa is switched on and off. It is a separate URL on purpose - the button in
 # Systemsteuerung opens the app, as it always has, and the hand-over above is untouched by any of
-# the settings below.
+# the settings below. Its changes are POSTs from its own buttons; a GET only shows it (B-41).
 
 source [file join [file dirname [info script]] lib common.tcl]
 
@@ -79,6 +79,15 @@ if {[string equal $cmd "config"] && $lite} {
 # ---------------------------------------------------------------------------------------------
 if {[string equal $cmd "config"]} {
     set message ""
+    # B-41: a change only from the page's own form, a POST; its fields come from the body. A GET
+    # only shows the page - a link or a redirect from another site changes nothing, even with the
+    # box's cookie along (openccu-lite task 213's gate refuses those before they get here as well).
+    array set change [post_params]
+    foreach name {auth_mode log idle} {
+        if {[info exists params($name)] && ![info exists change($name)]} {
+            set message "Eine Änderung geht nur über die Knöpfe dieser Seite; es wurde nichts geändert. / A change only goes through this page's buttons; nothing was changed."
+        }
+    }
     # D-40: on openccu-lite the second mode is not `rega` - there is no ReGaHSS and the users are
     # the box's own - it is `occulite`, where the session the box's shell hands over is checked
     # against the box's own API. Which of the two is offered is decided at runtime, so the same
@@ -106,8 +115,8 @@ if {[string equal $cmd "config"]} {
         set mode "token"
     }
 
-    if {[info exists params(auth_mode)]} {
-        set wanted $params(auth_mode)
+    if {[info exists change(auth_mode)]} {
+        set wanted $change(auth_mode)
         if {[string equal $wanted "token"] || [string equal $wanted $other]} {
             if {![string equal $wanted $mode]} {
                 write_env $variable $wanted
@@ -124,8 +133,8 @@ if {[string equal $cmd "config"]} {
     # above: written into hmm.env, which rc.d/hmm reads at the start the restart does. On openccu-lite
     # the log is the journal and there is nothing to choose.
     set logchoice [log_choice]
-    if {[info exists params(log)]} {
-        set wanted $params(log)
+    if {[info exists change(log)]} {
+        set wanted $change(log)
         if {$lite} {
             set message "Auf openccu-lite steht das Log im Journal, es gibt nichts umzustellen. / On openccu-lite the log is the journal, there is nothing to switch."
         } elseif {[string equal $wanted "varlog"] || [string equal $wanted "addon"]} {
@@ -147,8 +156,8 @@ if {[string equal $cmd "config"]} {
     # parse, and a typo here would keep the service from starting.
     set idle_choices {15m 30m 1h 4h 0}
     set idlechoice [read_env HMM_IDLE_UNSUBSCRIBE ""]
-    if {[info exists params(idle)]} {
-        set wanted $params(idle)
+    if {[info exists change(idle)]} {
+        set wanted $change(idle)
         if {[string equal $wanted "default"] || [lsearch -exact $idle_choices $wanted] >= 0} {
             if {[string equal $wanted "default"]} {
                 set target ""
@@ -174,6 +183,8 @@ if {[string equal $cmd "config"]} {
     if {![string equal $sid ""]} {
         set query "&sid=$sid"
     }
+    # B-41: every change is a button in a form that POSTs to this page, the session in its address
+    set action [html_escape "settings.cgi?cmd=config$query"]
 
     html_header
     puts "<!DOCTYPE html><html lang=\"de\"><head><meta charset=\"utf-8\">"
@@ -181,6 +192,7 @@ if {[string equal $cmd "config"]} {
     puts "<style>body{font-family:sans-serif;margin:2em;max-width:44em}"
     puts "h1{font-size:1.3em}h2{font-size:1.05em;margin-top:1.6em}"
     puts "p.note{color:#666}p.msg{padding:.5em .7em;border:1px solid #2779aa;background:#eef4fb}"
+    puts "form.choice{display:inline;margin:0}form.choice button{margin:0 .3em .3em 0}"
     puts "table{border-collapse:collapse}td{padding:.2em .8em .2em 0;vertical-align:top}"
     puts "pre{background:#f4f4f4;padding:.5em .7em;overflow:auto;max-height:30em;font-size:.85em}"
     puts "</style></head><body>"
@@ -210,12 +222,13 @@ if {[string equal $cmd "config"]} {
     puts "</td></tr></table>"
     puts "<p>Aktuell / current: <b>[html_escape $mode]</b></p>"
     if {[string equal $mode $other]} {
-        puts "<p><a href=\"settings.cgi?cmd=config&amp;auth_mode=token$query\">Auf <b>token</b>"
-        puts "umstellen / switch to <b>token</b></a></p>"
+        set switchmode "token"
     } else {
-        puts "<p><a href=\"settings.cgi?cmd=config&amp;auth_mode=[html_escape $other]$query\">Auf"
-        puts "<b>[html_escape $other]</b> umstellen / switch to <b>[html_escape $other]</b></a></p>"
+        set switchmode $other
     }
+    puts "<form class=\"choice\" method=\"post\" action=\"$action\"><p>"
+    puts "<button type=\"submit\" name=\"auth_mode\" value=\"[html_escape $switchmode]\">Auf"
+    puts "<b>[html_escape $switchmode]</b> umstellen / switch to <b>[html_escape $switchmode]</b></button></p></form>"
     puts "<p class=\"note\">Das schreibt $variable nach"
     puts "/usr/local/addons/hmm/etc/hmm.env und startet den Dienst neu. Dieselbe Datei nimmt jede"
     puts "weitere Option des Hosts auf (<code>homematic-manager-web --help</code>), z.B."
@@ -254,8 +267,9 @@ if {[string equal $cmd "config"]} {
         } else {
             set switchto "addon"
         }
-        puts "<p><a href=\"settings.cgi?cmd=config&amp;log=$switchto[html_escape $query]\">Auf"
-        puts "<b>$switchto</b> umstellen / switch to <b>$switchto</b></a></p>"
+        puts "<form class=\"choice\" method=\"post\" action=\"$action\"><p>"
+        puts "<button type=\"submit\" name=\"log\" value=\"$switchto\">Auf"
+        puts "<b>$switchto</b> umstellen / switch to <b>$switchto</b></button></p></form>"
         puts "<p class=\"note\">Das schreibt HMM_ADDON_LOG nach /usr/local/addons/hmm/etc/hmm.env und"
         puts "startet den Dienst neu; die Datei am anderen Ort wird dabei gelöscht. Beide Dateien werden"
         puts "bei 1 MB rotiert (hmm.log.1).</p>"
@@ -289,10 +303,10 @@ if {[string equal $cmd "config"]} {
         if {[string equal $value $idleshown]} {
             lappend entries "<b>$de / $en</b>"
         } else {
-            lappend entries "<a href=\"settings.cgi?cmd=config&amp;idle=$value[html_escape $query]\">$de / $en</a>"
+            lappend entries "<button type=\"submit\" name=\"idle\" value=\"$value\">$de / $en</button>"
         }
     }
-    puts "<p>[join $entries { &middot; }]</p>"
+    puts "<form class=\"choice\" method=\"post\" action=\"$action\"><p>[join $entries { }]</p></form>"
     puts "<p class=\"note\">Voreinstellung: 5 Minuten, oder die Zeit aus den Einstellungen der App."
     puts "Eine Wahl hier schreibt HMM_IDLE_UNSUBSCRIBE nach /usr/local/addons/hmm/etc/hmm.env, gilt"
     puts "vor der Einstellung der App und startet den Dienst neu."

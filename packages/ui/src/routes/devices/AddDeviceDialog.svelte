@@ -293,6 +293,15 @@
             <span></span>
             <p class="hmm-add-hint" data-testid="add-device-hmip-hint">{hmipHint}</p>
         </div>
+        <!-- openccu-lite task 217: an access point (HAP, DRAP) is paired through the same install mode -->
+        <div class="hmm-add-row">
+            <span></span>
+            <p class="hmm-add-hint" data-testid="add-device-ap-hint">
+                {t(
+                    'An access point (HAP, DRAP) is paired like a device: factory-reset it, start the install mode, then power it. System and access point must be in the same network.',
+                )}
+            </p>
+        </div>
 
         {#if hmipMode !== 'ANY'}
             <label class="hmm-add-row">

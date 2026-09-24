@@ -745,6 +745,12 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Der Schlüssel vom Aufkleber (26 Zeichen, Bindestriche optional), oder den QR-Code scannen.',
         en: 'The key from the sticker (26 characters, dashes optional), or scan the QR code.',
     },
+    // openccu-lite task 217: the pairing dialog's line for HmIP access points.
+    'An access point (HAP, DRAP) is paired like a device: factory-reset it, start the install mode, then power it. System and access point must be in the same network.':
+        {
+            de: 'Ein Access Point (HAP, DRAP) wird wie ein Gerät angelernt: auf Werkseinstellungen zurücksetzen, den Anlernmodus starten, dann mit Strom versorgen. System und Access Point müssen im selben Netzwerk sein.',
+            en: 'An access point (HAP, DRAP) is paired like a device: factory-reset it, start the install mode, then power it. System and access point must be in the same network.',
+        },
     'That is not a HomematicIP device code': {
         de: 'Das ist kein HomematicIP-Gerätecode',
         en: 'That is not a HomematicIP device code',

@@ -90,4 +90,12 @@ describe('the add-device dialog with a real QR code (B-72)', () => {
         await openDialog();
         expect(screen.getByTestId('add-device-key-hint').textContent).toMatch(/26/);
     });
+
+    // openccu-lite task 217: how a HAP or DRAP is paired, said where HmIP devices are paired
+    it('says how an access point is paired', async () => {
+        await openDialog();
+        const hint = screen.getByTestId('add-device-ap-hint').textContent;
+        expect(hint).toMatch(/HAP, DRAP/);
+        expect(hint).toMatch(/auf Werkseinstellungen zurücksetzen, den Anlernmodus starten, dann mit Strom versorgen/);
+    });
 });

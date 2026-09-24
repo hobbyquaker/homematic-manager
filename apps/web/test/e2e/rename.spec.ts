@@ -94,7 +94,9 @@ test('a double click on a device or a channel name opens the rename dialog for i
     await expect(dialog).not.toHaveAttribute('open');
     await expect(row.getByRole('button', {name: 'Collapse row'})).toBeVisible();
 
-    // the dialog gave the focus back to the grid: F2 renames the selected channel from there
+    // the dialog gave the focus back to the grid: F2 renames the selected channel from there.
+    // B-45: wait for the focus first - a key pressed before it is back goes nowhere.
+    await expect(channel).toBeFocused();
     await page.keyboard.press('F2');
     await expect(dialog).toHaveAttribute('open', '');
     await expect(page.getByTestId('rename-input')).toHaveValue('Steckdose:1');

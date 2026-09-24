@@ -127,6 +127,13 @@
 
     function close(): void {
         open = false;
+        // B-45: close the native dialog before the focus goes back. While a modal dialog is open
+        // everything outside it is inert, so a focus() on the opener would be dropped and the
+        // grid would depend on the browser's own restore, which comes a flush later - an F2
+        // pressed right after the dialog closed could land on nothing.
+        if (element?.open) {
+            element.close();
+        }
         onclose?.();
         previouslyFocused?.focus();
         previouslyFocused = undefined;

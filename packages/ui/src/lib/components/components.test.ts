@@ -43,6 +43,22 @@ describe('Dialog', () => {
         trigger.remove();
     });
 
+    it('gives the focus back at once, not a flush later through the browser (B-45)', async () => {
+        const trigger = document.createElement('button');
+        document.body.append(trigger);
+        trigger.focus();
+        const {rerender} = render(Dialog, {props: {open: false, title: 'Rename'}});
+        await rerender({open: true, title: 'Rename'});
+        const dialog = document.querySelector('dialog')!;
+        expect(document.activeElement).not.toBe(trigger);
+
+        // synchronously: no await between the ESC and the check, so no effect has run yet
+        dialog.dispatchEvent(new Event('cancel', {cancelable: true}));
+        expect(dialog.open).toBe(false);
+        expect(document.activeElement).toBe(trigger);
+        trigger.remove();
+    });
+
     it('closes on ESC only when it may be closed', async () => {
         const {rerender} = render(Dialog, {props: {open: true, title: 'RPC execution', closable: false}});
         const dialog = document.querySelector('dialog');

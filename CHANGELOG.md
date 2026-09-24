@@ -6,6 +6,14 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **A key pressed right after a dialog closed reaches the grid.** A dialog handed the focus back to the row it was
+  opened from while it was still modal, so the browser dropped it and put it back a moment later on its own; an F2
+  (rename) or an arrow key pressed in that moment went nowhere. The dialog now closes first and then focuses the row.
+
 ## [3.0.0-beta.22] — 2026-09-23
 
 ### New

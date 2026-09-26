@@ -70,6 +70,49 @@ describe('easyForm (task 62)', () => {
         expect(easyFormOf(undefined, description)).toBeUndefined();
     });
 
+    // B-73 (#168): the WebUI's BLIND_VIRTUAL_RECEIVER form takes one of three branches by the
+    // channel's `channelMode` metadata; the extract is the union of them, so the same control is
+    // listed up to three times. A form draws each control once - the first branch's occurrence -
+    // or Svelte's keyed each throws `each_key_duplicate` on the second.
+    it("draws a control listed by several branches once, with the first branch's label", () => {
+        const blind: ParamsetDescription = {
+            LOGIC_COMBINATION: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['OR', 'AND']},
+            LOGIC_COMBINATION_2: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['OR', 'AND']},
+            POSITION_SAVE_TIME: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 25.5},
+            EVENT_DELAY_UNIT: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['S', 'M', 'H']},
+            EVENT_DELAY_VALUE: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 15},
+        };
+        const form = easyFormOf(
+            [
+                {kind: 'time', prefix: 'EVENT_DELAY', selector: 'eventDelay', label: {de: 'Eventverzögerung'}},
+                {kind: 'param', param: 'LOGIC_COMBINATION', option: 'LOGIC_COMBINATION', label: {de: 'Jalousie'}},
+                {kind: 'param', param: 'LOGIC_COMBINATION_2', option: 'LOGIC_COMBINATION', label: {de: 'Lamellen'}},
+                {kind: 'param', param: 'POSITION_SAVE_TIME'},
+                {kind: 'subset', subsets: [1, 2]},
+                // the shutter branch
+                {kind: 'param', param: 'LOGIC_COMBINATION', option: 'LOGIC_COMBINATION', label: {de: 'Rollladen'}},
+                {kind: 'param', param: 'POSITION_SAVE_TIME'},
+                {kind: 'time', prefix: 'EVENT_DELAY', selector: 'eventDelay'},
+                {kind: 'subset', subsets: [1, 2]},
+                // a different subset choice is a control of its own
+                {kind: 'subset', subsets: [3]},
+            ],
+            blind,
+        );
+        const names = form?.map((control) =>
+            control.kind === 'time' ? control.pair.name : control.kind === 'param' ? control.param : control.subsets,
+        );
+        expect(names).toEqual([
+            'EVENT_DELAY',
+            'LOGIC_COMBINATION',
+            'LOGIC_COMBINATION_2',
+            'POSITION_SAVE_TIME',
+            [1, 2],
+            [3],
+        ]);
+        expect(form?.[1]).toMatchObject({label: {de: 'Jalousie'}});
+    });
+
     it('is undefined without controls, for no profile, and when nothing applies', () => {
         expect(easyForm({id: 1, key: 'plain', name: {}, description: {}, params: {}}, description)).toBeUndefined();
         expect(easyForm(undefined, description)).toBeUndefined();

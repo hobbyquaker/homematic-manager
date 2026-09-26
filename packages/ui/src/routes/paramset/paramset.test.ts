@@ -794,3 +794,86 @@ describe('the MASTER form by paramset id (task 64)', () => {
         expect(screen.getByTestId('param-TRANSMIT_TRY_MAX')).toBeTruthy();
     });
 });
+
+// B-73 (#168): an HmIPW-DRBL4's blind channels. The WebUI's BLIND_VIRTUAL_RECEIVER form takes
+// one of three branches by the channel's `channelMode` metadata; the extracted form is the union
+// of them, so LOGIC_COMBINATION and POSITION_SAVE_TIME are listed three times and the dialog's
+// keyed each threw `each_key_duplicate` ("page devices: https://svelte.dev/e/each_key_duplicate")
+// instead of drawing anything. Channel 0 has no such form and was fine.
+describe('a MASTER form whose controls repeat (B-73, #168)', () => {
+    const CHANNEL = '0001D8A9B7C6D5:1';
+    const description: ParamsetDescription = {
+        LOGIC_COMBINATION: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['LOGICAL_OR', 'LOGICAL_AND']},
+        LOGIC_COMBINATION_2: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['LOGICAL_OR', 'LOGICAL_AND']},
+        POSITION_SAVE_TIME: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 25.5, DEFAULT: 0.5},
+        PERMANENT_FULL_RX: {TYPE: 'BOOL', OPERATIONS: 3, DEFAULT: true},
+    };
+    // exactly the extract of OpenCCU 3.89.8's hmip/BLIND_VIRTUAL_RECEIVER.tcl before the fix
+    const branch = (blind: boolean) => [
+        {
+            kind: 'param',
+            param: 'LOGIC_COMBINATION',
+            option: 'LOGIC_COMBINATION',
+            requires: ['LOGIC_COMBINATION'],
+            label: blind ? {de: 'Verknüpfungsregel Jalousiesteuerung'} : {de: 'Verknüpfungsregel'},
+        },
+        ...(blind
+            ? [
+                  {
+                      kind: 'param',
+                      param: 'LOGIC_COMBINATION_2',
+                      option: 'LOGIC_COMBINATION',
+                      requires: ['LOGIC_COMBINATION'],
+                      label: {de: 'Verknüpfungsregel Lamellensteuerung'},
+                  },
+              ]
+            : []),
+        {
+            kind: 'param',
+            param: 'POSITION_SAVE_TIME',
+            requires: ['POSITION_SAVE_TIME'],
+            label: {de: 'Position Übernahmezeit'},
+        },
+    ];
+    const masterMetadata = {
+        KEY_TRANSCEIVER: {
+            channelType: 'KEY_TRANSCEIVER',
+            controls: [...branch(true), ...branch(false), ...branch(true)],
+        },
+    };
+    let transport: MockTransport;
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+        const demoFile = transport.handlerFor('data.file');
+        transport.respond('data.file', (path) =>
+            path === 'data/master-metadata.json' ? {...(demoFile(path) as object), ...masterMetadata} : demoFile(path),
+        );
+        const demoDescription = transport.handlerFor('paramset.description');
+        transport.respond('paramset.description', (interfaceName, address, paramset) =>
+            address === CHANNEL && paramset === 'MASTER'
+                ? description
+                : demoDescription(interfaceName, address, paramset),
+        );
+        const demoGet = transport.handlerFor('paramset.get');
+        transport.respond('paramset.get', (interfaceName, address, paramset) =>
+            address === CHANNEL && paramset === 'MASTER'
+                ? {LOGIC_COMBINATION: 0, LOGIC_COMBINATION_2: 1, POSITION_SAVE_TIME: 0.5, PERMANENT_FULL_RX: true}
+                : demoGet(interfaceName, address, paramset),
+        );
+    });
+
+    it("draws each control once, with the first branch's label, instead of failing the page", async () => {
+        await mountApp({transport, hash: '#/HmIP-RF/devices'});
+        const parent = document.querySelector<HTMLElement>('[data-row-id="0001D8A9B7C6D5"]')!;
+        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(await screen.findByTestId(`paramset-${CHANNEL}-MASTER`));
+        const form = await screen.findByTestId('paramset-easy-form');
+        expect(within(form).getAllByTestId('param-LOGIC_COMBINATION')).toHaveLength(1);
+        expect(within(form).getAllByTestId('param-LOGIC_COMBINATION_2')).toHaveLength(1);
+        expect(within(form).getAllByTestId('param-POSITION_SAVE_TIME')).toHaveLength(1);
+        expect(within(form).getByText('Verknüpfungsregel Jalousiesteuerung')).toBeTruthy();
+        expect(within(form).queryByText('Verknüpfungsregel')).toBeNull();
+        expect(screen.queryByTestId('param-PERMANENT_FULL_RX')).toBeNull();
+    });
+});

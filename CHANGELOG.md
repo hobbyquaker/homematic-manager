@@ -6,6 +6,16 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **The MASTER dialog of a blind channel opens again.** On an HmIPW-DRBL4 (and the other HmIP blind actuators, the
+  HmIP-SAM/STV tilt sensors, the HmIP-ESI meters and channel 1 of the HmIP-WTH) the MASTER button of a channel ended in
+  _page devices: each_key_duplicate_ instead of the dialog. The CCU's form of such a channel takes one of several
+  branches by the device's mode or type; the form the Homematic Manager carries was the union of them and listed the
+  same parameter two or three times. A parameter is drawn once now, from its first branch (#168, @EdyWenz).
+
 ## [3.0.0-beta.23] — 2026-09-26
 
 ### New

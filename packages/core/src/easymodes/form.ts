@@ -32,6 +32,16 @@ export function easyFormOf(
     // `EVENT_DELAY` for `EVENT_DELAY_UNIT` - both are among the description's duration pairs
     const pairs = new Map(findDurationPairs(description).map((pair) => [pair.unitParam, pair]));
     const form: EasyFormControl[] = [];
+    // The controls are the union of every branch the WebUI's Tcl can take, and a branch it decides
+    // on something other than the description - `hmip/BLIND_VIRTUAL_RECEIVER.tcl` asks the
+    // channel's `channelMode` metadata - lists the same control again. A form draws each control
+    // once, from its first branch (B-73, #168): the dialogs key their rows by it.
+    const drawn = new Set<string>();
+    const push = (identity: string, entry: EasyFormControl): void => {
+        if (drawn.has(identity)) return;
+        drawn.add(identity);
+        form.push(entry);
+    };
     for (const control of controls ?? []) {
         if (!(control.requires ?? []).every((param) => param in description)) {
             continue;
@@ -40,7 +50,10 @@ export function easyFormOf(
             case 'time': {
                 const pair = pairs.get(`${control.prefix}_BASE`) ?? pairs.get(`${control.prefix}_UNIT`);
                 if (pair) {
-                    form.push(withLabel({kind: 'time' as const, pair, selector: control.selector}, control.label));
+                    push(
+                        `time:${pair.name}`,
+                        withLabel({kind: 'time' as const, pair, selector: control.selector}, control.label),
+                    );
                 }
                 break;
             }
@@ -53,7 +66,7 @@ export function easyFormOf(
                         also,
                         ...(control.option === undefined ? {} : {option: control.option}),
                     };
-                    form.push(withLabel(entry, control.label));
+                    push(`param:${control.param}`, withLabel(entry, control.label));
                 }
                 break;
             }
@@ -63,7 +76,7 @@ export function easyFormOf(
                     subsets: control.subsets,
                     ...(control.names === undefined ? {} : {names: control.names}),
                 };
-                form.push(withLabel(entry, control.label));
+                push(`subset:${control.subsets.join(',')}`, withLabel(entry, control.label));
                 break;
             }
         }

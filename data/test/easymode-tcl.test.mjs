@@ -4,10 +4,13 @@ import path from 'node:path';
 import {describe, expect, it} from 'vitest';
 
 import {
+    branchWays,
     extractForms,
+    extractMasterBranches,
     extractMasterControls,
     extractTimeSelectorOptions,
     htmlParamsBody,
+    parseBranchTest,
     parseLocalization,
     parseProcs,
     timeOptionMeaning,
@@ -409,6 +412,182 @@ proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
         const byId = JSON.parse(readFileSync(path.join(distDir, 'master-forms.json'), 'utf8')).byParamsetId;
         for (const [id, entry] of Object.entries(byId)) {
             expect(doubled(entry.controls ?? []), id).toEqual([]);
+        }
+    });
+});
+
+// Task 75: the ways of a MASTER form the WebUI decides on something the description does not say
+describe('the branches of a MASTER form (task 75)', () => {
+    const dialogs = String.raw`
+proc getBlind {chn p descr} {
+  set param LOGIC_COMBINATION
+  if { [info exists ps($param)] == 1 } {
+    append html "<td>\${stringTableLogicCombinationBlind}</td>"
+    option LOGIC_COMBINATION
+    append html  "<td>[getOptionBox '$param' options $ps($param) $chn $prn]</td>"
+  }
+  set param LOGIC_COMBINATION_2
+  if { [info exists ps($param)] == 1 } {
+    append html "<td>\${stringTableLogicCombinationSlats}</td>"
+    append html  "<td>[getOptionBox '$param' options $ps($param) $chn $prn]</td>"
+  }
+  set param POSITION_SAVE_TIME
+  append html "<td>[getTextField $param $ps($param) $chn $prn]</td>"
+}
+
+proc getShutter {chn p descr} {
+  set param LOGIC_COMBINATION
+  if { [info exists ps($param)] == 1 } {
+    append html "<td>\${stringTableLogicCombination}</td>"
+    append html  "<td>[getOptionBox '$param' options $ps($param) $chn $prn]</td>"
+  }
+  set param POSITION_SAVE_TIME
+  append html "<td>[getTextField $param $ps($param) $chn $prn]</td>"
+}
+`;
+    const blindForm = String.raw`
+proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
+  set devMode [xmlrpc $url getMetadata [list string $address] channelMode]
+  append HTML_PARAMS(separate_1) "<table class=\"ProfileTbl\">"
+    if {[string equal $devMode blind] != 0} {
+      append HTML_PARAMS(separate_1) "[getBlind $chn ps psDescr ]"
+    } elseif {[string equal $devMode shutter] == 1} {
+      append HTML_PARAMS(separate_1) "[getShutter $chn ps psDescr]"
+    } else {
+      append HTML_PARAMS(separate_1) "[getBlind $chn ps psDescr]"
+    }
+  append HTML_PARAMS(separate_1) "</table>"
+}
+`;
+    const names = (controls) => controls.map((c) => (c.kind === 'time' ? c.prefix : c.param));
+
+    it('reads the tests the WebUI branches on, and nothing else', () => {
+        expect(parseBranchTest('[string equal $devMode blind] != 0')).toEqual({channelMode: 'blind'});
+        expect(parseBranchTest('[string equal $devMode shutter] == 1')).toEqual({channelMode: 'shutter'});
+        expect(parseBranchTest('[string equal $devMode shutter] == 0')).toEqual({channelMode: 'shutter', not: true});
+        expect(parseBranchTest('[string equal $devType HmIP-ESI] == 1')).toEqual({deviceType: 'HmIP-ESI'});
+        expect(parseBranchTest('([string first "HmIP-DLP" $dev_descr(TYPE)] == -1)')).toEqual({
+            deviceTypeIncludes: 'HmIP-DLP',
+            not: true,
+        });
+        expect(parseBranchTest('[string first "HmIP-ASIR" $dev_descr(TYPE)] != -1')).toEqual({
+            deviceTypeIncludes: 'HmIP-ASIR',
+        });
+        expect(parseBranchTest('$chn == 1')).toEqual({channel: 1});
+        expect(parseBranchTest('$chn ==2')).toEqual({channel: 2});
+        // a firmware version, an empty mode, a local flag: not read, the chain stays whole
+        expect(parseBranchTest('($devFwMajor == 1 && $devFwMinor > 5) || ($devFwMajor > 1)')).toBeUndefined();
+        expect(parseBranchTest('[string equal $devMode ""] == 1')).toBeUndefined();
+        expect(parseBranchTest('$channelOperationModeExists == 1')).toBeUndefined();
+    });
+
+    it("splits the blind form by channelMode, each way with its own controls in the WebUI's order", () => {
+        const branches = extractMasterBranches(htmlParamsBody(blindForm) ?? '', parseProcs(dialogs));
+        expect(branches?.map((branch) => branch.when)).toEqual([
+            [{channelMode: 'blind'}],
+            [{channelMode: 'blind', not: true}, {channelMode: 'shutter'}],
+            [
+                {channelMode: 'blind', not: true},
+                {channelMode: 'shutter', not: true},
+            ],
+        ]);
+        expect(branches?.map((branch) => names(branch.controls))).toEqual([
+            ['LOGIC_COMBINATION', 'LOGIC_COMBINATION_2', 'POSITION_SAVE_TIME'],
+            ['LOGIC_COMBINATION', 'POSITION_SAVE_TIME'],
+            ['LOGIC_COMBINATION', 'LOGIC_COMBINATION_2', 'POSITION_SAVE_TIME'],
+        ]);
+        expect(branches?.[1].controls[0].labelKey).toBe('stringTableLogicCombination');
+        // the union for everyone else stays as B-73 left it
+        expect(names(extractMasterControls(htmlParamsBody(blindForm) ?? '', parseProcs(dialogs)))).toEqual([
+            'LOGIC_COMBINATION',
+            'LOGIC_COMBINATION_2',
+            'POSITION_SAVE_TIME',
+        ]);
+    });
+
+    it('follows a nested chain, and a chain without else has a way that draws none of it', () => {
+        const form = String.raw`
+proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
+  set param EVENT_DELAY
+  append HTML_PARAMS(separate_1) "<td>[getTextField $param $ps($param) $chn $prn]</td>"
+  if {[string equal $devType HmIP-ESI] == 1} {
+    if {$chn == 1} {
+      append HTML_PARAMS(separate_1) "[getBlind $chn ps psDescr]"
+    }
+  } else {
+    append HTML_PARAMS(separate_1) "[getShutter $chn ps psDescr]"
+  }
+}
+`;
+        const branches = extractMasterBranches(htmlParamsBody(form) ?? '', parseProcs(dialogs));
+        expect(branches?.map((branch) => [branch.when, names(branch.controls)])).toEqual([
+            [
+                [{deviceType: 'HmIP-ESI'}, {channel: 1}],
+                ['EVENT_DELAY', 'LOGIC_COMBINATION', 'LOGIC_COMBINATION_2', 'POSITION_SAVE_TIME'],
+            ],
+            [[{deviceType: 'HmIP-ESI'}, {channel: 1, not: true}], ['EVENT_DELAY']],
+            [[{deviceType: 'HmIP-ESI', not: true}], ['EVENT_DELAY', 'LOGIC_COMBINATION', 'POSITION_SAVE_TIME']],
+        ]);
+    });
+
+    it('has no branches where every way draws the same, or the test is not one it reads', () => {
+        const same = String.raw`
+proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
+  if {[string equal $devMode blind] != 0} {
+    append HTML_PARAMS(separate_1) "[getShutter $chn ps psDescr]"
+  } else {
+    append HTML_PARAMS(separate_1) "[getShutter $chn ps psDescr]"
+  }
+}
+`;
+        expect(extractMasterBranches(htmlParamsBody(same) ?? '', parseProcs(dialogs))).toBeUndefined();
+        const firmware = String.raw`
+proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
+  if {($devFwMajor == 1 && $devFwMinor > 5) || ($devFwMajor > 1)} {
+    append HTML_PARAMS(separate_1) "[getBlind $chn ps psDescr]"
+  } else {
+    append HTML_PARAMS(separate_1) "[getShutter $chn ps psDescr]"
+  }
+}
+`;
+        expect(extractMasterBranches(htmlParamsBody(firmware) ?? '', parseProcs(dialogs))).toBeUndefined();
+        expect(branchWays(['a', 'b'])).toEqual([{when: [], lines: ['a', 'b']}]);
+    });
+
+    it('carries the ways of the blind and the other branched forms in dist/master-metadata.json', () => {
+        const master = JSON.parse(readFileSync(path.join(distDir, 'master-metadata.json'), 'utf8'));
+        const wayOf = (channelType, test) =>
+            master[channelType].branches.find((branch) => JSON.stringify(branch.when) === JSON.stringify(test));
+        const receiverShutter = wayOf('BLIND_VIRTUAL_RECEIVER', [
+            {channelMode: 'blind', not: true},
+            {channelMode: 'shutter'},
+        ]);
+        expect(names(receiverShutter.controls)).toEqual(['LOGIC_COMBINATION', 'POSITION_SAVE_TIME']);
+        expect(names(wayOf('BLIND_VIRTUAL_RECEIVER', [{channelMode: 'blind'}]).controls)).toContain(
+            'LOGIC_COMBINATION_2',
+        );
+        const transmitterShutter = wayOf('BLIND_TRANSMITTER', [
+            {channelMode: 'blind', not: true},
+            {channelMode: 'shutter'},
+        ]);
+        expect(names(transmitterShutter.controls)).not.toContain('REFERENCE_RUNNING_TIME_SLATS_VALUE');
+        expect(names(wayOf('BLIND_TRANSMITTER', [{channelMode: 'blind'}]).controls)).toContain(
+            'REFERENCE_RUNNING_TIME_SLATS_VALUE',
+        );
+        expect(master.ACCELERATION_TRANSCEIVER.branches).toHaveLength(2);
+        expect(master.ENERGIE_METER_TRANSMITTER.branches.length).toBeGreaterThan(2);
+        // the sabotage contact of an HmIP-ASIR claims to be a button and has no form in the WebUI
+        expect(wayOf('KEY_TRANSCEIVER', [{deviceTypeIncludes: 'HmIP-ASIR'}]).controls).toEqual([]);
+        // every way's controls are listed once, and every way's tests are ones the app knows
+        for (const entry of Object.values(master)) {
+            for (const branch of entry.branches ?? []) {
+                expect(new Set(names(branch.controls)).size, entry.channelType).toBe(branch.controls.length);
+                for (const test of branch.when) {
+                    const keys = Object.keys(test).filter((key) => key !== 'not');
+                    expect(keys).toHaveLength(1);
+                    expect(['channelMode', 'deviceType', 'deviceTypeIncludes', 'channel']).toContain(keys[0]);
+                }
+            }
         }
     });
 });

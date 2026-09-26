@@ -519,3 +519,142 @@ export function extractMasterControls(body, procs, seen = new Set()) {
     }
     return controls;
 }
+
+// ------------------------------------------------------------------ MASTER form branches (task 75)
+
+/**
+ * One test of a form's branch, as the WebUI's `set_htmlParams` makes it: the channel's
+ * `channelMode` metadata (`getMetadata <address> channelMode`: blind, shutter), the device type,
+ * a part of it, or the channel number; `not` for the other way round.
+ *
+ * @typedef {({channelMode: string} | {deviceType: string} | {deviceTypeIncludes: string} | {channel: number})
+ *   & {not?: true}} BranchTest
+ */
+
+/**
+ * The test of an `if {...}` / `elseif {...}`, or `undefined` for one this does not read (a
+ * firmware version, `$devIface`): such a chain is taken whole, as before task 75.
+ *
+ * @returns {BranchTest | undefined}
+ */
+export function parseBranchTest(condition) {
+    const text = condition
+        .trim()
+        .replace(/^\((.*)\)$/u, '$1')
+        .trim();
+    let match;
+    // [string equal $devMode blind] != 0 | == 1 | == 0
+    if ((match = /^\[\s*string equal \$(devMode|devType)\s+"?([\w-]+)"?\s*\]\s*(==|!=)\s*([01])$/u.exec(text))) {
+        const holds = (match[3] === '==') === (match[4] === '1');
+        const test = match[1] === 'devMode' ? {channelMode: match[2]} : {deviceType: match[2]};
+        return holds ? test : {...test, not: true};
+    }
+    // [string first "HmIP-DLP" $dev_descr(TYPE)] == -1 | != -1 | >= 0
+    if ((match = /^\[\s*string first\s+"?([\w-]+)"?\s+\$dev_descr\(TYPE\)\s*\]\s*(==|!=|>=)\s*(-1|0)$/u.exec(text))) {
+        const absent = match[2] === '==' && match[3] === '-1';
+        const present = (match[2] === '!=' && match[3] === '-1') || (match[2] === '>=' && match[3] === '0');
+        if (!absent && !present) return undefined;
+        return absent ? {deviceTypeIncludes: match[1], not: true} : {deviceTypeIncludes: match[1]};
+    }
+    // $chn == 1
+    if ((match = /^\$chn\s*==\s*(\d+)$/u.exec(text))) {
+        return {channel: Number(match[1])};
+    }
+    return undefined;
+}
+
+/** A line's brace balance, without `${KEY}`, escaped braces and quoted text. */
+function braceBalance(line) {
+    const braces = line
+        .replace(/\\?\$\{[^}]*\}/gu, '')
+        .replace(/\\[{}]/gu, '')
+        .replace(/"[^"]*"/gu, '""');
+    return (braces.match(/\{/gu) ?? []).length - (braces.match(/\}/gu) ?? []).length;
+}
+
+const IF_LINE = /^\s*if\s*\{(.*)\}\s*\{\s*$/u;
+const ELSEIF_LINE = /^\s*\}\s*elseif\s*\{(.*)\}\s*\{\s*$/u;
+const ELSE_LINE = /^\s*\}\s*else\s*\{\s*$/u;
+
+/**
+ * The bodies a form's `if` / `elseif` / `else` chains make, one per way through them, with the
+ * tests that lead there: a later branch carries the earlier ones' tests negated, so exactly one
+ * way holds for a channel. Only chains whose every test {@link parseBranchTest} reads are split;
+ * a form without one is a single way with no tests.
+ *
+ * @param {string[]} lines
+ * @param {BranchTest[]} [tests]
+ * @returns {Array<{when: BranchTest[], lines: string[]}>}
+ */
+export function branchWays(lines, tests = []) {
+    for (let start = 0; start < lines.length; start += 1) {
+        const first = IF_LINE.exec(lines[start].trim().startsWith('#') ? '' : lines[start]);
+        if (!first) continue;
+        /** @type {Array<{test: BranchTest | undefined | 'else', from: number, to: number}>} */
+        const segments = [{test: parseBranchTest(first[1]), from: start + 1, to: start + 1}];
+        let depth = braceBalance(lines[start]);
+        let end = -1;
+        for (let at = start + 1; at < lines.length; at += 1) {
+            const line = lines[at].trim().startsWith('#') ? '' : lines[at];
+            const before = depth;
+            depth += braceBalance(line);
+            if (before === 1 && /^\s*\}/u.test(line)) {
+                segments[segments.length - 1].to = at;
+                const elseif = ELSEIF_LINE.exec(line);
+                if (elseif) {
+                    segments.push({test: parseBranchTest(elseif[1]), from: at + 1, to: at + 1});
+                    continue;
+                }
+                if (ELSE_LINE.test(line)) {
+                    segments.push({test: 'else', from: at + 1, to: at + 1});
+                    continue;
+                }
+                end = at;
+                break;
+            }
+        }
+        if (end < 0 || segments.some((segment) => segment.test === undefined)) continue;
+        const before = lines.slice(0, start);
+        const after = lines.slice(end + 1);
+        /** @type {Array<{when: BranchTest[], lines: string[]}>} */
+        const ways = [];
+        /** @type {BranchTest[]} */
+        const earlier = [];
+        const negate = (test) => {
+            const {not, ...rest} = test;
+            return not ? rest : {...rest, not: true};
+        };
+        for (const segment of segments) {
+            const when = [...tests, ...earlier.map(negate), ...(segment.test === 'else' ? [] : [segment.test])];
+            ways.push(...branchWays([...before, ...lines.slice(segment.from, segment.to), ...after], when));
+            if (segment.test !== 'else') earlier.push(segment.test);
+        }
+        if (segments[segments.length - 1].test !== 'else') {
+            // no `else`: the way past every branch draws none of them
+            ways.push(...branchWays([...before, ...after], [...tests, ...earlier.map(negate)]));
+        }
+        return ways;
+    }
+    return [{when: tests, lines}];
+}
+
+/**
+ * Task 75: the branches of a MASTER form whose controls depend on something the description does
+ * not say - the blind forms' `channelMode`, the device type, the channel number - as the WebUI's
+ * `set_htmlParams` decides them. `undefined` when every way draws the same controls: the form's
+ * `controls` are then all there is.
+ *
+ * @param {string} body the form's `set_htmlParams`
+ * @param {Map<string, string>} procs
+ * @returns {Array<{when: BranchTest[], controls: EasyControl[]}> | undefined}
+ */
+export function extractMasterBranches(body, procs) {
+    const ways = branchWays(body.split('\n'));
+    if (ways.length < 2) return undefined;
+    const branches = ways.map((way) => ({
+        when: way.when,
+        controls: extractMasterControls(way.lines.join('\n'), procs),
+    }));
+    const same = branches.every((branch) => JSON.stringify(branch.controls) === JSON.stringify(branches[0].controls));
+    return same ? undefined : branches;
+}

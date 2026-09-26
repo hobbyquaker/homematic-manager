@@ -285,9 +285,15 @@ describe('master metadata, presets and cross validations', () => {
                     'optionPresets',
                     'parameterGroups',
                     'controls',
+                    'branches',
                 ]).toContain(key);
             }
-            for (const control of entry.controls ?? []) {
+            // task 75: each way of a branched form carries its tests and controls of the same shape
+            const ways = (entry.branches ?? []).map((branch) => {
+                expect(Array.isArray(branch.when)).toBe(true);
+                return branch.controls;
+            });
+            for (const control of [...(entry.controls ?? []), ...ways.flat()]) {
                 expect(['time', 'param', 'subset']).toContain(control.kind);
                 if (control.kind === 'time') expect(typeof control.selector).toBe('string');
                 else if (control.kind === 'param') expect(typeof control.param).toBe('string');

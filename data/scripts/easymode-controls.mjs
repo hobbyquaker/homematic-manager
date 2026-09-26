@@ -22,6 +22,7 @@ import {gzipSync} from 'node:zlib';
 
 import {
     extractForms,
+    extractMasterBranches,
     extractMasterControls,
     extractTimeSelectorOptions,
     htmlParamsBody,
@@ -189,10 +190,24 @@ for (const language of LANGUAGES) {
     }
 }
 const masterLabel = (key) => labelFor(key, webuiStrings);
+/** The controls with their label resolved in both languages instead of the key. */
+const labelled = (controls) =>
+    controls.map(({labelKey, ...control}) => {
+        const label = masterLabel(labelKey);
+        return {...control, ...(label === undefined ? {} : {label})};
+    });
+/**
+ * Task 75: the ways of a form the WebUI decides on the channel's `channelMode` metadata, the device
+ * type or the channel number, each with its own controls; `undefined` where every way draws the same.
+ */
+const branchesOf = (body, procs) =>
+    extractMasterBranches(body, procs)?.map((branch) => ({when: branch.when, controls: labelled(branch.controls)}));
 
 const dialogs = parseProcs(read(path.join(root, 'etc', 'hmipChannelConfigDialogs.tcl')));
 /** @type {Record<string, object[]>} */
 const master = {};
+/** @type {Record<string, Array<{when: object[], controls: object[]}>>} */
+const masterBranches = {};
 let masterControls = 0;
 const hmipDir = path.join(root, 'hmip');
 for (const file of isDir(hmipDir) ? readdirSync(hmipDir).sort() : []) {
@@ -201,12 +216,13 @@ for (const file of isDir(hmipDir) ? readdirSync(hmipDir).sort() : []) {
     const text = read(path.join(hmipDir, file));
     const body = htmlParamsBody(text);
     if (body === undefined) continue;
-    const controls = extractMasterControls(body, new Map([...dialogs, ...parseProcs(text)]));
+    const procs = new Map([...dialogs, ...parseProcs(text)]);
+    const controls = extractMasterControls(body, procs);
     if (controls.length === 0) continue;
-    master[file.slice(0, -'.tcl'.length)] = controls.map(({labelKey, ...control}) => {
-        const label = masterLabel(labelKey);
-        return {...control, ...(label === undefined ? {} : {label})};
-    });
+    const channelType = file.slice(0, -'.tcl'.length);
+    master[channelType] = labelled(controls);
+    const branches = branchesOf(body, procs);
+    if (branches !== undefined) masterBranches[channelType] = branches;
     masterControls += controls.length;
 }
 
@@ -237,12 +253,11 @@ let byIdControls = 0;
 const formOf = (text) => {
     const body = htmlParamsBody(text);
     if (body === undefined) return [];
-    return extractMasterControls(body, new Map([...etcProcs(text), ...parseProcs(text)])).map(
-        ({labelKey, ...control}) => {
-            const label = masterLabel(labelKey);
-            return {...control, ...(label === undefined ? {} : {label})};
-        },
-    );
+    return labelled(extractMasterControls(body, new Map([...etcProcs(text), ...parseProcs(text)])));
+};
+const formBranchesOf = (text) => {
+    const body = htmlParamsBody(text);
+    return body === undefined ? undefined : branchesOf(body, new Map([...etcProcs(text), ...parseProcs(text)]));
 };
 const paramIdFiles = [
     // BidCos and device-level forms first, so the HmIP file of the same id wins, as in the WebUI
@@ -260,7 +275,7 @@ for (const file of paramIdFiles) {
     // the link easymodes (`*_ch_link.tcl`, `linkHmIP_*`) and the helpers are not MASTER forms
     if (/_link$|^linkHmIP_|^em_common$|^NO_PROFILE$|_intkey$/u.test(id)) continue;
     const text = read(file);
-    /** @type {{controls?: object[], internalKey?: {receiverType: string}}} */
+    /** @type {{controls?: object[], branches?: object[], internalKey?: {receiverType: string}}} */
     const entry = {};
     const intKey = /^\s*set internalKey\b/mu.test(text)
         ? /easymodes\/([A-Z][A-Z0-9_]*)\/[A-Za-z0-9_]+\.tcl/u.exec(text)?.[1]
@@ -277,6 +292,9 @@ for (const file of paramIdFiles) {
     const paramsFile = path.join(path.dirname(file), `${id}Params.tcl`);
     const controls = [...formOf(text), ...(entry.internalKey && isFile(paramsFile) ? formOf(read(paramsFile)) : [])];
     if (controls.length > 0) entry.controls = controls;
+    // task 75: the branches of the form itself; a form with an internal key and expert parameters beside it has none
+    const branches = entry.internalKey === undefined ? formBranchesOf(text) : undefined;
+    if (entry.controls !== undefined && branches !== undefined) entry.branches = branches;
     if (entry.controls === undefined && entry.internalKey === undefined) continue;
     byParamsetId[id] = entry;
     byIdControls += controls.length;
@@ -289,12 +307,13 @@ const out = {
     timeSelectors: sortKeys(timeSelectors),
     receivers: sortKeys(receivers),
     master: sortKeys(master),
+    masterBranches: sortKeys(masterBranches),
     masterByParamsetId: sortKeys(byParamsetId),
 };
 const target = path.join(dataDir, 'extracted', 'easymode_controls.json.gz');
 writeFileSync(target, gzipSync(`${JSON.stringify(out)}\n`, {level: 9}));
 console.log(
     `${files} easymodes, ${profiles} profile forms, ${controls} controls, ${Object.keys(timeSelectors).length} time selector types; ` +
-        `${Object.keys(master).length} MASTER forms, ${masterControls} controls; ` +
+        `${Object.keys(master).length} MASTER forms, ${masterControls} controls, ${Object.keys(masterBranches).length} branched; ` +
         `${Object.keys(byParamsetId).length} by paramset id, ${byIdControls} controls -> ${path.relative(process.cwd(), target)}`,
 );

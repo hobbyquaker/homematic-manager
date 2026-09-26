@@ -52,7 +52,7 @@ const aliases = readUpstreamJson('profiles/_receiver_type_aliases.json');
 // task 62 (D-54): the CCU easy mode's forms, extracted from the WebUI by scripts/easymode-controls.mjs
 const easymodeControlsFile = path.join(dataDir, 'extracted', 'easymode_controls.json.gz');
 const easymodeControls = existsSync(easymodeControlsFile)
-    ? /** @type {{source: string, timeSelectors: Record<string, object[]>, receivers: Record<string, Record<string, Record<string, object[]>>>, master?: Record<string, object[]>, masterByParamsetId?: Record<string, object>}} */ (
+    ? /** @type {{source: string, timeSelectors: Record<string, object[]>, receivers: Record<string, Record<string, Record<string, object[]>>>, master?: Record<string, object[]>, masterBranches?: Record<string, object[]>, masterByParamsetId?: Record<string, object>}} */ (
           JSON.parse(gunzipSync(readFileSync(easymodeControlsFile)).toString('utf8'))
       )
     : undefined;
@@ -298,7 +298,14 @@ for (const [channelType, meta] of Object.entries(easymode.channel_metadata)) {
 // task 63 (D-55): the CCU's MASTER form of each HmIP channel type, extracted from the WebUI
 let masterFormCount = 0;
 for (const [channelType, controls] of Object.entries(easymodeControls?.master ?? {})) {
-    masterMetadata[channelType] = {...(masterMetadata[channelType] ?? {channelType}), controls};
+    // task 75: where the WebUI picks the form by the channel's `channelMode`, the device type or the
+    // channel number, each way with its own controls; `controls` stays the union for the rest
+    const branches = easymodeControls?.masterBranches?.[channelType];
+    masterMetadata[channelType] = {
+        ...(masterMetadata[channelType] ?? {channelType}),
+        controls,
+        ...(branches === undefined ? {} : {branches}),
+    };
     masterFormCount += 1;
 }
 

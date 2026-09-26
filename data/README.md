@@ -96,6 +96,17 @@ it calls (`getKeyTransceiver`, `getDimmerVirtualReceiver`, ...), into `master-me
 the WebUI's own `stringTable...` keys, so the script also takes `--webui-lang` (the
 `/www/webui/js/lang` directory, whose strings are %XX-escaped ISO-8859-1).
 
+Where a form's `set_htmlParams` chooses what to draw by something the description does not say, the
+channel type also gets **`branches`** (task 75): one entry per way through its `if` / `elseif` / `else`
+chains, with the tests that lead there (`when`, all of which hold) and that way's own `controls`. The
+tests read are the channel's `channelMode` metadata (the blind actuators' `blind` / `shutter`), the
+device type (equal, or containing a part) and the channel number, each possibly negated; a chain on
+anything else (a firmware version) stays whole. OpenCCU 3.89.8 has five such forms:
+`BLIND_VIRTUAL_RECEIVER`, `BLIND_TRANSMITTER`, `ACCELERATION_TRANSCEIVER` (HmIP-DLP),
+`ENERGIE_METER_TRANSMITTER` (HmIP-ESI, HmIP-ESI-IND by channel) and `KEY_TRANSCEIVER` (an HmIP-ASIR's
+sabotage contact has no form). `controls` stays the union of the ways, each control once, from its
+first way (B-73).
+
 The forms the WebUI picks by **paramset id** go to `master-forms.json` (task 64): the app asks
 `getParamsetId(address, MASTER)` and, as `ic_deviceparameters.cgi` does, takes that id's form before
 the channel type's - the BidCos channel and device forms (`easymodes/<paramid>.tcl`: `getCheckBox

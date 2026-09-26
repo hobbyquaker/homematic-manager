@@ -392,15 +392,22 @@ export function extractMasterControls(body, procs, seen = new Set()) {
     let skipping = 0;
 
     const requiresNow = () => [...new Set(blocks.map((block) => block.requires).filter((name) => name !== undefined))];
-    const add = (control) => {
-        const exists = controls.some((entry) =>
+    /**
+     * Whether the form draws this control already. A form's branches are the union of what the
+     * WebUI can take - `hmip/BLIND_VIRTUAL_RECEIVER.tcl` calls getBlindVirtualReceiver in two of
+     * its three `channelMode` branches - and a control is listed once, from the first branch
+     * (B-73, #168): the dialog keys its rows by the parameter.
+     */
+    const listed = (control) =>
+        controls.some((entry) =>
             entry.kind === 'time' && control.kind === 'time'
                 ? entry.prefix === control.prefix
                 : entry.kind === 'param' && control.kind === 'param'
                   ? entry.param === control.param
                   : false,
         );
-        if (exists) return;
+    const add = (control) => {
+        if (listed(control)) return;
         const requires = requiresNow();
         let entry = control;
         if (control.kind !== 'time' && labelKey !== undefined && entry.labelKey === undefined)
@@ -503,6 +510,7 @@ export function extractMasterControls(body, procs, seen = new Set()) {
             const inner = procs.get(name);
             if (inner !== undefined && !seen.has(name)) {
                 for (const control of extractMasterControls(inner, procs, new Set([...seen, name]))) {
+                    if (listed(control)) continue;
                     const requires = [...new Set([...requiresNow(), ...(control.requires ?? [])])];
                     controls.push(requires.length > 0 ? {...control, requires} : control);
                 }

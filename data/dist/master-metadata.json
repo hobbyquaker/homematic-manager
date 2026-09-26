@@ -71,31 +71,6 @@
         "param": "EVENT_TIMEOUT_VALUE",
         "requires": ["EVENT_TIMEOUT_BASE"],
         "label": {"de": "Wert der Zeitspanne", "en": "Time interval value"}
-      },
-      {
-        "kind": "param",
-        "param": "EVENT_FILTER_PERIOD",
-        "requires": ["EVENT_FILTER_NUMBER"],
-        "label": {"de": "Meldungen bei", "en": "Messages for"}
-      },
-      {
-        "kind": "param",
-        "param": "SENSOR_SENSITIVITY",
-        "requires": ["SENSOR_SENSITIVITY"],
-        "label": {"de": "Erschütterungs-Empfindlichkeit", "en": "Vibration sensitivity"}
-      },
-      {
-        "kind": "time",
-        "prefix": "EVENT_DELAY",
-        "selector": "eventDelay",
-        "requires": ["EVENT_DELAY_UNIT"],
-        "label": {"de": "Meldeverzögerung für Lageerkennung", "en": "Message delay for position detection"}
-      },
-      {
-        "kind": "param",
-        "param": "TRIGGER_ANGLE",
-        "requires": ["TRIGGER_ANGLE"],
-        "label": {"de": "Lagetoleranz", "en": "Position tolerance"}
       }
     ]
   },
@@ -473,129 +448,10 @@
         "label": {"de": "Zeitverzögerung", "en": "Time delay"}
       },
       {
-        "kind": "time",
-        "prefix": "EVENT_DELAY",
-        "selector": "eventDelay",
-        "requires": ["EVENT_DELAY_UNIT"],
-        "label": {"de": "Eventverzögerung", "en": "Event delay"}
-      },
-      {
-        "kind": "time",
-        "prefix": "EVENT_RANDOMTIME",
-        "selector": "eventRandomTime",
-        "requires": ["EVENT_RANDOMTIME_UNIT"],
-        "label": {"de": "Zufallsanteil", "en": "Random part"}
-      },
-      {
-        "kind": "param",
-        "param": "CHANGE_OVER_DELAY",
-        "requires": ["CHANGE_OVER_DELAY"],
-        "label": {"de": "Motorrichtungsumschaltzeit", "en": "Blind direction switch-over time"}
-      },
-      {
-        "kind": "param",
-        "param": "REFERENCE_RUN_COUNTER",
-        "requires": ["REFERENCE_RUN_COUNTER"],
-        "label": {
-          "de": "Anzahl der Fahrten bis zur automatischen Referenzfahrt",
-          "en": "Number of runs until automatic reference drive"
-        }
-      },
-      {
-        "kind": "param",
-        "param": "POSITION_SAVE_TIME",
-        "requires": ["POSITION_SAVE_TIME"],
-        "label": {"de": "Position Übernahmezeit", "en": "Position saving time"}
-      },
-      {
         "kind": "param",
         "param": "SENSOR_SENSITIVITY",
         "requires": ["SENSOR_SENSITIVITY"],
         "label": {"de": "Sensorempfindlichkeit Hinderniserkennung", "en": "Sensor sensitivity obstacle detection"}
-      },
-      {
-        "kind": "param",
-        "param": "ENDPOSITION_AUTO_DETECT",
-        "requires": ["ENDPOSITION_AUTO_DETECT"],
-        "label": {"de": "Automatische Erkennung der Endposition", "en": "Automatic detection of the end position"}
-      },
-      {
-        "kind": "param",
-        "param": "REFERENCE_RUNNING_TIME_BOTTOM_TOP_VALUE",
-        "requires": ["REFERENCE_RUNNING_TIME_BOTTOM_TOP_UNIT"],
-        "label": {"de": "Wert der Fahrzeit", "en": "Value movement time"}
-      },
-      {
-        "kind": "param",
-        "param": "REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE",
-        "requires": ["REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT"],
-        "label": {"de": "Wert der Fahrzeit", "en": "Value movement time"}
-      },
-      {"kind": "param", "param": "DELAY_COMPENSATION", "label": {"de": "Zeitverzögerung", "en": "Time delay"}},
-      {
-        "kind": "time",
-        "prefix": "EVENT_DELAY",
-        "selector": "eventDelay",
-        "requires": ["EVENT_DELAY_UNIT"],
-        "label": {"de": "Eventverzögerung", "en": "Event delay"}
-      },
-      {
-        "kind": "time",
-        "prefix": "EVENT_RANDOMTIME",
-        "selector": "eventRandomTime",
-        "requires": ["EVENT_RANDOMTIME_UNIT"],
-        "label": {"de": "Zufallsanteil", "en": "Random part"}
-      },
-      {
-        "kind": "param",
-        "param": "CHANGE_OVER_DELAY",
-        "requires": ["CHANGE_OVER_DELAY"],
-        "label": {"de": "Motorrichtungsumschaltzeit", "en": "Blind direction switch-over time"}
-      },
-      {
-        "kind": "param",
-        "param": "REFERENCE_RUN_COUNTER",
-        "requires": ["REFERENCE_RUN_COUNTER"],
-        "label": {
-          "de": "Anzahl der Fahrten bis zur automatischen Referenzfahrt",
-          "en": "Number of runs until automatic reference drive"
-        }
-      },
-      {
-        "kind": "param",
-        "param": "POSITION_SAVE_TIME",
-        "requires": ["POSITION_SAVE_TIME"],
-        "label": {"de": "Position Übernahmezeit", "en": "Position saving time"}
-      },
-      {
-        "kind": "param",
-        "param": "ENDPOSITION_AUTO_DETECT",
-        "requires": ["ENDPOSITION_AUTO_DETECT"],
-        "label": {"de": "Automatische Erkennung der Endposition", "en": "Automatic detection of the end position"}
-      },
-      {
-        "kind": "param",
-        "param": "REFERENCE_RUNNING_TIME_BOTTOM_TOP_VALUE",
-        "requires": ["REFERENCE_RUNNING_TIME_BOTTOM_TOP_UNIT"],
-        "label": {"de": "Wert der Fahrzeit", "en": "Value movement time"}
-      },
-      {
-        "kind": "param",
-        "param": "REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE",
-        "requires": ["REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT"],
-        "label": {"de": "Wert der Fahrzeit", "en": "Value movement time"}
-      },
-      {
-        "kind": "param",
-        "param": "REFERENCE_RUNNING_TIME_SLATS_VALUE",
-        "requires": ["REFERENCE_RUNNING_TIME_SLATS_UNIT"],
-        "label": {"de": "Wert der Lamellenverstellzeit", "en": "Value slat adjustment time"}
-      },
-      {
-        "kind": "param",
-        "param": "DELAY_COMPENSATION",
-        "requires": ["DELAY_COMPENSATION"],
-        "label": {"de": "Zeitverzögerung", "en": "Time delay"}
       }
     ]
   },
@@ -607,39 +463,6 @@
       {"id": "group_1", "labelKey": "virtualhelptxtdimmer", "parameters": ["POWERUP_JUMPTARGET"]}
     ],
     "controls": [
-      {
-        "kind": "param",
-        "param": "LOGIC_COMBINATION",
-        "option": "LOGIC_COMBINATION",
-        "requires": ["LOGIC_COMBINATION"],
-        "label": {"de": "Verknüpfungsregel Jalousiesteuerung", "en": "Connection rule blind"}
-      },
-      {
-        "kind": "param",
-        "param": "LOGIC_COMBINATION_2",
-        "option": "LOGIC_COMBINATION",
-        "requires": ["LOGIC_COMBINATION"],
-        "label": {"de": "Verknüpfungsregel Lamellensteuerung", "en": "Connection rule slat"}
-      },
-      {
-        "kind": "param",
-        "param": "POSITION_SAVE_TIME",
-        "requires": ["POSITION_SAVE_TIME"],
-        "label": {"de": "Position Übernahmezeit", "en": "Position saving time"}
-      },
-      {
-        "kind": "param",
-        "param": "LOGIC_COMBINATION",
-        "option": "LOGIC_COMBINATION",
-        "requires": ["LOGIC_COMBINATION"],
-        "label": {"de": "Verknüpfungsregel", "en": "Connection rule"}
-      },
-      {
-        "kind": "param",
-        "param": "POSITION_SAVE_TIME",
-        "requires": ["POSITION_SAVE_TIME"],
-        "label": {"de": "Position Übernahmezeit", "en": "Position saving time"}
-      },
       {
         "kind": "param",
         "param": "LOGIC_COMBINATION",
@@ -1477,13 +1300,6 @@
       {"kind": "param", "param": "METER_CONSTANT_VOLUME", "label": {"de": "Gerätekonstante", "en": "Device constant"}},
       {"kind": "param", "param": "METER_CONSTANT_ENERGY", "label": {"de": "Gerätekonstante", "en": "Device constant"}},
       {"kind": "param", "param": "METER_OBIS_SEARCH_STRING", "label": {"de": "OBIS String", "en": "OBIS string"}},
-      {"kind": "param", "param": "METER_OBIS_SEARCH_STRING", "label": {"de": "OBIS String", "en": "OBIS string"}},
-      {
-        "kind": "param",
-        "param": "METER_CONSTANT_VOLUME",
-        "requires": ["METER_CONSTANT_VOLUME"],
-        "label": {"de": "Gerätekonstante", "en": "Device constant"}
-      },
       {
         "kind": "time",
         "prefix": "INTERVAL",
@@ -1491,7 +1307,6 @@
         "requires": ["INTERVAL_UNIT"],
         "label": {"de": "Messintervall", "en": "Measurement interval"}
       },
-      {"kind": "param", "param": "METER_OBIS_SEARCH_STRING", "label": {"de": "OBIS String", "en": "OBIS string"}},
       {
         "kind": "time",
         "prefix": "EVENT_DELAY",

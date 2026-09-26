@@ -1452,31 +1452,6 @@
           "requires": ["TEMPERATUREFALL_WINDOW_OPEN_TIME_PERIOD"]
         },
         {"kind": "param", "param": "BOOST_AFTER_WINDOW_OPEN", "requires": ["BOOST_AFTER_WINDOW_OPEN"]},
-        {"kind": "param", "param": "ACOUSTIC_ALARM_SIGNAL", "requires": ["ACOUSTIC_ALARM_SIGNAL"]},
-        {
-          "kind": "param",
-          "param": "BUTTON_RESPONSE_WITHOUT_BACKLIGHT",
-          "requires": ["BUTTON_RESPONSE_WITHOUT_BACKLIGHT"],
-          "label": {"de": "Anzeige im Display", "en": "Information in display"}
-        },
-        {"kind": "param", "param": "TEMPERATURE_LOWERING_COOLING", "requires": ["TEMPERATURE_LOWERING_COOLING"]},
-        {"kind": "param", "param": "TEMPERATURE_LOWERING", "requires": ["TEMPERATURE_LOWERING_COOLING"]},
-        {"kind": "param", "param": "TEMPERATURE_MINIMUM"},
-        {"kind": "param", "param": "TEMPERATURE_MAXIMUM"},
-        {
-          "kind": "param",
-          "param": "MIN_MAX_VALUE_NOT_RELEVANT_FOR_MANU_MODE",
-          "requires": ["MIN_MAX_VALUE_NOT_RELEVANT_FOR_MANU_MODE"]
-        },
-        {"kind": "param", "param": "OPTIMUM_START_STOP", "requires": ["OPTIMUM_START_STOP"]},
-        {"kind": "param", "param": "DURATION_5MIN", "requires": ["DURATION_5MIN"]},
-        {"kind": "param", "param": "TEMPERATUREFALL_VALUE", "requires": ["TEMPERATUREFALL_VALUE"]},
-        {
-          "kind": "param",
-          "param": "TEMPERATUREFALL_WINDOW_OPEN_TIME_PERIOD",
-          "requires": ["TEMPERATUREFALL_WINDOW_OPEN_TIME_PERIOD"]
-        },
-        {"kind": "param", "param": "BOOST_AFTER_WINDOW_OPEN", "requires": ["BOOST_AFTER_WINDOW_OPEN"]},
         {"kind": "param", "param": "ACOUSTIC_ALARM_SIGNAL", "requires": ["ACOUSTIC_ALARM_SIGNAL"]}
       ]
     },

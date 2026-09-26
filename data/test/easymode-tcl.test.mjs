@@ -294,6 +294,60 @@ proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
         ]);
     });
 
+    // B-73 (#168): hmip/BLIND_VIRTUAL_RECEIVER.tcl calls getBlindVirtualReceiver in two of its three
+    // `channelMode` branches and getShutterVirtualReceiver in the third; a branch the extract cannot
+    // decide (it is device metadata, not the description) must not list the same control again.
+    it('lists a control once when several branches of the form call procedures that draw it', () => {
+        const dialogs = String.raw`
+proc getBlind {chn p descr} {
+  set param LOGIC_COMBINATION
+  if { [info exists ps($param)] == 1 } {
+    append html "<td>\${stringTableLogicCombinationBlind}</td>"
+    option LOGIC_COMBINATION
+    append html  "<td>[getOptionBox '$param' options $ps($param) $chn $prn]</td>"
+  }
+  set param POSITION_SAVE_TIME
+  append html "<td>[getTextField $param $ps($param) $chn $prn]</td>"
+}
+
+proc getShutter {chn p descr} {
+  set param LOGIC_COMBINATION
+  if { [info exists ps($param)] == 1 } {
+    append html "<td>\${stringTableLogicCombination}</td>"
+    option LOGIC_COMBINATION
+    append html  "<td>[getOptionBox '$param' options $ps($param) $chn $prn]</td>"
+  }
+  set param POSITION_SAVE_TIME
+  append html "<td>[getTextField $param $ps($param) $chn $prn]</td>"
+}
+`;
+        const form = String.raw`
+proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
+  set devMode [xmlrpc $url getMetadata [list string $address] channelMode]
+  append HTML_PARAMS(separate_1) "<table class=\"ProfileTbl\">"
+    if {[string equal $devMode blind] != 0} {
+      append HTML_PARAMS(separate_1) "[getBlind $chn ps psDescr ]"
+    } elseif {[string equal $devMode shutter] == 1} {
+      append HTML_PARAMS(separate_1) "[getShutter $chn ps psDescr]"
+    } else {
+      append HTML_PARAMS(separate_1) "[getBlind $chn ps psDescr]"
+    }
+  append HTML_PARAMS(separate_1) "</table>"
+}
+`;
+        const controls = extractMasterControls(htmlParamsBody(form) ?? '', parseProcs(dialogs));
+        expect(controls).toEqual([
+            {
+                kind: 'param',
+                param: 'LOGIC_COMBINATION',
+                option: 'LOGIC_COMBINATION',
+                labelKey: 'stringTableLogicCombinationBlind',
+                requires: ['LOGIC_COMBINATION'],
+            },
+            {kind: 'param', param: 'POSITION_SAVE_TIME'},
+        ]);
+    });
+
     it('reads a BidCos form keyed by paramset id: the kind before the parameter, and getComboBox (task 64)', () => {
         const bidcos = String.raw`
 proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
@@ -328,5 +382,33 @@ proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
             selector: 'timeOnOffShort',
         });
         expect(controls.find((c) => c.param === 'LED_DISABLE_CHANNELSTATE').label.de).toBe('Geräte-LED deaktivieren');
+    });
+
+    // B-73 (#168): the blind forms listed every control once per `channelMode` branch, and the
+    // dialog's keyed each threw on the second copy
+    it('lists no control twice in any committed MASTER form', () => {
+        const identity = (control) =>
+            control.kind === 'time'
+                ? `time:${control.prefix}`
+                : control.kind === 'param'
+                  ? `param:${control.param}`
+                  : `subset:${control.subsets.join(',')}`;
+        const doubled = (controls) => {
+            const seen = new Set();
+            const twice = [];
+            for (const id of controls.map(identity)) {
+                if (seen.has(id)) twice.push(id);
+                seen.add(id);
+            }
+            return twice;
+        };
+        const master = JSON.parse(readFileSync(path.join(distDir, 'master-metadata.json'), 'utf8'));
+        for (const [channelType, entry] of Object.entries(master)) {
+            expect(doubled(entry.controls ?? []), channelType).toEqual([]);
+        }
+        const byId = JSON.parse(readFileSync(path.join(distDir, 'master-forms.json'), 'utf8')).byParamsetId;
+        for (const [id, entry] of Object.entries(byId)) {
+            expect(doubled(entry.controls ?? []), id).toEqual([]);
+        }
     });
 });

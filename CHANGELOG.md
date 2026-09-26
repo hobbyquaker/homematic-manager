@@ -6,10 +6,15 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
-## [Unreleased]
+## [3.0.0-beta.23] — 2026-09-26
 
 ### New
 
+- **The CCU package tells openccu-lite what the addon needs.** It carries `openccu-lite.json` at its root, which
+  openccu-lite reads at the install and applies: the addon runs as its own user with its profile directory
+  `/usr/local/hmm`, it keeps a process running, it talks to BidCos-RF and HmIP-RF, and it starts early at boot,
+  before the interface processes, and waits for them quietly. The system's Addons page shows it as declared and
+  confined, and no longer depends on the catalogue for that. A CCU3 and OpenCCU ignore the file.
 - **The CCU's MASTER forms for BidCos devices and device-specific HmIP forms.** The MASTER dialog showed the CCU's
   form only by channel type (HmIP). The WebUI picks a form by the paramset id the interface reports first; so does
   the dialog now (`getParamsetId`, asked once per channel), which adds the BidCos channel and device forms (thermostats
@@ -1409,6 +1414,7 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
+[3.0.0-beta.23]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.23
 [3.0.0-beta.22]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.22
 [3.0.0-beta.21]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.21
 [3.0.0-beta.20]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.20

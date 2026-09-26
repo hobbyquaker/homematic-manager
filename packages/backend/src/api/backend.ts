@@ -626,6 +626,8 @@ export class Backend {
                 return this.#getParamset(p[0], p[1], p[2]);
             case 'paramset.id':
                 return this.#paramsetId(p[0], p[1]);
+            case 'channel.mode':
+                return this.#channelMode(p[0], p[1]);
             case 'paramset.description':
                 return this.#describe(p[0], p[1], p[2]);
             case 'paramset.put':
@@ -1411,6 +1413,20 @@ export class Backend {
         }
         this.#paramsetIds.set(key, id);
         return id;
+    }
+
+    /**
+     * Task 75: the channel's `channelMode` metadata, which the WebUI's blind forms are drawn by.
+     * Asked each time the dialog opens (the WebUI may have switched it); a fault, no metadata on the
+     * interface or anything but a string is `''`, and the form takes the WebUI's default.
+     */
+    async #channelMode(interfaceName: string, address: string): Promise<string> {
+        try {
+            const answer = await this.#read(interfaceName, 'getMetadata', [address, 'channelMode']);
+            return typeof answer === 'string' ? answer : '';
+        } catch {
+            return '';
+        }
     }
 
     async #listDevices(interfaceName: string, options?: {refresh?: boolean}): Promise<DeviceDescription[]> {
@@ -2233,6 +2249,7 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'meta.import',
     'paramset.get',
     'paramset.id',
+    'channel.mode',
     'paramset.description',
     'paramset.put',
     'paramset.putLink',

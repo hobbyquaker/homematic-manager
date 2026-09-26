@@ -1,5 +1,12 @@
 <script lang="ts">
-    import type {MasterView, Paramset, ParamsetDescription, ParamsetValue, WriteResult} from '@homematic-manager/core';
+    import type {
+        MasterChannel,
+        MasterView,
+        Paramset,
+        ParamsetDescription,
+        ParamsetValue,
+        WriteResult,
+    } from '@homematic-manager/core';
     import {easyFormOf, easyFormParams, multiApplyEligibility} from '@homematic-manager/core';
     import {untrack} from 'svelte';
 
@@ -297,14 +304,38 @@
         const current = description;
         if (!open || !current || paramset !== 'MASTER' || channelType === '') {
             view = undefined;
+            channelModeRequest = undefined;
             return;
         }
         const values = merged();
         const id = formId;
-        void stores.meta.masterView(channelType, current, values, id).then((result) => {
+        const channel = masterChannel(interfaceName, address);
+        void stores.meta.masterView(channelType, current, values, id, channel).then((result) => {
             view = result;
         });
     });
+
+    /**
+     * Task 75: what the ways of the CCU's form are decided by - the device type, the channel number and,
+     * for a blind actuator, the channel's `channelMode` metadata. That one is read at most once per
+     * opened dialog, and only when the form has a way that asks for it (the engine calls it then).
+     */
+    let channelModeRequest: {key: string; answer: Promise<string>} | undefined;
+    function masterChannel(interfaceName: string, address: string): MasterChannel {
+        const key = `${interfaceName}|${address}`;
+        const colon = address.indexOf(':');
+        const deviceAddress = colon < 0 ? address : address.slice(0, colon);
+        return {
+            deviceType: index?.get(address)?.PARENT_TYPE || index?.get(deviceAddress)?.TYPE || '',
+            channel: colon < 0 ? -1 : Number(address.slice(colon + 1)),
+            channelMode: () => {
+                if (channelModeRequest?.key !== key) {
+                    channelModeRequest = {key, answer: stores.paramsets.channelMode(interfaceName, address)};
+                }
+                return channelModeRequest.answer;
+            },
+        };
+    }
 
     /**
      * Task 64: the WebUI picks a MASTER form by the paramset id the interface reports, before the

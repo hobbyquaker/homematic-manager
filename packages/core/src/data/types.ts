@@ -149,6 +149,28 @@ export interface MasterMetadata {
      * order, extracted from the WebUI like `LinkProfile.controls`. Absent where there is no form.
      */
     controls?: EasyControl[];
+    /**
+     * Task 75: where the WebUI picks what the form draws by something the description does not say -
+     * the channel's `channelMode` metadata on a blind actuator, the device type, the channel number -
+     * the ways its `set_htmlParams` can take, each with its own controls. Exactly one way holds for
+     * a channel; `controls` is the union of them, for a caller that knows none of those facts.
+     */
+    branches?: MasterBranch[];
+}
+
+/**
+ * Task 75: one test of a MASTER form's way, as the WebUI's `set_htmlParams` makes it: the channel's
+ * `channelMode` metadata (`blind`, `shutter`), the device type, a part of it, or the channel number;
+ * `not` for the other way round.
+ */
+export type MasterBranchTest = (
+    {channelMode: string} | {deviceType: string} | {deviceTypeIncludes: string} | {channel: number}
+) & {not?: true};
+
+/** Task 75: one way through a MASTER form - the tests that lead there (all hold) and what it draws. */
+export interface MasterBranch {
+    when: MasterBranchTest[];
+    controls: EasyControl[];
 }
 
 /**
@@ -159,6 +181,8 @@ export interface MasterMetadata {
 export interface MasterFormEntry {
     /** The controls of the form, as `MasterMetadata.controls`; absent where the WebUI's form is its own code. */
     controls?: EasyControl[];
+    /** Task 75: the ways of the form, as `MasterMetadata.branches`. */
+    branches?: MasterBranch[];
     /**
      * The form shows the channel's own button - its "internal key" - as a link profile: the LINK
      * paramset of the channel with itself as the peer, drawn with the profiles of `receiverType`.

@@ -2,9 +2,18 @@ import {readFileSync} from 'node:fs';
 
 import {describe, expect, it} from 'vitest';
 
-import {EasyModeEngine, EXPERT_PROFILE_ID, resolveAlias, resolveParamsetId, UI_HINT} from './engine.js';
+import {
+    branchTestHolds,
+    channelModeOf,
+    EasyModeEngine,
+    EXPERT_PROFILE_ID,
+    masterBranchFor,
+    resolveAlias,
+    resolveParamsetId,
+    UI_HINT,
+} from './engine.js';
 import {MemoryDataSource, type MemoryData} from '../data/memory.js';
-import type {LinkProfile, ReceiverProfiles} from '../data/types.js';
+import type {EasyControl, LinkProfile, MasterBranch, ReceiverProfiles} from '../data/types.js';
 import type {ParamsetDescription} from '../paramset/description.js';
 
 const fixture = JSON.parse(
@@ -493,5 +502,160 @@ describe('against the data the pipeline actually produces (task 9)', () => {
         const {values, problems} = realEngine.applyProfile(switchOn, {}, description);
         expect(problems).toEqual([]);
         expect(realEngine.detectProfile(values, profiles)?.key).toBe('switch_on');
+    });
+});
+
+// Task 75: the WebUI draws a blind channel's form by its channelMode metadata, and a few others by the
+// device type or the channel number; the data carries each way with its tests
+describe('the ways of a MASTER form (task 75)', () => {
+    const param = (name: string): EasyControl => ({kind: 'param', param: name});
+    const blind = [param('LOGIC_COMBINATION'), param('LOGIC_COMBINATION_2'), param('POSITION_SAVE_TIME')];
+    const shutter = [param('LOGIC_COMBINATION'), param('POSITION_SAVE_TIME')];
+    const branches: MasterBranch[] = [
+        {when: [{channelMode: 'blind'}], controls: blind},
+        {when: [{channelMode: 'blind', not: true}, {channelMode: 'shutter'}], controls: shutter},
+        {
+            when: [
+                {channelMode: 'blind', not: true},
+                {channelMode: 'shutter', not: true},
+            ],
+            controls: blind,
+        },
+    ];
+    const receiver: ParamsetDescription = {
+        LOGIC_COMBINATION: {TYPE: 'ENUM', OPERATIONS: 3},
+        LOGIC_COMBINATION_2: {TYPE: 'ENUM', OPERATIONS: 3},
+        POSITION_SAVE_TIME: {TYPE: 'FLOAT', OPERATIONS: 3},
+    };
+    const withMode = (mode: string) => {
+        const asked: string[] = [];
+        return {
+            asked,
+            channel: {
+                deviceType: 'HmIPW-DRBL4',
+                channel: 2,
+                channelMode: () => {
+                    asked.push(mode);
+                    return Promise.resolve(mode);
+                },
+            },
+        };
+    };
+    const blinds = new EasyModeEngine(
+        new MemoryDataSource({
+            masterMetadata: {
+                BLIND_VIRTUAL_RECEIVER: {
+                    channelType: 'BLIND_VIRTUAL_RECEIVER',
+                    controls: blind,
+                    branches,
+                },
+                ENERGIE_METER_TRANSMITTER: {
+                    channelType: 'ENERGIE_METER_TRANSMITTER',
+                    controls: [param('A'), param('B')],
+                    branches: [
+                        {when: [{deviceType: 'HmIP-ESI'}, {channel: 1}], controls: [param('A')]},
+                        {when: [{deviceType: 'HmIP-ESI'}, {channel: 1, not: true}], controls: [param('B')]},
+                        {when: [{deviceTypeIncludes: 'HmIP-ESI', not: true}], controls: [param('A'), param('B')]},
+                    ],
+                },
+            },
+        }),
+    );
+
+    it("draws the way of the channel's channelMode, asking for it once", async () => {
+        const shutterMode = withMode('shutter');
+        const view = await blinds.masterMetadataFor('BLIND_VIRTUAL_RECEIVER', receiver, {}, '', shutterMode.channel);
+        expect(view.controls).toEqual(shutter);
+        expect(view.channelMode).toBe('shutter');
+        expect(shutterMode.asked).toEqual(['shutter']);
+
+        const blindMode = withMode('blind');
+        expect(
+            (await blinds.masterMetadataFor('BLIND_VIRTUAL_RECEIVER', receiver, {}, '', blindMode.channel)).controls,
+        ).toEqual(blind);
+    });
+
+    it("takes the WebUI's first-open default where the metadata is not set", async () => {
+        // no CHANNEL_OPERATION_MODE (firmware before 1.6): blind
+        const unset = await blinds.masterMetadataFor('BLIND_VIRTUAL_RECEIVER', receiver, {}, '', withMode('').channel);
+        expect(unset.channelMode).toBe('blind');
+        expect(unset.controls).toEqual(blind);
+        // with it: shutter
+        const newer = {...receiver, CHANNEL_OPERATION_MODE: {TYPE: 'ENUM' as const, OPERATIONS: 3}};
+        const view = await blinds.masterMetadataFor('BLIND_VIRTUAL_RECEIVER', newer, {}, '', withMode('').channel);
+        expect(view.channelMode).toBe('shutter');
+        expect(view.controls).toEqual(shutter);
+        // a failing read is the same as an unset one
+        const failing = {
+            deviceType: 'HmIPW-DRBL4',
+            channel: 2,
+            channelMode: () => Promise.reject(new Error('no metadata')),
+        };
+        expect((await blinds.masterMetadataFor('BLIND_VIRTUAL_RECEIVER', receiver, {}, '', failing)).channelMode).toBe(
+            'blind',
+        );
+        expect(channelModeOf('shutter', receiver)).toBe('shutter');
+    });
+
+    it('decides by device type and channel without reading any metadata', async () => {
+        const esi = withMode('blind');
+        const first = await blinds.masterMetadataFor('ENERGIE_METER_TRANSMITTER', {}, {}, '', {
+            ...esi.channel,
+            deviceType: 'HmIP-ESI',
+            channel: 1,
+        });
+        expect(first.controls).toEqual([param('A')]);
+        expect(first.channelMode).toBeUndefined();
+        expect(esi.asked).toEqual([]);
+        const second = await blinds.masterMetadataFor('ENERGIE_METER_TRANSMITTER', {}, {}, '', {
+            deviceType: 'HmIP-ESI',
+            channel: 2,
+        });
+        expect(second.controls).toEqual([param('B')]);
+        const other = await blinds.masterMetadataFor('ENERGIE_METER_TRANSMITTER', {}, {}, '', {
+            deviceType: 'HmIP-PSM',
+            channel: 6,
+        });
+        expect(other.controls).toEqual([param('A'), param('B')]);
+    });
+
+    it('keeps the union without a channel, and where no way holds', async () => {
+        expect((await blinds.masterMetadataFor('BLIND_VIRTUAL_RECEIVER', receiver, {})).controls).toEqual(blind);
+        // HmIP-ESI-IND is not HmIP-ESI and includes it: none of the three ways above holds
+        const none = await blinds.masterMetadataFor('ENERGIE_METER_TRANSMITTER', {}, {}, '', {
+            deviceType: 'HmIP-ESI-IND',
+            channel: 3,
+        });
+        expect(none.controls).toEqual([param('A'), param('B')]);
+        expect(await masterBranchFor([], {deviceType: '', channel: 0}, {})).toEqual({});
+    });
+
+    it('evaluates each kind of test, and its negation', () => {
+        const facts = {deviceType: 'HmIP-DLP-2', channel: 3, channelMode: 'blind'};
+        expect(branchTestHolds({channelMode: 'blind'}, facts)).toBe(true);
+        expect(branchTestHolds({channelMode: 'blind', not: true}, facts)).toBe(false);
+        expect(branchTestHolds({deviceType: 'HmIP-DLP'}, facts)).toBe(false);
+        expect(branchTestHolds({deviceTypeIncludes: 'HmIP-DLP'}, facts)).toBe(true);
+        expect(branchTestHolds({channel: 3}, facts)).toBe(true);
+        expect(branchTestHolds({channel: 3, not: true}, facts)).toBe(false);
+    });
+
+    it('takes the ways of a form by paramset id over the channel type', async () => {
+        const byId = new EasyModeEngine(
+            new MemoryDataSource({
+                masterMetadata: {X: {channelType: 'X', controls: [param('A')]}},
+                masterForms: {
+                    x_master: {
+                        controls: [param('A'), param('B')],
+                        branches: [
+                            {when: [{channel: 1}], controls: [param('B')]},
+                            {when: [{channel: 1, not: true}], controls: [param('A')]},
+                        ],
+                    },
+                },
+            }),
+        );
+        const view = await byId.masterMetadataFor('X', {}, {}, 'x_master', {deviceType: 'D', channel: 1});
+        expect(view.controls).toEqual([param('B')]);
     });
 });

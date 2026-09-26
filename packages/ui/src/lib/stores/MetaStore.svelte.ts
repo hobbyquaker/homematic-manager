@@ -4,6 +4,7 @@ import type {
     Language,
     LinkProfile,
     LinkSenderMetadata,
+    MasterChannel,
     MasterView,
     OptionPreset,
     TimeSelectorOption,
@@ -91,15 +92,17 @@ export class MetaStore {
 
     /**
      * The MASTER view of a channel type: order, visibility, presets and the failing rules; with the
-     * form of `formId` (task 64, from {@link masterFormId}) over the channel type's where there is one.
+     * form of `formId` (task 64, from {@link masterFormId}) over the channel type's where there is one,
+     * drawn the way the WebUI draws it for `channel` - its device type, number and `channelMode` (task 75).
      */
     masterView(
         channelType: string,
         description: ParamsetDescription,
         values: Paramset = {},
         formId = '',
+        channel?: MasterChannel,
     ): Promise<MasterView> {
-        return this.engine.masterMetadataFor(channelType, description, values, formId);
+        return this.engine.masterMetadataFor(channelType, description, values, formId, channel);
     }
 
     /** Task 64: the MASTER form a `getParamsetId` answer names, `''` when the data has none for it. */

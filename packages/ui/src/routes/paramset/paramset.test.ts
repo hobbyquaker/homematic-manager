@@ -1,5 +1,5 @@
 import type {MasterView, ParamsetDescription} from '@homematic-manager/core';
-import {fireEvent, screen, waitFor, within} from '@testing-library/svelte';
+import {cleanup, fireEvent, screen, waitFor, within} from '@testing-library/svelte';
 import {beforeEach, describe, expect, it} from 'vitest';
 
 import {MockTransport} from '../../lib/transport/MockTransport.js';
@@ -875,5 +875,112 @@ describe('a MASTER form whose controls repeat (B-73, #168)', () => {
         expect(within(form).getByText('Verknüpfungsregel Jalousiesteuerung')).toBeTruthy();
         expect(within(form).queryByText('Verknüpfungsregel')).toBeNull();
         expect(screen.queryByTestId('param-PERMANENT_FULL_RX')).toBeNull();
+    });
+});
+
+// Task 75: the WebUI draws a blind channel's form by the channel's channelMode metadata - the shutter
+// way has no slat rule. The dialog reads the metadata once when it opens, and only for a form that
+// branches on it.
+describe("a MASTER form drawn by the channel's channelMode (task 75)", () => {
+    const CHANNEL = '0001D8A9B7C6D5:1';
+    const description: ParamsetDescription = {
+        LOGIC_COMBINATION: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['LOGICAL_OR', 'LOGICAL_AND']},
+        LOGIC_COMBINATION_2: {TYPE: 'ENUM', OPERATIONS: 3, VALUE_LIST: ['LOGICAL_OR', 'LOGICAL_AND']},
+        POSITION_SAVE_TIME: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 25.5, DEFAULT: 0.5},
+    };
+    const logic = (label: string) => ({
+        kind: 'param',
+        param: 'LOGIC_COMBINATION',
+        option: 'LOGIC_COMBINATION',
+        requires: ['LOGIC_COMBINATION'],
+        label: {de: label},
+    });
+    const slats = {
+        kind: 'param',
+        param: 'LOGIC_COMBINATION_2',
+        requires: ['LOGIC_COMBINATION'],
+        label: {de: 'Lamellen'},
+    };
+    const save = {kind: 'param', param: 'POSITION_SAVE_TIME', label: {de: 'Position Übernahmezeit'}};
+    const blind = [logic('Verknüpfungsregel Jalousiesteuerung'), slats, save];
+    const shutter = [logic('Verknüpfungsregel'), save];
+    const masterMetadata = {
+        KEY_TRANSCEIVER: {
+            channelType: 'KEY_TRANSCEIVER',
+            controls: blind,
+            branches: [
+                {when: [{channelMode: 'blind'}], controls: blind},
+                {when: [{channelMode: 'blind', not: true}, {channelMode: 'shutter'}], controls: shutter},
+                {
+                    when: [
+                        {channelMode: 'blind', not: true},
+                        {channelMode: 'shutter', not: true},
+                    ],
+                    controls: blind,
+                },
+            ],
+        },
+    };
+    let transport: MockTransport;
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+        const demoFile = transport.handlerFor('data.file');
+        transport.respond('data.file', (path) =>
+            path === 'data/master-metadata.json' ? {...(demoFile(path) as object), ...masterMetadata} : demoFile(path),
+        );
+        const demoDescription = transport.handlerFor('paramset.description');
+        transport.respond('paramset.description', (interfaceName, address, paramset) =>
+            address === CHANNEL && paramset === 'MASTER'
+                ? description
+                : demoDescription(interfaceName, address, paramset),
+        );
+        const demoGet = transport.handlerFor('paramset.get');
+        transport.respond('paramset.get', (interfaceName, address, paramset) =>
+            address === CHANNEL && paramset === 'MASTER'
+                ? {LOGIC_COMBINATION: 0, LOGIC_COMBINATION_2: 1, POSITION_SAVE_TIME: 0.5}
+                : demoGet(interfaceName, address, paramset),
+        );
+    });
+
+    async function openMaster(address: string): Promise<HTMLElement> {
+        await mountApp({transport, hash: '#/HmIP-RF/devices'});
+        const parent = document.querySelector<HTMLElement>(`[data-row-id="${address.split(':')[0]}"]`)!;
+        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(await screen.findByTestId(`paramset-${address}-MASTER`));
+        return screen.findByTestId('paramset-easy-form');
+    }
+
+    it('draws the shutter way for a channel set to shutter: no slat rule', async () => {
+        transport.respond('channel.mode', () => 'shutter');
+        const form = await openMaster(CHANNEL);
+        await waitFor(() => expect(within(form).queryByTestId('param-LOGIC_COMBINATION_2')).toBeNull());
+        expect(within(form).getByTestId('param-LOGIC_COMBINATION')).toBeTruthy();
+        expect(within(form).getByText('Verknüpfungsregel')).toBeTruthy();
+        expect(transport.calls.filter((call) => call.method === 'channel.mode').map((call) => call.params)).toEqual([
+            ['HmIP-RF', CHANNEL],
+        ]);
+    });
+
+    it('draws the blind way for a blind channel, and for one whose mode is not set yet', async () => {
+        transport.respond('channel.mode', () => 'blind');
+        let form = await openMaster(CHANNEL);
+        await waitFor(() => expect(within(form).getByTestId('param-LOGIC_COMBINATION_2')).toBeTruthy());
+        expect(within(form).getByText('Verknüpfungsregel Jalousiesteuerung')).toBeTruthy();
+        cleanup();
+
+        transport.respond('channel.mode', () => '');
+        form = await openMaster(CHANNEL);
+        await waitFor(() => expect(within(form).getByTestId('param-LOGIC_COMBINATION_2')).toBeTruthy());
+    });
+
+    it('reads the metadata once per opened dialog, however often the view is recomputed', async () => {
+        transport.respond('channel.mode', () => 'shutter');
+        const form = await openMaster(CHANNEL);
+        await waitFor(() => expect(within(form).queryByTestId('param-LOGIC_COMBINATION_2')).toBeNull());
+        const field = within(within(form).getByTestId('param-POSITION_SAVE_TIME')).getByRole('spinbutton');
+        await fireEvent.input(field, {target: {value: '1.5'}});
+        await fireEvent.input(field, {target: {value: '2'}});
+        expect(transport.calls.filter((call) => call.method === 'channel.mode')).toHaveLength(1);
     });
 });

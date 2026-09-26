@@ -6,6 +6,18 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Changed
+
+- **A blind channel's MASTER dialog follows the channel's operating mode, as the WebUI does.** The WebUI draws the form of
+  a blind actuator channel (HmIPW-DRBL4, HmIP-DRBLI4, HmIP-BBL, HmIP-FBL, …) by the channel's `channelMode`: set to
+  shutter, it has the plain link rule and no slat rule or slat running time. The dialog reads that setting when it opens
+  and draws the same form; where it was never set, it takes the WebUI's default (shutter where the channel has
+  `CHANNEL_OPERATION_MODE`, blind otherwise). The other forms the WebUI chooses by device or channel follow it as well:
+  the HmIP-DLP's tilt sensor, the HmIP-ESI and HmIP-ESI-IND channels, and the sabotage contact of an HmIP-ASIR, which
+  has no form there. The mode itself is still set in the WebUI (#168, @EdyWenz).
+
 ## [3.0.0-beta.24] — 2026-09-26
 
 ### Fixed

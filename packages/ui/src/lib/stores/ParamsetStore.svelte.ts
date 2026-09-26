@@ -168,6 +168,15 @@ export class ParamsetStore {
         }
     }
 
+    /** Task 75: the channel's `channelMode` metadata (blind, shutter); `''` where unset or on a failure. */
+    async channelMode(interfaceName: string, address: string): Promise<string> {
+        try {
+            return await this.#transport.request('channel.mode', interfaceName, address);
+        } catch {
+            return '';
+        }
+    }
+
     async open(
         interfaceName: string,
         address: string,

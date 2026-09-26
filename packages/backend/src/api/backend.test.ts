@@ -1416,6 +1416,32 @@ describe('devices', () => {
         await h.backend.stop();
     });
 
+    it("reads a channel's channelMode metadata each time, and a refusal or a non-string as '' (task 75)", async () => {
+        const h = await harness({
+            answers: {
+                'HmIP-RF': (method, params) => {
+                    if (method === 'getMetadata') {
+                        if (params[0] === 'B:1') {
+                            throw Object.assign(new Error('Unknown object'), {faultCode: -2, faultString: 'Unknown'});
+                        }
+                        if (params[0] === 'C:1') return 5;
+                        expect(params).toEqual(['A:1', 'channelMode']);
+                        return 'shutter';
+                    }
+                    return (defaultAnswers['HmIP-RF'] as Answer)(method, params);
+                },
+            },
+        });
+        h.calls.length = 0;
+        expect(await h.backend.request('channel.mode', 'HmIP-RF', 'A:1')).toBe('shutter');
+        expect(await h.backend.request('channel.mode', 'HmIP-RF', 'A:1')).toBe('shutter');
+        expect(await h.backend.request('channel.mode', 'HmIP-RF', 'B:1')).toBe('');
+        expect(await h.backend.request('channel.mode', 'HmIP-RF', 'C:1')).toBe('');
+        // never cached: the WebUI may switch the mode between two dialogs
+        expect(h.calls.filter((call) => call.method === 'getMetadata')).toHaveLength(4);
+        await h.backend.stop();
+    });
+
     it('opens the install mode in every variant', async () => {
         const h = await harness();
         h.calls.length = 0;

@@ -35,7 +35,8 @@ export function easyFormOf(
     // The controls are the union of every branch the WebUI's Tcl can take, and a branch it decides
     // on something other than the description - `hmip/BLIND_VIRTUAL_RECEIVER.tcl` asks the
     // channel's `channelMode` metadata - lists the same control again. A form draws each control
-    // once, from its first branch (B-73, #168): the dialogs key their rows by it.
+    // once, from its first branch (B-73, #168): the dialogs key their rows by it. Where the data
+    // has the form's ways (task 75), the engine hands over the one way that holds instead.
     const drawn = new Set<string>();
     const push = (identity: string, entry: EasyFormControl): void => {
         if (drawn.has(identity)) return;

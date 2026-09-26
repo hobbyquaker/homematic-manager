@@ -990,6 +990,12 @@ export interface ApiMethods {
      * by. `''` where the interface has no such method or refuses it; cached per address.
      */
     'paramset.id': {params: [interfaceName: string, address: string]; result: string};
+    /**
+     * Task 75: the channel's `channelMode` metadata (`getMetadata(address, 'channelMode')`) - `blind`
+     * or `shutter` on a blind actuator, which the WebUI draws its MASTER form by. `''` where it is not
+     * set, the interface has no metadata, or refuses; never cached, the WebUI may change it.
+     */
+    'channel.mode': {params: [interfaceName: string, address: string]; result: string};
     'paramset.description': {
         params: [interfaceName: string, address: string, paramset: string];
         result: ParamsetDescription;

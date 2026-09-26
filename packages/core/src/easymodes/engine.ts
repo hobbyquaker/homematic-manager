@@ -18,6 +18,8 @@ import type {
     EasyControl,
     LinkProfile,
     LinkSenderMetadata,
+    MasterBranch,
+    MasterBranchTest,
     MasterMetadata,
     OptionPreset,
     ProfileConstraint,
@@ -87,6 +89,70 @@ export interface MasterView {
     readonly controls?: readonly EasyControl[];
     /** Task 64: the form of this paramset id shows the channel's internal key as a link profile. */
     readonly internalKey?: {readonly receiverType: string};
+    /** Task 75: the `channelMode` the form was drawn for, where its ways depend on it. */
+    readonly channelMode?: string;
+}
+
+/**
+ * Task 75: what the ways of a MASTER form are decided by, for the channel the dialog is open for.
+ * `channelMode` is asked only when a way tests it - one `getMetadata` per opened blind channel.
+ */
+export interface MasterChannel {
+    /** The device's type (`HmIPW-DRBL4`), the channel description's `PARENT_TYPE`. */
+    readonly deviceType: string;
+    /** The channel number, the part of the address after the colon. */
+    readonly channel: number;
+    /** The channel's `channelMode` metadata; `''` where it is not set or cannot be read. */
+    readonly channelMode?: () => Promise<string>;
+}
+
+/**
+ * Task 75: the `channelMode` a blind form is drawn for. The WebUI sets the metadata at the first
+ * open of the actuator channel, `shutter` where the channel has `CHANNEL_OPERATION_MODE` (firmware
+ * 1.6 and later) and `blind` otherwise; until then the Homematic Manager, which never writes it,
+ * takes that same default.
+ */
+export function channelModeOf(answer: string, description: ParamsetDescription): string {
+    if (answer !== '') return answer;
+    return 'CHANNEL_OPERATION_MODE' in description ? 'shutter' : 'blind';
+}
+
+/** Task 75: whether a way's test holds for these facts. */
+export function branchTestHolds(
+    test: MasterBranchTest,
+    facts: {deviceType: string; channel: number; channelMode?: string | undefined},
+): boolean {
+    let holds: boolean;
+    if ('channelMode' in test) holds = facts.channelMode === test.channelMode;
+    else if ('deviceType' in test) holds = facts.deviceType === test.deviceType;
+    else if ('deviceTypeIncludes' in test) holds = facts.deviceType.includes(test.deviceTypeIncludes);
+    else holds = facts.channel === test.channel;
+    return test.not === true ? !holds : holds;
+}
+
+/**
+ * Task 75: the way of a MASTER form that holds for this channel, reading its `channelMode` only
+ * when a way tests it; `undefined` when none holds (a table the extract does not cover).
+ */
+export async function masterBranchFor(
+    branches: readonly MasterBranch[],
+    channel: MasterChannel,
+    description: ParamsetDescription,
+): Promise<{branch?: MasterBranch; channelMode?: string}> {
+    const needsMode = branches.some((branch) => branch.when.some((test) => 'channelMode' in test));
+    let channelMode: string | undefined;
+    if (needsMode) {
+        let answer: string;
+        try {
+            answer = (await channel.channelMode?.()) ?? '';
+        } catch {
+            answer = '';
+        }
+        channelMode = channelModeOf(answer, description);
+    }
+    const facts = {deviceType: channel.deviceType, channel: channel.channel, channelMode};
+    const branch = branches.find((entry) => entry.when.every((test) => branchTestHolds(test, facts)));
+    return {...(branch === undefined ? {} : {branch}), ...(channelMode === undefined ? {} : {channelMode})};
 }
 
 /**
@@ -257,11 +323,20 @@ export class EasyModeEngine {
         description: ParamsetDescription,
         values: Paramset = {},
         paramsetId = '',
+        channel?: MasterChannel,
     ): Promise<MasterView> {
         const metadata = (await this.#source.masterMetadata())[channelType];
         // task 64: the form the WebUI picks by paramset id wins over the channel type's
         const byId = paramsetId === '' ? undefined : (await this.#source.masterForms())[paramsetId];
-        const controls = byId?.controls ?? metadata?.controls;
+        const form = byId?.controls ? byId : metadata;
+        let controls = form?.controls;
+        // task 75: the way of the form this channel takes - its channelMode, device type, number
+        let channelMode: string | undefined;
+        if (form?.branches && channel) {
+            const chosen = await masterBranchFor(form.branches, channel, description);
+            if (chosen.branch) controls = chosen.branch.controls;
+            channelMode = chosen.channelMode;
+        }
         const presets = await this.#source.optionPresets();
         const rules = await this.#source.crossValidations();
 
@@ -280,6 +355,7 @@ export class EasyModeEngine {
             parameters,
             ...(controls ? {controls} : {}),
             ...(byId?.internalKey ? {internalKey: byId.internalKey} : {}),
+            ...(channelMode === undefined ? {} : {channelMode}),
             problems: rules
                 .filter((rule) => appliesTo(rule, description))
                 .filter((rule) => !holds(rule, values))

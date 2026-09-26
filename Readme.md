@@ -44,6 +44,7 @@ Kopiervorgang — siehe [docs/moving-between-installs.md](docs/moving-between-in
 | Installationsart | Hardware / Betriebssystem | Kommando oder Download | Konfiguration liegt in |
 | --- | --- | --- | --- |
 | **CCU-Addon** ([Anleitung](docs/install-addon.md)) | CCU3, ELV-Charly, OpenCCU — `armv7l`, `aarch64`, `x86_64` | `hmm-ccu-<arch>-<version>.tar.gz` aus dem [Release](https://github.com/hobbyquaker/homematic-manager/releases/latest), hochgeladen unter _Systemsteuerung → Zusatzsoftware_ | `/usr/local/hmm/config.json` |
+| **Addon auf openccu-lite** ([Anleitung](docs/openccu-lite.md)) | [openccu-lite](https://github.com/hobbyquaker/openccu-lite), die CCU-Firmware ohne ReGaHSS — `aarch64`, `x86_64` | im Addon-Katalog des Systems installieren (_Zusatzsoftware → Katalog_); das Paket ist dasselbe wie für die CCU | `/usr/local/hmm/config.json` |
 | **Desktop-App** ([Anleitung](docs/install-electron.md)) | Windows 10+ (x64, arm64), macOS 12+ (universal), Linux glibc 2.31+ (x64, arm64) | Installer bzw. AppImage/deb/dmg aus dem [Release](https://github.com/hobbyquaker/homematic-manager/releases/latest) | `%APPDATA%\Homematic Manager\config.json`, `~/Library/Application Support/Homematic Manager/config.json`, `~/.config/Homematic Manager/config.json` |
 | **Server im LXC** ([Anleitung](docs/install-lxc.md)) — die empfohlene Serverinstallation | Proxmox-Container, Debian 12/13, oder jeder Linux-Host mit Node ≥ 22.12 | `npm install -g homematic-manager` + `homematic-manager-web --install` | `/var/lib/homematic-manager/config.json`, Dienstoptionen in `/etc/homematic-manager/config.env` |
 | **Docker** ([Anleitung](docs/install-docker.md)) | `linux/amd64`, `linux/arm64`, `linux/arm/v7` | `docker run … ghcr.io/hobbyquaker/homematic-manager:latest` | `/data/config.json` im Volume |
@@ -64,6 +65,9 @@ reines Node.
 
 - **Nur eine CCU und kein Server?** Das CCU-Addon. Es läuft auf der Zentrale selbst, ist über die
   Systemsteuerung erreichbar, braucht keine Firewall-Regel und keine Konfiguration.
+- **openccu-lite?** Dort ist der Homematic Manager das Werkzeug zum Anlernen, Konfigurieren und für
+  Direktverknüpfungen: aus dem Katalog des Systems installieren. Namen, Räume und Gewerke schreibt er
+  in den Metadatenspeicher des Systems ([docs/openccu-lite.md](docs/openccu-lite.md)).
 - **Ein Arbeitsplatzrechner?** Die Desktop-App. Sie ist die direkte Nachfolgerin von 2.x.
 - **Ein Server im Haus?** Ein Proxmox-LXC mit dem npm-Paket. Der Container hat eine eigene Adresse
   im LAN, damit erreicht die CCU den Callback ohne NAT und ohne Portfreigabe.
@@ -210,6 +214,7 @@ moving between them is a copy (D-25):
 | Install type | Hardware / OS | Command or download | Configuration lives in |
 | --- | --- | --- | --- |
 | [CCU addon](docs/install-addon.md) | CCU3, ELV-Charly, OpenCCU — `armv7l`, `aarch64`, `x86_64` | `hmm-ccu-<arch>-<version>.tar.gz`, uploaded in _Systemsteuerung → Zusatzsoftware_ | `/usr/local/hmm/config.json` |
+| [Addon on openccu-lite](docs/openccu-lite.md) | [openccu-lite](https://github.com/hobbyquaker/openccu-lite), the CCU firmware without ReGaHSS — `aarch64`, `x86_64` | installed from the system's addon catalogue (_Addons → Catalogue_); the same package as on a CCU | `/usr/local/hmm/config.json` |
 | [Desktop app](docs/install-electron.md) | Windows 10+, macOS 12+, Linux glibc 2.31+ | installer / AppImage / deb / dmg from the release | `%APPDATA%\Homematic Manager`, `~/Library/Application Support/Homematic Manager`, `~/.config/Homematic Manager` |
 | [Server in an LXC](docs/install-lxc.md) (recommended) | Proxmox / Debian 12+ / any Linux with Node ≥ 22.12 | `npm install -g homematic-manager` then `homematic-manager-web --install` | `/var/lib/homematic-manager/config.json` |
 | [Docker](docs/install-docker.md) | `amd64`, `arm64`, `arm/v7` | `docker run … ghcr.io/hobbyquaker/homematic-manager:latest` | `/data/config.json` |

@@ -137,6 +137,35 @@ describe('the service messages tab', () => {
         expect(local.dataset['source']).toBe('local');
     });
 
+    it('B-74: a message only the CCU lists says so on its name', async () => {
+        transport.result('serviceMessages.list', [
+            {
+                interfaceName: 'BidCos-RF',
+                address: 'KEQ0345678:0',
+                datapoint: 'STICKY_UNREACH',
+                value: true,
+                since: Date.UTC(2026, 8, 2),
+                sinceSource: 'rega',
+                source: 'rega',
+            },
+            {
+                interfaceName: 'BidCos-RF',
+                address: 'KEQ0345679:0',
+                datapoint: 'STICKY_UNREACH',
+                value: true,
+                since: Date.UTC(2026, 8, 3),
+                sinceSource: 'rega',
+            },
+        ]);
+        await mountApp({transport, hash: '#/BidCos-RF/messages'});
+        const regaOnly = await screen.findByTestId('message-KEQ0345678:0-STICKY_UNREACH');
+        expect(regaOnly.getAttribute('title')).toBe('Nur von der CCU geführt; die Schnittstelle meldet sie nicht mehr');
+        expect(regaOnly.dataset['listedBy']).toBe('rega');
+        const listed = screen.getByTestId('message-KEQ0345679:0-STICKY_UNREACH');
+        expect(listed.getAttribute('title')).toBeNull();
+        expect(listed.dataset['listedBy']).toBe('interface');
+    });
+
     it('B-24: shows a FAULT_REPORTING with the label of its value, and cannot acknowledge it', async () => {
         transport.result('serviceMessages.list', [fault]);
         await mountApp({transport, hash: '#/BidCos-RF/messages'});

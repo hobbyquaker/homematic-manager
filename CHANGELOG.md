@@ -6,6 +6,17 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **Service messages that only the CCU still lists are shown.** The list came from the interface process
+  (`getServiceMessages`), the WebUI's from ReGa's pending alarms - and an alarm stays pending until it is acknowledged,
+  whatever rfd reports meanwhile (it forgets a `STICKY_UNREACH` at a restart, ReGa does not). On a CCU with ReGa such a
+  message is now a row of its own, with the CCU's value and first report and a tooltip saying that only the CCU lists
+  it; acknowledging it clears the alarm, so it leaves the WebUI too, and _acknowledge the existing ones as well_ takes
+  these rows along (#150, @Herbert-Testmann).
+
 ## [3.0.0-beta.25] — 2026-09-27
 
 ### Changed

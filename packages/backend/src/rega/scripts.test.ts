@@ -96,28 +96,37 @@ describe('the acknowledge script (#94)', () => {
 });
 
 describe("ReGa's pending service messages (task 36)", () => {
-    it('reads the oncoming alarms of ID_SERVICES with their trigger and both times', () => {
+    it('reads the oncoming alarms of ID_SERVICES with their trigger, both times and the value, as the WebUI does', () => {
         expect(REGA_ALARMS_SCRIPT).toContain('dom.GetObject(ID_SERVICES).EnumIDs()');
-        expect(REGA_ALARMS_SCRIPT).toContain('oAlarm.AlState() == asOncoming');
+        // B-74: the WebUI's own filter (serviceMessages.htm) - used, enabled, oncoming
+        expect(REGA_ALARMS_SCRIPT).toContain(
+            '(oAlarm.Used() == true) && (oAlarm.Enabled() == true) && (oAlarm.AlState() == asOncoming)',
+        );
         expect(REGA_ALARMS_SCRIPT).toContain('oAlarm.AlOccurrenceTime().ToInteger()');
         expect(REGA_ALARMS_SCRIPT).toContain('oAlarm.Timestamp().ToInteger()');
+        // B-74: ReGa's value of the trigger, for the messages only ReGa lists
+        expect(REGA_ALARMS_SCRIPT).toContain('# oTrigger.Value() #');
         // ReGa's own escapes in the script, not a raw tab
         expect(REGA_ALARMS_SCRIPT).toContain('"\\t"');
     });
 
     it('parses the lines into messages with epoch milliseconds, and skips what is no datapoint', () => {
+        // the shape a CCU3 (3.87.6) answers with - Value() prints true/false, an ENUM its index
         const output =
-            'BidCos-RF.LEQ0000001:0.STICKY_UNREACH\t1790000000\t1790000500\n' +
-            'HmIP-RF.0001D3C99ABCDE:0.LOW_BAT\t1790001000\t0\n' +
-            'Systemalarm\t1790002000\t1790002000\n' +
-            'CUxD.CUX.2801:1.STATE\t1790003000\t1790003000\n' +
-            'BidCos-RF.LEQ0000002:0.UNREACH\t0\t0\n' +
+            'BidCos-RF.LEQ0000001:0.STICKY_UNREACH\t1790000000\t1790000500\ttrue\n' +
+            'HmIP-RF.0001D3C99ABCDE:0.LOW_BAT\t1790001000\t0\ttrue\n' +
+            'BidCos-RF.LEQ0000003:4.FAULT_REPORTING\t1790001500\t1790001600\t7\n' +
+            'BidCos-RF.LEQ0000004:0.UNREACH\t1790001700\t1790001700\tfalse\n' +
+            'Systemalarm\t1790002000\t1790002000\ttrue\n' +
+            'CUxD.CUX.2801:1.STATE\t1790003000\t1790003000\ttrue\n' +
+            'BidCos-RF.LEQ0000002:0.UNREACH\t0\t0\ttrue\n' +
             '\n';
         expect(parseRegaAlarms(output)).toEqual([
             {
                 interfaceName: 'BidCos-RF',
                 address: 'LEQ0000001:0',
                 datapoint: 'STICKY_UNREACH',
+                value: true,
                 first: 1_790_000_000_000,
                 last: 1_790_000_500_000,
             },
@@ -125,11 +134,37 @@ describe("ReGa's pending service messages (task 36)", () => {
                 interfaceName: 'HmIP-RF',
                 address: '0001D3C99ABCDE:0',
                 datapoint: 'LOW_BAT',
+                value: true,
                 first: 1_790_001_000_000,
                 last: 1_790_001_000_000,
             },
+            {
+                interfaceName: 'BidCos-RF',
+                address: 'LEQ0000003:4',
+                datapoint: 'FAULT_REPORTING',
+                value: 7,
+                first: 1_790_001_500_000,
+                last: 1_790_001_600_000,
+            },
+            {
+                interfaceName: 'BidCos-RF',
+                address: 'LEQ0000004:0',
+                datapoint: 'UNREACH',
+                value: false,
+                first: 1_790_001_700_000,
+                last: 1_790_001_700_000,
+            },
         ]);
         expect(parseRegaAlarms('')).toEqual([]);
+    });
+
+    it('B-74: a line without the value column (the script before it) means true, an unknown text stays text', () => {
+        expect(parseRegaAlarms('BidCos-RF.LEQ0000001:0.STICKY_UNREACH\t1790000000\t1790000500\n')).toMatchObject([
+            {value: true},
+        ]);
+        expect(parseRegaAlarms('BidCos-RF.LEQ0000001:0.ERROR\t1790000000\t1790000500\tJAMMED\n')).toMatchObject([
+            {value: 'JAMMED'},
+        ]);
     });
 });
 

@@ -21,6 +21,8 @@
  * bookkeeping.
  */
 
+import type {ParamsetValue} from '@homematic-manager/core';
+
 /** Escapes a string for the ReGa string literal it is written into. */
 export function escapeRegaString(value: string): string {
     return value
@@ -141,43 +143,54 @@ Write(iDone);
 }
 
 /**
- * Task 36: the CCU's pending service messages with their times, as the WebUI's service-message page
- * reads them: every `OT_ALARMDP` of `ID_SERVICES` that is `asOncoming`, one line per alarm with the
- * trigger datapoint's name, `AlOccurrenceTime()` (the WebUI's *Erste Meldung*) and `Timestamp()`
+ * Task 36, B-74: the CCU's pending service messages with their times and values, as the WebUI's
+ * service-message page lists them: every `OT_ALARMDP` of `ID_SERVICES` that is `Used()`,
+ * `Enabled()` and `asOncoming` (`serviceMessages.htm` of OpenCCU 3.89.8), one line per alarm with
+ * the trigger datapoint's name, `AlOccurrenceTime()` (the WebUI's *Erste Meldung*), `Timestamp()`
  * (*Letzte Meldung*), both as Unix seconds (`ToInteger()`, checked against `date +%s` on the lab's
- * OpenCCU). Read-only.
+ * OpenCCU), and the trigger's `Value()` - ReGa's own last value of the datapoint, which is what
+ * the WebUI shows for the message (`true`/`false`, an ENUM as its index). Read-only.
+ *
+ * B-74 (#150): an alarm stays oncoming until it is receipted, whatever the interface process
+ * reports meanwhile - rfd forgets a `STICKY_UNREACH` at a restart, ReGa does not - so the
+ * WebUI lists messages `getServiceMessages` does not. The value is what such a message is shown
+ * with.
  */
 export const REGA_ALARMS_SCRIPT = `string sId;
 foreach (sId, dom.GetObject(ID_SERVICES).EnumIDs()) {
     object oAlarm = dom.GetObject(sId);
     if (oAlarm) {
-        if (oAlarm.IsTypeOf(OT_ALARMDP) && (oAlarm.AlState() == asOncoming)) {
+        if (oAlarm.IsTypeOf(OT_ALARMDP) && (oAlarm.Used() == true) && (oAlarm.Enabled() == true) && (oAlarm.AlState() == asOncoming)) {
             object oTrigger = dom.GetObject(oAlarm.AlTriggerDP());
             if (oTrigger) {
-                Write(oTrigger.Name() # "\\t" # oAlarm.AlOccurrenceTime().ToInteger() # "\\t" # oAlarm.Timestamp().ToInteger() # "\\n");
+                Write(oTrigger.Name() # "\\t" # oAlarm.AlOccurrenceTime().ToInteger() # "\\t" # oAlarm.Timestamp().ToInteger() # "\\t" # oTrigger.Value() # "\\n");
             }
         }
     }
 }
 `;
 
-/** One pending ReGa service message: whose datapoint, first and last reported (epoch ms). */
+/** One pending ReGa service message: whose datapoint, its value, first and last reported (epoch ms). */
 export interface RegaAlarm {
     readonly interfaceName: string;
     readonly address: string;
     readonly datapoint: string;
+    /** ReGa's last value of the trigger datapoint; `true` when the line carries none (older script). */
+    readonly value: ParamsetValue;
     readonly first: number;
     readonly last: number;
 }
 
 /**
  * Reads what {@link REGA_ALARMS_SCRIPT} wrote. A line whose name is not `<interface>.<channel>.<datapoint>`
- * (a system alarm, a CUxD name with more dots) or whose time is no positive number is skipped.
+ * (a system alarm, a CUxD name with more dots) or whose time is no positive number is skipped. The
+ * value column is ReGa's text of the value: `true`/`false`, a number as it prints it (an ENUM by
+ * its index), anything else stays a string; a line without it means `true`.
  */
 export function parseRegaAlarms(output: string): RegaAlarm[] {
     const alarms: RegaAlarm[] = [];
     for (const line of output.split('\n')) {
-        const [name, first, last] = line.split('\t');
+        const [name, first, last, value] = line.split('\t');
         const match = /^([^.\s]+)\.([^.\s]+)\.([^.\s]+)$/u.exec(name?.trim() ?? '');
         const firstSeconds = Number(first);
         const lastSeconds = Number(last);
@@ -188,11 +201,25 @@ export function parseRegaAlarms(output: string): RegaAlarm[] {
             interfaceName: match[1] ?? '',
             address: match[2] ?? '',
             datapoint: match[3] ?? '',
+            value: parseRegaValue(value),
             first: firstSeconds * 1000,
             last: Number.isFinite(lastSeconds) && lastSeconds > 0 ? lastSeconds * 1000 : firstSeconds * 1000,
         });
     }
     return alarms;
+}
+
+/** ReGa's text of a datapoint value, as `Write(oDP.Value())` prints it. */
+function parseRegaValue(text: string | undefined): ParamsetValue {
+    const trimmed = text?.trim() ?? '';
+    if (trimmed === '' || trimmed === 'true') {
+        return true;
+    }
+    if (trimmed === 'false') {
+        return false;
+    }
+    const number = Number(trimmed);
+    return Number.isFinite(number) ? number : trimmed;
 }
 
 /**

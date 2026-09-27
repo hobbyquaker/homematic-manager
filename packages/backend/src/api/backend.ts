@@ -92,6 +92,7 @@ import {DETECT_TIMEOUT_MS, MetaApiClient} from '../meta/client.js';
 import {MetaService, hostBaseUrl, type HostProbe, type MetaServiceOptions} from '../meta/service.js';
 import {createSystemFetch} from '../meta/systemFetch.js';
 import {RegaService, type RegaServiceOptions} from '../rega/client.js';
+import type {RegaAlarm} from '../rega/scripts.js';
 import type {RpcCallRecord, RpcOutValue} from '../rpc/client.js';
 import {listDevicesAnswer, type CallbackHandler} from '../rpc/server.js';
 import {ApiEventEmitter} from '../util/emitter.js';
@@ -230,8 +231,8 @@ export class Backend {
      * swallows packets takes 30 s); a store that has not started by then never will.
      */
     #metaStarting: Promise<void> | undefined;
-    /** Task 36: ReGa's first report per `<interface>|<address>|<datapoint>`, from its pending alarms. */
-    readonly #regaFirstSeen = new Map<string, number>();
+    /** Task 36, B-74: ReGa's pending alarms per `<interface>|<address>|<datapoint>` - the CCU's own list. */
+    readonly #regaAlarms = new Map<string, RegaAlarm>();
     /** Task 64: `getParamsetId` answers by `<interface>|<address>`; emptied on every connect. */
     readonly #paramsetIds = new Map<string, string>();
     #serviceMessageTimer: ReturnType<typeof setInterval> | undefined;
@@ -840,7 +841,7 @@ export class Backend {
 
         // B-54: the names are waited for only so long; the store starts after them either way,
         // so its names still land over ReGa's as before (task 27, D-40)
-        this.#regaFirstSeen.clear();
+        this.#regaAlarms.clear();
         const names = this.#rega.refreshNames().then((changed) => {
             if (changed && this.#manager === manager) {
                 this.#caches.saveNames();
@@ -1306,7 +1307,8 @@ export class Backend {
      */
     #stickyUnreachMessages(): ServiceMessage[] {
         const states = this.#manager?.states() ?? [];
-        return this.#caches.listServiceMessages().filter((message) => {
+        // B-74: with the messages only ReGa lists - the WebUI's "war gestört" the interface forgot
+        return this.#serviceMessages().filter((message) => {
             if (message.datapoint !== 'STICKY_UNREACH' || message.value === false) {
                 return false;
             }
@@ -1324,9 +1326,9 @@ export class Backend {
      */
     async #acknowledgeExisting(messages: readonly ServiceMessage[]): Promise<void> {
         for (const message of messages) {
-            const listed = this.#caches
-                .listServiceMessages(message.interfaceName)
-                .some((entry) => entry.address === message.address && entry.datapoint === message.datapoint);
+            const listed = this.#serviceMessages(message.interfaceName).some(
+                (entry) => entry.address === message.address && entry.datapoint === message.datapoint,
+            );
             if (!listed || this.#stopped) {
                 continue;
             }
@@ -1696,21 +1698,62 @@ export class Backend {
     }
 
     #serviceMessages(interfaceName?: string): ServiceMessage[] {
-        return this.#withRegaTimes(this.#caches.listServiceMessages(interfaceName));
+        return this.#withRegaAlarms(this.#caches.listServiceMessages(interfaceName), interfaceName);
     }
 
     /**
      * Task 36: where ReGa knows a message, its first report (the WebUI's *Erste Meldung*) replaces
      * the time this application first saw it, and says so.
+     *
+     * B-74 (#150): and a pending alarm whose datapoint the interface process does not list becomes
+     * a row of its own, as the WebUI shows it - value and first report from ReGa, marked as listed
+     * by the CCU only. rfd forgets a `STICKY_UNREACH` at a restart while ReGa keeps the alarm until
+     * it is receipted, so the WebUI had nine messages this list lacked. Only the connection's own
+     * interfaces and the datapoints that are service messages here: an alarm on a system variable
+     * or a CUxD datapoint stays the WebUI's.
      */
-    #withRegaTimes(messages: ServiceMessage[]): ServiceMessage[] {
-        if (this.#regaFirstSeen.size === 0) {
+    #withRegaAlarms(messages: ServiceMessage[], interfaceName?: string): ServiceMessage[] {
+        if (this.#regaAlarms.size === 0) {
             return messages;
         }
-        return messages.map((message) => {
-            const first = this.#regaFirstSeen.get(`${message.interfaceName}|${message.address}|${message.datapoint}`);
-            return first === undefined ? message : {...message, since: first, sinceSource: 'rega' as const};
+        const listed = new Set<string>();
+        const result = messages.map((message) => {
+            const key = `${message.interfaceName}|${message.address}|${message.datapoint}`;
+            listed.add(key);
+            const alarm = this.#regaAlarms.get(key);
+            return alarm === undefined ? message : {...message, since: alarm.first, sinceSource: 'rega' as const};
         });
+        const known = new Set(this.#manager?.names() ?? []);
+        for (const [key, alarm] of this.#regaAlarms) {
+            if (
+                listed.has(key) ||
+                !known.has(alarm.interfaceName) ||
+                (interfaceName !== undefined && alarm.interfaceName !== interfaceName) ||
+                !countsAsServiceMessage(alarm.datapoint, alarm.value)
+            ) {
+                continue;
+            }
+            result.push({
+                interfaceName: alarm.interfaceName,
+                address: alarm.address,
+                datapoint: alarm.datapoint,
+                value: alarm.value,
+                since: alarm.first,
+                sinceSource: 'rega',
+                source: 'rega',
+            });
+        }
+        return result;
+    }
+
+    /** B-74: is this message one only ReGa lists - a pending alarm without the interface's datapoint? */
+    #isRegaOnly(interfaceName: string, address: string, datapoint: string): boolean {
+        return (
+            this.#regaAlarms.has(`${interfaceName}|${address}|${datapoint}`) &&
+            !this.#caches
+                .listServiceMessages(interfaceName)
+                .some((message) => message.address === address && message.datapoint === datapoint)
+        );
     }
 
     /**
@@ -1723,8 +1766,8 @@ export class Backend {
     async #refreshRegaAlarms(): Promise<void> {
         const rega = this.#rega;
         if (!rega?.state.enabled) {
-            if (this.#regaFirstSeen.size > 0) {
-                this.#regaFirstSeen.clear();
+            if (this.#regaAlarms.size > 0) {
+                this.#regaAlarms.clear();
                 this.events.emit('serviceMessages.changed', this.#serviceMessages());
             }
             return;
@@ -1734,14 +1777,17 @@ export class Backend {
             return;
         }
         const next = new Map(
-            alarms.map((alarm) => [`${alarm.interfaceName}|${alarm.address}|${alarm.datapoint}`, alarm.first]),
+            alarms.map((alarm) => [`${alarm.interfaceName}|${alarm.address}|${alarm.datapoint}`, alarm]),
         );
         const changed =
-            next.size !== this.#regaFirstSeen.size ||
-            [...next].some(([key, first]) => this.#regaFirstSeen.get(key) !== first);
-        this.#regaFirstSeen.clear();
-        for (const [key, first] of next) {
-            this.#regaFirstSeen.set(key, first);
+            next.size !== this.#regaAlarms.size ||
+            [...next].some(([key, alarm]) => {
+                const before = this.#regaAlarms.get(key);
+                return before === undefined || before.first !== alarm.first || before.value !== alarm.value;
+            });
+        this.#regaAlarms.clear();
+        for (const [key, alarm] of next) {
+            this.#regaAlarms.set(key, alarm);
         }
         if (changed) {
             this.events.emit('serviceMessages.changed', this.#serviceMessages());
@@ -1992,21 +2038,51 @@ export class Backend {
         if (!isAcknowledgeable(datapoint)) {
             throw validationError(`${datapoint} cannot be acknowledged`);
         }
-        const description = await this.#describe(interfaceName, address, 'VALUES');
-        const parameter = description[datapoint];
-        const value: RpcWriteValue = parameter?.TYPE === 'ACTION';
-        await this.#writer.setValue(interfaceName, address, datapoint, value);
+        // B-74: a message only ReGa lists has no flag left to clear on the interface; the write is
+        // still sent (rfd takes a `false` for a flag it does not hold), but its failure - a device
+        // the interface no longer knows, say - must not keep the alarm standing in the WebUI
+        const regaOnly = this.#isRegaOnly(interfaceName, address, datapoint);
+        try {
+            const description = await this.#describe(interfaceName, address, 'VALUES');
+            const parameter = description[datapoint];
+            const value: RpcWriteValue = parameter?.TYPE === 'ACTION';
+            await this.#writer.setValue(interfaceName, address, datapoint, value);
+        } catch (error) {
+            if (!regaOnly) {
+                throw error;
+            }
+            this.#notice(
+                'info',
+                `${address}: ${datapoint} is listed by the CCU only; the interface did not take the write (${errorMessage(error)}), the alarm is receipted in ReGa`,
+                interfaceName,
+            );
+        }
         if (this.#caches.serviceMessages.clear(interfaceName, address, datapoint)) {
             this.events.emit('serviceMessages.changed', this.#serviceMessages());
         }
         // Issue #94: the datapoint write above is the acknowledgement that matters, and it happened
         // whether ReGa exists or not. This clears the CCU's own alarm on top, so the WebUI stops
         // showing a message the user has already dealt with here. D-2: silent when ReGa is off.
-        void this.#rega?.acknowledgeAlarm(interfaceName, address, datapoint).then(async (receipted) => {
+        // B-74: for a message only ReGa lists the receipt *is* the acknowledgement, so it is waited
+        // for, and the row goes with the list that follows it.
+        const receipt = (
+            this.#rega?.acknowledgeAlarm(interfaceName, address, datapoint) ?? Promise.resolve(false)
+        ).then(async (receipted) => {
             if (receipted) {
                 await this.#refreshRegaAlarms();
+            } else if (regaOnly) {
+                this.#notice(
+                    'warn',
+                    `${address}: ${datapoint} is listed by the CCU only, and ReGa did not receipt it`,
+                    interfaceName,
+                );
             }
         });
+        if (regaOnly) {
+            await receipt;
+        } else {
+            void receipt;
+        }
         return null;
     }
 

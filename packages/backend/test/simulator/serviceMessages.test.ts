@@ -233,6 +233,92 @@ describe.skipIf(!simulatorAvailable)("ReGa's alarms beside the service messages 
         const receipt = scripts.find((script) => script.includes('AlReceipt')) ?? '';
         expect(receipt).toContain('"BidCos-RF.LEQ0000001:0.STICKY_UNREACH"');
     });
+
+    /**
+     * B-74 (#150): ReGa lists what the interface process no longer reports - the WebUI showed ten
+     * `STICKY_UNREACH`, `getServiceMessages` one. The stand-in answers three pending alarms the
+     * simulator's rfd knows nothing about: one on a device it has (the write is taken), one on a
+     * device it does not (the write fails; the receipt still happens), and one on an interface the
+     * connection does not have (stays the WebUI's).
+     */
+    function regaWithOrphanAlarms(scripts: string[]): {
+        getChannels: () => Promise<unknown[]>;
+        exec: (script: string) => Promise<{output: string; objects: Record<string, string>}>;
+    } {
+        const pending = new Map<string, string>([
+            ['BidCos-RF.LEQ0000001:0.STICKY_UNREACH', `\t${String(FIRST)}\t${String(FIRST + 60)}\ttrue`],
+            ['BidCos-RF.LEQ0009999:0.STICKY_UNREACH', `\t${String(FIRST + 10)}\t${String(FIRST + 10)}\ttrue`],
+            ['CUxD.CUX2801001:1.STICKY_UNREACH', `\t${String(FIRST + 20)}\t${String(FIRST + 20)}\ttrue`],
+        ]);
+        return {
+            getChannels: () => Promise.resolve([{id: 1000, address: 'LEQ0000001', name: 'Steckdose'}]),
+            exec: (script: string) => {
+                scripts.push(script);
+                if (script.includes('AlReceipt')) {
+                    const match = /== "([^"]+)"/u.exec(script);
+                    const hit = match?.[1] !== undefined && pending.delete(match[1]);
+                    return Promise.resolve({output: hit ? '1' : '0', objects: {}});
+                }
+                if (script.includes('AlOccurrenceTime')) {
+                    return Promise.resolve({
+                        output: [...pending].map(([name, rest]) => `${name}${rest}\n`).join(''),
+                        objects: {},
+                    });
+                }
+                return Promise.resolve({output: '', objects: {}});
+            },
+        };
+    }
+
+    it('B-74: lists the messages only ReGa knows, marked so, and an acknowledgement clears them in ReGa', async () => {
+        const sim = await startSimulator({rega: false});
+        running.push({close: () => sim.close()});
+        const scripts: string[] = [];
+        const harness = await startBackend(sim, {
+            backend: {regaOptions: {createClient: () => regaWithOrphanAlarms(scripts) as never}},
+        });
+        running.unshift({close: () => harness.close()});
+
+        const list = await harness.backend.request('serviceMessages.refresh', 'BidCos-RF');
+        expect(list.filter((message) => message.datapoint === 'STICKY_UNREACH')).toEqual([
+            {
+                interfaceName: 'BidCos-RF',
+                address: 'LEQ0000001:0',
+                datapoint: 'STICKY_UNREACH',
+                value: true,
+                since: FIRST * 1000,
+                sinceSource: 'rega',
+                source: 'rega',
+            },
+            {
+                interfaceName: 'BidCos-RF',
+                address: 'LEQ0009999:0',
+                datapoint: 'STICKY_UNREACH',
+                value: true,
+                since: (FIRST + 10) * 1000,
+                sinceSource: 'rega',
+                source: 'rega',
+            },
+        ]);
+        // the whole list too - CUxD is no interface of this connection, so its alarm stays out
+        const all = await harness.backend.request('serviceMessages.list');
+        expect(all.filter((message) => message.interfaceName === 'CUxD')).toEqual([]);
+        expect(all.filter((message) => message.source === 'rega')).toHaveLength(2);
+
+        // the device rfd has: the write goes, the alarm is receipted, the row is gone
+        await harness.backend.request('serviceMessages.ack', 'BidCos-RF', 'LEQ0000001:0', 'STICKY_UNREACH');
+        expect(scripts.filter((script) => script.includes('AlReceipt'))).toHaveLength(1);
+        let after = await harness.backend.request('serviceMessages.list', 'BidCos-RF');
+        expect(after.some((message) => message.address === 'LEQ0000001:0')).toBe(false);
+        expect(after.some((message) => message.address === 'LEQ0009999:0')).toBe(true);
+
+        // the device rfd does not have: the write fails, the alarm is receipted anyway, with a notice
+        await harness.backend.request('serviceMessages.ack', 'BidCos-RF', 'LEQ0009999:0', 'STICKY_UNREACH');
+        expect(scripts.filter((script) => script.includes('AlReceipt'))).toHaveLength(2);
+        after = await harness.backend.request('serviceMessages.list', 'BidCos-RF');
+        expect(after.some((message) => message.datapoint === 'STICKY_UNREACH')).toBe(false);
+        expect(harness.notices.some((notice) => notice.message.includes('listed by the CCU only'))).toBe(true);
+    });
 });
 
 async function waitUntil(predicate: () => boolean, timeoutMs = 3000): Promise<void> {

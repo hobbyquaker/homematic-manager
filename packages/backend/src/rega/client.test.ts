@@ -341,13 +341,17 @@ describe("ReGa's alarms (B-61, task 36)", () => {
     it('reads the pending alarms with their first report, and nothing without ReGa', async () => {
         const {rega} = service({
             exec: () =>
-                Promise.resolve({output: 'BidCos-RF.ABC1:0.STICKY_UNREACH\t1790000000\t1790000100\n', objects: {}}),
+                Promise.resolve({
+                    output: 'BidCos-RF.ABC1:0.STICKY_UNREACH\t1790000000\t1790000100\ttrue\n',
+                    objects: {},
+                }),
         });
         await expect(rega.readAlarms()).resolves.toEqual([
             {
                 interfaceName: 'BidCos-RF',
                 address: 'ABC1:0',
                 datapoint: 'STICKY_UNREACH',
+                value: true,
                 first: 1_790_000_000_000,
                 last: 1_790_000_100_000,
             },

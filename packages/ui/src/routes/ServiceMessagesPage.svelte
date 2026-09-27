@@ -251,9 +251,15 @@
                         src={stores.host.deviceImageUrl(deviceTypeOf(row.address))}
                     />
                 {:else if column.key === 'datapoint'}
+                    <!-- B-74 (#150): a message only the CCU's ReGa lists says so, as the WebUI shows it -->
                     <span
                         class="hmm-msg-name"
                         class:hmm-msg-ackable={isAcknowledgeable(row.datapoint)}
+                        class:hmm-msg-rega={row.source === 'rega'}
+                        title={row.source === 'rega'
+                            ? t('Listed by the CCU only; the interface no longer reports it')
+                            : undefined}
+                        data-listed-by={row.source ?? 'interface'}
                         data-testid={`message-${row.address}-${row.datapoint}`}>{row.datapoint}</span
                     >
                 {:else if column.key === 'value'}
@@ -324,6 +330,11 @@
     /* The two the CCU lets an application clear; the rest go away when their cause does. */
     .hmm-msg-ackable {
         color: var(--hmm-accent);
+    }
+
+    /* B-74: listed by the CCU only - the interface does not report it any more */
+    .hmm-msg-rega {
+        font-style: italic;
     }
 
     /* Task 36: the box's total reads as the count it replaces, and shows that it can be clicked. */

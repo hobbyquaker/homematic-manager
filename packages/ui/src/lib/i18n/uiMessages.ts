@@ -256,6 +256,11 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Vom Homematic Manager zuerst gesehen',
         en: 'First seen by the Homematic Manager',
     },
+    // B-74 (#150): the tooltip of a message only ReGa lists - the WebUI shows it, the interface no longer does
+    'Listed by the CCU only; the interface no longer reports it': {
+        de: 'Nur von der CCU geführt; die Schnittstelle meldet sie nicht mehr',
+        en: 'Listed by the CCU only; the interface no longer reports it',
+    },
     Clear: {de: 'Leeren', en: 'Clear'},
     'No data': {de: 'Keine Daten', en: 'No data'},
     'Nothing selected': {de: 'Nichts ausgewählt', en: 'Nothing selected'},

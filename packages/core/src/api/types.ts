@@ -610,6 +610,13 @@ export interface ServiceMessage {
      * WebUI's *Erste Meldung*); absent when it is when this application first saw it.
      */
     sinceSource?: 'rega';
+    /**
+     * B-74 (#150): `rega` when only the CCU's ReGa lists this message - its alarm is pending while
+     * the interface process no longer reports the datapoint (rfd forgets a `STICKY_UNREACH` at a
+     * restart, ReGa keeps the alarm until it is receipted). The WebUI shows such a message; so does
+     * this list. Absent when the interface reports it.
+     */
+    source?: 'rega';
 }
 
 export interface EventRecord {

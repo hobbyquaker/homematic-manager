@@ -6,6 +6,20 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Added
+
+- **Pairing a BidCos device that holds another system's security key.** Such a device asks to join, rfd refuses it for
+  the key it cannot verify and tells nobody - the CCU WebUI polls for it and asks for the key. The pairing dialog now does
+  the same: while a BidCos install mode runs it asks rfd every five seconds for a refused device (and once after a failed
+  _Add by serial number_), stops the install mode, names the device and asks for the security key of the system it was
+  paired to; _Set the key and try again_ sends it as the temporary key and starts the same pairing again. The
+  _Temporary key_ field stays for those who know the key up front, with a line saying what it is for. A key that was
+  sent is cleared again once the device has joined or the window is over, so a mistyped one does not linger for the
+  next pairing. The hint at the end of an empty BidCos install mode names the key case instead of a factory reset, which
+  does not remove the key.
+
 ## [3.0.0-beta.26] — 2026-09-27
 
 ### Fixed

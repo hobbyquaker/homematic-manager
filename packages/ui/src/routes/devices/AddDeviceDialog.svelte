@@ -295,8 +295,9 @@
     async function stopForKey(serial: string): Promise<void> {
         installWindow += 1;
         remaining = 0;
-        await askForKey(serial);
+        // the interface first (the lab saw the window stay open for the focus's tick otherwise), then the question
         await stores.devices.setInstallMode(interfaceName, false);
+        await askForKey(serial);
     }
 
     async function askForKey(serial: string): Promise<void> {

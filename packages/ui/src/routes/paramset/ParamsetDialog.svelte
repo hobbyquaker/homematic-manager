@@ -603,7 +603,7 @@
                 )}
             </p>
         {/if}
-        <div class="hmm-paramset-list" class:hmm-paramset-raw={paramset === 'ROUTING_TABLE'}>
+        <div class="hmm-paramset-list hmm-param-table" class:hmm-paramset-raw={paramset === 'ROUTING_TABLE'}>
             {#if form && description}
                 <EasyForm
                     {form}
@@ -620,7 +620,10 @@
             {/if}
             {#each form ? [] : shownFields as field (field.name)}
                 {@const withSuppress = serviceNames.includes(field.name)}
-                <div class="hmm-paramset-easy-mark" class:hmm-paramset-easy-marked={easyParams.has(field.name)}>
+                <div
+                    class="hmm-paramset-easy-mark hmm-param-table-span"
+                    class:hmm-paramset-easy-marked={easyParams.has(field.name)}
+                >
                     <ParameterRow
                         {field}
                         value={valueOf(field)}

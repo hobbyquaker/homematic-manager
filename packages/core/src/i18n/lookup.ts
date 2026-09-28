@@ -99,14 +99,27 @@ export class TranslationLookup {
     }
 }
 
-/** `CHANNEL_TYPE|SUFFIX` before `SUFFIX`, each as given and upper-cased. */
+/**
+ * `CHANNEL_TYPE|SUFFIX` before `SUFFIX`, each as given and upper-cased - and then the same two
+ * again without a `SHORT_` or `LONG_` prefix (B-75). The string tables label a link's parameters
+ * by the name behind the key press: `ON_TIME`, `JT_ON`, `PROFILE_ACTION_TYPE` are in them,
+ * `SHORT_ON_TIME` and `LONG_ON_TIME` are not - 2.7.1 stripped the prefix for a link's help
+ * texts (homematic-manager.js:3475), and a MASTER parameter that happens to start with one
+ * (`LONG_PRESS_TIME`) still finds its own entry first.
+ */
 function keys(suffix: string, channelType: string | undefined): string[] {
-    const bare = identifiers(suffix);
-    if (channelType === undefined || channelType === '') {
-        return bare;
-    }
-    const qualified = identifiers(channelType).map((type) => `${type}|${suffix}`);
-    return dedupe([...qualified, ...qualified.map((key) => key.toUpperCase()), ...bare]);
+    const stripped = suffix.replace(/^(?:SHORT|LONG)_/i, '');
+    const forms = stripped === suffix ? [suffix] : [suffix, stripped];
+    return dedupe(
+        forms.flatMap((form) => {
+            const bare = identifiers(form);
+            if (channelType === undefined || channelType === '') {
+                return bare;
+            }
+            const qualified = identifiers(channelType).map((type) => `${type}|${form}`);
+            return [...qualified, ...qualified.map((key) => key.toUpperCase()), ...bare];
+        }),
+    );
 }
 
 /** The key as it was given, plus its upper-case form where that differs. */

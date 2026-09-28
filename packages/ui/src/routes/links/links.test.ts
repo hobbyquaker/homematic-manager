@@ -737,6 +737,30 @@ describe('the CCU easy mode form (task 62, D-54)', () => {
         });
     });
 
+    it('labels a raw link parameter by the name behind its prefix, and an untranslated one once (B-75)', async () => {
+        // the string tables know ON_TIME_FACTOR, not SHORT_ON_TIME_FACTOR - the dialog showed the identifier twice
+        const files = transport.handlerFor('data.file');
+        transport.respond('data.file', (path) => {
+            const found = files(path);
+            return path === 'data/translations/de.json'
+                ? {
+                      ...(found as object),
+                      parameters: {...(found as {parameters: object}).parameters, ON_TIME_FACTOR: 'Zeitfaktor'},
+                  }
+                : found;
+        });
+        await openLink();
+        const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('easy-time-select-SHORT_ON'));
+        await fireEvent.change(select, {target: {value: '3'}});
+        const factor = await waitFor(() => screen.getByTestId('param-SHORT_ON_TIME_FACTOR'));
+        expect(factor.querySelector('.hmm-param-label span')?.textContent).toBe('Zeitfaktor');
+        expect(factor.querySelector('.hmm-param-id')?.textContent).toBe('SHORT_ON_TIME_FACTOR');
+        // nobody translated the base: its identifier, once
+        const base = screen.getByTestId('param-SHORT_ON_TIME_BASE');
+        expect(base.querySelector('.hmm-param-label')?.textContent.trim()).toBe('SHORT_ON_TIME_BASE');
+        expect(base.querySelector('.hmm-param-id')).toBeNull();
+    });
+
     it('opens base and factor raw for "enter value"', async () => {
         await openLink();
         const select = await waitFor(() => screen.getByTestId<HTMLSelectElement>('easy-time-select-SHORT_ON'));

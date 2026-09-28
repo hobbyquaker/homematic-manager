@@ -2,6 +2,7 @@
     import type {ParamsetValue} from '@homematic-manager/core';
     import {fromDisplayValue, toDisplayValue} from '@homematic-manager/core';
 
+    import {getStores} from '../../lib/stores/context.js';
     import type {FormField} from '../../lib/util/paramsetForm.js';
 
     interface Props {
@@ -56,6 +57,8 @@
         suppressChanged = false,
     }: Props = $props();
 
+    const t = getStores().i18n.t;
+
     const readOnly = $derived(disabled || !field.writable);
     const numeric = $derived(field.kind === 'integer' || field.kind === 'float');
     const shown = $derived(numeric ? toDisplayValue(asNumber(value), field.description) : value);
@@ -63,6 +66,11 @@
     const enumIndex = $derived(asNumber(value) ?? -1);
     /** `NOT_USED` and friends: a value outside MIN..MAX that means something (#96). */
     const activeSpecial = $derived(field.special.find((special) => special.VALUE === asNumber(value)));
+    /**
+     * B-75: a parameter nobody translated has its name as the label - then the name is printed
+     * once, not as label and identifier both.
+     */
+    const translated = $derived(label !== field.name);
 
     function asNumber(input: unknown): number | undefined {
         if (typeof input === 'number') {
@@ -89,10 +97,19 @@
     }
 </script>
 
-<div class="hmm-param" class:hmm-param-changed={changed || suppressChanged} data-testid={`param-${field.name}`}>
+<!--
+    Task 77: a row of the parameter table (`.hmm-param-table` in app.css) - a subgrid, its cells
+    placed by column so a row without a setValue button or a range leaves that column empty
+    rather than shifting the cells after it. The help text is a second line under all of them.
+-->
+<div
+    class="hmm-param hmm-param-table-row"
+    class:hmm-param-changed={changed || suppressChanged}
+    data-testid={`param-${field.name}`}
+>
     <div class="hmm-param-label">
         <span title={field.name}>{label}</span>
-        <span class="hmm-param-id">{field.name}</span>
+        {#if translated}<span class="hmm-param-id">{field.name}</span>{/if}
     </div>
 
     <div class="hmm-param-control">
@@ -106,7 +123,7 @@
             />
         {:else if field.kind === 'enum'}
             <select
-                class="hmm-select"
+                class="hmm-select hmm-param-enum"
                 disabled={readOnly}
                 aria-label={label}
                 value={String(enumIndex)}
@@ -180,55 +197,49 @@
         {/if}
 
         {#if field.unit !== ''}<span class="hmm-param-unit">{field.unit}</span>{/if}
+    </div>
 
-        {#if onset}
+    {#if onset}
+        <div class="hmm-param-set">
             <button
                 type="button"
-                class="hmm-button hmm-param-set"
+                class="hmm-button"
                 disabled={readOnly}
                 data-testid={`set-${field.name}`}
                 onclick={() => onset()}>setValue</button
             >
-        {/if}
-    </div>
+        </div>
+    {/if}
 
-    <div class="hmm-param-meta">
-        {#if onsuppress}
-            <label class="hmm-param-suppress" title={suppressTitle}>
-                <input
-                    type="checkbox"
-                    checked={suppressed === true}
-                    data-testid={`suppress-${field.name}`}
-                    onchange={(event) => onsuppress(event.currentTarget.checked)}
-                />
-                <span>{suppressLabel}</span>
-            </label>
-        {/if}
-        {#if !field.writable}<span class="hmm-param-flag">read-only</span>{/if}
-        {#if field.min !== undefined || field.max !== undefined}
-            <span>{field.min ?? '−∞'} … {field.max ?? '∞'}</span>
-        {/if}
-        {#if field.description.DEFAULT !== undefined}
-            <span>default {String(field.description.DEFAULT)}</span>
-        {/if}
-    </div>
+    {#if onsuppress}
+        <label class="hmm-param-suppress" title={suppressTitle}>
+            <input
+                type="checkbox"
+                checked={suppressed === true}
+                data-testid={`suppress-${field.name}`}
+                onchange={(event) => onsuppress(event.currentTarget.checked)}
+            />
+            <span>{suppressLabel}</span>
+        </label>
+    {/if}
+
+    {#if !field.writable}
+        <div class="hmm-param-flag"><span class="hmm-param-ro" title={t('Read-only')}>{t('ro')}</span></div>
+    {/if}
+    {#if field.min !== undefined || field.max !== undefined}
+        <div class="hmm-param-range">{field.min ?? '−∞'} … {field.max ?? '∞'}</div>
+    {/if}
+    {#if field.description.DEFAULT !== undefined}
+        <div class="hmm-param-default">{t('default {value}', {value: String(field.description.DEFAULT)})}</div>
+    {/if}
 
     {#if help}
-        <p class="hmm-param-help">{help}</p>
+        <p class="hmm-param-help hmm-param-table-wide">{help}</p>
     {/if}
 </div>
 
 <style>
-    /*
-     * B-63: a wrapping row rather than a three-column grid. Wide, it is what the grid was - the
-     * name at 240 px, the value filling the middle, range and default at 200 px on the right; in a
-     * narrow dialog (a 412 px phone) the value and then the range move under the name instead of
-     * being cut off at the dialog's edge.
-     */
     .hmm-param {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 2px 8px;
         align-items: center;
         padding: 2px 4px;
         border-bottom: 1px solid var(--hmm-border-muted);
@@ -240,7 +251,7 @@
 
     .hmm-param-label {
         display: flex;
-        flex: 0 1 240px;
+        grid-column: 1;
         flex-direction: column;
         min-width: 0;
     }
@@ -255,10 +266,17 @@
 
     .hmm-param-control {
         display: flex;
-        flex: 1 1 160px;
+        grid-column: 2;
         align-items: center;
         gap: 6px;
         min-width: 0;
+        padding-left: 8px;
+    }
+
+    /* One width per kind of control, not per content: the rows read as columns. */
+    .hmm-param-enum {
+        width: 220px;
+        max-width: 100%;
     }
 
     .hmm-param-number {
@@ -272,7 +290,8 @@
 
     .hmm-param-special,
     .hmm-param-preset {
-        max-width: 130px;
+        width: 130px;
+        max-width: 100%;
     }
 
     .hmm-param-unit {
@@ -280,37 +299,77 @@
     }
 
     .hmm-param-set {
-        margin-left: auto;
+        grid-column: 3;
+        padding-left: 8px;
     }
 
-    .hmm-param-meta {
+    .hmm-param-suppress {
         display: flex;
-        flex: 0 0 200px;
-        max-width: 100%;
-        margin-left: auto;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: flex-end;
-        color: var(--hmm-fg-muted);
+        grid-column: 4;
+        align-items: center;
+        gap: 4px;
+        padding-left: 10px;
         font-size: var(--hmm-font-size-small);
         white-space: nowrap;
     }
 
     .hmm-param-flag {
-        color: var(--hmm-warn);
+        grid-column: 5;
+        padding-left: 10px;
     }
 
-    .hmm-param-suppress {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        color: var(--hmm-fg);
+    .hmm-param-range,
+    .hmm-param-default {
+        padding-left: 10px;
+        color: var(--hmm-fg-muted);
+        font-size: var(--hmm-font-size-small);
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .hmm-param-range {
+        grid-column: 6;
+    }
+
+    .hmm-param-default {
+        grid-column: 7;
     }
 
     .hmm-param-help {
-        flex: 1 0 100%;
         margin: 0 0 4px;
         color: var(--hmm-fg-muted);
         font-size: var(--hmm-font-size-small);
+    }
+
+    /* The narrow layout of app.css: B-63's wrapping line - the name, then the control, then the rest. */
+    @container hmm-param-table (max-width: 599px) {
+        .hmm-param {
+            gap: 2px 0;
+        }
+
+        .hmm-param-label {
+            flex: 0 1 240px;
+        }
+
+        .hmm-param-control {
+            flex: 1 1 160px;
+        }
+
+        .hmm-param-set,
+        .hmm-param-suppress,
+        .hmm-param-flag,
+        .hmm-param-range,
+        .hmm-param-default {
+            flex: 0 0 auto;
+        }
+
+        .hmm-param-flag {
+            margin-left: auto;
+        }
+
+        .hmm-param-help {
+            flex: 1 0 100%;
+        }
     }
 </style>

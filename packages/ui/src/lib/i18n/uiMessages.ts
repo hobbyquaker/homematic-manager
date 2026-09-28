@@ -1065,6 +1065,9 @@ export const UI_MESSAGES: MessageCatalogue = {
     Unreachable: {de: 'Nicht erreichbar', en: 'Unreachable'},
     'Read-only': {de: 'Nur lesen', en: 'Read-only'},
     Writable: {de: 'Schreibbar', en: 'Writable'},
+    // task 77: the parameter row's read-only pill and its default column
+    ro: {de: 'ro', en: 'ro'},
+    'default {value}': {de: 'Standard {value}', en: 'default {value}'},
     'revision {revision}, {count} objects': {
         de: 'Revision {revision}, {count} Objekte',
         en: 'revision {revision}, {count} objects',

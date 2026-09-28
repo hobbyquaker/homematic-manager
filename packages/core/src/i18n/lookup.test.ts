@@ -65,6 +65,19 @@ describe('parameter labels', () => {
     it('normalises a lower-case identifier to the CCU own upper-case keys', () => {
         expect(lookup.parameter('powerup_action', 'switch')).toBe('Schaltzustand nach Spannungswiederkehr');
     });
+
+    // B-75: the string tables know `ON_TIME`, not `SHORT_ON_TIME` - the link dialog showed the raw name
+    it('labels a link parameter by the name behind its SHORT_ or LONG_ prefix', () => {
+        expect(lookup.parameter('SHORT_ON_TIME')).toBe('Einschaltdauer');
+        expect(lookup.parameter('LONG_ON_TIME', 'SWITCH')).toBe('Einschaltdauer des Schaltaktors');
+        expect(lookup.parameter('LONG_JT_ON', 'SWITCH_VIRTUAL_RECEIVER')).toBe('Sprungziel Ein');
+        expect(lookup.parameter('short_on_time')).toBe('Einschaltdauer');
+        expect(lookup.parameter('SHORT_NOT_TRANSLATED')).toBe('SHORT_NOT_TRANSLATED');
+    });
+
+    it('keeps the full name of a MASTER parameter that starts like a link one', () => {
+        expect(lookup.parameter('LONG_PRESS_TIME')).toBe('Mindestdauer langer Tastendruck');
+    });
 });
 
 describe('parameter value labels', () => {
@@ -77,6 +90,11 @@ describe('parameter value labels', () => {
 
     it('falls back to the enum name itself', () => {
         expect(lookup.parameterValue('POWERUP_ACTION', 'SOMETHING_ELSE')).toBe('SOMETHING_ELSE');
+    });
+
+    it('finds the values of a link parameter behind its SHORT_ or LONG_ prefix (B-75)', () => {
+        expect(lookup.parameterValue('SHORT_JT_ON', 'ON_DELAY')).toBe('Einschaltverzoegerung');
+        expect(lookup.parameterValue('LONG_JT_ON', 'ON_DELAY', 'SWITCH')).toBe('Einschaltverzoegerung');
     });
 });
 
@@ -91,6 +109,11 @@ describe('parameter help', () => {
     it('has no text rather than an invented one - a missing help is not an error', () => {
         expect(lookup.parameterHelp('STATUSINFO_MINDELAY')).toBeUndefined();
         expect(new TranslationLookup().parameterHelp('POWERUP_ACTION')).toBeUndefined();
+    });
+
+    it('finds the help of a link parameter behind its prefix, as 2.7.1 did (B-75)', () => {
+        expect(lookup.parameterHelp('SHORT_ON_TIME', 'SWITCH')).toBe('Wie lange der Kanal eingeschaltet bleibt.');
+        expect(lookup.parameterHelp('LONG_ON_TIME')).toBe('Wie lange der Kanal eingeschaltet bleibt.');
     });
 });
 

@@ -169,16 +169,23 @@
       "parameters": {
         "POWERUP_ACTION": "Verhalten nach Spannungswiederkehr",
         "SWITCH|POWERUP_ACTION": "Schaltzustand nach Spannungswiederkehr",
-        "STATUSINFO_MINDELAY": "Mindestsendeverzoegerung"
+        "STATUSINFO_MINDELAY": "Mindestsendeverzoegerung",
+        "ON_TIME": "Einschaltdauer",
+        "SWITCH|ON_TIME": "Einschaltdauer des Schaltaktors",
+        "JT_ON": "Sprungziel Ein",
+        "LONG_PRESS_TIME": "Mindestdauer langer Tastendruck",
+        "PRESS_TIME": "Falsch"
       },
       "parameterValues": {
         "SWITCH|POWERUP_ACTION|POWERUP_ON": "Kanal eingeschaltet",
         "POWERUP_ACTION|POWERUP_ON": "eingeschaltet",
-        "POWERUP_OFF": "ausgeschaltet"
+        "POWERUP_OFF": "ausgeschaltet",
+        "JT_ON|ON_DELAY": "Einschaltverzoegerung"
       },
       "parameterHelp": {
         "POWERUP_ACTION": "Zustand nach Spannungswiederkehr.",
-        "SWITCH|POWERUP_ACTION": "Zustand des Schaltaktors nach Spannungswiederkehr."
+        "SWITCH|POWERUP_ACTION": "Zustand des Schaltaktors nach Spannungswiederkehr.",
+        "ON_TIME": "Wie lange der Kanal eingeschaltet bleibt."
       },
       "uiLabels": {"none": "keine", "err_dim_max_ge_min": "Max muss groesser als Min sein"}
     },

@@ -544,13 +544,13 @@ describe.skipIf(!hasLayout)('the paramset editor with a long expert view (task 6
                 row.scrollIntoView({block: 'center'});
                 expect(row.scrollWidth).toBeLessThanOrEqual(row.clientWidth);
                 for (const part of row.querySelectorAll<HTMLElement>(
-                    '.hmm-param-label, .hmm-param-control, .hmm-param-meta',
+                    '.hmm-param-label, .hmm-param-control, .hmm-param-range, .hmm-param-default',
                 )) {
                     const rect = part.getBoundingClientRect();
                     expect(Math.round(rect.left)).toBeGreaterThanOrEqual(Math.round(body.left));
                     expect(Math.round(rect.right)).toBeLessThanOrEqual(Math.round(body.right));
                 }
-                expect(row.querySelector('.hmm-param-meta')?.textContent).toMatch(/0 … \d+/);
+                expect(row.querySelector('.hmm-param-range')?.textContent).toMatch(/0 … \d+/);
             }
         } finally {
             await page.viewport(1280, 800);

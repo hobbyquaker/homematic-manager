@@ -20,10 +20,10 @@
     let {name, suppressed, label, title = undefined, changed = false, onchange}: Props = $props();
 </script>
 
-<div class="hmm-param" class:hmm-param-changed={changed} data-testid={`suppress-row-${name}`}>
+<!-- A row of the parameter table (task 77, app.css): the name in the label column, the checkbox as the control. -->
+<div class="hmm-param hmm-param-table-row" class:hmm-param-changed={changed} data-testid={`suppress-row-${name}`}>
     <div class="hmm-param-label">
         <span>{name}</span>
-        <span class="hmm-param-id">{name}</span>
     </div>
 
     <div class="hmm-param-control">
@@ -37,16 +37,10 @@
             <span>{label}</span>
         </label>
     </div>
-
-    <div class="hmm-param-meta"></div>
 </div>
 
 <style>
-    /* The grid of ParameterRow, repeated: a scoped style cannot be shared, and the rows must line up. */
     .hmm-param {
-        display: grid;
-        grid-template-columns: 240px minmax(0, 1fr) 200px;
-        gap: 8px;
         align-items: center;
         padding: 2px 4px;
         border-bottom: 1px solid var(--hmm-border-muted);
@@ -58,28 +52,33 @@
 
     .hmm-param-label {
         display: flex;
+        grid-column: 1;
         flex-direction: column;
         min-width: 0;
     }
 
-    .hmm-param-id {
-        font-family: var(--hmm-font-mono);
-        font-size: var(--hmm-font-size-small);
-        color: var(--hmm-fg-faint);
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
     .hmm-param-control {
         display: flex;
+        grid-column: 2;
         align-items: center;
         gap: 6px;
         min-width: 0;
+        padding-left: 8px;
     }
 
     .hmm-param-suppress {
         display: flex;
         align-items: center;
         gap: 4px;
+    }
+
+    @container hmm-param-table (max-width: 599px) {
+        .hmm-param-label {
+            flex: 0 1 240px;
+        }
+
+        .hmm-param-control {
+            flex: 1 1 160px;
+        }
     }
 </style>

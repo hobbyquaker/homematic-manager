@@ -516,7 +516,7 @@
                     {t('Sender')}: {stores.nameOf(sender)} ({sender})
                 </h4>
                 {#if senderOpen}
-                    <div class="hmm-link-list" data-testid="link-sender-params">
+                    <div class="hmm-link-list hmm-param-table" data-testid="link-sender-params">
                         {#each senderFields as field (field.name)}
                             <ParameterRow
                                 {field}
@@ -640,7 +640,7 @@
                     )}
                 </p>
             {/if}
-            <div class="hmm-link-list" data-testid="link-receiver-params">
+            <div class="hmm-link-list hmm-param-table" data-testid="link-receiver-params">
                 {#if form && receiverDescription}
                     <EasyForm
                         {form}
@@ -657,7 +657,10 @@
                     />
                 {:else}
                     {#each fields as field (field.name)}
-                        <div class="hmm-link-easy-mark" class:hmm-link-easy-marked={easyParams.has(field.name)}>
+                        <div
+                            class="hmm-link-easy-mark hmm-param-table-span"
+                            class:hmm-link-easy-marked={easyParams.has(field.name)}
+                        >
                             <ParameterRow
                                 {field}
                                 value={valueOf(field, receiverValues, edited)}

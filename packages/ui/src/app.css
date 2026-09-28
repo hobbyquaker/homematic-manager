@@ -349,3 +349,59 @@ textarea {
     opacity: 0.45;
     cursor: default;
 }
+
+/*
+ * Task 77: the parameter table of the paramset and link dialogs. The list is one grid of seven
+ * columns - label, control, setValue, "suppressed", the read-only pill, the range, the default -
+ * and every row (`ParameterRow`, `SuppressRow`, the easy form's selector rows) is a subgrid of it,
+ * so the `auto` columns take the width of their widest cell across the whole list and the buttons,
+ * ranges and defaults line up like a table; a column nobody fills is 0 wide. The wrappers the
+ * dialogs put around a row (the easy-mode mark, the easy form) are subgrids too, so the columns
+ * pass through them. No column gap: it would keep the empty columns apart - the cells carry their
+ * own padding instead.
+ *
+ * B-63 kept the rows inside a 412 px phone by letting them wrap; below 600 px of list width the
+ * container query does the same - each row is a wrapping flex line again, spanning the grid - so
+ * nothing is cut off at the dialog's edge.
+ */
+.hmm-param-table {
+    display: grid;
+    grid-template-columns: minmax(0, 240px) minmax(0, 1fr) repeat(5, auto);
+    container-type: inline-size;
+    container-name: hmm-param-table;
+}
+
+.hmm-param-table-row,
+.hmm-param-table-span {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+}
+
+.hmm-param-table-wide {
+    grid-column: 1 / -1;
+}
+
+@container hmm-param-table (max-width: 599px) {
+    .hmm-param-table-row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .hmm-param-table-span {
+        display: block;
+    }
+}
+
+/* The read-only mark of a parameter row: "ro" in a small pill, the word in its tooltip. */
+.hmm-param-ro {
+    display: inline-block;
+    padding: 0 5px;
+    border: 1px solid var(--hmm-border);
+    border-radius: 999px;
+    font-family: var(--hmm-font-mono);
+    font-size: 10px;
+    line-height: 14px;
+    color: var(--hmm-fg-muted);
+    cursor: default;
+}

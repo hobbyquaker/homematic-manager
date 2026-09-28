@@ -126,11 +126,11 @@
     }
 </script>
 
-<div class="hmm-link-easy" data-testid={testId}>
+<div class="hmm-link-easy hmm-param-table-span" data-testid={testId}>
     {#each form as control, index (control.kind === 'time' ? control.pair.name : control.kind === 'param' ? control.param : `subset-${String(control.subsets)}`)}
         {@const heading = headingBefore(index)}
         {#if heading}
-            <h5 class="hmm-link-press" data-testid="link-easy-press">{heading}</h5>
+            <h5 class="hmm-link-press hmm-param-table-wide" data-testid="link-easy-press">{heading}</h5>
         {/if}
         {#if control.kind === 'time'}
             {@const options = timeSelectors[control.selector] ?? []}
@@ -142,7 +142,7 @@
                 options.length === 0}
             {@const label = labelOf(control, control.pair.countParam)}
             <div
-                class="hmm-link-easy-row"
+                class="hmm-link-easy-row hmm-param-table-row"
                 class:hmm-param-changed={changed(control.pair.unitParam) || changed(control.pair.countParam)}
                 data-testid={`easy-time-${control.pair.name}`}
             >
@@ -191,7 +191,7 @@
                 {@const free = enteringValue[control.param] === true || current < 0}
                 {@const label = labelOf(control, control.param)}
                 <div
-                    class="hmm-link-easy-row"
+                    class="hmm-link-easy-row hmm-param-table-row"
                     class:hmm-param-changed={changed(control.param)}
                     data-testid={`easy-preset-${control.param}`}
                 >
@@ -241,7 +241,7 @@
             {#if choices.length > 0}
                 {@const current = subsetIndex(choices, values, description)}
                 {@const label = localizedText(control.label, language) ?? t('Mode')}
-                <div class="hmm-link-easy-row" data-testid="easy-subset">
+                <div class="hmm-link-easy-row hmm-param-table-row" data-testid="easy-subset">
                     <span class="hmm-link-easy-label">{label}</span>
                     <select
                         class="hmm-select"
@@ -277,24 +277,35 @@
         color: var(--hmm-fg-muted);
     }
 
-    /* the grid of ParameterRow, so a selector row lines up with the parameter rows around it */
+    /* A row of the parameter table (task 77, app.css): the label in its column, the selector
+       across the rest, so it lines up with the parameter rows around it. */
     .hmm-link-easy-row {
-        display: grid;
-        grid-template-columns: 240px minmax(0, 1fr) 200px;
-        gap: 8px;
         align-items: center;
         padding: 2px 4px;
         border-bottom: 1px solid var(--hmm-border-muted);
     }
 
     .hmm-link-easy-row select {
+        grid-column: 2 / -1;
         justify-self: start;
-        min-width: 12em;
+        width: 220px;
         max-width: 100%;
+        margin-left: 8px;
     }
 
     .hmm-link-easy-label {
+        grid-column: 1;
         overflow-wrap: anywhere;
+    }
+
+    @container hmm-param-table (max-width: 599px) {
+        .hmm-link-easy-label {
+            flex: 0 1 240px;
+        }
+
+        .hmm-link-easy-row select {
+            flex: 0 1 auto;
+        }
     }
 
     .hmm-link-easy-row.hmm-param-changed {

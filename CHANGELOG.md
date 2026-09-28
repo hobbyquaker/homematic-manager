@@ -6,6 +6,25 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Changed
+
+- **The parameter rows of the paramset and link dialogs are a table.** The range, the default and the read-only mark
+  used to trail each row as free text at whatever width the row needed, the controls were as wide as their content,
+  and a `setValue` button sat wherever the control ended. Now the list is one grid: the `setValue` buttons, the
+  read-only marks, the ranges and the defaults each have a column of their own and line up down the whole dialog, a
+  dropdown or a number field is the same width on every row, and read-only is a small `ro` pill with the word in its
+  tooltip. On a narrow screen the rows still wrap instead of being cut off.
+
+### Fixed
+
+- **A link's parameters have their names, not their identifiers twice.** The CCU's string tables label a link
+  parameter by the name behind the key press - `ON_TIME`, not `SHORT_ON_TIME` - so the raw rows of the link dialog
+  (and the parameters of an easy mode opened for "enter value") showed the identifier as the label and once more as
+  the identifier. They now find the label, the help and the value names behind the `SHORT_` or `LONG_` prefix, as
+  2.7.1 did for the help texts; a parameter nobody translated shows its name once.
+
 ## [3.0.0-beta.27] — 2026-09-28
 
 ### Added

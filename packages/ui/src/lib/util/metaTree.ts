@@ -14,7 +14,12 @@ import {enumTitle, flattenEnum, parseRef, type MetaEnum, type MetaObjectView} fr
 
 import {canMoveUnder, membersOf, nodeOptions, type NodeOption} from './taxonomy.js';
 
-/** Devices and channels in a node's subtree, counted apart: a room holds channels far more often. */
+/**
+ * The members of a node's subtree: `channels` the member channels, `devices` the distinct devices
+ * among the members - a device that is a member itself, or one with at least one member channel
+ * (B-76, #167: on a CCU only channels are members, so a count of device-level members alone was
+ * blank on every row there).
+ */
 export interface MemberCount {
     readonly devices: number;
     readonly channels: number;
@@ -51,12 +56,18 @@ export function isChannelRef(ref: string): boolean {
 
 export function countMembers(refs: readonly string[]): MemberCount {
     let channels = 0;
+    const devices = new Set<string>();
     for (const ref of refs) {
-        if (isChannelRef(ref)) {
+        const parsed = parseRef(ref);
+        const address = parsed?.address ?? ref;
+        const colon = address.indexOf(':');
+        if (colon >= 0) {
             channels += 1;
         }
+        const device = colon >= 0 ? address.slice(0, colon) : address;
+        devices.add(parsed ? `${parsed.interfaceName}.${device}` : device);
     }
-    return {devices: refs.length - channels, channels};
+    return {devices: devices.size, channels};
 }
 
 /**

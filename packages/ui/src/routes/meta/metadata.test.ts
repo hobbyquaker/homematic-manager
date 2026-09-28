@@ -126,8 +126,8 @@ describe('the Rooms page of a flat store', () => {
             'room/og/schlafzimmer',
             'room/aussen',
         ]);
-        expect(cells('room/eg/kueche')).toEqual(['Küche', '', '1', 'room/eg/kueche']);
-        expect(cells('room/eg')).toEqual(['Erdgeschoss', '', '3', 'room/eg']);
+        expect(cells('room/eg/kueche')).toEqual(['Küche', '1', '1', 'room/eg/kueche']);
+        expect(cells('room/eg')).toEqual(['Erdgeschoss', '3', '3', 'room/eg']);
         expect(screen.getByTestId('meta-table-room-count').textContent).toBe('8 Räume');
         expect(screen.getAllByRole('columnheader').map((cell) => cell.textContent.trim())).toEqual([
             'Name',
@@ -254,8 +254,8 @@ describe('the Metadata page of a tree store', () => {
             'floor',
         ]);
         // the expander is no cell, so the name is the first one on both levels
-        expect(cells('room')).toEqual(['Räume', '', '6', 'room']);
-        expect(cells('room/eg/kueche')).toEqual(['Küche', '', '1', 'room/eg/kueche']);
+        expect(cells('room')).toEqual(['Räume', '6', '6', 'room']);
+        expect(cells('room/eg/kueche')).toEqual(['Küche', '1', '1', 'room/eg/kueche']);
         expect(depthOf('room')).toBe('0');
         expect(depthOf('room/eg')).toBe('1');
         expect(depthOf('room/eg/kueche')).toBe('2');

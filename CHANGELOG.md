@@ -6,6 +6,15 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **The Devices column of the rooms and functions pages counts on a CCU too.** It counted devices that are members
+  of a room or function as a whole - which a CCU never has, the WebUI assigns channels only - so on a CCU it was blank
+  on every row. It now counts the distinct devices among the members: a device that is a member itself, or one with
+  at least one member channel (#167, @Herbert-Testmann).
+
 ## [3.0.0-beta.28] — 2026-09-28
 
 ### Changed

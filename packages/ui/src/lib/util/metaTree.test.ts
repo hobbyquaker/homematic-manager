@@ -44,8 +44,19 @@ describe('counting members', () => {
         expect(isChannelRef('BidCos-RF.MEQ0123456:1')).toBe(true);
         expect(isChannelRef('BidCos-RF.MEQ0123456')).toBe(false);
         expect(isChannelRef('CUxD:1.CUX0000001')).toBe(false);
-        expect(countMembers(['a.b:1', 'a.c', 'a.d:0'])).toEqual({devices: 1, channels: 2});
+        expect(countMembers(['a.b:1', 'a.c', 'a.d:0'])).toEqual({devices: 3, channels: 2});
         expect(countMembers([])).toEqual({devices: 0, channels: 0});
+    });
+
+    // B-76 (#167): a CCU assigns channels only, so the devices are the distinct ones behind them
+    it('counts a device once, whether it is a member itself or through one or more channels', () => {
+        expect(countMembers(['BidCos-RF.MEQ0123456:1', 'BidCos-RF.MEQ0123456:2', 'BidCos-RF.MEQ0123456:3'])).toEqual({
+            devices: 1,
+            channels: 3,
+        });
+        expect(countMembers(['HmIP-RF.0001D3C99ABCDE', 'HmIP-RF.0001D3C99ABCDE:3'])).toEqual({devices: 1, channels: 1});
+        // the same address on two interfaces is two devices
+        expect(countMembers(['BidCos-RF.X:1', 'HmIP-RF.X:1'])).toEqual({devices: 2, channels: 2});
     });
 });
 
@@ -53,10 +64,10 @@ describe('nodeRows', () => {
     it('lists one taxonomy depth first, with the members of every subtree', () => {
         const rows = nodeRows(ENUMS, OBJECTS, 'room');
         expect(rows.map((row) => [row.id, row.depth, row.devices, row.channels, row.hasChildren])).toEqual([
-            ['room/eg', 1, 1, 2, true],
-            ['room/eg/kueche', 2, 0, 2, true],
-            ['room/eg/kueche/ecke', 3, 0, 1, false],
-            ['room/aussen', 1, 0, 1, false],
+            ['room/eg', 1, 2, 2, true],
+            ['room/eg/kueche', 2, 1, 2, true],
+            ['room/eg/kueche/ecke', 3, 1, 1, false],
+            ['room/aussen', 1, 1, 1, false],
         ]);
         expect(rows[0]).toMatchObject({kind: 'node', enumId: 'room', path: 'room/eg', name: 'Erdgeschoss'});
         expect(rows[0]).not.toHaveProperty('nodes');
@@ -71,8 +82,8 @@ describe('enumRows', () => {
     it('makes every taxonomy a top-level row named in the language, with its nodes under it', () => {
         const rows = enumRows(ENUMS, OBJECTS, 'de');
         expect(rows.map((row) => [row.id, row.name, row.devices, row.channels, row.hasChildren])).toEqual([
-            ['room', 'Räume', 1, 3, true],
-            ['function', 'Functions', 0, 2, true],
+            ['room', 'Räume', 3, 3, true],
+            ['function', 'Functions', 2, 2, true],
             ['floor', 'Etagen', 0, 0, false],
         ]);
         expect(rows[0]?.kind).toBe('enum');

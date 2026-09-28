@@ -9,8 +9,9 @@
  * The HmIP side is exercised end to end: the group is created from the toolbar, the simulator's
  * write log shows one MASTER write of exactly `{GROUP_1: true}` per detector, the row appears with
  * what the interface holds, and a member taken out of it is one write of `{GROUP_1: false}`. The
- * BidCos side is read-only here: hm-simulator 1.0 has no `setTeam`, so the team row, its members
- * and the detectors' team column are checked, and the members dialog is opened, but not applied.
+ * BidCos side is the team row, its members and the detectors' team column, and since hm-simulator
+ * 1.1.0 (`listTeams`, `setTeam`, task 70) the team write too: a detector leaves its team and
+ * comes back, each change one `setTeam` that the simulator answers with rfd's device changes.
  */
 
 import {startForTest, type TestHost} from 'homematic-manager';
@@ -216,8 +217,8 @@ test('a BidCos team is a row with its detectors under it, and the detectors name
     await expect(page.locator(`[data-row-id="${SD_1}:1"]`)).toContainText('Rauchmelder Flur:1');
     await expect(page.locator(`[data-row-id="${SD_2}:1"]`)).toContainText('Rauchmelder Küche:1');
 
-    // the members dialog from the row: both ticked, nothing to apply yet. hm-simulator 1.0 has
-    // no setTeam, so the write itself is the unit tests' and the maintainer's real detectors'.
+    // the members dialog from the row: both ticked, nothing to apply yet (the write is the
+    // setTeam test below)
     await page.getByTestId(`smoke-group-members-${TEAM}`).click();
     const dialog = page.getByTestId('smoke-group-dialog');
     await expect(dialog).toContainText('Team: Rauchmelder Gruppe');
@@ -278,4 +279,42 @@ test('an HmIP smoke group is created from the toolbar with one GROUP_n write per
     const after = host.simulator.getWriteLog() as {address: string; values: Record<string, unknown>}[];
     expect(after).toHaveLength(3);
     expect(after[2]).toMatchObject({address: `${SWSD_2}:1`, values: {GROUP_1: false}});
+});
+
+/**
+ * Task 70: the BidCos team write end to end, against an hm-simulator with listTeams/setTeam.
+ * A detector taken out of the team goes back into a team of its own (rfd's `*<serial>`), and put
+ * back in, its own team is gone again - each change one `setTeam` through the paced queue.
+ */
+test('a BidCos detector leaves its team and joins it again, with setTeam (task 70)', async ({page}) => {
+    // Feature-detected, not version-pinned, like the setTempKey spec: `setTeam` arrived in 1.1.0.
+    test.skip(
+        !(host.simulator.methodNames() as string[]).includes('setTeam'),
+        'the installed hm-simulator has no setTeam (it arrived in 1.1.0)',
+    );
+    const teamOf = (address: string): string =>
+        ((host.simulator.getDevice('rfd', address) as {TEAM?: string} | false) || {TEAM: ''}).TEAM ?? '';
+    await page.goto(`${host.url}#/BidCos-RF/devices`);
+    await expect(groupCell(page, TEAM)).toContainText('2 detectors');
+
+    await page.getByTestId(`smoke-group-members-${TEAM}`).click();
+    const dialog = page.getByTestId('smoke-group-dialog');
+    await dialog.getByTestId(`smoke-group-member-${SD_2}:1`).uncheck();
+    await dialog.getByTestId('smoke-group-apply').click();
+    await expect(dialog).toBeHidden();
+
+    // the interface holds it: SD_2 is in a team of its own, the old team has one member left
+    await expect.poll(() => teamOf(`${SD_2}:1`)).toBe(`*${SD_2}:1`);
+    await expect(groupCell(page, TEAM)).toContainText('1 detector');
+    await expect(page.locator(`[data-row-id="*${SD_2}"]`)).toBeVisible();
+    await expect(groupCell(page, SD_2)).not.toHaveText('Rauchmelder Gruppe');
+
+    // and back: the own team is gone again
+    await page.getByTestId(`smoke-group-members-${TEAM}`).click();
+    await dialog.getByTestId(`smoke-group-member-${SD_2}:1`).check();
+    await dialog.getByTestId('smoke-group-apply').click();
+    await expect(dialog).toBeHidden();
+    await expect.poll(() => teamOf(`${SD_2}:1`)).toBe(`${TEAM}:1`);
+    await expect(groupCell(page, TEAM)).toContainText('2 detectors');
+    await expect(page.locator(`[data-row-id="*${SD_2}"]`)).toHaveCount(0);
 });

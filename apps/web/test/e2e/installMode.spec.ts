@@ -131,10 +131,10 @@ test('the install mode opens for a while and can be stopped again', async ({page
 test('the temporary key is set before the install mode opens (#20)', async ({page, host, sim}) => {
     // A device taught in with a passphrase only pairs again when the same passphrase is offered.
     // 2.7 had no field for it at all; the dialog sends `setTempKey` and then `setInstallMode`.
-    // Feature-detected, not version-pinned: `setTempKey` arrived in hm-simulator 1.0.1.
+    // Feature-detected, not version-pinned: `setTempKey` arrived in hm-simulator 1.1.0.
     test.skip(
         typeof sim.getTempKey !== 'function',
-        'the installed hm-simulator has no setTempKey (it arrived in 1.0.1)',
+        'the installed hm-simulator has no setTempKey (it arrived in 1.1.0)',
     );
 
     await page.goto(`${host.url}#/BidCos-RF/devices`);

@@ -31,9 +31,9 @@ These are one-time, and nothing below works until they are done.
       `id-token: write` and `attestations: write` are requested per workflow and need no setting).
 - [x] **Done (D-33): the npm package is `homematic-manager`**, the 2.x name, and it is in
       `apps/web/package.json`. Its 1.x versions stay deprecated on npm, which does not block a new
-      version. Note for the announcement: `npm install -g homematic-manager` gives the **deprecated
-      1.0.14 from 2022** until 3.0.0 moves `latest`, so every pre-release instruction has to say
-      `npm install -g homematic-manager@next`.
+      version. Every 3.0 version, a beta as well, is published as `latest` (D-39), so every
+      instruction says a plain `npm install -g homematic-manager`; the `next` dist-tag is gone
+      (D-53).
 - [x] **Done: npm trusted publishing is configured** for `homematic-manager` on npmjs.com:
       repository `hobbyquaker/homematic-manager`, workflow **`release-npm.yml`**. The publisher
       names the workflow *file*, so that file cannot be renamed without updating the publisher on
@@ -172,12 +172,11 @@ gh run watch <run-id>
 - [ ] All four release runs (and the tag's CI run) are green. A red one is re-run alone (see
       [Re-running one workflow alone](#re-running-one-workflow-alone)); never re-tag.
 - [ ] **npm dist-tags.** D-39: `release-npm.yml` publishes every version - a beta as well - as
-      `latest`, because the 1.x versions under the name are dead, and then tries to add the `next`
-      alias. That second step fails with E401 under the trusted-publishing token (beta.4, beta.6)
-      and only warns. Check `npm view homematic-manager dist-tags`: `latest` is the version just
-      published (the registry needs a few minutes before `npm view <name>@<version>` answers).
-      Moving `next` (`npm dist-tag add homematic-manager@<version> next`) is the maintainer's; an
-      agent leaves it where it is (after beta.18 it was still on beta.2).
+      `latest`, because the 1.x versions under the name are dead. Check
+      `npm view homematic-manager dist-tags`: `latest` is the version just published (the registry
+      needs a few minutes before `npm view <name>@<version>` answers). There is no `next` tag any
+      more (D-53); removing a leftover one (`npm dist-tag rm homematic-manager next`) is the
+      maintainer's.
 
 ### 4. Check the draft, then publish
 

@@ -117,8 +117,8 @@ jobs:
         # deprecated 1.0.14.
         run: |
           # D-39 (maintainer, 2026-09-06): the 1.x versions under this name are dead, so a pre-release
-          # is what `npm install -g homematic-manager` should give; it is published as `latest` and
-          # additionally tagged `next`, so both spellings in the docs keep working.
+          # is what `npm install -g homematic-manager` should give; it is published as `latest`. The
+          # `next` alias it used to add as well is gone (D-53, B-71): the docs say a plain install.
           VERSION="$(node -p "require('./apps/web/package.json').version")"
           if [ "$(npm view "homematic-manager@$VERSION" version 2>/dev/null)" = "$VERSION" ]; then
             echo "$VERSION is already on the registry; a re-run of this workflow does not publish twice"
@@ -126,11 +126,6 @@ jobs:
             echo "publishing $VERSION as latest"
             npm publish "./${{ steps.pack.outputs.tarball }}" --provenance --access public --tag latest
           fi
-          # `next` is a courtesy alias for the docs; the trusted-publishing token may not be allowed to
-          # move dist-tags, and that must not fail a release that has published (beta.4 did).
-          case "$VERSION" in
-            *-*) npm dist-tag add "homematic-manager@$VERSION" next || echo "::warning::could not move the next dist-tag; the maintainer can: npm dist-tag add homematic-manager@$VERSION next" ;;
-          esac
 
       # The draft's title (the version without the `v`) and body (the 3.0 hint, the CHANGELOG.md
       # section of the version, GitHub's generated notes), the same from every workflow because the

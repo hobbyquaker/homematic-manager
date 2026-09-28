@@ -24,7 +24,7 @@ spelling.
 ## Install and run
 
 ```sh
-npm install -g homematic-manager@next        # `latest` is still the deprecated 1.0.14 until 3.0.0
+npm install -g homematic-manager             # the current beta
 homematic-manager-web --ccu ccu3.local
 ```
 

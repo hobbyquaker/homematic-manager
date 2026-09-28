@@ -228,9 +228,10 @@ gh release view v3.0.0-beta.n --json isDraft,name,assets --jq '.isDraft, .name, 
 - [ ] **The release note.** The generated title and body (hint, changelog section, GitHub's notes -
       step 3) stay; what users of this release must do by hand is added at the top, in English and
       German (beta.18: re-choose `token` on openccu-lite once; the settings page is for administrators;
-      `writeLog.*` renamed). **Until a signed Mac build exists: Mac users of beta.18 and older download
-      the dmg of this release by hand once** — their app cannot install an update and does not know
-      the link mode yet (B-47). `gh release edit v3.0.0-beta.n --notes-file <file>` sets the body.
+      `writeLog.*` renamed). Only when there is something to do by hand: no "Before updating" block and
+      no "nothing to do by hand" line otherwise. The beta.18-and-older macOS dmg hint (B-47) is no
+      longer added (the maintainer, 2026-09-28, from beta.28 on; removed from beta.27's body too).
+      `gh release edit v3.0.0-beta.n --notes-file <file>` sets the body.
 - [ ] **Credit reporters and requesters by @handle in the release notes** (the maintainer, 2026-09-12,
       from beta.15 on). Everyone who reported a bug or asked for a feature that this release carries is
       named with their exact GitHub handle (`gh issue view <n> --json author`; for a report made in a

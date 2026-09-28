@@ -105,8 +105,10 @@ carries an extra `VARIANT=lite` line:
   in `GET /api/auth/v1/state` - the gate's header, or where the box does not confirm it, the session
   id in `?sid=`. A `user` account, the session's legacy alias (which carries no role the addon can
   see) and the addon's token cookie get "Nur für Administratoren / Administrators only" and change
-  nothing. The way into the app is not affected. On a CCU and OpenCCU any WebUI session keeps its
-  access.
+  nothing. Since 3.0.0 the same holds for `settings.cgi` without `?cmd=config`, the hand-over that
+  issues the addon's token cookie: a session that is not an administrator's gets the same page and
+  no cookie. The app's own entry in the addon menu is not affected. On a CCU and OpenCCU any WebUI
+  session keeps its access.
 - **the credentials for the store**: reads use the box's local token
   (`/usr/local/etc/occulite/local-token`, role `user`, read-only by design); writes use the session
   of the person looking at the page. A rename is therefore attributed to a user, and nothing

@@ -6,6 +6,16 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Changed
+
+- **On openccu-lite the addon's hand-over into the app is for administrators too.** `settings.cgi` without
+  `?cmd=config` - the page that hands out the addon's token cookie - now wants a session the system names as an
+  administrator, like the settings page and the service control since beta.18; any other session gets the same
+  "Nur für Administratoren / Administrators only" page and no cookie. The app's own entry in the addon menu is not
+  affected. On a CCU and OpenCCU nothing changes.
+
 ## [3.0.0-beta.29] — 2026-09-28
 
 ### Fixed

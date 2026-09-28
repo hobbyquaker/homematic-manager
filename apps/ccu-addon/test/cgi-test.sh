@@ -818,13 +818,14 @@ case "$out" in
 esac
 state_calls >/dev/null
 # an image from before occulited's task 125 hands out ten-character ids, and the gate sends those
-out="$(lite_cgi settings.cgi '' "$OLD")"
+# (an administrator's: since B-37 the hand-over wants one on openccu-lite)
+out="$(lite_cgi settings.cgi '' "$OLDADMIN")"
 case "$out" in
     *'Status: 302 Found'*) pass "a ten-character session id of an older image is asked about and let in" ;;
     *) fail "a ten-character session id of an older image is asked about and let in" "$out" ;;
 esac
 calls="$(state_calls)"
-if [ "$calls" = "GET /api/auth/v1/state Bearer $OLD" ]; then
+if [ "$calls" = "GET /api/auth/v1/state Bearer $OLDADMIN" ]; then
     pass "with that id as Bearer"
 else
     fail "with that id as Bearer" "$calls"
@@ -887,20 +888,28 @@ done
 
 # the fallbacks stay: ?sid= through ReGa when the box does not confirm the header (as the
 # frontend does, B-36), and the token cookie
+# (since B-37 the hand-over on openccu-lite wants an administrator the box names: the alias a ReGa
+# shim confirms and the token cookie prove a session and no role, see below)
+out="$(cd "$TREE/www" && QUERY_STRING="sid=@$OLDADMIN@" HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
+    HTTP_X_OCCULITE_SESSION="UNKNOWNUNKNOWNUNKNOWNUNK22" tclsh "$STUB" settings.cgi 2>&1)"
+case "$out" in
+    *'Status: 302 Found'*) pass "an unconfirmed header falls through to an administrator's ?sid=" ;;
+    *) fail "an unconfirmed header falls through to an administrator's ?sid=" "$out" ;;
+esac
+state_calls >/dev/null
 out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
     HTTP_X_OCCULITE_SESSION="UNKNOWNUNKNOWNUNKNOWNUNK22" tclsh "$STUB" settings.cgi 2>&1)"
 case "$out" in
-    *'Status: 302 Found'*) pass "an unconfirmed header falls through to a ?sid= ReGa confirms" ;;
-    *) fail "an unconfirmed header falls through to a ?sid= ReGa confirms" "$out" ;;
+    *'Status: 403 Forbidden'*'Administrators only.'*) pass "and to a ?sid= only ReGa confirms: administrators only" ;;
+    *) fail "and to a ?sid= only ReGa confirms: administrators only" "$out" ;;
 esac
 state_calls >/dev/null
-# (the hand-over: on openccu-lite the settings page takes no cookie since B-37, see below)
 out="$(cd "$TREE/www" && QUERY_STRING='' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
     HTTP_X_OCCULITE_SESSION="UNKNOWNUNKNOWNUNKNOWNUNK22" HTTP_COOKIE='hmm_token=deadbeefcafebabe0123456789abcdef' \
     HMM_TEST_SESSION=invalid tclsh "$STUB" settings.cgi 2>&1)"
 case "$out" in
-    *'Status: 302 Found'*) pass "and to the token cookie" ;;
-    *) fail "and to the token cookie" "$out" ;;
+    *'Status: 403 Forbidden'*'Administrators only.'*) pass "and to the token cookie: administrators only" ;;
+    *) fail "and to the token cookie: administrators only" "$out" ;;
 esac
 state_calls >/dev/null
 
@@ -1118,18 +1127,39 @@ case "$out" in
 esac
 unchanged "  nothing restarted"
 
-# the hand-over is not the settings page: unchanged, a user's session keeps it (what it gets in the
-# app is task 52's question)
+# the hand-over wants an administrator too (the maintainer, 2026-09-24): the same rule and the same
+# page, and no token cookie for anybody else (what a user gets in the app from the box's addon menu
+# is task 52's question)
+out="$(b37 settings.cgi '' "$LIVE")"
+case "$out" in
+    *'Status: 302 Found'*"Set-Cookie: $TOKEN_COOKIE;"*) pass "the hand-over lets an administrator's session into the app" ;;
+    *) fail "the hand-over lets an administrator's session into the app" "$out" ;;
+esac
+state_calls >/dev/null
 out="$(b37 settings.cgi '' "$USERSID")"
+admin_only "the hand-over refuses a user's session in the header" "$out"
+asked "  after one question to the box" "$USERSID"
+out="$(b37 settings.cgi "sid=@$OLDADMIN@" "$USERSID")"
+admin_only "  also with an administrator's id in ?sid= next to it" "$out"
+asked "  which is not asked" "$USERSID"
+out="$(b37 settings.cgi "sid=%40$USERSID%40" '')"
+admin_only "the hand-over refuses ?sid= with a user's session id" "$out"
+out="$(b37 settings.cgi "sid=@$OLDADMIN@" '')"
 case "$out" in
-    *'Status: 302 Found'*"Set-Cookie: $TOKEN_COOKIE;"*) pass "the hand-over still lets a user's session into the app" ;;
-    *) fail "the hand-over still lets a user's session into the app" "$out" ;;
+    *'Status: 302 Found'*"Set-Cookie: $TOKEN_COOKIE;"*) pass "and takes ?sid= with an administrator's session id (an image from before task 125)" ;;
+    *) fail "and takes ?sid= with an administrator's session id (an image from before task 125)" "$out" ;;
 esac
+out="$(b37 settings.cgi 'sid=@1234567890@' '' valid)"
+admin_only "the hand-over refuses an alias only the shim confirms" "$out"
 out="$(b37 settings.cgi '' '' invalid "$TOKEN_COOKIE")"
+admin_only "and a browser with the token cookie alone" "$out"
+out="$(b37 settings.cgi '' "$UNKNOWN")"
 case "$out" in
-    *'Status: 302 Found'*) pass "and a browser with the token cookie" ;;
-    *) fail "and a browser with the token cookie" "$out" ;;
+    *'Status: 403'*) fail "without any session the hand-over stays the invalid-session page, not a 403" "$out" ;;
+    *'Sitzung ungültig'*) pass "without any session the hand-over stays the invalid-session page, not a 403" ;;
+    *) fail "without any session the hand-over stays the invalid-session page, not a 403" "$out" ;;
 esac
+unchanged "  nothing written, nothing restarted"
 state_calls >/dev/null
 
 # a CCU and OpenCCU: any WebUI session, as before - ReGa names a user and no level, and no box is asked
@@ -1159,6 +1189,16 @@ for case in "$CCU_VERSION:a CCU" "$TMP/no-such-VERSION:a firmware without /VERSI
     case "$out" in
         *'rc.d called with restart'*) pass "  and service.cgi restarts the service for it" ;;
         *) fail "  and service.cgi restarts the service for it" "$out" ;;
+    esac
+    out="$(ccu_b37 "$file" settings.cgi 'sid=@1234567890@' valid)"
+    case "$out" in
+        *'Status: 302 Found'*"Set-Cookie: $TOKEN_COOKIE;"*) pass "  the hand-over takes the same ?sid=, as before" ;;
+        *) fail "  the hand-over takes the same ?sid=, as before" "$out" ;;
+    esac
+    out="$(ccu_b37 "$file" settings.cgi '' invalid "$TOKEN_COOKIE")"
+    case "$out" in
+        *'Status: 302 Found'*) pass "  and the token cookie" ;;
+        *) fail "  and the token cookie" "$out" ;;
     esac
     asked "  and the box was never asked" ""
 done

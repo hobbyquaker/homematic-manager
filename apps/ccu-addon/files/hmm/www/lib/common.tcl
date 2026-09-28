@@ -284,24 +284,23 @@ proc lite_admin_access {sid cookie} {
     return none
 }
 
-# B-37: the settings page's answer to a session that is not an administrator's on openccu-lite. A
-# 403, and nothing was read beyond the session, nothing written, nothing restarted.
+# B-37: the settings page's answer to a session that is not an administrator's on openccu-lite -
+# on ?cmd=config and on the hand-over alike. A 403, and nothing was read beyond the session, nothing
+# written, nothing restarted, no token cookie issued.
 proc admin_only_page {} {
-    global BASE_PATH
     puts "Status: 403 Forbidden"
     html_header
     puts "<!DOCTYPE html><html lang=\"de\"><head><meta charset=\"utf-8\">"
     puts "<title>Homematic Manager</title></head><body style=\"font-family:sans-serif;margin:2em;max-width:44em\">"
     puts "<h1>Homematic Manager</h1>"
-    puts "<p><b>Nur für Administratoren.</b> Die Einstellungen des Addons und die Steuerung seines Dienstes"
-    puts "sind auf openccu-lite Administratoren vorbehalten. Diese Sitzung gehört keinem Administrator, oder"
-    puts "die Box konnte ihre Rolle nicht bestätigen. Es wurde nichts geändert. Bitte als Administrator an"
-    puts "der Box anmelden und die Seite erneut öffnen.</p>"
-    puts "<p><b>Administrators only.</b> On openccu-lite the addon's settings and the control of its"
-    puts "service are reserved for administrators. This session does not belong to an administrator, or"
-    puts "the box could not confirm its role. Nothing was changed. Please sign in to the box as an"
-    puts "administrator and open the page again.</p>"
-    puts "<p><a href=\"$BASE_PATH/\">Homematic Manager öffnen / open</a></p>"
+    puts "<p><b>Nur für Administratoren.</b> Diese Seite des Addons, seine Einstellungen und die Steuerung"
+    puts "seines Dienstes sind auf openccu-lite Administratoren vorbehalten. Diese Sitzung gehört keinem"
+    puts "Administrator, oder das System konnte ihre Rolle nicht bestätigen. Es wurde nichts geändert. Bitte"
+    puts "als Administrator am System anmelden und die Seite erneut öffnen.</p>"
+    puts "<p><b>Administrators only.</b> On openccu-lite this page of the addon, its settings and the"
+    puts "control of its service are reserved for administrators. This session does not belong to an"
+    puts "administrator, or the system could not confirm its role. Nothing was changed. Please sign in to"
+    puts "the system as an administrator and open the page again.</p>"
     puts "</body></html>"
     exit 0
 }

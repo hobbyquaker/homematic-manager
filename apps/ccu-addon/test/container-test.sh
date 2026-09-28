@@ -422,7 +422,7 @@ out="$(dex "curl -si -H 'X-Occulite-Session: @$SID@' 'http://127.0.0.1/addons/hm
 check "an @-wrapped header is refused" "Sitzung ung" "$out"
 none "without asking the box" "$(dex 'cat /tmp/occulite-stub.log')"
 out="$(dex "curl -si -H 'X-Occulite-Session: 0000000000' 'http://127.0.0.1/addons/hmm/settings.cgi?sid=%40${SID}%40'")"
-check "an unconfirmed header falls through to a ?sid= the shim confirms" "302 Found" "$out"
+check "an unconfirmed header falls through to a ?sid= the box confirms as an administrator's" "302 Found" "$out"
 
 echo
 echo "openccu-lite: the settings page and service.cgi through lighttpd, for administrators only (B-37)"
@@ -456,14 +456,20 @@ check "?sid= with an alias the shim confirms and the box's API does not: 403" "4
 out="$(dex "curl -si 'http://127.0.0.1/addons/hmm/service.cgi?cmd=status&sid=%40aliasonly1%40'")"
 check "and service.cgi refuses it too" '{"error":"administrators only"}' "$out"
 out="$(dex "curl -si -H 'X-Occulite-Session: $USER_SID' 'http://127.0.0.1/addons/hmm/settings.cgi'")"
-check "the hand-over still lets the user's session into the app" "302 Found" "$out"
-USER_COOKIE="hmm_token=$(printf '%s' "$out" | sed -n 's/.*hmm_token=\([0-9a-f]*\);.*/\1/p' | head -1)"
-case "$USER_COOKIE" in
+check "the hand-over refuses the user's session too: 403" "403 Forbidden" "$out"
+check "with the same page" "Administrators only." "$out"
+absent "and no token cookie" "Set-Cookie" "$out"
+out="$(dex "curl -si -H 'X-Occulite-Session: $SID' 'http://127.0.0.1/addons/hmm/settings.cgi'")"
+check "the hand-over lets an administrator's session into the app" "302 Found" "$out"
+ADMIN_COOKIE="hmm_token=$(printf '%s' "$out" | sed -n 's/.*hmm_token=\([0-9a-f]*\);.*/\1/p' | head -1)"
+case "$ADMIN_COOKIE" in
     hmm_token=?*) pass "with the token cookie" ;;
     *) fail "with the token cookie" "$out" ;;
 esac
-out="$(dex "curl -si -b '$USER_COOKIE' 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config'")"
-check "and the cookie it got does not open the settings page: 403" "403 Forbidden" "$out"
+out="$(dex "curl -si -b '$ADMIN_COOKIE' 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config'")"
+check "and that cookie alone does not open the settings page: 403" "403 Forbidden" "$out"
+out="$(dex "curl -si -b '$ADMIN_COOKIE' 'http://127.0.0.1/addons/hmm/settings.cgi'")"
+check "nor the hand-over: 403" "403 Forbidden" "$out"
 out="$(dex "curl -si -H 'X-Occulite-Session: $SID' 'http://127.0.0.1/addons/hmm/settings.cgi?cmd=config'")"
 check "an administrator's session still opens it" "Anmeldung / Login" "$out"
 check "with a 200" "200 OK" "$out"

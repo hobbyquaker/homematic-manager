@@ -57,11 +57,12 @@ proc invalid_session_page {} {
 # B-37 (D-49): on openccu-lite the settings page, and so every change it makes, is for
 # administrators, and the box has to say so on this very request (lib/common.tcl,
 # lite_admin_access): the token cookie is no way in here, and neither is a ?sid= the box cannot tell
-# the role of. The hand-over below is not the settings page and is unchanged: it changes nothing on
-# the box, and what a session that is not an administrator's gets in the app is not decided here. A
-# CCU and OpenCCU take the three ways in exactly as before.
+# the role of. The hand-over below wants the same since 2026-09-24 (the maintainer, B-37): a
+# session that is not an administrator's gets the same 403 there and no token cookie. What such a
+# session gets in the app itself, opened from the box's addon menu, is not decided here. A CCU and
+# OpenCCU take the three ways in exactly as before.
 set lite [is_openccu_lite]
-if {[string equal $cmd "config"] && $lite} {
+if {$lite} {
     set access [lite_admin_access $sid 1]
     if {[string equal $access "none"]} {
         invalid_session_page
@@ -324,7 +325,8 @@ if {[string equal $cmd "config"]} {
 
 # ---------------------------------------------------------------------------------------------
 # The hand-over. Unchanged by D-32: a WebUI session that passed the check above gets the token
-# cookie and is let straight into the UI, login page or no login page.
+# cookie and is let straight into the UI, login page or no login page - on openccu-lite only an
+# administrator's (B-37, above).
 # ---------------------------------------------------------------------------------------------
 set token [read_token]
 if {[string equal $token ""]} {

@@ -143,9 +143,9 @@ answers the session's legacy alias), then the token cookie; a header the box doe
 through to `?sid=`. Because both the frontend (task 45) and this page read the header, the catalogue
 can declare `session.header_since` for the addon and the box stops putting `?sid=` into its URLs.
 
-**On openccu-lite the settings page and `service.cgi` are for administrators** (B-37, D-49); the
-hand-over above is not the settings page and keeps taking any session. `settings.cgi?cmd=config`
-and every command of `service.cgi` want the box to name the session's role as `admin`, and only the
+**On openccu-lite the settings page, the hand-over and `service.cgi` are for administrators** (B-37,
+D-49; the hand-over since the maintainer's word of 2026-09-24). `settings.cgi` with or without
+`?cmd=config` and every command of `service.cgi` want the box to name the session's role as `admin`, and only the
 box can: the state answer for the header's session has to say `"role": "admin"` as well, and a
 header it confirms decides — a `?sid=` next to it is not asked. Only where the box does not confirm
 the header is the id in `?sid=` asked about the same way; on an image from before openccu-lite's
@@ -154,7 +154,9 @@ API, and the `tclrega.so` shim knows the user name behind it and no role, so `?s
 session and never an administrator. The `hmm_token` cookie is one secret for everybody the hand-over
 let into the app and opens neither page there. A session that is not a confirmed administrator's
 gets a 403 — a page "Nur für Administratoren / Administrators only" from `settings.cgi`,
-`{"error":"administrators only"}` from `service.cgi` — and nothing is written or restarted; without
+`{"error":"administrators only"}` from `service.cgi` — and nothing is written, restarted or issued (no
+token cookie); what such a session gets in the app itself, opened from the box's addon menu, is
+decided there, not here. Without
 any session the answers stay as before. A CCU and OpenCCU are unchanged: any WebUI session.
 
 ## The optional login (D-32)
@@ -509,8 +511,9 @@ npm run test:container -w apps/ccu-addon -- --idle                   # needs doc
   administrator's id in `?sid=` next to it), `?sid=` with a user's session id or with an alias the
   shim confirms, the alias as the header, the token cookie - with nothing written or restarted;
   an answer without a role, `Admin`, an escaped role, a user name spelling `"role":"admin"` and every
-  failed lookup are refused too, the hand-over still takes a user's session, and a CCU still takes
-  any WebUI session and the cookie without asking a box.
+  failed lookup are refused too, the hand-over gives the token cookie to an administrator's session
+  and the 403 to everything else, and a CCU still takes any WebUI session and the cookie (on the
+  settings page and the hand-over) without asking a box.
 - **package-test.sh** unpacks a built package into the layout a CCU installs it into — including the
   `addons/www/hmm` symlink the CGIs are reached through, which the source tree never has — runs the
   CGIs from there, and checks the SBOM against the package: its `node` component must say what the

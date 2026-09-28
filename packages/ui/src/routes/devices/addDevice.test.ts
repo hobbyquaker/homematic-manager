@@ -1,6 +1,6 @@
 import type {DeviceDescription} from '@homematic-manager/core';
 import {fireEvent, screen, waitFor} from '@testing-library/svelte';
-import {beforeEach, describe, expect, it} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {MockTransport} from '../../lib/transport/MockTransport.js';
 import {mountApp} from '../../testHarness.js';
@@ -379,6 +379,194 @@ describe('the add-device dialog', () => {
             expect(screen.queryByTestId('add-device-countdown')).toBeNull();
         });
         expect(screen.queryByTestId('add-device-nothing-joined')).toBeNull();
+    });
+
+    /**
+     * Task 76: a BidCos device that holds another system's security key does ask to join; rfd
+     * refuses it quietly and only `getKeyMismatchDevice(true)` tells. The dialog asks every fifth
+     * countdown tick, stops the window when a serial comes back, asks for the other system's key,
+     * sends it with `setTempKey` before the next start, and clears it once the device has arrived.
+     */
+    async function openOnBidcos(): Promise<ReturnType<typeof mountApp>> {
+        const mounted = mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await mounted;
+        await fireEvent.click(screen.getByTestId('devices-add'));
+        return mounted;
+    }
+
+    it("asks for the other system's key when rfd refuses a device during the install mode, and retries with it (task 76)", async () => {
+        vi.useFakeTimers({shouldAdvanceTime: true, toFake: ['setInterval', 'clearInterval']});
+        try {
+            // a real interface counts down, which re-runs the countdown effect every second
+            let left = 60;
+            transport.respond('devices.installMode.get', () => {
+                left -= 1;
+                return left;
+            });
+            transport.result('devices.installMode.keyMismatch', 'LEQ0000009');
+            await openOnBidcos();
+            await fireEvent.click(screen.getByTestId('add-device-start'));
+            await waitFor(() => {
+                expect(screen.getByTestId('add-device-countdown')).toBeTruthy();
+            });
+
+            // four ticks: the countdown runs, nothing is asked about keys yet
+            await vi.advanceTimersByTimeAsync(4000);
+            expect(transport.countOf('devices.installMode.keyMismatch')).toBe(0);
+            expect(screen.queryByTestId('add-device-key-mismatch')).toBeNull();
+
+            // the fifth tick: rfd names the device; the window is stopped and the question opens
+            await vi.advanceTimersByTimeAsync(1000);
+            const question = await waitFor(() => screen.getByTestId('add-device-key-mismatch'));
+            expect(question.textContent).toContain('LEQ0000009');
+            expect(question.textContent).toContain('Sicherheitsschlüssel des anderen Systems');
+            await waitFor(() => {
+                expect(transport.lastCall('devices.installMode.set')).toEqual(['BidCos-RF', false, undefined]);
+            });
+            expect(screen.queryByTestId('add-device-countdown')).toBeNull();
+            expect(transport.countOf('devices.installMode.keyMismatch')).toBe(1);
+            expect(document.activeElement).toBe(screen.getByTestId('add-device-temp-key'));
+
+            // the retry needs a key; with one it goes out before the same install mode as before
+            const retry = screen.getByTestId<HTMLButtonElement>('add-device-key-retry');
+            expect(retry.disabled).toBe(true);
+            transport.result('devices.installMode.keyMismatch', '');
+            await fireEvent.input(screen.getByTestId('add-device-temp-key'), {target: {value: ' other-system '}});
+            await waitFor(() => {
+                expect(retry.disabled).toBe(false);
+            });
+            await fireEvent.click(retry);
+            await waitFor(() => {
+                expect(transport.lastCall('devices.installMode.set')).toEqual([
+                    'BidCos-RF',
+                    true,
+                    {seconds: 60, mode: 1, tempKey: 'other-system'},
+                ]);
+            });
+            expect(screen.queryByTestId('add-device-key-mismatch')).toBeNull();
+            await waitFor(() => {
+                expect(screen.getByTestId('add-device-countdown')).toBeTruthy();
+            });
+
+            // the device comes: the key was for this pairing and is cleared again
+            expect(transport.countOf('devices.installMode.tempKey')).toBe(0);
+            transport.emit('devices.changed', {interfaceName: 'BidCos-RF', kind: 'new', addresses: ['LEQ0000009']});
+            await waitFor(() => {
+                expect(transport.lastCall('devices.installMode.tempKey')).toEqual(['BidCos-RF', '']);
+            });
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('turns a refused addDevice into the key question instead of an error notice (task 76)', async () => {
+        transport.fail('devices.installMode.set', {
+            message: 'addDevice failed',
+            kind: 'rpc',
+            faultCode: -1,
+            faultString: 'Failure',
+        });
+        transport.result('devices.installMode.keyMismatch', 'LEQ0000009');
+        const {stores} = await openOnBidcos();
+        await fireEvent.input(screen.getByTestId('add-device-serial'), {target: {value: 'LEQ0000009'}});
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLButtonElement>('add-device-serial-start').disabled).toBe(false);
+        });
+        await fireEvent.click(screen.getByTestId('add-device-serial-start'));
+
+        const question = await waitFor(() => screen.getByTestId('add-device-key-mismatch'));
+        expect(question.textContent).toContain('LEQ0000009');
+        expect(stores.notices.items).toEqual([]);
+        expect(transport.countOf('devices.installMode.keyMismatch')).toBe(1);
+
+        // with the key, the same addDevice again - the key first
+        transport.result('devices.installMode.set', null);
+        transport.result('devices.installMode.keyMismatch', '');
+        await fireEvent.input(screen.getByTestId('add-device-temp-key'), {target: {value: 'other-system'}});
+        await fireEvent.click(screen.getByTestId('add-device-key-retry'));
+        await waitFor(() => {
+            expect(transport.lastCall('devices.installMode.set')).toEqual([
+                'BidCos-RF',
+                true,
+                {seconds: 60, mode: 1, address: 'LEQ0000009', tempKey: 'other-system'},
+            ]);
+        });
+        expect(screen.queryByTestId('add-device-key-mismatch')).toBeNull();
+        expect(screen.queryByTestId('add-device-countdown')).toBeNull();
+    });
+
+    it('keeps reporting any other addDevice failure as a notice (task 76)', async () => {
+        transport.fail('devices.installMode.set', {message: 'Unknown device', kind: 'rpc', faultCode: -2});
+        const {stores} = await openOnBidcos();
+        await fireEvent.input(screen.getByTestId('add-device-serial'), {target: {value: 'LEQ0000009'}});
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLButtonElement>('add-device-serial-start').disabled).toBe(false);
+        });
+        await fireEvent.click(screen.getByTestId('add-device-serial-start'));
+
+        await waitFor(() => {
+            expect(stores.notices.items.map((notice) => notice.message)).toEqual([
+                'setInstallMode: Unknown device (Unknown device, -2)',
+            ]);
+        });
+        expect(transport.countOf('devices.installMode.keyMismatch')).toBe(1);
+        expect(screen.queryByTestId('add-device-key-mismatch')).toBeNull();
+    });
+
+    it('tells a BidCos user about the key case when nothing joined, and clears a sent key (task 76)', async () => {
+        // getInstallMode answers 0: the first tick finds the window closed
+        await openOnBidcos();
+        await fireEvent.input(screen.getByTestId('add-device-temp-key'), {target: {value: 'other-system'}});
+        await fireEvent.click(screen.getByTestId('add-device-start'));
+        await waitFor(() => {
+            expect(transport.lastCall('devices.installMode.set')).toEqual([
+                'BidCos-RF',
+                true,
+                {seconds: 60, mode: 1, tempKey: 'other-system'},
+            ]);
+        });
+
+        const notice = await waitFor(() => screen.getByTestId('add-device-nothing-joined'), {timeout: 3000});
+        expect(notice.textContent).toContain('Sicherheitsschlüssel eines anderen Systems');
+        expect(notice.textContent).not.toContain('auf Werkseinstellungen zurücksetzen');
+        // the key went out with the start and is cleared with the window
+        await waitFor(() => {
+            expect(transport.lastCall('devices.installMode.tempKey')).toEqual(['BidCos-RF', '']);
+        });
+        expect(transport.countOf('devices.installMode.tempKey')).toBe(1);
+
+        // a start without a key leaves nothing to clear
+        await fireEvent.input(screen.getByTestId('add-device-temp-key'), {target: {value: ''}});
+        await fireEvent.click(screen.getByTestId('add-device-start'));
+        await waitFor(() => screen.getByTestId('add-device-nothing-joined'), {timeout: 3000});
+        expect(transport.countOf('devices.installMode.tempKey')).toBe(1);
+    });
+
+    it('clears a sent key when the window is stopped or the dialog closed (task 76)', async () => {
+        transport.result('devices.installMode.get', 42);
+        await openOnBidcos();
+        await fireEvent.input(screen.getByTestId('add-device-temp-key'), {target: {value: 'other-system'}});
+        await fireEvent.click(screen.getByTestId('add-device-start'));
+        await waitFor(() => {
+            expect(screen.getByTestId('add-device-stop')).toBeTruthy();
+        });
+        await fireEvent.click(screen.getByTestId('add-device-stop'));
+        await waitFor(() => {
+            expect(transport.lastCall('devices.installMode.tempKey')).toEqual(['BidCos-RF', '']);
+        });
+
+        // sent again, then the dialog is closed with the window still open
+        await fireEvent.click(screen.getByTestId('add-device-start'));
+        await waitFor(() => {
+            expect(transport.countOf('devices.installMode.set')).toBe(3);
+        });
+        await fireEvent.click(screen.getByTestId('add-device-dialog').querySelector('.hmm-dialog-close') as Element);
+        await waitFor(() => {
+            expect(transport.countOf('devices.installMode.tempKey')).toBe(2);
+        });
+        // the field starts empty at the next opening
+        await fireEvent.click(screen.getByTestId('devices-add'));
+        expect(screen.getByTestId<HTMLInputElement>('add-device-temp-key').value).toBe('');
     });
 
     it('does not open the camera until the scanner is switched on, and reports a failure (#112)', async () => {

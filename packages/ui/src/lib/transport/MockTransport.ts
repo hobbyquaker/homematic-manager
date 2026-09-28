@@ -306,6 +306,8 @@ export class MockTransport implements Transport {
         this.result('value.set', null);
         this.result('devices.installMode.set', null);
         this.result('devices.installMode.get', 0);
+        this.result('devices.installMode.keyMismatch', '');
+        this.result('devices.installMode.tempKey', null);
         this.respond('devices.repairConfig', (interfaceName, address, options) => ({
             interfaceName,
             address,

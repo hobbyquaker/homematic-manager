@@ -703,6 +703,22 @@ export const UI_MESSAGES: MessageCatalogue = {
     Mode: {de: 'Modus', en: 'Mode'},
     'Serial number': {de: 'Seriennummer', en: 'Serial number'},
     'Temporary key': {de: 'Temporärer Schlüssel', en: 'Temporary key'},
+    // Task 76: the key is the other system's security key; the dialog asks for it when rfd refuses a device.
+    'The security key of the system the device was last paired to, if it holds one. Leave it empty otherwise: the system asks for it when a device is refused for its key.':
+        {
+            de: 'Der Sicherheitsschlüssel des Systems, an dem das Gerät zuletzt angelernt war, falls es einen trägt. Sonst leer lassen: Das System fragt danach, wenn ein Gerät wegen seines Schlüssels abgewiesen wird.',
+            en: 'The security key of the system the device was last paired to, if it holds one. Leave it empty otherwise: the system asks for it when a device is refused for its key.',
+        },
+    'Security key of the other system': {
+        de: 'Sicherheitsschlüssel des anderen Systems',
+        en: 'Security key of the other system',
+    },
+    'The device {serial} could not be paired: it holds a security key this system does not know. Enter the security key of the system it was paired to and try again.':
+        {
+            de: 'Das Gerät {serial} konnte nicht angelernt werden: Es trägt einen Sicherheitsschlüssel, den dieses System nicht kennt. Geben Sie den Sicherheitsschlüssel des Systems ein, an dem es angelernt war, und versuchen Sie es erneut.',
+            en: 'The device {serial} could not be paired: it holds a security key this system does not know. Enter the security key of the system it was paired to and try again.',
+        },
+    'Set the key and try again': {de: 'Schlüssel setzen und erneut versuchen', en: 'Set the key and try again'},
     'Normal install mode': {de: 'Normaler Anlernmodus', en: 'Normal install mode'},
     'Write the MASTER defaults and delete the existing links': {
         de: 'Default-Parameter in Paramset MASTER schreiben, bestehende Verknüpfungen löschen',
@@ -741,6 +757,12 @@ export const UI_MESSAGES: MessageCatalogue = {
         {
             de: 'Der Anlernmodus ist abgelaufen, und kein Gerät hat sich angemeldet. Ein Gerät, das noch an einer anderen Zentrale angelernt ist, sendet keine Anlernanfrage: Gerät auf Werkseinstellungen zurücksetzen und erneut starten.',
             en: 'The install mode has ended and no device has joined. A device that is still paired with another central sends no inclusion request: reset it to factory state and start again.',
+        },
+    // Task 76: the BidCos text - a device with another system's key does ask; rfd refuses it and the dialog asks for the key.
+    "The install mode has ended and no device has joined. Put the device into its pairing mode and start again. A device that holds another system's security key is reported here and that key asked for; a factory reset does not remove it.":
+        {
+            de: 'Der Anlernmodus ist abgelaufen, und kein Gerät hat sich angemeldet. Bringen Sie das Gerät in den Anlernmodus und starten Sie erneut. Ein Gerät mit dem Sicherheitsschlüssel eines anderen Systems wird hier gemeldet und der Schlüssel abgefragt; ein Zurücksetzen auf Werkseinstellungen entfernt ihn nicht.',
+            en: "The install mode has ended and no device has joined. Put the device into its pairing mode and start again. A device that holds another system's security key is reported here and that key asked for; a factory reset does not remove it.",
         },
     'QR scanner': {de: 'QR-Scanner', en: 'QR scanner'},
     Scan: {de: 'Scannen', en: 'Scan'},

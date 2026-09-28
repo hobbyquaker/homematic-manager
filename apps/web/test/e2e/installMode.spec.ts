@@ -7,11 +7,103 @@
 
 import {startForTest} from 'homematic-manager';
 
-import {BIDCOS_SWITCH, SIMULATOR_FIXTURE, expect, simulatorReady, test} from './fixtures.js';
+import {BIDCOS_SWITCH, SIMULATOR_FIXTURE, expect, simulatorReady, test, type Simulator} from './fixtures.js';
 import {STUB_TOKEN, startOcculiteStub} from './occuliteStub.js';
 import {expectPrimaryToolbarButton} from './primaryButton.js';
 
 const NEW_DEVICE = 'LEQ0000009';
+/** Task 76: the device that holds another system's security key, and that key. Both made up. */
+const FOREIGN_DEVICE = 'LEQ0000076';
+const FOREIGN_KEY = 'other-system-key';
+
+/** A BidCos switch and its two channels, as rfd would list a freshly paired one. */
+function switchDescriptions(address: string): unknown[] {
+    return [
+        {
+            ADDRESS: address,
+            TYPE: 'HM-LC-Sw1-Pl',
+            VERSION: 1,
+            FIRMWARE: '2.8',
+            CHILDREN: [`${address}:0`, `${address}:1`],
+            PARAMSETS: ['MASTER'],
+            RF_ADDRESS: 76,
+        },
+        {
+            ADDRESS: `${address}:0`,
+            TYPE: 'MAINTENANCE',
+            VERSION: 1,
+            PARENT: address,
+            PARENT_TYPE: 'HM-LC-Sw1-Pl',
+            PARAMSETS: ['MASTER', 'VALUES'],
+            INDEX: 0,
+        },
+        {
+            ADDRESS: `${address}:1`,
+            TYPE: 'SWITCH',
+            VERSION: 1,
+            PARENT: address,
+            PARENT_TYPE: 'HM-LC-Sw1-Pl',
+            PARAMSETS: ['MASTER', 'VALUES', 'LINK'],
+            LINK_TARGET_ROLES: 'SWITCH',
+            DIRECTION: 2,
+            INDEX: 1,
+        },
+    ];
+}
+
+/**
+ * Task 76: rfd's behaviour with a device that holds another system's security key, faked on the
+ * simulator's method table (hm-simulator has no model for it; the maintainer releases that
+ * separately, and the installed 1.0.0 has no `setTempKey` at all). While the temporary key is not
+ * the device's, an install mode "hears" the device and refuses it: nothing joins, and
+ * `getKeyMismatchDevice(true)` names it once; `addDevice` answers a fault and names it the same
+ * way. With the right key the device joins. `calls` records what the client sent, in order.
+ */
+function fakeForeignKeyDevice(sim: Simulator, serial: string, passphrase: string): {calls: string[]} {
+    const methods = sim.rpcMethods;
+    const originalInstallMode = methods['setInstallMode'] as (iface: string, params: unknown[]) => unknown;
+    const calls: string[] = [];
+    let key = '';
+    let refused = '';
+    methods['setTempKey'] = (iface, params) => {
+        key = String(params[0] ?? '');
+        calls.push(`setTempKey ${key === '' ? '(cleared)' : key}`);
+        return '';
+    };
+    methods['getKeyMismatchDevice'] = (iface, params) => {
+        const serialToReport = refused;
+        if (params[0] === true) {
+            refused = '';
+        }
+        return serialToReport;
+    };
+    methods['setInstallMode'] = (iface, params) => {
+        calls.push(`setInstallMode ${JSON.stringify(params)}`);
+        const result = originalInstallMode(iface, params);
+        if (params[0] === true) {
+            setTimeout(() => {
+                if (key === passphrase) {
+                    sim.addDevice(iface, ...switchDescriptions(serial));
+                    originalInstallMode(iface, [false]);
+                } else {
+                    refused = serial;
+                }
+            }, 200);
+        }
+        return result;
+    };
+    methods['addDevice'] = (iface, params) => {
+        calls.push(`addDevice ${JSON.stringify(params)}`);
+        if (key === passphrase) {
+            return sim.addDevice(iface, ...switchDescriptions(String(params[0])))[0];
+        }
+        refused = serial;
+        // rfd's fault for this case is pinned from the lab in the item; the code is not what the
+        // dialog keys on - it asks getKeyMismatchDevice after any addDevice fault
+        throw Object.assign(new Error('Failure'), {faultCode: -1, faultString: 'Failure'});
+    };
+    return {calls};
+}
 
 test.beforeAll(async () => {
     test.skip(!(await simulatorReady()), 'hm-simulator is not installed');
@@ -119,6 +211,84 @@ test('a device paired while the dialog is open can be named right there (#24)', 
     await row.getByRole('button', {name: 'Expand row'}).click();
     await expect(page.locator(`[data-row-id="${NEW_DEVICE}:0"]`)).toContainText('New socket:0');
     await expect(page.locator(`[data-row-id="${NEW_DEVICE}:1"]`)).toContainText('New socket:1');
+});
+
+/**
+ * Task 76: a BidCos device that holds another system's security key. The install mode runs, the
+ * device asks, rfd refuses it and tells nobody - the dialog polls `getKeyMismatchDevice(true)` every
+ * five seconds (as the CCU WebUI does), stops the window, asks for the other system's key, sends it
+ * with `setTempKey` and starts the same install mode again; the device joins, and the key is
+ * cleared again so it does not linger for the next pairing.
+ */
+test("a device with another system's key is refused, its key asked for, then paired (task 76)", async ({
+    page,
+    host,
+    sim,
+}) => {
+    const fake = fakeForeignKeyDevice(sim, FOREIGN_DEVICE, FOREIGN_KEY);
+
+    await page.goto(`${host.url}#/BidCos-RF/devices`);
+    await page.getByTestId('devices-add').click();
+    await page.getByTestId('add-device-start').click();
+    await expect(page.getByTestId('add-device-countdown')).toBeVisible();
+
+    // the fifth tick finds the refused device: the window is stopped and the question opens
+    const question = page.getByTestId('add-device-key-mismatch');
+    await expect(question).toBeVisible({timeout: 10_000});
+    await expect(question).toContainText(FOREIGN_DEVICE);
+    await expect(question).toContainText('Security key of the other system');
+    await expect(page.getByTestId('add-device-countdown')).toHaveCount(0);
+    expect(sim.getInstallMode('rfd')).toBe(0);
+    await expect(page.getByTestId('add-device-temp-key')).toBeFocused();
+
+    // the key, then the same install mode again; the device joins and is offered for a name
+    await page.getByTestId('add-device-temp-key').fill(FOREIGN_KEY);
+    await page.getByTestId('add-device-key-retry').click();
+    await expect(question).toHaveCount(0);
+    const paired = page.getByTestId('add-device-paired');
+    await expect(paired).toBeVisible();
+    await expect(paired).toContainText(FOREIGN_DEVICE);
+
+    // the key went out before the retry and was cleared once the device had come
+    await expect.poll(() => fake.calls.at(-1)).toBe('setTempKey (cleared)');
+    expect(fake.calls).toEqual([
+        'setInstallMode [true,60,1]',
+        'setInstallMode [false]',
+        `setTempKey ${FOREIGN_KEY}`,
+        'setInstallMode [true,60,1]',
+        'setTempKey (cleared)',
+    ]);
+});
+
+/**
+ * Task 76, by serial number: `addDevice` answers a fault for such a device. The dialog asks rfd
+ * whether it was the key, shows the same question instead of an error notice, and repeats the
+ * `addDevice` with the key set.
+ */
+test('a refused addDevice asks for the key and is repeated with it (task 76)', async ({page, host, sim}) => {
+    const fake = fakeForeignKeyDevice(sim, FOREIGN_DEVICE, FOREIGN_KEY);
+
+    await page.goto(`${host.url}#/BidCos-RF/devices`);
+    await page.getByTestId('devices-add').click();
+    await page.getByTestId('add-device-serial').fill(FOREIGN_DEVICE);
+    await page.getByTestId('add-device-serial-start').click();
+
+    const question = page.getByTestId('add-device-key-mismatch');
+    await expect(question).toBeVisible();
+    await expect(question).toContainText(FOREIGN_DEVICE);
+    await expect(page.locator('.hmm-notice')).toHaveCount(0);
+
+    await page.getByTestId('add-device-temp-key').fill(FOREIGN_KEY);
+    await page.getByTestId('add-device-key-retry').click();
+    await expect(question).toHaveCount(0);
+    await expect(page.getByTestId('add-device-paired')).toContainText(FOREIGN_DEVICE);
+    await expect.poll(() => fake.calls.at(-1)).toBe('setTempKey (cleared)');
+    expect(fake.calls).toEqual([
+        `addDevice ["${FOREIGN_DEVICE}",1]`,
+        `setTempKey ${FOREIGN_KEY}`,
+        `addDevice ["${FOREIGN_DEVICE}",1]`,
+        'setTempKey (cleared)',
+    ]);
 });
 
 /**

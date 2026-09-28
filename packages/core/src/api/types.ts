@@ -780,7 +780,10 @@ export interface InstallModeOptions {
      * seconds)` with exactly two arguments, `hmipKey` ignored.
      */
     hmipKeyMode?: 'KEY' | 'SGTIN' | 'ANY';
-    /** BidCos: temporary key for `setTempKey`. */
+    /**
+     * BidCos: temporary key for `setTempKey` - the security key (passphrase) of the system the
+     * device was paired to, sent before the install mode or `addDevice`.
+     */
     tempKey?: string;
     /** Restrict to a device address (BidCos `setInstallMode` with address). */
     address?: string;
@@ -876,6 +879,19 @@ export interface ApiMethods {
         result: null;
     };
     'devices.installMode.get': {params: [interfaceName: string]; result: number};
+    /**
+     * Task 76: the serial of the last BidCos device rfd refused to pair because it holds a security
+     * key this system does not have (`getKeyMismatchDevice(true)`: read once, then cleared in the
+     * interface process), or `''` when there is none. rfd reports it to nobody, so a client polls
+     * it while its install mode is open, as the CCU WebUI does every five seconds.
+     */
+    'devices.installMode.keyMismatch': {params: [interfaceName: string]; result: string};
+    /**
+     * Task 76: `setTempKey(passphrase)` on its own - the security key of the system a device was
+     * paired to, which rfd uses for the pairings that follow; `''` clears it, so a mistyped key does
+     * not linger for the next pairing. `devices.installMode.set` sends it too when `tempKey` is set.
+     */
+    'devices.installMode.tempKey': {params: [interfaceName: string, key: string]; result: null};
     'devices.replaceable': {params: [interfaceName: string, address: string]; result: DeviceDescription[]};
     /**
      * Issue #97: the teams an interface process knows, as device descriptions.

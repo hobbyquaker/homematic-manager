@@ -398,6 +398,12 @@ export interface Simulator {
      */
     getTempKey?: (iface: string) => string;
     /**
+     * The XML-RPC method table, `method -> handler(iface, params)`, as `callMethod` dispatches it.
+     * Task 76's spec puts a `getKeyMismatchDevice` fake into it: hm-simulator has no model of a
+     * device that holds another system's key, and the released 1.0.0 has no `setTempKey` either.
+     */
+    rpcMethods: Record<string, (iface: string, params: unknown[]) => unknown>;
+    /**
      * What a behaviour script does: `emit('setValue', iface, address, datapoint, value)` stores the
      * value and sends its event, so a flag with the SERVICE bit is in `getServiceMessages` until it
      * is written back - a real pending message, not only an event.

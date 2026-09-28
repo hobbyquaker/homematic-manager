@@ -540,6 +540,14 @@ export class Backend {
                 return this.#setInstallMode(p[0], p[1], p[2]);
             case 'devices.installMode.get':
                 return Number(await this.#read(p[0], 'getInstallMode', []));
+            case 'devices.installMode.keyMismatch': {
+                // rfd answers the serial as a string; anything else means "none"
+                const serial = await this.#read(p[0], 'getKeyMismatchDevice', [true]);
+                return typeof serial === 'string' ? serial : '';
+            }
+            case 'devices.installMode.tempKey':
+                await this.#write(p[0], 'setTempKey', [p[1]]);
+                return null;
             case 'devices.replaceable':
                 return asDescriptions(await this.#read(p[0], 'listReplaceableDevices', [p[1]]));
 
@@ -2297,6 +2305,8 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'devices.installFirmware',
     'devices.installMode.set',
     'devices.installMode.get',
+    'devices.installMode.keyMismatch',
+    'devices.installMode.tempKey',
     'devices.replaceable',
     'names.get',
     'names.set',

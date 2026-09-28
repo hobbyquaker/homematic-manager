@@ -9,6 +9,8 @@
         type MetaHmipPairing,
     } from '@homematic-manager/core';
 
+    import {tick} from 'svelte';
+
     import Dialog from '../../lib/components/Dialog.svelte';
     import {getStores} from '../../lib/stores/context.js';
 
@@ -28,6 +30,12 @@
 
     /** How often the countdown asks the interface how much install time is left. */
     const COUNTDOWN_MS = 1000;
+    /**
+     * Task 76: every how-many-th countdown tick asks rfd for a device it refused for its security
+     * key. rfd tells nobody about it - `getKeyMismatchDevice(true)` is the only way to learn it -
+     * and the CCU WebUI asks every five seconds while its install mode runs.
+     */
+    const KEY_MISMATCH_EVERY = 5;
 
     let seconds = $state(60);
     let bidcosMode = $state(1);
@@ -64,6 +72,27 @@
      * request at all - so the dialog says it once the window has closed, instead of just going quiet.
      */
     let nothingJoined = $state(false);
+    /**
+     * Task 76: the serial of the BidCos device rfd refused because it holds a security key this
+     * system does not have - the CCU's "Sicherheitsabfrage". `''` while there is none. The dialog
+     * then asks for the other system's key, sends it with `setTempKey` and tries again.
+     */
+    let keyMismatch = $state('');
+    /** Task 76: what the last start sent (without its key), for "set the key and try again". */
+    let lastStart: InstallModeOptions | undefined;
+    /**
+     * Task 76: a temporary key went to the interface. rfd keeps it for every pairing that follows,
+     * and the WebUI never clears it; here it is cleared once the pairing is over (a device came,
+     * the window ran out, Stop, Close), so a mistyped key does not linger for the next one.
+     */
+    let tempKeySent = false;
+    let tempKeyField = $state<HTMLInputElement | undefined>(undefined);
+    /**
+     * Task 76: the countdown ticks of the current window. Kept outside the countdown effect, which
+     * re-runs (and restarts its interval) whenever `remaining` changes - every second, against a
+     * real interface - so a counter inside it would never reach five.
+     */
+    let countdownTicks = 0;
     /**
      * Bumped by every start and every stop: a countdown answer that arrives after the user pressed
      * Stop belongs to a window that is already closed and must not report on it.
@@ -139,6 +168,9 @@
         renameChannels = true;
         inboxConfirmed = '';
         nothingJoined = false;
+        keyMismatch = '';
+        tempKey = '';
+        void clearTempKey();
     });
 
     /** There is nothing to scan without an SGTIN; a running camera is switched off with the fields. */
@@ -160,6 +192,9 @@
             const fresh = change.addresses.filter((address) => !address.includes(':') && !paired.includes(address));
             if (fresh.length > 0) {
                 paired = [...paired, ...fresh];
+                // task 76: the pairing the key was for is done
+                keyMismatch = '';
+                void clearTempKey();
             }
         });
     });
@@ -171,16 +206,28 @@
         }
         const current = installWindow;
         const timer = setInterval(() => {
+            countdownTicks += 1;
             void stores.devices.installModeSeconds(interfaceName).then((left) => {
                 if (current !== installWindow) {
                     return;
                 }
                 remaining = left;
-                // task 28: the window closed by itself and nobody came
-                if (left <= 0 && isHmip && paired.length === 0) {
-                    nothingJoined = true;
+                if (left <= 0) {
+                    // task 28: the window closed by itself and nobody came
+                    if (paired.length === 0) {
+                        nothingJoined = true;
+                    }
+                    void clearTempKey();
                 }
             });
+            // task 76: a device with another system's key did ask to join; rfd refused it quietly
+            if (!isHmip && countdownTicks % KEY_MISMATCH_EVERY === 0) {
+                void stores.devices.keyMismatchDevice(interfaceName).then((serial) => {
+                    if (current === installWindow && serial !== '') {
+                        void stopForKey(serial);
+                    }
+                });
+            }
         }, COUNTDOWN_MS);
         return () => {
             clearInterval(timer);
@@ -199,11 +246,27 @@
     async function start(options: InstallModeOptions): Promise<void> {
         busy = true;
         nothingJoined = false;
+        keyMismatch = '';
         installWindow += 1;
-        const ok = await stores.devices.setInstallMode(interfaceName, true, {seconds, ...options});
+        countdownTicks = 0;
+        const {tempKey: key, ...withoutKey} = options;
+        lastStart = withoutKey;
+        if (key !== undefined) {
+            tempKeySent = true;
+        }
+        const error = await stores.devices.tryInstallMode(interfaceName, true, {seconds, ...options});
         busy = false;
+        if (error !== null) {
+            // task 76: rfd answers `addDevice` for a device with another system's key with a fault
+            // and remembers the serial - that is the CCU's question, not an error notice
+            if (!isHmip && options.address !== undefined && (await askForKeyIfRefused())) {
+                return;
+            }
+            stores.notices.fromError(error, 'setInstallMode');
+            return;
+        }
         // `addDevice` opens no install mode, so nothing counts down (checked against 2.7)
-        if (ok && options.address === undefined) {
+        if (options.address === undefined) {
             remaining = seconds;
         }
     }
@@ -212,6 +275,52 @@
         installWindow += 1;
         await stores.devices.setInstallMode(interfaceName, false);
         remaining = 0;
+        await clearTempKey();
+    }
+
+    /** Task 76: did rfd just refuse a device for its key? Then ask for that key. */
+    async function askForKeyIfRefused(): Promise<boolean> {
+        const serial = await stores.devices.keyMismatchDevice(interfaceName);
+        if (serial === '') {
+            return false;
+        }
+        await askForKey(serial);
+        return true;
+    }
+
+    /**
+     * Task 76: the poll found a refused device while the window was open - the WebUI stops its
+     * install mode there and opens the question; so does this.
+     */
+    async function stopForKey(serial: string): Promise<void> {
+        installWindow += 1;
+        remaining = 0;
+        await askForKey(serial);
+        await stores.devices.setInstallMode(interfaceName, false);
+    }
+
+    async function askForKey(serial: string): Promise<void> {
+        keyMismatch = serial;
+        await tick();
+        tempKeyField?.focus();
+    }
+
+    /** Task 76: `setTempKey(key)`, then the same start as before - the WebUI's "Schlüssel setzen und erneut versuchen". */
+    async function setKeyAndRetry(): Promise<void> {
+        const key = tempKey.trim();
+        if (key === '' || lastStart === undefined) {
+            return;
+        }
+        await start({...lastStart, tempKey: key});
+    }
+
+    /** Task 76: the temporary key is for one pairing; `setTempKey('')` puts the system's own key back. */
+    async function clearTempKey(): Promise<void> {
+        if (!tempKeySent) {
+            return;
+        }
+        tempKeySent = false;
+        await stores.devices.setTempKey(interfaceName, '');
     }
 
     /** BidCos-Wired has no install mode; `searchDevices` is what 2.x sent there. */
@@ -400,12 +509,46 @@
 
         <!--
             Issue #20: a device that was taught in with a temporary key can only be paired again
-            when the same key is offered. 2.x had no field for it at all.
+            when the same key is offered. 2.x had no field for it at all. Task 76: the key is the
+            other system's security key; whoever does not know it up front is asked for it below
+            when rfd refuses the device.
         -->
         <label class="hmm-add-row">
             <span>{t('Temporary key')}</span>
-            <input class="hmm-input hmm-mono" bind:value={tempKey} data-testid="add-device-temp-key" />
+            <input
+                class="hmm-input hmm-mono"
+                bind:value={tempKey}
+                bind:this={tempKeyField}
+                data-testid="add-device-temp-key"
+            />
         </label>
+        <div class="hmm-add-row">
+            <span></span>
+            <p class="hmm-add-hint" data-testid="add-device-temp-key-hint">
+                {t(
+                    'The security key of the system the device was last paired to, if it holds one. Leave it empty otherwise: the system asks for it when a device is refused for its key.',
+                )}
+            </p>
+        </div>
+        {#if keyMismatch !== ''}
+            <!-- Task 76: the CCU WebUI's "Geräte anlernen - Sicherheitsabfrage", inside this dialog -->
+            <section class="hmm-add-key-question" role="alert" data-testid="add-device-key-mismatch">
+                <h4>{t('Security key of the other system')}</h4>
+                <p>
+                    {t(
+                        'The device {serial} could not be paired: it holds a security key this system does not know. Enter the security key of the system it was paired to and try again.',
+                        {serial: keyMismatch},
+                    )}
+                </p>
+                <button
+                    type="button"
+                    class="hmm-button"
+                    disabled={busy || tempKey.trim() === ''}
+                    data-testid="add-device-key-retry"
+                    onclick={() => void setKeyAndRetry()}>{t('Set the key and try again')}</button
+                >
+            </section>
+        {/if}
     {/if}
 
     {#if !isWired}
@@ -446,10 +589,21 @@
             {/if}
         </div>
         {#if nothingJoined}
+            <!--
+                Task 76: two texts, because the two radio systems fail differently. An HmIP device
+                still paired elsewhere sends nothing until it is reset. A BidCos device with another
+                system's security key does send its request - rfd refuses it and this dialog asks for
+                the key above; a factory reset does not remove that key, so the old text sent the
+                user the wrong way.
+            -->
             <p class="hmm-add-notice" role="status" data-testid="add-device-nothing-joined">
-                {t(
-                    'The install mode has ended and no device has joined. A device that is still paired with another central sends no inclusion request: reset it to factory state and start again.',
-                )}
+                {isHmip
+                    ? t(
+                          'The install mode has ended and no device has joined. A device that is still paired with another central sends no inclusion request: reset it to factory state and start again.',
+                      )
+                    : t(
+                          "The install mode has ended and no device has joined. Put the device into its pairing mode and start again. A device that holds another system's security key is reported here and that key asked for; a factory reset does not remove it.",
+                      )}
             </p>
         {/if}
     {/if}
@@ -580,6 +734,22 @@
         margin-top: 10px;
         padding-top: 8px;
         border-top: 1px solid var(--hmm-border);
+    }
+
+    /* Task 76: the CCU's security question, as a block of its own under the key field. */
+    .hmm-add-key-question {
+        margin: 6px 0 10px;
+        padding: 8px 10px;
+        border: 1px solid var(--hmm-warn);
+        border-radius: 4px;
+    }
+
+    .hmm-add-key-question h4 {
+        margin: 0 0 4px;
+    }
+
+    .hmm-add-key-question p {
+        margin: 0 0 8px;
     }
 
     .hmm-add-paired h4 {

@@ -1461,6 +1461,30 @@ describe('devices', () => {
     });
 
     /**
+     * Task 76: a BidCos device that holds another system's security key. rfd refuses the pairing
+     * and remembers the serial for `getKeyMismatchDevice(true)` - read once, then cleared in the
+     * interface process - and `setTempKey` on its own is how the key of the other system is offered
+     * (and cleared again with `''`) between the tries.
+     */
+    it('reads the key-mismatch serial with a reset and sets or clears the temporary key on its own (task 76)', async () => {
+        const h = await harness({
+            answers: {
+                'BidCos-RF': (method) => (method === 'getKeyMismatchDevice' ? 'LEQ0000009' : ''),
+            },
+        });
+        h.calls.length = 0;
+        expect(await h.backend.request('devices.installMode.keyMismatch', 'BidCos-RF')).toBe('LEQ0000009');
+        await h.backend.request('devices.installMode.tempKey', 'BidCos-RF', 'other-system');
+        await h.backend.request('devices.installMode.tempKey', 'BidCos-RF', '');
+        expect(h.calls.map(({method, params}) => [method, params])).toEqual([
+            ['getKeyMismatchDevice', [true]],
+            ['setTempKey', ['other-system']],
+            ['setTempKey', ['']],
+        ]);
+        await h.backend.stop();
+    });
+
+    /**
      * Task 28: any HmIP device without its SGTIN. `hmipKeyMode: 'ANY'` in the contract is
      * `setInstallMode` with exactly two arguments on the wire, and a mode integer never reaches
      * hmipserver - the lab's answered `setInstallMode(true, 30, 1)` with an empty HTTP reply and

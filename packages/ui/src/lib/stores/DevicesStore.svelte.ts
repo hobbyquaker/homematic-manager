@@ -1,4 +1,5 @@
 import type {
+    ApiError,
     DeviceDescription,
     InstallModeOptions,
     MetaHmipPairing,
@@ -8,6 +9,7 @@ import type {
 } from '@homematic-manager/core';
 import {DeviceIndex} from '@homematic-manager/core';
 
+import {toApiRequestError} from '../transport/error.js';
 import type {NoticesStore} from './NoticesStore.svelte.js';
 
 /**
@@ -366,6 +368,45 @@ export class DevicesStore {
             return (await this.#transport.request('meta.pairing')) ?? undefined;
         } catch {
             return undefined;
+        }
+    }
+
+    /**
+     * Task 76: `setInstallMode` for the pairing dialog, which tells its own story about a failure -
+     * an `addDevice` refused for a security key is a question to the user, not an error notice.
+     * Returns the error instead of pushing a notice; `null` when the calls went through.
+     */
+    async tryInstallMode(interfaceName: string, on: boolean, options?: InstallModeOptions): Promise<ApiError | null> {
+        try {
+            await this.#transport.request('devices.installMode.set', interfaceName, on, options);
+            return null;
+        } catch (error) {
+            return toApiRequestError(error);
+        }
+    }
+
+    /**
+     * Task 76: the serial of the BidCos device rfd last refused for a security key it does not
+     * have, or `''`. Polled while an install mode is open; a failure is no notice, because the
+     * countdown's `getInstallMode` already reports a dead interface and hmipserver has no such
+     * method at all.
+     */
+    async keyMismatchDevice(interfaceName: string): Promise<string> {
+        try {
+            return await this.#transport.request('devices.installMode.keyMismatch', interfaceName);
+        } catch {
+            return '';
+        }
+    }
+
+    /** Task 76: `setTempKey` on its own; `''` clears the temporary key. */
+    async setTempKey(interfaceName: string, key: string): Promise<boolean> {
+        try {
+            await this.#transport.request('devices.installMode.tempKey', interfaceName, key);
+            return true;
+        } catch (error) {
+            this.#notices.fromError(error, 'setTempKey');
+            return false;
         }
     }
 

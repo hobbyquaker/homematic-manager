@@ -22,12 +22,12 @@
  * what `bundleDependencies` then finds. `postpack.mjs` removes them again, so development keeps
  * using the workspace symlinks and never a stale copy.
  *
- * Their own registry dependencies (`binrpc`, `homematic-rega`, `homematic-xmlrpc`, `ws`) are
- * declared as dependencies of this package, so npm installs them for the bundled code normally -
- * and they are deliberately **not** repeated in the bundled manifests. npm counts a dependency of
- * a bundled package as part of the bundle: with them declared, `npm install -g <tarball>` creates
- * an empty directory for each and never fills it, and the first `import 'ws'` fails with
- * ERR_MODULE_NOT_FOUND (npm 10.9 and 12.0 alike). A plain `npm install` hoists them into the
+ * Their own registry dependencies (`binrpc`, `homematic-rega`, `homematic-xmlrpc`, `occulite-client`,
+ * `ws`) are declared as dependencies of this package, so npm installs them for the bundled code
+ * normally - and they are deliberately **not** repeated in the bundled manifests. npm counts a
+ * dependency of a bundled package as part of the bundle: with them declared,
+ * `npm install -g <tarball>` creates an empty directory for each and never fills it, and the first
+ * `import 'ws'` fails with ERR_MODULE_NOT_FOUND (npm 10.9 and 12.0 alike). A plain `npm install` hoists them into the
  * consumer's own `node_modules` and hides the problem, which is why it went unnoticed.
  */
 

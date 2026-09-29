@@ -160,9 +160,12 @@ the per-CCU cache directory instead, so a restart while the box is unreachable s
 The provider is deliberately readable as a reference: openccu-lite's format and API are implemented
 in [`packages/core/src/meta/`](../packages/core/src/meta) (the document, its validation, the store
 with every operation and its revisions, and `applyEvent` for following the change stream), and the
-HTTP side in [`packages/backend/src/meta/`](../packages/backend/src/meta) (the client, the three
-providers - `local`, `occulite`, and `rega` over the CCU's script interface - the detection and the
-credentials). Both halves run openccu-lite's **conformance
+backend side in [`packages/backend/src/meta/`](../packages/backend/src/meta) (the three providers -
+`local`, `occulite`, and `rega` over the CCU's script interface - the detection and the
+credentials). The wire itself - the requests, the change stream, the certificate check - is
+[occulite-client](https://www.npmjs.com/package/occulite-client), openccu-lite's own package for
+programs that talk to such a system; a new integration should start there. Both halves run
+openccu-lite's **conformance
 corpus** — its D-16 contract between the Go implementation and this one — from
 `packages/core/test/fixtures/meta/`, refreshed with `node scripts/sync-meta-fixtures.mjs
 <checkout>`, and there is an integration test against a real `occulited` in

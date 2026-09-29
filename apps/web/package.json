@@ -72,6 +72,7 @@
     "binrpc": "^4.2.0",
     "homematic-rega": "^2.0.0",
     "homematic-xmlrpc": "^2.0.0",
+    "occulite-client": "^0.2.0",
     "ws": "^8.21.3"
   },
   "bundleDependencies": [

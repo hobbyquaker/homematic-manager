@@ -180,7 +180,7 @@ function check(sbom, versions) {
             component.group === undefined ? component.name : `${component.group}/${component.name}`,
         ]),
     );
-    for (const wanted of ['@homematic-manager/backend', '@homematic-manager/core', 'ws', 'node']) {
+    for (const wanted of ['@homematic-manager/backend', '@homematic-manager/core', 'ws', 'occulite-client', 'node']) {
         if (!names.has(wanted)) {
             problems.push(`${wanted} is missing from the component list`);
         }

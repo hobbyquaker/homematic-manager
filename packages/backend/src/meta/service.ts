@@ -35,15 +35,16 @@ import {
     type MetaVersion,
     type SystemCertificateProblem,
 } from '@homematic-manager/core';
+import type {Auth, Transport} from 'occulite-client';
+import {nodeAuth} from 'occulite-client/node';
 
 import type {NameStore} from '../cache/names.js';
 import {validationError} from '../errors.js';
-import {MetaApiClient, DETECT_TIMEOUT_MS, type MetaDetection} from './client.js';
-import {normaliseSid, readLocalToken} from './credentials.js';
 import {LocalMetaProvider} from './localProvider.js';
 import {OcculiteProvider} from './occuliteProvider.js';
 import type {MetadataProvider, MetaMembershipEntry} from './provider.js';
 import {RegaMetaProvider, type RegaScriptRunner} from './regaProvider.js';
+import {DETECT_TIMEOUT_MS, SystemLink, detectSystem, transportFor, type MetaDetection} from './system.js';
 
 /** What the service needs to know about ReGa to offer it as a provider (task 27). */
 export interface MetaRegaLink {
@@ -84,10 +85,35 @@ export interface MetaServiceOptions {
      * common case probes once; a store at another `metaUrl` is still probed on its own.
      */
     readonly hostProbe?: HostProbe | undefined;
-    /** Injected by the tests. */
+    /**
+     * Injected by the tests: the local token file (occulite-client's `LOCAL_TOKEN_FILE` otherwise),
+     * and a `fetch` in place of the transport that carries the profile's certificate trust.
+     */
     readonly localTokenFile?: string | undefined;
     readonly fetch?: typeof globalThis.fetch;
     readonly detectTimeoutMs?: number;
+}
+
+/**
+ * A session id as the box hands it over: `@xxxxxxxxxx@`, the CCU convention, or bare.
+ *
+ * The API accepts both spellings; this normalises to the bare one so that one shape goes on the
+ * wire and a log line stays readable.
+ */
+export function normaliseSid(value: string | undefined): string | undefined {
+    const bare = (value ?? '').replace(/^@|@$/g, '').trim();
+    return /^[0-9a-zA-Z]{6,64}$/.test(bare) ? bare : undefined;
+}
+
+/**
+ * The box's local token, or `undefined` when there is no file - which is every installation that
+ * is not the addon on an openccu-lite box. On the box it is the token for programs running there:
+ * it reads everything and writes nothing, on purpose (the addon reads as itself and writes as the
+ * person looking at the page). Read by occulite-client's credential resolution; never throws.
+ */
+export async function readLocalToken(file?: string): Promise<string | undefined> {
+    const found = await nodeAuth({local: true}, file === undefined ? {} : {localTokenFile: file}).resolve('start');
+    return found.token;
 }
 
 /**
@@ -148,11 +174,14 @@ export class MetaService {
     /** The session of the person looking at the page; writes go out as this one. */
     #sessionCredential: string | undefined;
     #localToken: string | undefined;
+    /** B-67: the transport with the profile's certificate trust (occulite-client's, task 72). */
+    readonly #transport: Transport;
 
     private constructor(options: MetaServiceOptions, provider: MetadataProvider, version?: MetaVersion) {
         this.#options = options;
         this.#provider = provider;
         this.#version = version;
+        this.#transport = transportFor({fetch: options.fetch, trust: options.connection.systemTrust});
     }
 
     /**
@@ -196,7 +225,7 @@ export class MetaService {
                             ? {}
                             : {certificate: options.hostProbe.certificate}),
                     }
-                  : await service.#client(configuredUrl).detect(options.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
+                  : await detectSystem(service.#transport, configuredUrl, options.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
         const version = detection?.version;
         // B-67: the system answered at the https:// URL it redirected to; every later call goes there
         const baseUrl = detection?.baseUrl ?? configuredUrl;
@@ -462,12 +491,12 @@ export class MetaService {
         return undefined;
     }
 
-    #client(baseUrl: string): MetaApiClient {
-        return new MetaApiClient({
+    #link(baseUrl: string): SystemLink {
+        return new SystemLink({
             baseUrl,
-            credential: () => this.#readCredential(),
+            transport: this.#transport,
+            readCredential: () => this.#readCredential(),
             writeCredential: () => this.#writeCredential(),
-            ...(this.#options.fetch === undefined ? {} : {fetch: this.#options.fetch}),
         });
     }
 
@@ -477,15 +506,27 @@ export class MetaService {
      * The token in the profile wins because it is the one a user off the box configured on purpose;
      * the local token is what an addon has without anybody configuring anything.
      */
-    #readCredential(): string | undefined {
+    #readCredential(): Auth | undefined {
         const configured = (this.#options.connection.metaToken ?? '').trim();
-        return configured !== '' ? configured : (this.#localToken ?? this.#sessionCredential);
+        if (configured !== '') {
+            return {token: configured};
+        }
+        if (this.#localToken !== undefined) {
+            return {token: this.#localToken};
+        }
+        return this.#sessionCredential === undefined ? undefined : {session: this.#sessionCredential};
     }
 
     /** Writes: the user's session first - the local token may not write, and should not. */
-    #writeCredential(): string | undefined {
+    #writeCredential(): Auth | undefined {
+        if (this.#sessionCredential !== undefined) {
+            return {session: this.#sessionCredential};
+        }
         const configured = (this.#options.connection.metaToken ?? '').trim();
-        return this.#sessionCredential ?? (configured !== '' ? configured : this.#localToken);
+        if (configured !== '') {
+            return {token: configured};
+        }
+        return this.#localToken === undefined ? undefined : {token: this.#localToken};
     }
 
     #buildLocal(): MetadataProvider {
@@ -519,7 +560,7 @@ export class MetaService {
 
     #buildOcculite(baseUrl: string, version: MetaVersion): MetadataProvider {
         return new OcculiteProvider({
-            client: this.#client(baseUrl),
+            system: this.#link(baseUrl),
             cacheFile: path.join(this.#options.cacheDir, 'occulite-meta.json'),
             ...(version.implementation === undefined ? {} : {implementation: version.implementation}),
             onChanged: () => {
@@ -548,8 +589,8 @@ export class MetaService {
         if (baseUrl === undefined || baseUrl === '') {
             return undefined;
         }
-        const version = await this.#client(baseUrl).version(this.#options.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
-        return version?.hmip;
+        const found = await detectSystem(this.#transport, baseUrl, this.#options.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
+        return found.version?.hmip;
     }
 
     /**
@@ -562,13 +603,15 @@ export class MetaService {
     }
 
     /**
-     * Task 57: the credential a call to the box's system API goes out with. The same order as a
-     * write to the store: the person's session first, then the token the profile configured, then
-     * the local token - which the box refuses there, as it should: an addon's local token reads
-     * metadata and nothing else, and a group is changed by a person.
+     * Task 57: the box's other APIs, while the store is the box's - `undefined` otherwise. A call
+     * to its system API goes out with the credential of a write to the store: the person's session
+     * first, then the token the profile configured, then the local token - which the box refuses
+     * there, as it should: an addon's local token reads metadata and nothing else, and a group is
+     * changed by a person. The same transport, so the same certificate trust (B-67).
      */
-    boxCredential(): string | undefined {
-        return this.#writeCredential();
+    boxLink(): SystemLink | undefined {
+        const baseUrl = this.boxUrl;
+        return baseUrl === undefined || baseUrl === '' ? undefined : this.#link(baseUrl);
     }
 }
 

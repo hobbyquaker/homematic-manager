@@ -8,8 +8,9 @@
  * JSON API with the box's own login - the one this application already has for the metadata store
  * (D-40). This client speaks that API and nothing else; on a CCU it is never built.
  *
- * Like the metadata client: `fetch` and `AbortSignal` only, a typed answer or a thrown
- * {@link BackendError} whose `kind` says what the UI should make of it. The box's error body
+ * The requests are occulite-client's `system.groups` (task 72), on the same transport and with the
+ * same certificate trust as the metadata store; what stays here is the contract's shape and a
+ * thrown {@link BackendError} whose `kind` says what the UI should make of it. The box's error body
  * (`{error, message}`) is kept, because its message is the one worth showing - "there is no group
  * 7", "members: hmipserver's device ids, as GET /groups/types lists them".
  */
@@ -23,8 +24,10 @@ import type {
     HeatingGroupType,
     HeatingGroupsState,
 } from '@homematic-manager/core';
+import {OccuLiteError, type OccuLite} from 'occulite-client';
 
 import {BackendError} from '../errors.js';
+import type {SystemLink} from '../meta/system.js';
 
 /**
  * How long a call may take. A change makes the box's group process configure direct links, and the
@@ -34,17 +37,14 @@ import {BackendError} from '../errors.js';
 export const GROUPS_TIMEOUT_MS = 45_000;
 
 export interface HeatingGroupsClientOptions {
-    /** `http://ccu` or `http://127.0.0.1` - scheme and authority, no path. */
-    readonly baseUrl: string;
     /**
-     * The credential every call goes out with. Reads need the box's `system:read`, changes
-     * `system:write`: the person's session on the box, or the API token off it. Never the addon's
-     * local token by choice - it reads metadata and nothing else, and the box answers 403.
+     * The box, with the credential every call goes out with (its write credential). Reads need the
+     * box's `system:read`, changes `system:write`: the person's session on the box, or the API token
+     * off it. Never the addon's local token by choice - it reads metadata and nothing else, and the
+     * box answers 403.
      */
-    readonly credential: () => string | undefined;
+    readonly system: SystemLink;
     readonly timeoutMs?: number;
-    /** Injected by the tests. */
-    readonly fetch?: typeof globalThis.fetch;
 }
 
 /** The box refused or could not answer; `status` and `code` are what it said. */
@@ -106,15 +106,13 @@ interface DetailWire {
 
 export class HeatingGroupsClient {
     readonly #options: HeatingGroupsClientOptions;
-    readonly #fetch: typeof globalThis.fetch;
 
     constructor(options: HeatingGroupsClientOptions) {
         this.#options = options;
-        this.#fetch = options.fetch ?? globalThis.fetch;
     }
 
     get baseUrl(): string {
-        return this.#options.baseUrl;
+        return this.#options.system.baseUrl;
     }
 
     /**
@@ -123,7 +121,7 @@ export class HeatingGroupsClient {
      */
     async probe(): Promise<HeatingGroupsState> {
         try {
-            await this.#json('GET', '/groups');
+            await this.#call((groups, options) => groups.list(options));
             return {available: true};
         } catch (error) {
             if (error instanceof HeatingGroupsApiError) {
@@ -148,12 +146,10 @@ export class HeatingGroupsClient {
      * between the two calls) is listed without members rather than failing the list.
      */
     async list(): Promise<HeatingGroupList> {
-        const answer = (await this.#json('GET', '/groups')) as {
-            groups?: GroupWire[];
-            devices_to_configure?: HeatingGroupMember[];
-        };
+        const answer = (await this.#call((groups, options) => groups.list(options))) as
+            {groups?: GroupWire[]; devices_to_configure?: HeatingGroupMember[]} | undefined;
         const groups = await Promise.all(
-            (answer.groups ?? []).map(async (wire): Promise<HeatingGroup> => {
+            (answer?.groups ?? []).map(async (wire): Promise<HeatingGroup> => {
                 let members: HeatingGroupMember[] = [];
                 try {
                     members = (await this.get(wire.id)).members;
@@ -163,13 +159,14 @@ export class HeatingGroupsClient {
                 return {...toGroup(wire), members};
             }),
         );
-        return {groups, devicesToConfigure: answer.devices_to_configure ?? []};
+        return {groups, devicesToConfigure: answer?.devices_to_configure ?? []};
     }
 
     /** `GET /groups/types` - what a new group can be, and what each type could take now. */
     async types(): Promise<HeatingGroupType[]> {
-        const answer = (await this.#json('GET', '/groups/types')) as {types?: Partial<HeatingGroupType>[]};
-        return (answer.types ?? []).map((type) => ({
+        const types = (await this.#call((groups, options) => groups.types(options))) as
+            Partial<HeatingGroupType>[] | undefined;
+        return (types ?? []).map((type) => ({
             id: type.id ?? '',
             label: type.label ?? type.id ?? '',
             assignable: type.assignable ?? [],
@@ -179,12 +176,14 @@ export class HeatingGroupsClient {
 
     /** `GET /groups/{id}`. */
     async get(id: number): Promise<HeatingGroupDetail> {
-        return toDetail((await this.#json('GET', `/groups/${String(id)}`)) as DetailWire);
+        return toDetail(await this.#call((groups, options) => groups.get(id, options)));
     }
 
     /** `POST /groups` - the box's `create` then `save`, and the metadata side effects in one go. */
     async create(name: string, type: string, members: readonly string[]): Promise<HeatingGroupChange> {
-        return toChange((await this.#json('POST', '/groups', {name, type, members: [...members]})) as DetailWire);
+        return toChange(
+            await this.#call((groups, options) => groups.create({name, type, members: [...members]}, options)),
+        );
     }
 
     /**
@@ -199,58 +198,24 @@ export class HeatingGroupsClient {
             ...(change.name === undefined ? {} : {name: change.name}),
             ...(change.members === undefined ? {} : {members: [...change.members]}),
         };
-        return toChange((await this.#json('PUT', `/groups/${String(id)}`, body)) as DetailWire);
+        return toChange(await this.#call((groups, options) => groups.update(id, body, options)));
     }
 
     /** `DELETE /groups/{id}` - answers with the former members, whose group membership is gone. */
     async remove(id: number): Promise<HeatingGroupMember[]> {
-        const answer = (await this.#json('DELETE', `/groups/${String(id)}`)) as {
-            former_members?: HeatingGroupMember[];
-        };
-        return answer.former_members ?? [];
+        const answer = (await this.#call((groups, options) => groups.remove(id, options))) as
+            {former_members?: HeatingGroupMember[]} | undefined;
+        return answer?.former_members ?? [];
     }
 
-    #url(route: string): string {
-        return `${this.#options.baseUrl.replace(/\/$/, '')}/api/system/v1${route}`;
-    }
-
-    async #json(method: 'GET' | 'POST' | 'PUT' | 'DELETE', route: string, body?: unknown): Promise<unknown> {
-        const credential = this.#options.credential();
-        let response: Response;
+    /** One call of the package's `system.groups`, its errors turned into the contract's. */
+    async #call<T>(run: (groups: OccuLite['system']['groups'], options: {timeout: number}) => Promise<T>): Promise<T> {
         try {
-            response = await this.#fetch(this.#url(route), {
-                method,
-                signal: AbortSignal.timeout(this.#options.timeoutMs ?? GROUPS_TIMEOUT_MS),
-                headers: {
-                    Accept: 'application/json',
-                    ...(body === undefined ? {} : {'Content-Type': 'application/json'}),
-                    ...(credential === undefined ? {} : {Authorization: `Bearer ${credential}`}),
-                },
-                ...(body === undefined ? {} : {body: JSON.stringify(body)}),
+            return await run(this.#options.system.client('write').system.groups, {
+                timeout: this.#options.timeoutMs ?? GROUPS_TIMEOUT_MS,
             });
         } catch (error) {
-            // the box is off, or the change outlasted the timeout above
-            throw new BackendError(
-                {
-                    message: `the groups API at ${this.#options.baseUrl} did not answer: ${errorText(error)}`,
-                    kind: 'connection',
-                },
-                {cause: error},
-            );
-        }
-        if (!response.ok) {
-            throw await refusal(response);
-        }
-        if (response.status === 204) {
-            return {};
-        }
-        try {
-            return await response.json();
-        } catch (error) {
-            throw new BackendError(
-                {message: `the groups API answered ${String(response.status)} without JSON`, kind: 'internal'},
-                {cause: error},
-            );
+            throw refusal(error, this.baseUrl);
         }
     }
 }
@@ -288,25 +253,29 @@ function toChange(wire: DetailWire): HeatingGroupChange {
     return {...toDetail(wire), devicesToConfigure: wire.devices_to_configure ?? []};
 }
 
-/** The API's `{error, message}` body as the error, or the status when there is none. */
-async function refusal(response: Response): Promise<HeatingGroupsApiError> {
-    let code = response.status === 401 || response.status === 403 ? 'forbidden' : 'error';
-    let message = `${String(response.status)} ${response.statusText}`.trim();
-    try {
-        const body = (await response.json()) as {error?: unknown; message?: unknown};
-        if (typeof body.error === 'string') {
-            code = body.error;
-        }
-        if (typeof body.message === 'string') {
-            message = body.message;
-        }
-    } catch {
-        // not JSON: lighttpd's own error page, or a box that is not openccu-lite at all
+/**
+ * The API's `{error, message}` answer as the error; a box that did not answer (off, the change
+ * outlasted the timeout above, a certificate nobody trusts) as a connection error.
+ */
+function refusal(error: unknown, baseUrl: string): BackendError {
+    if (!(error instanceof OccuLiteError) || error.status === undefined) {
+        return new BackendError(
+            {message: `the groups API at ${baseUrl} did not answer: ${errorText(error)}`, kind: 'connection'},
+            {cause: error},
+        );
     }
-    if (response.status === 401 || response.status === 403) {
-        message = `the system refused the credential for the heating groups (${String(response.status)}): ${message}`;
+    const status = error.status;
+    const detail = error.detail as {message?: unknown} | undefined;
+    let message = typeof detail?.message === 'string' ? detail.message : error.message;
+    const code = error.code.startsWith('http-')
+        ? status === 401 || status === 403
+            ? 'forbidden'
+            : 'error'
+        : error.code;
+    if (status === 401 || status === 403) {
+        message = `the system refused the credential for the heating groups (${String(status)}): ${message}`;
     }
-    return new HeatingGroupsApiError(response.status, code, message);
+    return new HeatingGroupsApiError(status, code, message);
 }
 
 function errorText(error: unknown): string {

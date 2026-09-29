@@ -88,8 +88,8 @@ ENV NODE_ENV=production \
     HMM_CALLBACK_BINRPC_PORT=2032
 
 # The tarball is mounted rather than copied, so it leaves no layer behind. The package bundles
-# `@homematic-manager/{backend,core}`; npm pulls its four registry dependencies (binrpc,
-# homematic-rega, homematic-xmlrpc, ws), all of them pure JavaScript.
+# `@homematic-manager/{backend,core}`; npm pulls its five registry dependencies (binrpc,
+# homematic-rega, homematic-xmlrpc, occulite-client, ws), all of them pure JavaScript.
 RUN --mount=from=build,source=/pack,target=/pack \
     npm install -g /pack/homematic-manager-*.tgz \
     && npm cache clean --force

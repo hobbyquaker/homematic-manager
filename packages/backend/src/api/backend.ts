@@ -88,9 +88,8 @@ import {
     type InterfaceManagerOptions,
 } from '../interfaces/manager.js';
 import {HeatingGroupsClient} from '../groups/client.js';
-import {DETECT_TIMEOUT_MS, MetaApiClient} from '../meta/client.js';
 import {MetaService, hostBaseUrl, type HostProbe, type MetaServiceOptions} from '../meta/service.js';
-import {createSystemFetch} from '../meta/systemFetch.js';
+import {DETECT_TIMEOUT_MS, detectSystem, transportFor} from '../meta/system.js';
 import {RegaService, type RegaServiceOptions} from '../rega/client.js';
 import type {RegaAlarm} from '../rega/scripts.js';
 import type {RpcCallRecord, RpcOutValue} from '../rpc/client.js';
@@ -886,22 +885,17 @@ export class Backend {
         if (baseUrl === '') {
             return {answer: undefined};
         }
-        const client = new MetaApiClient({baseUrl, fetch: this.#systemFetch(connection)});
         // B-67: the redirect to https:// is followed, and a certificate nothing trusts is said
-        const found = await client.detect(this.#options.metaOptions?.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
+        const found = await detectSystem(
+            transportFor({fetch: this.#options.metaOptions?.fetch, trust: connection.systemTrust}),
+            baseUrl,
+            this.#options.metaOptions?.detectTimeoutMs ?? DETECT_TIMEOUT_MS,
+        );
         return {
             answer: found.version,
             baseUrl: found.baseUrl,
             ...(found.certificate === undefined ? {} : {certificate: found.certificate}),
         };
-    }
-
-    /**
-     * B-67: the `fetch` for the system's own APIs - with the certificates the profile trusts. The
-     * tests inject theirs through `metaOptions.fetch`, which wins.
-     */
-    #systemFetch(connection: AppConfig['connection']): typeof globalThis.fetch {
-        return this.#options.metaOptions?.fetch ?? createSystemFetch(connection.systemTrust);
     }
 
     async #disconnect(): Promise<void> {
@@ -956,7 +950,6 @@ export class Backend {
                 onNotice: (level, message) => {
                     this.#notice(level, message);
                 },
-                fetch: this.#systemFetch(connection),
                 ...this.#options.metaOptions,
             });
             if (this.#stopped) {
@@ -1594,17 +1587,9 @@ export class Backend {
      */
     async #groupsClient(): Promise<HeatingGroupsClient | undefined> {
         await this.#metaReady?.catch(() => undefined);
-        const meta = this.#meta;
-        const baseUrl = meta?.boxUrl;
-        if (meta === undefined || baseUrl === undefined) {
-            return undefined;
-        }
-        return new HeatingGroupsClient({
-            baseUrl,
-            credential: () => meta.boxCredential(),
-            // B-67: the same trust as the store's, on the https:// URL the detection found
-            fetch: this.#systemFetch(this.#config.connection),
-        });
+        // B-67: the same transport and trust as the store's, on the https:// URL the detection found
+        const system = this.#meta?.boxLink();
+        return system === undefined ? undefined : new HeatingGroupsClient({system});
     }
 
     /** `groups.state`: no box is an answer, not an error - it is what every CCU says. */

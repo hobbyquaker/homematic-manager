@@ -19,6 +19,12 @@
  *
  * The snapshot is persisted where the ReGa provider persists its names, for the same reason: a
  * restart while the box is unreachable must not leave the grid nameless.
+ *
+ * The wire is occulite-client's (task 72): the requests, the writes on the API's routes, the
+ * certificate trust and the Server-Sent Events parser are the package's, reached through
+ * {@link SystemLink}. What stays here is the policy - when to re-read, how long to wait, what the
+ * state says - and the document itself, which is core's and follows the stream with core's
+ * `applyEvent`, the code the conformance corpus runs against.
  */
 
 import {
@@ -32,11 +38,12 @@ import {
     type MetaNodePatch,
     type MetaState,
 } from '@homematic-manager/core';
+import type {MetaCopy, MetaDocument as SystemDocument, WriteResult} from 'occulite-client';
 
 import {errorMessage} from '../errors.js';
 import {readJsonFile, writeJsonFile} from '../util/jsonFile.js';
-import {MetaApiClient} from './client.js';
 import type {MetadataProvider, MetaMembershipEntry, MetaNameEntry, MetaProviderEvents} from './provider.js';
+import type {SystemLink} from './system.js';
 
 /** First wait before the event stream is opened again, in milliseconds. */
 export const RECONNECT_MIN_MS = 2000;
@@ -45,7 +52,8 @@ export const RECONNECT_MIN_MS = 2000;
 export const RECONNECT_MAX_MS = 60_000;
 
 export interface OcculiteProviderOptions extends MetaProviderEvents {
-    readonly client: MetaApiClient;
+    /** The box, with the read and the write credential (occulite-client underneath). */
+    readonly system: SystemLink;
     /** `<cacheDir>/occulite-meta.json`: the last snapshot, so a restart without the box has names. */
     readonly cacheFile?: string;
     /** `occulited 0.1.0`, from the detection call. */
@@ -59,7 +67,7 @@ export interface OcculiteProviderOptions extends MetaProviderEvents {
 export class OcculiteProvider implements MetadataProvider {
     readonly kind = 'occulite' as const;
     readonly #options: OcculiteProviderOptions;
-    readonly #client: MetaApiClient;
+    readonly #system: SystemLink;
     #document: MetaDocument = emptyDocument();
     #reachable = false;
     #writable = true;
@@ -73,7 +81,7 @@ export class OcculiteProvider implements MetadataProvider {
 
     constructor(options: OcculiteProviderOptions) {
         this.#options = options;
-        this.#client = options.client;
+        this.#system = options.system;
     }
 
     state(): MetaState {
@@ -83,7 +91,7 @@ export class OcculiteProvider implements MetadataProvider {
             writable: this.#writable,
             revision: this.#document.revision,
             objects: Object.keys(this.#document.objects).length,
-            url: this.#client.baseUrl,
+            url: this.#system.baseUrl,
             ...(this.#options.implementation === undefined ? {} : {implementation: this.#options.implementation}),
             ...(this.#error === undefined ? {} : {error: this.#error}),
         };
@@ -139,30 +147,30 @@ export class OcculiteProvider implements MetadataProvider {
         for (const entry of entries) {
             sets[entry.ref] = {name: entry.name};
         }
-        await this.#write(() => this.#client.bulk(sets));
+        await this.#write((meta) => meta.objects.bulk({set: sets}));
     }
 
     async setMembership(entries: readonly MetaMembershipEntry[]): Promise<void> {
         if (entries.length === 0) {
             return;
         }
-        const sets: Record<string, {enums: readonly string[]}> = {};
+        const sets: Record<string, {enums: string[]}> = {};
         for (const entry of entries) {
-            sets[entry.ref] = {enums: entry.paths};
+            sets[entry.ref] = {enums: [...entry.paths]};
         }
-        await this.#write(() => this.#client.bulk(sets));
+        await this.#write((meta) => meta.objects.bulk({set: sets}));
     }
 
     async createEnum(id: string, name: Readonly<Record<string, string>>): Promise<void> {
-        await this.#write(() => this.#client.createEnum(id, name));
+        await this.#write((meta) => meta.enums.create(id, {...name}));
     }
 
     async updateEnum(id: string, name: Readonly<Record<string, string>>): Promise<void> {
-        await this.#write(() => this.#client.updateEnum(id, name));
+        await this.#write((meta) => meta.enums.update(id, {name: {...name}}));
     }
 
     async deleteEnum(id: string, detach: boolean): Promise<void> {
-        await this.#write(() => this.#client.deleteEnum(id, detach ? 'detach' : 'refuse'));
+        await this.#write((meta) => meta.enums.delete(id, {detach}));
     }
 
     async createNode(
@@ -172,8 +180,8 @@ export class OcculiteProvider implements MetadataProvider {
         name: string,
         options: {readonly icon?: string; readonly position?: number},
     ): Promise<string> {
-        await this.#write(() =>
-            this.#client.createNode(enumId, {
+        await this.#write((meta) =>
+            meta.tree.create(enumId, {
                 parent,
                 id,
                 name,
@@ -185,15 +193,23 @@ export class OcculiteProvider implements MetadataProvider {
     }
 
     async updateNode(path: string, patch: MetaNodePatch): Promise<void> {
-        await this.#write(() => this.#client.updateNode(path, patch));
+        await this.#write((meta) =>
+            meta.tree.update(path, {
+                ...(patch.name === undefined ? {} : {name: patch.name}),
+                ...(patch.icon === undefined ? {} : {icon: patch.icon}),
+                ...(patch.parent === undefined ? {} : {parent: patch.parent}),
+                ...(patch.position === undefined ? {} : {position: patch.position}),
+            }),
+        );
     }
 
     async deleteNode(path: string, detach: boolean): Promise<void> {
-        await this.#write(() => this.#client.deleteNode(path, detach ? 'detach' : 'refuse'));
+        await this.#write((meta) => meta.tree.delete(path, {detach}));
     }
 
     async import(document: unknown, mode: MetaImportMode): Promise<void> {
-        await this.#write(() => this.#client.import(document, mode));
+        // a document object as JSON; a string goes as it is, which the API reads as YAML
+        await this.#write((meta) => meta.import(document as SystemDocument | string, {mode}));
     }
 
     /**
@@ -204,9 +220,9 @@ export class OcculiteProvider implements MetadataProvider {
      * 403 is turned into `writable: false` so the state says *why*, and is then re-thrown for the
      * caller to show.
      */
-    async #write<T>(call: () => Promise<T>): Promise<T> {
+    async #write(call: (meta: MetaCopy) => Promise<WriteResult>): Promise<WriteResult> {
         try {
-            const answer = await call();
+            const answer = await this.#system.write(call);
             if (!this.#writable) {
                 this.#writable = true;
                 this.#options.onStateChanged(this.state());
@@ -226,7 +242,7 @@ export class OcculiteProvider implements MetadataProvider {
     /** `GET /snapshot`, with every failure turned into a state instead of an exception. */
     async #refresh(): Promise<void> {
         try {
-            const document = await this.#client.snapshot();
+            const document = await this.#system.snapshot();
             this.#document = document;
             this.#reachable = true;
             this.#error = undefined;
@@ -256,7 +272,7 @@ export class OcculiteProvider implements MetadataProvider {
         let wait = this.#options.reconnectMinMs ?? RECONNECT_MIN_MS;
         while (!aborted()) {
             try {
-                for await (const event of this.#client.events(this.#document.revision, signal)) {
+                for await (const event of this.#system.events(this.#document.revision, signal)) {
                     wait = this.#options.reconnectMinMs ?? RECONNECT_MIN_MS;
                     if (!this.#reachable) {
                         this.#reachable = true;

@@ -9,7 +9,7 @@
  * from the real thing: the tarball is installed into a temporary directory with
  * `npm install --omit=dev --ignore-scripts`, and `cyclonedx-npm` describes *that* tree. What comes
  * out therefore lists the bundled workspace packages next to `binrpc`, `homematic-rega`,
- * `homematic-xmlrpc` and `ws`, at the versions the tarball actually resolves to.
+ * `homematic-xmlrpc`, `occulite-client` and `ws`, at the versions the tarball actually resolves to.
  *
  * `metadata.component` is the tarball itself, with its SHA-512, so the document is a statement
  * about one artefact rather than about "the project" - which is what `actions/attest-sbom` signs
@@ -182,7 +182,7 @@ function check(sbom, floor) {
     if (sbom.components.length < floor) {
         problems.push(`only ${sbom.components.length} components, expected at least ${floor}`);
     }
-    for (const wanted of ['@homematic-manager/backend', '@homematic-manager/core', 'ws']) {
+    for (const wanted of ['@homematic-manager/backend', '@homematic-manager/core', 'ws', 'occulite-client']) {
         if (!names.has(wanted)) {
             problems.push(`${wanted} is missing - is it still bundled?`);
         }

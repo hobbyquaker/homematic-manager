@@ -16,6 +16,14 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   second for a listener that keeps it waiting. The answer goes out first now, and the tabs get the events right after,
   in the same order. A test drives both callback servers with a burst of 500 events and a `newDevices` of 100 devices
   while twenty tabs are connected, one of which never reads, and every answer arrives within 50 ms. (task 73)
+- **Names, rooms and heating groups on openccu-lite go through occulite-client.** The app talked to an openccu-lite
+  system's metadata and system APIs with a client of its own - its own HTTP requests, its own reader of the change
+  stream, its own certificate check. It now uses [occulite-client](https://www.npmjs.com/package/occulite-client),
+  openccu-lite's package for every program that talks to such a system, and about a thousand lines of duplicated code
+  are gone. Nothing changes in what you see: the store is detected, read, followed and written as before, a
+  certificate or CA you trusted stays trusted, and the addon still reads with its local token and writes as the person
+  looking at the page. occulite-client is a new dependency of the npm package, the desktop app and the addon; it has no
+  dependencies of its own. (task 72)
 
 ### Fixed
 

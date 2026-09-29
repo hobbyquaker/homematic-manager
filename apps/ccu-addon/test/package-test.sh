@@ -61,7 +61,8 @@ tar tzf "$PKG" > "$LISTING"
 for entry in hmm/rc.d/hmm hmm/bin/node hmm/bin/update_addon hmm/www/settings.cgi hmm/www/service.cgi \
     hmm/www/update_check.cgi hmm/www/lib/session.tcl hmm/etc/lighttpd.conf.in hmm/etc/monit.cfg \
     hmm/etc/default.env hmm/app/dist/cli.js hmm/app/ui/index.html hmm/app/data/manifest.json \
-    hmm/app/node_modules/ws/package.json hmm/versions update_script hmm.cfg openccu-lite.json; do
+    hmm/app/node_modules/ws/package.json hmm/app/node_modules/occulite-client/package.json hmm/versions \
+    update_script hmm.cfg openccu-lite.json; do
     if grep -qxF "$entry" "$LISTING"; then
         pass "contains $entry"
     else
@@ -203,7 +204,7 @@ process.stdout.write(node ? `v${node.version}` : "");
     else
         fail "the SBOM's node component matches the runtime" "sbom: $sbom_node, runtime: $expected"
     fi
-    for wanted in '@homematic-manager/backend' '@homematic-manager/core' 'ws'; do
+    for wanted in '@homematic-manager/backend' '@homematic-manager/core' 'ws' 'occulite-client'; do
         if "$NODE" -e '
 const fs = require("node:fs");
 const sbom = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));

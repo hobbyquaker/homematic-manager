@@ -1,5 +1,7 @@
 /**
- * The heating groups client against a `fetch` that answers whatever the test needs (task 57).
+ * The heating groups client against a `fetch` that answers whatever the test needs (task 57),
+ * carried by occulite-client's fetch transport (task 72) - the requests are the package's
+ * `system.groups`, so these tests hold the contract's side and the wire both.
  *
  * What is asserted is the protocol: which URL a call goes to, that every call carries the one
  * credential, what a body looks like, how the box's `snake_case` becomes the contract's shape, and
@@ -11,7 +13,10 @@
 
 import {describe, expect, it} from 'vitest';
 
+import {fetchTransport} from 'occulite-client';
+
 import {BackendError} from '../errors.js';
+import {SystemLink} from '../meta/system.js';
 import {GROUPS_TIMEOUT_MS, HeatingGroupsApiError, HeatingGroupsClient} from './client.js';
 
 interface Call {
@@ -19,6 +24,17 @@ interface Call {
     method: string;
     headers: Record<string, string>;
     body?: unknown;
+}
+
+/** The box at `http://box` through the package, with one credential for everything. */
+function link(fetchImpl: typeof globalThis.fetch, credential: string | undefined): SystemLink {
+    const auth = () => (credential === undefined ? undefined : {token: credential});
+    return new SystemLink({
+        baseUrl: 'http://box',
+        transport: fetchTransport(fetchImpl),
+        readCredential: auth,
+        writeCredential: auth,
+    });
 }
 
 function json(body: unknown, status = 200): Response {
@@ -54,11 +70,7 @@ function box(
         return Promise.resolve(typeof answer === 'function' ? answer(call) : answer);
     }) as unknown as typeof globalThis.fetch;
     return {
-        client: new HeatingGroupsClient({
-            baseUrl: 'http://box',
-            credential: () => credential ?? undefined,
-            fetch: fetchImpl,
-        }),
+        client: new HeatingGroupsClient({system: link(fetchImpl, credential ?? undefined)}),
         calls,
     };
 }
@@ -131,10 +143,10 @@ describe('the list', () => {
             'GET http://box/api/system/v1/groups/1',
             'GET http://box/api/system/v1/groups/2',
         ]);
-        // one credential for everything, as a bearer token
+        // one credential for everything, as a bearer token, and occulited's request header
         for (const call of calls) {
             expect(call.headers['authorization']).toBe('Bearer olt_0123456789abcdef0123456789abcdef');
-            expect(call.headers['accept']).toBe('application/json');
+            expect(call.headers['x-occulite-request']).toBe('1');
         }
     });
 
@@ -270,9 +282,7 @@ describe('the refusals', () => {
         await expect(client.list()).rejects.toMatchObject({kind: 'connection', code: 'hmipserver'});
 
         const off = new HeatingGroupsClient({
-            baseUrl: 'http://box',
-            credential: () => 'olt_x',
-            fetch: () => Promise.reject(new TypeError('fetch failed')),
+            system: link(() => Promise.reject(new TypeError('fetch failed')), 'olt_x'),
         });
         const error = await off.list().catch((thrown: unknown) => thrown);
         expect(error).toBeInstanceOf(BackendError);
@@ -287,7 +297,7 @@ describe('the refusals', () => {
         await expect(client.list()).rejects.toMatchObject({
             kind: 'connection',
             status: 502,
-            message: '502 Bad Gateway',
+            message: 'HTTP 502',
         });
     });
 
@@ -329,9 +339,7 @@ describe('the probe', () => {
         expect(await down.client.probe()).toEqual({available: false, reason: 'error', message: 'errorCode 42'});
 
         const off = new HeatingGroupsClient({
-            baseUrl: 'http://box',
-            credential: () => undefined,
-            fetch: () => Promise.reject(new TypeError('fetch failed')),
+            system: link(() => Promise.reject(new TypeError('fetch failed')), undefined),
         });
         expect(await off.probe()).toMatchObject({available: false, reason: 'error'});
     });

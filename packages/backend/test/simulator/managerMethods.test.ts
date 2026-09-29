@@ -160,7 +160,7 @@ describe.skipIf(!simulatorAvailable)('the interface methods of hm-simulator 1.3.
     /**
      * Task 73 seen from the interface process: every callback the simulator made to hmipserver's
      * listener - a pairing of fifty devices (a hundred descriptions), 500 events in multicall batches of 50 - was
-     * answered, and within 50 ms. (HmIP, because the XML-RPC client sends the batches side by side
+     * answered, in time. (HmIP, because the XML-RPC client sends the batches side by side
      * as hmipserver does; hm-simulator's BIN-RPC client holds all but one in a queue it retries every
      * 50 ms, which would be measured instead of the answer.)
      */
@@ -194,10 +194,9 @@ describe.skipIf(!simulatorAvailable)('the interface methods of hm-simulator 1.3.
         expect(log.filter((entry) => entry.method === 'system.multicall')).toHaveLength(10);
         expect(log.every((entry) => entry.error === null)).toBe(true);
         const times = log.map((entry) => (entry.answeredAt ?? Infinity) - entry.sentAt);
-        // the typical answer within 50 ms, every one within 250 (the full unit run loads the machine;
-        // a callback that waits on the UI takes seconds)
-        const sorted = [...times].sort((a, b) => a - b);
-        expect(sorted[Math.floor(sorted.length / 2)], `answer times in ms: ${times.join(' ')}`).toBeLessThan(50);
+        // the ten batches arrive side by side and are answered one after another, so the later ones
+        // carry the earlier ones' time (and the full unit run's load): every one within 250 ms. The
+        // per-answer bound of 50 ms is callbackTiming.test.ts's, which sends one call at a time.
         expect(Math.max(...times), `answer times in ms: ${times.join(' ')}`).toBeLessThan(250);
     });
 });

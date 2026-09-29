@@ -6,7 +6,7 @@ import App from '../App.svelte';
 import {browserLanguage} from '../lib/i18n/i18n.svelte.js';
 import type {StorageLike} from '../lib/stores/AppStore.svelte.js';
 import {createStores, type Stores} from '../lib/stores/Stores.svelte.js';
-import {DEMO_CONFIG, demoCallbackAddresses} from '../lib/transport/demoData.js';
+import {DEMO_CONFIG, DEMO_INTERFACE_STATES, demoCallbackAddresses} from '../lib/transport/demoData.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
 
 class MemoryStorage implements StorageLike {
@@ -570,6 +570,159 @@ describe('ConfigDialog', () => {
         await fireEvent.click(screen.getByTestId('config-save'));
         await waitFor(() => expect(transport.lastCall('config.set')).toBeDefined());
         expect('systemTrust' in (transport.lastCall('config.set')?.[0] ?? {})).toBe(false);
+    });
+
+    /** Task 72: an openccu-lite system as `connection.test` reports it. */
+    const LITE_FOUND = {
+        kind: 'openccu-lite' as const,
+        reachable: true,
+        url: 'https://lite.lan',
+        implementation: 'occulited 1.0.0-dev.32',
+        token: {state: 'none' as const, scopes: []},
+    };
+
+    it('tests the connection and says what answered (task 72)', async () => {
+        await open(transport);
+        expect(screen.queryByTestId('config-test-result')).toBeNull();
+        await fireEvent.click(screen.getByTestId('config-test'));
+        await waitFor(() => expect(screen.getByTestId('config-test-result')).toBeTruthy());
+        expect(screen.getByTestId('config-test-result').textContent).toBe(
+            'Eine CCU oder OpenCCU unter http://demo.local: XML-RPC mit Rückrufen',
+        );
+        expect(transport.lastCall('connection.test')?.[0]?.host).toBe('demo.local');
+        // a CCU calls back: the callback fields stay
+        expect(screen.getByTestId('config-callback-ip')).toBeTruthy();
+
+        transport.result('connection.test', LITE_FOUND);
+        await fireEvent.click(screen.getByTestId('config-test'));
+        await waitFor(() =>
+            expect(screen.getByTestId('config-test-result').textContent).toBe(
+                'openccu-lite (occulited 1.0.0-dev.32) unter https://lite.lan: lite-rpc, keine Rückrufe · kein API-Token: die Anwendung mit dem System koppeln',
+            ),
+        );
+        // nothing calls back from an openccu-lite system: the fields make way for one line
+        expect(screen.queryByTestId('config-callback-ip')).toBeNull();
+        expect(screen.getByTestId('config-callback-lite')).toBeTruthy();
+        expect(screen.getByText('Aus der Kopplung unten oder von der API-Token-Seite des Systems')).toBeTruthy();
+
+        // another host is another system: the answer is not about it
+        await fireEvent.input(screen.getByTestId('config-host'), {target: {value: 'other.lan'}});
+        await waitFor(() => expect(screen.queryByTestId('config-test-result')).toBeNull());
+        expect(screen.getByTestId('config-callback-ip')).toBeTruthy();
+
+        transport.result('connection.test', {
+            kind: 'unreachable',
+            reachable: false,
+            reason: 'refused',
+            url: 'http://other.lan',
+        });
+        await fireEvent.click(screen.getByTestId('config-test'));
+        await waitFor(() =>
+            expect(screen.getByTestId('config-test-result').textContent).toBe(
+                'Unter http://other.lan antwortet nichts (refused)',
+            ),
+        );
+        expect(screen.getByTestId('config-test-result').classList.contains('hmm-config-warning')).toBe(true);
+    });
+
+    it('shows the certificate a test found untrusted, with the same trust buttons (task 72, B-67)', async () => {
+        transport.result('connection.test', {
+            kind: 'unreachable',
+            reachable: true,
+            reason: 'certificate',
+            url: 'https://10.0.0.5',
+            certificate: PROBLEM,
+        });
+        await open(transport);
+        expect(screen.queryByTestId('config-certificate')).toBeNull();
+        await fireEvent.click(screen.getByTestId('config-test'));
+        await waitFor(() => expect(screen.getByTestId('config-certificate')).toBeTruthy());
+        expect(screen.getByTestId('config-test-result').textContent).toContain(
+            'unter Namen und Räume kann es vertraut werden',
+        );
+        await fireEvent.click(screen.getByTestId('config-trust-certificate'));
+        expect(screen.getByTestId('config-trusted-count').textContent).toContain('1');
+    });
+
+    it('pairs with the system: the code is shown large, the approval fills the token and trusts the certificate (task 72)', async () => {
+        await open(transport);
+        await fireEvent.click(screen.getByTestId('config-pair'));
+        await waitFor(() => expect(transport.lastCall('connection.pair')?.[0]?.host).toBe('demo.local'));
+        await waitFor(() => expect(screen.getByTestId('config-pairing-requesting')).toBeTruthy());
+
+        transport.emit('pairing.changed', {state: 'code', code: '123456'});
+        await waitFor(() => expect(screen.getByTestId('config-pairing-code').textContent).toBe('123456'));
+        expect(
+            screen.getByText('Auf der Statusseite des Systems bestätigen: dort wird derselbe Code angezeigt.'),
+        ).toBeTruthy();
+        expect(screen.getByTestId('config-pairing-cancel')).toBeTruthy();
+
+        transport.emit('pairing.changed', {
+            state: 'approved',
+            token: 'olt_new',
+            fingerprint256: 'AA:BB:CC',
+            scopes: ['rpc:admin', 'meta:write'],
+            name: 'homematic-manager on lab',
+        });
+        await waitFor(() => expect(screen.getByTestId('config-pairing-done')).toBeTruthy());
+        expect(screen.getByTestId<HTMLInputElement>('config-meta-token').value).toBe('olt_new');
+        expect(screen.getByTestId('config-trusted-count').textContent).toContain('1');
+        expect(screen.getByTestId('config-pair')).toBeTruthy();
+
+        await fireEvent.click(screen.getByTestId('config-save'));
+        await waitFor(() => expect(transport.lastCall('config.set')).toBeDefined());
+        const saved = transport.lastCall('config.set')?.[0];
+        expect(saved?.metaToken).toBe('olt_new');
+        expect(saved?.systemTrust).toEqual({certificates: ['AA:BB:CC']});
+    });
+
+    it('withdraws a pairing on Cancel, and says why one failed (task 72)', async () => {
+        await open(transport);
+        await fireEvent.click(screen.getByTestId('config-pair'));
+        await waitFor(() => expect(screen.getByTestId('config-pairing-cancel')).toBeTruthy());
+        await fireEvent.click(screen.getByTestId('config-pairing-cancel'));
+        await waitFor(() => expect(transport.lastCall('connection.pairCancel')).toBeDefined());
+        await waitFor(() => expect(screen.getByTestId('config-pair')).toBeTruthy());
+
+        await fireEvent.click(screen.getByTestId('config-pair'));
+        transport.emit('pairing.changed', {
+            state: 'failed',
+            message: 'nobody approved the request within five minutes',
+        });
+        await waitFor(() =>
+            expect(screen.getByTestId('config-pairing-failed').textContent).toBe(
+                'nobody approved the request within five minutes',
+            ),
+        );
+        // a pairing over plain HTTP binds no certificate: nothing is trusted
+        transport.emit('pairing.changed', {
+            state: 'approved',
+            token: 'olt_plain',
+            fingerprint256: '',
+            scopes: [],
+            name: 'x',
+        });
+        await waitFor(() => expect(screen.getByTestId<HTMLInputElement>('config-meta-token').value).toBe('olt_plain'));
+        expect(screen.queryByTestId('config-trusted')).toBeNull();
+    });
+
+    it('hides the callback fields while the connection runs through lite-rpc (task 72)', async () => {
+        transport.result(
+            'interfaces.list',
+            DEMO_INTERFACE_STATES.map((state) => ({...state, lite: true})),
+        );
+        await open(transport);
+        expect(screen.getByTestId('config-callback-lite')).toBeTruthy();
+        expect(screen.queryByTestId('config-callback-ip')).toBeNull();
+        // another host may be a CCU: the fields are back
+        await fireEvent.input(screen.getByTestId('config-host'), {target: {value: 'other.lan'}});
+        await waitFor(() => expect(screen.getByTestId('config-callback-ip')).toBeTruthy());
+    });
+
+    it('offers no pairing on the system itself, where the addon has its own credential (task 72)', async () => {
+        transport.result('config.get', {...DEMO_CONFIG, connection: {...DEMO_CONFIG.connection, local: true}});
+        await open(transport);
+        expect(screen.queryByTestId('config-pairing')).toBeNull();
     });
 
     it('offers no idle time where the host never goes idle, the Electron case (B-70)', async () => {

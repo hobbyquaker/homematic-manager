@@ -198,6 +198,14 @@ export class MockTransport implements Transport {
         this.result('config.discover', DEMO_CONFIG.discovered);
         this.result('config.clearCaches', null);
         this.respond('config.callbackAddresses', (host) => demoCallbackAddresses(host));
+        // task 72: the demo's host is a CCU; a test that wants an openccu-lite system answers this itself
+        this.respond('connection.test', (connection) => ({
+            kind: 'ccu' as const,
+            reachable: true,
+            url: `http://${connection.host}`,
+        }));
+        this.result('connection.pair', null);
+        this.result('connection.pairCancel', null);
         this.result('interfaces.list', DEMO_INTERFACE_STATES);
         this.result('interfaces.reconnect', null);
         this.result('rega.state', DEMO_REGA_STATE);

@@ -1061,6 +1061,59 @@ export const UI_MESSAGES: MessageCatalogue = {
     'This profile': {de: 'Dieses Profil', en: 'This profile'},
     'API token': {de: 'API-Token', en: 'API token'},
     'Only needed off the box': {de: 'Nur nötig, wenn nicht auf der Box', en: 'Only needed off the box'},
+    // task 72: the connection test and the pairing with an openccu-lite system
+    "From the pairing below, or the system's API tokens page": {
+        de: 'Aus der Kopplung unten oder von der API-Token-Seite des Systems',
+        en: "From the pairing below, or the system's API tokens page",
+    },
+    'Test connection': {de: 'Verbindung testen', en: 'Test connection'},
+    'Testing…': {de: 'Test läuft…', en: 'Testing…'},
+    'Nothing answers at {url} ({reason})': {
+        de: 'Unter {url} antwortet nichts ({reason})',
+        en: 'Nothing answers at {url} ({reason})',
+    },
+    'The certificate of {url} is not trusted ({code}); it can be trusted under Names and rooms': {
+        de: 'Dem Zertifikat von {url} wird nicht vertraut ({code}); unter Namen und Räume kann es vertraut werden',
+        en: 'The certificate of {url} is not trusted ({code}); it can be trusted under Names and rooms',
+    },
+    'A CCU or OpenCCU at {url}: XML-RPC with callbacks': {
+        de: 'Eine CCU oder OpenCCU unter {url}: XML-RPC mit Rückrufen',
+        en: 'A CCU or OpenCCU at {url}: XML-RPC with callbacks',
+    },
+    'openccu-lite ({implementation}) at {url}: lite-rpc, no callbacks': {
+        de: 'openccu-lite ({implementation}) unter {url}: lite-rpc, keine Rückrufe',
+        en: 'openccu-lite ({implementation}) at {url}: lite-rpc, no callbacks',
+    },
+    'no API token: pair the application with the system': {
+        de: 'kein API-Token: die Anwendung mit dem System koppeln',
+        en: 'no API token: pair the application with the system',
+    },
+    'the API token is refused': {de: 'das API-Token wird abgelehnt', en: 'the API token is refused'},
+    'the API token reads names only: pair for devices and values': {
+        de: 'das API-Token liest nur Namen: für Geräte und Werte koppeln',
+        en: 'the API token reads names only: pair for devices and values',
+    },
+    'the API token is accepted': {de: 'das API-Token wird akzeptiert', en: 'the API token is accepted'},
+    'None: an openccu-lite system does not call a remote client back; the events come from its stream.': {
+        de: 'Keiner: ein openccu-lite-System ruft einen entfernten Client nicht zurück; die Ereignisse kommen aus seinem Stream.',
+        en: 'None: an openccu-lite system does not call a remote client back; the events come from its stream.',
+    },
+    Pairing: {de: 'Kopplung', en: 'Pairing'},
+    'Pair with the system': {de: 'Mit dem System koppeln', en: 'Pair with the system'},
+    'Asking the system…': {de: 'Das System wird gefragt…', en: 'Asking the system…'},
+    "Approve it on the system's Status page: the same code is shown there.": {
+        de: 'Auf der Statusseite des Systems bestätigen: dort wird derselbe Code angezeigt.',
+        en: "Approve it on the system's Status page: the same code is shown there.",
+    },
+    'Paired: the token is in the field above. Save to connect.': {
+        de: 'Gekoppelt: das Token steht im Feld oben. Speichern verbindet.',
+        en: 'Paired: the token is in the field above. Save to connect.',
+    },
+    'Asks an openccu-lite system for an API token: a code appears here and on its Status page, where an administrator approves it. The token replaces the one above, and the certificate is trusted from then on.':
+        {
+            de: 'Fragt ein openccu-lite-System nach einem API-Token: ein Code erscheint hier und auf seiner Statusseite, wo ihn ein Administrator bestätigt. Das Token ersetzt das oben, und dem Zertifikat wird von da an vertraut.',
+            en: 'Asks an openccu-lite system for an API token: a code appears here and on its Status page, where an administrator approves it. The token replaces the one above, and the certificate is trusted from then on.',
+        },
     Reachable: {de: 'Erreichbar', en: 'Reachable'},
     Unreachable: {de: 'Nicht erreichbar', en: 'Unreachable'},
     'Read-only': {de: 'Nur lesen', en: 'Read-only'},

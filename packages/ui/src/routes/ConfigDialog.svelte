@@ -3,6 +3,7 @@
         CallbackAddressInfo,
         CallbackPins,
         ConnectionConfig,
+        ConnectionTest,
         LanguageChoice,
         MetaProviderChoice,
         UserDefinedInterface,
@@ -38,6 +39,12 @@
     let clearCaches = $state(false);
     let saving = $state(false);
     let discovering = $state(false);
+    /** Task 72: the last *Test connection* and the host it was about; shown while that host stays in the field. */
+    let testing = $state(false);
+    let tested = $state<ConnectionTest | undefined>(undefined);
+    let testedHost = $state('');
+    /** Task 72: a pairing was approved in this dialog and its token is in the draft. */
+    let paired = $state(false);
 
     /**
      * #149: "Save & Restart" only does something when there is something to save. The button used
@@ -127,6 +134,15 @@
         }
         if (!open) {
             draft = undefined;
+            // task 72: a pairing the user walked away from is withdrawn, and the test is about a
+            // draft that is gone
+            const running = stores.app.pairing?.state;
+            if (running === 'requesting' || running === 'code') {
+                void stores.app.cancelPairing();
+            }
+            tested = undefined;
+            testedHost = '';
+            paired = false;
         }
     });
 
@@ -264,13 +280,7 @@
             return;
         }
         saving = true;
-        const connection: ConnectionConfig = {
-            ...structuredClone($state.snapshot(draft)),
-            ...(useAuth && draft.auth ? {auth: {...draft.auth}} : {}),
-        };
-        if (!useAuth) {
-            delete (connection as {auth?: unknown}).auth;
-        }
+        const connection = draftConnection();
         // task 34: the answer to the one-time question, only while the switch is still on
         const ok = await stores.app.save(
             connection,
@@ -405,6 +415,96 @@
             draft.host.trim() === (stored?.host ?? '').trim(),
     );
 
+    /**
+     * Task 72: the host is an openccu-lite system reached from off it - the last test said so, or the
+     * running connection goes through its lite-rpc and the host is unchanged. Nothing calls back
+     * then, so the callback fields mean nothing, and the token is what pairing gives.
+     */
+    const liteHost = $derived.by(() => {
+        if (draft === undefined || draft.local === true) {
+            return false;
+        }
+        const host = draft.host.trim();
+        if (host === '') {
+            return false;
+        }
+        if (tested !== undefined && testedHost === host) {
+            return tested.kind === 'openccu-lite';
+        }
+        return stores.interfaces.states.some((state) => state.lite === true) && host === (stored?.host ?? '').trim();
+    });
+    /** Task 72: the test's answer in one line, while it is about the host in the field. */
+    const testLine = $derived.by(() => {
+        if (draft === undefined || tested === undefined || testedHost !== draft.host.trim()) {
+            return '';
+        }
+        if (tested.kind === 'unreachable') {
+            return tested.reason === 'certificate' && tested.certificate !== undefined
+                ? t('The certificate of {url} is not trusted ({code}); it can be trusted under Names and rooms', {
+                      url: tested.certificate.url,
+                      code: tested.certificate.code,
+                  })
+                : t('Nothing answers at {url} ({reason})', {url: tested.url, reason: tested.reason ?? 'error'});
+        }
+        if (tested.kind === 'ccu') {
+            return t('A CCU or OpenCCU at {url}: XML-RPC with callbacks', {url: tested.url});
+        }
+        const token = {
+            none: () => t('no API token: pair the application with the system'),
+            refused: () => t('the API token is refused'),
+            'names-only': () => t('the API token reads names only: pair for devices and values'),
+            full: () => t('the API token is accepted'),
+        }[tested.token?.state ?? 'none']();
+        return `${t('openccu-lite ({implementation}) at {url}: lite-rpc, no callbacks', {
+            implementation: tested.implementation ?? 'occulited',
+            url: tested.url,
+        })} \u00b7 ${token}`;
+    });
+    const pairing = $derived(stores.app.pairing);
+    /** Task 72: an approval lands in the draft once - the token, and the certificate the code was bound to. */
+    $effect(() => {
+        if (pairing?.state === 'approved' && draft !== undefined) {
+            draft.metaToken = pairing.token;
+            if (pairing.fingerprint256 !== '') {
+                trust('certificates', pairing.fingerprint256);
+            }
+            paired = true;
+            stores.app.pairing = undefined;
+        }
+    });
+
+    /** Task 72: the draft as `config.set` would get it - what the test and the pairing are about too. */
+    function draftConnection(): ConnectionConfig {
+        const connection: ConnectionConfig = {
+            ...structuredClone($state.snapshot(draft as ConnectionConfig)),
+            ...(useAuth && draft?.auth ? {auth: {...draft.auth}} : {}),
+        };
+        if (!useAuth) {
+            delete (connection as {auth?: unknown}).auth;
+        }
+        return connection;
+    }
+
+    async function testConnection(): Promise<void> {
+        if (!draft) {
+            return;
+        }
+        testing = true;
+        const host = draft.host.trim();
+        const found = await stores.app.testConnection(draftConnection());
+        tested = found;
+        testedHost = host;
+        testing = false;
+    }
+
+    async function pair(): Promise<void> {
+        if (!draft) {
+            return;
+        }
+        paired = false;
+        await stores.app.pair(draftConnection());
+    }
+
     /** #54: the same for the ReGa inbox, which only means anything while ReGa is on (D-2). */
     function setAutoConfirmInbox(value: boolean): void {
         if (draft) {
@@ -444,7 +544,10 @@
      * the profile trusts it (or its CA) whether this is an openccu-lite system is not known; the
      * choice goes into the draft and takes effect with "Save & Restart", like every other setting.
      */
-    const certificateProblem = $derived(metaState?.certificate);
+    const certificateProblem = $derived(
+        metaState?.certificate ??
+            (tested !== undefined && testedHost === (draft?.host.trim() ?? '') ? tested.certificate : undefined),
+    );
     const trustedCount = $derived(
         (draft?.systemTrust?.certificates?.length ?? 0) + (draft?.systemTrust?.cas?.length ?? 0),
     );
@@ -532,6 +635,31 @@
                                 </span>
                             </label>
 
+                            <!-- task 72: what is at that host, before anything is saved -->
+                            <div class="hmm-config-row">
+                                <span class="hmm-config-label">{t('Test connection')}</span>
+                                <span class="hmm-config-field">
+                                    <span class="hmm-config-buttons">
+                                        <button
+                                            type="button"
+                                            class="hmm-button"
+                                            disabled={testing || draft.host.trim() === ''}
+                                            data-testid="config-test"
+                                            onclick={() => void testConnection()}
+                                            >{testing ? t('Testing…') : t('Test connection')}</button
+                                        >
+                                    </span>
+                                    {#if testLine !== ''}
+                                        <small
+                                            class={tested?.reachable === false || tested?.reason === 'certificate'
+                                                ? 'hmm-config-warning'
+                                                : 'hmm-config-help'}
+                                            data-testid="config-test-result">{testLine}</small
+                                        >
+                                    {/if}
+                                </span>
+                            </div>
+
                             <div class="hmm-config-row">
                                 <span class="hmm-config-label">{t('Discovered CCUs')}</span>
                                 <span class="hmm-config-field">
@@ -615,106 +743,115 @@
 
                     <section class="hmm-config-section">
                         <h3 class="hmm-config-title">{t('Callback')}</h3>
-                        <div class="hmm-config-grid">
-                            <label class="hmm-config-row">
-                                <span class="hmm-config-label">{t('Homematic Manager Address')}</span>
-                                <span class="hmm-config-field">
-                                    <select
-                                        class="hmm-select hmm-config-wide"
-                                        bind:value={draft.callback.ip}
-                                        disabled={pinned('ip')}
-                                        title={t(
-                                            "Automatic takes this machine's address in the CCU's network, else the one on the route to the CCU",
-                                        )}
-                                        data-testid="config-callback-ip"
-                                    >
-                                        <!-- B-53: the automatic choice first, then every address with its marks -->
-                                        <option value="" data-testid="config-callback-ip-auto">{autoLabel}</option>
-                                        {#each addressChoices as choice (choice.address)}
-                                            <option value={choice.address}>{choice.label}</option>
-                                        {/each}
-                                        <!--
+                        {#if liteHost}
+                            <!-- task 72: an openccu-lite system reached from off it never calls back -->
+                            <small class="hmm-config-help" data-testid="config-callback-lite"
+                                >{t(
+                                    'None: an openccu-lite system does not call a remote client back; the events come from its stream.',
+                                )}</small
+                            >
+                        {:else}
+                            <div class="hmm-config-grid">
+                                <label class="hmm-config-row">
+                                    <span class="hmm-config-label">{t('Homematic Manager Address')}</span>
+                                    <span class="hmm-config-field">
+                                        <select
+                                            class="hmm-select hmm-config-wide"
+                                            bind:value={draft.callback.ip}
+                                            disabled={pinned('ip')}
+                                            title={t(
+                                                "Automatic takes this machine's address in the CCU's network, else the one on the route to the CCU",
+                                            )}
+                                            data-testid="config-callback-ip"
+                                        >
+                                            <!-- B-53: the automatic choice first, then every address with its marks -->
+                                            <option value="" data-testid="config-callback-ip-auto">{autoLabel}</option>
+                                            {#each addressChoices as choice (choice.address)}
+                                                <option value={choice.address}>{choice.label}</option>
+                                            {/each}
+                                            <!--
                                             Task 38: an address that is not one of this machine's - the
                                             Docker host's, seen from a container - is still what is set,
                                             so it is shown rather than an empty "Select".
                                         -->
-                                        {#if draft.callback.ip !== '' && !addressChoices.some((choice) => choice.address === draft?.callback.ip)}
-                                            <option value={draft.callback.ip}>{draft.callback.ip}</option>
-                                        {/if}
-                                    </select>
-                                    <small class="hmm-config-help" data-testid="config-callback-ip-hint"
-                                        >{pinned('ip')
-                                            ? pinHint('ip')
-                                            : t('The address the interface processes call back to')}</small
-                                    >
-                                    {#if callbackWarning !== ''}
-                                        <span
-                                            class="hmm-config-warning"
-                                            role="alert"
-                                            data-testid="config-callback-ip-warning"
+                                            {#if draft.callback.ip !== '' && !addressChoices.some((choice) => choice.address === draft?.callback.ip)}
+                                                <option value={draft.callback.ip}>{draft.callback.ip}</option>
+                                            {/if}
+                                        </select>
+                                        <small class="hmm-config-help" data-testid="config-callback-ip-hint"
+                                            >{pinned('ip')
+                                                ? pinHint('ip')
+                                                : t('The address the interface processes call back to')}</small
                                         >
-                                            <span>{callbackWarning}</span>
-                                            <button
-                                                type="button"
-                                                class="hmm-button"
-                                                data-testid="config-callback-ip-use-auto"
-                                                onclick={() => {
-                                                    if (draft) {
-                                                        draft.callback.ip = '';
-                                                    }
-                                                }}>{t('Use automatic')}</button
+                                        {#if callbackWarning !== ''}
+                                            <span
+                                                class="hmm-config-warning"
+                                                role="alert"
+                                                data-testid="config-callback-ip-warning"
                                             >
-                                        </span>
-                                    {/if}
-                                </span>
-                            </label>
+                                                <span>{callbackWarning}</span>
+                                                <button
+                                                    type="button"
+                                                    class="hmm-button"
+                                                    data-testid="config-callback-ip-use-auto"
+                                                    onclick={() => {
+                                                        if (draft) {
+                                                            draft.callback.ip = '';
+                                                        }
+                                                    }}>{t('Use automatic')}</button
+                                                >
+                                            </span>
+                                        {/if}
+                                    </span>
+                                </label>
 
-                            <label class="hmm-config-row">
-                                <span class="hmm-config-label">{t('Callback XML-RPC port')}</span>
-                                <span class="hmm-config-field">
-                                    <input
-                                        class="hmm-input hmm-config-narrow"
-                                        type="number"
-                                        min="0"
-                                        bind:value={draft.callback.xmlrpcPort}
-                                        disabled={pinned('xmlrpcPort')}
-                                        data-testid="config-callback-xmlrpc-port"
-                                    />
-                                    <small class="hmm-config-help" data-testid="config-callback-xmlrpc-port-hint"
-                                        >{pinned('xmlrpcPort')
-                                            ? pinHint('xmlrpcPort')
-                                            : callbackDefaults && callbackDefaults.xmlrpc !== 0
-                                              ? t('0 uses port {port}, or a free one when it is taken', {
-                                                    port: String(callbackDefaults.xmlrpc),
-                                                })
-                                              : t('0 picks a free port')}</small
-                                    >
-                                </span>
-                            </label>
+                                <label class="hmm-config-row">
+                                    <span class="hmm-config-label">{t('Callback XML-RPC port')}</span>
+                                    <span class="hmm-config-field">
+                                        <input
+                                            class="hmm-input hmm-config-narrow"
+                                            type="number"
+                                            min="0"
+                                            bind:value={draft.callback.xmlrpcPort}
+                                            disabled={pinned('xmlrpcPort')}
+                                            data-testid="config-callback-xmlrpc-port"
+                                        />
+                                        <small class="hmm-config-help" data-testid="config-callback-xmlrpc-port-hint"
+                                            >{pinned('xmlrpcPort')
+                                                ? pinHint('xmlrpcPort')
+                                                : callbackDefaults && callbackDefaults.xmlrpc !== 0
+                                                  ? t('0 uses port {port}, or a free one when it is taken', {
+                                                        port: String(callbackDefaults.xmlrpc),
+                                                    })
+                                                  : t('0 picks a free port')}</small
+                                        >
+                                    </span>
+                                </label>
 
-                            <label class="hmm-config-row">
-                                <span class="hmm-config-label">{t('Callback BIN-RPC port')}</span>
-                                <span class="hmm-config-field">
-                                    <input
-                                        class="hmm-input hmm-config-narrow"
-                                        type="number"
-                                        min="0"
-                                        bind:value={draft.callback.binrpcPort}
-                                        disabled={pinned('binrpcPort')}
-                                        data-testid="config-callback-binrpc-port"
-                                    />
-                                    <small class="hmm-config-help" data-testid="config-callback-binrpc-port-hint"
-                                        >{pinned('binrpcPort')
-                                            ? pinHint('binrpcPort')
-                                            : callbackDefaults && callbackDefaults.binrpc !== 0
-                                              ? t('0 uses port {port}, or a free one when it is taken', {
-                                                    port: String(callbackDefaults.binrpc),
-                                                })
-                                              : t('0 picks a free port')}</small
-                                    >
-                                </span>
-                            </label>
-                        </div>
+                                <label class="hmm-config-row">
+                                    <span class="hmm-config-label">{t('Callback BIN-RPC port')}</span>
+                                    <span class="hmm-config-field">
+                                        <input
+                                            class="hmm-input hmm-config-narrow"
+                                            type="number"
+                                            min="0"
+                                            bind:value={draft.callback.binrpcPort}
+                                            disabled={pinned('binrpcPort')}
+                                            data-testid="config-callback-binrpc-port"
+                                        />
+                                        <small class="hmm-config-help" data-testid="config-callback-binrpc-port-hint"
+                                            >{pinned('binrpcPort')
+                                                ? pinHint('binrpcPort')
+                                                : callbackDefaults && callbackDefaults.binrpc !== 0
+                                                  ? t('0 uses port {port}, or a free one when it is taken', {
+                                                        port: String(callbackDefaults.binrpc),
+                                                    })
+                                                  : t('0 picks a free port')}</small
+                                        >
+                                    </span>
+                                </label>
+                            </div>
+                        {/if}
                     </section>
 
                     <!--
@@ -836,9 +973,78 @@
                                         data-testid="config-meta-token"
                                         oninput={(event) => setMetaToken(event.currentTarget.value)}
                                     />
-                                    <small class="hmm-config-help">{t('Only needed off the box')}</small>
+                                    <small class="hmm-config-help"
+                                        >{liteHost
+                                            ? t("From the pairing below, or the system's API tokens page")
+                                            : t('Only needed off the box')}</small
+                                    >
                                 </span>
                             </label>
+
+                            {#if draft.local !== true}
+                                <!--
+                                    task 72 (openccu-lite task 219): the token by pairing. The code is
+                                    shown here and on the system's Status page; an administrator
+                                    approves it there, and the token lands in the field above.
+                                -->
+                                <div class="hmm-config-row" data-testid="config-pairing">
+                                    <span class="hmm-config-label">{t('Pairing')}</span>
+                                    <span class="hmm-config-field">
+                                        {#if pairing?.state === 'requesting' || pairing?.state === 'code'}
+                                            {#if pairing.state === 'code'}
+                                                <span class="hmm-config-code" data-testid="config-pairing-code"
+                                                    >{pairing.code}</span
+                                                >
+                                                <small class="hmm-config-help"
+                                                    >{t(
+                                                        "Approve it on the system's Status page: the same code is shown there.",
+                                                    )}</small
+                                                >
+                                            {:else}
+                                                <small class="hmm-config-help" data-testid="config-pairing-requesting"
+                                                    >{t('Asking the system…')}</small
+                                                >
+                                            {/if}
+                                            <span class="hmm-config-buttons">
+                                                <button
+                                                    type="button"
+                                                    class="hmm-button"
+                                                    data-testid="config-pairing-cancel"
+                                                    onclick={() => void stores.app.cancelPairing()}
+                                                    >{t('Cancel')}</button
+                                                >
+                                            </span>
+                                        {:else}
+                                            <span class="hmm-config-buttons">
+                                                <button
+                                                    type="button"
+                                                    class="hmm-button"
+                                                    disabled={draft.host.trim() === ''}
+                                                    data-testid="config-pair"
+                                                    onclick={() => void pair()}>{t('Pair with the system')}</button
+                                                >
+                                            </span>
+                                            {#if paired}
+                                                <small class="hmm-config-note" data-testid="config-pairing-done"
+                                                    >{t(
+                                                        'Paired: the token is in the field above. Save to connect.',
+                                                    )}</small
+                                                >
+                                            {:else if pairing?.state === 'failed'}
+                                                <small class="hmm-config-warning" data-testid="config-pairing-failed"
+                                                    >{pairing.message}</small
+                                                >
+                                            {:else}
+                                                <small class="hmm-config-help"
+                                                    >{t(
+                                                        'Asks an openccu-lite system for an API token: a code appears here and on its Status page, where an administrator approves it. The token replaces the one above, and the certificate is trusted from then on.',
+                                                    )}</small
+                                                >
+                                            {/if}
+                                        {/if}
+                                    </span>
+                                </div>
+                            {/if}
                         </div>
                     </section>
                 </div>
@@ -1352,6 +1558,15 @@
 
     .hmm-config-certificate {
         overflow-wrap: anywhere;
+    }
+
+    /* Task 72: the pairing code, large enough to compare with the system's Status page across the room. */
+    .hmm-config-code {
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.2;
     }
 
     /* Task 34: what "Save & Restart" will also do, in the accent so it is not read past as help. */

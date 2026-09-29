@@ -3,8 +3,10 @@ import type {
     CallbackAddressInfo,
     ConfigSetOptions,
     ConnectionConfig,
+    ConnectionTest,
     Language,
     LanguageChoice,
+    PairingState,
     SessionInfo,
     Transport,
 } from '@homematic-manager/core';
@@ -99,6 +101,11 @@ export class AppStore {
      */
     callbackAddresses = $state<CallbackAddressInfo | undefined>(undefined);
     #callbackAsk = 0;
+    /**
+     * Task 72: where the pairing with an openccu-lite system stands - `connection.pair` started it,
+     * the backend pushes every step. `undefined` while none runs or after the dialog took the result.
+     */
+    pairing = $state<PairingState | undefined>(undefined);
     selectedInterface = $state('');
     tab = $state<TabId>(DEFAULT_TAB);
     /**
@@ -178,6 +185,9 @@ export class AppStore {
             }),
             transport.on('config.changed', (config) => {
                 this.config = config;
+            }),
+            transport.on('pairing.changed', (state) => {
+                this.pairing = state;
             }),
             (options.onHashChange ?? defaultHashSubscribe)(() => {
                 const previous = this.selectedInterface;
@@ -371,6 +381,40 @@ export class AppStore {
         }
         const next = $state.snapshot(connection);
         return this.save({...next, callback: {...next.callback, ip: ''}});
+    }
+
+    /**
+     * Task 72: the settings dialog's *Test connection* - what is at the draft's host, and what its
+     * token is worth there. `undefined` when the backend could not even try (no host), said as a notice.
+     */
+    async testConnection(connection: ConnectionConfig): Promise<ConnectionTest | undefined> {
+        try {
+            return await this.#transport.request('connection.test', connection);
+        } catch (error) {
+            this.#notices.fromError(error, 'connection.test');
+            return undefined;
+        }
+    }
+
+    /** Task 72: starts the pairing with the openccu-lite system at the draft's host; the steps land in `pairing`. */
+    async pair(connection: ConnectionConfig): Promise<void> {
+        this.pairing = {state: 'requesting'};
+        try {
+            await this.#transport.request('connection.pair', connection);
+        } catch (error) {
+            this.pairing = {state: 'failed', message: error instanceof Error ? error.message : String(error)};
+            this.#notices.fromError(error, 'connection.pair');
+        }
+    }
+
+    /** Task 72: withdraws the running pairing request. */
+    async cancelPairing(): Promise<void> {
+        try {
+            await this.#transport.request('connection.pairCancel');
+        } catch (error) {
+            this.#notices.fromError(error, 'connection.pairCancel');
+        }
+        this.pairing = undefined;
     }
 
     async discover(): Promise<void> {

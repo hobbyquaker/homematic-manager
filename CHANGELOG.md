@@ -6,7 +6,7 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
-## [Unreleased]
+## [3.0.0-beta.30] — 2026-09-29
 
 ### Changed
 
@@ -19,6 +19,9 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   in `/VERSION`. Now a `LITE=` line there, or openccu-lite's system service, is what counts - the rule every addon for
   openccu-lite follows. Today's images carry both lines, so nothing changes on them; an image or system with only one
   of the two markers no longer puts the addon on the CCU path (log file instead of the journal, the CCU's login).
+- **Install with a plain `npm install -g homematic-manager`.** The README of the npm package and the install and
+  migration guides still said `@next`; every 3.0 version is published as `latest`, and a release no longer sets the
+  `next` tag.
 
 ## [3.0.0-beta.29] — 2026-09-28
 
@@ -1503,6 +1506,7 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
+[3.0.0-beta.30]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.30
 [3.0.0-beta.29]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.29
 [3.0.0-beta.28]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.28
 [3.0.0-beta.27]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.27

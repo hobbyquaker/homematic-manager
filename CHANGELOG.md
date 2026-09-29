@@ -6,7 +6,7 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
-## [Unreleased]
+## [3.0.0-beta.32] — 2026-09-29
 
 ### Changed
 
@@ -15,7 +15,8 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   callback was answered, so a busy tab made the interface process wait - and hmipserver logs a stack trace every
   second for a listener that keeps it waiting. The answer goes out first now, and the tabs get the events right after,
   in the same order. A test drives both callback servers with a burst of 500 events and a `newDevices` of 100 devices
-  while twenty tabs are connected, one of which never reads, and every answer arrives within 50 ms. (task 73)
+  while twenty tabs are connected, one of which never reads: the answers take a few milliseconds, and each tab still
+  sees an event its own request caused before the answer to that request. (task 73)
 - **Names, rooms and heating groups on openccu-lite go through occulite-client.** The app talked to an openccu-lite
   system's metadata and system APIs with a client of its own - its own HTTP requests, its own reader of the change
   stream, its own certificate check. It now uses [occulite-client](https://www.npmjs.com/package/occulite-client),
@@ -1542,6 +1543,7 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
+[3.0.0-beta.32]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.32
 [3.0.0-beta.31]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.31
 [3.0.0-beta.30]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.30
 [3.0.0-beta.29]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.29

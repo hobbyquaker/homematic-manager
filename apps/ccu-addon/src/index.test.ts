@@ -104,9 +104,14 @@ describe('rc.d/hmm logs to the journal on openccu-lite (task 41)', () => {
     const elseAt = start.indexOf('\n    else\n', journalAt);
     const fileAt = start.indexOf('RUN="exec $NODE"', journalAt);
 
-    it('chooses the journal only on VARIANT=lite, and only where systemd-cat is', () => {
+    it('chooses the journal only on openccu-lite, and only where systemd-cat is', () => {
         const target = /\nLogTarget\(\) \{\n([\s\S]*?)\n\}\n/.exec(rc)?.[1] ?? '';
-        expect(target).toContain("grep -q '^VARIANT=lite$' /VERSION");
+        expect(target).toContain('if IsOpenccuLite && command -v systemd-cat');
+        // task 79: a LITE= line in /VERSION or occulited, never VARIANT=lite alone
+        const isLite = /\nIsOpenccuLite\(\) \{\n([\s\S]*?)\n\}\n/.exec(rc)?.[1] ?? '';
+        expect(isLite).toContain("grep -q '^LITE=' $VERSION_FILE 2>/dev/null || [ -x $OCCULITED ]");
+        expect(rc).toContain('\nVERSION_FILE=/VERSION\nOCCULITED=/usr/bin/occulited\n');
+        expect(rc).not.toContain('VARIANT=lite$');
         expect(target).toContain('command -v systemd-cat');
         expect(start).toContain('LOG_TARGET="$(LogTarget)"');
     });

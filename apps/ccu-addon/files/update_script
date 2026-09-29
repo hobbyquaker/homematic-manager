@@ -46,10 +46,13 @@ if [ -n "$PKG_ARCH" ] && [ "$PKG_ARCH" != "$MACHINE" ]; then
     exit 13
 fi
 
-# openccu-lite (its /VERSION says VARIANT=lite; the CCU3's install chroot has no /VERSION and is a
-# CCU). Read once here, like rc.d/hmm reads it at every start.
+# openccu-lite: a LITE= line in /VERSION or its system service occulited (task 79, the CCU addon
+# handbook's rule; the CCU3's install chroot has neither and is a CCU). Read once here, like
+# rc.d/hmm's IsOpenccuLite asks at every start.
 LITE=0
-grep -q '^VARIANT=lite$' /VERSION 2>/dev/null && LITE=1
+if grep -q '^LITE=' /VERSION 2>/dev/null || [ -x /usr/bin/occulited ]; then
+    LITE=1
+fi
 
 mkdir -p $ADDONS_DIR $CONF_DIR/rc.d $CONF_DIR/addons/www $STATE_DIR
 [ "$LITE" = 1 ] || mkdir -p $LIGHTTPD_DIR

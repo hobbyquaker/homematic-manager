@@ -78,7 +78,7 @@ export async function startOcculite(): Promise<OcculiteBox> {
     // the firmware's own file, with the extra line openccu-lite identifies itself by (their D-17)
     await fs.writeFile(
         path.join(root, 'VERSION'),
-        'VERSION=3.89.8.20260719\nPRODUCT=ova\nPLATFORM=ova\nVARIANT=lite\n',
+        'VERSION=3.89.8.20260719\nPRODUCT=ova\nPLATFORM=ova\nVARIANT=lite\nLITE=1.0.0-dev.28\n',
     );
 
     const log: string[] = [];

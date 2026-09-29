@@ -76,8 +76,10 @@ answers that save a round trip:
 Install it from the box's catalogue (it is listed there as `hmm`) or upload the package for the
 box's architecture on the addon page. The `update_script` is the same one a CCU runs; nothing in
 the package is openccu-lite-specific. What the addon does differently is decided **at every start**
-(the Config-Url at every install and every `rc.d/hmm info`) from the firmware's own `/VERSION`, which
-carries an extra `VARIANT=lite` line:
+(the Config-Url at every install and every `rc.d/hmm info`) from the firmware's own markers: a
+`LITE=` line in `/VERSION` (written next to `VARIANT=lite`), or openccu-lite's system service
+`/usr/bin/occulited`. A CCU3 and OpenCCU have neither; since 3.0.0-beta.30 `VARIANT=lite` alone no
+longer counts (the rule every addon for openccu-lite follows):
 
 - **the login**: `--auth-mode occulite`. openccu-lite's shell opens the addon with the user's
   session on the URL (`?sid=@xxxxxxxxxx@`, the CCU convention), the addon checks that session

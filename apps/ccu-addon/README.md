@@ -136,7 +136,7 @@ with the id as Bearer (5 s timeout), and the answer has to say `"authenticated":
 very `sid` — an API token (authenticated, no `sid`), another session, a non-200 or a box that cannot
 be asked all mean *refused*. Only an id of one of the two shapes of occulited's session ids (26
 characters of base32, or ten alphanumerics on images from before their task 125) goes into a
-header. The header is read on openccu-lite only (`VARIANT=lite` in `/VERSION`, the rule of
+header. The header is read on openccu-lite only (a `LITE=` line in `/VERSION` or occulited, the rule of
 `rc.d/hmm`): a CCU's lighttpd passes a client's header straight through, so there it counts for
 nothing. The order is header, then `?sid=` through ReGa (on openccu-lite the `tclrega.so` shim
 answers the session's legacy alias), then the token cookie; a header the box does not confirm falls

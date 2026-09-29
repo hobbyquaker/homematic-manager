@@ -269,10 +269,11 @@ dex "printf '%s\n' '\$HTTP[\"url\"] =~ \"^/api/auth/\" {' '    proxy.server = (\
     > /usr/local/etc/config/lighttpd/zz-occulite-stub.conf && /etc/init.d/S50lighttpd reload" >/dev/null
 sleep 1
 lighttpd_actions >/dev/null
+# /VERSION with the LITE= line alone (task 79): the image build's marker is enough by itself
 dex 'cp /usr/local/addons/hmm/etc/hmm.env /tmp/hmm.env.t41 \
     && sed -i "s/^#*HMM_AUTH_MODE=.*/HMM_AUTH_MODE=token/" /usr/local/addons/hmm/etc/hmm.env \
     && cp /opt/systemd-cat-stub /usr/bin/systemd-cat && chmod 755 /usr/bin/systemd-cat \
-    && printf "VERSION=3.89.8.20260719\nPRODUCT=ova\nPLATFORM=ova\nVARIANT=lite\n" > /VERSION \
+    && printf "VERSION=3.89.8.20260719\nPRODUCT=ova\nPLATFORM=ova\nLITE=1.0.0-dev.28\n" > /VERSION \
     && echo old > /usr/local/addons/hmm/var/hmm.log.1' >/dev/null
 # task 43: and the CCU's /var/log/hmm.log out of the way, to see that nothing writes it here either
 dex '/usr/local/etc/config/rc.d/hmm stop; rm -f /var/log/hmm.log /var/log/hmm.log.1' >/dev/null
@@ -346,7 +347,7 @@ lite_restart() {
 }
 check "the backend runs in occulite mode: its start line says so" "login: the session openccu-lite hands over is checked against" \
     "$(dex 'cat /tmp/journal-addon-hmm.log')"
-check "the rc.d script said which mode it chose" "openccu-lite detected (VARIANT=lite): --auth-mode occulite" "$(syslog)"
+check "the rc.d script said which mode it chose" "openccu-lite detected: --auth-mode occulite" "$(syslog)"
 check "and that the CCU's line is not read here" "HMM_AUTH_MODE=token in etc/hmm.env is the CCU's setting and is not read on openccu-lite" "$(syslog)"
 check "the settings page shows occulite" "current: <b>occulite</b>" "$(dex "curl -s '$LITE_SETTINGS'")"
 check "and names the CCU's line" "HMM_AUTH_MODE=token is in the file as well" "$(dex "curl -s '$LITE_SETTINGS'")"
@@ -358,7 +359,7 @@ check "as HMM_AUTH_MODE_LITE=token in etc/hmm.env" "HMM_AUTH_MODE_LITE=token" \
 check "next to the CCU's line, which stays" "HMM_AUTH_MODE=token" "$(dex 'grep "^HMM_AUTH_MODE=" /usr/local/addons/hmm/etc/hmm.env')"
 check "and the service runs" "running" "$(dex '/usr/local/etc/config/rc.d/hmm status')"
 lite_restart
-check "the backend runs in token mode now" "openccu-lite detected (VARIANT=lite): --auth-mode token" "$(syslog)"
+check "the backend runs in token mode now" "openccu-lite detected: --auth-mode token" "$(syslog)"
 absent "without the occulite login line" "login: the session openccu-lite hands over" "$(dex 'cat /tmp/journal-addon-hmm.log')"
 check "the settings page shows token" "current: <b>token</b>" "$(dex "curl -s '$LITE_SETTINGS'")"
 # a value of the lite line that is no lite mode, by hand: occulite, and the syslog says why

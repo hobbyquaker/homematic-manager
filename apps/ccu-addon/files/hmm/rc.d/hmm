@@ -44,6 +44,9 @@ LOG_MAX=1048576
 # writes a log file onto the SD card. The backend's output goes to journald under the unit's own
 # identifier, so `journalctl -t addon-hmm`, `journalctl -u addon-hmm` and the box's Log page find it.
 JOURNAL_TAG=addon-$ADDON
+# openccu-lite's two markers, read by IsOpenccuLite (variables so the test can point them elsewhere)
+VERSION_FILE=/VERSION
+OCCULITED=/usr/bin/occulited
 
 [ -f $ADDON_DIR/versions ] && . $ADDON_DIR/versions
 
@@ -147,8 +150,16 @@ LiteRule() {
     fi
 }
 
+# D-40, task 79: is this firmware openccu-lite? A `LITE=` line in /VERSION (the image build writes it
+# next to `VARIANT=lite`), or its system service occulited; a CCU3 and OpenCCU have neither. The rule
+# of the CCU addon handbook, the same as update_script and lib/session.tcl here and the other addons'.
+# Asked at every call, never remembered: the same /usr/local may move between the firmwares.
+IsOpenccuLite() {
+    grep -q '^LITE=' $VERSION_FILE 2>/dev/null || [ -x $OCCULITED ]
+}
+
 # Task 41: where the backend's output goes - "journal" on openccu-lite, a file everywhere else.
-# Decided at every start from `/VERSION`, like the auth mode below and for the same reason: the same
+# Decided at every start by IsOpenccuLite, like the auth mode below and for the same reason: the same
 # /usr/local may move between the firmwares. The output cannot simply be left to the unit: `-b` points
 # the backend's stdio at /dev/null, and a restart from a CGI would hand it the CGI's pipe. systemd-cat
 # connects stdout and stderr to journald and execs the backend, so the recorded pid stays node's own.
@@ -156,7 +167,7 @@ LiteRule() {
 # Task 43: the file is "varlog" (/var/log/hmm.log) unless etc/hmm.env says HMM_ADDON_LOG=addon; any
 # other value is the default. Called after hmm.env was sourced.
 LogTarget() {
-    if grep -q '^VARIANT=lite$' /VERSION 2>/dev/null && command -v systemd-cat >/dev/null 2>&1; then
+    if IsOpenccuLite && command -v systemd-cat >/dev/null 2>&1; then
         echo journal
     elif [ "$HMM_ADDON_LOG" = addon ]; then
         echo addon
@@ -186,7 +197,7 @@ NodeFlags() {
 }
 
 # D-40, B-22: the auth mode on openccu-lite, printed. Called after hmm.env was sourced, only on a box
-# whose /VERSION says VARIANT=lite.
+# that IsOpenccuLite says is openccu-lite.
 #
 # HMM_AUTH_MODE is the CCU's setting and is not read here: `token` is what every install from the
 # CCU days wrote into hmm.env (task 13's default.env, the CCU's settings page), and the same
@@ -272,13 +283,13 @@ Start() {
     # D-40: openccu-lite has no ReGaHSS and its own users, so `rega` cannot work there and the
     # box's own hand-over can: its shell opens an addon page with the user's session on the URL and
     # this host checks that session against the box. Decided **at every start** from the firmware's
-    # own `/VERSION` (their D-17 keeps PRODUCT and PLATFORM and adds `VARIANT=lite`), never written
+    # own markers (IsOpenccuLite: a `LITE=` line in `/VERSION`, or occulited; task 79), never written
     # into hmm.env - the same /usr/local may be moved from openccu-lite to OpenCCU and back, and a
     # remembered answer would be wrong on the other side. On a CCU, HMM_AUTH_MODE as the user set it
     # (unset: the host's default, token); on openccu-lite, HMM_AUTH_MODE_LITE (B-22, LiteAuthMode).
-    if grep -q '^VARIANT=lite$' /VERSION 2>/dev/null; then
+    if IsOpenccuLite; then
         HMM_AUTH_MODE="$(LiteAuthMode)"
-        logger -t $ADDON -p daemon.info "openccu-lite detected (VARIANT=lite): --auth-mode $HMM_AUTH_MODE"
+        logger -t $ADDON -p daemon.info "openccu-lite detected: --auth-mode $HMM_AUTH_MODE"
         LiteRule
     fi
     [ -n "$HMM_AUTH_MODE" ] && export HMM_AUTH_MODE
@@ -442,10 +453,10 @@ Stop() {
 # (D-32: settings.cgi checks the WebUI session and hands the browser over with the token cookie), and
 # the settings page is linked from the description. On openccu-lite the app has its own entry in the
 # addon menu, and the shell frames the Config-Url behind the gear and the Settings button - there it
-# has to be the settings page. Read from /VERSION like everything else that differs between the two,
-# never remembered. update_script writes the same into hm_addons.cfg.
+# has to be the settings page. Asked of IsOpenccuLite like everything else that differs between the
+# two, never remembered. update_script writes the same into hm_addons.cfg.
 ConfigUrl() {
-    if grep -q '^VARIANT=lite$' /VERSION 2>/dev/null; then
+    if IsOpenccuLite; then
         printf '%s' "/addons/$ADDON/settings.cgi?cmd=config"
     else
         printf '%s' "/addons/$ADDON/settings.cgi"

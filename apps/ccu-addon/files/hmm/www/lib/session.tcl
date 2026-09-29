@@ -47,32 +47,36 @@ proc check_session {sid} {
 # frontend falls back the same way, B-36).
 # ---------------------------------------------------------------------------------------------
 
-# D-40: is this firmware openccu-lite?
+# D-40, task 79: is this firmware openccu-lite?
 #
-# `/VERSION` keeps upstream's PRODUCT and PLATFORM and carries an extra `VARIANT=lite` line (their
-# D-17), so that update packages stay interchangeable in both directions and the variant is still
-# recognisable. That extra line is the only thing to look at - and it is read at *runtime*, never
-# written into a configuration file, because a user may move the same `/usr/local` from openccu-lite
-# to OpenCCU and back, and an addon that remembered the answer would then be wrong. rc.d/hmm reads
-# the same line (B-22); the header path and the settings page follow it, one rule for the addon.
+# A `LITE=` line in `/VERSION` (the image build writes it next to upstream's PRODUCT and PLATFORM and
+# the `VARIANT=lite` of their D-17), or its system service `/usr/bin/occulited`; a CCU3 and OpenCCU
+# have neither. That is the CCU addon handbook's rule, the same as rc.d/hmm's IsOpenccuLite and
+# update_script here and the other addons'. It is asked at *runtime*, never written into a
+# configuration file, because a user may move the same `/usr/local` from openccu-lite to OpenCCU and
+# back, and an addon that remembered the answer would then be wrong. The header path and the settings
+# page follow it, one rule for the addon. HMM_VERSION_FILE and HMM_OCCULITED point the test elsewhere.
 proc is_openccu_lite {} {
     global env
     set file /VERSION
     if {[info exists env(HMM_VERSION_FILE)]} {
         set file $env(HMM_VERSION_FILE)
     }
-    if {![file exists $file]} {
-        return 0
+    set occulited /usr/bin/occulited
+    if {[info exists env(HMM_OCCULITED)]} {
+        set occulited $env(HMM_OCCULITED)
     }
-    set fd [open $file r]
-    set content [read $fd]
-    close $fd
-    foreach line [split $content "\n"] {
-        if {[regexp {^VARIANT=lite$} [string trim $line]]} {
-            return 1
+    if {[file exists $file]} {
+        set fd [open $file r]
+        set content [read $fd]
+        close $fd
+        foreach line [split $content "\n"] {
+            if {[regexp {^LITE=} $line]} {
+                return 1
+            }
         }
     }
-    return 0
+    return [file executable $occulited]
 }
 
 # The id in this request's session header, "" when there is none to use. On a CCU the answer is

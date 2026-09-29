@@ -30,7 +30,7 @@ export const DEFAULT_IDLE_UNSUBSCRIBE = '5m';
  *
  * `occulite` is the openccu-lite form of the same idea: no form of our own, the box's shell hands
  * the session over on the URL and the host checks it against the box. The addon's `update_script`
- * sets it by itself when it is installed on a box (`VARIANT=lite` in `/VERSION`).
+ * sets it by itself when it is installed on a box (a `LITE=` line in `/VERSION`, or occulited).
  */
 export const AUTH_MODES = ['token', 'rega', 'occulite'] as const;
 

@@ -15,6 +15,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   administrator, like the settings page and the service control since beta.18; any other session gets the same
   "Nur für Administratoren / Administrators only" page and no cookie. The app's own entry in the addon menu is not
   affected. On a CCU and OpenCCU nothing changes.
+- **The addon recognises openccu-lite by its `LITE=` line or by occulited.** It used to look only for `VARIANT=lite`
+  in `/VERSION`. Now a `LITE=` line there, or openccu-lite's system service, is what counts - the rule every addon for
+  openccu-lite follows. Today's images carry both lines, so nothing changes on them; an image or system with only one
+  of the two markers no longer puts the addon on the CCU path (log file instead of the journal, the CCU's login).
 
 ## [3.0.0-beta.29] — 2026-09-28
 

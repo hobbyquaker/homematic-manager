@@ -277,7 +277,7 @@ case "$out" in
 esac
 # task 41: on openccu-lite the backend writes no file, and the log view is the box's Log page
 LOG_LITE_VERSION="$TMP/VERSION-lite-log"
-printf 'VERSION=3.89.8.20260719\nPRODUCT=ova\nPLATFORM=ova\nVARIANT=lite\n' > "$LOG_LITE_VERSION"
+printf 'VERSION=3.89.8.20260719\nPRODUCT=ova\nPLATFORM=ova\nVARIANT=lite\nLITE=1.0.0-dev.28\n' > "$LOG_LITE_VERSION"
 LOG_CCU_VERSION="$TMP/VERSION-ccu-log"
 printf 'VERSION=3.83.5.20250401\nPRODUCT=HM-RASPBERRYMATIC\nPLATFORM=oci\n' > "$LOG_CCU_VERSION"
 mv "$TREE/var/hmm.log" "$TMP/hmm.log.aside"
@@ -556,7 +556,7 @@ echo "the addon settings page on openccu-lite (D-40)"
 # The firmware's own file, with the extra line openccu-lite identifies itself by (their D-17). The
 # CGI reads it at every request, so the same package shows the mode that fits the box it is on.
 LITE_VERSION="$TMP/VERSION-lite"
-printf 'VERSION=3.89.8.20260719\nPRODUCT=ova\nPLATFORM=ova\nVARIANT=lite\n' > "$LITE_VERSION"
+printf 'VERSION=3.89.8.20260719\nPRODUCT=ova\nPLATFORM=ova\nVARIANT=lite\nLITE=1.0.0-dev.28\n' > "$LITE_VERSION"
 CCU_VERSION="$TMP/VERSION-ccu"
 printf 'VERSION=3.83.5.20250401\nPRODUCT=HM-RASPBERRYMATIC\nPLATFORM=oci\n' > "$CCU_VERSION"
 
@@ -564,8 +564,8 @@ printf 'VERSION=3.83.5.20250401\nPRODUCT=HM-RASPBERRYMATIC\nPLATFORM=oci\n' > "$
 cp -a "$ADDON_SRC/files/hmm/etc/default.env" "$TREE/etc/hmm.env"
 out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
 case "$out" in
-    *'current: <b>occulite</b>'*) pass "unset means occulite on a box with VARIANT=lite" ;;
-    *) fail "unset means occulite on a box with VARIANT=lite" "$out" ;;
+    *'current: <b>occulite</b>'*) pass "unset means occulite on a box of openccu-lite" ;;
+    *) fail "unset means occulite on a box of openccu-lite" "$out" ;;
 esac
 case "$out" in
     *'?sid=@...@'*) pass "and the page explains the hand-over instead of the ReGa login" ;;
@@ -735,8 +735,8 @@ no_update_action() {
 out="$(cd "$TREE/www" && QUERY_STRING='cmd=config' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
     HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
 case "$out" in
-    *'Anmeldung / Login'*) no_update_action "VARIANT=lite: the settings page offers no update, download or installer" "$out" ;;
-    *) fail "VARIANT=lite: the settings page offers no update, download or installer" "the page did not render: $out" ;;
+    *'Anmeldung / Login'*) no_update_action "openccu-lite: the settings page offers no update, download or installer" "$out" ;;
+    *) fail "openccu-lite: the settings page offers no update, download or installer" "the page did not render: $out" ;;
 esac
 out="$(cd "$TREE/www" && QUERY_STRING='sid=@1234567890@&cmd=config' HMM_VERSION_FILE="$CCU_VERSION" tclsh "$STUB" settings.cgi 2>&1)"
 case "$out" in
@@ -747,15 +747,15 @@ esac
 out="$(cd "$TREE/www" && QUERY_STRING='' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
     HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" settings.cgi 2>&1)"
 case "$out" in
-    *'Location: /addons/hmm/'*) no_update_action "VARIANT=lite: the hand-over redirects into the UI, with no update in it" "$out" ;;
-    *) fail "VARIANT=lite: the hand-over redirects into the UI, with no update in it" "$out" ;;
+    *'Location: /addons/hmm/'*) no_update_action "openccu-lite: the hand-over redirects into the UI, with no update in it" "$out" ;;
+    *) fail "openccu-lite: the hand-over redirects into the UI, with no update in it" "$out" ;;
 esac
 # service.cgi's status names the versions and offers nothing to do with them
 out="$(cd "$TREE/www" && QUERY_STRING='cmd=status' HMM_VERSION_FILE="$LITE_VERSION" HMM_OCCULITE_URL="$STATE_URL" \
     HTTP_X_OCCULITE_SESSION="$LIVE" tclsh "$STUB" service.cgi 2>&1)"
 case "$out" in
-    *'"VERSION_ADDON":"3.0.0-dev.0"'*) no_update_action "VARIANT=lite: service.cgi's status carries no update action" "$out" ;;
-    *) fail "VARIANT=lite: service.cgi's status carries no update action" "$out" ;;
+    *'"VERSION_ADDON":"3.0.0-dev.0"'*) no_update_action "openccu-lite: service.cgi's status carries no update action" "$out" ;;
+    *) fail "openccu-lite: service.cgi's status carries no update action" "$out" ;;
 esac
 
 echo "the openccu-lite session header on settings.cgi and service.cgi (task 50)"
@@ -1272,10 +1272,95 @@ fi
 # and the line of Start that uses it: on a lite box the answer replaces HMM_AUTH_MODE, on a CCU
 # HMM_AUTH_MODE stays what hmm.env made it
 case "$(cat "$ADDON_SRC/files/hmm/rc.d/hmm")" in
-    *'if grep -q '"'"'^VARIANT=lite$'"'"' /VERSION 2>/dev/null; then
-        HMM_AUTH_MODE="$(LiteAuthMode)"'*) pass "Start takes LiteAuthMode's answer as the mode where VARIANT=lite is in /VERSION, and only there" ;;
-    *) fail "Start takes LiteAuthMode's answer as the mode where VARIANT=lite is in /VERSION, and only there" "the grep and the assignment are not together in rc.d/hmm" ;;
+    *'if IsOpenccuLite; then
+        HMM_AUTH_MODE="$(LiteAuthMode)"'*) pass "Start takes LiteAuthMode's answer as the mode where IsOpenccuLite says openccu-lite, and only there" ;;
+    *) fail "Start takes LiteAuthMode's answer as the mode where IsOpenccuLite says openccu-lite, and only there" "the test and the assignment are not together in rc.d/hmm" ;;
 esac
+
+echo "openccu-lite is a LITE= line in /VERSION or occulited, in all three places (task 79)"
+# The CCU addon handbook's rule, the one RedMatic, hm2mqtt.js and ccu-addon-mosquitto follow:
+# `VARIANT=lite` alone is no longer asked, a `LITE=` line or an executable /usr/bin/occulited is.
+DETECT="$TMP/detect"
+mkdir -p "$DETECT"
+printf 'VERSION=3.89.8.20260719\nPRODUCT=ova\nPLATFORM=ova\nVARIANT=lite\nLITE=1.0.0-dev.28\n' > "$DETECT/both"
+printf 'VERSION=3.89.8.20260719\nPRODUCT=ova\nPLATFORM=ova\nLITE=1.0.0-dev.28\n' > "$DETECT/lite-only"
+printf 'VERSION=3.89.8.20260719\nPRODUCT=ova\nPLATFORM=ova\nVARIANT=lite\n' > "$DETECT/variant-only"
+printf 'VERSION=3.83.5.20250401\nPRODUCT=HM-RASPBERRYMATIC\nPLATFORM=oci\n' > "$DETECT/ccu"
+printf 'VERSION=3.83.5.20250401\nPRODUCT=HM-RASPBERRYMATIC\nPLATFORM=oci\nMYLITE=1\n LITE=1\n' > "$DETECT/lookalike"
+printf '#!/bin/sh\n' > "$DETECT/occulited"
+chmod 755 "$DETECT/occulited"
+printf '#!/bin/sh\n' > "$DETECT/occulited-not-x"
+chmod 644 "$DETECT/occulited-not-x"
+# detect_cases <runner>: <runner> <version file> <occulited path> prints 1 for openccu-lite, 0 otherwise
+detect_cases() {
+    for c in \
+        "both:none:1:VARIANT=lite and LITE=, today's images" \
+        "lite-only:none:1:a LITE= line alone" \
+        "variant-only:none:0:VARIANT=lite alone is no longer openccu-lite" \
+        "ccu:none:0:a CCU's /VERSION" \
+        "lookalike:none:0:MYLITE= and an indented LITE= are not the line" \
+        "missing:none:0:no /VERSION at all (the CCU3's install chroot)" \
+        "ccu:occulited:1:occulited alone, whatever /VERSION says" \
+        "missing:occulited:1:occulited alone without a /VERSION" \
+        "variant-only:occulited:1:VARIANT=lite with occulited" \
+        "ccu:occulited-not-x:0:an occulited that is not executable"; do
+        version="${c%%:*}"; rest="${c#*:}"
+        occ="${rest%%:*}"; rest="${rest#*:}"
+        want="${rest%%:*}"; what="${rest#*:}"
+        got="$("$1" "$DETECT/$version" "$DETECT/$occ")"
+        if [ "$got" = "$want" ]; then
+            pass "$2: $what -> $want"
+        else
+            fail "$2: $what -> $want" "got '$got'"
+        fi
+    done
+}
+IS_LITE_SH="$TMP/is-openccu-lite.sh"
+sed -n '/^IsOpenccuLite() {$/,/^}$/p' "$ADDON_SRC/files/hmm/rc.d/hmm" > "$IS_LITE_SH"
+if [ -s "$IS_LITE_SH" ]; then
+    pass "IsOpenccuLite could be taken out of rc.d/hmm"
+else
+    fail "IsOpenccuLite could be taken out of rc.d/hmm" "no such function"
+fi
+rc_is_lite() {
+    VERSION_FILE="$1" OCCULITED="$2" sh -c ". '$IS_LITE_SH'; if IsOpenccuLite; then echo 1; else echo 0; fi"
+}
+detect_cases rc_is_lite "rc.d/hmm"
+IS_LITE_TCL="$TMP/is-openccu-lite.tcl"
+sed -n '/^proc is_openccu_lite {} {$/,/^}$/p' "$ADDON_SRC/files/hmm/www/lib/session.tcl" > "$IS_LITE_TCL"
+if [ -s "$IS_LITE_TCL" ]; then
+    pass "is_openccu_lite could be taken out of lib/session.tcl"
+else
+    fail "is_openccu_lite could be taken out of lib/session.tcl" "no such proc"
+fi
+tcl_is_lite() {
+    printf 'source {%s}\nputs [is_openccu_lite]\n' "$IS_LITE_TCL" | HMM_VERSION_FILE="$1" HMM_OCCULITED="$2" tclsh
+}
+detect_cases tcl_is_lite "lib/session.tcl"
+UPDATE_LITE_SH="$TMP/update-script-lite.sh"
+sed -n '/^LITE=0$/,/^fi$/p' "$ADDON_SRC/files/update_script" > "$UPDATE_LITE_SH"
+if grep -q "grep -q '^LITE=' /VERSION 2>/dev/null || \[ -x /usr/bin/occulited \]" "$UPDATE_LITE_SH"; then
+    pass "update_script's test could be taken out, with the firmware's two paths"
+else
+    fail "update_script's test could be taken out, with the firmware's two paths" "$(cat "$UPDATE_LITE_SH")"
+fi
+update_is_lite() {
+    sed "s|/VERSION|$1|; s|/usr/bin/occulited|$2|" "$UPDATE_LITE_SH" > "$UPDATE_LITE_SH.run"
+    sh -c ". '$UPDATE_LITE_SH.run'; echo \$LITE"
+}
+detect_cases update_is_lite "update_script"
+leftover="$(grep -n 'VARIANT=lite' "$ADDON_SRC/files/update_script" "$ADDON_SRC/files/hmm/rc.d/hmm" "$ADDON_SRC/files/hmm/www/lib/session.tcl" | grep -v '^[^:]*:[0-9]*: *#' || true)"
+if [ -z "$leftover" ]; then
+    pass "no code line asks for VARIANT=lite any more"
+else
+    fail "no code line asks for VARIANT=lite any more" "$leftover"
+fi
+detections="$(grep -c 'IsOpenccuLite' "$ADDON_SRC/files/hmm/rc.d/hmm")"
+if [ "$detections" -ge 4 ]; then
+    pass "rc.d/hmm's LogTarget, Start and ConfigUrl ask IsOpenccuLite"
+else
+    fail "rc.d/hmm's LogTarget, Start and ConfigUrl ask IsOpenccuLite" "$detections mentions"
+fi
 
 echo "update_check.cgi"
 out="$(cgi update_check.cgi 'cmd=download')"

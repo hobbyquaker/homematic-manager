@@ -54,6 +54,12 @@
          * screen and the body scrolls. A box the user dragged replaces it.
          */
         minHeight?: number | undefined;
+        /**
+         * Task 81: the distance of the top edge from the window's, for a dialog that is as tall as its
+         * content and grows while it is open. A centred one would move its top - and the control
+         * just clicked - up by half of every growth; anchored, it grows downwards only.
+         */
+        top?: string | undefined;
         /** Draggable by the title bar, resizable by the edges and the bottom-right corner. */
         movable?: boolean;
         testId?: string | undefined;
@@ -73,6 +79,7 @@
         minWidth = undefined,
         minHeight = undefined,
         movable = true,
+        top = undefined,
         testId = undefined,
     }: Props = $props();
 
@@ -213,6 +220,10 @@
     style:height={geometry === undefined ? height : `${geometry.height}px`}
     style:min-height={geometry === undefined && minHeight !== undefined
         ? `min(${minHeight}px, calc(100vh - ${VIEWPORT_MARGIN}px))`
+        : undefined}
+    style:margin-top={geometry === undefined ? top : undefined}
+    style:max-height={geometry === undefined && top !== undefined
+        ? `calc(100vh - ${top} - ${VIEWPORT_MARGIN / 2}px)`
         : undefined}
     style:left={geometry === undefined ? undefined : `${geometry.left}px`}
     style:top={geometry === undefined ? undefined : `${geometry.top}px`}

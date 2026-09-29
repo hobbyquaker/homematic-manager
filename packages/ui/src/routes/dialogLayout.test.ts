@@ -271,21 +271,28 @@ describe.skipIf(!hasLayout)('dialogs at 1280x800', () => {
     });
 
     /**
-     * Task 30: the dialog opened a few rows tall and its channel lists unfolded inside that small
-     * box. It is 650 px at least now, wider than the 760 it was, and each list opens inside the
-     * body without the body having to scroll.
+     * Task 30 gave the dialog a 650 px floor and 920 px so that its channel lists opened inside it;
+     * that left it empty down to the buttons (task 81). It is as tall as its content now and a
+     * form's width; a list opens inline, so the dialog grows downwards around it - the button just
+     * clicked stays where it was - and nothing has to scroll.
      */
-    it('the add-link dialog is at least 650 px tall and wider than 760, and its lists open uncut', async () => {
+    it('the add-link dialog fits its content and grows downwards around an open list (task 81)', async () => {
         await mountApp({transport: new MockTransport({demo: true}), hash: '#/HmIP-RF/links'});
         await fireEvent.click(screen.getByTestId('links-add'));
         const dialog = await waitFor(() => screen.getByTestId('add-link-dialog'));
-        expect(box(dialog).height).toBeGreaterThanOrEqual(650);
-        expect(box(dialog).width).toBeGreaterThan(760);
+        const closed = box(dialog);
+        expect(closed.height).toBeLessThan(300);
+        expect(closed.width).toBeGreaterThanOrEqual(600);
+        expect(closed.width).toBeLessThanOrEqual(760);
         const body = dialog.querySelector<HTMLElement>('.hmm-dialog-body')!;
 
         const senders = screen.getByTestId('add-link-senders');
-        await fireEvent.click(within(senders).getByRole('button'));
+        const trigger = within(senders).getByRole('button');
+        const before = trigger.getBoundingClientRect().top;
+        await fireEvent.click(trigger);
         expectInside(senders.querySelector<HTMLElement>('.hmm-multiselect-menu')!, body);
+        expect(box(dialog).height).toBeGreaterThan(closed.height + 40);
+        expect(Math.abs(trigger.getBoundingClientRect().top - before)).toBeLessThan(1);
         // the wall button of the demo, which has receivers
         await fireEvent.input(within(senders).getByLabelText('Filter'), {target: {value: '0001D8A9B7C6D5:1'}});
         await fireEvent.click(within(senders).getAllByRole('option')[0]!);
@@ -385,6 +392,28 @@ describe.skipIf(!hasLayout)('a dialog with a minimum height', () => {
         // and the minimum is the floor of that drag, like the designed width is for the width
         await drag(handleOf(dialog, 'se'), 0, -2000);
         expect(box(dialog).height).toBe(500);
+    });
+});
+
+/**
+ * Task 81: `Dialog`'s `top`. The top edge stays where it was put while the content grows, and the
+ * bottom stays inside the window; a box the user dragged replaces it.
+ */
+describe.skipIf(!hasLayout)('a dialog anchored at the top', () => {
+    beforeEach(() => {
+        forgetDialogGeometry();
+    });
+
+    it('keeps its top edge and ends inside the window', async () => {
+        render(Dialog, {props: {open: true, title: 'Anchored', testId: 'anchored-dialog', top: '96px'}});
+        const dialog = screen.getByTestId('anchored-dialog');
+        expect(frame(dialog).top).toBe(96);
+        expect(getComputedStyle(dialog).maxHeight).toBe(`${String(window.innerHeight - 96 - VIEWPORT_MARGIN / 2)}px`);
+
+        await drag(titleBarOf(dialog), 0, 40);
+        expect(frame(dialog).top).toBe(136);
+        expect(dialog.style.marginTop).toBe('');
+        expect(dialog.style.maxHeight).toBe('');
     });
 });
 

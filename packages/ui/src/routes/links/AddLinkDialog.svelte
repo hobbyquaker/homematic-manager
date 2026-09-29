@@ -168,45 +168,72 @@
     few rows high, and wide enough for the two lists and the pair table. The window still bounds
     both, so a phone gets a dialog that fits.
 -->
-<Dialog bind:open title={t('Create link')} width="920px" minHeight={650} testId="add-link-dialog">
+<!--
+    Task 81: as tall as its content - it grows while a channel list is open (the lists are inline) or
+    the pair table is shown, and scrolls inside past the window - and as wide as a form, with the
+    name and the description taking the row's free width. Task 30's fixed 650 px floor and 920 px
+    left an empty dialog down to the buttons. Its top edge stays put, so it grows downwards only.
+-->
+<Dialog bind:open title={t('Create link')} width="720px" top="min(12vh, 96px)" testId="add-link-dialog">
     <div class="hmm-add-link">
-        <span>{t('Sender')}</span>
-        <MultiSelect
-            options={senderOptions}
-            bind:selected={senders}
-            label={t('Sender')}
-            placeholder={t('Select')}
-            filterLabel={t('Filter')}
-            checkAllLabel={t('Check all')}
-            uncheckAllLabel={t('Uncheck all')}
-            summary={(chosen) => t('{count} channels selected', {}, chosen.length)}
-            testId="add-link-senders"
-        />
-        <span class="hmm-add-link-roles">LINK_SOURCE_ROLES: {sourceRoles}</span>
+        <span class="hmm-add-link-label">{t('Sender')}</span>
+        <div class="hmm-add-link-field">
+            <MultiSelect
+                options={senderOptions}
+                bind:selected={senders}
+                label={t('Sender')}
+                placeholder={t('Select')}
+                filterLabel={t('Filter')}
+                checkAllLabel={t('Check all')}
+                uncheckAllLabel={t('Uncheck all')}
+                summary={(chosen) => t('{count} channels selected', {}, chosen.length)}
+                testId="add-link-senders"
+                inline
+            />
+            <span class="hmm-add-link-roles">LINK_SOURCE_ROLES: {sourceRoles}</span>
+        </div>
 
-        <span>{t('Receiver')}</span>
-        <MultiSelect
-            options={receiverOptions}
-            bind:selected={receivers}
-            disabled={senders.length === 0}
-            label={t('Receiver')}
-            placeholder={senders.length === 0 ? t('Sender') : t('Select')}
-            filterLabel={t('Filter')}
-            checkAllLabel={t('Check all')}
-            uncheckAllLabel={t('Uncheck all')}
-            summary={(chosen) => t('{count} channels selected', {}, chosen.length)}
-            testId="add-link-receivers"
-        />
-        <span class="hmm-add-link-roles">LINK_TARGET_ROLES: {targetRoles}</span>
+        <span class="hmm-add-link-label">{t('Receiver')}</span>
+        <div class="hmm-add-link-field">
+            <MultiSelect
+                options={receiverOptions}
+                bind:selected={receivers}
+                disabled={senders.length === 0}
+                label={t('Receiver')}
+                placeholder={senders.length === 0 ? t('Sender') : t('Select')}
+                filterLabel={t('Filter')}
+                checkAllLabel={t('Check all')}
+                uncheckAllLabel={t('Uncheck all')}
+                summary={(chosen) => t('{count} channels selected', {}, chosen.length)}
+                testId="add-link-receivers"
+                inline
+            />
+            <span class="hmm-add-link-roles">LINK_TARGET_ROLES: {targetRoles}</span>
+        </div>
 
         {#if pairs().length > 0}
-            <span>{t('Name')}</span>
-            <input class="hmm-input" bind:value={nameForAll} data-testid="add-link-name-all" />
-            <span class="hmm-add-link-roles">{t('Used for every pair without its own name')}</span>
+            <span class="hmm-add-link-label">{t('Name')}</span>
+            <div class="hmm-add-link-field">
+                <input
+                    class="hmm-input hmm-add-link-input"
+                    aria-label={t('Name')}
+                    bind:value={nameForAll}
+                    data-testid="add-link-name-all"
+                />
+                <span class="hmm-add-link-roles hmm-add-link-under"
+                    >{t('Used for every pair without its own name')}</span
+                >
+            </div>
 
-            <span>{t('Description')}</span>
-            <input class="hmm-input" bind:value={descriptionForAll} data-testid="add-link-description-all" />
-            <span></span>
+            <span class="hmm-add-link-label">{t('Description')}</span>
+            <div class="hmm-add-link-field">
+                <input
+                    class="hmm-input hmm-add-link-input"
+                    aria-label={t('Description')}
+                    bind:value={descriptionForAll}
+                    data-testid="add-link-description-all"
+                />
+            </div>
         {/if}
 
         {#if senders.length > 0 && receiverOptions.length === 0}
@@ -214,7 +241,6 @@
             <span class="hmm-add-link-empty" data-testid="add-link-none"
                 >{t('No channel can receive from this sender')}</span
             >
-            <span></span>
         {/if}
     </div>
 
@@ -292,9 +318,9 @@
 <style>
     .hmm-add-link {
         display: grid;
-        grid-template-columns: 90px auto 1fr;
+        grid-template-columns: max-content minmax(0, 1fr);
         gap: 8px;
-        align-items: center;
+        align-items: start;
         /* the extra height is for the lists: more rows open than the widget's default 260 px */
         --hmm-multiselect-list-height: 400px;
         /* task 31: a channel name and a device name side by side on the first line; never wider
@@ -303,12 +329,40 @@
         --hmm-multiselect-menu-max-width: min(640px, calc(100vw - 160px));
     }
 
+    /* the label on the line of the button or the input next to it, not at the top of an open list */
+    .hmm-add-link-label {
+        line-height: 24px;
+    }
+
+    /* Task 81: the control, then its hint beside it - or under it where the row is too narrow - and
+       an open channel list on a line of its own below both. */
+    .hmm-add-link-field {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        /* the first line keeps its place when a list opens under it */
+        align-content: flex-start;
+        gap: 4px 8px;
+        min-width: 0;
+    }
+
+    .hmm-add-link-input {
+        flex: 1 1 260px;
+        min-width: 0;
+    }
+
     .hmm-add-link-roles {
+        min-width: 0;
+        max-width: 100%;
         font-family: var(--hmm-font-mono);
         font-size: var(--hmm-font-size-small);
         color: var(--hmm-fg-muted);
-        overflow: hidden;
-        text-overflow: ellipsis;
+        overflow-wrap: anywhere;
+    }
+
+    /* the name's hint under it, so the name is as wide as the description */
+    .hmm-add-link-under {
+        flex-basis: 100%;
     }
 
     .hmm-add-link-empty {

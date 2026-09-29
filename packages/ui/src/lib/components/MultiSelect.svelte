@@ -16,6 +16,14 @@
         label?: string | undefined;
         onchange?: ((selected: string[]) => void) | undefined;
         testId?: string | undefined;
+        /**
+         * Task 81: the open list takes its place in the page instead of floating over it, so a dialog
+         * that is as tall as its content grows while the list is open rather than scrolling it away.
+         * The widget's box dissolves into its parent (`display: contents`): the parent is a wrapping
+         * flex row, the trigger sits in it with whatever follows, and the list claims a line of its
+         * own under them.
+         */
+        inline?: boolean;
     }
 
     let {
@@ -31,6 +39,7 @@
         label = undefined,
         onchange = undefined,
         testId = undefined,
+        inline = false,
     }: Props = $props();
 
     let open = $state(false);
@@ -187,7 +196,7 @@
 
 <svelte:window onmousedown={onWindowPointerDown} onkeydown={onWindowKey} />
 
-<div class="hmm-multiselect" bind:this={root} data-testid={testId}>
+<div class="hmm-multiselect" class:hmm-multiselect-inline={inline} bind:this={root} data-testid={testId}>
     <button
         type="button"
         class="hmm-button hmm-multiselect-button"
@@ -321,6 +330,19 @@
         border-radius: var(--hmm-radius);
         background: var(--hmm-bg);
         box-shadow: var(--hmm-shadow-menu);
+    }
+
+    /* Task 81: see the `inline` property. The trigger and the list become items of the parent's
+       wrapping flex row; the list comes last and fills a line of its own. */
+    .hmm-multiselect-inline {
+        display: contents;
+    }
+
+    .hmm-multiselect-inline .hmm-multiselect-menu {
+        position: static;
+        order: 1;
+        flex: 1 0 100%;
+        box-shadow: none;
     }
 
     .hmm-multiselect-head {

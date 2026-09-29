@@ -126,46 +126,102 @@ async function expectInside(inner: Locator, outer: Locator): Promise<void> {
 }
 
 /**
- * Task 30: the dialog opened a few rows tall and the channel lists unfolded inside that small box.
- * At 1280x800 it is 650 px tall at least and wider than the 760 px it was, and both lists open
- * inside it; on a phone the window bounds it and the buttons stay on the screen.
+ * The dialog body holds its content and nothing more: no scrollbar, and no empty band under the
+ * last row down to the buttons (task 81).
  */
-test('the create-link dialog is tall and wide enough for its lists, and fits a phone', async ({page, host}) => {
+async function expectFitsContent(dialog: Locator): Promise<void> {
+    const gap = await dialog.locator('.hmm-dialog-body').evaluate((body) => {
+        const style = getComputedStyle(body);
+        const padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+        const content = [...body.children].reduce((sum, child) => sum + (child as HTMLElement).offsetHeight, 0);
+        return {slack: body.clientHeight - padding - content, scrolls: body.scrollHeight > body.clientHeight};
+    });
+    expect(gap.scrolls).toBe(false);
+    expect(gap.slack).toBeLessThanOrEqual(12);
+}
+
+/**
+ * Task 30 made room for the channel lists with a fixed floor: at least 650 px tall and 920 px wide,
+ * which left the dialog empty down to the buttons (task 81). Now it is as tall as its content, grows
+ * while a list is open (the lists are inline, not floating), is a form's width, and the name and
+ * the description take the row's free width; on a phone the window bounds it and the buttons stay on
+ * the screen.
+ */
+test('the create-link dialog fits its content, grows with an open list, and fits a phone (task 81)', async ({
+    page,
+    host,
+}) => {
     await page.setViewportSize({width: 1280, height: 800});
     await page.goto(`${host.url}#/HmIP-RF/links`);
     await page.getByTestId('links-add').click();
     const dialog = page.getByTestId('add-link-dialog');
     await expect(dialog).toHaveAttribute('open', '');
-    const frame = await dialog.boundingBox();
-    expect(frame!.height).toBeGreaterThanOrEqual(650);
-    expect(frame!.width).toBeGreaterThan(760);
+    const closed = (await dialog.boundingBox())!;
+    expect(closed.height).toBeLessThan(300);
+    expect(closed.width).toBeGreaterThanOrEqual(600);
+    expect(closed.width).toBeLessThanOrEqual(760);
+    await expectFitsContent(dialog);
     const body = dialog.locator('.hmm-dialog-body');
 
     const senders = page.getByTestId('add-link-senders');
     const sendersToggle = senders.getByRole('button').first();
+    const before = (await sendersToggle.boundingBox())!;
     await sendersToggle.click();
     await expectInside(senders.locator('.hmm-multiselect-menu'), body);
+    expect((await dialog.boundingBox())!.height).toBeGreaterThan(closed.height + 40);
+    // it grows downwards: the button just clicked stays under the pointer
+    expect((await sendersToggle.boundingBox())!.y).toBeCloseTo(before.y, 0);
     await pickByAddress(senders, SENDER);
     await sendersToggle.click();
 
     const receivers = page.getByTestId('add-link-receivers');
-    await receivers.getByRole('button').first().click();
+    const receiversToggle = receivers.getByRole('button').first();
+    await receiversToggle.click();
     await expect(receivers.getByRole('option').first()).toBeVisible();
     await expectInside(receivers.locator('.hmm-multiselect-menu'), body);
-    await receivers.getByRole('button').first().click();
+    await pickByAddress(receivers, RECEIVER);
+    await receiversToggle.click();
+    await expect(receivers.locator('.hmm-multiselect-menu')).toHaveCount(0);
+    await expectFitsContent(dialog);
+
+    // the name and the description fill the row next to their labels, far wider than a channel button
+    const grid = (await dialog.locator('.hmm-add-link').boundingBox())!;
+    const button = (await sendersToggle.boundingBox())!;
+    for (const id of ['add-link-name-all', 'add-link-description-all']) {
+        const input = (await page.getByTestId(id).boundingBox())!;
+        expect(input.width).toBeGreaterThan(button.width * 2);
+        expect(input.x + input.width).toBeGreaterThan(grid.x + grid.width - 2);
+    }
     await dialog.getByRole('button', {name: 'Cancel'}).click();
     await expect(dialog).not.toHaveAttribute('open');
 
     await page.setViewportSize({width: 360, height: 640});
     await page.getByTestId('links-add').click();
     await expect(dialog).toHaveAttribute('open', '');
-    const phone = await dialog.boundingBox();
-    expect(phone!.x).toBeGreaterThanOrEqual(0);
-    expect(phone!.y).toBeGreaterThanOrEqual(0);
-    expect(phone!.x + phone!.width).toBeLessThanOrEqual(360);
-    expect(phone!.y + phone!.height).toBeLessThanOrEqual(640);
-    for (const button of await dialog.locator('.hmm-dialog-buttons button').all()) {
-        const place = await button.boundingBox();
+    await expectFitsContent(dialog);
+    await sendersToggle.click();
+    await pickByAddress(senders, SENDER);
+    await sendersToggle.click();
+    await receiversToggle.click();
+    await pickByAddress(receivers, RECEIVER);
+    // with a list open the dialog stays inside the window and its body scrolls
+    const open = (await dialog.boundingBox())!;
+    expect(open.y + open.height).toBeLessThanOrEqual(640);
+    await receiversToggle.click();
+    const phone = (await dialog.boundingBox())!;
+    expect(phone.x).toBeGreaterThanOrEqual(0);
+    expect(phone.y).toBeGreaterThanOrEqual(0);
+    expect(phone.x + phone.width).toBeLessThanOrEqual(360);
+    expect(phone.y + phone.height).toBeLessThanOrEqual(640);
+    expect(await body.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+    for (const id of ['add-link-name-all', 'add-link-description-all']) {
+        const input = (await page.getByTestId(id).boundingBox())!;
+        expect(input.width).toBeGreaterThan(150);
+        expect(input.x + input.width).toBeLessThanOrEqual(phone.x + phone.width);
+    }
+    for (const place of await Promise.all(
+        (await dialog.locator('.hmm-dialog-buttons button').all()).map((entry) => entry.boundingBox()),
+    )) {
         expect(place!.x).toBeGreaterThanOrEqual(0);
         expect(place!.x + place!.width).toBeLessThanOrEqual(360);
         expect(place!.y + place!.height).toBeLessThanOrEqual(640);

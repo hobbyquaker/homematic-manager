@@ -186,6 +186,12 @@ need is that **your machine is reachable from the CCU** — a local firewall on 
 let the callback ports through. By default they are picked freely at start; the settings dialog can
 pin them.
 
+**An openccu-lite system needs none of this.** It never calls a client back: the app talks to its
+web port with an API token and reads the events from a stream it opens itself, so no port on this
+machine has to be reachable. Use *Test connection* in the settings dialog to see what is at the
+address, and *Pair with the system* to get the token (a code is shown here and on the system's
+Status page). Details in [openccu-lite.md](openccu-lite.md#off-the-system-a-desktop-a-server-docker).
+
 ### Which address the CCU calls back to
 
 With **Automatic** (the default, no address chosen), the app takes, at every connect:

@@ -6,6 +6,22 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Added
+
+- **An openccu-lite system is reached without callbacks from off the system.** A desktop, server or Docker install
+  pointed at an openccu-lite system with an API token now talks to the system's lite-rpc through occulite-client:
+  every request over the system's web port, the events from a stream the app opens itself - resumed after a break,
+  re-read after a restart of the system. No callback servers, no callback address, nothing to open in a firewall or
+  to publish from a container; the interface popup says _lite-rpc_ and the system's address. The settings dialog gets
+  _Test connection_ (what is at the address: an openccu-lite system and what the token is worth there, a CCU, nothing
+  and why, or a certificate to trust first) and _Pair with the system_: a six-digit code shown here and on the
+  system's Status page, one click by an administrator there, and the token is in the profile with the system's
+  certificate trusted. What a token may call is decided per call - a refused method names the missing scope and
+  never counts as a lost connection. The addon on the system itself keeps its loopback callbacks, a profile without
+  a token connects the CCU way, and nothing changes for a CCU or OpenCCU. (task 72)
+
 ## [3.0.0-beta.32] — 2026-09-29
 
 ### Changed

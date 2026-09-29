@@ -18,7 +18,7 @@ immediately.
 
 | | on a CCU / OpenCCU | on openccu-lite |
 | --- | --- | --- |
-| Devices, channels, paramsets, direct links, RSSI, service messages, events, the RPC console | XML-RPC / BIN-RPC to `rfd`, `hs485d`, `hmipserver` | identical — the interface processes are the same |
+| Devices, channels, paramsets, direct links, RSSI, service messages, events, the RPC console | XML-RPC / BIN-RPC to `rfd`, `hs485d`, `hmipserver`, with callback servers the CCU pushes its events to | **on the system** (the addon): identical — the interface processes are the same, over the loopback. **From off the system** (a desktop, a server, Docker): through the system's **lite-rpc** with an API token — the requests over its web port, the events from a stream the app opens; no callback servers, nothing to open in a firewall (see [below](#off-the-system-a-desktop-a-server-docker)) |
 | Friendly names | ReGa when it is on, else this profile's own store | the box's metadata store; a rename is written there |
 | Rooms, functions, floors | ReGa's own rooms and functions when ReGa is on (a flat list, no floors), else this profile's own store | the box's, as trees; shared with every other program on the box |
 | The login of the addon | the WebUI session (`settings.cgi`), optionally a CCU user (`--auth-mode rega`) | the session openccu-lite's shell hands over (`--auth-mode occulite`) |
@@ -125,19 +125,47 @@ box's login after an upgrade (B-22). The addon's settings page
 (`/addons/hmm/settings.cgi?cmd=config`) offers the two modes that fit the firmware it is running
 on and writes that firmware's line.
 
-## Off the box: a desktop, a server, Docker
+## Off the system: a desktop, a server, Docker
 
-The same detection applies wherever the Homematic Manager runs: point it at the box's address and
-it finds the metadata API. Reads and writes then need an **API token**, because the local token
-file only exists on the box:
+The same detection applies wherever the Homematic Manager runs: point it at the system's address
+and it finds the metadata API. An openccu-lite system never calls a remote client back (its
+D-70), so from off the system the interfaces are not reached the CCU way. Since 3.0.0-beta.33 the
+app uses the system's **lite-rpc** instead, through
+[occulite-client](https://www.npmjs.com/package/occulite-client): every request goes to the
+system's web port (`/api/rpc/v1/json/<interface>`) with an **API token**, and the events come
+from a stream the app opens itself (`/api/rpc/v1/events`) — resumed after a break, re-read after
+a restart of the system. No callback servers, no callback address, no ports to open on this
+machine or to publish from a container; a system behind NAT or a VPN works as well as one next
+door. The interface popup says *lite-rpc* and the system's address for such an interface.
 
-1. on the box, open *Users* and create a token — role `user` to read the names, `admin` to edit
-   them;
-2. paste it into the connection settings (`metaToken` in `config.json`).
+**Getting the token** is one click on each side. In the settings dialog, *Test connection*
+under the address says what is there (an openccu-lite system with its occulited version, a CCU,
+nothing) and what the token in the profile is worth. *Pair with the system* under *Names and
+rooms* asks the system for a token (openccu-lite's pairing): the app shows a six-digit code, the
+system's **Status page** shows the same code to its administrators, and one click there approves
+it. The token lands in the *API token* field, the system's certificate is trusted from then on,
+and *Save & Restart* connects. The app asks for the access it needs — devices *administer*
+(pairing, deleting, re-keying, firmware, links and paramsets), names *configure*, system
+*configure* (heating groups) — and the administrator sees exactly that on the Status page. A
+token made by hand on the system's *API tokens* page works too, pasted into the field; what it
+may do is what its scopes allow (`rpc:read` for the grids, `rpc:operate` for `setValue`,
+`rpc:configure` for paramsets and links, `rpc:admin` for the rest). A token from the days when
+only the names came from the system (`meta:read` alone) shows the names and nothing else, and the
+interfaces say so: pair, or grant the token more access on the system.
 
-Without a token the box answers `401`, and the Homematic Manager runs with the names it has in its
-own store, says so in the connection state, and tries again on the next reconnect. It never fails
-to start because a box refused a credential.
+**What the token decides, per call.** A method the token may not call is refused per call, with
+the missing scope in the error — the interface stays connected, the grids stay filled; it is not
+a connection failure. The RPC console shows the refusal like a fault of the interface process.
+
+**Without a token** the profile connects the CCU way, as before: the system's classic ports where
+its owner switched them on (openccu-lite's classic mode), callbacks included. The metadata store
+then answers `401` and the app runs with the names it has in its own store, says so in the
+connection state, and tries again on the next reconnect. It never fails to start because a system
+refused a credential.
+
+**Two streams per token.** The app opens one stream for the events and one for the metadata
+store; the system allows two per token. A second installation must pair on its own — never copy
+a token between two of them, the second one gets `too-many-streams`.
 
 `metaUrl` in `config.json` overrides the address the store is looked for at — for a reverse proxy
 on a non-standard port, and for the integration tests. It is not needed for a normal installation.
@@ -147,7 +175,7 @@ on a non-standard port, and for the integration tests. It is not needed for a no
 | Key in `config.json` → `connection` | Meaning |
 | --- | --- |
 | `metaProvider` | `auto` (the default: probe once per connect, then ReGa when it is on and answered, else this profile), `local` (never probe, keep everything in this profile), `occulite` (insist on the box and say so when it does not answer), `rega` (insist on ReGa's rooms and functions; a flat list, no floors) |
-| `metaToken` | the API token for an installation that is not on the box |
+| `metaToken` | the API token for an installation that is not on the system — from the pairing in the settings dialog, or made on the system's *API tokens* page. With it the interfaces are reached through lite-rpc; without it the CCU way |
 | `metaUrl` | the box's base URL when it is not `http(s)://<host>` |
 
 The `local` store is `meta.json` in the profile directory, next to `config.json` — the user's own

@@ -1476,7 +1476,10 @@ describe('devices', () => {
         expect(await h.backend.request('devices.installMode.keyMismatch', 'BidCos-RF')).toBe('LEQ0000009');
         await h.backend.request('devices.installMode.tempKey', 'BidCos-RF', 'other-system');
         await h.backend.request('devices.installMode.tempKey', 'BidCos-RF', '');
-        expect(h.calls.map(({method, params}) => [method, params])).toEqual([
+        // only the two methods at issue: the harness start's VALUES sweep may still land a
+        // getParamset after the clear above (B-78)
+        const keyCalls = h.calls.filter(({method}) => method === 'getKeyMismatchDevice' || method === 'setTempKey');
+        expect(keyCalls.map(({method, params}) => [method, params])).toEqual([
             ['getKeyMismatchDevice', [true]],
             ['setTempKey', ['other-system']],
             ['setTempKey', ['']],
@@ -1583,7 +1586,8 @@ describe('paramsets, values and links', () => {
         await h.backend.request('paramset.description', 'HmIP-RF', 'ABC1:1', 'MASTER');
         h.calls.length = 0;
         await h.backend.request('paramset.description', 'HmIP-RF', 'ABC1:1', 'MASTER');
-        expect(h.calls).toEqual([]);
+        // the start-up VALUES sweep may still be reading; only descriptions count here (B-78)
+        expect(h.calls.filter((call) => call.method === 'getParamsetDescription')).toEqual([]);
         await h.backend.stop();
     });
 
@@ -2256,10 +2260,10 @@ describe('the console and data files', () => {
         expect(methods[0]?.help).toBe('Liest ein Paramset');
         expect(methods[0]?.params.length).toBeGreaterThan(0);
         expect(methods[1]?.params).toEqual([]);
-        // cached for the session
+        // cached for the session; the start-up VALUES sweep may still be reading (B-78)
         h.calls.length = 0;
         await h.backend.request('rpc.methods', 'HmIP-RF');
-        expect(h.calls).toEqual([]);
+        expect(h.calls.filter((call) => call.method.startsWith('system.'))).toEqual([]);
         await h.backend.stop();
     });
 

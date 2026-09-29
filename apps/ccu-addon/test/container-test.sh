@@ -781,6 +781,10 @@ dex 'mkdir -p /etc/init.d && touch /etc/init.d/S00InstallAddon' >/dev/null
 # B-32: a user's own flags next to beta.16's --lite-mode - the update keeps them and takes it out
 dex "echo 'HMM_NODE_FLAGS=\"--max-old-space-size=300 --lite-mode\"' >> /usr/local/addons/hmm/etc/hmm.env" >/dev/null
 PID_BEFORE="$(dex 'cat /usr/local/addons/hmm/var/hmm.pid')"
+# B-79: bystanders that merely name the app directory - a shell whose command line mentions it (the
+# ssh session of a lab install did) and a tail of a file in it - must survive the update
+BYSTANDER_SH="$(dex "nohup sh -c 'sleep 300; : /usr/local/addons/hmm/app/package.json' >/dev/null 2>&1 & echo \$!")"
+BYSTANDER_TAIL="$(dex 'nohup tail -f /usr/local/addons/hmm/app/package.json >/dev/null 2>&1 & echo $!')"
 dex 'rm -f /usr/local/addons/hmm/var/hmm.pid' >/dev/null
 check "the installed rc.d can no longer see its own process, as in the chroot" "stopped" \
     "$(dex '/usr/local/etc/config/rc.d/hmm status')"
@@ -791,6 +795,12 @@ absent "the old backend was stopped, by name, with no pidfile to go by" "hmm/app
 check "and a new one is running, so the update needs no restart by hand" "running" \
     "$(dex '/usr/local/etc/config/rc.d/hmm status')"
 absent "with a pid of its own" "$PID_BEFORE" "$(dex 'cat /usr/local/addons/hmm/var/hmm.pid')"
+check "a shell that names the app directory survived the update (B-79)" "alive" \
+    "$(dex "kill -0 $BYSTANDER_SH && echo alive")"
+check "and so did a tail of a file in it" "alive" "$(dex "kill -0 $BYSTANDER_TAIL && echo alive")"
+none "and the stop did not name either" \
+    "$(syslog | grep 'stopping the running backend' | grep -w -e "$BYSTANDER_SH" -e "$BYSTANDER_TAIL")"
+dex "kill $BYSTANDER_SH $BYSTANDER_TAIL" >/dev/null
 check "the update kept the user's own flag in etc/hmm.env and took --lite-mode out (B-32)" \
     'HMM_NODE_FLAGS="--max-old-space-size=300"' "$(dex 'grep "^HMM_NODE_FLAGS=" /usr/local/addons/hmm/etc/hmm.env')"
 check "and says so in the syslog" 'took --lite-mode out of HMM_NODE_FLAGS, now "--max-old-space-size=300"' "$(syslog)"

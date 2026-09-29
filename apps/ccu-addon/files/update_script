@@ -58,10 +58,33 @@ mkdir -p $ADDONS_DIR $CONF_DIR/rc.d $CONF_DIR/addons/www $STATE_DIR
 [ "$LITE" = 1 ] || mkdir -p $LIGHTTPD_DIR
 chmod 755 $ADDONS_DIR
 
+# Is /proc/<pid> this addon's backend? A node - argv[0] is `node` or ends in /node - with a script
+# of the addon's app/ as one of its arguments (after node's own flags). B-79: a bare "names $ADDON_DIR/app/" matched every
+# process that merely mentions the path - the ssh shell that ran install_addon with a version check
+# in its command line, a `tail -f` of a file under app/, an editor - and StopOld killed them.
+IsBackend() {
+    tr '\0' '\n' < "$1/cmdline" 2>/dev/null | {
+        IFS= read -r argv0 || exit 1
+        case "$argv0" in
+            node | */node) ;;
+            *) exit 1 ;;
+        esac
+        while IFS= read -r arg; do
+            case "$arg" in
+                "$ADDON_DIR/app/"*) exit 0 ;;
+            esac
+        done
+        exit 1
+    }
+}
+
 # Every pid that is this addon's backend. The pid files first - the one inside the addon tree, which
 # is on /usr/local and is therefore visible from the CCU3 install chroot too, and the /var/run one
 # an installation from before that change still writes - and then /proc, which finds the process
 # when neither pid file can be read from here. /proc is bound into the chroot, so this works there.
+# A pid file's pid counts when its process is the backend, or when its command line cannot be read
+# or is empty (a process in the middle of an exec, B-46); a pid the kernel handed to another
+# process since does not.
 AddonPids() {
     for file in $PIDFILE $LEGACY_PIDFILE; do
         [ -f "$file" ] || continue
@@ -69,15 +92,15 @@ AddonPids() {
         case "$pid" in
             '' | *[!0-9]*) continue ;;
         esac
-        [ -d /proc/"$pid" ] && echo "$pid"
+        [ -d /proc/"$pid" ] || continue
+        if [ -z "$(tr -d '\0' < /proc/"$pid"/cmdline 2>/dev/null)" ] || IsBackend /proc/"$pid"; then
+            echo "$pid"
+        fi
     done
     for dir in /proc/[0-9]*; do
         pid="${dir#/proc/}"
         [ "$pid" = "$$" ] && continue
-        cmdline="$(tr '\0' ' ' < "$dir/cmdline" 2>/dev/null)" || continue
-        case "$cmdline" in
-            *"$ADDON_DIR/app/"*) echo "$pid" ;;
-        esac
+        IsBackend "$dir" && echo "$pid"
     done
 }
 

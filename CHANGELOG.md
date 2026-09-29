@@ -6,6 +6,15 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **An addon update stops only the old backend.** The installer's update script took every process whose command
+  line named the addon's `app/` directory for the backend and stopped it - an ssh session that ran the install with a
+  version check in its command line, a `tail -f` of a file in there, an editor. It now stops a process only when it is
+  a node running the addon's app. (B-79)
+
 ## [3.0.0-beta.31] — 2026-09-29
 
 ### Fixed

@@ -71,8 +71,12 @@ export class IpcBridge {
     readonly #onProtocolError: (message: string) => void;
     readonly #renderers = new Map<number, WebContentsLike>();
     readonly #unsubscribe: Array<() => void> = [];
-    /** Task 73: event frames waiting for the next turn of the event loop, oldest first. */
-    #pending: string[] = [];
+    /**
+     * Task 73: frames waiting for the next turn of the event loop, oldest first - the events, and
+     * an answer that comes while events wait, so a renderer sees the event its request caused
+     * before the answer.
+     */
+    #pending: {frame: string; sender?: WebContentsLike}[] = [];
     #flushScheduled = false;
 
     #disposed = false;
@@ -133,15 +137,19 @@ export class IpcBridge {
         if (this.#renderers.size === 0) {
             return;
         }
-        this.#pending.push(encodeFrame(frame));
+        this.#pending.push({frame: encodeFrame(frame)});
         if (!this.#flushScheduled) {
             this.#flushScheduled = true;
             setImmediate(() => {
                 this.#flushScheduled = false;
                 const frames = this.#pending;
                 this.#pending = [];
-                for (const encoded of frames) {
-                    this.#send(API_CHANNEL, encoded);
+                for (const {frame: encoded, sender} of frames) {
+                    if (sender === undefined) {
+                        this.#send(API_CHANNEL, encoded);
+                    } else {
+                        this.#answer(sender, encoded);
+                    }
                 }
             });
         }
@@ -202,11 +210,21 @@ export class IpcBridge {
         } catch (error) {
             answer = errorFrame(id, toApiError(error));
         }
+        const encoded = encodeFrame(answer);
+        if (this.#pending.length > 0) {
+            // behind the events that wait, so the renderer sees them before this answer (task 73)
+            this.#pending.push({frame: encoded, sender});
+            return;
+        }
+        this.#answer(sender, encoded);
+    }
+
+    #answer(sender: WebContentsLike, encoded: string): void {
         if (sender.isDestroyed()) {
             return;
         }
         try {
-            sender.send(API_CHANNEL, encodeFrame(answer));
+            sender.send(API_CHANNEL, encoded);
         } catch {
             // Same race as in #send: the window closed while its request was running.
         }

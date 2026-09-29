@@ -173,6 +173,28 @@ describe('ApiWebSocketServer', () => {
         expect(b).toEqual(a);
     });
 
+    it('sends an event a request caused before the answer to that request (task 73)', async () => {
+        const {url} = await serve();
+        const socket = await connect(url);
+        // a request whose handling emits an event and answers at once: the event waits for the next
+        // turn of the event loop (task 73), and the answer has to wait behind it
+        const request = backend.request.bind(backend) as (method: string, ...params: unknown[]) => Promise<unknown>;
+        (backend as unknown as {request: typeof request}).request = (method, ...params) => {
+            if (method === 'events.clear') {
+                backend.events.emit('notice', {level: 'info', message: 'caused by the request'});
+            }
+            return request(method, ...params);
+        };
+        const order: string[] = [];
+        socket.on('message', (data: Buffer) => {
+            const frame = decodeFrame(data.toString());
+            order.push(frame?.t ?? '?');
+        });
+        socket.send(encodeFrame({t: 'req', id: 3, m: 'events.clear', p: []}));
+        await until(() => order.includes('res'));
+        expect(order).toEqual(['ev', 'res']);
+    });
+
     it('drops a frame that is not a frame instead of answering it', async () => {
         const {url} = await serve();
         const socket = await connect(url);

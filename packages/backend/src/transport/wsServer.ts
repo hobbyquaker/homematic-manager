@@ -86,8 +86,12 @@ export class ApiWebSocketServer {
     /** D-32: the session each socket was opened with, for `session.info`. */
     readonly #sessions = new WeakMap<WebSocket, SessionInfo>();
     readonly #unsubscribe: () => void;
-    /** Task 73: event frames waiting for the next turn of the event loop, oldest first. */
-    #pending: string[] = [];
+    /**
+     * Task 73: frames waiting for the next turn of the event loop, oldest first - the events, and
+     * any answer to a client that comes while events are waiting, so that a client still sees an
+     * event its request caused before the answer to that request.
+     */
+    #pending: {frame: string; socket?: WebSocket}[] = [];
     #flushScheduled = false;
     #server: WebSocketServer | undefined;
 
@@ -208,7 +212,7 @@ export class ApiWebSocketServer {
         if (this.#sockets.size === 0) {
             return;
         }
-        this.#pending.push(encodeFrame({t: 'ev', n: event, d: payload}));
+        this.#pending.push({frame: encodeFrame({t: 'ev', n: event, d: payload})});
         if (!this.#flushScheduled) {
             this.#flushScheduled = true;
             setImmediate(() => {
@@ -221,7 +225,11 @@ export class ApiWebSocketServer {
         this.#flushScheduled = false;
         const frames = this.#pending;
         this.#pending = [];
-        for (const frame of frames) {
+        for (const {frame, socket: target} of frames) {
+            if (target !== undefined) {
+                this.#send(target, frame);
+                continue;
+            }
             for (const socket of this.#sockets) {
                 this.#send(socket, frame);
             }
@@ -320,10 +328,19 @@ export class ApiWebSocketServer {
                 frame.m === 'session.info'
                     ? (this.#sessions.get(socket) ?? null)
                     : await this.#options.backend.request(frame.m, ...(frame.p as ApiParams<ApiMethodName>));
-            this.#send(socket, encodeFrame(responseFrame(frame.id, result)));
+            this.#answer(socket, encodeFrame(responseFrame(frame.id, result)));
         } catch (error) {
-            this.#send(socket, encodeFrame(errorFrame(frame.id, toApiError(error))));
+            this.#answer(socket, encodeFrame(errorFrame(frame.id, toApiError(error))));
         }
+    }
+
+    /** An answer goes out at once, unless events wait: then behind them, in order (task 73). */
+    #answer(socket: WebSocket, frame: string): void {
+        if (this.#pending.length > 0) {
+            this.#pending.push({frame, socket});
+            return;
+        }
+        this.#send(socket, frame);
     }
 
     #send(socket: WebSocket, frame: string): void {

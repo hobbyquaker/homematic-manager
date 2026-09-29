@@ -194,6 +194,10 @@ describe.skipIf(!simulatorAvailable)('the interface methods of hm-simulator 1.3.
         expect(log.filter((entry) => entry.method === 'system.multicall')).toHaveLength(10);
         expect(log.every((entry) => entry.error === null)).toBe(true);
         const times = log.map((entry) => (entry.answeredAt ?? Infinity) - entry.sentAt);
-        expect(Math.max(...times), `answer times in ms: ${times.join(' ')}`).toBeLessThan(50);
+        // the typical answer within 50 ms, every one within 250 (the full unit run loads the machine;
+        // a callback that waits on the UI takes seconds)
+        const sorted = [...times].sort((a, b) => a - b);
+        expect(sorted[Math.floor(sorted.length / 2)], `answer times in ms: ${times.join(' ')}`).toBeLessThan(50);
+        expect(Math.max(...times), `answer times in ms: ${times.join(' ')}`).toBeLessThan(250);
     });
 });

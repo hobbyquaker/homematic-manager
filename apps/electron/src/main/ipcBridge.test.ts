@@ -199,6 +199,15 @@ describe('IpcBridge', () => {
         }
     });
 
+    it('sends an event a request caused before the answer to that request (task 73)', async () => {
+        transport.respond = () => {
+            transport.emit('names.changed', {'ABC:1': 'Lamp'});
+            return Promise.resolve({});
+        };
+        ipcMain.emit(API_CHANNEL, contents, request(11, 'names.get'));
+        await vi.waitFor(() => expect(contents.frames().map((frame) => frame.t)).toEqual(['ev', 'res']));
+    });
+
     it('does not send a renderer its events twice after a reload', async () => {
         bridge.attach(contents);
         transport.emit('names.changed', {'ABC:1': 'Lamp'});

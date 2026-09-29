@@ -19,9 +19,8 @@ import {
     startSimulator,
     VIRTUAL_DEVICES,
     waitFor,
+    type Simulator,
 } from './helpers.js';
-
-/* eslint-disable @typescript-eslint/no-explicit-any -- hm-simulator ships no types */
 
 const running: {close: () => unknown}[] = [];
 
@@ -41,7 +40,7 @@ afterEach(async () => {
 });
 
 async function bothRunning(options: Parameters<typeof startSimulator>[0] = {}): Promise<{
-    sim: any;
+    sim: Simulator;
     harness: Awaited<ReturnType<typeof startBackend>>;
 }> {
     const sim = await startSimulator(options);

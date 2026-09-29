@@ -14,6 +14,8 @@
  */
 
 import {BIDCOS_GATEWAY, BIDCOS_SWITCH, expect, simulatorReady, test} from './fixtures.js';
+import type HmSim from 'hm-simulator/sim.mjs';
+
 import type {Simulator} from './fixtures.js';
 
 test.beforeAll(async () => {
@@ -121,8 +123,8 @@ const READINGS: readonly Reading[] = [
 ];
 
 /** The fixture's switch under another address, with its maintenance and switch channel. */
-function switchDescriptions(address: string, rfAddress: number): unknown[] {
-    const channel = (index: number, type: string, paramsets: string[]): Record<string, unknown> => ({
+function switchDescriptions(address: string, rfAddress: number): HmSim.DeviceDescription[] {
+    const channel = (index: number, type: string, paramsets: string[]): HmSim.DeviceDescription => ({
         ADDRESS: `${address}:${String(index)}`,
         TYPE: type,
         VERSION: 1,

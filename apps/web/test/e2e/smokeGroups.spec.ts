@@ -287,11 +287,6 @@ test('an HmIP smoke group is created from the toolbar with one GROUP_n write per
  * back in, its own team is gone again - each change one `setTeam` through the paced queue.
  */
 test('a BidCos detector leaves its team and joins it again, with setTeam (task 70)', async ({page}) => {
-    // Feature-detected, not version-pinned, like the setTempKey spec: `setTeam` arrived in 1.1.0.
-    test.skip(
-        !(host.simulator.methodNames() as string[]).includes('setTeam'),
-        'the installed hm-simulator has no setTeam (it arrived in 1.1.0)',
-    );
     const teamOf = (address: string): string =>
         ((host.simulator.getDevice('rfd', address) as {TEAM?: string} | false) || {TEAM: ''}).TEAM ?? '';
     await page.goto(`${host.url}#/BidCos-RF/devices`);

@@ -242,13 +242,16 @@ test('PARAMSETS keeps its buttons whole, is resized, kept, reset, and stops at i
 
 /**
  * B-35: the other columns that were fixed for a text or a button are dragged, kept and reset like every column - FLAGS
- * on the Links tab, and the suppress column of the HmIP service messages. hm-simulator has no suppression methods, so
- * that column shows no button here; the button whole at the column's minimum is `messagesAndEvents.test.ts`.
+ * on the Links tab, and the suppress column of the HmIP service messages, which holds a real Suppress button since
+ * hm-simulator 1.3.0 answers `getSuppressedServiceMessages` (task 78). The button whole at the column's minimum is
+ * `messagesAndEvents.test.ts`; here it is whole at the designed width after the reset.
  */
 test('FLAGS on the Links tab and the suppress column are dragged, kept over a reload and reset (B-35)', async ({
     page,
     host,
+    sim,
 }) => {
+    sim.fireEvent('hmip', `${HMIP_DIMMER}:0`, 'STICKY_UNREACH', true);
     const cases = [
         {
             hash: '#/HmIP-RF/links',
@@ -281,6 +284,12 @@ test('FLAGS on the Links tab and the suppress column are dragged, kept over a re
         await head().click({button: 'right'});
         await page.getByTestId(`${testId}-columns-menu`).getByRole('menuitem', {name: 'Reset column widths'}).click();
         await expect.poll(() => widthOf(head())).toBe(designed);
+        if (key === 'suppress') {
+            const button = page.getByTestId(`suppress-${HMIP_DIMMER}:0-STICKY_UNREACH`);
+            await expect(button).toHaveText('Suppress');
+            const cell = page.getByTestId(testId).locator(`.hmm-td[data-column-key="${key}"]`).first();
+            expect(await cell.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+        }
     }
 });
 

@@ -6,9 +6,7 @@
 
 import {afterEach, describe, expect, it} from 'vitest';
 
-import {simulatorAvailable, startBackend, startSimulator} from './helpers.js';
-
-/* eslint-disable @typescript-eslint/no-explicit-any -- hm-simulator ships no types */
+import {simulatorAvailable, startBackend, startSimulator, type Simulator} from './helpers.js';
 
 const PDT = '0001D3C99ABCDE:3';
 const PDT_OTHER_FIRMWARE = '0003D3C99ABCDE:3';
@@ -23,7 +21,7 @@ afterEach(async () => {
 });
 
 async function connected(options: Parameters<typeof startSimulator>[0] = {}): Promise<{
-    sim: any;
+    sim: Simulator;
     harness: Awaited<ReturnType<typeof startBackend>>;
 }> {
     const sim = await startSimulator(options);

@@ -83,6 +83,41 @@ test('a method is chosen, its arguments filled in, the answer shown and the call
     await expect(logged.locator('.hmm-rpclog-status')).toContainText('HmIP-PDT');
 });
 
+/**
+ * Task 78: the interface information calls, answered as rfd and hmipserver of 3.89.11 were measured to
+ * (hm-simulator 1.3.0) - `getVersion` on both, the metadata of a channel on hmipserver - and
+ * `getLGWStatus`, which rfd of that firmware does not know at all: a fault, in the response.
+ */
+test('getVersion, getMetadata and getLGWStatus answer as the interface processes do (task 78)', async ({
+    page,
+    host,
+    sim,
+}) => {
+    const method = await openConsole(page, host.url);
+    await method.selectOption('getVersion');
+    await expect(page.getByTestId('console-params')).toHaveText('getVersion()');
+    await page.getByTestId('console-send-button').click();
+    await expect(page.getByTestId('console-response')).toHaveValue(/3\.89\.11/);
+
+    sim.setMetadata('hmip', [`${HMIP_DIMMER}:3`, 'channelMode', 'shutter']);
+    await method.selectOption('getMetadata');
+    await page.locator('#arg-input-object_id').fill(`${HMIP_DIMMER}:3`);
+    await page.locator('#arg-input-data_id').fill('channelMode');
+    await page.getByTestId('console-send-button').click();
+    await expect(page.getByTestId('console-response')).toHaveValue(/shutter/);
+
+    await page.goto(`${host.url}#/BidCos-RF/console`);
+    const bidcos = page.getByTestId('console-method');
+    await expect(bidcos.locator('option')).not.toHaveCount(1);
+    await bidcos.selectOption('getVersion');
+    await page.getByTestId('console-send-button').click();
+    await expect(page.getByTestId('console-response')).toHaveValue(/2\.6\.0/);
+    await bidcos.selectOption('getLGWStatus');
+    await page.getByTestId('console-send-button').click();
+    await expect(page.getByTestId('console-error')).toBeVisible();
+    await expect(page.getByTestId('notices')).toBeEmpty();
+});
+
 test('a fault is shown in the response and never as a toast', async ({page, host}) => {
     const method = await openConsole(page, host.url);
 

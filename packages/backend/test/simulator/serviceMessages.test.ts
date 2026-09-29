@@ -9,10 +9,10 @@
  * call. The core's table says so now (`serviceMessages: false`). An interface the table does not know
  * is judged by its `system.listMethods`, and without a usable list it is asked exactly once.
  *
- * hm-simulator serves `VirtualDevices` and CUxD from the same dispatcher as every other interface, so
- * they answer `getServiceMessages` perfectly well - which is what makes them the right witnesses
- * here: the sweep must skip them because the *table* says to, not because the answer was bad. The
- * bad answer is a stub of its own below, in the place a user-defined interface (D-13) sits.
+ * Since hm-simulator 1.3.0 the two answer `getServiceMessages` with `Invalid XML-RPC message`, as
+ * the real ones do (`getServiceMessagesFault`, task 78): the sweep must skip them because the *table*
+ * says to, and a call that slipped through would now show up as the notice it causes on a CCU. The
+ * bad answer of a user-defined interface (D-13) is a stub of its own below.
  */
 
 import http from 'node:http';
@@ -22,7 +22,7 @@ import {afterEach, describe, expect, it} from 'vitest';
 
 import {simulatorAvailable, startBackend, startSimulator} from './helpers.js';
 
-/* eslint-disable @typescript-eslint/no-explicit-any -- hm-simulator ships no types */
+/* eslint-disable @typescript-eslint/no-explicit-any -- `dispatch` is the simulator's internal entry, not in its declarations */
 
 const running: {close: () => unknown}[] = [];
 
@@ -104,7 +104,11 @@ async function brokenServiceMessageInterface(options: {listMethods?: readonly st
 
 describe.skipIf(!simulatorAvailable)('the service-message sweep', () => {
     it('never asks VirtualDevices or CUxD, and keeps asking the interface that does answer', async () => {
-        const sim = await startSimulator({virtual: true, cuxd: true});
+        const sim = await startSimulator({
+            virtual: true,
+            cuxd: true,
+            interfaces: {virtual: {getServiceMessagesFault: true}, cuxd: {getServiceMessagesFault: true}},
+        });
         running.push({close: () => sim.close()});
         const harness = await startBackend(sim, {
             connection: {interfaces: ['BidCos-RF', 'VirtualDevices', 'CUxD']},

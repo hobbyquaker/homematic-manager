@@ -365,56 +365,12 @@ export const SIMULATOR_FIXTURE: Record<string, unknown> = {
 };
 
 /**
- * The part of hm-simulator's scenario API the specs use.
- *
- * The package ships no types, and `TestHost.simulator` is therefore `any`. Writing the handful of
- * methods down here is the one cast in the whole suite, and it doubles as the list of what a spec
- * is allowed to reach around the UI for: raise an event the device would have sent, script a
- * pairing, and read back what the interface process really stored.
+ * The simulator a spec reaches around the UI with: raise an event the device would have sent, script
+ * a pairing, read back what the interface process really stored. Typed by hm-simulator's own
+ * declarations since 1.3.0 (task 78); the hand-written interface that stood here drifted silently
+ * whenever the simulator changed.
  */
-export interface Simulator {
-    /** What a device reports: an `event` callback to every connected logic layer. */
-    fireEvent(iface: string, address: string, datapoint: string, value: unknown): void;
-    getValue(iface: string, address: string, datapoint: string): unknown;
-    /**
-     * CONFIG_PENDING on the device's `:0` channel. `sticky` is the #98 case - a configuration the
-     * device never acknowledged - and stays until a valid full MASTER write; without it the flag
-     * clears itself after the interface's delay.
-     */
-    setConfigPending(iface: string, address: string, options?: {sticky?: boolean}): void;
-    /** Every `putParamset` the simulator accepted, oldest first. */
-    getWriteLog(): {iface: string; address: string; paramset: string; values: Record<string, unknown>}[];
-    getLinks(iface: string, params: unknown[]): unknown[];
-    /** Remaining seconds of the install mode, 0 when it is off. */
-    getInstallMode(iface: string): number;
-    /** Devices that appear the next time the install mode is switched on. */
-    scriptNewDevices(iface: string, devices: unknown[], delay?: number): void;
-    /** A device and its channels, added at once; every logic layer is told with `newDevices`. */
-    addDevice(iface: string, ...descriptions: unknown[]): unknown[];
-    /**
-     * The temporary BidCos pairing key (#20), as `setTempKey` left it. Optional on purpose: it
-     * arrived in hm-simulator 1.0.1, and the spec that uses it feature-detects rather than pinning
-     * a version, so this repository stays green against 1.0.0.
-     */
-    getTempKey?: (iface: string) => string;
-    /**
-     * The XML-RPC method table, `method -> handler(iface, params)`, as `callMethod` dispatches it.
-     * Task 76's spec puts a `getKeyMismatchDevice` fake into it: hm-simulator has no model of a
-     * device that holds another system's key, and the released 1.0.0 has no `setTempKey` either.
-     */
-    rpcMethods: Record<string, (iface: string, params: unknown[]) => unknown>;
-    /**
-     * What a behaviour script does: `emit('setValue', iface, address, datapoint, value)` stores the
-     * value and sends its event, so a flag with the SERVICE bit is in `getServiceMessages` until it
-     * is written back - a real pending message, not only an event.
-     */
-    api: {emit(event: 'setValue', iface: string, address: string, datapoint: string, value: unknown): void};
-    /**
-     * The ReGa mock; `renames` is every `dom.GetObject(id).Name(...)` script it was sent - read from
-     * the script's first line only, so a script renaming several objects is in `scripts` in full.
-     */
-    regaSim: {renames: {id: number; name: string; script: string}[]; scripts: string[]};
-}
+export type Simulator = InstanceType<typeof import('hm-simulator/sim.mjs').default>;
 
 export interface E2eFixtures {
     /** The web host, backend and simulator of this test; closed when the test ends. */

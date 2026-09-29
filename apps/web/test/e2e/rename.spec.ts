@@ -37,9 +37,9 @@ test('renaming a device changes the name in the grid, its channels with it', asy
     await expect(table.locator(`[data-row-id="${BIDCOS_SWITCH}:1"]`)).toContainText('Kitchen socket:1');
 
     // and the ReGa mock really saw the script, rather than the name only living in the local map
-    expect(sim.regaSim.renames.some((entry) => entry.name === 'Kitchen socket')).toBe(true);
+    expect(sim.regaSim?.renames.some((entry) => entry.name === 'Kitchen socket')).toBe(true);
     // the mock records the first line of a script only; the channel is in the same script
-    expect(sim.regaSim.scripts.some((script) => script.includes('.Name("Kitchen socket:1")'))).toBe(true);
+    expect(sim.regaSim?.scripts.some((script) => script.includes('.Name("Kitchen socket:1")'))).toBe(true);
 });
 
 /** Task 65, the `:0` convention: the maintenance channel follows the device's name and is never renamed alone. */

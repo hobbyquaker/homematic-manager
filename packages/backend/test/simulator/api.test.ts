@@ -14,9 +14,7 @@ import {afterEach, describe, expect, it} from 'vitest';
 import type {ApiFrame} from '@homematic-manager/core';
 
 import {ApiWebSocketServer, InProcessTransport, decodeFrame, encodeFrame} from '../../src/index.js';
-import {simulatorAvailable, startBackend, startSimulator} from './helpers.js';
-
-/* eslint-disable @typescript-eslint/no-explicit-any -- hm-simulator ships no types */
+import {simulatorAvailable, startBackend, startSimulator, type Simulator} from './helpers.js';
 
 const running: {close: () => unknown}[] = [];
 
@@ -26,7 +24,7 @@ afterEach(async () => {
     }
 });
 
-async function connected(): Promise<{sim: any; harness: Awaited<ReturnType<typeof startBackend>>}> {
+async function connected(): Promise<{sim: Simulator; harness: Awaited<ReturnType<typeof startBackend>>}> {
     const sim = await startSimulator();
     running.push({close: () => sim.close()});
     const harness = await startBackend(sim);

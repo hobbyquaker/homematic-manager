@@ -17,13 +17,17 @@ import os from 'node:os';
 import path from 'node:path';
 
 import type {ConnectionConfig} from '@homematic-manager/core';
+import type HmSimNamespace from 'hm-simulator/sim.mjs';
 
 import {Backend, type BackendOptions} from '../../src/index.js';
 
-/* eslint-disable @typescript-eslint/no-explicit-any -- hm-simulator ships no types */
+/** hm-simulator's class; the package ships its declarations since 1.3.0 (task 78). */
+type HmSimClass = typeof import('hm-simulator/sim.mjs').default;
+/** A running simulator. */
+export type Simulator = InstanceType<HmSimClass>;
 
 /** The simulator's constructor, or `undefined` when the package is not installed. */
-let HmSim: any;
+let HmSim: HmSimClass | undefined;
 try {
     HmSim = (await import('hm-simulator/sim.mjs')).default;
 } catch {
@@ -334,27 +338,39 @@ export interface SimulatorOptions {
     readonly configPendingMode?: 'strict' | 'pending' | 'hmip' | 'bidcos';
     /** The same for the `rfd` interface; defaults to `bidcos`, as rfd was measured. */
     readonly rfdConfigPendingMode?: 'strict' | 'pending' | 'hmip' | 'bidcos';
-    readonly links?: Record<string, unknown[]>;
-    readonly serviceMessages?: Record<string, unknown[]>;
+    readonly links?: Record<string, HmSimNamespace.Link[]>;
+    readonly serviceMessages?: Record<string, HmSimNamespace.ServiceMessage[]>;
     /** Starts the VirtualDevices server (the CCU's group process) on `/groups`, port from the OS. */
     readonly virtual?: boolean;
     /** What that server lists; empty unless given. Implies `virtual`. */
-    readonly virtualDevices?: {devices: unknown[]};
+    readonly virtualDevices?: {devices: HmSimNamespace.DeviceDescription[]};
     /**
      * Starts a CUxD server (BIN-RPC), port from the OS. hm-simulator answers every method there,
      * `getServiceMessages` included - unlike the real CUxD (B-26, #158).
      */
     readonly cuxd?: boolean;
+    /**
+     * Behaviour per interface on top of the CONFIG_PENDING modes above, e.g.
+     * `{virtual: {getServiceMessagesFault: true}}` (hm-simulator 1.3.0).
+     */
+    readonly interfaces?: Record<string, HmSimNamespace.InterfaceOptions>;
+    /** `getMetadata`'s answers before any `setMetadata`: `{<iface>: {<address>: {<key>: value}}}`. */
+    readonly metadata?: Record<string, Record<string, Record<string, unknown>>>;
 }
 
 /** Starts a simulator with the fixtures above. */
-export async function startSimulator(options: SimulatorOptions = {}): Promise<any> {
+export async function startSimulator(options: SimulatorOptions = {}): Promise<Simulator> {
     const virtual = options.virtual === true || options.virtualDevices !== undefined;
+    if (HmSim === undefined) {
+        throw new Error(SKIP_MESSAGE);
+    }
     const sim = new HmSim({
+        // copies: hm-simulator keeps the lists it is given and pairs into them, and a device one
+        // test paired must not turn up in the next test's simulator (task 78)
         devices: {
-            rfd: RFD_DEVICES,
-            hmip: HMIP_DEVICES,
-            ...(options.virtualDevices === undefined ? {} : {virtual: options.virtualDevices}),
+            rfd: structuredClone(RFD_DEVICES),
+            hmip: structuredClone(HMIP_DEVICES),
+            ...(options.virtualDevices === undefined ? {} : {virtual: structuredClone(options.virtualDevices)}),
         },
         paramsetDescriptions: PARAMSET_DESCRIPTIONS,
         config: {
@@ -370,9 +386,11 @@ export async function startSimulator(options: SimulatorOptions = {}): Promise<an
         ...(options.rega === false ? {} : {rega: {port: 0, listenAddress: '127.0.0.1', channels: REGA_CHANNELS}}),
         ...(options.links ? {links: options.links} : {}),
         ...(options.serviceMessages ? {serviceMessages: options.serviceMessages} : {}),
+        ...(options.metadata ? {metadata: options.metadata} : {}),
         interfaces: {
-            hmip: {configPendingMode: options.configPendingMode ?? 'hmip'},
-            rfd: {configPendingMode: options.rfdConfigPendingMode ?? 'bidcos'},
+            ...options.interfaces,
+            hmip: {...options.interfaces?.['hmip'], configPendingMode: options.configPendingMode ?? 'hmip'},
+            rfd: {...options.interfaces?.['rfd'], configPendingMode: options.rfdConfigPendingMode ?? 'bidcos'},
         },
     });
     await sim.whenReady();
@@ -388,7 +406,7 @@ export interface BackendHarness {
 
 /** Opens a backend against a running simulator and connects it. */
 export async function startBackend(
-    sim: any,
+    sim: Simulator,
     options: {
         connection?: Partial<ConnectionConfig>;
         backend?: Partial<BackendOptions>;

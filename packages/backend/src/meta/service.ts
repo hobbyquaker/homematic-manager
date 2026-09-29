@@ -220,6 +220,7 @@ export class MetaService {
                 : options.hostProbe !== undefined && configuredUrl === hostBaseUrl(options.connection)
                   ? {
                         baseUrl: options.hostProbe.baseUrl ?? configuredUrl,
+                        answered: options.hostProbe.answer !== undefined,
                         ...(options.hostProbe.answer === undefined ? {} : {version: options.hostProbe.answer}),
                         ...(options.hostProbe.certificate === undefined
                             ? {}

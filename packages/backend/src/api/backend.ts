@@ -30,6 +30,9 @@ import {
     type ApiEventName,
     type CallbackAddressInfo,
     type CallbackPins,
+    type ConnectionConfig,
+    type ConnectionTest,
+    type InterfaceState,
     type ApiEvents,
     type ApiMethodName,
     type ApiMethods,
@@ -66,7 +69,7 @@ import {
 import {CacheStore} from '../cache/store.js';
 import {ConfigStore, type ConfigStoreOptions} from '../config/store.js';
 import {LinkTemplateStore} from '../config/linkTemplates.js';
-import {validateConnection, writePaceFor} from '../config/defaults.js';
+import {normaliseConnection, validateConnection, writePaceFor} from '../config/defaults.js';
 import {DataFileServer} from '../data/files.js';
 import {installModeCalls} from '../devices/installMode.js';
 import {discoverCcus, type DiscoverOptions} from '../discovery/discover.js';
@@ -86,10 +89,19 @@ import {
     callbackBindHost,
     firstBidcosInterfaceAddress,
     type InterfaceManagerOptions,
+    type Interfaces,
 } from '../interfaces/manager.js';
+import {LiteInterfaces, type LiteInterfacesOptions} from '../interfaces/lite.js';
 import {HeatingGroupsClient} from '../groups/client.js';
 import {MetaService, hostBaseUrl, type HostProbe, type MetaServiceOptions} from '../meta/service.js';
-import {DETECT_TIMEOUT_MS, detectSystem, transportFor} from '../meta/system.js';
+import {
+    DETECT_TIMEOUT_MS,
+    detectSystem,
+    pairWithSystem,
+    testSystem,
+    transportFor,
+    type PairWithSystemOptions,
+} from '../meta/system.js';
 import {RegaService, type RegaServiceOptions} from '../rega/client.js';
 import type {RegaAlarm} from '../rega/scripts.js';
 import type {RpcCallRecord, RpcOutValue} from '../rpc/client.js';
@@ -183,6 +195,11 @@ export interface BackendOptions extends Omit<ConfigStoreOptions, 'version'> {
     readonly now?: () => number;
     /** Injected by the tests in place of the real world. */
     readonly createInterfaceManager?: (options: InterfaceManagerOptions) => InterfaceManager;
+    /** Task 72: the same for the openccu-lite path of a remote connection. */
+    readonly createLiteInterfaces?: (options: LiteInterfacesOptions) => LiteInterfaces;
+    readonly liteOptions?: Partial<LiteInterfacesOptions>;
+    /** Task 72: occulite-client's `pair()`, replaced by the tests. */
+    readonly pair?: PairWithSystemOptions['pair'];
     readonly createRega?: (options: RegaServiceOptions) => RegaService;
     /** D-40: injected by the tests, and by the integration test that runs a real occulited. */
     readonly metaOptions?: Partial<MetaServiceOptions>;
@@ -209,7 +226,16 @@ export class Backend {
     readonly #methodCache = new Map<string, RpcMethodInfo[]>();
 
     #caches: CacheStore;
-    #manager: InterfaceManager | undefined;
+    /**
+     * Task 72: the interface processes - through callback servers and `init` on a CCU (and on the
+     * system itself, where the addon runs), through lite-rpc on an openccu-lite system reached from
+     * off it. Everything below the API talks to the {@link Interfaces} surface and nothing else.
+     */
+    #manager: Interfaces | undefined;
+    /** Task 72: counts the connects, so a connect that waited for the probe knows it is still the current one. */
+    #connectSeq = 0;
+    /** Task 72: the pairing with an openccu-lite system that is running, if any. */
+    #pairing: AbortController | undefined;
     #rega: RegaService | undefined;
     /** D-40: the metadata store of this connection - this profile's own, or an openccu-lite box. */
     #meta: MetaService | undefined;
@@ -504,6 +530,12 @@ export class Backend {
                 return this.#clearCaches();
             case 'config.callbackAddresses':
                 return this.#callbackAddresses(p[0]);
+            case 'connection.test':
+                return this.#testConnection(p[0]);
+            case 'connection.pair':
+                return this.#startPairing(p[0]);
+            case 'connection.pairCancel':
+                return this.#cancelPairing();
 
             case 'interfaces.list':
                 return this.#manager?.states() ?? [];
@@ -745,7 +777,7 @@ export class Backend {
      * connection
      */
 
-    #requireManager(): InterfaceManager {
+    #requireManager(): Interfaces {
         if (!this.#manager) {
             throw configError('not connected to a CCU');
         }
@@ -763,48 +795,92 @@ export class Backend {
 
     async #connectNow(): Promise<void> {
         const connection = this.#config.connection;
+        const seq = ++this.#connectSeq;
         this.#paramsetIds.clear();
         this.#noServiceMessages.clear();
         this.#serviceMessageFailures.clear();
         this.#listedMethods.clear();
         this.#noListMethods.clear();
-        const manager = (this.#options.createInterfaceManager ?? ((options) => new InterfaceManager(options)))({
+
+        // Task 72: a connection from off the system with an API token may be one to an openccu-lite
+        // system, which never calls a remote client back (its D-70): the probe decides *before* the
+        // interfaces are started, and its answer picks lite-rpc over callback servers. Only then is
+        // the probe waited for - for everybody else (the addon on the system, a profile without a
+        // token, every CCU) it runs alongside the interface start as before (D-40's rule: a host
+        // that swallows the packet holds up the names, never the interfaces).
+        const token = (connection.metaToken ?? '').trim();
+        const mayBeRemoteLite = connection.local !== true && token !== '';
+        let hostProbe: Promise<HostProbe>;
+        let liteProbe: HostProbe | undefined;
+        if (mayBeRemoteLite) {
+            liteProbe = await this.#probeHost(connection);
+            if (this.#stopped || seq !== this.#connectSeq) {
+                // disconnected while the host was being asked
+                return;
+            }
+            hostProbe = Promise.resolve(liteProbe);
+        } else {
+            hostProbe = this.#probeHost(connection);
+        }
+
+        const shared = {
             connection,
             handler: this.#callbackHandler(),
-            onStateChanged: (states) => {
+            onStateChanged: (states: InterfaceState[]) => {
                 this.events.emit('interfaces.changed', states);
             },
-            onNotice: (level, message, interfaceName) => {
+            onNotice: (level: 'debug' | 'info' | 'warn' | 'error', message: string, interfaceName?: string) => {
                 this.#notice(level, message, interfaceName);
             },
-            onConnected: (interfaceName) =>
+            onConnected: (interfaceName: string) =>
                 runWithOrigin('background', () => this.#onInterfaceConnected(interfaceName)),
-            onCall: (record) => {
+            onCall: (record: RpcCallRecord) => {
                 this.#onCall(record);
             },
             originOf: currentOrigin,
-            ...(this.#options.callbackHost === undefined ? {} : {callbackHost: this.#options.callbackHost}),
-            ...(this.#options.defaultCallbackPorts === undefined
-                ? {}
-                : {defaultCallbackPorts: this.#options.defaultCallbackPorts}),
-            ...(this.#config.callbackPins === undefined ? {} : {callbackPins: this.#config.callbackPins}),
-            // B-69: read at every watchdog round - the cache is replaced when the host changes
-            listsDevices: (interfaceName) => this.#caches.devices.size(interfaceName) > 0,
-            ...(this.#options.rpcTimeoutMs === undefined ? {} : {rpcTimeoutMs: this.#options.rpcTimeoutMs}),
-            ...(this.#options.watchdogIntervalMs === undefined
-                ? {}
-                : {watchdogIntervalMs: this.#options.watchdogIntervalMs}),
-            ...(this.#options.localAddresses === undefined ? {} : {localAddresses: this.#options.localAddresses}),
-            ...(this.#options.network === undefined ? {} : {network: this.#options.network}),
-            ...(this.#keepsConfiguredCallbackIp() ? {keepConfiguredCallbackIp: true} : {}),
-            ...(this.#options.now === undefined ? {} : {now: this.#options.now}),
-            ...this.#options.interfaceManagerOptions,
-        });
+        };
+        const manager: Interfaces =
+            liteProbe?.answer !== undefined
+                ? (this.#options.createLiteInterfaces ?? ((options) => new LiteInterfaces(options)))({
+                      ...shared,
+                      baseUrl: liteProbe.baseUrl ?? hostBaseUrl(connection),
+                      token,
+                      transport: transportFor({
+                          fetch: this.#options.metaOptions?.fetch,
+                          trust: connection.systemTrust,
+                      }),
+                      ...(this.#options.rpcTimeoutMs === undefined ? {} : {rpcTimeoutMs: this.#options.rpcTimeoutMs}),
+                      ...(this.#options.now === undefined ? {} : {now: this.#options.now}),
+                      ...this.#options.liteOptions,
+                  })
+                : (this.#options.createInterfaceManager ?? ((options) => new InterfaceManager(options)))({
+                      ...shared,
+                      ...(this.#options.callbackHost === undefined ? {} : {callbackHost: this.#options.callbackHost}),
+                      ...(this.#options.defaultCallbackPorts === undefined
+                          ? {}
+                          : {defaultCallbackPorts: this.#options.defaultCallbackPorts}),
+                      ...(this.#config.callbackPins === undefined ? {} : {callbackPins: this.#config.callbackPins}),
+                      // B-69: read at every watchdog round - the cache is replaced when the host changes
+                      listsDevices: (interfaceName) => this.#caches.devices.size(interfaceName) > 0,
+                      ...(this.#options.rpcTimeoutMs === undefined ? {} : {rpcTimeoutMs: this.#options.rpcTimeoutMs}),
+                      ...(this.#options.watchdogIntervalMs === undefined
+                          ? {}
+                          : {watchdogIntervalMs: this.#options.watchdogIntervalMs}),
+                      ...(this.#options.localAddresses === undefined
+                          ? {}
+                          : {localAddresses: this.#options.localAddresses}),
+                      ...(this.#options.network === undefined ? {} : {network: this.#options.network}),
+                      ...(this.#keepsConfiguredCallbackIp() ? {keepConfiguredCallbackIp: true} : {}),
+                      ...(this.#options.now === undefined ? {} : {now: this.#options.now}),
+                      ...this.#options.interfaceManagerOptions,
+                  });
         this.#manager = manager;
-
-        // B-62: is the host an openccu-lite system? Asked alongside the interface start, so that a
-        // host which swallows the packet holds up the names, never the interfaces (D-40's rule).
-        const hostProbe = this.#probeHost(connection);
+        if (liteProbe?.answer !== undefined) {
+            this.#notice(
+                'info',
+                `${connection.host}: an openccu-lite system - the interfaces are reached through its lite-rpc with the API token, without callbacks`,
+            );
+        }
 
         try {
             await manager.start();
@@ -899,6 +975,7 @@ export class Backend {
     }
 
     async #disconnect(): Promise<void> {
+        this.#connectSeq += 1;
         this.#clearTimers();
         this.#queue.cancel();
         await this.#manager?.stop();
@@ -1221,6 +1298,92 @@ export class Backend {
         // task's context; the origin is the one of whoever enqueued, so it is taken here.
         const origin = currentOrigin();
         return this.#queue.enqueue(interfaceName, () => client.call(method, params, {origin}));
+    }
+
+    /*
+     * task 72: the connection test and the pairing with an openccu-lite system
+     */
+
+    /** `connection.test`: what is at the draft's host, and what its token is worth there. */
+    async #testConnection(input: unknown): Promise<ConnectionTest> {
+        const connection = normaliseConnection(input);
+        const baseUrl = hostBaseUrl(connection);
+        if (baseUrl === '') {
+            throw validationError('no CCU address configured');
+        }
+        return testSystem(
+            transportFor({fetch: this.#options.metaOptions?.fetch, trust: connection.systemTrust}),
+            baseUrl,
+            (connection.metaToken ?? '').trim(),
+            this.#options.metaOptions?.detectTimeoutMs ?? DETECT_TIMEOUT_MS,
+        );
+    }
+
+    /**
+     * `connection.pair`: asks the system for a token and answers at once; the steps come as
+     * `pairing.changed` (openccu-lite task 219: the code is shown here and on the system's Status
+     * page, an administrator approves it there). One pairing at a time - a new one cancels the old.
+     */
+    #startPairing(input: unknown): null {
+        const connection = normaliseConnection(input);
+        const baseUrl = hostBaseUrl(connection);
+        if (baseUrl === '') {
+            throw validationError('no CCU address configured');
+        }
+        this.#cancelPairing();
+        const controller = new AbortController();
+        this.#pairing = controller;
+        this.events.emit('pairing.changed', {state: 'requesting'});
+        void this.#runPairing(connection, baseUrl, controller);
+        return null;
+    }
+
+    async #runPairing(connection: ConnectionConfig, baseUrl: string, controller: AbortController): Promise<void> {
+        const current = (): boolean => this.#pairing === controller;
+        try {
+            const paired = await pairWithSystem({
+                transport: transportFor({fetch: this.#options.metaOptions?.fetch, trust: connection.systemTrust}),
+                baseUrl,
+                appVersion: this.#config.config.version,
+                detectTimeoutMs: this.#options.metaOptions?.detectTimeoutMs ?? DETECT_TIMEOUT_MS,
+                signal: controller.signal,
+                onCode: (code) => {
+                    if (current()) {
+                        this.events.emit('pairing.changed', {state: 'code', code});
+                    }
+                },
+                ...(this.#options.pair === undefined ? {} : {pair: this.#options.pair}),
+            });
+            if (!current()) {
+                return;
+            }
+            this.#pairing = undefined;
+            this.events.emit('pairing.changed', {
+                state: 'approved',
+                token: paired.token,
+                fingerprint256: paired.fingerprint256,
+                scopes: paired.scopes,
+                name: paired.name,
+            });
+        } catch (error) {
+            if (!current()) {
+                // cancelled, or replaced by a newer one: that one said so
+                return;
+            }
+            this.#pairing = undefined;
+            this.events.emit('pairing.changed', {state: 'failed', message: errorMessage(error)});
+        }
+    }
+
+    /** `connection.pairCancel`: withdraws the request, on the system too (the client does that). */
+    #cancelPairing(): null {
+        const controller = this.#pairing;
+        if (controller !== undefined) {
+            this.#pairing = undefined;
+            controller.abort();
+            this.events.emit('pairing.changed', {state: 'cancelled'});
+        }
+        return null;
     }
 
     /*
@@ -2275,6 +2438,9 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'config.discover',
     'config.clearCaches',
     'config.callbackAddresses',
+    'connection.test',
+    'connection.pair',
+    'connection.pairCancel',
     'interfaces.list',
     'interfaces.reconnect',
     'rega.state',

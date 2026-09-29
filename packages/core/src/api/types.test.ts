@@ -18,6 +18,7 @@ describe('API_EVENT_NAMES', () => {
             'meta.objects.changed',
             'names.changed',
             'notice',
+            'pairing.changed',
             'rega.changed',
             'rpc.event',
             'rpcLog.appended',

@@ -27,13 +27,16 @@
  * backoff, the state it shows, the cache file.
  */
 
+import os from 'node:os';
+
 import type {MetaCopy, Transport, WriteResult} from 'occulite-client';
 import {OccuLite, OccuLiteError, fetchTransport, parseSSE, type Auth} from 'occulite-client';
-import {nodeTransport} from 'occulite-client/node';
+import {nodeTransport, pair, type Paired, type PairOptions} from 'occulite-client/node';
 
 import {
     MetaError,
     parseDocument,
+    type ConnectionTest,
     type MetaDocument,
     type MetaErrorCode,
     type MetaEvent,
@@ -274,6 +277,13 @@ export interface MetaDetection {
     readonly version?: MetaVersion;
     readonly baseUrl: string;
     readonly certificate?: SystemCertificateProblem;
+    /**
+     * Task 72: something answered over HTTP - the version, a CCU's 404 or HTML, anything. False
+     * when the request itself failed; `reason` then says how (`refused`, `dns`, `timeout`, or the
+     * transport's own word), and never for a certificate problem, which is `certificate` above.
+     */
+    readonly answered: boolean;
+    readonly reason?: string;
 }
 
 /**
@@ -374,18 +384,132 @@ export async function detectSystem(
         if (REDIRECTS.has(response.status)) {
             const target = httpsRedirectTarget(response.headers['location'], requested);
             if (target === undefined) {
-                return {baseUrl: found};
+                return {baseUrl: found, answered: true};
             }
             found = target.baseUrl;
             requested = target.url;
             response = await transport.request('GET', target.url, headers, undefined, signal);
         }
         const version = versionOf(response.status, response.body);
-        return version === undefined ? {baseUrl: found} : {version, baseUrl: found};
+        return version === undefined ? {baseUrl: found, answered: true} : {version, baseUrl: found, answered: true};
     } catch (error) {
         const certificate = certificateProblemOf(error, requested);
-        return certificate === undefined ? {baseUrl: found} : {baseUrl: found, certificate};
+        if (certificate !== undefined) {
+            return {baseUrl: found, certificate, answered: false};
+        }
+        const reason =
+            error instanceof OccuLiteError
+                ? (error.reason ?? error.code)
+                : (error as {name?: string}).name === 'TimeoutError'
+                  ? 'timeout'
+                  : 'error';
+        return {baseUrl: found, answered: false, reason};
     }
+}
+
+/*
+ * task 72: the connection test and the pairing
+ */
+
+/**
+ * The settings dialog's *Test connection*: what is at `baseUrl` and what `token` is worth there.
+ * Nothing is kept open. Never throws for a system that does not answer - that is the answer.
+ */
+export async function testSystem(
+    transport: Transport,
+    baseUrl: string,
+    token: string,
+    timeoutMs = DETECT_TIMEOUT_MS,
+): Promise<ConnectionTest> {
+    const found = await detectSystem(transport, baseUrl, timeoutMs);
+    if (found.certificate !== undefined) {
+        return {
+            kind: 'unreachable',
+            reachable: true,
+            reason: 'certificate',
+            url: found.certificate.url,
+            certificate: found.certificate,
+        };
+    }
+    if (found.version === undefined) {
+        return found.answered
+            ? {kind: 'ccu', reachable: true, url: found.baseUrl}
+            : {kind: 'unreachable', reachable: false, reason: found.reason ?? 'error', url: found.baseUrl};
+    }
+    const result: ConnectionTest = {
+        kind: 'openccu-lite',
+        reachable: true,
+        url: found.baseUrl,
+        ...(found.version.implementation === undefined ? {} : {implementation: found.version.implementation}),
+        token: {state: 'none', scopes: []},
+    };
+    if (token === '') {
+        return result;
+    }
+    const box = new OccuLite({url: found.baseUrl, transport, auth: {token}, timeout: DEFAULT_TIMEOUT_MS});
+    try {
+        const state = await box.request<{scopes?: string[]; authenticated?: boolean}>('GET', '/api/auth/v1/state');
+        const scopes = Array.isArray(state.scopes)
+            ? state.scopes.filter((s): s is string => typeof s === 'string')
+            : [];
+        if (state.authenticated === false) {
+            return {...result, token: {state: 'refused', scopes: []}};
+        }
+        const rpc = scopes.includes('*') || scopes.includes('rpc:read');
+        return {...result, token: {state: rpc ? 'full' : 'names-only', scopes}};
+    } catch (error) {
+        if (error instanceof OccuLiteError && (error.code === 'unauthenticated' || error.code === 'forbidden')) {
+            return {...result, token: {state: 'refused', scopes: []}};
+        }
+        throw error;
+    }
+}
+
+export interface PairWithSystemOptions {
+    /** The transport with the profile's trust, for the detection that finds the `https://` URL. */
+    readonly transport: Transport;
+    readonly baseUrl: string;
+    readonly appVersion: string;
+    readonly detectTimeoutMs?: number;
+    readonly onCode: (code: string) => void;
+    readonly signal: AbortSignal;
+    /** occulite-client's `pair()`, replaced by the tests. */
+    readonly pair?: (options: PairOptions) => Promise<Paired>;
+}
+
+/**
+ * Pairs this application with the openccu-lite system at `baseUrl` (openccu-lite task 219): one
+ * request, a six-digit code both sides show, an administrator's click on the system's Status page.
+ * The system's `https://` is found first (an `http://` request would only be redirected), and the
+ * pairing itself accepts whatever certificate the system presents - this is the first contact, and
+ * the fingerprint it answers is the one the profile pins from then on. The access asked for is what
+ * this application does: it administers devices (delete, re-key, firmware, install mode), edits
+ * names and rooms, and changes heating groups.
+ */
+export async function pairWithSystem(options: PairWithSystemOptions): Promise<Paired> {
+    const found = await detectSystem(options.transport, options.baseUrl, options.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
+    if (found.version === undefined && found.certificate === undefined) {
+        throw new Error(
+            found.answered
+                ? `${options.baseUrl} is not an openccu-lite system`
+                : `${options.baseUrl} does not answer (${found.reason ?? 'error'})`,
+        );
+    }
+    const url = found.certificate?.url ?? found.baseUrl;
+    return (options.pair ?? pair)({
+        url,
+        app: 'homematic-manager',
+        appVersion: options.appVersion,
+        instance: os.hostname(),
+        access: {devices: 'administer', names: 'configure', system: 'configure'},
+        purpose: {
+            devices: 'configure devices, direct links and paramsets; pair, delete and update devices',
+            names: 'rename devices and channels, edit rooms and functions',
+            system: 'heating groups, service messages and the radio health',
+        },
+        onCode: options.onCode,
+        signal: options.signal,
+    });
 }
 
 /*

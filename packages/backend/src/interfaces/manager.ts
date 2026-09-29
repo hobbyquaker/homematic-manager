@@ -33,6 +33,7 @@ import type {
     InterfaceState,
     ResolvedInterface,
     RpcProtocol,
+    RpcValue,
 } from '@homematic-manager/core';
 import {
     INTERFACE_NAMES,
@@ -52,7 +53,13 @@ import {
     isNotAnswering,
 } from '../errors.js';
 import {interfaceTargets, type InterfaceTarget} from '../config/defaults.js';
-import {RpcClient, type RpcCallRecord, type RpcClientOptions} from '../rpc/client.js';
+import {
+    RpcClient,
+    type RpcCallOptions,
+    type RpcCallRecord,
+    type RpcClientOptions,
+    type RpcOutValue,
+} from '../rpc/client.js';
 import {CallbackServers, type CallbackHandler, type CallbackServerSet} from '../rpc/server.js';
 import {
     describeCallbackAddresses,
@@ -301,8 +308,42 @@ export function callbackBindHost(connection: ConnectionConfig): string | undefin
     return ip === LOOPBACK_IP || (ip === '' && connection.local === true) ? LOOPBACK_IP : undefined;
 }
 
+/**
+ * Task 72: one interface's request channel, as the rest of the backend calls it - the {@link RpcClient}
+ * of an interface process on a CCU, or the lite-rpc path of an openccu-lite system reached from off
+ * the system (`lite.ts`). Every call, however it ends, is reported to the RPC log with its origin.
+ */
+export interface InterfaceLink {
+    call(method: string, params?: readonly RpcOutValue[], options?: RpcCallOptions): Promise<RpcValue>;
+}
+
+/**
+ * Task 72: what the backend needs from whatever connects the interfaces - this manager with its
+ * callback servers and `init` for a CCU, {@link LiteInterfaces} for an openccu-lite system reached
+ * from off the system. The write queue, the RPC log and every `ApiMethods` handler talk to this
+ * surface and nothing else, so the CCU path is untouched by the other one.
+ */
+export interface Interfaces {
+    /** D-31: are the subscriptions currently dropped because nobody is looking? */
+    readonly idle: boolean;
+    /** The state of every configured interface, in configuration order. */
+    states(): InterfaceState[];
+    /** The request channel of one interface. Throws `kind: 'config'` for a name that is not configured. */
+    client(interfaceName: string): InterfaceLink;
+    isConnected(interfaceName: string): boolean;
+    names(): string[];
+    resolved(interfaceName: string): ResolvedInterface | undefined;
+    start(): Promise<void>;
+    stop(): Promise<void>;
+    unsubscribe(): Promise<void>;
+    subscribe(): Promise<void>;
+    reconnect(interfaceName?: string): Promise<void>;
+    /** An event or a device callback arrived; the interface is alive. */
+    noteEvent(interfaceName: string, kind?: 'event' | 'device'): void;
+}
+
 /** Connects, watches and disconnects every configured interface. */
-export class InterfaceManager {
+export class InterfaceManager implements Interfaces {
     readonly #options: InterfaceManagerOptions;
     readonly #now: () => number;
     readonly #monotonicNow: () => number;

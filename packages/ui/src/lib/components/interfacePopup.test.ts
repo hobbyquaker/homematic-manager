@@ -114,6 +114,13 @@ describe('the second line of an item', () => {
         ]);
     });
 
+    /** Task 72: through an openccu-lite system's lite-rpc there is no port of the process to name. */
+    it('says lite-rpc and the system for an interface reached through openccu-lite', () => {
+        expect(
+            detailParts(state('HmIP-RF', {lite: true, host: 'lite.lan', port: 443, tls: true}), {devices: 3}, labels),
+        ).toEqual(['lite-rpc', 'lite.lan:443', 'TLS', '3 Geräte']);
+    });
+
     it('names the encryption when the connection is encrypted', () => {
         expect(detailParts(state('BidCos-RF', {port: 42_001, tls: true}), undefined, labels)).toEqual([
             'xmlrpc',

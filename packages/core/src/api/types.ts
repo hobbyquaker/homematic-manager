@@ -164,6 +164,46 @@ export interface SystemCertificateProblem {
     ca?: SystemCertificate & {pem: string};
 }
 
+/**
+ * Task 72: what `connection.test` found at a host - before anything is saved.
+ *
+ * `kind` is what answered: an openccu-lite system (its version answer's `implementation`), a CCU
+ * (any other HTTP answer, the WebUI's HTML included) or nothing. `reachable` and `reason` tell a
+ * system that is there but refuses (`certificate`: its `https://` is not trusted - the problem is
+ * in `certificate`, for the same buttons the dialog has for a connected system) from one that is
+ * not (`timeout`, `refused`, `dns`). A timeout is never a CCU. `token` says what the profile's API
+ * token is worth on that system: `none` when the profile has none, `refused` when the system does
+ * not accept it, `names-only` when it lacks `rpc:read` (the metadata store's `user` token), `full`
+ * when devices and values can be read with it.
+ */
+export interface ConnectionTest {
+    kind: 'openccu-lite' | 'ccu' | 'unreachable';
+    reachable: boolean;
+    reason?: string;
+    /** Where it answered: the `https://` URL when the system redirected there. */
+    url: string;
+    /** `occulited 1.0.0-dev.32`, on openccu-lite. */
+    implementation?: string;
+    certificate?: SystemCertificateProblem;
+    token?: {state: 'none' | 'refused' | 'names-only' | 'full'; scopes: string[]};
+}
+
+/**
+ * Task 72: the pairing with an openccu-lite system, as the settings dialog follows it (openccu-lite
+ * task 219). `connection.pair` starts it and the backend pushes each step as `pairing.changed`:
+ * the request is on its way (`requesting`), the system has it and shows the same six-digit code on
+ * its Status page (`code`: show it large), an administrator approved it (`approved`: the token to
+ * save and the certificate's fingerprint to trust), or it ended without one (`failed`: rejected,
+ * expired after five minutes, the system unreachable; `cancelled`: `connection.pairCancel`, or a
+ * second pairing started).
+ */
+export type PairingState =
+    | {state: 'requesting'}
+    | {state: 'code'; code: string}
+    | {state: 'approved'; token: string; fingerprint256: string; scopes: string[]; name: string}
+    | {state: 'failed'; message: string}
+    | {state: 'cancelled'};
+
 export interface AppConfig {
     version: string;
     connection: ConnectionConfig;
@@ -300,6 +340,14 @@ export interface InterfaceState {
      * only to somebody who knows the CCU's port table by heart.
      */
     tls?: boolean;
+    /**
+     * Task 72: this interface is reached through an openccu-lite system's lite-rpc - requests over
+     * its web port with the profile's API token, events from the stream the app opens - and not
+     * through the interface process's own port with a callback server. `host` and `port` are the
+     * system's; `protocol` says `xmlrpc` for want of a better word and the popup shows "lite-rpc".
+     * Only present when it is true.
+     */
+    lite?: boolean;
     /** `init` succeeded and the ping/event watchdog is satisfied. */
     connected: boolean;
     /** Milliseconds since epoch of the last event or ping answer, if any. */
@@ -841,6 +889,21 @@ export interface ApiMethods {
      * the one being typed into the settings dialog - or the configured CCU when it is absent.
      */
     'config.callbackAddresses': {params: [host?: string]; result: CallbackAddressInfo};
+    /**
+     * Task 72: what is at the host of `connection` - an openccu-lite system, a CCU, nothing - and
+     * what the profile's token is worth there. Nothing is saved and the running connection is not
+     * touched; the dialog's *Test connection*.
+     */
+    'connection.test': {params: [connection: ConnectionConfig]; result: ConnectionTest};
+    /**
+     * Task 72: pairs this application with the openccu-lite system at `connection`'s host (openccu-lite
+     * task 219). Answers as soon as the request is on its way; every step comes as `pairing.changed`,
+     * and the token of an approved request is the dialog's to put into the profile. A pairing that is
+     * still running is cancelled by a new one.
+     */
+    'connection.pair': {params: [connection: ConnectionConfig]; result: null};
+    /** Task 72: withdraws the running pairing request, on the system too. */
+    'connection.pairCancel': {params: []; result: null};
 
     'interfaces.list': {params: []; result: InterfaceState[]};
     'interfaces.reconnect': {params: [interfaceName?: string]; result: null};
@@ -1150,6 +1213,8 @@ export interface ApiEvents {
     /** Issue #26: a device went unreachable, or a counter was reset. */
     'unreach.changed': UnreachCounter[];
     'config.changed': AppConfig;
+    /** Task 72: a step of the pairing `connection.pair` started. */
+    'pairing.changed': PairingState;
     /** Backend-side problem the user should see (ReGa down, port in use, ...). */
     /**
      * `debug` is for the host's log only (task 56: the start retries of an interface that is not
@@ -1210,6 +1275,7 @@ const API_EVENT_FLAGS = {
     'write.progress': true,
     'unreach.changed': true,
     'config.changed': true,
+    'pairing.changed': true,
     notice: true,
 } as const satisfies Record<ApiEventName, true>;
 

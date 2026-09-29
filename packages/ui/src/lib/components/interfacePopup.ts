@@ -150,7 +150,12 @@ export function detailParts(
     details: InterfaceDetails | undefined,
     labels: DetailLabels,
 ): string[] {
-    const parts = [state.protocol, `${labels.port} ${String(state.port)}`];
+    // task 72: through an openccu-lite system's lite-rpc there is no port of the process to name -
+    // the system's web port and its host are what the requests go to
+    const parts =
+        state.lite === true
+            ? ['lite-rpc', `${state.host}:${String(state.port)}`]
+            : [state.protocol, `${labels.port} ${String(state.port)}`];
     if (state.tls === true) {
         parts.push(labels.tls);
     }

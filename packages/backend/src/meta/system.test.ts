@@ -178,6 +178,8 @@ describe("the profile's trust on the package's transport (B-67)", () => {
             const started = Date.now();
             expect(await detectSystem(systemTransport({certificates: [LEAF_FINGERPRINT]}), url, 100)).toEqual({
                 baseUrl: url,
+                answered: false,
+                reason: 'timeout',
             });
             expect(Date.now() - started).toBeLessThan(2000);
         } finally {
@@ -229,6 +231,7 @@ describe('the detection', () => {
         expect(await detectSystem(fetchTransport(box.fetch), 'http://box/')).toEqual({
             version: VERSION,
             baseUrl: 'http://box/',
+            answered: true,
         });
         expect(box.urls).toEqual(['http://box/api/meta/v1/version']);
     });
@@ -241,13 +244,17 @@ describe('the detection', () => {
             json({...VERSION, version: 'one'}),
         ]) {
             const found = await detectSystem(fetchTransport(fetchOf(() => answer).fetch), 'http://ccu');
-            expect(found).toEqual({baseUrl: 'http://ccu'});
+            expect(found).toEqual({baseUrl: 'http://ccu', answered: true});
         }
     });
 
     it('answers no version when the host does not answer at all, and never throws', async () => {
         const refused = fetchTransport(() => Promise.reject(new TypeError('fetch failed')));
-        expect(await detectSystem(refused, 'http://gone')).toEqual({baseUrl: 'http://gone'});
+        expect(await detectSystem(refused, 'http://gone')).toEqual({
+            baseUrl: 'http://gone',
+            answered: false,
+            reason: 'error',
+        });
         const silent = fetchTransport(
             (_input, init) =>
                 new Promise((_resolve, reject) => {
@@ -256,7 +263,11 @@ describe('the detection', () => {
                     });
                 }),
         );
-        expect(await detectSystem(silent, 'http://silent', 50)).toEqual({baseUrl: 'http://silent'});
+        expect(await detectSystem(silent, 'http://silent', 50)).toEqual({
+            baseUrl: 'http://silent',
+            answered: false,
+            reason: 'timeout',
+        });
     });
 
     it('follows the system to https:// and hands back the base URL there', async () => {
@@ -266,13 +277,16 @@ describe('the detection', () => {
                 : json(VERSION),
         );
         const found = await detectSystem(fetchTransport(box.fetch), 'http://10.0.0.5');
-        expect(found).toEqual({version: VERSION, baseUrl: 'https://10.0.0.5'});
+        expect(found).toEqual({version: VERSION, baseUrl: 'https://10.0.0.5', answered: true});
         expect(box.urls).toEqual(['http://10.0.0.5/api/meta/v1/version', 'https://10.0.0.5/api/meta/v1/version']);
     });
 
     it('does not follow a redirect anywhere else - a login page is not the API', async () => {
         const box = fetchOf(() => new Response(null, {status: 302, headers: {Location: '/login.htm'}}));
-        expect(await detectSystem(fetchTransport(box.fetch), 'http://ccu')).toEqual({baseUrl: 'http://ccu'});
+        expect(await detectSystem(fetchTransport(box.fetch), 'http://ccu')).toEqual({
+            baseUrl: 'http://ccu',
+            answered: true,
+        });
         expect(box.urls.length).toBe(1);
     });
 

@@ -86,6 +86,9 @@ export class ApiWebSocketServer {
     /** D-32: the session each socket was opened with, for `session.info`. */
     readonly #sessions = new WeakMap<WebSocket, SessionInfo>();
     readonly #unsubscribe: () => void;
+    /** Task 73: event frames waiting for the next turn of the event loop, oldest first. */
+    #pending: string[] = [];
+    #flushScheduled = false;
     #server: WebSocketServer | undefined;
 
     constructor(options: ApiWebSocketServerOptions) {
@@ -172,6 +175,7 @@ export class ApiWebSocketServer {
     /** Closes every socket and the server. */
     async stop(): Promise<void> {
         this.#unsubscribe();
+        this.#pending = [];
         for (const socket of [...this.#sockets]) {
             socket.close();
         }
@@ -190,14 +194,37 @@ export class ApiWebSocketServer {
         });
     }
 
-    /** Pushes an event to every connected client. */
+    /**
+     * Pushes an event to every connected client - on the next turn of the event loop, in order.
+     *
+     * Task 73: most events come out of an RPC callback (`event`, `newDevices`), and the backend emits
+     * them before the callback server answers the interface process. A send to every client inline
+     * made that answer wait on the WebSocket bookkeeping of each tab, and hmipserver keeps a worker
+     * blocked for as long as a listener takes (its Vert.x checker then logs a stack trace a second).
+     * The frame is encoded at once, so it carries the payload as it was; only the sends wait until
+     * the callback has been answered.
+     */
     broadcast(event: ApiEventName, payload: unknown): void {
         if (this.#sockets.size === 0) {
             return;
         }
-        const frame = encodeFrame({t: 'ev', n: event, d: payload});
-        for (const socket of this.#sockets) {
-            this.#send(socket, frame);
+        this.#pending.push(encodeFrame({t: 'ev', n: event, d: payload}));
+        if (!this.#flushScheduled) {
+            this.#flushScheduled = true;
+            setImmediate(() => {
+                this.#flush();
+            });
+        }
+    }
+
+    #flush(): void {
+        this.#flushScheduled = false;
+        const frames = this.#pending;
+        this.#pending = [];
+        for (const frame of frames) {
+            for (const socket of this.#sockets) {
+                this.#send(socket, frame);
+            }
         }
     }
 

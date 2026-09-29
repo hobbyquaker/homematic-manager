@@ -8,6 +8,15 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ## [Unreleased]
 
+### Changed
+
+- **The interface processes get their answer before the app's windows get the news.** An event or a `newDevices`
+  from rfd or hmipserver used to be sent on to every open browser tab (or window of the desktop app) before the
+  callback was answered, so a busy tab made the interface process wait - and hmipserver logs a stack trace every
+  second for a listener that keeps it waiting. The answer goes out first now, and the tabs get the events right after,
+  in the same order. A test drives both callback servers with a burst of 500 events and a `newDevices` of 100 devices
+  while twenty tabs are connected, one of which never reads, and every answer arrives within 50 ms. (task 73)
+
 ### Fixed
 
 - **An addon update stops only the old backend.** The installer's update script took every process whose command

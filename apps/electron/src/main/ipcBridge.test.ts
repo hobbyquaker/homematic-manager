@@ -108,6 +108,12 @@ class FakeTransport implements Transport {
     }
 }
 
+/** Task 73: the bridge sends events on the next turn of the event loop. */
+const nextTurn = (): Promise<void> =>
+    new Promise((resolve) => {
+        setImmediate(resolve);
+    });
+
 const request = (id: number, method: string, params: unknown[] = []): string =>
     JSON.stringify({t: 'req', id, m: method, p: params});
 
@@ -177,20 +183,26 @@ describe('IpcBridge', () => {
         });
     });
 
-    it('fans events out to every attached renderer', () => {
+    it('fans events out to every attached renderer, after the emitter returned (task 73)', async () => {
         const second = new FakeContents(2);
         bridge.attach(second);
         transport.emit('notice', {level: 'warn', message: 'ReGa is not answering'});
+        transport.emit('names.changed', {'ABC:1': 'Lamp'});
+        // nothing inline: an RPC callback's answer must not wait on the renderers
+        expect(contents.frames()).toEqual([]);
+        await nextTurn();
         for (const target of [contents, second]) {
             expect(target.frames()).toEqual([
                 {t: 'ev', n: 'notice', d: {level: 'warn', message: 'ReGa is not answering'}},
+                {t: 'ev', n: 'names.changed', d: {'ABC:1': 'Lamp'}},
             ]);
         }
     });
 
-    it('does not send a renderer its events twice after a reload', () => {
+    it('does not send a renderer its events twice after a reload', async () => {
         bridge.attach(contents);
         transport.emit('names.changed', {'ABC:1': 'Lamp'});
+        await nextTurn();
         expect(contents.frames()).toHaveLength(1);
         expect(bridge.renderers).toHaveLength(1);
     });
@@ -200,17 +212,19 @@ describe('IpcBridge', () => {
         expect(contents.sent.at(-1)).toEqual([API_CONNECTED_CHANNEL, false]);
     });
 
-    it('forgets a destroyed renderer instead of throwing at it', () => {
+    it('forgets a destroyed renderer instead of throwing at it', async () => {
         contents.destroyed = true;
         transport.emit('names.changed', {});
+        await nextTurn();
         expect(bridge.renderers).toHaveLength(0);
     });
 
-    it('survives a renderer that is destroyed between the check and the send', () => {
+    it('survives a renderer that is destroyed between the check and the send', async () => {
         contents.throwOnSend = true;
         expect(() => {
             transport.emit('names.changed', {});
         }).not.toThrow();
+        await nextTurn();
         expect(bridge.renderers).toHaveLength(0);
     });
 
@@ -250,9 +264,10 @@ describe('IpcBridge', () => {
         expect(ipcMain.listeners.has(API_CHANNEL)).toBe(false);
     });
 
-    it('detaches a window on request', () => {
+    it('detaches a window on request', async () => {
         bridge.detach(contents);
         transport.emit('names.changed', {});
+        await nextTurn();
         expect(contents.frames()).toHaveLength(0);
     });
 

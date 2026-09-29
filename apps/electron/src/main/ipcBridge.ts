@@ -71,6 +71,9 @@ export class IpcBridge {
     readonly #onProtocolError: (message: string) => void;
     readonly #renderers = new Map<number, WebContentsLike>();
     readonly #unsubscribe: Array<() => void> = [];
+    /** Task 73: event frames waiting for the next turn of the event loop, oldest first. */
+    #pending: string[] = [];
+    #flushScheduled = false;
 
     #disposed = false;
 
@@ -86,7 +89,7 @@ export class IpcBridge {
         for (const name of options.events ?? API_EVENT_NAMES) {
             this.#unsubscribe.push(
                 this.#transport.on(name, (payload) => {
-                    this.broadcast({t: 'ev', n: name, d: payload});
+                    this.#queue({t: 'ev', n: name, d: payload});
                 }),
             );
         }
@@ -115,9 +118,33 @@ export class IpcBridge {
         this.#renderers.delete(contents.id);
     }
 
-    /** Sends one frame to every attached renderer. */
+    /** Sends one frame to every attached renderer, now. */
     broadcast(frame: ApiFrame): void {
         this.#send(API_CHANNEL, encodeFrame(frame));
+    }
+
+    /**
+     * An event, sent on the next turn of the event loop, in order (task 73): the backend emits most
+     * events inside an RPC callback, before the callback server answers the interface process, and
+     * that answer must not wait on the renderers. Encoded at once, so the frame carries the payload
+     * as it was.
+     */
+    #queue(frame: ApiFrame): void {
+        if (this.#renderers.size === 0) {
+            return;
+        }
+        this.#pending.push(encodeFrame(frame));
+        if (!this.#flushScheduled) {
+            this.#flushScheduled = true;
+            setImmediate(() => {
+                this.#flushScheduled = false;
+                const frames = this.#pending;
+                this.#pending = [];
+                for (const encoded of frames) {
+                    this.#send(API_CHANNEL, encoded);
+                }
+            });
+        }
     }
 
     /** Unsubscribes from the backend and forgets the renderers. Idempotent. */
@@ -126,6 +153,7 @@ export class IpcBridge {
             return;
         }
         this.#disposed = true;
+        this.#pending = [];
         for (const off of this.#unsubscribe.splice(0)) {
             off();
         }

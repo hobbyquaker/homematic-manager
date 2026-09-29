@@ -5,6 +5,9 @@ import {beforeEach, describe, expect, it} from 'vitest';
 import {MockTransport} from '../../lib/transport/MockTransport.js';
 import {linkFields, profileDescription, profileLabel} from '../../lib/util/linkForm.js';
 import {mountApp} from '../../testHarness.js';
+import hmipSwitchLinksRaw from '../../../../core/test/fixtures/hmip-switch-links.json?raw';
+import switchVirtualReceiverRaw from '../../../../../data/dist/profiles/SWITCH_VIRTUAL_RECEIVER.json?raw';
+import timeSelectorsRaw from '../../../../../data/dist/easymode-time-selectors.json?raw';
 
 const description: ParamsetDescription = {
     SHORT_ON_TIME: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 8590, UNIT: 's', TAB_ORDER: 3},
@@ -802,6 +805,81 @@ describe('the CCU easy mode form (task 62, D-54)', () => {
         });
         expect(screen.queryByTestId('link-easy-form')).toBeNull();
         expect(screen.getByTestId('param-SHORT_ACTION_TYPE')).toBeTruthy();
+    });
+});
+
+describe('an HmIP toggle link with the real profile data (B-77)', () => {
+    // An HmIP key channel on an HmIP switch actuator channel, with the LINK paramset and description a
+    // lab system answered and the profiles the pipeline ships. The WebUI shows it as "Schalter ein /
+    // aus"; the fixed parameters alone made it "Schalter ein", which names more of them.
+    const RECEIVER = '000A1B2C3D4E5F:4';
+    const SENDER = '0001D8A9B7C6D5:1';
+    const links = JSON.parse(hmipSwitchLinksRaw) as {
+        toggle: Record<string, number | boolean>;
+        on: Record<string, number | boolean>;
+        description: ParamsetDescription;
+    };
+    let transport: MockTransport;
+
+    async function openLink(values: Record<string, number | boolean>): Promise<HTMLSelectElement> {
+        const demoGet = transport.handlerFor('paramset.get');
+        transport.respond('paramset.get', (interfaceName, address, paramset) =>
+            address === RECEIVER ? values : demoGet(interfaceName, address, paramset),
+        );
+        const {stores} = await mountApp({transport, hash: '#/HmIP-RF/links'});
+        await waitFor(() => {
+            expect(stores.links.of('HmIP-RF').length).toBeGreaterThan(0);
+        });
+        await fireEvent.dblClick(document.querySelector(`[data-row-id="${SENDER}->${RECEIVER}"]`)!);
+        return waitFor(() => {
+            const select = screen.getByTestId<HTMLSelectElement>('link-profile');
+            expect(select.value).not.toBe('');
+            return select;
+        });
+    }
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+        const demoFile = transport.handlerFor('data.file');
+        transport.respond('data.file', (path) => {
+            if (path === 'data/profiles/SWITCH_VIRTUAL_RECEIVER.json') return JSON.parse(switchVirtualReceiverRaw);
+            if (path === 'data/easymode-time-selectors.json') return JSON.parse(timeSelectorsRaw);
+            return demoFile(path);
+        });
+        const demoDescription = transport.handlerFor('paramset.description');
+        transport.respond('paramset.description', (interfaceName, address, paramset) =>
+            address === RECEIVER && paramset === 'LINK'
+                ? links.description
+                : demoDescription(interfaceName, address, paramset),
+        );
+    });
+
+    it('selects "switch on / off", its times "permanent", and saving it unchanged writes nothing', async () => {
+        const select = await openLink(links.toggle);
+        await waitFor(() => {
+            expect(select.value).toBe('3');
+        });
+        expect(select.selectedOptions[0]?.textContent).toContain('ein / aus');
+        const onTime = await waitFor(() => screen.getByTestId<HTMLSelectElement>('easy-time-select-SHORT_ON'));
+        expect(onTime.selectedOptions[0]?.textContent).toBe('dauerhaft');
+        expect(
+            screen.getByTestId<HTMLSelectElement>('easy-time-select-SHORT_OFF').selectedOptions[0]?.textContent,
+        ).toBe('dauerhaft');
+
+        const before = transport.countOf('paramset.putLink');
+        await fireEvent.click(screen.getByTestId('link-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('write-preview')).toBeTruthy();
+        });
+        expect(screen.getByTestId<HTMLButtonElement>('write-stage').disabled).toBe(true);
+        expect(transport.countOf('paramset.putLink')).toBe(before);
+    });
+
+    it('still selects "switch on" for a switch-on link', async () => {
+        const select = await openLink(links.on);
+        await waitFor(() => {
+            expect(select.value).toBe('1');
+        });
     });
 });
 

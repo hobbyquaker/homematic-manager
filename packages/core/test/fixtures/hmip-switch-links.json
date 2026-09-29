@@ -1,0 +1,651 @@
+{
+  "_comment": "B-77: the LINK paramsets of an HmIP key channel (KEY_TRANSCEIVER) on an HmIP switch actuator channel (SWITCH_VIRTUAL_RECEIVER), read with getParamset (and getParamsetDescription) from a lab system. The WebUI shows 'toggle' as 'Schalter ein / aus' and 'on' as 'Schalter ein'.",
+  "toggle": {
+    "LONG_COND_VALUE_HI": 150,
+    "LONG_COND_VALUE_LO": 50,
+    "LONG_CT_OFF": 0,
+    "LONG_CT_OFFDELAY": 0,
+    "LONG_CT_ON": 0,
+    "LONG_CT_ONDELAY": 0,
+    "LONG_JT_OFF": 1,
+    "LONG_JT_OFFDELAY": 6,
+    "LONG_JT_ON": 4,
+    "LONG_JT_ONDELAY": 3,
+    "LONG_MULTIEXECUTE": false,
+    "LONG_OFFDELAY_TIME_BASE": 0,
+    "LONG_OFFDELAY_TIME_FACTOR": 0,
+    "LONG_OFF_TIME_BASE": 7,
+    "LONG_OFF_TIME_FACTOR": 31,
+    "LONG_OFF_TIME_MODE": 0,
+    "LONG_ONDELAY_TIME_BASE": 0,
+    "LONG_ONDELAY_TIME_FACTOR": 0,
+    "LONG_ON_TIME_BASE": 7,
+    "LONG_ON_TIME_FACTOR": 31,
+    "LONG_ON_TIME_MODE": 0,
+    "LONG_PROFILE_ACTION_TYPE": 1,
+    "SHORT_COND_VALUE_HI": 150,
+    "SHORT_COND_VALUE_LO": 50,
+    "SHORT_CT_OFF": 0,
+    "SHORT_CT_OFFDELAY": 0,
+    "SHORT_CT_ON": 0,
+    "SHORT_CT_ONDELAY": 0,
+    "SHORT_JT_OFF": 1,
+    "SHORT_JT_OFFDELAY": 6,
+    "SHORT_JT_ON": 4,
+    "SHORT_JT_ONDELAY": 3,
+    "SHORT_MULTIEXECUTE": false,
+    "SHORT_OFFDELAY_TIME_BASE": 0,
+    "SHORT_OFFDELAY_TIME_FACTOR": 0,
+    "SHORT_OFF_TIME_BASE": 7,
+    "SHORT_OFF_TIME_FACTOR": 31,
+    "SHORT_OFF_TIME_MODE": 0,
+    "SHORT_ONDELAY_TIME_BASE": 0,
+    "SHORT_ONDELAY_TIME_FACTOR": 0,
+    "SHORT_ON_TIME_BASE": 7,
+    "SHORT_ON_TIME_FACTOR": 31,
+    "SHORT_ON_TIME_MODE": 0,
+    "SHORT_PROFILE_ACTION_TYPE": 1
+  },
+  "on": {
+    "LONG_COND_VALUE_HI": 150,
+    "LONG_COND_VALUE_LO": 50,
+    "LONG_CT_OFF": 0,
+    "LONG_CT_OFFDELAY": 0,
+    "LONG_CT_ON": 0,
+    "LONG_CT_ONDELAY": 0,
+    "LONG_JT_OFF": 1,
+    "LONG_JT_OFFDELAY": 3,
+    "LONG_JT_ON": 1,
+    "LONG_JT_ONDELAY": 3,
+    "LONG_MULTIEXECUTE": false,
+    "LONG_OFFDELAY_TIME_BASE": 0,
+    "LONG_OFFDELAY_TIME_FACTOR": 0,
+    "LONG_OFF_TIME_BASE": 7,
+    "LONG_OFF_TIME_FACTOR": 31,
+    "LONG_OFF_TIME_MODE": 0,
+    "LONG_ONDELAY_TIME_BASE": 0,
+    "LONG_ONDELAY_TIME_FACTOR": 0,
+    "LONG_ON_TIME_BASE": 7,
+    "LONG_ON_TIME_FACTOR": 31,
+    "LONG_ON_TIME_MODE": 0,
+    "LONG_PROFILE_ACTION_TYPE": 1,
+    "SHORT_COND_VALUE_HI": 150,
+    "SHORT_COND_VALUE_LO": 50,
+    "SHORT_CT_OFF": 0,
+    "SHORT_CT_OFFDELAY": 0,
+    "SHORT_CT_ON": 0,
+    "SHORT_CT_ONDELAY": 0,
+    "SHORT_JT_OFF": 1,
+    "SHORT_JT_OFFDELAY": 3,
+    "SHORT_JT_ON": 1,
+    "SHORT_JT_ONDELAY": 3,
+    "SHORT_MULTIEXECUTE": false,
+    "SHORT_OFFDELAY_TIME_BASE": 0,
+    "SHORT_OFFDELAY_TIME_FACTOR": 0,
+    "SHORT_OFF_TIME_BASE": 7,
+    "SHORT_OFF_TIME_FACTOR": 31,
+    "SHORT_OFF_TIME_MODE": 0,
+    "SHORT_ONDELAY_TIME_BASE": 0,
+    "SHORT_ONDELAY_TIME_FACTOR": 0,
+    "SHORT_ON_TIME_BASE": 7,
+    "SHORT_ON_TIME_FACTOR": 31,
+    "SHORT_ON_TIME_MODE": 0,
+    "SHORT_PROFILE_ACTION_TYPE": 1
+  },
+  "description": {
+    "LONG_COND_VALUE_HI": {
+      "MIN": 0,
+      "OPERATIONS": 3,
+      "MAX": 255,
+      "FLAGS": 1,
+      "ID": "LONG_COND_VALUE_HI",
+      "TYPE": "INTEGER",
+      "DEFAULT": 150
+    },
+    "LONG_COND_VALUE_LO": {
+      "MIN": 0,
+      "OPERATIONS": 3,
+      "MAX": 255,
+      "FLAGS": 1,
+      "ID": "LONG_COND_VALUE_LO",
+      "TYPE": "INTEGER",
+      "DEFAULT": 50
+    },
+    "LONG_CT_OFF": {
+      "MIN": "VALUE_GE_LO",
+      "OPERATIONS": 3,
+      "MAX": "VALUE_L_LO_OR_GE_HI",
+      "FLAGS": 1,
+      "ID": "LONG_CT_OFF",
+      "TYPE": "ENUM",
+      "DEFAULT": "VALUE_GE_LO",
+      "VALUE_LIST": [
+        "VALUE_GE_LO",
+        "VALUE_GE_HI",
+        "VALUE_L_LO",
+        "VALUE_L_HI",
+        "VALUE_GE_LO_AND_L_HI",
+        "VALUE_L_LO_OR_GE_HI"
+      ]
+    },
+    "LONG_CT_OFFDELAY": {
+      "MIN": "VALUE_GE_LO",
+      "OPERATIONS": 3,
+      "MAX": "VALUE_L_LO_OR_GE_HI",
+      "FLAGS": 1,
+      "ID": "LONG_CT_OFFDELAY",
+      "TYPE": "ENUM",
+      "DEFAULT": "VALUE_GE_LO",
+      "VALUE_LIST": [
+        "VALUE_GE_LO",
+        "VALUE_GE_HI",
+        "VALUE_L_LO",
+        "VALUE_L_HI",
+        "VALUE_GE_LO_AND_L_HI",
+        "VALUE_L_LO_OR_GE_HI"
+      ]
+    },
+    "LONG_CT_ON": {
+      "MIN": "VALUE_GE_LO",
+      "OPERATIONS": 3,
+      "MAX": "VALUE_L_LO_OR_GE_HI",
+      "FLAGS": 1,
+      "ID": "LONG_CT_ON",
+      "TYPE": "ENUM",
+      "DEFAULT": "VALUE_GE_LO",
+      "VALUE_LIST": [
+        "VALUE_GE_LO",
+        "VALUE_GE_HI",
+        "VALUE_L_LO",
+        "VALUE_L_HI",
+        "VALUE_GE_LO_AND_L_HI",
+        "VALUE_L_LO_OR_GE_HI"
+      ]
+    },
+    "LONG_CT_ONDELAY": {
+      "MIN": "VALUE_GE_LO",
+      "OPERATIONS": 3,
+      "MAX": "VALUE_L_LO_OR_GE_HI",
+      "FLAGS": 1,
+      "ID": "LONG_CT_ONDELAY",
+      "TYPE": "ENUM",
+      "DEFAULT": "VALUE_GE_LO",
+      "VALUE_LIST": [
+        "VALUE_GE_LO",
+        "VALUE_GE_HI",
+        "VALUE_L_LO",
+        "VALUE_L_HI",
+        "VALUE_GE_LO_AND_L_HI",
+        "VALUE_L_LO_OR_GE_HI"
+      ]
+    },
+    "LONG_JT_OFF": {
+      "MIN": "NOP",
+      "OPERATIONS": 3,
+      "MAX": "OFF",
+      "FLAGS": 1,
+      "ID": "LONG_JT_OFF",
+      "TYPE": "ENUM",
+      "DEFAULT": "ON_DELAY",
+      "VALUE_LIST": ["NOP", "ON_DELAY", "RAMP_ON", "ON", "OFF_DELAY", "RAMP_OFF", "OFF"]
+    },
+    "LONG_JT_OFFDELAY": {
+      "MIN": "NOP",
+      "OPERATIONS": 3,
+      "MAX": "OFF",
+      "FLAGS": 1,
+      "ID": "LONG_JT_OFFDELAY",
+      "TYPE": "ENUM",
+      "DEFAULT": "OFF",
+      "VALUE_LIST": ["NOP", "ON_DELAY", "RAMP_ON", "ON", "OFF_DELAY", "RAMP_OFF", "OFF"]
+    },
+    "LONG_JT_ON": {
+      "MIN": "NOP",
+      "OPERATIONS": 3,
+      "MAX": "OFF",
+      "FLAGS": 1,
+      "ID": "LONG_JT_ON",
+      "TYPE": "ENUM",
+      "DEFAULT": "OFF_DELAY",
+      "VALUE_LIST": ["NOP", "ON_DELAY", "RAMP_ON", "ON", "OFF_DELAY", "RAMP_OFF", "OFF"]
+    },
+    "LONG_JT_ONDELAY": {
+      "MIN": "NOP",
+      "OPERATIONS": 3,
+      "MAX": "OFF",
+      "FLAGS": 1,
+      "ID": "LONG_JT_ONDELAY",
+      "TYPE": "ENUM",
+      "DEFAULT": "ON",
+      "VALUE_LIST": ["NOP", "ON_DELAY", "RAMP_ON", "ON", "OFF_DELAY", "RAMP_OFF", "OFF"]
+    },
+    "LONG_MULTIEXECUTE": {
+      "MIN": false,
+      "OPERATIONS": 3,
+      "MAX": true,
+      "FLAGS": 1,
+      "ID": "LONG_MULTIEXECUTE",
+      "TYPE": "BOOL",
+      "DEFAULT": false
+    },
+    "LONG_OFFDELAY_TIME_BASE": {
+      "MIN": "BASE_100_MS",
+      "OPERATIONS": 3,
+      "MAX": "BASE_1_H",
+      "FLAGS": 1,
+      "ID": "LONG_OFFDELAY_TIME_BASE",
+      "TYPE": "ENUM",
+      "DEFAULT": "BASE_100_MS",
+      "VALUE_LIST": [
+        "BASE_100_MS",
+        "BASE_1_S",
+        "BASE_5_S",
+        "BASE_10_S",
+        "BASE_1_M",
+        "BASE_5_M",
+        "BASE_10_M",
+        "BASE_1_H"
+      ]
+    },
+    "LONG_OFFDELAY_TIME_FACTOR": {
+      "MIN": 0,
+      "OPERATIONS": 3,
+      "MAX": 31,
+      "FLAGS": 1,
+      "ID": "LONG_OFFDELAY_TIME_FACTOR",
+      "TYPE": "INTEGER",
+      "DEFAULT": 0
+    },
+    "LONG_OFF_TIME_BASE": {
+      "MIN": "BASE_100_MS",
+      "OPERATIONS": 3,
+      "MAX": "BASE_1_H",
+      "FLAGS": 1,
+      "ID": "LONG_OFF_TIME_BASE",
+      "TYPE": "ENUM",
+      "DEFAULT": "BASE_1_H",
+      "VALUE_LIST": [
+        "BASE_100_MS",
+        "BASE_1_S",
+        "BASE_5_S",
+        "BASE_10_S",
+        "BASE_1_M",
+        "BASE_5_M",
+        "BASE_10_M",
+        "BASE_1_H"
+      ]
+    },
+    "LONG_OFF_TIME_FACTOR": {
+      "MIN": 0,
+      "OPERATIONS": 3,
+      "MAX": 31,
+      "FLAGS": 1,
+      "ID": "LONG_OFF_TIME_FACTOR",
+      "TYPE": "INTEGER",
+      "DEFAULT": 31
+    },
+    "LONG_OFF_TIME_MODE": {
+      "MIN": "TIME_IS_ABSOLUTE",
+      "OPERATIONS": 3,
+      "MAX": "TIME_IS_MINIMAL",
+      "FLAGS": 1,
+      "ID": "LONG_OFF_TIME_MODE",
+      "TYPE": "ENUM",
+      "DEFAULT": "TIME_IS_ABSOLUTE",
+      "VALUE_LIST": ["TIME_IS_ABSOLUTE", "TIME_IS_MINIMAL"]
+    },
+    "LONG_ONDELAY_TIME_BASE": {
+      "MIN": "BASE_100_MS",
+      "OPERATIONS": 3,
+      "MAX": "BASE_1_H",
+      "FLAGS": 1,
+      "ID": "LONG_ONDELAY_TIME_BASE",
+      "TYPE": "ENUM",
+      "DEFAULT": "BASE_100_MS",
+      "VALUE_LIST": [
+        "BASE_100_MS",
+        "BASE_1_S",
+        "BASE_5_S",
+        "BASE_10_S",
+        "BASE_1_M",
+        "BASE_5_M",
+        "BASE_10_M",
+        "BASE_1_H"
+      ]
+    },
+    "LONG_ONDELAY_TIME_FACTOR": {
+      "MIN": 0,
+      "OPERATIONS": 3,
+      "MAX": 31,
+      "FLAGS": 1,
+      "ID": "LONG_ONDELAY_TIME_FACTOR",
+      "TYPE": "INTEGER",
+      "DEFAULT": 0
+    },
+    "LONG_ON_TIME_BASE": {
+      "MIN": "BASE_100_MS",
+      "OPERATIONS": 3,
+      "MAX": "BASE_1_H",
+      "FLAGS": 1,
+      "ID": "LONG_ON_TIME_BASE",
+      "TYPE": "ENUM",
+      "DEFAULT": "BASE_1_H",
+      "VALUE_LIST": [
+        "BASE_100_MS",
+        "BASE_1_S",
+        "BASE_5_S",
+        "BASE_10_S",
+        "BASE_1_M",
+        "BASE_5_M",
+        "BASE_10_M",
+        "BASE_1_H"
+      ]
+    },
+    "LONG_ON_TIME_FACTOR": {
+      "MIN": 0,
+      "OPERATIONS": 3,
+      "MAX": 31,
+      "FLAGS": 1,
+      "ID": "LONG_ON_TIME_FACTOR",
+      "TYPE": "INTEGER",
+      "DEFAULT": 31
+    },
+    "LONG_ON_TIME_MODE": {
+      "MIN": "TIME_IS_ABSOLUTE",
+      "OPERATIONS": 3,
+      "MAX": "TIME_IS_MINIMAL",
+      "FLAGS": 1,
+      "ID": "LONG_ON_TIME_MODE",
+      "TYPE": "ENUM",
+      "DEFAULT": "TIME_IS_ABSOLUTE",
+      "VALUE_LIST": ["TIME_IS_ABSOLUTE", "TIME_IS_MINIMAL"]
+    },
+    "LONG_PROFILE_ACTION_TYPE": {
+      "MIN": "PROFILE_ACTION_TYPE_INACTIVE",
+      "OPERATIONS": 3,
+      "MAX": "PROFILE_ACTION_TYPE_TOGGLE",
+      "FLAGS": 1,
+      "ID": "LONG_PROFILE_ACTION_TYPE",
+      "TYPE": "ENUM",
+      "DEFAULT": "PROFILE_ACTION_TYPE_JUMP",
+      "VALUE_LIST": ["PROFILE_ACTION_TYPE_INACTIVE", "PROFILE_ACTION_TYPE_JUMP", "PROFILE_ACTION_TYPE_TOGGLE"]
+    },
+    "SHORT_COND_VALUE_HI": {
+      "MIN": 0,
+      "OPERATIONS": 3,
+      "MAX": 255,
+      "FLAGS": 1,
+      "ID": "SHORT_COND_VALUE_HI",
+      "TYPE": "INTEGER",
+      "DEFAULT": 150
+    },
+    "SHORT_COND_VALUE_LO": {
+      "MIN": 0,
+      "OPERATIONS": 3,
+      "MAX": 255,
+      "FLAGS": 1,
+      "ID": "SHORT_COND_VALUE_LO",
+      "TYPE": "INTEGER",
+      "DEFAULT": 50
+    },
+    "SHORT_CT_OFF": {
+      "MIN": "VALUE_GE_LO",
+      "OPERATIONS": 3,
+      "MAX": "VALUE_L_LO_OR_GE_HI",
+      "FLAGS": 1,
+      "ID": "SHORT_CT_OFF",
+      "TYPE": "ENUM",
+      "DEFAULT": "VALUE_GE_LO",
+      "VALUE_LIST": [
+        "VALUE_GE_LO",
+        "VALUE_GE_HI",
+        "VALUE_L_LO",
+        "VALUE_L_HI",
+        "VALUE_GE_LO_AND_L_HI",
+        "VALUE_L_LO_OR_GE_HI"
+      ]
+    },
+    "SHORT_CT_OFFDELAY": {
+      "MIN": "VALUE_GE_LO",
+      "OPERATIONS": 3,
+      "MAX": "VALUE_L_LO_OR_GE_HI",
+      "FLAGS": 1,
+      "ID": "SHORT_CT_OFFDELAY",
+      "TYPE": "ENUM",
+      "DEFAULT": "VALUE_GE_LO",
+      "VALUE_LIST": [
+        "VALUE_GE_LO",
+        "VALUE_GE_HI",
+        "VALUE_L_LO",
+        "VALUE_L_HI",
+        "VALUE_GE_LO_AND_L_HI",
+        "VALUE_L_LO_OR_GE_HI"
+      ]
+    },
+    "SHORT_CT_ON": {
+      "MIN": "VALUE_GE_LO",
+      "OPERATIONS": 3,
+      "MAX": "VALUE_L_LO_OR_GE_HI",
+      "FLAGS": 1,
+      "ID": "SHORT_CT_ON",
+      "TYPE": "ENUM",
+      "DEFAULT": "VALUE_GE_LO",
+      "VALUE_LIST": [
+        "VALUE_GE_LO",
+        "VALUE_GE_HI",
+        "VALUE_L_LO",
+        "VALUE_L_HI",
+        "VALUE_GE_LO_AND_L_HI",
+        "VALUE_L_LO_OR_GE_HI"
+      ]
+    },
+    "SHORT_CT_ONDELAY": {
+      "MIN": "VALUE_GE_LO",
+      "OPERATIONS": 3,
+      "MAX": "VALUE_L_LO_OR_GE_HI",
+      "FLAGS": 1,
+      "ID": "SHORT_CT_ONDELAY",
+      "TYPE": "ENUM",
+      "DEFAULT": "VALUE_GE_LO",
+      "VALUE_LIST": [
+        "VALUE_GE_LO",
+        "VALUE_GE_HI",
+        "VALUE_L_LO",
+        "VALUE_L_HI",
+        "VALUE_GE_LO_AND_L_HI",
+        "VALUE_L_LO_OR_GE_HI"
+      ]
+    },
+    "SHORT_JT_OFF": {
+      "MIN": "NOP",
+      "OPERATIONS": 3,
+      "MAX": "OFF",
+      "FLAGS": 1,
+      "ID": "SHORT_JT_OFF",
+      "TYPE": "ENUM",
+      "DEFAULT": "ON_DELAY",
+      "VALUE_LIST": ["NOP", "ON_DELAY", "RAMP_ON", "ON", "OFF_DELAY", "RAMP_OFF", "OFF"]
+    },
+    "SHORT_JT_OFFDELAY": {
+      "MIN": "NOP",
+      "OPERATIONS": 3,
+      "MAX": "OFF",
+      "FLAGS": 1,
+      "ID": "SHORT_JT_OFFDELAY",
+      "TYPE": "ENUM",
+      "DEFAULT": "OFF",
+      "VALUE_LIST": ["NOP", "ON_DELAY", "RAMP_ON", "ON", "OFF_DELAY", "RAMP_OFF", "OFF"]
+    },
+    "SHORT_JT_ON": {
+      "MIN": "NOP",
+      "OPERATIONS": 3,
+      "MAX": "OFF",
+      "FLAGS": 1,
+      "ID": "SHORT_JT_ON",
+      "TYPE": "ENUM",
+      "DEFAULT": "OFF_DELAY",
+      "VALUE_LIST": ["NOP", "ON_DELAY", "RAMP_ON", "ON", "OFF_DELAY", "RAMP_OFF", "OFF"]
+    },
+    "SHORT_JT_ONDELAY": {
+      "MIN": "NOP",
+      "OPERATIONS": 3,
+      "MAX": "OFF",
+      "FLAGS": 1,
+      "ID": "SHORT_JT_ONDELAY",
+      "TYPE": "ENUM",
+      "DEFAULT": "ON",
+      "VALUE_LIST": ["NOP", "ON_DELAY", "RAMP_ON", "ON", "OFF_DELAY", "RAMP_OFF", "OFF"]
+    },
+    "SHORT_MULTIEXECUTE": {
+      "MIN": false,
+      "OPERATIONS": 3,
+      "MAX": true,
+      "FLAGS": 1,
+      "ID": "SHORT_MULTIEXECUTE",
+      "TYPE": "BOOL",
+      "DEFAULT": false
+    },
+    "SHORT_OFFDELAY_TIME_BASE": {
+      "MIN": "BASE_100_MS",
+      "OPERATIONS": 3,
+      "MAX": "BASE_1_H",
+      "FLAGS": 1,
+      "ID": "SHORT_OFFDELAY_TIME_BASE",
+      "TYPE": "ENUM",
+      "DEFAULT": "BASE_100_MS",
+      "VALUE_LIST": [
+        "BASE_100_MS",
+        "BASE_1_S",
+        "BASE_5_S",
+        "BASE_10_S",
+        "BASE_1_M",
+        "BASE_5_M",
+        "BASE_10_M",
+        "BASE_1_H"
+      ]
+    },
+    "SHORT_OFFDELAY_TIME_FACTOR": {
+      "MIN": 0,
+      "OPERATIONS": 3,
+      "MAX": 31,
+      "FLAGS": 1,
+      "ID": "SHORT_OFFDELAY_TIME_FACTOR",
+      "TYPE": "INTEGER",
+      "DEFAULT": 0
+    },
+    "SHORT_OFF_TIME_BASE": {
+      "MIN": "BASE_100_MS",
+      "OPERATIONS": 3,
+      "MAX": "BASE_1_H",
+      "FLAGS": 1,
+      "ID": "SHORT_OFF_TIME_BASE",
+      "TYPE": "ENUM",
+      "DEFAULT": "BASE_1_H",
+      "VALUE_LIST": [
+        "BASE_100_MS",
+        "BASE_1_S",
+        "BASE_5_S",
+        "BASE_10_S",
+        "BASE_1_M",
+        "BASE_5_M",
+        "BASE_10_M",
+        "BASE_1_H"
+      ]
+    },
+    "SHORT_OFF_TIME_FACTOR": {
+      "MIN": 0,
+      "OPERATIONS": 3,
+      "MAX": 31,
+      "FLAGS": 1,
+      "ID": "SHORT_OFF_TIME_FACTOR",
+      "TYPE": "INTEGER",
+      "DEFAULT": 31
+    },
+    "SHORT_OFF_TIME_MODE": {
+      "MIN": "TIME_IS_ABSOLUTE",
+      "OPERATIONS": 3,
+      "MAX": "TIME_IS_MINIMAL",
+      "FLAGS": 1,
+      "ID": "SHORT_OFF_TIME_MODE",
+      "TYPE": "ENUM",
+      "DEFAULT": "TIME_IS_ABSOLUTE",
+      "VALUE_LIST": ["TIME_IS_ABSOLUTE", "TIME_IS_MINIMAL"]
+    },
+    "SHORT_ONDELAY_TIME_BASE": {
+      "MIN": "BASE_100_MS",
+      "OPERATIONS": 3,
+      "MAX": "BASE_1_H",
+      "FLAGS": 1,
+      "ID": "SHORT_ONDELAY_TIME_BASE",
+      "TYPE": "ENUM",
+      "DEFAULT": "BASE_100_MS",
+      "VALUE_LIST": [
+        "BASE_100_MS",
+        "BASE_1_S",
+        "BASE_5_S",
+        "BASE_10_S",
+        "BASE_1_M",
+        "BASE_5_M",
+        "BASE_10_M",
+        "BASE_1_H"
+      ]
+    },
+    "SHORT_ONDELAY_TIME_FACTOR": {
+      "MIN": 0,
+      "OPERATIONS": 3,
+      "MAX": 31,
+      "FLAGS": 1,
+      "ID": "SHORT_ONDELAY_TIME_FACTOR",
+      "TYPE": "INTEGER",
+      "DEFAULT": 0
+    },
+    "SHORT_ON_TIME_BASE": {
+      "MIN": "BASE_100_MS",
+      "OPERATIONS": 3,
+      "MAX": "BASE_1_H",
+      "FLAGS": 1,
+      "ID": "SHORT_ON_TIME_BASE",
+      "TYPE": "ENUM",
+      "DEFAULT": "BASE_1_H",
+      "VALUE_LIST": [
+        "BASE_100_MS",
+        "BASE_1_S",
+        "BASE_5_S",
+        "BASE_10_S",
+        "BASE_1_M",
+        "BASE_5_M",
+        "BASE_10_M",
+        "BASE_1_H"
+      ]
+    },
+    "SHORT_ON_TIME_FACTOR": {
+      "MIN": 0,
+      "OPERATIONS": 3,
+      "MAX": 31,
+      "FLAGS": 1,
+      "ID": "SHORT_ON_TIME_FACTOR",
+      "TYPE": "INTEGER",
+      "DEFAULT": 31
+    },
+    "SHORT_ON_TIME_MODE": {
+      "MIN": "TIME_IS_ABSOLUTE",
+      "OPERATIONS": 3,
+      "MAX": "TIME_IS_MINIMAL",
+      "FLAGS": 1,
+      "ID": "SHORT_ON_TIME_MODE",
+      "TYPE": "ENUM",
+      "DEFAULT": "TIME_IS_ABSOLUTE",
+      "VALUE_LIST": ["TIME_IS_ABSOLUTE", "TIME_IS_MINIMAL"]
+    },
+    "SHORT_PROFILE_ACTION_TYPE": {
+      "MIN": "PROFILE_ACTION_TYPE_INACTIVE",
+      "OPERATIONS": 3,
+      "MAX": "PROFILE_ACTION_TYPE_TOGGLE",
+      "FLAGS": 1,
+      "ID": "SHORT_PROFILE_ACTION_TYPE",
+      "TYPE": "ENUM",
+      "DEFAULT": "PROFILE_ACTION_TYPE_JUMP",
+      "VALUE_LIST": ["PROFILE_ACTION_TYPE_INACTIVE", "PROFILE_ACTION_TYPE_JUMP", "PROFILE_ACTION_TYPE_TOGGLE"]
+    }
+  }
+}

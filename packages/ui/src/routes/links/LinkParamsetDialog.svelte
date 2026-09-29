@@ -222,7 +222,8 @@
     });
 
     /**
-     * Which profile the stored values follow: `UI_HINT` first, then the fixed parameters.
+     * Which profile the stored values follow: `UI_HINT` while its profile fits, then the profile
+     * whose parameters all hold, as the WebUI decides it (B-77).
      *
      * Once per load of a link, and only on the values loaded for it (B-58: the dialog is reused, and
      * detecting on the previous link's values showed that link's profile). `detectedFor` is a plain

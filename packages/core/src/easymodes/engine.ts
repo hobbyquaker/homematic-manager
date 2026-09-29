@@ -266,46 +266,45 @@ export class EasyModeEngine {
     }
 
     /**
-     * Which profile a link paramset currently follows: by `UI_HINT` when the CCU wrote one,
-     * otherwise by matching the profiles' `fixed` parameters against the current values - the more
-     * fixed parameters a profile matches, the better the fit.
+     * Which profile a link paramset currently follows, the way the WebUI's `get_cur_profile2`
+     * decides it: a profile fits when every parameter it names holds on the link - a `fixed` value
+     * equal, a `list` value one of its values, a `range` value inside it - leaving out the
+     * parameters the link does not have (B-59, "Gibt es diesen Parameter im Aktor überhaupt?").
+     *
+     * B-77: only the `fixed` parameters used to count, and the profile with the most of them won.
+     * The profiles of one channel pair often differ only in their lists - an HmIP switch's
+     * "Schalter ein" and "Schalter ein / aus" differ in the jump table (`*_JT_ON` 1/3 or 4/6) -
+     * so a toggle link was shown as "switch on", which has more fixed parameters.
+     *
+     * Order: `UI_HINT` when its profile fits (`0`, the expert view, is taken as it is); otherwise
+     * the fitting profile the link has the most named parameters of, then the one with more fixed
+     * parameters (a staircase light is a "switch on" with a fixed time: the more specific one), then
+     * the one that lacks fewer, then the lower id - the WebUI takes the first fitting one by id, and
+     * where only one fits, as for B-77's pair, the two agree; last a `UI_HINT` whose profile no
+     * longer fits, as before.
      *
      * `undefined` means "none of them"; the caller then shows the expert view.
      */
     detectProfile(linkParamset: Paramset, profiles: readonly LinkProfile[]): LinkProfile | undefined {
         const hint = linkParamset[UI_HINT];
-        if (hint !== undefined && hint !== '') {
-            const byHint = profiles.find((profile) => String(profile.id) === String(hint));
-            if (byHint) {
-                return byHint;
-            }
+        const byHint =
+            hint === undefined || hint === ''
+                ? undefined
+                : profiles.find((profile) => String(profile.id) === String(hint));
+        if (byHint && (byHint.id === EXPERT_PROFILE_ID || profileFits(byHint, linkParamset) !== undefined)) {
+            return byHint;
         }
 
         let best: LinkProfile | undefined;
-        let bestScore = 0;
-        let bestMissing = 0;
-        for (const profile of profiles) {
-            const all = Object.entries(profile.params).filter(
-                (entry): entry is [string, Extract<ProfileConstraint, {kind: 'fixed'}>] => entry[1].kind === 'fixed',
-            );
-            // B-59: a parameter the link does not have (this firmware lacks it) is left out, as the
-            // WebUI's get_cur_profile2 does ("Gibt es diesen Parameter im Aktor überhaupt?")
-            const fixed = all.filter(([param]) => param in linkParamset);
-            const missing = all.length - fixed.length;
-            if (fixed.length === 0) {
-                continue;
-            }
-            if (!fixed.every(([param, constraint]) => sameProfileValue(linkParamset[param], constraint.value))) {
-                continue;
-            }
-            // the most fixed parameters matched; on a tie the profile that asks for less the link lacks
-            if (fixed.length > bestScore || (fixed.length === bestScore && missing < bestMissing)) {
-                bestScore = fixed.length;
-                bestMissing = missing;
+        let bestFit: ProfileFit | undefined;
+        for (const profile of [...profiles].sort((a, b) => a.id - b.id)) {
+            const fit = profileFits(profile, linkParamset);
+            if (fit !== undefined && betterFit(fit, bestFit)) {
+                bestFit = fit;
                 best = profile;
             }
         }
-        return best;
+        return best ?? byHint;
     }
 
     /**
@@ -375,6 +374,65 @@ export function resolveAlias(receiverType: string, aliases: Readonly<Record<stri
         next = aliases[current];
     }
     return current;
+}
+
+/**
+ * Whether every parameter a profile names holds on the link, as `get_cur_profile2` checks it, and
+ * how many of them the link has and lacks. `undefined` when one does not hold, or when the link
+ * has none of them (the expert profile, or a profile of another firmware).
+ */
+function profileFits(profile: LinkProfile, linkParamset: Paramset): ProfileFit | undefined {
+    let present = 0;
+    let fixed = 0;
+    let missing = 0;
+    for (const [param, constraint] of Object.entries(profile.params)) {
+        if (!(param in linkParamset)) {
+            missing += 1;
+            continue;
+        }
+        if (!constraintHolds(constraint, linkParamset[param])) {
+            return undefined;
+        }
+        present += 1;
+        if (constraint.kind === 'fixed') {
+            fixed += 1;
+        }
+    }
+    return present === 0 ? undefined : {present, fixed, missing};
+}
+
+/** How well a fitting profile is backed by the link: parameters present, fixed ones among them, lacking. */
+interface ProfileFit {
+    readonly present: number;
+    readonly fixed: number;
+    readonly missing: number;
+}
+
+/** Whether a fit is the better one: more named parameters, then more fixed ones, then fewer lacking. */
+function betterFit(fit: ProfileFit, best: ProfileFit | undefined): boolean {
+    if (best === undefined) return true;
+    if (fit.present !== best.present) return fit.present > best.present;
+    if (fit.fixed !== best.fixed) return fit.fixed > best.fixed;
+    return fit.missing < best.missing;
+}
+
+function constraintHolds(constraint: ProfileConstraint, value: ParamsetValue | undefined): boolean {
+    switch (constraint.kind) {
+        case 'fixed':
+            return sameProfileValue(value, constraint.value);
+        case 'list':
+            return constraint.values.some((entry) => sameProfileValue(value, entry));
+        case 'range': {
+            const number = Number(value);
+            // an enum name where the range counts indices cannot be judged here; it rules nothing out
+            if (value === '' || Number.isNaN(number)) {
+                return true;
+            }
+            // the WebUI also accepts the range's default outside it: `{31 range 0 - 7}` of an HmIP
+            // "Schalter aus" holds for 31, because its last check compares against the first element
+            return (number >= constraint.min && number <= constraint.max) || number === constraint.default;
+        }
+    }
 }
 
 function applyConstraint(constraint: ProfileConstraint, current: ParamsetValue | undefined): ParamsetValue | undefined {

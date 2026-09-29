@@ -6,6 +6,16 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## Unreleased
+
+### Fixed
+
+- **A direct link's easy mode shows the profile the WebUI shows.** The profile of a link was recognised by the
+  parameters a profile fixes alone, and the one with the most of them won; the WebUI checks every parameter a profile
+  names, lists and ranges too. An HmIP toggle link ("Schalter ein / aus") was therefore shown as "Switch - on", with
+  its permanent on time as "Enter value": the two profiles differ only in the jump table, and "Switch - on" fixes more
+  parameters. The profile the CCU's hint names is taken only while the link's values still fit it. (B-77)
+
 ## [3.0.0-beta.30] — 2026-09-29
 
 ### Changed

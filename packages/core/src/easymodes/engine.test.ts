@@ -15,6 +15,8 @@ import {
 import {MemoryDataSource, type MemoryData} from '../data/memory.js';
 import type {EasyControl, LinkProfile, MasterBranch, ReceiverProfiles} from '../data/types.js';
 import type {ParamsetDescription} from '../paramset/description.js';
+import {diffParamset} from '../paramset/diff.js';
+import type {Paramset} from '../rpc/values.js';
 
 const fixture = JSON.parse(
     readFileSync(new URL('../../test/fixtures/data.json', import.meta.url), 'utf8'),
@@ -301,6 +303,62 @@ describe('detectProfile', () => {
     it('never picks the expert profile by matching, because it constrains nothing', async () => {
         expect(engine.detectProfile({}, await engine.profilesFor('DIMMER', 'KEY'))).toBeUndefined();
     });
+
+    // B-77: the WebUI's get_cur_profile2 checks every parameter a profile names, not only the fixed ones
+    it('rules a profile out by a list value the link does not have', async () => {
+        const profiles = await engine.profilesFor('SWITCH', 'KEY');
+        const values = {SHORT_ACTION_TYPE: 1, SHORT_JT_ON: 3, SHORT_MULTIEXECUTE: true, SHORT_ON_TIME: 45};
+        // light_stairway's SHORT_ON_TIME is one of 5, 30, 60, 300; switch_on's range takes 45
+        expect(engine.detectProfile(values, profiles)?.key).toBe('switch_on');
+        expect(engine.detectProfile({...values, SHORT_ON_TIME: 30}, profiles)?.key).toBe('light_stairway');
+    });
+
+    it('rules a profile out by a value outside its range', async () => {
+        const profiles = await engine.profilesFor('SWITCH', 'KEY');
+        expect(
+            engine.detectProfile({SHORT_ACTION_TYPE: 1, SHORT_JT_ON: 3, SHORT_ON_TIME: 200000}, profiles),
+        ).toBeUndefined();
+    });
+
+    it('does not judge a range by an enum name it cannot count', () => {
+        const ranged: LinkProfile = {
+            id: 3,
+            key: 'ranged',
+            name: {},
+            description: {},
+            params: {SHORT_ACTION_TYPE: {kind: 'fixed', value: 1}, SHORT_ON_TIME_BASE: {kind: 'range', min: 0, max: 7}},
+        };
+        expect(engine.detectProfile({SHORT_ACTION_TYPE: 1, SHORT_ON_TIME_BASE: 'BASE_1_H'}, [ranged])?.key).toBe(
+            'ranged',
+        );
+        expect(engine.detectProfile({SHORT_ACTION_TYPE: 1, SHORT_ON_TIME_BASE: 8}, [ranged])).toBeUndefined();
+    });
+
+    it('never matches an empty list', () => {
+        const empty: LinkProfile = {
+            id: 3,
+            key: 'empty',
+            name: {},
+            description: {},
+            params: {SHORT_JT_ON: {kind: 'list', values: []}},
+        };
+        expect(engine.detectProfile({SHORT_JT_ON: 1}, [empty])).toBeUndefined();
+    });
+
+    it('takes UI_HINT only while its profile still fits the link', async () => {
+        const profiles = await engine.profilesFor('SWITCH', 'KEY');
+        // the hint says switch_off, the values are switch_on's: the WebUI shows switch_on
+        expect(engine.detectProfile({UI_HINT: '2', SHORT_ACTION_TYPE: 1, SHORT_JT_ON: 3}, profiles)?.key).toBe(
+            'switch_on',
+        );
+        // a hint whose profile fits wins over a profile with more parameters
+        const stairway = {SHORT_ACTION_TYPE: 1, SHORT_JT_ON: 3, SHORT_MULTIEXECUTE: true};
+        expect(engine.detectProfile({...stairway, UI_HINT: '1'}, profiles)?.key).toBe('switch_on');
+        // a hint no profile backs up is still shown, as before
+        expect(engine.detectProfile({UI_HINT: '2', SHORT_ACTION_TYPE: 3}, profiles)?.key).toBe('switch_off');
+        // the expert view chosen on purpose stays the expert view
+        expect(engine.detectProfile({...stairway, UI_HINT: '0'}, profiles)?.key).toBe('expert');
+    });
 });
 
 describe('MASTER forms by paramset id (task 64)', () => {
@@ -502,6 +560,35 @@ describe('against the data the pipeline actually produces (task 9)', () => {
         const {values, problems} = realEngine.applyProfile(switchOn, {}, description);
         expect(problems).toEqual([]);
         expect(realEngine.detectProfile(values, profiles)?.key).toBe('switch_on');
+    });
+
+    // B-77: an HmIP key on an HmIP switch actuator, with the paramsets a lab system answered. The
+    // WebUI shows the first as 'Schalter ein / aus', the second as 'Schalter ein'; the two differ
+    // only in lists (*_JT_*), and "switch on" names more fixed parameters than the toggle profile.
+    const hmipReal = JSON.parse(
+        readFileSync(new URL('../../../../data/dist/profiles/SWITCH_VIRTUAL_RECEIVER.json', import.meta.url), 'utf8'),
+    ) as ReceiverProfiles;
+    const hmipEngine = new EasyModeEngine(new MemoryDataSource({profiles: {SWITCH_VIRTUAL_RECEIVER: hmipReal}}));
+    const links = JSON.parse(
+        readFileSync(new URL('../../test/fixtures/hmip-switch-links.json', import.meta.url), 'utf8'),
+    ) as {toggle: Paramset; on: Paramset; description: ParamsetDescription};
+
+    it('tells an HmIP toggle link from a switch-on link, as the WebUI does (B-77)', async () => {
+        const profiles = await hmipEngine.profilesFor('SWITCH_VIRTUAL_RECEIVER', 'KEY_TRANSCEIVER');
+        expect(hmipEngine.detectProfile(links.toggle, profiles)?.key).toBe('switch_on_off');
+        expect(hmipEngine.detectProfile(links.on, profiles)?.key).toBe('switch_on');
+    });
+
+    it('keeps an HmIP toggle link as it is when its profile is applied again (B-77)', async () => {
+        const profiles = await hmipEngine.profilesFor('SWITCH_VIRTUAL_RECEIVER', 'KEY_TRANSCEIVER');
+        const toggle = profiles.find((entry) => entry.key === 'switch_on_off');
+        if (!toggle) {
+            throw new Error('the pipeline no longer ships switch_on_off for SWITCH_VIRTUAL_RECEIVER/KEY_TRANSCEIVER');
+        }
+        const {values, problems} = hmipEngine.applyProfile(toggle, links.toggle, links.description);
+        expect(problems).toEqual([]);
+        // the easy mode's save sends only what changed: nothing
+        expect(diffParamset(links.toggle, values, links.description, {enumAs: 'name'}).changed).toEqual([]);
     });
 });
 

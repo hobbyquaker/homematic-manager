@@ -47,7 +47,12 @@
     let metadata = $state<LinkSenderMetadata | undefined>(undefined);
     let profileId = $state(EXPERT_PROFILE_ID);
     let expert = $state(false);
-    let senderOpen = $state(false);
+    /**
+     * Task 80: the sender's parameters are open by default whenever the sender has any; 2.7 kept them
+     * behind the `+`, and they were overlooked there. The toggle still closes them; the choice lasts for
+     * the link on screen, and the next link opens with the default again.
+     */
+    let senderToggled = $state<boolean | undefined>(undefined);
     let linkName = $state('');
     let linkDescription = $state('');
     let targets = $state<string[]>([]);
@@ -109,6 +114,7 @@
             : [],
     );
     const senderFields = $derived<LinkField[]>(senderDescription ? linkFields(senderDescription, {expert: true}) : []);
+    const senderOpen = $derived(senderToggled ?? senderFields.length > 0);
 
     /**
      * Task 62 (D-54): the CCU easy mode's form of the chosen profile on this device. With it, the
@@ -165,6 +171,7 @@
         senderValues = {};
         edited = {};
         senderEdited = {};
+        senderToggled = undefined;
         void (async () => {
             const [receiverDesc, receiverParamset, senderDesc, senderParamset, info] = await Promise.all([
                 stores.paramsets.describe(request.interfaceName, request.receiver, 'LINK'),
@@ -512,7 +519,7 @@
                         class="hmm-link-toggle"
                         aria-expanded={senderOpen}
                         data-testid="link-sender-toggle"
-                        onclick={() => (senderOpen = !senderOpen)}>{senderOpen ? '−' : '+'}</button
+                        onclick={() => (senderToggled = !senderOpen)}>{senderOpen ? '−' : '+'}</button
                     >
                     {t('Sender')}: {stores.nameOf(sender)} ({sender})
                 </h4>

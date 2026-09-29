@@ -63,13 +63,15 @@ test('a link is created, its paramset written and the link removed again', async
     await page.getByTestId('links-edit').click();
     const editor = page.getByTestId('link-paramset-dialog');
     await expect(editor).toHaveAttribute('open', '');
-    await expect(page.getByTestId('param-SHORT_ON_TIME')).toBeVisible();
+    // the receiver's field: since task 80 the sender's parameters are open too, and the button has its own
+    const receiverOnTime = page.getByTestId('link-receiver-params').getByTestId('param-SHORT_ON_TIME');
+    await expect(receiverOnTime).toBeVisible();
 
     await page.getByTestId('link-name').fill('Button to dimmer');
     await page.getByTestId('link-description').fill('short press');
     await page.getByTestId('link-info-save').click();
 
-    await page.getByTestId('param-SHORT_ON_TIME').getByRole('spinbutton').fill('12');
+    await receiverOnTime.getByRole('spinbutton').fill('12');
     await page.getByTestId('link-preview').click();
     await expect(page.getByTestId('write-preview')).toHaveAttribute('open', '');
     await expect(page.getByTestId('preview-SHORT_ON_TIME')).toBeVisible();
@@ -260,4 +262,29 @@ test('"Add link" is the captioned main action of the Links tab (task 33)', async
         dialog: 'add-link-dialog',
         captions: {en: 'Add link', de: 'Verknüpfung anlegen'},
     });
+});
+
+/**
+ * Task 80: the sender's link parameters (a weather sensor's wind thresholds, say) were collapsed behind a `+` and went
+ * unnoticed. The editor opens with them visible now; the toggle still closes them.
+ */
+test('the link editor opens with the sender parameters visible (task 80)', async ({page, host, sim}) => {
+    sim.callMethod('hmip', 'addLink', [SENDER, RECEIVER, '', '']);
+    await page.goto(`${host.url}#/HmIP-RF/links`);
+    const row = page.locator(`[data-row-id="${LINK_ROW}"]`);
+    await expect(row).toBeVisible();
+    await row.click();
+    await page.getByTestId('links-edit').click();
+    await expect(page.getByTestId('link-paramset-dialog')).toHaveAttribute('open', '');
+
+    const toggle = page.getByTestId('link-sender-toggle');
+    const senderParams = page.getByTestId('link-sender-params');
+    await expect(senderParams.getByTestId('param-SHORT_ON_TIME')).toBeVisible();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(toggle).toHaveText('−');
+
+    await toggle.click();
+    await expect(senderParams).toHaveCount(0);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(toggle).toHaveText('+');
 });

@@ -562,13 +562,51 @@ describe('the link paramset dialog', () => {
         expect(screen.queryByTestId('param-SHORT_ON_TIME')).toBeTruthy();
     });
 
-    it('keeps the sender paramset collapsed until it is asked for, as 2.7 did', async () => {
+    it('opens the sender paramset by default when the sender has link parameters (task 80)', async () => {
+        transport.respond('paramset.description', (_interfaceName, address, paramset) =>
+            address === '0001D8A9B7C6D5:1' && paramset === 'LINK'
+                ? {STORM_UPPER_THRESHOLD: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 255, DEFAULT: 0}}
+                : description,
+        );
         await openLink();
-        expect(screen.queryByTestId('link-sender-params')).toBeNull();
-        await fireEvent.click(screen.getByTestId('link-sender-toggle'));
+        const toggle = screen.getByTestId('link-sender-toggle');
         await waitFor(() => {
             expect(screen.getByTestId('link-sender-params')).toBeTruthy();
         });
+        expect(toggle.getAttribute('aria-expanded')).toBe('true');
+        expect(toggle.textContent).toBe('−');
+        expect(
+            within(screen.getByTestId('link-sender-params')).getByTestId('param-STORM_UPPER_THRESHOLD'),
+        ).toBeTruthy();
+
+        // the toggle still closes it, and opens it again
+        await fireEvent.click(toggle);
+        await waitFor(() => {
+            expect(screen.queryByTestId('link-sender-params')).toBeNull();
+        });
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+        await fireEvent.click(toggle);
+        await waitFor(() => {
+            expect(screen.getByTestId('link-sender-params')).toBeTruthy();
+        });
+
+        // closed on one link, the next link opens with the default again
+        await fireEvent.click(toggle);
+        await fireEvent.click(screen.getByTestId('link-paramset-dialog').querySelector('.hmm-dialog-close')!);
+        await fireEvent.dblClick(document.querySelector('[data-row-id="0001D8A9B7C6D5:1->000A1B2C3D4E5F:4"]')!);
+        await waitFor(() => {
+            expect(screen.getByTestId('link-sender-params')).toBeTruthy();
+        });
+    });
+
+    it('keeps the sender section collapsed when the sender has no link parameters (task 80)', async () => {
+        transport.respond('paramset.description', (_interfaceName, address, paramset) =>
+            address === '0001D8A9B7C6D5:1' && paramset === 'LINK' ? {} : description,
+        );
+        await openLink();
+        const toggle = screen.getByTestId('link-sender-toggle');
+        expect(toggle.getAttribute('aria-expanded')).toBe('false');
+        expect(screen.queryByTestId('link-sender-params')).toBeNull();
     });
 });
 

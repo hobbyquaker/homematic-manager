@@ -69,6 +69,20 @@ export class TranslationLookup {
         return this.#firstKey((translations) => translations.parameterValues, candidates) ?? value;
     }
 
+    /**
+     * B-80: the label of a `SPECIAL` value's id (`NOT_USED`). What `parameterValue` finds first -
+     * `CHANNEL_TYPE|PARAM=ID` is how the WebUI keys a MASTER special - and then the bare id as a
+     * string-table key of its own: the WebUI's `NOT_USED` is `${stringTableNotUsed}` ("Nicht benutzt",
+     * "Unused"), which lands among the parameter labels. Only for special ids: an enum value that
+     * happened to share its name with a parameter must not take that parameter's label.
+     */
+    specialValue(param: string, id: string, channelType?: string): string {
+        const found = this.parameterValue(param, id, channelType);
+        return found !== id
+            ? found
+            : (this.#firstKey((translations) => translations.parameters, identifiers(id)) ?? id);
+    }
+
     /** The help text of a parameter, or `undefined` - a missing help text is not an error. */
     parameterHelp(param: string, channelType?: string): string | undefined {
         return this.#firstKey((translations) => translations.parameterHelp, keys(param, channelType));

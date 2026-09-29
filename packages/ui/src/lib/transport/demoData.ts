@@ -1376,7 +1376,8 @@ export const DEMO_DATA_FILES: Readonly<Record<string, unknown>> = {
         language: 'de',
         channelTypes: {SWITCH: 'Schaltaktor'},
         deviceModels: {},
-        parameters: {LOGGING: 'Statusmeldungen', 'SWITCH|ON_TIME': 'Einschaltdauer'},
+        // B-80: a special's bare id is a key of its own, as the WebUI's `NOT_USED` -> `${stringTableNotUsed}`
+        parameters: {LOGGING: 'Statusmeldungen', 'SWITCH|ON_TIME': 'Einschaltdauer', NOT_USED: 'Nicht benutzt'},
         parameterValues: {
             'LOGGING|ON': 'an',
             'LOGGING|OFF': 'aus',
@@ -1389,7 +1390,7 @@ export const DEMO_DATA_FILES: Readonly<Record<string, unknown>> = {
         language: 'en',
         channelTypes: {SWITCH: 'Switch actuator'},
         deviceModels: {},
-        parameters: {LOGGING: 'Status messages'},
+        parameters: {LOGGING: 'Status messages', NOT_USED: 'Unused'},
         parameterValues: {'CLIMATECONTROL_RT_TRANSCEIVER|FAULT_REPORTING|COMMUNICATION_ERROR': 'Communication error'},
         parameterHelp: {},
         uiLabels: {not_used: 'not used', delay_max: 'delay larger than the transmit tries'},

@@ -34,7 +34,7 @@
     interface Props {
         form: readonly EasyFormControl[];
         /** Every field of the paramset, by name - the rows are drawn from these. */
-        fields: ReadonlyMap<string, FormField & {readonly fixedByProfile?: boolean}>;
+        fields: ReadonlyMap<string, FormField>;
         /** The stored values with the edits on top. */
         values: Readonly<Record<string, ParamsetValue>>;
         /** Which parameters differ from what the device answered. */
@@ -184,7 +184,13 @@
         {:else if control.kind === 'param'}
             {@const field = fields.get(control.param)}
             {@const preset = presetOf(control)}
-            {#if field && preset && field.fixedByProfile !== true}
+            <!--
+                B-81: what the form draws is edited, as in the WebUI - a profile's plain value
+                (`set PROFILE_1(SHORT_ONDELAY_TIME) 0`) is where the control starts, not a lock. The
+                data marks every such value `fixed`, and the rows it greyed out were the very ones the
+                CCU offers: a weather sensor's up-delay, a Keymatic's automatic relocking.
+            -->
+            {#if field && preset}
                 <!-- the WebUI's combo box: the current preset, or "enter value" and the free field -->
                 {@const value = values[control.param] ?? field.description.DEFAULT}
                 {@const current = presetIndex(preset, value)}
@@ -215,6 +221,7 @@
                     <ParameterRow
                         {field}
                         {value}
+                        entry
                         label={stores.meta.parameterLabel(control.param, channelType)}
                         help={stores.meta.parameterHelp(control.param, channelType)}
                         changed={changed(control.param)}
@@ -230,7 +237,6 @@
                     label={labelOf(control, control.param)}
                     help={stores.meta.parameterHelp(control.param, channelType)}
                     changed={changed(control.param)}
-                    disabled={field.fixedByProfile === true}
                     valueLabel={(entry) => stores.meta.valueLabel(control.param, entry, channelType)}
                     presetLabel={(key) => stores.meta.uiLabel(key)}
                     onchange={(changedValue) => changeParam(control, changedValue)}

@@ -2,6 +2,8 @@
     import type {ParamsetValue} from '@homematic-manager/core';
     import {fromDisplayValue, toDisplayValue} from '@homematic-manager/core';
 
+    import {tick} from 'svelte';
+
     import {getStores} from '../../lib/stores/context.js';
     import type {FormField} from '../../lib/util/paramsetForm.js';
 
@@ -25,6 +27,12 @@
         /** Marked when the value differs from what the device answered with. */
         changed?: boolean;
         disabled?: boolean;
+        /**
+         * B-80/B-81: the row is the free entry of an easy-mode combo box whose "Enter value" was
+         * chosen - a special value then opens as a number too, prefilled like the row's own "Enter
+         * value", instead of showing its select alone.
+         */
+        entry?: boolean;
         /**
          * Task 26: on channel 0 of an HmIP interface a service datapoint has a "suppressed"
          * checkbox at the right of its row - `getSuppressedServiceMessages` says what it holds,
@@ -50,6 +58,7 @@
         onchange,
         changed = false,
         disabled = false,
+        entry = false,
         suppressed = undefined,
         onsuppress = undefined,
         suppressLabel = '',
@@ -57,7 +66,8 @@
         suppressChanged = false,
     }: Props = $props();
 
-    const t = getStores().i18n.t;
+    const stores = getStores();
+    const t = stores.i18n.t;
 
     const readOnly = $derived(disabled || !field.writable);
     const numeric = $derived(field.kind === 'integer' || field.kind === 'float');
@@ -66,6 +76,27 @@
     const enumIndex = $derived(asNumber(value) ?? -1);
     /** `NOT_USED` and friends: a value outside MIN..MAX that means something (#96). */
     const activeSpecial = $derived(field.special.find((special) => special.VALUE === asNumber(value)));
+
+    /**
+     * B-81: "Enter value" chosen while a special is set. The number opens, prefilled, and nothing is
+     * written until the user types - choosing it used to write `MIN` at once, which for "lock
+     * automatically" meant "lock immediately". Bound to the value it was chosen on, so a value that
+     * changes under it (another link, a profile) is shown as what it is.
+     */
+    let entering = $state<{on: unknown; draft: number} | undefined>(undefined);
+    /** B-80: while a special is chosen, only its select shows - the number and the range are hidden, as in the WebUI. */
+    const showSpecial = $derived(
+        activeSpecial !== undefined && !entry && (entering === undefined || entering.on !== value),
+    );
+    let numberInput = $state<HTMLInputElement | undefined>(undefined);
+    /** The last plain value this row showed: the prefill when the default is itself a special. */
+    let lastPlain: number | undefined;
+    $effect(() => {
+        const plain = asNumber(value);
+        if (plain !== undefined && activeSpecial === undefined) lastPlain = plain;
+    });
+    /** B-81 (refined): the preset the value is one of, so the dropdown shows it instead of `…`. */
+    const matchingPreset = $derived(field.preset?.presets.find((entry) => entry.value === asNumber(value)));
     /**
      * B-75: a parameter nobody translated has its name as the label - then the name is printed
      * once, not as label and identifier both.
@@ -94,6 +125,44 @@
 
     function labelOf(entry: string): string {
         return valueLabel ? valueLabel(entry) : entry;
+    }
+
+    /** B-80: a special's id as the CCU names it - the parameter's own value label, else the bare key. */
+    function specialText(id: string): string {
+        const own = labelOf(id);
+        return own !== id ? own : stores.meta.specialLabel(field.name, id);
+    }
+
+    /** A number the free field may start from: not a special, inside the range. */
+    function plainInRange(candidate: number | undefined): candidate is number {
+        if (candidate === undefined || field.special.some((special) => special.VALUE === candidate)) return false;
+        const shown = toDisplayValue(candidate, field.description);
+        return (
+            typeof shown === 'number' &&
+            (field.min === undefined || shown >= field.min) &&
+            (field.max === undefined || shown <= field.max)
+        );
+    }
+
+    /** Where the free number starts: the default if it is a plain number in range, the last plain value, `MIN`. */
+    function prefill(): number {
+        const fallback = asNumber(field.description.DEFAULT);
+        if (plainInRange(fallback)) return fallback;
+        if (plainInRange(lastPlain)) return lastPlain;
+        return fromDisplayValue(field.min ?? 0, field.description) ?? 0;
+    }
+
+    async function chooseSpecial(id: string): Promise<void> {
+        const chosen = field.special.find((special) => special.ID === id);
+        if (chosen) {
+            entering = undefined;
+            onchange(chosen.VALUE);
+            return;
+        }
+        entering = {on: value, draft: prefill()};
+        await tick();
+        numberInput?.focus();
+        numberInput?.select();
     }
 </script>
 
@@ -134,31 +203,38 @@
                 {/each}
             </select>
         {:else if numeric}
-            <input
-                class="hmm-input hmm-param-number"
-                type="number"
-                min={field.min}
-                max={field.max}
-                step={field.step}
-                disabled={readOnly || activeSpecial !== undefined}
-                aria-label={label}
-                value={text}
-                oninput={(event) => changeNumber(event.currentTarget.value)}
-            />
+            {#if !showSpecial}
+                <input
+                    class="hmm-input hmm-param-number"
+                    type="number"
+                    min={field.min}
+                    max={field.max}
+                    step={field.step}
+                    disabled={readOnly}
+                    aria-label={label}
+                    bind:this={numberInput}
+                    value={activeSpecial === undefined
+                        ? text
+                        : String(
+                              toDisplayValue(
+                                  entering !== undefined && entering.on === value ? entering.draft : prefill(),
+                                  field.description,
+                              ),
+                          )}
+                    oninput={(event) => changeNumber(event.currentTarget.value)}
+                />
+            {/if}
             {#if field.special.length > 0}
                 <select
                     class="hmm-select hmm-param-special"
                     disabled={readOnly}
                     aria-label={`${label} SPECIAL`}
-                    value={activeSpecial?.ID ?? ''}
-                    onchange={(event) => {
-                        const chosen = field.special.find((special) => special.ID === event.currentTarget.value);
-                        onchange(chosen ? chosen.VALUE : (field.min ?? 0));
-                    }}
+                    value={showSpecial ? (activeSpecial?.ID ?? '') : ''}
+                    onchange={(event) => void chooseSpecial(event.currentTarget.value)}
                 >
-                    <option value="">—</option>
+                    <option value="">{t('Enter value')}</option>
                     {#each field.special as special (special.ID)}
-                        <option value={special.ID}>{labelOf(special.ID)}</option>
+                        <option value={special.ID}>{specialText(special.ID)}</option>
                     {/each}
                 </select>
             {/if}
@@ -167,7 +243,7 @@
                     class="hmm-select hmm-param-preset"
                     disabled={readOnly}
                     aria-label={`${label} presets`}
-                    value=""
+                    value={matchingPreset === undefined ? '' : String(matchingPreset.value)}
                     onchange={(event) => {
                         const entry = field.preset?.presets.find(
                             (candidate) => String(candidate.value) === event.currentTarget.value,
@@ -196,7 +272,7 @@
             />
         {/if}
 
-        {#if field.unit !== ''}<span class="hmm-param-unit">{field.unit}</span>{/if}
+        {#if field.unit !== '' && !showSpecial}<span class="hmm-param-unit">{field.unit}</span>{/if}
     </div>
 
     {#if onset}
@@ -226,11 +302,16 @@
     {#if !field.writable}
         <div class="hmm-param-flag"><span class="hmm-param-ro" title={t('Read-only')}>{t('ro')}</span></div>
     {/if}
-    {#if field.min !== undefined || field.max !== undefined}
+    {#if (field.min !== undefined || field.max !== undefined) && !showSpecial}
         <div class="hmm-param-range">{field.min ?? '−∞'} … {field.max ?? '∞'}</div>
     {/if}
     {#if field.description.DEFAULT !== undefined}
-        <div class="hmm-param-default">{t('default {value}', {value: String(field.description.DEFAULT)})}</div>
+        {@const defaultSpecial = field.special.find((special) => special.VALUE === asNumber(field.description.DEFAULT))}
+        <div class="hmm-param-default">
+            {t('default {value}', {
+                value: defaultSpecial ? specialText(defaultSpecial.ID) : String(field.description.DEFAULT),
+            })}
+        </div>
     {/if}
 
     {#if help}

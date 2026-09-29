@@ -169,3 +169,36 @@ describe('against the translations the pipeline actually produces (task 9)', () 
         expect(realLookup.uiLabel(key)).toBe(real.uiLabels[key]);
     });
 });
+
+describe('special value labels (B-80)', () => {
+    const table = (language: 'de' | 'en', notUsed: string): Translations => ({
+        language,
+        channelTypes: {},
+        deviceModels: {},
+        parameters: {NOT_USED: notUsed, LEVEL: language === 'de' ? 'Pegel' : 'Level'},
+        parameterValues: {'KEYMATIC|RELOCK_DELAY|NOT_USED': language === 'de' ? 'Nicht verriegeln' : 'Do not lock'},
+        parameterHelp: {},
+        uiLabels: {},
+    });
+    const german = new TranslationLookup(table('de', 'Nicht benutzt'), table('en', 'Unused'));
+    const english = new TranslationLookup(table('en', 'Unused'), table('de', 'Nicht benutzt'));
+
+    it('reads a special id through its bare string-table key, in German and English', () => {
+        expect(german.specialValue('SHORT_ON_TIME', 'NOT_USED', 'BLIND')).toBe('Nicht benutzt');
+        expect(english.specialValue('SHORT_ON_TIME', 'NOT_USED', 'BLIND')).toBe('Unused');
+        expect(english.specialValue('short_on_time', 'not_used')).toBe('Unused');
+    });
+
+    it('prefers a value label of the parameter itself', () => {
+        expect(german.specialValue('RELOCK_DELAY', 'NOT_USED', 'KEYMATIC')).toBe('Nicht verriegeln');
+    });
+
+    it('falls back to the id itself', () => {
+        expect(english.specialValue('SHORT_ON_TIME', 'SOMETHING_ELSE')).toBe('SOMETHING_ELSE');
+    });
+
+    it('is for special ids only: an enum value never takes a parameter label', () => {
+        expect(english.parameterValue('MODE', 'LEVEL')).toBe('LEVEL');
+        expect(english.parameterValue('SHORT_ON_TIME', 'NOT_USED')).toBe('NOT_USED');
+    });
+});

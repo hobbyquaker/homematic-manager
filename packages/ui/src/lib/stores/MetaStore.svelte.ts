@@ -132,6 +132,11 @@ export class MetaStore {
         return this.lookup.parameterValue(param, value, channelType);
     }
 
+    /** B-80: the label of a `SPECIAL` value's id - `NOT_USED` reads "Unused" / "Nicht benutzt". */
+    specialLabel(param: string, id: string, channelType?: string): string {
+        return this.lookup.specialValue(param, id, channelType);
+    }
+
     /**
      * The label of one enum value, or `undefined` when no language has one.
      *

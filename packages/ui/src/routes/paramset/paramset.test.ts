@@ -221,9 +221,53 @@ describe('the paramset dialog', () => {
         const row = screen.getByTestId('param-ON_TIME');
         const special = await waitFor(() => within(row).getByLabelText(/SPECIAL/) as HTMLSelectElement);
         expect([...special.options].map((option) => option.value)).toEqual(['', 'NOT_USED']);
-        // The demo value is the NOT_USED one, so the number box is inert until it is cleared.
         expect(special.value).toBe('NOT_USED');
-        expect((within(row).getByRole('spinbutton') as HTMLInputElement).disabled).toBe(true);
+    });
+
+    // B-80: as in the WebUI, a chosen special is its select alone - the number, the unit and the range are hidden
+    it('shows a chosen special as its select alone, named and not as its id (B-80)', async () => {
+        await openMaster();
+        const row = screen.getByTestId('param-ON_TIME');
+        const special = await waitFor(() => within(row).getByLabelText(/SPECIAL/) as HTMLSelectElement);
+        expect(within(row).queryByRole('spinbutton')).toBeNull();
+        expect(row.querySelector('.hmm-param-range')).toBeNull();
+        expect(row.querySelector('.hmm-param-unit')).toBeNull();
+        expect([...special.options].map((option) => option.textContent)).toEqual(['Wert eingeben', 'Nicht benutzt']);
+        // B-81 (refined): the preset dropdown beside it shows the preset the value is, not "…"
+        await waitFor(() => {
+            expect(within(row).getByLabelText<HTMLSelectElement>(/presets/).value).toBe('111600');
+        });
+    });
+
+    // B-81: "Enter value" opens the number, prefilled with the default, and writes nothing until it is edited
+    it('opens the number on "Enter value", prefilled and focused, and writes only what is typed (B-81)', async () => {
+        await openMaster();
+        const row = screen.getByTestId('param-ON_TIME');
+        const special = await waitFor(() => within(row).getByLabelText(/SPECIAL/) as HTMLSelectElement);
+        await fireEvent.change(special, {target: {value: ''}});
+        const number = await waitFor(() => within(row).getByRole('spinbutton') as HTMLInputElement);
+        expect(number.disabled).toBe(false);
+        expect(number.value).toBe('0');
+        await waitFor(() => {
+            expect(document.activeElement).toBe(number);
+        });
+        expect(row.querySelector('.hmm-param-range')).toBeTruthy();
+
+        // nothing changed yet: the row is not marked, the value is still the special
+        expect(row.classList.contains('hmm-param-changed')).toBe(false);
+
+        await fireEvent.input(number, {target: {value: '30'}});
+        await waitFor(() => {
+            expect(within(row).getByLabelText<HTMLSelectElement>(/presets/).value).toBe('30');
+        });
+        await fireEvent.click(screen.getByTestId('paramset-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('preview-ON_TIME')).toBeTruthy();
+        });
+        await fireEvent.click(screen.getByTestId('write-confirm'));
+        await waitFor(() => {
+            expect(transport.lastCall('paramset.put')?.[3]).toEqual({ON_TIME: {explicitDouble: 30}});
+        });
     });
 
     it('previews only the changed parameter and writes exactly that', async () => {

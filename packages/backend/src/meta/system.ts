@@ -412,6 +412,58 @@ export async function detectSystem(
  */
 
 /**
+ * Does a credential with these scopes read devices and values? openccu-lite's rpc scopes are tiers
+ * (`internal/auth/scopes.go`: operate covers read, configure covers operate, admin covers all), and
+ * a paired token lists only the tier it was approved with - `rpc:admin`, not `rpc:read` beside it.
+ * occulite-client 0.2.0 looks for the literal `rpc:read` and takes such a token for names-only
+ * (occulite-client B-3); until that is fixed the tiers are known here.
+ */
+export function readsDevices(scopes: readonly string[]): boolean {
+    return scopes.some((scope) => scope === '*' || RPC_TIERS.has(scope));
+}
+
+const RPC_TIERS: ReadonlySet<string> = new Set(['rpc:read', 'rpc:operate', 'rpc:configure', 'rpc:admin']);
+
+/**
+ * occulite-client B-3: the client decides "names only" from the scopes `GET /api/auth/v1/state`
+ * lists, looking for the literal `rpc:read`; a paired token names its tier (`rpc:admin`) and would
+ * get no devices, no values and no stream. This transport hands the client the answer with the
+ * tier's `rpc:read` spelled out. Nothing else passes through it changed; it goes when the package
+ * knows the tiers.
+ */
+export function tierAwareTransport(transport: Transport): Transport {
+    return {
+        request: async (method, url, headers, body, signal) => {
+            const response = await transport.request(method, url, headers, body, signal);
+            if (method !== 'GET' || !/\/api\/auth\/v1\/state(\?|$)/.test(url) || response.status !== 200) {
+                return response;
+            }
+            let parsed: unknown;
+            try {
+                parsed = JSON.parse(response.body);
+            } catch {
+                return response;
+            }
+            if (
+                typeof parsed !== 'object' ||
+                parsed === null ||
+                !Array.isArray((parsed as {scopes?: unknown}).scopes)
+            ) {
+                return response;
+            }
+            const scopes = (parsed as {scopes: unknown[]}).scopes.filter(
+                (scope): scope is string => typeof scope === 'string',
+            );
+            if (scopes.includes('rpc:read') || !readsDevices(scopes)) {
+                return response;
+            }
+            return {...response, body: JSON.stringify({...parsed, scopes: [...scopes, 'rpc:read']})};
+        },
+        stream: (url, headers, signal) => transport.stream(url, headers, signal),
+    };
+}
+
+/**
  * The settings dialog's *Test connection*: what is at `baseUrl` and what `token` is worth there.
  * Nothing is kept open. Never throws for a system that does not answer - that is the answer.
  */
@@ -455,8 +507,7 @@ export async function testSystem(
         if (state.authenticated === false) {
             return {...result, token: {state: 'refused', scopes: []}};
         }
-        const rpc = scopes.includes('*') || scopes.includes('rpc:read');
-        return {...result, token: {state: rpc ? 'full' : 'names-only', scopes}};
+        return {...result, token: {state: readsDevices(scopes) ? 'full' : 'names-only', scopes}};
     } catch (error) {
         if (error instanceof OccuLiteError && (error.code === 'unauthenticated' || error.code === 'forbidden')) {
             return {...result, token: {state: 'refused', scopes: []}};

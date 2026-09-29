@@ -45,6 +45,7 @@ import {
 
 import {interfaceTargets, type InterfaceTarget} from '../config/defaults.js';
 import {BackendError, configError, connectionError, errorMessage, rpcFaultError} from '../errors.js';
+import {tierAwareTransport} from '../meta/system.js';
 import type {RpcCallOptions, RpcCallRecord, RpcOutValue} from '../rpc/client.js';
 import type {CallbackHandler} from '../rpc/server.js';
 import type {InterfaceLink, Interfaces} from './manager.js';
@@ -349,7 +350,9 @@ export class LiteInterfaces implements Interfaces {
         const options: OccuLiteOptions = {
             url: this.#options.baseUrl,
             auth: {token: this.#options.token},
-            transport: this.#options.transport,
+            // occulite-client B-3: a paired token names its tier (rpc:admin), and the client would
+            // take it for names-only; the transport spells the tier's rpc:read out for it
+            transport: tierAwareTransport(this.#options.transport),
             interfaces: [...this.#entries.keys()],
             // the state store at connect (task 68's timestamps); no sweep of every channel - the
             // grids read a paramset when they need it, as on a CCU, and rfd asks a BidCos device on

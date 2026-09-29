@@ -242,6 +242,9 @@ describe('a remote openccu-lite connection (task 72)', () => {
             state: 'names-only',
             scopes: ['meta:read'],
         });
+        // a paired token names its tier, not rpc:read beside it (occulite-client B-3)
+        fake.opts.scopes = ['logs:read', 'meta:write', 'rpc:admin', 'system:write'];
+        expect((await h.backend.request('connection.test', liteConnection() as never)).token?.state).toBe('full');
 
         const gone = new FakeBox({});
         const url = await gone.start();

@@ -17,7 +17,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-import {OccuLiteError, fetchTransport} from 'occulite-client';
+import {OccuLiteError, fetchTransport, type Transport} from 'occulite-client';
 import {afterAll, beforeAll, describe, expect, it} from 'vitest';
 
 import {MetaError} from '@homematic-manager/core';
@@ -33,6 +33,8 @@ import {
     metaRefusal,
     normaliseFingerprint,
     systemTransport,
+    readsDevices,
+    tierAwareTransport,
 } from './system.js';
 
 const TLS = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../test/tls');
@@ -224,6 +226,41 @@ function fetchOf(answer: (url: string) => Response | Promise<Response>): {
 
 const json = (body: unknown, status = 200): Response =>
     new Response(JSON.stringify(body), {status, headers: {'Content-Type': 'application/json'}});
+
+describe('the rpc tiers (occulite-client B-3)', () => {
+    it('knows that a higher tier reads devices too', () => {
+        expect(readsDevices(['rpc:admin', 'meta:write'])).toBe(true);
+        expect(readsDevices(['rpc:operate'])).toBe(true);
+        expect(readsDevices(['*'])).toBe(true);
+        expect(readsDevices(['meta:read'])).toBe(false);
+        expect(readsDevices([])).toBe(false);
+    });
+
+    it('spells rpc:read out in the auth state for the client, and touches nothing else', async () => {
+        const answers: Record<string, unknown> = {
+            'http://box/api/auth/v1/state': {authenticated: true, scopes: ['rpc:admin', 'meta:write']},
+            'http://box/api/meta/v1/version': {api: 'meta', version: 1},
+        };
+        const seen: string[] = [];
+        const inner: Transport = {
+            request: (method, url) => {
+                seen.push(`${method} ${url}`);
+                return Promise.resolve({status: 200, headers: {}, body: JSON.stringify(answers[url] ?? null)});
+            },
+            stream: () => Promise.reject(new Error('not here')),
+        };
+        const transport = tierAwareTransport(inner);
+        const state = await transport.request('GET', 'http://box/api/auth/v1/state', {}, undefined, undefined);
+        expect(JSON.parse(state.body)).toEqual({authenticated: true, scopes: ['rpc:admin', 'meta:write', 'rpc:read']});
+        const version = await transport.request('GET', 'http://box/api/meta/v1/version', {}, undefined, undefined);
+        expect(JSON.parse(version.body)).toEqual({api: 'meta', version: 1});
+        // a token that reads names only stays what it is
+        answers['http://box/api/auth/v1/state'] = {authenticated: true, scopes: ['meta:read']};
+        const names = await transport.request('GET', 'http://box/api/auth/v1/state', {}, undefined, undefined);
+        expect(JSON.parse(names.body)).toEqual({authenticated: true, scopes: ['meta:read']});
+        expect(seen).toHaveLength(3);
+    });
+});
 
 describe('the detection', () => {
     it('answers with the version a system reports, and the URL it answered at', async () => {

@@ -632,23 +632,7 @@
                                         data-testid="config-host"
                                     />
                                     <small class="hmm-config-help">{t('Host name or address of the CCU')}</small>
-                                </span>
-                            </label>
-
-                            <!-- task 72: what is at that host, before anything is saved -->
-                            <div class="hmm-config-row">
-                                <span class="hmm-config-label">{t('Test connection')}</span>
-                                <span class="hmm-config-field">
-                                    <span class="hmm-config-buttons">
-                                        <button
-                                            type="button"
-                                            class="hmm-button"
-                                            disabled={testing || draft.host.trim() === ''}
-                                            data-testid="config-test"
-                                            onclick={() => void testConnection()}
-                                            >{testing ? t('Testing…') : t('Test connection')}</button
-                                        >
-                                    </span>
+                                    <!-- task 72: what the footer's "Test connection" found at that host -->
                                     {#if testLine !== ''}
                                         <small
                                             class={tested?.reachable === false || tested?.reason === 'certificate'
@@ -658,7 +642,7 @@
                                         >
                                     {/if}
                                 </span>
-                            </div>
+                            </label>
 
                             <div class="hmm-config-row">
                                 <span class="hmm-config-label">{t('Discovered CCUs')}</span>
@@ -965,86 +949,77 @@
                             <label class="hmm-config-row">
                                 <span class="hmm-config-label">{t('API token')}</span>
                                 <span class="hmm-config-field">
-                                    <input
-                                        class="hmm-input hmm-config-wide"
-                                        type="password"
-                                        autocomplete="off"
-                                        value={draft.metaToken ?? ''}
-                                        data-testid="config-meta-token"
-                                        oninput={(event) => setMetaToken(event.currentTarget.value)}
-                                    />
-                                    <small class="hmm-config-help"
-                                        >{liteHost
-                                            ? t("From the pairing below, or the system's API tokens page")
-                                            : t('Only needed off the box')}</small
-                                    >
-                                </span>
-                            </label>
-
-                            {#if draft.local !== true}
-                                <!--
-                                    task 72 (openccu-lite task 219): the token by pairing. The code is
-                                    shown here and on the system's Status page; an administrator
-                                    approves it there, and the token lands in the field above.
-                                -->
-                                <div class="hmm-config-row" data-testid="config-pairing">
-                                    <span class="hmm-config-label">{t('Pairing')}</span>
-                                    <span class="hmm-config-field">
-                                        {#if pairing?.state === 'requesting' || pairing?.state === 'code'}
-                                            {#if pairing.state === 'code'}
-                                                <span class="hmm-config-code" data-testid="config-pairing-code"
-                                                    >{pairing.code}</span
-                                                >
-                                                <small class="hmm-config-help"
-                                                    >{t(
-                                                        "Approve it on the system's Status page: the same code is shown there.",
-                                                    )}</small
-                                                >
-                                            {:else}
-                                                <small class="hmm-config-help" data-testid="config-pairing-requesting"
-                                                    >{t('Asking the system…')}</small
-                                                >
-                                            {/if}
-                                            <span class="hmm-config-buttons">
-                                                <button
-                                                    type="button"
-                                                    class="hmm-button"
-                                                    data-testid="config-pairing-cancel"
-                                                    onclick={() => void stores.app.cancelPairing()}
-                                                    >{t('Cancel')}</button
-                                                >
+                                    <span class="hmm-config-inline">
+                                        <input
+                                            class="hmm-input hmm-config-wide"
+                                            type="password"
+                                            autocomplete="off"
+                                            value={draft.metaToken ?? ''}
+                                            data-testid="config-meta-token"
+                                            oninput={(event) => setMetaToken(event.currentTarget.value)}
+                                        />
+                                        {#if draft.local !== true}
+                                            <!--
+                                                task 72 (openccu-lite task 219): the token by pairing. The code is
+                                                shown here and on the system's Status page; an administrator
+                                                approves it there, and the token lands in the field. Not on the
+                                                system itself, where the addon has its own credential.
+                                            -->
+                                            <span class="hmm-config-buttons" data-testid="config-pairing">
+                                                {#if pairing?.state === 'requesting' || pairing?.state === 'code'}
+                                                    <button
+                                                        type="button"
+                                                        class="hmm-button"
+                                                        data-testid="config-pairing-cancel"
+                                                        onclick={() => void stores.app.cancelPairing()}
+                                                        >{t('Cancel')}</button
+                                                    >
+                                                {:else}
+                                                    <button
+                                                        type="button"
+                                                        class="hmm-button"
+                                                        disabled={draft.host.trim() === ''}
+                                                        title={t(
+                                                            'Asks an openccu-lite system for an API token: a code appears here and on its Status page, where an administrator approves it. The token replaces the one above, and the certificate is trusted from then on.',
+                                                        )}
+                                                        data-testid="config-pair"
+                                                        onclick={() => void pair()}>{t('Pair')}</button
+                                                    >
+                                                {/if}
                                             </span>
-                                        {:else}
-                                            <span class="hmm-config-buttons">
-                                                <button
-                                                    type="button"
-                                                    class="hmm-button"
-                                                    disabled={draft.host.trim() === ''}
-                                                    data-testid="config-pair"
-                                                    onclick={() => void pair()}>{t('Pair with the system')}</button
-                                                >
-                                            </span>
-                                            {#if paired}
-                                                <small class="hmm-config-note" data-testid="config-pairing-done"
-                                                    >{t(
-                                                        'Paired: the token is in the field above. Save to connect.',
-                                                    )}</small
-                                                >
-                                            {:else if pairing?.state === 'failed'}
-                                                <small class="hmm-config-warning" data-testid="config-pairing-failed"
-                                                    >{pairing.message}</small
-                                                >
-                                            {:else}
-                                                <small class="hmm-config-help"
-                                                    >{t(
-                                                        'Asks an openccu-lite system for an API token: a code appears here and on its Status page, where an administrator approves it. The token replaces the one above, and the certificate is trusted from then on.',
-                                                    )}</small
-                                                >
-                                            {/if}
                                         {/if}
                                     </span>
-                                </div>
-                            {/if}
+                                    <small class="hmm-config-help"
+                                        >{liteHost
+                                            ? t("From the pairing, or the system's API tokens page")
+                                            : t('Only needed off the box')}</small
+                                    >
+                                    {#if draft.local !== true}
+                                        {#if pairing?.state === 'code'}
+                                            <span class="hmm-config-code" data-testid="config-pairing-code"
+                                                >{pairing.code}</span
+                                            >
+                                            <small class="hmm-config-help"
+                                                >{t(
+                                                    "Approve it on the system's Status page: the same code is shown there.",
+                                                )}</small
+                                            >
+                                        {:else if pairing?.state === 'requesting'}
+                                            <small class="hmm-config-help" data-testid="config-pairing-requesting"
+                                                >{t('Asking the system…')}</small
+                                            >
+                                        {:else if paired}
+                                            <small class="hmm-config-note" data-testid="config-pairing-done"
+                                                >{t('Paired: the token is in the field above. Save to connect.')}</small
+                                            >
+                                        {:else if pairing?.state === 'failed'}
+                                            <small class="hmm-config-warning" data-testid="config-pairing-failed"
+                                                >{pairing.message}</small
+                                            >
+                                        {/if}
+                                    {/if}
+                                </span>
+                            </label>
                         </div>
                     </section>
                 </div>
@@ -1359,6 +1334,14 @@
     {/if}
 
     {#snippet buttons()}
+        <!-- task 72: what is at the address, before anything is saved; the answer lands under the address field -->
+        <button
+            type="button"
+            class="hmm-button hmm-config-test"
+            disabled={testing || draft === undefined || draft.host.trim() === ''}
+            data-testid="config-test"
+            onclick={() => void testConnection()}>{testing ? t('Testing…') : t('Test connection')}</button
+        >
         {#if saving}
             <!--
                 #149: "Speichern und Neustarten" rebuilds the whole connection - on the reporter's
@@ -1453,6 +1436,11 @@
     .hmm-config-error {
         margin-right: auto;
         color: var(--hmm-error);
+    }
+
+    /* Task 72: the test stands left, away from Cancel and Save; the busy pill and the error take the middle. */
+    .hmm-config-test {
+        margin-right: auto;
     }
 
     .hmm-config {

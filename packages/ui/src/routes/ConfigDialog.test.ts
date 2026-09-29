@@ -603,7 +603,7 @@ describe('ConfigDialog', () => {
         // nothing calls back from an openccu-lite system: the fields make way for one line
         expect(screen.queryByTestId('config-callback-ip')).toBeNull();
         expect(screen.getByTestId('config-callback-lite')).toBeTruthy();
-        expect(screen.getByText('Aus der Kopplung unten oder von der API-Token-Seite des Systems')).toBeTruthy();
+        expect(screen.getByText('Aus der Kopplung oder von der API-Token-Seite des Systems')).toBeTruthy();
 
         // another host is another system: the answer is not about it
         await fireEvent.input(screen.getByTestId('config-host'), {target: {value: 'other.lan'}});

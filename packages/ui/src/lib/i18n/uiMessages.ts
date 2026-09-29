@@ -1062,9 +1062,9 @@ export const UI_MESSAGES: MessageCatalogue = {
     'API token': {de: 'API-Token', en: 'API token'},
     'Only needed off the box': {de: 'Nur nötig, wenn nicht auf der Box', en: 'Only needed off the box'},
     // task 72: the connection test and the pairing with an openccu-lite system
-    "From the pairing below, or the system's API tokens page": {
-        de: 'Aus der Kopplung unten oder von der API-Token-Seite des Systems',
-        en: "From the pairing below, or the system's API tokens page",
+    "From the pairing, or the system's API tokens page": {
+        de: 'Aus der Kopplung oder von der API-Token-Seite des Systems',
+        en: "From the pairing, or the system's API tokens page",
     },
     'Test connection': {de: 'Verbindung testen', en: 'Test connection'},
     'Testing…': {de: 'Test läuft…', en: 'Testing…'},
@@ -1098,8 +1098,7 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Keiner: ein openccu-lite-System ruft einen entfernten Client nicht zurück; die Ereignisse kommen aus seinem Stream.',
         en: 'None: an openccu-lite system does not call a remote client back; the events come from its stream.',
     },
-    Pairing: {de: 'Kopplung', en: 'Pairing'},
-    'Pair with the system': {de: 'Mit dem System koppeln', en: 'Pair with the system'},
+    Pair: {de: 'Koppeln', en: 'Pair'},
     'Asking the system…': {de: 'Das System wird gefragt…', en: 'Asking the system…'},
     "Approve it on the system's Status page: the same code is shown there.": {
         de: 'Auf der Statusseite des Systems bestätigen: dort wird derselbe Code angezeigt.',

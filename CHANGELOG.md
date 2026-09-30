@@ -6,9 +6,51 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
-## Unreleased
+## [3.0.0] — 2026-09-30
 
-### Added
+**The first stable release of the rebuild.** 3.0 is a new Homematic Manager on current Electron, Svelte 5, a tested
+TypeScript core and a Node backend, with the tabs, grids, dialogs and workflows of 2.7.1. The betas since 2026-09-06 went
+into it; what changed for a 2.x user is in [docs/migration-from-2.x.md](docs/migration-from-2.x.md),
+and every beta's section below says what it changed.
+
+Thanks to @Herbert-Testmann, @Baxxy13, @EdyWenz, @ChrWi and @FraatTailscale for the reports and ideas of the beta, to
+@pvizeli, @litti, @finerider, @thoduh, @soosp, @poidi, @oradke, @maxxiger, @maxbec, @MarkSau, @jp112sdl, @janwidmer,
+@Hypnos3, @hoedlmoser, @github6043, @Flole998, @envas, @djiwondee, @corbolais and @banolka, whose 2.x issues 3.0
+closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in it in spirit.
+
+### What 3.0 is, compared with 2.7.1
+
+- **Four ways to run it, one backend and one configuration**: the desktop app for Windows, macOS and Linux (the
+  AppImage updates itself, the others offer the new installer), the addon for the CCU3, the ELV-Charly, OpenCCU and
+  openccu-lite, the npm package as a server with `--install` for an LXC or any Linux host, and a multi-arch Docker
+  image. Moving between them is a copy of `config.json`.
+- **Writes that cannot break a device**: the paramset editor sends only changed, validated parameters, shows the exact
+  `putParamset` first and reads the result back; applying to several channels is limited to channels with an identical
+  description (#98). `CONFIG_PENDING` is explained and repaired.
+- **ReGa is optional**: with or without the logic layer, on a CCU, on openccu-lite and on bare interface
+  processes. Rooms and functions come from ReGa, from openccu-lite's metadata store or from the app's own profile.
+- **openccu-lite**: the addon is the system's device frontend and edits its names, rooms and functions; from off the
+  system the app talks lite-rpc with an API token it can pair for itself, and shows values and their age on the
+  system's clock.
+- **Links** with the WebUI's easy modes for BidCos and HmIP receivers, profile templates, one name and description per
+  pair, and several links changed and written with one Apply; **pairing** of BidCos (with a foreign key), BidCos-Wired
+  and HmIP (SGTIN and key, QR scanner); **firmware updates**; the **radio** view with HmIP's matrix and the best
+  receiver for every BidCos device (#69); **service messages** of all interfaces, acknowledged, suppressed and dated as
+  the WebUI does.
+- **German and English**, light and dark, the grids' columns adjustable, the RPC console with a generated form for 51
+  methods.
+- **A supply chain that can be checked**: every installer, package and image carries an SBOM and signed build
+  provenance.
+
+### Known issues
+
+- The Windows installers are not code-signed (#68) and the macOS app is not notarised: both show their system's
+  warning at the first start, and on those two the app opens the new installer in the browser instead of updating
+  itself.
+
+### Since 3.0.0-beta.33
+
+#### Added
 
 - **Since when, on the openccu-lite system's clock.** From off an openccu-lite system (lite-rpc with an API token), a
   VALUES dialog now says _since …_ beside a value - the last change the system's state store keeps, the last report in
@@ -17,7 +59,7 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   of the app no longer resets it, and the tooltip of _Since_ names the clock: the system's, the CCU's _Erste Meldung_
   or the app's own. Nothing changes on a CCU or for the addon on the system. (task 82)
 
-### Changed
+#### Changed
 
 - **An interface that is not up yet is found within 3 seconds, and a missing one is checked quietly.** For the first
   90 seconds after the start - or after an interface went away - its port is tried every 3 seconds, then every 15
@@ -28,7 +70,7 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   log says once how long after the start an interface was found. BidCos-Wired on a CCU
   without a wired gateway costs one refused connection every 15 seconds and no log line. (task 83)
 
-### Fixed
+#### Fixed
 
 - **The easy view's presets read as the CCU's do.** A Keymatic's _Lock automatically_ offered "after" six times and
   _inactive_: the entries of the WebUI's option sets are a label and a text (`${after} 1min`), and only the label was
@@ -1615,6 +1657,7 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
+[3.0.0]: https://github.com/hobbyquaker/homematic-manager/compare/2.7.1...v3.0.0
 [3.0.0-beta.33]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.33
 [3.0.0-beta.32]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.32
 [3.0.0-beta.31]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.31

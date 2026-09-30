@@ -20,7 +20,7 @@
  * (docs/release-checklist.md, step 4).
  *
  * Usage: `node scripts/release-notes.mjs <tag> <body-file>`; needs `GH_TOKEN` (or `GITHUB_TOKEN`)
- * and `GITHUB_REPOSITORY` for the generated notes. Writes `name=<version>` and `body=<body-file>`
+ * and `GITHUB_REPOSITORY` for the generated notes. Writes `name=<tag>` and `body=<body-file>`
  * to `$GITHUB_OUTPUT` when that is set, otherwise prints them.
  */
 import {readFileSync, writeFileSync, appendFileSync} from 'node:fs';
@@ -158,7 +158,8 @@ export function releaseNotes({tag, repository, changelog, generated}) {
     if (notes) {
         parts.push(notes);
     }
-    return {name: version, body: `${parts.join('\n\n')}\n`, missingSection: !section};
+    // the title is the tag itself, `v3.0.0` (the maintainer, 2026-09-29: "title = tag")
+    return {name: tag, body: `${parts.join('\n\n')}\n`, missingSection: !section};
 }
 
 /**

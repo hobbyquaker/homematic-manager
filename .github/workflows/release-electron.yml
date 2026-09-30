@@ -199,7 +199,7 @@ jobs:
       # workflow and from every job of this matrix, because the action *replaces* both on every
       # attach: left to itself it names the release after the tag (`v3.0.0-beta.5`, where every
       # release so far was `3.0.0-beta.5`) and puts only GitHub's generated notes in the body. The
-      # script gives the version without the `v`, and the 3.0 hint, the CHANGELOG.md section of
+      # script gives the tag as the title (title = tag, the maintainer), and the 3.0 hint, the CHANGELOG.md section of
       # the version and the generated notes, in that order; a missing section is said in the body
       # and warned about, never a failed release. `shell: bash` for the Windows job.
       - name: Title and body of the draft release

@@ -158,8 +158,8 @@ Whichever gets there first creates **one** GitHub release as a **draft**; the ot
 assets to it. Nothing is public until the draft is published.
 
 The draft's **title and body are generated** (`scripts/release-notes.mjs`, run by each of the four
-workflows, so they are the same whichever creates the draft): the title is the version without the
-`v` (`3.0.0-beta.5` for the tag `v3.0.0-beta.5`), the body is the 3.0 hint paragraph (German and
+workflows, so they are the same whichever creates the draft): the title is the tag itself
+(`v3.0.0-beta.5`; the maintainer: title = tag), the body is the 3.0 hint paragraph (German and
 English), the `CHANGELOG.md` section of the version (between `## [<version>]` and the next
 `## [`, links pointed at the tag) and GitHub's generated notes below it. Nothing to add by hand for
 those; a version without a changelog section gets a body that says so and a warning in the run.
@@ -184,7 +184,7 @@ gh run watch <run-id>
 gh release view v3.0.0-beta.n --json isDraft,name,assets --jq '.isDraft, .name, (.assets | length), .assets[].name'
 ```
 
-- [ ] One draft, titled with the version, with every asset of the table above (beta.18: 40), and each
+- [ ] One draft, titled with the tag, with every asset of the table above (beta.18: 40), and each
       installer/package with its `.cdx.json` (D-27: a release with a missing SBOM is not published).
 - [ ] The checksums and attestations verify — see [Verifying the assets](#verifying-the-assets-d-27)
       (beta.18: `.sha256` OK, 14 attestations, the ghcr image for three platforms with its CycloneDX

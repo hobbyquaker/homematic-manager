@@ -137,7 +137,7 @@ describe('releaseNotes', () => {
             changelog: CHANGELOG,
             generated: '**Full Changelog**: https://github.com/hobbyquaker/homematic-manager/compare/a...b\n',
         });
-        expect(name).toBe('3.0.0-beta.5');
+        expect(name).toBe('v3.0.0-beta.5');
         expect(missingSection).toBe(false);
         const i = (needle) => body.indexOf(needle);
         expect(i('**Homematic Manager 3.0 ist')).toBe(0);

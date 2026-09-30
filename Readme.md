@@ -19,7 +19,7 @@ Eine ausführliche Beschreibung der 2.x-Oberfläche steht im
 > Das letzte 2.x-Release ist **2.7.1** (2023-01-28), eine reine Electron-App. Version
 > 3.0 ist ein Neubau auf aktuellem Electron, Svelte 5 und einem getesteten TypeScript-Kern und
 > läuft zusätzlich als Server und als CCU-Addon. Die Entwicklung findet auf `master` statt, der
-> 2.7.1-Stand liegt unverändert unter `legacy/`.
+> 2.7.1-Stand ist der Tag [`2.7.1`](https://github.com/hobbyquaker/homematic-manager/tree/2.7.1).
 > Das aktuelle Release steht unter [Releases](https://github.com/hobbyquaker/homematic-manager/releases/latest), mit
 > Installern für Windows, macOS und Linux, den drei CCU-Addon-Paketen, dem Docker-Image und dem npm-Paket
 > (`npm install -g homematic-manager`). Bekannte Probleme stehen in den Release-Notes.
@@ -169,10 +169,10 @@ Copyright (c) 2014-2026 Sebastian "Hobbyquaker" Raff
 Der 3.0-Code steht unter [AGPL-3.0-or-later](https://www.gnu.org/licenses/agpl-3.0.html), siehe
 [LICENSE](LICENSE). Bis einschließlich 2.7.1 war das Projekt GPL-3.0.
 
-- Die 2.x-Quellen unter [`legacy/`](legacy/) bleiben **GPL-3.0-or-later** — sie enthalten Beiträge
-  von anli-ger, Stefan Simroth, Homoran, Sathya Laufer und anderen. GPLv3 Abschnitt 13 erlaubt die
-  Kombination mit einem AGPL-Werk; nichts aus `legacy/` wandert ungeprüft in die neuen Pakete
-  (D-26).
+- Die 2.x-Quellen (Tag [`2.7.1`](https://github.com/hobbyquaker/homematic-manager/tree/2.7.1)) bleiben
+  **GPL-3.0-or-later** — sie enthalten Beiträge von anli-ger, Stefan Simroth, Homoran, Sathya Laufer
+  und anderen. GPLv3 Abschnitt 13 erlaubt die Kombination mit einem AGPL-Werk; nichts aus 2.x wandert
+  ungeprüft in die neuen Pakete (D-26).
 - Portierter MIT-Code aus eigenen Repositories des Autors (`cast.js` aus node-red-contrib-ccu, der
   Installer aus mqtt-interfaces-core) behält seine Nennung im Dateikopf.
 - Die Gerätedaten unter [`data/dist/`](data/) sind **kein** Teil des AGPL-Programms: sie sind aus
@@ -203,7 +203,7 @@ the live event stream and call any RPC method by hand. The user interface is Ger
 **Version 3.0.0 is released.** 2.7.1 (2023-01-28) is the last 2.x release and is a
 desktop app only; 3.0 is a rebuild on current Electron, Svelte 5 and a tested
 TypeScript core that additionally runs as a server and as a CCU addon. Work happens on `master`;
-the 2.7.1 sources sit unchanged under `legacy/`. The current release is on the
+the 2.7.1 sources are the tag [`2.7.1`](https://github.com/hobbyquaker/homematic-manager/tree/2.7.1). The current release is on the
 [releases](https://github.com/hobbyquaker/homematic-manager/releases/latest) page, with the Windows, macOS and Linux
 installers, the three CCU addon packages, the Docker image and the npm package (`npm install -g homematic-manager`).
 
@@ -227,6 +227,6 @@ Documentation: [docs/README.md](docs/README.md) is the index;
 [BUILD.md](BUILD.md) is how to build it; [CHANGELOG.md](CHANGELOG.md) lists what changed.
 
 Licence: **AGPL-3.0-or-later** for the 3.0 code ([LICENSE](LICENSE)), **GPL-3.0-or-later** for the
-2.x sources under [`legacy/`](legacy/) with their contributors, and the eQ-3 device data under
+2.x sources (tag [`2.7.1`](https://github.com/hobbyquaker/homematic-manager/tree/2.7.1)) with their contributors, and the eQ-3 device data under
 [`data/dist/`](data/) stays under the **Homematic Software License 2.0** — see
 [data/NOTICE.md](data/NOTICE.md).

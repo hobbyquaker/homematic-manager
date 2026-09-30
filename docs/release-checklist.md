@@ -301,8 +301,11 @@ Everything in the beta list, plus:
 - [ ] `latest` moves on npm and on ghcr.io automatically for a version with no `-` in it.
 - [ ] Publish the draft **without** "pre-release", so `electron-updater` offers it: the updater
       only ever sees published, non-draft releases.
-- [ ] `legacy/` is deleted in a commit of its own after the release, not before (AGENTS.md: it is
-      the only specification of the 2.x behaviour that exists).
+- [x] `legacy/` is deleted in a commit of its own after the release, not before (AGENTS.md: it is
+      the only specification of the 2.x behaviour that exists). Done 2026-09-30 (task 84); the
+      reference is the tag [`2.7.1`](https://github.com/hobbyquaker/homematic-manager/tree/2.7.1),
+      what 3.0 still read from the tree is under `data/easymodes-2.7.1/` and
+      `packages/core/test/fixtures/2.7.1/`.
 - [ ] Close the issues below.
 
 ### The addon's own version (D-24)

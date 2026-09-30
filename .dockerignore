@@ -22,9 +22,6 @@ apps/electron/dist
 apps/web/ui
 apps/web/data
 
-# the 2.7.1 sources, kept for reference only - never built, never linted, 39 MB
-legacy
-
 # the pinned upstream artefacts the converter reads; `data/dist` is what ships
 data/occu
 data/upstream

@@ -7,9 +7,11 @@ artifacts, the converter that turns them into the runtime format, and the commit
 [`packages/core/src/data/types.ts`](../packages/core/src/data/types.ts). That file is the contract;
 this one explains where its content comes from and how to renew it.
 
-This replaces `legacy/www/easymodes`, `stringtable.json`, `helpLinkParamset.json`,
-`deviceImages.json` and `legacy/tools/convert_*.js`. What the switch gains and what it costs is
-measured in [COMPARISON.md](COMPARISON.md).
+This replaces the 2.x code's `www/easymodes`, `stringtable.json`, `helpLinkParamset.json`,
+`deviceImages.json` and `tools/convert_*.js` (tag [`2.7.1`](https://github.com/hobbyquaker/homematic-manager/tree/2.7.1)).
+What the switch gains and what it costs is measured in [COMPARISON.md](COMPARISON.md). The 2.7.1
+easy modes themselves stay under [`easymodes-2.7.1/`](easymodes-2.7.1/): the converter still reads
+them (below), and `legacy/` is gone since 3.0.0.
 
 ## What is in `dist/`
 
@@ -41,7 +43,7 @@ names, 480 descriptions).
    Without `--update-hashes` a changed artifact is an error, which is the point of the pin.
 3. `npm run convert` — rewrites `dist/profiles/`, `dist/translations/` and the top-level files.
    Read the warnings it prints: every value it could not resolve is listed.
-4. `npm run compare-legacy` — refreshes `COMPARISON.md` while `legacy/` still exists.
+4. `npm run compare-legacy` — refreshes `COMPARISON.md` against `easymodes-2.7.1/`.
 5. Review `git diff data/dist`. The output is Prettier-formatted two-space JSON with sorted keys, so
    a real change is visible; `manifest.json` keeps its `generatedAt` when nothing else moved, and a
    second `npm run update` therefore produces no diff at all.
@@ -71,9 +73,9 @@ Three sources overlap, and they do not agree. The order below is what the conver
    produced for it; `test/constraints.test.mjs` re-derives it and shows both sources agree on 99 % of
    the ~25 000 shared constraints. A value that still does not resolve is **dropped**, not shipped -
    a half-resolved constraint would end up in a `putParamset`.
-3. **`legacy/www/easymodes/`** fills descriptions the first two have none for, supplies every Turkish
-   string (D-15), and supplies the name key of the ten profiles that only exist in the profiles
-   files.
+3. **`easymodes-2.7.1/`** (the 2.7.1 code's `www/easymodes`) fills descriptions the first two have
+   none for, supplies every Turkish string (D-15), and supplies the name key of the ten profiles that
+   only exist in the profiles files.
 
 ### The CCU easy mode's form of each profile (task 62, D-54)
 
@@ -189,9 +191,9 @@ committed.
 | `npm run fetch` | download `sources.json` into `upstream/`, verify sha256 (`-- --update-hashes` re-pins, `-- --force` re-downloads) |
 | `npm run convert` | write `dist/` from `upstream/` |
 | `npm run update` | fetch + convert |
-| `npm run compare-legacy` | write `COMPARISON.md` from `dist/` and `legacy/www/easymodes/` |
+| `npm run compare-legacy` | write `COMPARISON.md` from `dist/` and `easymodes-2.7.1/` |
 | `node scripts/easymode-controls.mjs <easymodes dir> --source "<firmware>" --webui-lang <lang dir>` | rebuild `extracted/easymode_controls.json.gz` from a WebUI easymode tree and its language files (tasks 62, 63); `npm run convert` afterwards |
-| `npm run icons-subset -- --ccu <dir>` | rebuild `dist/icons/` from a CCU's `www/config/img/devices` (its `50/` thumbnails, `250/` scaled down where a thumbnail is missing; D-51); without `--ccu` from `legacy/`, BidCos only (`--height 40 --quality 75` to shrink it) |
+| `npm run icons-subset -- --ccu <dir>` | rebuild `dist/icons/` from a CCU's `www/config/img/devices` (its `50/` thumbnails, `250/` scaled down where a thumbnail is missing; D-51); `--ccu` is required since `legacy/` and its 2.7.1 device images are gone |
 | `npm test` | validate `dist/` against the contract and against the facts in `docs/analysis-2026-09.md` |
 
 ## Licensing

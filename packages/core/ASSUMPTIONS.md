@@ -1,7 +1,9 @@
 # Assumptions of `@homematic-manager/core`
 
-Everything in this package is derived from three sources: the 2.x code in `legacy/` (the only
-specification of the old behaviour that exists, D-3), the eQ-3 XML-RPC specification as the 2.x
+Everything in this package is derived from three sources: the 2.x code (the only specification of
+the old behaviour that exists, D-3; it was kept under `legacy/` until 3.0.0 shipped and is the tag
+[`2.7.1`](https://github.com/hobbyquaker/homematic-manager/tree/2.7.1) - `legacy/<path>` below means
+`<path>` at that tag), the eQ-3 XML-RPC specification as the 2.x
 `rpcMethods.json` carries it, and 962 real paramset descriptions from
 [node-red-contrib-ccu](https://github.com/rdmtc/node-red-contrib-ccu)'s `paramsets.json`.
 

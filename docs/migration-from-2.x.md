@@ -196,7 +196,7 @@ The old 1.x versions under that name are deprecated on npm. Every 3.0 version is
   appears once, not once per error.
 - **The device metadata is new.** Easy-mode profiles, translations, help texts and device images come
   from pinned [openccu-data](https://github.com/SukramJ/openccu-data) artifacts instead of the 2015
-  conversion in `legacy/www/easymodes`. No receiver type and no sender combination was lost against
+  conversion in 2.x's `www/easymodes`. No receiver type and no sender combination was lost against
   2.x; 832 of 837 shared profiles are parameter-identical, and 10 profiles, 1 parameter and 4 fixed
   values differ because the CCU's own data moved on since 2015.
 

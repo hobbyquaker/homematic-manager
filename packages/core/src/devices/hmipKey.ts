@@ -5,7 +5,7 @@
  * sticker shows them twice:
  *
  * - as a QR code, `EQ01SG<SGTIN, 24 hex>DLK<key, 32 hex>` - the form 2.x's scanner parsed
- *   (`legacy/www/js/homematic-manager.js`), with a four-character prefix before `SG`;
+ *   (`www/js/homematic-manager.js` at the tag 2.7.1), with a four-character prefix before `SG`;
  * - printed, the SGTIN in groups of four and the key as 26 characters of eQ-3's base-32 alphabet in
  *   groups of 5-5-5-5-6 (`XXXXX-XXXXX-XXXXX-XXXXX-XXXXXX`).
  *

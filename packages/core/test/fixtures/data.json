@@ -1,5 +1,5 @@
 {
-  "_source": "Hand-built, shaped exactly like packages/core/src/data/types.ts. The SWITCH and DIMMER profiles follow the structure of the 2.x easy modes in legacy/www/easymodes/{SWITCH,DIMMER}/KEY.json (profile keys expert/switch_on/switch_off/light_stairway/dimmer_on_brighter, readonly params -> fixed constraints) and the openccu-data artifact description in docs/analysis-2026-09.md section 6.2. It is not a converted openccu-data release; task 9 produces the real thing.",
+  "_source": "Hand-built, shaped exactly like packages/core/src/data/types.ts. The SWITCH and DIMMER profiles follow the structure of the 2.x easy modes in data/easymodes-2.7.1/{SWITCH,DIMMER}/KEY.json (profile keys expert/switch_on/switch_off/light_stairway/dimmer_on_brighter, readonly params -> fixed constraints) and the openccu-data artifact description in docs/analysis-2026-09.md section 6.2. It is not a converted openccu-data release; task 9 produces the real thing.",
   "manifest": {
     "generatedAt": "2026-09-05T00:00:00.000Z",
     "sources": [{"name": "openccu-data", "version": "2026.7.2", "url": "https://github.com/SukramJ/openccu-data"}],

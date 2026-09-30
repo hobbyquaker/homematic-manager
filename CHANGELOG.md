@@ -25,6 +25,12 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   side. The mark now stays on links to or from a peer that is not a device of the interface (`@1A2B3C:14`) and on links
   between two devices whose flags say one side was not written. (B-86)
 
+### Removed
+
+- **The 2.7.1 sources are no longer in the repository.** `legacy/` held them as the reference for the rebuild; the
+  reference is the tag [`2.7.1`](https://github.com/hobbyquaker/homematic-manager/tree/2.7.1) now. The 2.7.1 easy-mode
+  data the metadata converter still reads stays under `data/easymodes-2.7.1/`. Nothing changes in the application.
+
 ## [3.0.0] — 2026-09-30
 
 **The first stable release of the rebuild.** 3.0 is a new Homematic Manager on current Electron, Svelte 5, a tested

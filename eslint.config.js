@@ -14,7 +14,7 @@ import svelteConfig from './packages/ui/svelte.config.js';
 // repository does not need a program for every config file.
 export default tseslint.config(
     {
-        ignores: ['legacy/**', '**/dist/**', '**/out/**', '**/.vite/**', 'coverage/**', '**/*.tsbuildinfo'],
+        ignores: ['**/dist/**', '**/out/**', '**/.vite/**', 'coverage/**', '**/*.tsbuildinfo'],
     },
     js.configs.recommended,
     tseslint.configs.recommended,

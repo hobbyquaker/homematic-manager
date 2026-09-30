@@ -256,6 +256,21 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Vom Homematic Manager zuerst gesehen',
         en: 'First seen by the Homematic Manager',
     },
+    // Task 82 (task 68): the Since of a remote openccu-lite connection, the state store's last change
+    'Last changed, from the openccu-lite system': {
+        de: 'Letzte Änderung, vom openccu-lite-System',
+        en: 'Last changed, from the openccu-lite system',
+    },
+    // Task 82: a VALUES row's time from the openccu-lite system's state store, and its tooltip
+    'since {time}': {de: 'seit {time}', en: 'since {time}'},
+    restored: {de: 'wiederhergestellt', en: 'restored'},
+    'Last change: {time}': {de: 'Letzte Änderung: {time}', en: 'Last change: {time}'},
+    'Last report: {time}': {de: 'Letzte Meldung: {time}', en: 'Last report: {time}'},
+    'Restored by the system from its own file; no device has reported it since the system started.': {
+        de: 'Vom System aus seiner eigenen Datei wiederhergestellt; seit dem Start des Systems hat es kein Gerät gemeldet.',
+        en: 'Restored by the system from its own file; no device has reported it since the system started.',
+    },
+    "The openccu-lite system's clock": {de: 'Die Uhr des openccu-lite-Systems', en: "The openccu-lite system's clock"},
     // B-74 (#150): the tooltip of a message only ReGa lists - the WebUI shows it, the interface no longer does
     'Listed by the CCU only; the interface no longer reports it': {
         de: 'Nur von der CCU geführt; die Schnittstelle meldet sie nicht mehr',

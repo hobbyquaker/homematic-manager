@@ -137,6 +137,17 @@ describe('the service messages tab', () => {
         expect(local.dataset['source']).toBe('local');
     });
 
+    it("task 82: on a remote openccu-lite connection Since is the system's last change, and says so", async () => {
+        transport.result('serviceMessages.list', [
+            {...fault, interfaceName: 'HmIP-RF', since: Date.UTC(2026, 8, 1, 10, 0), sinceSource: 'system'},
+        ]);
+        await mountApp({transport, hash: '#/HmIP-RF/messages'});
+        const fromSystem = await screen.findByTestId('message-since-KEQ0345678:4-FAULT_REPORTING');
+        expect(fromSystem.getAttribute('title')).toBe('Letzte Änderung, vom openccu-lite-System');
+        expect(fromSystem.dataset['source']).toBe('system');
+        expect(fromSystem.textContent).toContain('2026');
+    });
+
     it('B-74: a message only the CCU lists says so on its name', async () => {
         transport.result('serviceMessages.list', [
             {

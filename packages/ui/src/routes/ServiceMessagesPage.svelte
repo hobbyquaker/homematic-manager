@@ -267,11 +267,13 @@
                         >{valueText(row)}</span
                     >
                 {:else if column.key === 'since'}
-                    <!-- Task 36: the CCU's own first report where ReGa has one, else when this application first saw it -->
+                    <!-- Task 36: the CCU's own first report where ReGa has one; task 82: the openccu-lite system's last change; else when this application first saw it -->
                     <span
                         title={row.sinceSource === 'rega'
                             ? t('First reported, from the CCU')
-                            : t('First seen by the Homematic Manager')}
+                            : row.sinceSource === 'system'
+                              ? t('Last changed, from the openccu-lite system')
+                              : t('First seen by the Homematic Manager')}
                         data-testid={`message-since-${row.address}-${row.datapoint}`}
                         data-source={row.sinceSource ?? 'local'}>{formatDateTime(row.since)}</span
                     >

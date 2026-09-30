@@ -8,6 +8,15 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ## Unreleased
 
+### Added
+
+- **Since when, on the openccu-lite system's clock.** From off an openccu-lite system (lite-rpc with an API token), a
+  VALUES dialog now says _since …_ beside a value - the last change the system's state store keeps, the last report in
+  the tooltip - and greys a value the system restored from its own file that no device has reported since it
+  started. The service-message list dates a message by the last change of its datapoint on the system, so a restart
+  of the app no longer resets it, and the tooltip of _Since_ names the clock: the system's, the CCU's _Erste Meldung_
+  or the app's own. Nothing changes on a CCU or for the addon on the system. (task 82)
+
 ### Fixed
 
 - **The easy view's presets read as the CCU's do.** A Keymatic's _Lock automatically_ offered "after" six times and

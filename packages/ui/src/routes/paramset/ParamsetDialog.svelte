@@ -5,6 +5,7 @@
         Paramset,
         ParamsetDescription,
         ParamsetValue,
+        ValueState,
         WriteResult,
     } from '@homematic-manager/core';
     import {easyFormOf, easyFormParams, multiApplyEligibility} from '@homematic-manager/core';
@@ -49,6 +50,8 @@
 
     let description = $state<ParamsetDescription | undefined>(undefined);
     let original = $state<Paramset>({});
+    /** Task 82: the state store's times of the VALUES, on a remote openccu-lite connection; `{}` elsewhere. */
+    let valueStates = $state<Record<string, ValueState>>({});
     let edited = $state<Record<string, unknown>>({});
     let view = $state<MasterView | undefined>(undefined);
     /** Task 64: the MASTER form the paramset id names (`getParamsetId`), `''` for the channel type's. */
@@ -286,6 +289,10 @@
             }
             description = loaded?.description;
             original = loaded?.values ?? {};
+            valueStates = {};
+            if (request.paramset === 'VALUES') {
+                void loadValueStates(token);
+            }
             edited = {};
             results = [];
             readBack = [];
@@ -439,6 +446,9 @@
         if (reread) {
             readBack = computeReadBack(payload.values, reread, description);
             original = reread;
+            if (paramset === 'VALUES') {
+                void loadValueStates(loadToken);
+            }
             edited = {};
         }
         if (written.length > 0 && written.every((result) => result.ok) && !readBack.some((entry) => entry.differs)) {
@@ -484,6 +494,14 @@
         return String(value);
     }
 
+    /** Task 82: the times of the values just read, unless the dialog moved on meanwhile. */
+    async function loadValueStates(token: number): Promise<void> {
+        const states = await stores.paramsets.valueStates(interfaceName, address);
+        if (token === loadToken) {
+            valueStates = states;
+        }
+    }
+
     /**
      * The per-datapoint `setValue` of the VALUES paramset.
      *
@@ -505,6 +523,7 @@
         // The device holds it now, so the row is no longer "changed" and the dialog agrees again.
         edited = Object.fromEntries(Object.entries(edited).filter(([name]) => name !== field.name));
         original = {...original, [field.name]: value};
+        void loadValueStates(loadToken);
         stores.notices.push(
             'info',
             `setValue ${stores.nameOf(address)} (${address}) ${field.name} = ${shownValue(field, value)}`,
@@ -632,6 +651,7 @@
                         changed={isChanged(field)}
                         valueLabel={(entry) => stores.meta.valueLabel(field.name, entry, channelType)}
                         presetLabel={(key) => stores.meta.uiLabel(key)}
+                        valueState={perDatapoint ? valueStates[field.name] : undefined}
                         onchange={(value) => change(field, value)}
                         onset={perDatapoint && field.writable ? () => void setOne(field) : undefined}
                         suppressed={withSuppress ? isSuppressed(field.name) : undefined}

@@ -1,10 +1,11 @@
 <script lang="ts">
-    import type {ParamsetValue} from '@homematic-manager/core';
+    import type {ParamsetValue, ValueState} from '@homematic-manager/core';
     import {fromDisplayValue, presetLabel as presetText, toDisplayValue} from '@homematic-manager/core';
 
     import {tick} from 'svelte';
 
     import {getStores} from '../../lib/stores/context.js';
+    import {formatDateTime} from '../../lib/util/format.js';
     import type {FormField} from '../../lib/util/paramsetForm.js';
 
     interface Props {
@@ -21,6 +22,12 @@
          * not enum names, so `valueLabel` would not find them and show the key itself (B-82).
          */
         presetLabel?: ((key: string) => string) | undefined;
+        /**
+         * Task 82 (task 68): what an openccu-lite system's state store says of this VALUES
+         * datapoint - since when the value stands, when it was last reported, and whether a device
+         * has confirmed it since the system started (a restored one is greyed). Absent on a CCU.
+         */
+        valueState?: ValueState | undefined;
         /** A `setValue` button next to the control - the VALUES paramset has one per datapoint. */
         onset?: (() => void) | undefined;
         onchange: (value: ParamsetValue) => void;
@@ -54,6 +61,7 @@
         help = undefined,
         valueLabel = undefined,
         presetLabel = undefined,
+        valueState = undefined,
         onset = undefined,
         onchange,
         changed = false,
@@ -164,6 +172,21 @@
         numberInput?.focus();
         numberInput?.select();
     }
+
+    /** Task 82: the times of a stored value in words, and whose clock they are. */
+    function stateTitle(state: ValueState): string {
+        const lines = [
+            t('Last change: {time}', {time: state.lc === undefined ? '–' : formatDateTime(state.lc)}),
+            t('Last report: {time}', {time: formatDateTime(state.ts)}),
+        ];
+        if (!state.confirmed) {
+            lines.push(
+                t('Restored by the system from its own file; no device has reported it since the system started.'),
+            );
+        }
+        lines.push(t("The openccu-lite system's clock"));
+        return lines.join('\n');
+    }
 </script>
 
 <!--
@@ -271,6 +294,19 @@
         {/if}
 
         {#if field.unit !== '' && !showSpecial}<span class="hmm-param-unit">{field.unit}</span>{/if}
+        {#if valueState}
+            <!-- task 82: the system's clock, not this application's - the tooltip says so -->
+            <span
+                class="hmm-param-since"
+                class:hmm-param-restored={!valueState.confirmed}
+                title={stateTitle(valueState)}
+                data-testid={`since-${field.name}`}
+                data-confirmed={String(valueState.confirmed)}
+                >{valueState.confirmed
+                    ? t('since {time}', {time: formatDateTime(valueState.lc ?? valueState.ts)})
+                    : t('restored')}</span
+            >
+        {/if}
     </div>
 
     {#if onset}
@@ -326,6 +362,21 @@
 
     .hmm-param-changed {
         background: var(--hmm-accent-bg);
+    }
+
+    /* task 82: the state store's time beside a VALUES datapoint; a restored value is greyed */
+    .hmm-param-since {
+        font-size: var(--hmm-font-size-small);
+        color: var(--hmm-fg-faint);
+        white-space: nowrap;
+    }
+
+    .hmm-param-control:has(.hmm-param-restored) > :not(.hmm-param-since) {
+        opacity: 0.55;
+    }
+
+    .hmm-param-restored {
+        font-style: italic;
     }
 
     .hmm-param-label {

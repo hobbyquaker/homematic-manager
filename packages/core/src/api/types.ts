@@ -654,10 +654,12 @@ export interface ServiceMessage {
     /** Milliseconds since epoch when it was first seen. */
     since: number;
     /**
-     * Task 36: `rega` when `since` is the CCU's own first report of the message (ReGa's alarm, the
-     * WebUI's *Erste Meldung*); absent when it is when this application first saw it.
+     * Whose clock `since` is. Task 36: `rega` when it is the CCU's own first report of the message
+     * (ReGa's alarm, the WebUI's *Erste Meldung*). Task 82 (task 68): `system` when it is the last
+     * change of the datapoint in an openccu-lite system's state store (`lc`), on a remote lite-rpc
+     * connection. Absent when it is when this application first saw it.
      */
-    sinceSource?: 'rega';
+    sinceSource?: 'rega' | 'system';
     /**
      * B-74 (#150): `rega` when only the CCU's ReGa lists this message - its alarm is pending while
      * the interface process no longer reports the datapoint (rfd forgets a `STICKY_UNREACH` at a
@@ -665,6 +667,21 @@ export interface ServiceMessage {
      * this list. Absent when the interface reports it.
      */
     source?: 'rega';
+}
+
+/**
+ * Task 82 (task 68): what an openccu-lite system's state store says of one datapoint, beside its
+ * value - on a remote lite-rpc connection only; a CCU answers none of it.
+ */
+export interface ValueState {
+    /** Milliseconds since epoch: the last report, the same value or not. */
+    ts: number;
+    /** Milliseconds since epoch: the last change; absent for a value the system saw only once without its store. */
+    lc?: number;
+    /** `false` for a value the system restored from its own file that no device has reported since. */
+    confirmed: boolean;
+    /** Where the system has it from: `event`, `sweep`, `restored`. */
+    source?: string;
 }
 
 export interface EventRecord {
@@ -1071,6 +1088,11 @@ export interface ApiMethods {
     'groups.delete': {params: [id: number]; result: HeatingGroupMember[]};
 
     'paramset.get': {params: [interfaceName: string, address: string, paramset: string]; result: Paramset};
+    /**
+     * Task 82: the state store's times of a channel's VALUES, by datapoint - on a remote openccu-lite
+     * connection; `{}` everywhere else (a CCU, the addon's loopback callbacks), where nothing keeps them.
+     */
+    'paramset.valueStates': {params: [interfaceName: string, address: string]; result: Record<string, ValueState>};
     /**
      * Task 64: what `getParamsetId(address, MASTER)` answers - the key the WebUI picks a MASTER form
      * by. `''` where the interface has no such method or refuses it; cached per address.

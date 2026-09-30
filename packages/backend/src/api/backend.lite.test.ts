@@ -328,4 +328,90 @@ describe('a remote openccu-lite connection (task 72)', () => {
             .find((step) => step.state === 'failed') as {message: string};
         expect(failed.message).toMatch(/does not answer \(refused\)/);
     });
+
+    it("answers the state store's times of a channel, and a message's Since from its last change (task 82)", async () => {
+        await fake.stop();
+        fake = new FakeBox({
+            token: 'olt_test',
+            interfaces: ['HmIP-RF', 'BidCos-RF'],
+            devices: DEVICES,
+            values: {
+                'HmIP-RF.ABC1:0.UNREACH': {
+                    value: true,
+                    ts: '2026-09-30T08:00:00.000Z',
+                    lc: '2026-09-01T10:00:00.000Z',
+                    confirmed: true,
+                },
+                'HmIP-RF.ABC1:1.STATE': {
+                    value: true,
+                    ts: '2026-09-29T20:00:00.000Z',
+                    lc: '2026-09-29T19:00:00.000Z',
+                    confirmed: false,
+                    source: 'restored',
+                },
+                // a channel whose address begins like ABC1:1's
+                'HmIP-RF.ABC1:10.STATE': {value: false},
+            },
+            descriptions: {
+                'HmIP-RF.ABC1:0': {UNREACH: {TYPE: 'BOOL', OPERATIONS: 5}},
+                'HmIP-RF.ABC1:1': {STATE: {TYPE: 'BOOL', OPERATIONS: 7}},
+            },
+            meta: {revision: 3, objects: {}, enums: {}},
+        });
+        await fake.start();
+        const h = await open();
+        await h.backend.request('config.set', liteConnection() as never);
+        await until(() => h.events.filter((event) => event.name === 'devices.changed').length >= 2);
+
+        expect(await h.backend.request('paramset.valueStates', 'HmIP-RF', 'ABC1:1')).toEqual({
+            STATE: {
+                ts: Date.parse('2026-09-29T20:00:00.000Z'),
+                lc: Date.parse('2026-09-29T19:00:00.000Z'),
+                confirmed: false,
+                source: 'restored',
+            },
+        });
+        // ABC1:10's STATE was not mixed in above; one channel's keys only, and nothing where the store has none
+        expect(Object.keys(await h.backend.request('paramset.valueStates', 'HmIP-RF', 'ABC1:0'))).toEqual(['UNREACH']);
+        expect(await h.backend.request('paramset.valueStates', 'BidCos-RF', 'LEQ1:1')).toEqual({});
+
+        // the device reports its UNREACH: the message dates from the store's last change, not from now
+        fake.event('HmIP-RF', 'ABC1:0', 'UNREACH', true);
+        await until(() => h.events.some((event) => event.name === 'rpc.event'));
+        const messages = await h.backend.request('serviceMessages.list', 'HmIP-RF');
+        expect(messages.find((message) => message.datapoint === 'UNREACH')).toMatchObject({
+            address: 'ABC1:0',
+            since: Date.parse('2026-09-01T10:00:00.000Z'),
+            sinceSource: 'system',
+        });
+    });
+
+    it('answers no times on the CCU path', async () => {
+        const h = await open({
+            createInterfaceManager: () =>
+                ({
+                    idle: false,
+                    detected: [],
+                    states: () => [],
+                    client: () => {
+                        throw new Error('not in this test');
+                    },
+                    isConnected: () => false,
+                    names: () => [],
+                    resolved: () => undefined,
+                    start: () => Promise.resolve(),
+                    stop: () => Promise.resolve(),
+                    unsubscribe: () => Promise.resolve(),
+                    subscribe: () => Promise.resolve(),
+                    reconnect: () => Promise.resolve(),
+                    noteEvent: () => undefined,
+                    probeInterfaces: () => Promise.resolve([]),
+                    tick: () => Promise.resolve(),
+                    callbackIp: '',
+                    callbackWarning: undefined,
+                }) as never,
+        });
+        await h.backend.request('config.set', liteConnection({metaToken: ''}) as never);
+        expect(await h.backend.request('paramset.valueStates', 'HmIP-RF', 'ABC1:1')).toEqual({});
+    });
 });

@@ -24,10 +24,12 @@
 import {
     OccuLite,
     OccuLiteError,
+    datapointRef,
     parseRef,
     type DeviceDescription as LiteDeviceDescription,
     type Options as OccuLiteOptions,
     type Transport,
+    type Value,
     type ValueEvent,
 } from 'occulite-client';
 
@@ -41,6 +43,7 @@ import {
     type ResolvedInterface,
     type RpcOrigin,
     type RpcValue,
+    type ValueState,
 } from '@homematic-manager/core';
 
 import {interfaceTargets, type InterfaceTarget} from '../config/defaults.js';
@@ -172,6 +175,29 @@ export class LiteInterfaces implements Interfaces {
     /** The client in use, for a test and for the backend's values (task 68). */
     get box(): OccuLite | undefined {
         return this.#box;
+    }
+
+    /**
+     * Task 82 (task 68): the state store's times of one datapoint - its last report, its last change
+     * and whether a device has confirmed it since the system started. `undefined` where the store has
+     * nothing (or before the first connect).
+     */
+    valueState(interfaceName: string, address: string, datapoint: string): ValueState | undefined {
+        const found = this.#box?.values.get(datapointRef(interfaceName, address, datapoint));
+        return found === undefined ? undefined : toValueState(found);
+    }
+
+    /** Task 82: {@link valueState} for every datapoint of a channel the store has, by datapoint. */
+    valueStates(interfaceName: string, address: string): Record<string, ValueState> {
+        const prefix = datapointRef(interfaceName, address, '');
+        const states: Record<string, ValueState> = {};
+        for (const [key, value] of this.#box?.values ?? []) {
+            // `interface.address.KEY`: only this channel's own keys, not a longer address beginning alike
+            if (key.startsWith(prefix) && !key.slice(prefix.length).includes('.')) {
+                states[key.slice(prefix.length)] = toValueState(value);
+            }
+        }
+        return states;
     }
 
     states(): InterfaceState[] {
@@ -836,4 +862,14 @@ export class LiteInterfaces implements Interfaces {
         }
         entry.state = state;
     }
+}
+
+/** The client's view of a stored value, without the value: what the grids show beside it (task 82). */
+function toValueState(value: Value): ValueState {
+    return {
+        ts: value.ts,
+        ...(value.lc === undefined ? {} : {lc: value.lc}),
+        confirmed: value.confirmed,
+        ...(value.source === undefined ? {} : {source: value.source}),
+    };
 }

@@ -664,6 +664,8 @@ export class Backend {
 
             case 'paramset.get':
                 return this.#getParamset(p[0], p[1], p[2]);
+            case 'paramset.valueStates':
+                return this.#manager instanceof LiteInterfaces ? this.#manager.valueStates(p[0], p[1]) : {};
             case 'paramset.id':
                 return this.#paramsetId(p[0], p[1]);
             case 'channel.mode':
@@ -1854,7 +1856,26 @@ export class Backend {
     }
 
     #serviceMessages(interfaceName?: string): ServiceMessage[] {
-        return this.#withRegaAlarms(this.#caches.listServiceMessages(interfaceName), interfaceName);
+        return this.#withSystemTimes(
+            this.#withRegaAlarms(this.#caches.listServiceMessages(interfaceName), interfaceName),
+        );
+    }
+
+    /**
+     * Task 82 (task 68): on a remote openccu-lite connection a message's *Since* is the last change
+     * of its datapoint in the system's state store - it outlives a restart of this application,
+     * which the time this application first saw it does not. A datapoint the store has no change
+     * time for keeps this application's own.
+     */
+    #withSystemTimes(messages: ServiceMessage[]): ServiceMessage[] {
+        const manager = this.#manager;
+        if (!(manager instanceof LiteInterfaces)) {
+            return messages;
+        }
+        return messages.map((message) => {
+            const lc = manager.valueState(message.interfaceName, message.address, message.datapoint)?.lc;
+            return lc === undefined ? message : {...message, since: lc, sinceSource: 'system' as const};
+        });
     }
 
     /**
@@ -2485,6 +2506,7 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'meta.export',
     'meta.import',
     'paramset.get',
+    'paramset.valueStates',
     'paramset.id',
     'channel.mode',
     'paramset.description',

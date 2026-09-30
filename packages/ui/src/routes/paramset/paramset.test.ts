@@ -393,6 +393,49 @@ describe('the paramset dialog', () => {
         expect(screen.getByTestId('notices').textContent).toContain('STATE = false');
     });
 
+    it("task 82: a VALUES row says since when its value stands on the system's clock, and greys a restored one", async () => {
+        const lc = new Date(2026, 8, 30, 7, 15, 0).getTime();
+        transport.respond('paramset.valueStates', (_interfaceName, address) =>
+            address === 'MEQ0123456:1'
+                ? {
+                      STATE: {ts: lc + 60_000, lc, confirmed: true, source: 'event'},
+                      WORKING: {ts: lc, confirmed: false, source: 'restored'},
+                  }
+                : {},
+        );
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
+        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:1-VALUES'));
+
+        const since = await waitFor(() => screen.getByTestId('since-STATE'));
+        expect(transport.lastCall('paramset.valueStates')).toEqual(['BidCos-RF', 'MEQ0123456:1']);
+        expect(since.textContent).toMatch(/^seit .*07:15:00$/);
+        expect(since.dataset['confirmed']).toBe('true');
+        expect(since.getAttribute('title')).toContain('Letzte Änderung:');
+        expect(since.getAttribute('title')).toContain('Letzte Meldung:');
+        expect(since.getAttribute('title')).toContain('Die Uhr des openccu-lite-Systems');
+
+        const restored = screen.getByTestId('since-WORKING');
+        expect(restored.textContent).toBe('wiederhergestellt');
+        expect(restored.dataset['confirmed']).toBe('false');
+        expect(restored.classList.contains('hmm-param-restored')).toBe(true);
+        expect(restored.getAttribute('title')).toContain('Letzte Änderung: –');
+        expect(restored.getAttribute('title')).toContain('seit dem Start des Systems hat es kein Gerät gemeldet');
+    });
+
+    it('shows no times where the connection answers none, as on a CCU (task 82)', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
+        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:1-VALUES'));
+        await waitFor(() => {
+            expect(screen.getByTestId('set-STATE')).toBeTruthy();
+        });
+        expect(screen.queryByTestId('since-STATE')).toBeNull();
+        expect(transport.countOf('paramset.valueStates')).toBe(1);
+    });
+
     /**
      * The task 19 defect, at the unit level: the dialog must hand the raw value to the transport.
      * Casting it here as well wrapped a `FLOAT` in `{explicitDouble}`, which the backend then cast

@@ -163,6 +163,16 @@ then answers `401` and the app runs with the names it has in its own store, says
 connection state, and tries again on the next reconnect. It never fails to start because a system
 refused a credential.
 
+**The system's clock.** The system keeps the time of every datapoint it stores (its state store):
+the last report and the last change. The app shows them on such a connection (task 82).
+A VALUES dialog says *since …* beside a value — its last change, the tooltip adds the last report —
+and greys a value the system restored from its own file that no device has reported since the
+system started (*restored*). The service-message list dates a message by the last change of its
+datapoint instead of by the moment this app first saw it, so a restart of the app does not reset
+it; the tooltip of the *Since* cell says whose clock it is — the system's, the CCU's (*Erste
+Meldung*, on a CCU with ReGa) or this app's. The store keeps what the system chose to keep; a
+datapoint without a time there keeps this app's.
+
 **Two streams per token.** The app opens one stream for the events and one for the metadata
 store; the system allows two per token. A second installation must pair on its own — never copy
 a token between two of them, the second one gets `too-many-streams`.

@@ -7,6 +7,7 @@ import {
     type RpcValue,
     type RpcWriteValue,
     type Transport,
+    type ValueState,
     type WriteOptions,
     type WriteResult,
 } from '@homematic-manager/core';
@@ -267,6 +268,18 @@ export class ParamsetStore {
         } catch (error) {
             this.#notices.fromError(error, `getValue ${address} ${parameter}`);
             return undefined;
+        }
+    }
+
+    /**
+     * Task 82 (task 68): the state store's times of a channel's VALUES on a remote openccu-lite
+     * connection - `{}` on a CCU, and on a failure, which only means the rows show no times.
+     */
+    async valueStates(interfaceName: string, address: string): Promise<Record<string, ValueState>> {
+        try {
+            return await this.#transport.request('paramset.valueStates', interfaceName, address);
+        } catch {
+            return {};
         }
     }
 

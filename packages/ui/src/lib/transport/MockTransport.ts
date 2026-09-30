@@ -287,6 +287,7 @@ export class MockTransport implements Transport {
         this.respond('paramset.get', (_interfaceName, address, paramset) => demoParamset(address, paramset));
         // task 64: the demo's channels have no paramset id of a form the data knows
         this.result('paramset.id', '');
+        this.result('paramset.valueStates', {});
         this.result('channel.mode', '');
         this.respond('paramset.put', (interfaceName, addresses, paramset, values) =>
             addresses.map((address) => ({

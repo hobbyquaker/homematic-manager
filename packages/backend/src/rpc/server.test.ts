@@ -357,16 +357,33 @@ describe('CallbackServers', () => {
 
     /** Task 35 (D-43): the CCU addon's fixed pair, for the ports the configuration leaves at 0. */
     it('takes the default port while the configured one is 0', async () => {
-        const probe = new CallbackServer({protocol: 'binrpc', host: '127.0.0.1', port: 0, handler: recordingHandler()});
-        const free = await probe.start();
-        await probe.stop();
-        const servers = new CallbackServers({
-            handler: recordingHandler(),
-            host: '127.0.0.1',
-            ports: {xmlrpc: 0, binrpc: 0},
-            defaultPorts: {xmlrpc: 0, binrpc: free},
-        });
-        expect(await servers.ensure('binrpc')).toBe(free);
+        // The default comes from a probe that is closed again, and between that close and the bind
+        // another test file running in parallel may take the number (B-83); the server then falls
+        // back to a free port, which is right but not what this test is about, so it probes again.
+        let servers: CallbackServers | undefined;
+        for (let attempt = 1; servers === undefined; attempt += 1) {
+            const probe = new CallbackServer({
+                protocol: 'binrpc',
+                host: '127.0.0.1',
+                port: 0,
+                handler: recordingHandler(),
+            });
+            const free = await probe.start();
+            await probe.stop();
+            const candidate = new CallbackServers({
+                handler: recordingHandler(),
+                host: '127.0.0.1',
+                ports: {xmlrpc: 0, binrpc: 0},
+                defaultPorts: {xmlrpc: 0, binrpc: free},
+            });
+            const port = await candidate.ensure('binrpc');
+            if (port === free || attempt >= 5) {
+                expect(port).toBe(free);
+                servers = candidate;
+            } else {
+                await candidate.stop();
+            }
+        }
         // a default of 0 is no default: the kernel's free port, as before
         expect(await servers.ensure('xmlrpc')).toBeGreaterThan(0);
         await servers.stop();

@@ -18,8 +18,6 @@ export const repoDir = path.resolve(dataDir, '..');
 export const upstreamDir = path.join(dataDir, 'upstream');
 /** The committed runtime format. */
 export const distDir = path.join(dataDir, 'dist');
-/** The 2.7.1 tree, reference only. */
-export const legacyDir = path.join(repoDir, 'legacy');
 
 /** @returns {{openccuData: {name: string, repository: string, version: string, license: string, baseUrl: string, files: Record<string, string|null>}}} */
 export function readSources() {

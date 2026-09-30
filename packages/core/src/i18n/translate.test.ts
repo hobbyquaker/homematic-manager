@@ -6,7 +6,7 @@ import {MESSAGE_KEYS, MESSAGES, type MessageCatalogue} from './messages.js';
 import {createTranslator, DEFAULT_FALLBACKS, interpolate, pluralCategory, Translator} from './translate.js';
 
 const legacy = JSON.parse(
-    readFileSync(new URL('../../../../legacy/www/js/language.json', import.meta.url), 'utf8'),
+    readFileSync(new URL('../../test/fixtures/2.7.1/language.json', import.meta.url), 'utf8'),
 ) as Record<string, {de: string}>;
 
 describe('the catalogue', () => {

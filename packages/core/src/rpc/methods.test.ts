@@ -14,7 +14,7 @@ import {
 } from './methods.js';
 
 const legacy = JSON.parse(
-    readFileSync(new URL('../../../../legacy/www/js/rpcMethods.json', import.meta.url), 'utf8'),
+    readFileSync(new URL('../../test/fixtures/2.7.1/rpcMethods.json', import.meta.url), 'utf8'),
 ) as Record<string, {params?: {name: string}[]; returns?: string; help?: {de?: string}}>;
 
 describe('the catalogue', () => {

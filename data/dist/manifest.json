@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-30T14:40:52.310Z",
+  "generatedAt": "2026-09-30T20:15:59.038Z",
   "sources": [
     {
       "name": "openccu-data/easymode_extract",
@@ -34,7 +34,7 @@
     {
       "name": "homematic-manager/legacy-easymode-localization",
       "version": "2.7.1",
-      "url": "https://github.com/hobbyquaker/homematic-manager/tree/master/www/easymodes/localization",
+      "url": "https://github.com/hobbyquaker/homematic-manager/tree/2.7.1/www/easymodes/localization",
       "sha256": "00e0e2d79c7fbc1f97b8e7cb10d4da4473a3f693d0d07493ad909c14ddfb906c"
     }
   ],

@@ -11,13 +11,13 @@
  *        profiles (1) does not cover (494 senders, 2409 profiles) and is the only source of
  *        `name_key`, which becomes `LinkProfile.key`. Its values are raw Tcl and are resolved by
  *        `lib/constraints.mjs`.
- *     3. `legacy/www/easymodes/localization/{de,en,tr}` - fills descriptions that neither has, and
- *        is the only source of Turkish (D-15).
+ *     3. `data/easymodes-2.7.1/localization/{de,en,tr}` (the 2.7.1 code's `www/easymodes`, task 84) -
+ *        fills descriptions that neither has, and is the only source of Turkish (D-15).
  *
  *   translations/{de,en}.json
  *     `translation_custom/*.json` over `translation_extract.json.gz`.
  *   translations/tr.json
- *     `legacy/www/easymodes/localization/tr/{PNAME,GENERIC}.json`, restricted to keys that de and
+ *     `data/easymodes-2.7.1/localization/tr/{PNAME,GENERIC}.json`, restricted to keys that de and
  *     en actually have.
  */
 import {existsSync, readFileSync, readdirSync} from 'node:fs';
@@ -25,7 +25,7 @@ import path from 'node:path';
 import {gunzipSync} from 'node:zlib';
 
 import {toConstraint} from './lib/constraints.mjs';
-import {hasLegacy, legacyEasymodesDir, legacyLocalization, legacyProfiles, legacyReceiverTypes} from './lib/legacy.mjs';
+import {legacyEasymodesDir, legacyLocalization, legacyProfiles, legacyReceiverTypes} from './lib/legacy.mjs';
 import {
     dataDir,
     distDir,
@@ -119,39 +119,35 @@ function useLabelKey(key) {
 
 /** Descriptions from the 2.x tree: receiverType -> senderType -> language -> profile id -> text. */
 const legacyDescriptions = new Map();
-if (hasLegacy()) {
-    for (const receiverType of legacyReceiverTypes()) {
-        /** @type {Record<string, Record<string, Record<number, string>>>} */
-        const perSender = {};
-        for (const language of LANGUAGES) {
-            const file = legacyLocalization(language, receiverType);
-            if (!file) continue;
-            for (const [senderType, entries] of Object.entries(file)) {
-                for (const [key, text] of Object.entries(entries)) {
-                    const match = /^description_(\d+)$/u.exec(key);
-                    if (!match || typeof text !== 'string' || text === '') continue;
-                    perSender[senderType] ??= {};
-                    perSender[senderType][language] ??= {};
-                    perSender[senderType][language][Number(match[1])] = text;
-                }
+for (const receiverType of legacyReceiverTypes()) {
+    /** @type {Record<string, Record<string, Record<number, string>>>} */
+    const perSender = {};
+    for (const language of LANGUAGES) {
+        const file = legacyLocalization(language, receiverType);
+        if (!file) continue;
+        for (const [senderType, entries] of Object.entries(file)) {
+            for (const [key, text] of Object.entries(entries)) {
+                const match = /^description_(\d+)$/u.exec(key);
+                if (!match || typeof text !== 'string' || text === '') continue;
+                perSender[senderType] ??= {};
+                perSender[senderType][language] ??= {};
+                perSender[senderType][language][Number(match[1])] = text;
             }
         }
-        legacyDescriptions.set(receiverType, perSender);
     }
+    legacyDescriptions.set(receiverType, perSender);
 }
 /** Turkish profile names: the 2.x code looked the profile's name key up in GENERIC.json. */
 const legacyGeneric = Object.fromEntries(LANGUAGES.map((l) => [l, legacyLocalization(l, 'GENERIC') ?? {}]));
 
 /** The 2.x profile files, the fallback for the name key of profiles `easymode_extract` does not have. */
 const legacyKeys = new Map();
-if (hasLegacy()) {
-    for (const receiverType of legacyReceiverTypes()) {
-        for (const [senderType, byId] of Object.entries(legacyProfiles(receiverType))) {
-            for (const [id, profile] of Object.entries(byId)) {
-                // A few 2.x keys are unevaluated Tcl (`dimmer_on} / \${light_stairway`); ignore those.
-                if (typeof profile.name === 'string' && /^[a-z][\w]*$/iu.test(profile.name)) {
-                    legacyKeys.set(`${receiverType}/${senderType}#${id}`, profile.name);
-                }
+for (const receiverType of legacyReceiverTypes()) {
+    for (const [senderType, byId] of Object.entries(legacyProfiles(receiverType))) {
+        for (const [id, profile] of Object.entries(byId)) {
+            // A few 2.x keys are unevaluated Tcl (`dimmer_on} / \${light_stairway`); ignore those.
+            if (typeof profile.name === 'string' && /^[a-z][\w]*$/iu.test(profile.name)) {
+                legacyKeys.set(`${receiverType}/${senderType}#${id}`, profile.name);
             }
         }
     }
@@ -433,7 +429,7 @@ const turkish = {
     parameterHelp: {},
     uiLabels: {},
 };
-if (hasLegacy()) {
+{
     const parameterNames = legacyLocalization('tr', 'PNAME') ?? {};
     const generic = legacyGeneric.tr ?? {};
     let dropped = 0;
@@ -479,11 +475,9 @@ function bundleHash(match) {
 }
 
 const legacyTurkishDir = path.join(legacyEasymodesDir, 'localization', 'tr');
-const legacyFiles = hasLegacy()
-    ? readdirSync(legacyTurkishDir)
-          .sort()
-          .map((file) => sha256(readFileSync(path.join(legacyTurkishDir, file))))
-    : [];
+const legacyFiles = readdirSync(legacyTurkishDir)
+    .sort()
+    .map((file) => sha256(readFileSync(path.join(legacyTurkishDir, file))));
 
 const manifestSources = [
     {
@@ -523,7 +517,7 @@ if (legacyFiles.length > 0) {
     manifestSources.push({
         name: 'homematic-manager/legacy-easymode-localization',
         version: '2.7.1',
-        url: 'https://github.com/hobbyquaker/homematic-manager/tree/master/www/easymodes/localization',
+        url: 'https://github.com/hobbyquaker/homematic-manager/tree/2.7.1/www/easymodes/localization',
         sha256: sha256(legacyFiles.join('\n')),
     });
 }

@@ -1,4 +1,4 @@
-<img width="152px" src="legacy/build/icon.png" align="left"/>
+<img width="152px" src="apps/electron/build/icon.png" align="left"/>
 
 # Homematic Manager
 

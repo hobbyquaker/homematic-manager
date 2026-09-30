@@ -14,3 +14,8 @@ Readme.md
 # fixtures/, refreshed by scripts/sync-meta-fixtures.mjs. Reformatting it would make every refresh
 # a diff of whitespace and hide the change that matters.
 packages/core/test/fixtures/meta/
+
+# the 2.7.1 easy-mode data the converter still reads (task 84) and the two 2.x catalogues the core
+# tests compare against: kept byte for byte as the 2.7.1 tag has them, so prettier leaves them alone
+data/easymodes-2.7.1/
+packages/core/test/fixtures/2.7.1/

@@ -1,5 +1,7 @@
 /**
- * Reading the 2.7.1 easy-mode data under `legacy/www/easymodes/`.
+ * Reading the 2.7.1 easy-mode data under `data/easymodes-2.7.1/` - the hand conversion the 2.x code
+ * shipped as `www/easymodes/` (https://github.com/hobbyquaker/homematic-manager/tree/2.7.1/www/easymodes),
+ * kept here when `legacy/` was deleted after 3.0.0 (task 84).
  *
  * Two things are still needed from it:
  *   - the Turkish easy-mode localisation of 2015 (D-15), which openccu-data has no equivalent for,
@@ -14,9 +16,9 @@
 import {existsSync, readFileSync, readdirSync} from 'node:fs';
 import path from 'node:path';
 
-import {legacyDir} from './paths.mjs';
+import {dataDir} from './paths.mjs';
 
-export const legacyEasymodesDir = path.join(legacyDir, 'www', 'easymodes');
+export const legacyEasymodesDir = path.join(dataDir, 'easymodes-2.7.1');
 
 const ENTITIES = {amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', szlig: 'ß'};
 
@@ -41,14 +43,8 @@ function readJson(file) {
     return JSON.parse(readFileSync(file, 'utf8'));
 }
 
-/** @returns {boolean} whether the legacy tree is present at all (it is deleted when 3.0 ships) */
-export function hasLegacy() {
-    return existsSync(legacyEasymodesDir);
-}
-
 /** @returns {string[]} the 28 receiver types the 2.x code shipped easy modes for */
 export function legacyReceiverTypes() {
-    if (!hasLegacy()) return [];
     return readdirSync(legacyEasymodesDir, {withFileTypes: true})
         .filter((entry) => entry.isDirectory() && entry.name !== 'localization')
         .map((entry) => entry.name)

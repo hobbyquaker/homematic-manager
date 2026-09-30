@@ -397,6 +397,9 @@ describe('LiteInterfaces', () => {
         const h = open(fake.url);
         await h.lite.start();
         expect(h.lite.idle).toBe(false);
+        // the client is ready before its stream request is out (it asks for no device lists), so
+        // going idle at once could abort the request before the system sees it (B-84)
+        await until(() => fake.streamsOpened === 1);
 
         await h.lite.unsubscribe();
         expect(h.lite.idle).toBe(true);

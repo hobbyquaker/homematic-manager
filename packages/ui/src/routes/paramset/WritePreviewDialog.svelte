@@ -85,9 +85,17 @@
                     <tr><th>{t('Parameter')}</th><th>{t('Current value')}</th><th>{t('New value')}</th></tr>
                 </thead>
                 <tbody>
-                    {#each preview.entries as entry (entry.param)}
-                        <tr data-testid={`preview-${entry.param}`}>
-                            <td class="hmm-mono">{entry.param}</td>
+                    {#each preview.entries as entry (`${entry.side ?? ''}:${entry.param}`)}
+                        <tr
+                            data-testid={entry.side === 'sender'
+                                ? `preview-sender-${entry.param}`
+                                : `preview-${entry.param}`}
+                        >
+                            <td class="hmm-mono"
+                                >{entry.param}{#if entry.side}<span class="hmm-preview-side"
+                                        >{entry.side === 'sender' ? t('Sender') : t('Receiver')}</span
+                                    >{/if}</td
+                            >
                             <td>{entry.from}</td>
                             <td class="hmm-preview-new">{entry.to}</td>
                         </tr>
@@ -118,9 +126,18 @@
                     <tr><th>{t('Parameter')}</th><th>{t('What was sent')}</th><th>{t('Read back')}</th></tr>
                 </thead>
                 <tbody>
-                    {#each readBack as entry (entry.param)}
-                        <tr class:hmm-preview-differs={entry.differs} data-testid={`readback-${entry.param}`}>
-                            <td class="hmm-mono">{entry.param}</td>
+                    {#each readBack as entry (`${entry.side ?? ''}:${entry.param}`)}
+                        <tr
+                            class:hmm-preview-differs={entry.differs}
+                            data-testid={entry.side === 'sender'
+                                ? `readback-sender-${entry.param}`
+                                : `readback-${entry.param}`}
+                        >
+                            <td class="hmm-mono"
+                                >{entry.param}{#if entry.side}<span class="hmm-preview-side"
+                                        >{entry.side === 'sender' ? t('Sender') : t('Receiver')}</span
+                                    >{/if}</td
+                            >
                             <td>{entry.sent}</td>
                             <td>{entry.stored}</td>
                         </tr>
@@ -136,9 +153,11 @@
 
         {#if results.length > 0}
             <ul class="hmm-preview-results" data-testid="preview-results">
-                {#each results as result (`${result.address}-${result.paramset}`)}
+                {#each results as result (`${result.address}-${result.peer ?? ''}-${result.paramset}`)}
                     <li class:hmm-preview-failed={!result.ok}>
-                        <span class="hmm-mono">{result.address}</span>
+                        <span class="hmm-mono"
+                            >{result.address}{result.peer === undefined ? '' : `←${result.peer}`}</span
+                        >
                         {result.ok ? '✔' : `✕ ${result.faultString ?? ''}`}
                     </li>
                 {/each}
@@ -189,6 +208,13 @@
         text-align: left;
         padding: 2px 4px;
         border-bottom: 1px solid var(--hmm-border-muted);
+    }
+
+    /* B-87: which end of a link a parameter belongs to */
+    .hmm-preview-side {
+        margin-left: 6px;
+        font-size: var(--hmm-font-size-small);
+        color: var(--hmm-fg-muted);
     }
 
     .hmm-preview-new {

@@ -17,9 +17,10 @@
     import {linkFields, profileDescription, profileLabel, type LinkField} from '../../lib/util/linkForm.js';
     import {
         buildPreview,
+        linkWritePreview,
+        linkWriteValues,
         readBack as computeReadBack,
         type ReadBackEntry,
-        type WritePreview,
     } from '../../lib/util/paramsetForm.js';
     import ParameterRow from '../paramset/ParameterRow.svelte';
     import WritePreviewDialog from '../paramset/WritePreviewDialog.svelte';
@@ -57,7 +58,7 @@
     let linkDescription = $state('');
     let targets = $state<string[]>([]);
     let previewOpen = $state(false);
-    let preview = $state<WritePreview | undefined>(undefined);
+    let preview = $state<ReturnType<typeof linkWritePreview> | undefined>(undefined);
     let results = $state<WriteResult[]>([]);
     let readBack = $state<ReadBackEntry[]>([]);
     let loading = $state(false);
@@ -391,15 +392,30 @@
         return [{sender, receiver}, ...chosen];
     }
 
+    /**
+     * B-87: the preview covers both ends. The sender's parameters (`EXPECT_AES`, `PEER_NEEDS_BURST`)
+     * live in the sender's LINK paramset with the receiver as peer; the preview used to be built from
+     * the receiver alone, so a sender-only change read "nothing has changed" and was never written.
+     */
     function openPreview(): void {
         if (!receiverDescription) {
             return;
         }
         results = [];
-        preview = buildPreview(receiverValues, edited, receiverDescription, {
+        readBack = [];
+        const pairs = links();
+        const receiverPart = buildPreview(receiverValues, edited, receiverDescription, {
             interfaceName,
-            targets: links().map((link) => `${link.receiver}←${link.sender}`),
+            targets: pairs.map((link) => `${link.receiver}←${link.sender}`),
         });
+        const senderPart =
+            senderDescription && sender !== receiver
+                ? buildPreview(senderValues, senderEdited, senderDescription, {
+                      interfaceName,
+                      targets: pairs.map((link) => `${link.sender}←${link.receiver}`),
+                  })
+                : undefined;
+        preview = linkWritePreview(receiverPart, senderPart, pairs);
         previewOpen = true;
     }
 
@@ -413,14 +429,8 @@
         if (!payload) {
             return;
         }
-        const senderPayload = senderDescription
-            ? buildPreview(senderValues, senderEdited, senderDescription, {interfaceName, targets: [sender]}).values
-            : {};
-        const values = {
-            receiverToSender: payload.values,
-            ...(Object.keys(senderPayload).length > 0 ? {senderToReceiver: senderPayload} : {}),
-        };
-        if (Object.keys(payload.values).length === 0 && Object.keys(senderPayload).length === 0) {
+        const values = linkWriteValues(payload);
+        if (values.receiverToSender === undefined && values.senderToReceiver === undefined) {
             return;
         }
         const pairs = links();
@@ -430,10 +440,12 @@
             title: `LINK — ${stores.nameOf(sender)} → ${stores.nameOf(receiver)}`,
             links: pairs,
             values,
-            calls: pairs.map(
-                (pair) => `putParamset(${pair.receiver}, ${pair.sender}, ${JSON.stringify(values.receiverToSender)})`,
-            ),
-            lines: payload.entries.map((entry) => ({label: entry.param, from: entry.from, to: entry.to})),
+            calls: [...(payload.calls ?? [])],
+            lines: payload.entries.map((entry) => ({
+                label: entry.side === 'sender' ? `${t('Sender')}: ${entry.param}` : entry.param,
+                from: entry.from,
+                to: entry.to,
+            })),
         });
         previewOpen = false;
         open = false;
@@ -444,22 +456,42 @@
         if (!payload) {
             return;
         }
-        const senderPayload = senderDescription
-            ? buildPreview(senderValues, senderEdited, senderDescription, {interfaceName, targets: [sender]}).values
-            : {};
-        const written = await stores.paramsets.putLink(interfaceName, links(), {
-            receiverToSender: payload.values,
-            ...(Object.keys(senderPayload).length > 0 ? {senderToReceiver: senderPayload} : {}),
-        });
-        results = written;
-        // `ok` means nothing on BidCos: read back what the interface really stored (task 6).
-        const reread = await stores.paramsets.read(interfaceName, receiver, sender);
-        if (reread && receiverDescription) {
-            readBack = computeReadBack(payload.values, reread, receiverDescription);
-            receiverValues = reread;
-            edited = {};
-            senderEdited = {};
+        const values = linkWriteValues(payload);
+        if (values.receiverToSender === undefined && values.senderToReceiver === undefined) {
+            return;
         }
+        const written = await stores.paramsets.putLink(interfaceName, links(), values);
+        results = written;
+        // `ok` means nothing on BidCos: read back what the interface really stored (task 6), on
+        // each end that was written (B-87: the sender's too, or its form keeps the old values)
+        const back: ReadBackEntry[] = [];
+        if (values.receiverToSender !== undefined) {
+            const reread = await stores.paramsets.read(interfaceName, receiver, sender);
+            if (reread && receiverDescription) {
+                back.push(
+                    ...computeReadBack(values.receiverToSender, reread, receiverDescription).map((entry) => ({
+                        ...entry,
+                        side: 'receiver' as const,
+                    })),
+                );
+                receiverValues = reread;
+                edited = {};
+            }
+        }
+        if (values.senderToReceiver !== undefined) {
+            const reread = await stores.paramsets.read(interfaceName, sender, receiver);
+            if (reread && senderDescription) {
+                back.push(
+                    ...computeReadBack(values.senderToReceiver, reread, senderDescription).map((entry) => ({
+                        ...entry,
+                        side: 'sender' as const,
+                    })),
+                );
+                senderValues = reread;
+                senderEdited = {};
+            }
+        }
+        readBack = back;
         if (written.length > 0 && written.every((result) => result.ok) && !readBack.some((entry) => entry.differs)) {
             previewOpen = false;
         }

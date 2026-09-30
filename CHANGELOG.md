@@ -10,6 +10,11 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Fixed
 
+- **The link editor writes the sender's parameters.** A change in the sender section alone - AES (`EXPECT_AES`), burst
+  (`PEER_NEEDS_BURST`) or any other parameter of the sender's side of the link - was missing from the preview, which said
+  "nothing has changed" and offered no write, so it never reached the device. The preview now lists both ends, each
+  parameter marked with its end and one `putParamset` line per end that has something to write; writing sends only
+  those, reads each written end back, and the pending-changes set gets the same calls. (B-87)
 - **Links within one device are no longer marked as defective.** A switch actuator's own button linked to its relay, or
   a dimmer's channel linked to its virtual channels, carried the red mark in the Links list and counted in the toolbar's
   "defective" number, although the links work: the interface process reports every such link as broken on the sender

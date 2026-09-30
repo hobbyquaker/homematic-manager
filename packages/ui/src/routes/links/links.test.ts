@@ -530,6 +530,146 @@ describe('the link paramset dialog', () => {
         });
     });
 
+    /** B-87: a BidCos-like sender with its own LINK parameter, stored as `stored` says. */
+    function senderWithAes(stored: {EXPECT_AES: boolean}): void {
+        const SENDER = '0001D8A9B7C6D5:1';
+        const RECEIVER = '000A1B2C3D4E5F:4';
+        const describe = transport.handlerFor('paramset.description');
+        transport.respond('paramset.description', (interfaceName, address, paramset) =>
+            address === SENDER && paramset === 'LINK'
+                ? {
+                      EXPECT_AES: {TYPE: 'BOOL', OPERATIONS: 7, DEFAULT: false, MIN: false, MAX: true},
+                      PEER_NEEDS_BURST: {TYPE: 'BOOL', OPERATIONS: 7, DEFAULT: false, MIN: false, MAX: true},
+                  }
+                : describe(interfaceName, address, paramset),
+        );
+        const read = transport.handlerFor('paramset.get');
+        transport.respond('paramset.get', (interfaceName, address, paramset) =>
+            address === SENDER && paramset === RECEIVER
+                ? {EXPECT_AES: stored.EXPECT_AES, PEER_NEEDS_BURST: false}
+                : read(interfaceName, address, paramset),
+        );
+        transport.respond('paramset.putLink', (interfaceName, links, values) => {
+            const sent = (values as {senderToReceiver?: {EXPECT_AES?: boolean}}).senderToReceiver;
+            if (sent?.EXPECT_AES !== undefined) {
+                stored.EXPECT_AES = sent.EXPECT_AES;
+            }
+            return (links as Array<{sender: string; receiver: string}>).map((link) => ({
+                interfaceName: interfaceName as string,
+                address: link.sender,
+                peer: link.receiver,
+                paramset: 'LINK',
+                sent: sent ?? {},
+                ok: true,
+                problems: [],
+            }));
+        });
+    }
+
+    it('previews and writes a change on the sender side alone (B-87)', async () => {
+        const stored = {EXPECT_AES: false};
+        senderWithAes(stored);
+        await openLink();
+        const row = await waitFor(() =>
+            within(screen.getByTestId('link-sender-params')).getByTestId('param-EXPECT_AES'),
+        );
+        await fireEvent.click(within(row).getByRole('checkbox'));
+
+        await fireEvent.click(screen.getByTestId('link-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('preview-sender-EXPECT_AES')).toBeTruthy();
+        });
+        expect(screen.queryByTestId('preview-empty')).toBeNull();
+        // only the sender's call: its LINK paramset with the receiver as peer, nothing for the receiver
+        expect(screen.getByTestId('preview-call-0').textContent).toBe(
+            'putParamset(0001D8A9B7C6D5:1←000A1B2C3D4E5F:4, LINK, {"EXPECT_AES":true})',
+        );
+        expect(screen.queryByTestId('preview-call-1')).toBeNull();
+        expect(screen.getByTestId('preview-sender-EXPECT_AES').textContent).toContain('Sender');
+        const confirm = screen.getByTestId<HTMLButtonElement>('write-confirm');
+        expect(confirm.disabled).toBe(false);
+
+        await fireEvent.click(confirm);
+        await waitFor(() => {
+            expect(transport.lastCall('paramset.putLink')?.[2]).toEqual({senderToReceiver: {EXPECT_AES: true}});
+        });
+        // read back on the sender: stored as sent, and the form shows the stored value without an edit mark
+        await waitFor(() => {
+            expect(stored.EXPECT_AES).toBe(true);
+            const reads = transport.calls.filter((call) => call.method === 'paramset.get').map((call) => call.params);
+            expect(reads.filter((params) => params[1] === '0001D8A9B7C6D5:1').length).toBeGreaterThanOrEqual(2);
+        });
+    });
+
+    it('previews and writes both ends when both changed (B-87)', async () => {
+        senderWithAes({EXPECT_AES: false});
+        await openLink();
+        const row = await waitFor(() =>
+            within(screen.getByTestId('link-sender-params')).getByTestId('param-EXPECT_AES'),
+        );
+        await fireEvent.click(within(row).getByRole('checkbox'));
+        await fireEvent.input(within(screen.getByTestId('param-SHORT_ON_LEVEL')).getByRole('spinbutton'), {
+            target: {value: '50'},
+        });
+
+        await fireEvent.click(screen.getByTestId('link-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('preview-SHORT_ON_LEVEL')).toBeTruthy();
+        });
+        expect(screen.getByTestId('preview-sender-EXPECT_AES')).toBeTruthy();
+        expect(screen.getByTestId('preview-call-0').textContent).toContain(
+            'putParamset(000A1B2C3D4E5F:4←0001D8A9B7C6D5:1',
+        );
+        expect(screen.getByTestId('preview-call-1').textContent).toContain(
+            'putParamset(0001D8A9B7C6D5:1←000A1B2C3D4E5F:4',
+        );
+
+        await fireEvent.click(screen.getByTestId('write-confirm'));
+        await waitFor(() => {
+            expect(transport.lastCall('paramset.putLink')?.[2]).toEqual({
+                receiverToSender: {SHORT_ON_LEVEL: {explicitDouble: 0.5}},
+                senderToReceiver: {EXPECT_AES: true},
+            });
+        });
+    });
+
+    it('says nothing changed and offers no write when neither end changed (B-87)', async () => {
+        senderWithAes({EXPECT_AES: false});
+        await openLink();
+        await fireEvent.click(screen.getByTestId('link-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('preview-empty')).toBeTruthy();
+        });
+        expect(screen.queryByTestId('preview-call-0')).toBeNull();
+        expect(screen.getByTestId<HTMLButtonElement>('write-confirm').disabled).toBe(true);
+    });
+
+    it('stages a sender-only change with its call and a Sender line (B-87, #124)', async () => {
+        senderWithAes({EXPECT_AES: false});
+        const {stores} = await mountApp({transport, hash: '#/HmIP-RF/links'});
+        await waitFor(() => {
+            expect(stores.links.of('HmIP-RF').length).toBeGreaterThan(0);
+        });
+        await fireEvent.dblClick(document.querySelector('[data-row-id="0001D8A9B7C6D5:1->000A1B2C3D4E5F:4"]')!);
+        const row = await waitFor(() =>
+            within(screen.getByTestId('link-sender-params')).getByTestId('param-EXPECT_AES'),
+        );
+        await fireEvent.click(within(row).getByRole('checkbox'));
+        await fireEvent.click(screen.getByTestId('link-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('preview-sender-EXPECT_AES')).toBeTruthy();
+        });
+        await fireEvent.click(screen.getByTestId('write-stage'));
+
+        const staged = stores.changeSet.changes.at(-1);
+        expect(staged).toMatchObject({
+            kind: 'linkParamset',
+            values: {senderToReceiver: {EXPECT_AES: true}},
+            calls: ['putParamset(0001D8A9B7C6D5:1←000A1B2C3D4E5F:4, LINK, {"EXPECT_AES":true})'],
+            lines: [{label: 'Sender: EXPECT_AES', from: 'false', to: 'true'}],
+        });
+    });
+
     it('saves name and description through setLinkInfo', async () => {
         await openLink();
         await fireEvent.input(screen.getByTestId('link-name'), {target: {value: 'Flurlicht'}});

@@ -121,7 +121,12 @@ export interface PreviewEntry {
     readonly param: string;
     readonly from: string;
     readonly to: string;
+    /** B-87: which end of a link the parameter belongs to; absent for a channel's own paramset. */
+    readonly side?: LinkSide;
 }
+
+/** The two ends of a direct link, each with its own LINK paramset. */
+export type LinkSide = 'sender' | 'receiver';
 
 /** What a write would do, per target channel. */
 export interface WritePreview {
@@ -175,6 +180,61 @@ export function buildPreview(
     };
 }
 
+/** The write of one direct link, sender to receiver - what `paramset.putLink` gets per link. */
+export interface LinkPair {
+    readonly sender: string;
+    readonly receiver: string;
+}
+
+/**
+ * B-87: one preview for both ends of a link. The receiver's LINK paramset is written on the receiver
+ * with the sender as peer, the sender's on the sender with the receiver as peer - `putLink`'s two
+ * directions. The preview carries one `putParamset` line per link and end that has something to
+ * write, and the table both ends' parameters, each marked with its end. `values` stays the
+ * receiver's payload; the sender's is `senderValues`.
+ */
+export function linkWritePreview(
+    receiver: WritePreview,
+    sender: WritePreview | undefined,
+    pairs: readonly LinkPair[],
+): WritePreview & {readonly senderValues: ParamsetWrite} {
+    const call = (owner: string, peer: string, values: ParamsetWrite) =>
+        `putParamset(${owner}←${peer}, LINK, ${JSON.stringify(values)})`;
+    const senderValues = sender?.values ?? {};
+    const receiverWrites = Object.keys(receiver.values).length > 0;
+    const senderWrites = Object.keys(senderValues).length > 0;
+    return {
+        targets: pairs.map((pair) => `${pair.receiver}←${pair.sender}`),
+        entries: [
+            ...receiver.entries.map((entry) => ({...entry, side: 'receiver' as const})),
+            ...(sender?.entries ?? []).map((entry) => ({...entry, side: 'sender' as const})),
+        ],
+        values: receiver.values,
+        senderValues,
+        skipped: [...receiver.skipped, ...(sender?.skipped ?? [])],
+        problems: [...receiver.problems, ...(sender?.problems ?? [])],
+        calls: [
+            ...(receiverWrites ? pairs.map((pair) => call(pair.receiver, pair.sender, receiver.values)) : []),
+            ...(senderWrites ? pairs.map((pair) => call(pair.sender, pair.receiver, senderValues)) : []),
+        ],
+    };
+}
+
+/**
+ * The `paramset.putLink` payload of a link preview: only the directions that have something to
+ * write, so a sender-only change does not also send the receiver an empty set.
+ */
+export function linkWriteValues(preview: WritePreview & {readonly senderValues?: ParamsetWrite}): {
+    receiverToSender?: ParamsetWrite;
+    senderToReceiver?: ParamsetWrite;
+} {
+    const senderValues = preview.senderValues ?? {};
+    return {
+        ...(Object.keys(preview.values).length > 0 ? {receiverToSender: preview.values} : {}),
+        ...(Object.keys(senderValues).length > 0 ? {senderToReceiver: senderValues} : {}),
+    };
+}
+
 /** How the preview prints a value: enum names rather than indexes, `explicitDouble` unwrapped. */
 export function displayValue(value: unknown, description: ParameterDescription | undefined): string {
     if (value === undefined) {
@@ -203,6 +263,8 @@ export interface ReadBackEntry {
     readonly stored: string;
     /** The two differ - on BidCos the usual reason is a silent clamp or a dropped value. */
     readonly differs: boolean;
+    /** B-87: which end of a link the parameter was written to. */
+    readonly side?: LinkSide;
 }
 
 /**

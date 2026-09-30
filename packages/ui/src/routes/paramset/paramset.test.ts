@@ -9,6 +9,8 @@ import {
     fieldKind,
     formFields,
     displayValue,
+    linkWritePreview,
+    linkWriteValues,
     serviceMessageParameters,
 } from '../../lib/util/paramsetForm.js';
 import {mountApp} from '../../testHarness.js';
@@ -139,6 +141,66 @@ describe('buildPreview', () => {
         expect(displayValue(undefined, undefined)).toBe('—');
         expect(displayValue({explicitDouble: 0.5}, description['LEVEL'])).toBe('0.5');
         expect(displayValue(true, description['STATE'])).toBe('true');
+    });
+});
+
+describe('linkWritePreview (B-87)', () => {
+    const bool = {TYPE: 'BOOL', OPERATIONS: 7, DEFAULT: false, MIN: false, MAX: true} as const;
+    const senderDescription: ParamsetDescription = {EXPECT_AES: bool, PEER_NEEDS_BURST: bool};
+    const receiverDescription: ParamsetDescription = {
+        SHORT_ON_TIME: {TYPE: 'FLOAT', OPERATIONS: 7, MIN: 0, MAX: 108000, DEFAULT: 0},
+    };
+    const pairs = [
+        {sender: 'S:1', receiver: 'R:1'},
+        {sender: 'S:2', receiver: 'R:1'},
+    ];
+    const part = (
+        original: Record<string, boolean | number>,
+        edited: Record<string, unknown>,
+        description: ParamsetDescription,
+    ) => buildPreview(original, edited, description, {interfaceName: 'BidCos-RF', targets: []});
+
+    it('writes the sender alone when only a sender parameter changed', () => {
+        const preview = linkWritePreview(
+            part({SHORT_ON_TIME: 0}, {}, receiverDescription),
+            part({EXPECT_AES: false}, {EXPECT_AES: true}, senderDescription),
+            pairs,
+        );
+        expect(preview.entries).toEqual([{param: 'EXPECT_AES', from: 'false', to: 'true', side: 'sender'}]);
+        expect(preview.calls).toEqual([
+            'putParamset(S:1←R:1, LINK, {"EXPECT_AES":true})',
+            'putParamset(S:2←R:1, LINK, {"EXPECT_AES":true})',
+        ]);
+        expect(linkWriteValues(preview)).toEqual({senderToReceiver: {EXPECT_AES: true}});
+    });
+
+    it('writes the receiver alone when only a receiver parameter changed', () => {
+        const preview = linkWritePreview(
+            part({SHORT_ON_TIME: 0}, {SHORT_ON_TIME: 0.4}, receiverDescription),
+            part({EXPECT_AES: false}, {}, senderDescription),
+            pairs.slice(0, 1),
+        );
+        expect(preview.entries.map((entry) => entry.side)).toEqual(['receiver']);
+        expect(preview.calls).toEqual(['putParamset(R:1←S:1, LINK, {"SHORT_ON_TIME":{"explicitDouble":0.4}})']);
+        expect(linkWriteValues(preview)).toEqual({receiverToSender: {SHORT_ON_TIME: {explicitDouble: 0.4}}});
+    });
+
+    it('writes both ends, receiver first, and nothing at all when nothing changed', () => {
+        const both = linkWritePreview(
+            part({SHORT_ON_TIME: 0}, {SHORT_ON_TIME: 1}, receiverDescription),
+            part({PEER_NEEDS_BURST: false}, {PEER_NEEDS_BURST: true}, senderDescription),
+            pairs.slice(0, 1),
+        );
+        expect(both.calls?.map((call) => call.slice(0, 22))).toEqual([
+            'putParamset(R:1←S:1, L',
+            'putParamset(S:1←R:1, L',
+        ]);
+        expect(Object.keys(linkWriteValues(both))).toEqual(['receiverToSender', 'senderToReceiver']);
+
+        const none = linkWritePreview(part({SHORT_ON_TIME: 0}, {}, receiverDescription), undefined, pairs);
+        expect(none.entries).toEqual([]);
+        expect(none.calls).toEqual([]);
+        expect(linkWriteValues(none)).toEqual({});
     });
 });
 

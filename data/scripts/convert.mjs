@@ -52,7 +52,7 @@ const aliases = readUpstreamJson('profiles/_receiver_type_aliases.json');
 // task 62 (D-54): the CCU easy mode's forms, extracted from the WebUI by scripts/easymode-controls.mjs
 const easymodeControlsFile = path.join(dataDir, 'extracted', 'easymode_controls.json.gz');
 const easymodeControls = existsSync(easymodeControlsFile)
-    ? /** @type {{source: string, timeSelectors: Record<string, object[]>, receivers: Record<string, Record<string, Record<string, object[]>>>, master?: Record<string, object[]>, masterBranches?: Record<string, object[]>, masterByParamsetId?: Record<string, object>}} */ (
+    ? /** @type {{source: string, timeSelectors: Record<string, object[]>, receivers: Record<string, Record<string, Record<string, object[]>>>, master?: Record<string, object[]>, masterBranches?: Record<string, object[]>, masterByParamsetId?: Record<string, object>, optionPresets?: Record<string, {allowCustom: boolean, presets: Array<{value: number, template: string}>}>, optionStrings?: Record<string, Record<string, string>>}} */ (
           JSON.parse(gunzipSync(readFileSync(easymodeControlsFile)).toString('utf8'))
       )
     : undefined;
@@ -318,18 +318,80 @@ const masterForms = {
     byParamsetId: sortKeys(easymodeControls?.masterByParamsetId ?? {}),
 };
 
+// B-82: an option set keeps the text the WebUI's page gets from `etc/options.tcl` as a template -
+// the units already in (`1min`), each `${key}` left for the app to translate from `uiLabels` as the
+// WebUI's JavaScript does (`${after} 1min` is "nach 1min"). The WebUI's own sets come from the
+// extract of `etc/options.tcl`; openccu-data's set of the same id is replaced (its TIMEBASE_LONG
+// mixed in DELAY's values, its DOOR_LOCK_TIME kept only the key), and the sets openccu-data alone
+// has (the forms' inline `_INLINE_*` sets) take its label or key as the template.
+/**
+ * Where the WebUI lists one text for two values, hmm makes them distinct in the WebUI's own words -
+ * the one deliberate deviation from `options.tcl` (B-82, maintainer 2026-09-30).
+ *
+ * @type {Record<string, Record<number, string>>}
+ */
+const OPTION_PRESET_FIXES = {
+    // values 1 and 2 are both `${currentDetectionInactiveValueOutput1}` there, a key no language file
+    // has ("because not in use not yet translated"); the WebUI's stringtable names all three
+    CURRENTDETECTION_BEHAVIOR: {
+        0: '${stringTableCurrentDetectionBehaviorActive}',
+        1: '${stringTableCurrentDetectionBehaviorOutput1}',
+        2: '${stringTableCurrentDetectionBehaviorOutput2}',
+    },
+};
+const templateKeysOf = (template) => [...template.matchAll(/\$\{(\w+)\}/gu)].map((match) => match[1]);
+/** Make a template's keys resolve in `uiLabels`: openccu-data's strings first, else the WebUI's own. */
+function useTemplateKeys(template) {
+    for (const key of templateKeysOf(template)) {
+        const lower = labelKey(key);
+        for (const language of ['de', 'en']) {
+            const webui = easymodeControls?.optionStrings?.[language]?.[key];
+            if (!(lower in translations[language].uiLabels) && webui !== undefined) {
+                translations[language].uiLabels[lower] = webui;
+            }
+        }
+        useLabelKey(key);
+    }
+    return template;
+}
 /** @type {Record<string, object>} */
 const optionPresets = {};
-for (const [id, preset] of Object.entries(easymode.option_presets)) {
+const webuiOptionPresets = easymodeControls?.optionPresets ?? {};
+for (const id of [...new Set([...Object.keys(easymode.option_presets), ...Object.keys(webuiOptionPresets)])].sort()) {
+    const webui = webuiOptionPresets[id];
+    const upstream = easymode.option_presets[id];
+    const fixes = OPTION_PRESET_FIXES[id] ?? {};
     optionPresets[id] = {
         id,
-        allowCustom: Boolean(preset.allow_custom),
-        presets: preset.presets.map((entry) => ({
-            ...(entry.label === undefined ? {} : {label: entry.label}),
-            ...(entry.label_key === undefined ? {} : {labelKey: useLabelKey(entry.label_key)}),
-            value: entry.value,
-        })),
+        allowCustom: webui?.allowCustom ?? Boolean(upstream.allow_custom),
+        presets: webui
+            ? webui.presets.map((entry) => ({
+                  template: useTemplateKeys(fixes[entry.value] ?? entry.template),
+                  value: entry.value,
+              }))
+            : upstream.presets.map((entry) => ({
+                  // a key openccu-data could not resolve (`\${motionDetectorOptionMotion_$operationMode}`)
+                  // stays the text it is
+                  template: useTemplateKeys(
+                      entry.label ??
+                          (/^\w+$/u.test(entry.label_key)
+                              ? `\${${entry.label_key}}`
+                              : entry.label_key.replace(/\\/gu, '')),
+                  ),
+                  value: entry.value,
+              })),
     };
+}
+// a set that still shows one text for two values (in either language) is worth a look
+for (const preset of Object.values(optionPresets)) {
+    for (const language of ['de', 'en']) {
+        const labels = preset.presets.map((entry) =>
+            entry.template.replace(/\$\{(\w+)\}/gu, (_, key) => translations[language].uiLabels[labelKey(key)] ?? key),
+        );
+        const twice = labels.filter((label, index) => labels.indexOf(label) !== index);
+        if (twice.length > 0)
+            warn(`option preset ${preset.id} (${language}) lists ${[...new Set(twice)].join(', ')} twice`);
+    }
 }
 // Drop references to presets that the extract does not define, so that every id in
 // master-metadata.json resolves in option-presets.json.

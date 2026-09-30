@@ -64,7 +64,7 @@ export interface EditorContext {
     optionByIndex(param: string, index: number): string | undefined;
     /** The option preset the MASTER metadata assigns to a parameter, if any. */
     preset(param: string): OptionPreset | undefined;
-    /** A WebUI label by its own key, what `OptionPresetEntry.labelKey` points at. */
+    /** A WebUI label by its own key, what the `${key}`s of `OptionPresetEntry.template` name. */
     uiLabel(key: string): string;
 }
 

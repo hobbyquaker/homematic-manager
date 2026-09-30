@@ -1,6 +1,6 @@
 <script lang="ts">
     import type {ParamsetValue} from '@homematic-manager/core';
-    import {fromDisplayValue, toDisplayValue} from '@homematic-manager/core';
+    import {fromDisplayValue, presetLabel as presetText, toDisplayValue} from '@homematic-manager/core';
 
     import {tick} from 'svelte';
 
@@ -17,8 +17,8 @@
         /** Translates one enum name. */
         valueLabel?: ((value: string) => string) | undefined;
         /**
-         * Translates a preset's `labelKey`, a WebUI label key (`Translations.uiLabels`) - not an enum
-         * name, so `valueLabel` would not find it and show the key itself.
+         * Translates the `${key}`s of a preset's template, WebUI label keys (`Translations.uiLabels`) -
+         * not enum names, so `valueLabel` would not find them and show the key itself (B-82).
          */
         presetLabel?: ((key: string) => string) | undefined;
         /** A `setValue` button next to the control - the VALUES paramset has one per datapoint. */
@@ -255,9 +255,7 @@
                 >
                     <option value="">…</option>
                     {#each field.preset.presets as entry (String(entry.value))}
-                        <option value={String(entry.value)}
-                            >{entry.label ?? (presetLabel ?? labelOf)(entry.labelKey ?? '')}</option
-                        >
+                        <option value={String(entry.value)}>{presetText(entry, presetLabel ?? labelOf)}</option>
                     {/each}
                 </select>
             {/if}

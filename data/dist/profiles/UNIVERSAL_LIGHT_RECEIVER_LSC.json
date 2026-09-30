@@ -43,7 +43,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -486,7 +486,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -591,7 +591,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -747,7 +747,7 @@
           {
             "kind": "param",
             "param": "SHORT_ON_LEVEL",
-            "option": "DIM_0",
+            "option": "DIM_0-100",
             "label": {"de": "Helligkeit", "en": "Brightness"}
           }
         ]
@@ -802,7 +802,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -1245,7 +1245,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -1350,7 +1350,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -1506,7 +1506,7 @@
           {
             "kind": "param",
             "param": "SHORT_ON_LEVEL",
-            "option": "DIM_0",
+            "option": "DIM_0-100",
             "label": {"de": "Helligkeit", "en": "Brightness"}
           }
         ]
@@ -1681,7 +1681,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -3566,7 +3566,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -3911,7 +3911,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -4451,7 +4451,7 @@
           {
             "kind": "param",
             "param": "SHORT_ON_LEVEL",
-            "option": "DIM_0",
+            "option": "DIM_0-100",
             "label": {"de": "Helligkeit", "en": "Brightness"}
           }
         ]
@@ -4512,7 +4512,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -4958,7 +4958,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -5063,7 +5063,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -5219,7 +5219,7 @@
           {
             "kind": "param",
             "param": "SHORT_ON_LEVEL",
-            "option": "DIM_0",
+            "option": "DIM_0-100",
             "label": {"de": "Helligkeit", "en": "Brightness"}
           }
         ]
@@ -5274,7 +5274,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -5717,7 +5717,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -5822,7 +5822,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -5978,7 +5978,7 @@
           {
             "kind": "param",
             "param": "SHORT_ON_LEVEL",
-            "option": "DIM_0",
+            "option": "DIM_0-100",
             "label": {"de": "Helligkeit", "en": "Brightness"}
           }
         ]
@@ -6033,7 +6033,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -6380,7 +6380,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -6483,7 +6483,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -6625,7 +6625,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -6730,7 +6730,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -6886,7 +6886,7 @@
           {
             "kind": "param",
             "param": "SHORT_ON_LEVEL",
-            "option": "DIM_0",
+            "option": "DIM_0-100",
             "label": {"de": "Helligkeit", "en": "Brightness"}
           }
         ]
@@ -6941,7 +6941,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -7384,7 +7384,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -7489,7 +7489,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -7645,7 +7645,7 @@
           {
             "kind": "param",
             "param": "SHORT_ON_LEVEL",
-            "option": "DIM_0",
+            "option": "DIM_0-100",
             "label": {"de": "Helligkeit", "en": "Brightness"}
           }
         ]
@@ -10878,7 +10878,7 @@
           {
             "kind": "param",
             "param": "SHORT_ON_LEVEL",
-            "option": "DIM_0",
+            "option": "DIM_0-100",
             "label": {"de": "Helligkeit", "en": "Brightness"}
           }
         ]
@@ -10930,7 +10930,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -11268,7 +11268,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -11355,7 +11355,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -11487,7 +11487,7 @@
           {
             "kind": "param",
             "param": "SHORT_ON_LEVEL",
-            "option": "DIM_0",
+            "option": "DIM_0-100",
             "label": {"de": "Helligkeit", "en": "Brightness"}
           }
         ]
@@ -11536,7 +11536,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -11874,7 +11874,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -11961,7 +11961,7 @@
           {
             "kind": "param",
             "param": "LONG_DIM_STEP",
-            "option": "DIM_STEPwoLastValue_5",
+            "option": "DIM_STEPwoLastValue_5-90",
             "requires": ["LONG_DIM_STEP"],
             "label": {"de": "Schrittweite", "en": "Step width"}
           }
@@ -12093,7 +12093,7 @@
           {
             "kind": "param",
             "param": "SHORT_ON_LEVEL",
-            "option": "DIM_0",
+            "option": "DIM_0-100",
             "label": {"de": "Helligkeit", "en": "Brightness"}
           }
         ]

@@ -1,5 +1,6 @@
 import {readFileSync} from 'node:fs';
 import path from 'node:path';
+import {gunzipSync} from 'node:zlib';
 
 import {describe, expect, it} from 'vitest';
 
@@ -8,14 +9,17 @@ import {
     extractForms,
     extractMasterBranches,
     extractMasterControls,
+    extractOptionPresets,
     extractTimeSelectorOptions,
     htmlParamsBody,
     parseBranchTest,
     parseLocalization,
     parseProcs,
+    parseTclSets,
+    templateKeys,
     timeOptionMeaning,
 } from '../scripts/lib/easymode-tcl.mjs';
-import {distDir} from '../scripts/lib/paths.mjs';
+import {dataDir, distDir} from '../scripts/lib/paths.mjs';
 
 // A cut-down set_htmlParams in the shape of the WebUI's DIMMER_VIRTUAL_RECEIVER/KEY_TRANSCEIVER.tcl;
 // `@{...}` stands for TCL's `${...}`, which a template literal would interpolate.
@@ -589,5 +593,150 @@ proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
                 }
             }
         }
+    });
+});
+
+describe('the option sets of options.tcl (B-82)', () => {
+    // `EnterFreeValue.tcl` and a cut-down `etc/options.tcl` in the WebUI's own shape
+    const FREE_VALUE = String.raw`#!/bin/tclsh
+set unit_hour  "h"
+set unit_min  "min"
+set unit_sec  "s"
+set unit_perc  "%"
+set free_value  "\${enterValue}"
+
+proc GetTempUnit {} {
+  set unit_temp "x"
+}
+`;
+    const OPTIONS = String.raw`#!/bin/tclsh
+proc option {type} {
+  upvar #0 unit_hour h
+  upvar #0 unit_min m
+  upvar #0 unit_sec s
+  upvar #0 unit_perc p
+  upvar #0 free_value Wert
+  upvar options options
+  array_clear options
+
+  switch $type {
+    "DOOR_LOCK_TIME" {
+        set options(111600)    "\${inactive}"
+        set options(60)      "\${after} 1$m"
+        set options(3600)    "\${after} 1$h"
+        set options(99999999)  "\${enterValue}"
+    }
+    "DIM_0-100" {
+        set options(0.10) "10$p"
+        set options(1.005) "\${lastValue}"
+        set options(99999998)  "\${enterValue}"
+    }
+    "CURRENTDETECTION_BEHAVIOR" {
+      set options(0) "\${currentDetectionActive}"; # because not in use not yet translated
+      set options(1) "\${currentDetectionInactiveValueOutput1}"; #because not in use not yet translated
+    }
+    "POWERUP_JUMPTARGET" {
+      set options(1) "\${stringTableOnDelay}"
+      #set options(0) "\${stringTableStateFalse}"
+    }
+    "TIMEBASE_SHORT" {
+        set options(0)    "100mS"
+        set options(1)    "$s"
+        set options(1)    "1$s"
+    }
+  }
+}
+
+proc garageDoorExtension {} {
+  upvar options options
+  set options(0.4) "0.4$s"
+}
+`;
+
+    it('reads the global units of EnterFreeValue.tcl', () => {
+        expect(parseTclSets(FREE_VALUE)).toEqual({
+            unit_hour: 'h',
+            unit_min: 'min',
+            unit_sec: 's',
+            unit_perc: '%',
+            free_value: '${enterValue}',
+        });
+    });
+
+    it('keeps each text as the page gets it: the units in, the ${key}s for the app to translate', () => {
+        const {presets, unresolved} = extractOptionPresets(OPTIONS, parseTclSets(FREE_VALUE));
+        expect(unresolved).toEqual([]);
+        expect(Object.keys(presets)).toEqual([
+            'DOOR_LOCK_TIME',
+            'DIM_0-100',
+            'CURRENTDETECTION_BEHAVIOR',
+            'POWERUP_JUMPTARGET',
+            'TIMEBASE_SHORT',
+        ]);
+        // sorted as get_ComboBox2 sorts (lsort -real); the free-value entry is allowCustom
+        expect(presets.DOOR_LOCK_TIME).toEqual({
+            allowCustom: true,
+            presets: [
+                {value: 60, template: '${after} 1min'},
+                {value: 3600, template: '${after} 1h'},
+                {value: 111600, template: '${inactive}'},
+            ],
+        });
+        expect(presets['DIM_0-100']).toEqual({
+            allowCustom: true,
+            presets: [
+                {value: 0.1, template: '10%'},
+                {value: 1.005, template: '${lastValue}'},
+            ],
+        });
+    });
+
+    it('drops trailing and whole-line comments, and a second set of a key wins', () => {
+        const {presets} = extractOptionPresets(OPTIONS, parseTclSets(FREE_VALUE));
+        expect(presets.CURRENTDETECTION_BEHAVIOR.presets).toEqual([
+            {value: 0, template: '${currentDetectionActive}'},
+            {value: 1, template: '${currentDetectionInactiveValueOutput1}'},
+        ]);
+        expect(presets.POWERUP_JUMPTARGET).toEqual({
+            allowCustom: false,
+            presets: [{value: 1, template: '${stringTableOnDelay}'}],
+        });
+        expect(presets.TIMEBASE_SHORT.presets).toEqual([
+            {value: 0, template: '100mS'},
+            {value: 1, template: '1s'},
+        ]);
+    });
+
+    it('reports a variable it cannot resolve instead of guessing', () => {
+        const {unresolved, presets} = extractOptionPresets(OPTIONS, {unit_min: 'min'});
+        expect(unresolved).toEqual(['h', 'p', 's']);
+        expect(presets.DOOR_LOCK_TIME.presets[1]).toEqual({value: 3600, template: '${after} 1$h'});
+        expect(extractOptionPresets('no proc here', {}).presets).toEqual({});
+    });
+
+    it('lists the ${key}s of a template', () => {
+        expect(templateKeys('${after} 1min')).toEqual(['after']);
+        expect(templateKeys('10%')).toEqual([]);
+    });
+
+    it('reads a dash in an option set id where a form names it', () => {
+        const forms = extractForms(String.raw`
+proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
+  set prn 1
+  append HTML_PARAMS(separate_$prn) "<tr><td>\${DIM_STEP}</td><td>"
+  option DIM_STEPwoLastValue_5-90
+  append HTML_PARAMS(separate_$prn) [get_ComboBox options LONG_DIM_STEP separate_x PROFILE_$prn LONG_DIM_STEP]
+}
+`);
+        expect(forms['1']?.[0]).toMatchObject({param: 'LONG_DIM_STEP', option: 'DIM_STEPwoLastValue_5-90'});
+    });
+
+    it('is in the committed extract, with the WebUI strings its keys name', () => {
+        const extract = JSON.parse(
+            gunzipSync(readFileSync(path.join(dataDir, 'extracted', 'easymode_controls.json.gz'))).toString('utf8'),
+        );
+        expect(extract.optionPresets.DOOR_LOCK_TIME.presets[0]).toEqual({value: 60, template: '${after} 1min'});
+        expect(extract.optionStrings.de.after).toBe('nach');
+        expect(extract.optionStrings.en.after).toBe('after');
     });
 });

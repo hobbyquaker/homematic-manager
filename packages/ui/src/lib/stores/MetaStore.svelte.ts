@@ -158,7 +158,7 @@ export class MetaStore {
         return this.lookup.deviceModel(deviceType);
     }
 
-    /** A WebUI label by its own key - what `OptionPresetEntry.labelKey` and `errorKey` point at. */
+    /** A WebUI label by its own key - what the `${key}`s of `OptionPresetEntry.template` and `errorKey` name. */
     uiLabel(key: string): string {
         return this.lookup.uiLabel(key);
     }

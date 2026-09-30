@@ -1363,9 +1363,9 @@ export const DEMO_DATA_FILES: Readonly<Record<string, unknown>> = {
             id: 'duration',
             allowCustom: true,
             presets: [
-                {label: '5s', value: 5},
-                {label: '30s', value: 30},
-                {labelKey: 'not_used', value: 111_600},
+                {template: '5s', value: 5},
+                {template: '30s', value: 30},
+                {template: '${not_used}', value: 111_600},
             ],
         },
     },

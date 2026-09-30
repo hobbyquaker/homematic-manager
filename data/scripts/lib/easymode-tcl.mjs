@@ -162,7 +162,7 @@ export function extractForms(source) {
             prn += 1;
             continue;
         }
-        if ((match = /^\s*option\s+(\w+)/u.exec(line))) {
+        if ((match = /^\s*option\s+([\w-]+)/u.exec(line))) {
             option = match[1];
             continue;
         }
@@ -452,7 +452,7 @@ export function extractMasterControls(body, procs, seen = new Set()) {
             param = match[1];
             continue;
         }
-        if ((match = /^\s*option\s+(\w+)/u.exec(line))) {
+        if ((match = /^\s*option\s+([\w-]+)/u.exec(line))) {
             option = match[1];
             continue;
         }
@@ -657,4 +657,93 @@ export function extractMasterBranches(body, procs) {
     }));
     const same = branches.every((branch) => JSON.stringify(branch.controls) === JSON.stringify(branches[0].controls));
     return same ? undefined : branches;
+}
+
+// ------------------------------------------------------------------ option sets (B-82)
+
+/**
+ * The top-level `set NAME "VALUE"` lines of a TCL file - `EnterFreeValue.tcl`'s units
+ * (`unit_min` is `min`), with TCL's `\$` escape taken out.
+ *
+ * @returns {Record<string, string>}
+ */
+export function parseTclSets(source) {
+    /** @type {Record<string, string>} */
+    const result = {};
+    for (const match of source.matchAll(/^set\s+(\w+)\s+"((?:[^"\\]|\\.)*)"/gmu)) {
+        result[match[1]] = match[2].replace(/\\(.)/gu, '$1');
+    }
+    return result;
+}
+
+/** The free-value entries `get_ComboBox2` (`ic_common.tcl`) turns into the value being edited. */
+const FREE_VALUE_KEYS = new Set(['99999999', '99999998', '99999997', '99999990']);
+
+/**
+ * B-82: the WebUI's option sets, `proc option {type}` in `etc/options.tcl` - what the combo box of
+ * `option DOOR_LOCK_TIME` + `get_ComboBox options ...` lists. Each entry keeps the text the page
+ * gets from TCL: the units are substituted (`$m` is `EnterFreeValue.tcl`'s `unit_min`, the same in
+ * every language), the `\${key}` references stay for the page to translate (`${after} 1min`), as
+ * the WebUI's JavaScript does. The entries are sorted as `get_ComboBox2` sorts them (`lsort
+ * -real`); its free-value entries (`99999999` and the like, "enter value") become `allowCustom`.
+ * Commented-out lines are not entries.
+ *
+ * @param {string} source `etc/options.tcl`
+ * @param {Record<string, string>} globals the global variables `upvar #0` names (`parseTclSets` of
+ *   `EnterFreeValue.tcl`)
+ * @returns {{presets: Record<string, {allowCustom: boolean, presets: Array<{value: number, template: string}>}>,
+ *   unresolved: string[]}}
+ */
+export function extractOptionPresets(source, globals) {
+    const start = source.search(/^proc option \{type\}/mu);
+    const rest = start < 0 ? '' : source.slice(start + 1);
+    const end = rest.search(/^proc \w/mu);
+    const proc = start < 0 ? '' : end < 0 ? source.slice(start) : source.slice(start, start + 1 + end);
+    /** @type {Record<string, string>} */
+    const locals = {};
+    for (const match of proc.matchAll(/^\s*upvar\s+#0\s+(\w+)\s+(\w+)/gmu)) {
+        const value = globals[match[1]];
+        if (value !== undefined) locals[match[2]] = value;
+    }
+    const unresolved = new Set();
+    /** TCL's substitution inside "...": `\$` stays a dollar, `$name` is the variable's value. */
+    const substitute = (text) =>
+        text.replace(/\\(.)|\$(\w+)/gu, (whole, escaped, name) => {
+            if (escaped !== undefined) return escaped;
+            if (name in locals) return locals[name];
+            unresolved.add(name);
+            return whole;
+        });
+    /** @type {Record<string, {allowCustom: boolean, presets: Array<{value: number, template: string}>}>} */
+    const presets = {};
+    let current;
+    for (const raw of proc.split('\n')) {
+        const line = raw.trim();
+        if (line.startsWith('#')) continue;
+        const heading = /^"([^"]+)"\s*\{/u.exec(line);
+        if (heading) {
+            current = {allowCustom: false, presets: []};
+            presets[heading[1]] = current;
+            continue;
+        }
+        const entry = /^set\s+options\(([^)]+)\)\s+"((?:[^"\\]|\\.)*)"/u.exec(line);
+        if (!entry || current === undefined) continue;
+        if (FREE_VALUE_KEYS.has(entry[1])) {
+            current.allowCustom = true;
+            continue;
+        }
+        // a second `set` of the same key replaces the first, as in TCL
+        const value = Number(entry[1]);
+        current.presets = current.presets.filter((known) => known.value !== value);
+        current.presets.push({value, template: substitute(entry[2])});
+    }
+    for (const preset of Object.values(presets)) {
+        preset.presets.sort((a, b) => a.value - b.value);
+    }
+    return {presets, unresolved: [...unresolved].sort()};
+}
+
+/** The `${key}` references of a template, in order. */
+export function templateKeys(template) {
+    return [...template.matchAll(/\$\{(\w+)\}/gu)].map((match) => match[1]);
 }

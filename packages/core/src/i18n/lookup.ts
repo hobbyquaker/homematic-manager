@@ -5,8 +5,9 @@
  *
  *   the five identifier maps use the CCU's uppercase identifiers, with `|` between the parts:
  *   `DIMMER|LEVEL`, `ACTION_TYPE|JUMP_TO_TARGET`, `ACCELERATION_TRANSCEIVER|MOTION|FALSE`
- *   `uiLabels` uses the WebUI's own lowercase keys, and so do every `labelKey` in the option
- *   presets and every `errorKey` in the cross-validation rules
+ *   `uiLabels` uses the WebUI's own lowercase keys; the `${key}`s of the option presets' templates
+ *   keep the WebUI's case (`${stringTableLogicOR}`), every `errorKey` of the cross-validation rules
+ *   is lower case
  *
  * so a key is tried as it was given and then in the case the file uses: upper case for the five
  * identifier maps, lower case for the UI labels. Device models are the reason for "as it was
@@ -89,7 +90,7 @@ export class TranslationLookup {
     }
 
     /**
-     * A WebUI label by its own lowercase key - what `OptionPresetEntry.labelKey` and
+     * A WebUI label by its own lowercase key - what the `${key}`s of `OptionPresetEntry.template` and
      * `CrossValidationRule.errorKey` point at. Falls back to the key itself.
      */
     uiLabel(key: string): string {

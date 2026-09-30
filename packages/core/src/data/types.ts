@@ -197,9 +197,12 @@ export interface MasterForms {
 }
 
 export interface OptionPresetEntry {
-    /** Literal label such as `5s`; `labelKey` refers to `Translations.uiLabels`. */
-    label?: string;
-    labelKey?: string;
+    /**
+     * The WebUI's text for the entry as its page gets it from `etc/options.tcl` (B-82): the units in
+     * (`5s`, `1min`), every `${key}` a WebUI label key (`Translations.uiLabels`) the app translates -
+     * `${after} 1min`, `${inactive}`. {@link presetLabel} renders it.
+     */
+    template: string;
     value: number | string;
 }
 

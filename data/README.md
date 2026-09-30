@@ -22,7 +22,7 @@ Currently 196 files, 9.3 MB, built from openccu-data **2026.7.2**.
 | `receiver-type-aliases.json` | `ReceiverTypeAliases` | 3 receiver types that reuse another type's profiles |
 | `master-metadata.json` | `Record<channelType, MasterMetadata>` | 40 KB, 54 channel types: display order, conditional visibility, option-preset assignment, parameter groups |
 | `master-forms.json` | `MasterForms` | 83 KB, 71 MASTER forms keyed by paramset id (task 64), 9 of them with the channel's internal key |
-| `option-presets.json` | `Record<id, OptionPreset>` | 34 KB, 85 dropdowns of typical values (`DELAY`: none/5s/…/1h plus a free value) |
+| `option-presets.json` | `Record<id, OptionPreset>` | 89 dropdowns of typical values (`DELAY`: `${none}`/5s/…/1h plus a free value), each entry the WebUI's template (`${after} 1min`, B-82) |
 | `cross-validations.json` | `CrossValidationRule[]` | 5 rules between parameters of one paramset (`DIM_MAX_LEVEL >= DIM_MIN_LEVEL`, …) |
 | `translations/de.json`, `en.json` | `Translations` | 767 KB / 746 KB: 253 channel types, 488 device models, 2359 parameters, ~3040 parameter values, 167 help texts, ~5470 UI labels |
 | `translations/tr.json` | `Translations` | 4 KB, the 2015 Turkish easy-mode strings as a fallback locale (D-15) |
@@ -87,6 +87,17 @@ the WebUI's own row label where it could be resolved and the parameters an `info
 for (`requires`). The time selectors' presets go to `easymode-time-selectors.json`. The current
 extract is from OpenCCU 3.89.8.20260719: 609 easymodes, 2205 profiles with a form; the rest keep the
 dialog's full list. Unlike `upstream/`, `extracted/` is committed, because it cannot be downloaded.
+
+The combo boxes' **option sets** come from the same tree (B-82): `proc option` in `etc/options.tcl`,
+each entry the text the WebUI's page gets - the units of `EnterFreeValue.tcl` substituted (`1$m` is
+`1min`, the same in every language), each `${key}` left for the app to translate from `uiLabels`
+(`${after} 1min` is "nach 1min"), sorted as `get_ComboBox2` sorts them, the "enter value" entries
+as `allowCustom`. They replace openccu-data's sets of the same id (its `DOOR_LOCK_TIME` kept only the
+key, its `TIMEBASE_LONG` mixed in DELAY's values); openccu-data's inline `_INLINE_*` sets stay, their
+label or key as the template. The one deliberate deviation is in `convert.mjs`'s
+`OPTION_PRESET_FIXES`: `CURRENTDETECTION_BEHAVIOR` names values 1 and 2 alike in the WebUI, hmm
+names all three from the WebUI's stringtable. The converter warns about any set that still lists one
+text twice.
 
 The same script reads the **MASTER forms** of the HmIP channel types (task 63, D-55): the
 `set_htmlParams` of `hmip/<CHANNEL_TYPE>.tcl` and the procedure of `etc/hmipChannelConfigDialogs.tcl`

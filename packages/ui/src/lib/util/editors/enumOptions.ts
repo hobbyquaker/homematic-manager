@@ -1,5 +1,5 @@
 import type {ParameterDescription} from '@homematic-manager/core';
-import {enumList, isWritable} from '@homematic-manager/core';
+import {enumList, isWritable, presetLabel} from '@homematic-manager/core';
 
 import type {DeviceEditorBase, EditorContext, EditorTarget} from './types.js';
 
@@ -105,7 +105,7 @@ function presetOptions(
         }
         options.push({
             value,
-            label: entry.label ?? (entry.labelKey === undefined ? '' : context.uiLabel(entry.labelKey)),
+            label: presetLabel(entry, (key) => context.uiLabel(key)),
             raw: list[value] ?? '',
             named: true,
         });
@@ -134,7 +134,6 @@ function namedOptions(param: string, list: readonly string[], context: EditorCon
 }
 
 type EditorContextPreset = readonly {
-    label?: string | undefined;
-    labelKey?: string | undefined;
+    template: string;
     value: number | string;
 }[];

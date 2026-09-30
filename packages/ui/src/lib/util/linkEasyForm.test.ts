@@ -126,9 +126,9 @@ describe('the preset combo box (task 62)', () => {
         id: 'DIM_ONLEVEL',
         allowCustom: true,
         presets: [
-            {label: '10%', value: 0.1},
-            {label: '100%', value: 1},
-            {labelKey: 'lastvalue', value: 1.005},
+            {template: '10%', value: 0.1},
+            {template: '100%', value: 1},
+            {template: '${lastValue}', value: 1.005},
         ],
     };
 

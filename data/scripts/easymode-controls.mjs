@@ -10,6 +10,9 @@
  * firmware it came from. Unlike `upstream/` (downloaded, git-ignored), `extracted/` is committed,
  * since nobody could download it again; it is under the same HMSL notice (D-6).
  *
+ * B-82: the option sets of `etc/options.tcl` (the combo boxes' presets) with the units of
+ * `EnterFreeValue.tcl` and the WebUI strings their `${key}` texts name.
+ *
  * The MASTER forms' labels are mostly `stringTable...` keys of the WebUI's own language files
  * (`/www/webui/js/lang/<de|en>/translate.lang*.js`); `--webui-lang` names that `lang` directory.
  *
@@ -24,10 +27,13 @@ import {
     extractForms,
     extractMasterBranches,
     extractMasterControls,
+    extractOptionPresets,
     extractTimeSelectorOptions,
     htmlParamsBody,
     parseLocalization,
     parseProcs,
+    parseTclSets,
+    templateKeys,
     timeOptionMeaning,
 } from './lib/easymode-tcl.mjs';
 import {dataDir, sortKeys} from './lib/paths.mjs';
@@ -300,6 +306,30 @@ for (const file of paramIdFiles) {
     byIdControls += controls.length;
 }
 
+// ------------------------------------------------------------------ the option sets (B-82)
+// `option <ID>` in a form fills the combo box from `etc/options.tcl`; the units come from
+// `EnterFreeValue.tcl`, the `${key}` texts from the same strings as the forms' labels.
+const optionSets = extractOptionPresets(
+    read(path.join(root, 'etc', 'options.tcl')),
+    parseTclSets(read(path.join(root, 'EnterFreeValue.tcl'))),
+);
+if (optionSets.unresolved.length > 0) {
+    console.error(`options.tcl: unresolved TCL variables ${optionSets.unresolved.join(', ')}`);
+    process.exit(1);
+}
+/** @type {Record<string, Record<string, string>>} */
+const optionStrings = Object.fromEntries(LANGUAGES.map((language) => [language, {}]));
+for (const preset of Object.values(optionSets.presets)) {
+    for (const entry of preset.presets) {
+        for (const key of templateKeys(entry.template)) {
+            const label = labelFor(key, webuiStrings) ?? {};
+            for (const language of LANGUAGES) {
+                if (label[language] !== undefined) optionStrings[language][key] = label[language];
+            }
+        }
+    }
+}
+
 const out = {
     $comment:
         'The CCU easy mode forms (task 62, D-54), extracted by scripts/easymode-controls.mjs from the WebUI easymode TCL; HMSL, see NOTICE.md.',
@@ -309,11 +339,14 @@ const out = {
     master: sortKeys(master),
     masterBranches: sortKeys(masterBranches),
     masterByParamsetId: sortKeys(byParamsetId),
+    optionPresets: sortKeys(optionSets.presets),
+    optionStrings: Object.fromEntries(LANGUAGES.map((language) => [language, sortKeys(optionStrings[language])])),
 };
 const target = path.join(dataDir, 'extracted', 'easymode_controls.json.gz');
 writeFileSync(target, gzipSync(`${JSON.stringify(out)}\n`, {level: 9}));
 console.log(
     `${files} easymodes, ${profiles} profile forms, ${controls} controls, ${Object.keys(timeSelectors).length} time selector types; ` +
         `${Object.keys(master).length} MASTER forms, ${masterControls} controls, ${Object.keys(masterBranches).length} branched; ` +
-        `${Object.keys(byParamsetId).length} by paramset id, ${byIdControls} controls -> ${path.relative(process.cwd(), target)}`,
+        `${Object.keys(byParamsetId).length} by paramset id, ${byIdControls} controls; ` +
+        `${Object.keys(optionSets.presets).length} option sets -> ${path.relative(process.cwd(), target)}`,
 );

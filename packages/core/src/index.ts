@@ -13,6 +13,7 @@ export const PACKAGE = '@homematic-manager/core';
 export * from './api/types.js';
 export * from './data/types.js';
 export * from './data/memory.js';
+export * from './data/presets.js';
 
 // The CCU model
 export * from './interfaces/table.js';

@@ -312,23 +312,62 @@ describe('master metadata, presets and cross validations', () => {
         expect(masterMetadata.SWITCH_VIRTUAL_RECEIVER.parameterOrder).toEqual(['POWERUP_JUMPTARGET']);
     });
 
-    it('matches OptionPreset for all 85 presets', () => {
-        expect(Object.keys(optionPresets)).toHaveLength(85);
+    it('matches OptionPreset for all 89 presets', () => {
+        // openccu-data's 85 plus the three of options.tcl whose id has a dash (DIM_0-100,
+        // DIM_STEPwoLastValue_5-90/-100) and WINDOW_OPEN_LEVEL_FREEVAL (B-82)
+        expect(Object.keys(optionPresets)).toHaveLength(89);
         for (const [id, preset] of Object.entries(optionPresets)) {
             expect(preset.id).toBe(id);
             expect(typeof preset.allowCustom).toBe('boolean');
-            expect(preset.presets.length).toBeGreaterThan(0);
+            if (id !== 'WINDOW_OPEN_LEVEL_FREEVAL') expect(preset.presets.length).toBeGreaterThan(0);
             for (const entry of preset.presets) {
                 expect(['number', 'string']).toContain(typeof entry.value);
-                expect(entry.label === undefined || typeof entry.label === 'string').toBe(true);
-                expect(entry.labelKey === undefined || typeof entry.labelKey === 'string').toBe(true);
-                expect(entry.label !== undefined || entry.labelKey !== undefined).toBe(true);
+                expect(Object.keys(entry).sort()).toEqual(['template', 'value']);
+                expect(typeof entry.template).toBe('string');
             }
         }
         expect(optionPresets.DELAY.allowCustom).toBe(true);
         expect(optionPresets.DELAY.presets).toHaveLength(10);
-        expect(optionPresets.DELAY.presets[0]).toEqual({labelKey: 'none', value: 0});
-        expect(optionPresets.DELAY.presets.at(-1)).toEqual({label: '1h', value: 3600});
+        expect(optionPresets.DELAY.presets[0]).toEqual({template: '${none}', value: 0});
+        expect(optionPresets.DELAY.presets.at(-1)).toEqual({template: '1h', value: 3600});
+    });
+
+    it("keeps the WebUI's templates of options.tcl (B-82)", () => {
+        expect(optionPresets.DOOR_LOCK_TIME).toEqual({
+            id: 'DOOR_LOCK_TIME',
+            allowCustom: true,
+            presets: [
+                {template: '${after} 1min', value: 60},
+                {template: '${after} 3min', value: 180},
+                {template: '${after} 5min', value: 300},
+                {template: '${after} 10min', value: 600},
+                {template: '${after} 15min', value: 900},
+                {template: '${after} 1h', value: 3600},
+                {template: '${inactive}', value: 111600},
+            ],
+        });
+        // options.tcl's time bases, not openccu-data's mix with DELAY's values
+        expect(optionPresets.TIMEBASE_LONG.presets.map((entry) => entry.template)).toEqual([
+            '100mS',
+            '1s',
+            '5s',
+            '10s',
+            '1min',
+            '5min',
+            '10min',
+            '1h',
+        ]);
+        expect(optionPresets.TIMEBASE_LONG_WITH_DAY.presets.map((entry) => entry.value)).toEqual([
+            0, 1, 2, 3, 4, 5, 6, 7,
+        ]);
+        // the one deliberate deviation: the WebUI names values 1 and 2 alike
+        expect(optionPresets.CURRENTDETECTION_BEHAVIOR.presets.map((entry) => entry.template)).toEqual([
+            '${stringTableCurrentDetectionBehaviorActive}',
+            '${stringTableCurrentDetectionBehaviorOutput1}',
+            '${stringTableCurrentDetectionBehaviorOutput2}',
+        ]);
+        // the ids with a dash resolve now, where the forms name them
+        expect(optionPresets['DIM_STEPwoLastValue_5-90'].presets.at(-1)).toEqual({template: '90%', value: 0.9});
     });
 
     it('matches CrossValidationRule for all 5 rules', () => {
@@ -353,24 +392,22 @@ describe('master metadata, presets and cross validations', () => {
     });
 
     it('resolves every label key it emits', () => {
-        // Six WebUI keys have no string in openccu-data's ui_labels (two of them are unevaluated Tcl
-        // expressions upstream); everything else must resolve, so the UI never shows a raw key.
+        // Two WebUI keys have no string in openccu-data's ui_labels; everything else must resolve,
+        // so the UI never shows a raw key. (openccu-data's two unevaluated Tcl expressions
+        // `\${motionDetectorOptionMotion_$operationMode}` stay plain text, no key.)
         const missing = new Set();
         const check = (key) => {
-            if (key !== undefined && !(key in translations.de.uiLabels)) missing.add(key);
+            if (key !== undefined && !(key.toLowerCase() in translations.de.uiLabels)) missing.add(key.toLowerCase());
         };
-        for (const preset of Object.values(optionPresets)) for (const entry of preset.presets) check(entry.labelKey);
+        for (const preset of Object.values(optionPresets)) {
+            for (const entry of preset.presets) {
+                for (const match of entry.template.matchAll(/\$\{(\w+)\}/gu)) check(match[1]);
+            }
+        }
         for (const entry of Object.values(masterMetadata)) {
             for (const group of entry.parameterGroups ?? []) check(group.labelKey);
         }
-        expect([...missing].sort()).toEqual([
-            '\\${motiondetectoroptionmotion_$operationmode}',
-            '\\${motiondetectoroptionnomotion_$operationmode}',
-            'currentdetectionactive',
-            'currentdetectioninactivevalueoutput1',
-            'stringtablepowermeterconstantvolume',
-            'virtualhelptxtdimmer',
-        ]);
+        expect([...missing].sort()).toEqual(['stringtablepowermeterconstantvolume', 'virtualhelptxtdimmer']);
     });
 });
 

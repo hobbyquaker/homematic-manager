@@ -69,7 +69,7 @@ describe('linkFields', () => {
     it('attaches the option preset the metadata names', () => {
         const fields = linkFields(description, {
             metadata: {optionPresets: {SHORT_ON_TIME: 'duration'}},
-            presets: {duration: {id: 'duration', allowCustom: true, presets: [{label: '5s', value: 5}]}},
+            presets: {duration: {id: 'duration', allowCustom: true, presets: [{template: '5s', value: 5}]}},
         });
         expect(fields.find((field) => field.name === 'SHORT_ON_TIME')?.preset?.id).toBe('duration');
     });
@@ -678,7 +678,7 @@ describe('the CCU easy mode form (task 62, D-54)', () => {
     };
     let transport: MockTransport;
 
-    async function openLink(): Promise<void> {
+    async function openLink(): Promise<Awaited<ReturnType<typeof mountApp>>['stores']> {
         const {stores} = await mountApp({transport, hash: '#/HmIP-RF/links'});
         await waitFor(() => {
             expect(stores.links.of('HmIP-RF').length).toBeGreaterThan(0);
@@ -687,6 +687,7 @@ describe('the CCU easy mode form (task 62, D-54)', () => {
         await waitFor(() => {
             expect(screen.getByTestId<HTMLSelectElement>('link-profile').value).toBe('1');
         });
+        return stores;
     }
 
     beforeEach(() => {
@@ -702,8 +703,8 @@ describe('the CCU easy mode form (task 62, D-54)', () => {
                         id: 'DIM_ONLEVEL',
                         allowCustom: true,
                         presets: [
-                            {label: '50%', value: 0.5},
-                            {label: '100%', value: 1},
+                            {template: '50%', value: 0.5},
+                            {template: '100%', value: 1},
                         ],
                     },
                 };
@@ -749,6 +750,47 @@ describe('the CCU easy mode form (task 62, D-54)', () => {
         const select = screen.getByTestId<HTMLSelectElement>('easy-time-select-SHORT_ON');
         expect(select.selectedOptions[0]?.textContent).toBe('dauerhaft');
         expect(within(screen.getByTestId('easy-time-SHORT_ON')).getByText('Einschaltdauer')).toBeTruthy();
+    });
+
+    it("renders a preset's WebUI template in the current language (B-82)", async () => {
+        const files = transport.handlerFor('data.file');
+        const labels: Record<string, Record<string, string>> = {
+            de: {after: 'nach', inactive: 'Inaktiv'},
+            en: {after: 'after', inactive: 'Inactive'},
+        };
+        transport.respond('data.file', (path) => {
+            const found = files(path) as Record<string, unknown>;
+            if (path === 'data/option-presets.json') {
+                return {
+                    ...found,
+                    DIM_ONLEVEL: {
+                        id: 'DIM_ONLEVEL',
+                        allowCustom: true,
+                        presets: [
+                            {template: '${after} 1min', value: 0.5},
+                            {template: '${inactive}', value: 1},
+                        ],
+                    },
+                };
+            }
+            const language = /^data\/translations\/(de|en)\.json$/u.exec(path)?.[1];
+            return language === undefined
+                ? found
+                : {...found, uiLabels: {...(found as {uiLabels: object}).uiLabels, ...labels[language]}};
+        });
+        const stores = await openLink();
+        const options = (): string[] =>
+            [...screen.getByTestId<HTMLSelectElement>('easy-preset-select-SHORT_ON_LEVEL').options].map(
+                (option) => option.textContent,
+            );
+        await waitFor(() => {
+            expect(options().slice(0, 2)).toEqual(['nach 1min', 'Inaktiv']);
+        });
+        // the string tables of the other language, as a restart in English loads them
+        await stores.meta.setLanguage('en');
+        await waitFor(() => {
+            expect(options().slice(0, 2)).toEqual(['after 1min', 'Inactive']);
+        });
     });
 
     it('writes a preset as base and factor, and "enter value" opens the raw pair', async () => {

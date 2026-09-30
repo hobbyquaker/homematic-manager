@@ -33,9 +33,9 @@ const preset: OptionPreset = {
     id: '_INLINE_ACCELERATION_TRANSCEIVER_CHANNEL_OPERATION_MODE',
     allowCustom: false,
     presets: [
-        {labelKey: 'anymotion', value: 1},
-        {labelKey: 'flat', value: 2},
-        {labelKey: 'tilt', value: 3},
+        {template: '${anymotion}', value: 1},
+        {template: '${flat}', value: 2},
+        {template: '${tilt}', value: 3},
     ],
 };
 
@@ -98,7 +98,7 @@ describe('detecting the enums the description cannot render', () => {
     });
 
     it('leaves a preset alone that is not about enum indexes', () => {
-        const seconds: OptionPreset = {id: 'DELAY', allowCustom: true, presets: [{label: '1.5 s', value: 1.5}]};
+        const seconds: OptionPreset = {id: 'DELAY', allowCustom: true, presets: [{template: '1.5 s', value: 1.5}]};
         const specs = detectDeviceEditors(target, {
             ...context,
             preset: (param) => (param === 'CHANNEL_OPERATION_MODE' ? seconds : undefined),

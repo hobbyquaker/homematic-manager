@@ -123,10 +123,10 @@
       "id": "DELAY",
       "allowCustom": true,
       "presets": [
-        {"labelKey": "none", "value": 0},
-        {"label": "5s", "value": 5},
-        {"label": "1min", "value": 60},
-        {"label": "1h", "value": 3600}
+        {"template": "${none}", "value": 0},
+        {"template": "5s", "value": 5},
+        {"template": "1min", "value": 60},
+        {"template": "1h", "value": 3600}
       ]
     }
   },

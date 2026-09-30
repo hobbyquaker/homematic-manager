@@ -6,6 +6,17 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## Unreleased
+
+### Fixed
+
+- **The easy view's presets read as the CCU's do.** A Keymatic's _Lock automatically_ offered "after" six times and
+  _inactive_: the entries of the WebUI's option sets are a label and a text (`${after} 1min`), and only the label was
+  kept. Every option set now comes from the WebUI's own `options.tcl` and is rendered from the string table in the
+  current language - "nach 1min" … "nach 1h", "Inaktiv". The time bases no longer list DELAY's values, a switch
+  actuator's current-detection behaviour names its three choices apart, and the dimmer step widths of the
+  universal-light forms get their preset lists. (B-82)
+
 ## [3.0.0-beta.33] — 2026-09-30
 
 ### Added

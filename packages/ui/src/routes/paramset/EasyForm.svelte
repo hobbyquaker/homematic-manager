@@ -7,6 +7,7 @@
         ParamsetValue,
         TimeSelectorOption,
     } from '@homematic-manager/core';
+    import {presetLabel} from '@homematic-manager/core';
 
     import {getStores} from '../../lib/stores/context.js';
     import {
@@ -211,7 +212,7 @@
                     >
                         {#each preset.presets as entry, entryIndex (entryIndex)}
                             <option value={String(entryIndex)}
-                                >{entry.label ?? stores.meta.uiLabel(entry.labelKey ?? '')}</option
+                                >{presetLabel(entry, (key) => stores.meta.uiLabel(key))}</option
                             >
                         {/each}
                         <option value="-1">{t('Enter value')}</option>

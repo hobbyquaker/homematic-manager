@@ -58,6 +58,7 @@ function fixture(): Record<string, unknown> {
     const options = structuredClone(SIMULATOR_FIXTURE) as Record<string, unknown> & {
         devices: {rfd: {devices: unknown[]}};
         paramsetDescriptions: Record<string, unknown>;
+        links?: Record<string, unknown[]>;
     };
     options.devices.rfd.devices.push(...dimmer());
     options.paramsetDescriptions = {

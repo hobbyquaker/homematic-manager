@@ -1,5 +1,5 @@
 import type {LinkRecord, LinkTemplate, Transport} from '@homematic-manager/core';
-import {decodeLinkFlags} from '@homematic-manager/core';
+import {linkFlags} from '@homematic-manager/core';
 
 import type {NoticesStore} from './NoticesStore.svelte.js';
 
@@ -43,9 +43,9 @@ export class LinksStore {
         }
     }
 
-    /** The links whose `FLAGS` say one side could not be written - issue #79. */
+    /** The links whose `FLAGS` say one side could not be written - issue #79; a device-internal link never (B-86). */
     defective(interfaceName: string): LinkRecord[] {
-        return this.of(interfaceName).filter((link) => decodeLinkFlags(link.FLAGS).broken);
+        return this.of(interfaceName).filter((link) => linkFlags(link).broken);
     }
 
     /**

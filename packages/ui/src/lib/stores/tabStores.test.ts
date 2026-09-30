@@ -320,6 +320,19 @@ describe('LinksStore', () => {
         expect(store.defective('BidCos-RF').map((link) => link.SENDER)).toEqual(['A:1']);
         expect(store.forAddress('BidCos-RF', 'B:1')).toHaveLength(3);
     });
+
+    it('does not count a device-internal link as defective, whatever rfd says (B-86)', async () => {
+        const {transport, notices} = setup();
+        transport.respond('links.list', () => [
+            {SENDER: 'A:1', RECEIVER: 'A:1', FLAGS: 1},
+            {SENDER: 'A:1', RECEIVER: 'A:2', FLAGS: 1},
+            {SENDER: '@1A2B3C:14', RECEIVER: 'A:1', FLAGS: 1},
+        ]);
+        const store = new LinksStore(transport, notices);
+        await store.load('BidCos-RF');
+
+        expect(store.defective('BidCos-RF').map((link) => link.SENDER)).toEqual(['@1A2B3C:14']);
+    });
 });
 
 describe('RadioStore', () => {

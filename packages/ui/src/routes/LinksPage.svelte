@@ -1,6 +1,6 @@
 <script lang="ts">
     import type {LinkRecord} from '@homematic-manager/core';
-    import {decodeLinkFlags, linkSenders} from '@homematic-manager/core';
+    import {linkFlags, linkSenders} from '@homematic-manager/core';
 
     import ContextMenu from '../lib/components/ContextMenu.svelte';
     import type {ContextMenuItem} from '../lib/components/contextMenu.js';
@@ -131,7 +131,7 @@
             width: 48,
             align: 'center',
             sortable: false,
-            value: (link) => (decodeLinkFlags(link.FLAGS).broken ? 'broken' : ''),
+            value: (link) => (linkFlags(link).broken ? 'broken' : ''),
         },
         {key: 'NAME', label: 'NAME', width: 180},
         {key: 'DESCRIPTION', label: 'DESCRIPTION'},
@@ -288,7 +288,7 @@
                         src={stores.host.deviceImageUrl(deviceTypeOf(row.RECEIVER))}
                     />
                 {:else if column.key === 'FLAGS'}
-                    {@const flags = decodeLinkFlags(row.FLAGS)}
+                    {@const flags = linkFlags(row)}
                     {#if flags.broken}
                         <span
                             class="hmm-link-broken"

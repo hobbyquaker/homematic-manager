@@ -18,7 +18,7 @@ is `tools/lab/config-pending-study.mjs`. Each entry below now starts with what c
 | ---- | ------------------------------------------------------------ | --------------------------------------------------------------------- |
 | A-1  | enum names on HmIP, indexes elsewhere                        | **refuted** - both take both; the code sends the index everywhere now |
 | A-2  | `STRING` at most 255 characters                              | untested - no writable `STRING` without a link on the lab devices     |
-| A-3  | link `FLAGS` bits                                            | untested                                                              |
+| A-3  | link `FLAGS` bits                                            | partly - rfd sets bit 1 on every device-internal link (B-86)          |
 | A-4  | which service messages can be acknowledged                   | untested                                                              |
 | A-5  | a `SPECIAL` value passes although it is outside `MIN`..`MAX` | **verified**                                                          |
 | A-6  | "not used" is the parameter's own `SPECIAL`                  | untested - the lab has no `*_TIME` parameter with one                 |
@@ -75,6 +75,11 @@ against. The two bits come from the eQ-3 specification.
 **Verify:** create a link, take the receiver off power, delete the link, put it back - or provoke a
 failed transfer in whatever way the lab allows - and read `getLinks` with and without
 `GL_FLAG_SENDER_PARAMSET`.
+
+**Seen (B-86, 2026-09-30):** rfd answers a device-internal link - a switch actuator's own button on its relay, a
+dimmer's channel and its virtual channels - with `FLAGS: 1` although it works (a lab HM-LC-Sw1's `:1` → `:1`, and every
+internal link on a real installation). A link to a peer that is not a device (`@1A2B3C:14`, `@4D5E6F:1`) carries bit 1
+or 2 as the specification says. `linkFlags()` therefore drops the two bits for a link between channels of one device.
 
 ## A-4 `STICKY_UNREACH`, `SABOTAGE` and `ERROR*` can be acknowledged, the rest cannot
 

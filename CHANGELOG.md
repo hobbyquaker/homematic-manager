@@ -6,6 +6,16 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **Links within one device are no longer marked as defective.** A switch actuator's own button linked to its relay, or
+  a dimmer's channel linked to its virtual channels, carried the red mark in the Links list and counted in the toolbar's
+  "defective" number, although the links work: the interface process reports every such link as broken on the sender
+  side. The mark now stays on links to or from a peer that is not a device of the interface (`@1A2B3C:14`) and on links
+  between two devices whose flags say one side was not written. (B-86)
+
 ## [3.0.0] — 2026-09-30
 
 **The first stable release of the rebuild.** 3.0 is a new Homematic Manager on current Electron, Svelte 5, a tested

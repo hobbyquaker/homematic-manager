@@ -131,6 +131,35 @@ describe('the links grid', () => {
         expect(cell.scrollWidth).toBeLessThanOrEqual(cell.clientWidth);
     });
 
+    it('does not mark a device-internal link although rfd flags it, and keeps the mark on a missing peer (B-86)', async () => {
+        transport.respond('links.list', () => [
+            // rfd's answer for a device's own button on its relay, and a dimmer's real and virtual channels
+            {SENDER: 'KEQ0000302:1', RECEIVER: 'KEQ0000302:1', FLAGS: 1},
+            {SENDER: 'JEQ0000301:1', RECEIVER: 'JEQ0000301:2', FLAGS: 1},
+            {SENDER: 'JEQ0000301:2', RECEIVER: 'JEQ0000301:1', FLAGS: 1},
+            // a sender that is no device here, and a receiver that is none
+            {SENDER: '@1A2B3C:14', RECEIVER: 'GEQ0000308:1', FLAGS: 1},
+            {SENDER: 'BidCoS-RF:12', RECEIVER: '@4D5E6F:1', FLAGS: 2},
+        ]);
+        await mountApp({transport, hash: '#/BidCos-RF/links'});
+
+        await waitFor(() => {
+            expect(screen.getByTestId('links-defective')).toBeTruthy();
+        });
+        expect(screen.getByTestId('links-defective').textContent).toContain('2');
+        for (const id of ['KEQ0000302:1->KEQ0000302:1', 'JEQ0000301:1->JEQ0000301:2', 'JEQ0000301:2->JEQ0000301:1']) {
+            const row = document.querySelector<HTMLElement>(`[data-row-id="${id}"]`)!;
+            expect(row).toBeTruthy();
+            expect(row.querySelector('.hmm-link-broken')).toBeNull();
+        }
+        const sender = document.querySelector<HTMLElement>('[data-row-id="@1A2B3C:14->GEQ0000308:1"] .hmm-link-broken');
+        expect(sender?.getAttribute('title')).toBe('SENDER_BROKEN');
+        const receiver = document.querySelector<HTMLElement>(
+            '[data-row-id="BidCoS-RF:12->@4D5E6F:1"] .hmm-link-broken',
+        );
+        expect(receiver?.getAttribute('title')).toBe('RECEIVER_BROKEN');
+    });
+
     it('hides the two play buttons on an interface without activateLinkParamset', async () => {
         const {stores} = await mountApp({transport, hash: '#/HmIP-RF/links'});
         await waitFor(() => {

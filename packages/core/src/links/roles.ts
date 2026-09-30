@@ -12,7 +12,7 @@
  * not offered at all.
  */
 
-import {isMaintenanceAddress} from '../address/address.js';
+import {isMaintenanceAddress, tryParseAddress} from '../address/address.js';
 import {isChannelDescription, parseRoles, type DeviceDescription, type DeviceIndex} from '../devices/index.js';
 
 /** A link as `getLinks` returns it. */
@@ -60,6 +60,32 @@ export function decodeLinkFlags(flags: number | undefined): DecodedLinkFlags {
         broken: senderBroken || receiverBroken,
         unknownBits: bits & ~(LINK_FLAGS.SENDER_BROKEN | LINK_FLAGS.RECEIVER_BROKEN),
     };
+}
+
+/**
+ * Is this a link between two channels of one device - the button of a switch or dimmer actuator
+ * driving its own relay (`KEQ…:1` → `KEQ…:1`), or a dimmer's real channel and its virtual ones
+ * (`JEQ…:1` → `JEQ…:2`)? An address that does not parse is never part of one.
+ */
+export function isInternalLink(link: Pick<Link, 'SENDER' | 'RECEIVER'>): boolean {
+    const sender = tryParseAddress(link.SENDER);
+    const receiver = tryParseAddress(link.RECEIVER);
+    return sender !== undefined && receiver !== undefined && sender.device === receiver.device;
+}
+
+/**
+ * The `FLAGS` of a link as the grid shows them (B-86): rfd reports every device-internal link with
+ * `SENDER_BROKEN` set (a lab HM-LC-Sw1's own `:1` → `:1` answers `FLAGS: 1`, and the maintainer's
+ * dimmers and switch plugs flag each of their internal links), although the links work. For such a
+ * link the two broken bits carry no information and are dropped; a link to or from a peer that is
+ * not a device of this interface (`@1A2B3C:14`) keeps them, as does every other link.
+ */
+export function linkFlags(link: Pick<Link, 'SENDER' | 'RECEIVER' | 'FLAGS'>): DecodedLinkFlags {
+    const decoded = decodeLinkFlags(link.FLAGS);
+    if (!decoded.broken || !isInternalLink(link)) {
+        return decoded;
+    }
+    return {senderBroken: false, receiverBroken: false, broken: false, unknownBits: decoded.unknownBits};
 }
 
 /** `getLinks` request flags, as the RPC console offers them. */

@@ -8,7 +8,9 @@ import {
     canSend,
     decodeLinkFlags,
     GET_LINKS_FLAGS,
+    isInternalLink,
     LINK_FLAGS,
+    linkFlags,
     linkReceivers,
     linkSenders,
     linkSourcesFor,
@@ -31,6 +33,57 @@ function channel(from: DeviceIndex, address: string): DeviceDescription {
     }
     return found;
 }
+
+describe('linkFlags (B-86)', () => {
+    it('does not call a device-internal link broken although rfd sets SENDER_BROKEN on it', () => {
+        // a lab HM-LC-Sw1: its own button drives its relay, getLinks answers FLAGS 1
+        expect(linkFlags({SENDER: 'JEQ0000303:1', RECEIVER: 'JEQ0000303:1', FLAGS: 1})).toEqual({
+            senderBroken: false,
+            receiverBroken: false,
+            broken: false,
+            unknownBits: 0,
+        });
+        // a HM-LC-Dim1TPBU-FM: the dimmer channel and its virtual ones, in both directions
+        expect(linkFlags({SENDER: 'JEQ0000301:1', RECEIVER: 'JEQ0000301:2', FLAGS: 1}).broken).toBe(false);
+        expect(linkFlags({SENDER: 'JEQ0000301:2', RECEIVER: 'JEQ0000301:1', FLAGS: 1}).broken).toBe(false);
+        expect(linkFlags({SENDER: 'JEQ0000301:2', RECEIVER: 'JEQ0000301:3', FLAGS: 3}).broken).toBe(false);
+    });
+
+    it('keeps the bits nobody documented on an internal link', () => {
+        expect(linkFlags({SENDER: 'KEQ0000302:1', RECEIVER: 'KEQ0000302:1', FLAGS: 8 | 1}).unknownBits).toBe(8);
+    });
+
+    it('still flags a link to or from a peer that is not a device here', () => {
+        expect(linkFlags({SENDER: '@1A2B3C:14', RECEIVER: 'GEQ0000308:1', FLAGS: 1})).toMatchObject({
+            senderBroken: true,
+            broken: true,
+        });
+        expect(linkFlags({SENDER: 'BidCoS-RF:12', RECEIVER: '@4D5E6F:1', FLAGS: 2})).toMatchObject({
+            receiverBroken: true,
+            broken: true,
+        });
+    });
+
+    it('still flags a broken link between two devices and passes an intact one', () => {
+        expect(linkFlags({SENDER: 'JEQ0000304:3', RECEIVER: 'JEQ0000305:1', FLAGS: 2}).receiverBroken).toBe(true);
+        expect(linkFlags({SENDER: 'JEQ0000304:3', RECEIVER: 'JEQ0000305:1', FLAGS: 0}).broken).toBe(false);
+        expect(linkFlags({SENDER: 'JEQ0000304:3', RECEIVER: 'JEQ0000305:1'}).broken).toBe(false);
+    });
+});
+
+describe('isInternalLink', () => {
+    it('is true for two channels of one device and for a channel linked to itself', () => {
+        expect(isInternalLink({SENDER: 'KEQ0000306:1', RECEIVER: 'KEQ0000306:1'})).toBe(true);
+        expect(isInternalLink({SENDER: 'JEQ0000305:1', RECEIVER: 'JEQ0000305:3'})).toBe(true);
+    });
+
+    it('is false across devices, for an unknown peer that happens to look alike, and for what does not parse', () => {
+        expect(isInternalLink({SENDER: 'JEQ0000304:3', RECEIVER: 'JEQ0000305:1'})).toBe(false);
+        expect(isInternalLink({SENDER: '@7A8B9C:1', RECEIVER: 'LEQ0000307:3'})).toBe(false);
+        expect(isInternalLink({SENDER: '', RECEIVER: ''})).toBe(false);
+        expect(isInternalLink({SENDER: 'A:x', RECEIVER: 'A:x'})).toBe(false);
+    });
+});
 
 describe('decodeLinkFlags', () => {
     it('decodes the two broken bits', () => {

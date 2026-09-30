@@ -15,14 +15,14 @@ Contents: [The container](#1-the-container) · [Node](#2-node-22) ·
 [Checking that events arrive](#5-checking-that-events-actually-arrive) ·
 [Update, backup, uninstall](#update-backup-uninstall) · [Troubleshooting](#troubleshooting)
 
-> **3.0 is available as a beta.** The current beta ([releases](https://github.com/hobbyquaker/homematic-manager/releases)) is published and its npm package is on the
-> registry as `latest`: `npm install -g homematic-manager`. A checkout produces the same tarball
+> The current release ([releases](https://github.com/hobbyquaker/homematic-manager/releases/latest)) is on the
+> npm registry as `latest`: `npm install -g homematic-manager`. A checkout produces the same tarball
 > with `npm pack -w apps/web` — see [BUILD.md](../BUILD.md).
 >
 > **The package is `homematic-manager`** (D-33), the name the 2.x desktop app had on npm — its
 > `npm i -g` audience wanted a headless install anyway. The 1.x versions under that name are
-> deprecated; every 3.0 version, a beta as well, is published as `latest` (D-39), so a plain
-> `npm install -g homematic-manager` gives the current beta. The binary is
+> deprecated; every 3.0 version is published as `latest` (D-39), so a plain
+> `npm install -g homematic-manager` gives the current version. The binary is
 > `homematic-manager`; `homematic-manager-web` is a second name for the same file, and this page
 > uses it throughout because the CCU addon and the proxy examples do.
 
@@ -70,7 +70,7 @@ apt install -y nodejs
 ## 3. Install and register the service
 
 ```sh
-npm install -g homematic-manager             # the current beta
+npm install -g homematic-manager             # the current version
 homematic-manager-web --install --ccu ccu3.local --host 0.0.0.0
 ```
 
@@ -185,7 +185,7 @@ point of the installation is to watch events around the clock.
 ## Update, backup, uninstall
 
 ```sh
-npm install -g homematic-manager          # the current beta
+npm install -g homematic-manager          # the current version
 homematic-manager-web --install             # rewrites the unit, keeps the configuration
 systemctl restart homematic-manager
 ```

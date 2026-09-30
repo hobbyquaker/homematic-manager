@@ -177,8 +177,8 @@ all — see [install-electron.md](install-electron.md). Electron in a global npm
 sensible way to ship a desktop application, and the `npm i -g` audience of 2.x mostly wanted a
 headless install to begin with.
 
-The old 1.x versions under that name are deprecated on npm. Every 3.0 version, a beta as well, is
-published as `latest`, so `npm install -g homematic-manager` installs the current beta.
+The old 1.x versions under that name are deprecated on npm. Every 3.0 version is published as
+`latest`, so `npm install -g homematic-manager` installs the current version.
 
 ### Smaller behavioural changes
 

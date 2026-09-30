@@ -11,7 +11,7 @@
   "release": {
     "github": "hobbyquaker/homematic-manager",
     "asset": "hmm-ccu-{arch}-{version}.tar.gz",
-    "prerelease": true
+    "prerelease": false
   },
   "requires": {
     "architectures": ["armv7l", "aarch64", "x86_64"]

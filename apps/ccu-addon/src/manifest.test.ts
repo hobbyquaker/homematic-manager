@@ -18,7 +18,7 @@ describe('the openccu-lite manifest', () => {
         expect(manifest.release).toEqual({
             github: 'hobbyquaker/homematic-manager',
             asset: 'hmm-ccu-{arch}-{version}.tar.gz',
-            prerelease: true,
+            prerelease: false,
         });
     });
 

@@ -10,8 +10,10 @@
  *    `ping`, whose answer arrives as an event and resets the clock. HmIP-RF gets 600 s because
  *    hmipserver answers pings but sends events rarely (eq-3/occu#42); an interface that answers no
  *    ping at all (VirtualDevices) is watched by events only.
- *    At the start (task 56, D-52) an `init` that is refused or times out is not left to the watchdog:
- *    it is tried again after 1, 2, 4 and 8 s and then every 2 s, and the interface shows *waiting*.
+ *    An interface whose `init` is refused or times out is not left to the watchdog (task 56, task 83,
+ *    D-58): its port is tried every 3 s for 90 s after the start (or after it went missing) and then
+ *    every 15 s, a TCP connect first and the `init` only when the port answers; at the start the
+ *    interface shows *waiting*, and when another interface appears every missing one is tried at once.
  *    HmIP-RF has a liveness ping of its own besides (B-56, D-53): after 30 s of silence it is
  *    pinged, and a missing PONG 10 s later means hmipserver has restarted - it reads its handler
  *    list back but sends nothing until the client calls `init` again - so the interface shows
@@ -101,38 +103,35 @@ export const SHUTDOWN_TIMEOUT_MS = 5000;
 export const MAX_INIT_BACKOFF_MS = 300_000;
 
 /**
- * Task 56 (D-52): the waits between the `init` attempts of an interface that refuses or does not
- * answer at the start, before {@link START_RETRY_INTERVAL_MS} takes over.
+ * Task 83 (D-58): the wait between two attempts to reach an interface that is missing - at the start
+ * (task 56), after a lost subscription (B-56) or after it went away - for the first
+ * {@link START_WINDOW_MS}. Each attempt is a TCP connect to its port first; the `init` goes out only
+ * when the port answers, so a process that is not there yet costs a refused connection on the
+ * loopback and nothing else.
  *
- * On openccu-lite the addon may start before the interface processes (`runtime.start: "early"`):
- * a Raspberry Pi 3 measured the first `init` 45 s before hmipserver answered, and on the 15 s watchdog
- * ticks with the doubling back-off below HmIP-RF was asked again only 17 s after it was there.
+ * D-52 had 1, 2, 4, 8 s and then 15 s, D-57 every 2 s after the first four inside 120 s. hm2mqtt.js
+ * with the D-52 steps, measured on a Raspberry Pi 4 with the addon started early (openccu-lite task
+ * 294): hmipserver answered at about 50-55 s and was found at the 61 s tick. The maintainer
+ * (2026-09-30): "not so aggressive ... every 3 seconds for 90 seconds and after 90sec we just go
+ * down to 15s".
  */
-export const START_RETRY_DELAYS_MS: readonly number[] = [1000, 2000, 4000, 8000];
+export const START_RETRY_INTERVAL_MS = 3000;
 
 /**
- * Task 56 (D-57): the wait between two start attempts after {@link START_RETRY_DELAYS_MS}.
- *
- * D-52 had 15 s here. Measured on openccu-lite with the addon started early, that made HmIP-RF on a
- * Raspberry Pi 4 connect 2-3 s *later* than when the addon waits for hmipserver, because hmipserver
- * came up between two attempts 15 s apart; with 2 s it connected 9.6 s earlier. A refused
- * connection on the loopback every 2 s for at most the start window costs nothing.
+ * Task 83 (D-58): the wait between two attempts after {@link START_WINDOW_MS}, for as long as the
+ * interface is missing. Only a TCP connect as long as the port is closed, so BidCos-Wired on a CCU
+ * without a wired gateway - which never runs `hs485d` - costs one refused connection every 15 s and
+ * no log line (task 13's four ERROR lines a minute came from the `init` calls).
  */
-export const START_RETRY_INTERVAL_MS = 2000;
+export const MISSING_RETRY_INTERVAL_MS = 15_000;
 
 /**
- * Task 56: how long after `start()` (or a D-31 resubscribe) an interface that has not answered yet
- * is *waiting* rather than missing. Two minutes cover a Raspberry Pi 3 booting with the addon
- * started early, where the interface processes come up about 50 s after it. After the window the
- * interface is treated as before: "not present" or "not answering", said once, and tried with the
- * back-off up to {@link MAX_INIT_BACKOFF_MS} - a CCU without a wired gateway never runs `hs485d`.
+ * Task 56, task 83 (D-58): how long after `start()` (or a D-31 resubscribe, or the moment an interface
+ * went missing) it is tried every {@link START_RETRY_INTERVAL_MS}. At the start an interface that
+ * has not answered yet is *waiting* rather than missing for this long; after it, it is "not present"
+ * or "not answering", said once, and tried every {@link MISSING_RETRY_INTERVAL_MS}.
  */
-export const START_WINDOW_MS = 120_000;
-
-/** Task 56: the wait before start attempt number `attempt` (1 for the first retry). */
-export function startRetryDelay(attempt: number): number {
-    return START_RETRY_DELAYS_MS[attempt - 1] ?? START_RETRY_INTERVAL_MS;
-}
+export const START_WINDOW_MS = 90_000;
 
 /**
  * D-31: the grace period a server install waits, with no UI session connected, before it drops its
@@ -161,10 +160,20 @@ export interface ManagedInterface {
     failures: number;
     /** On the monotonic clock (B-65): the moment before which the watchdog does not try `init` again. */
     retryAt: number;
-    /** Task 56: failed `init` attempts while waiting at the start; 0 once it answered. */
+    /** Task 56: failed attempts (a closed port or a failed `init`) while waiting at the start; 0 once it answered. */
     waitingAttempts: number;
-    /** Task 56: the timer of the next start attempt, which the watchdog then leaves alone. */
+    /** Task 56, task 83: the timer of the next attempt of a missing interface, which the watchdog then leaves alone. */
     retryTimer: ReturnType<typeof setTimeout> | undefined;
+    /**
+     * Task 83: counts up whenever the pending attempt is cancelled or replaced, so a port probe that
+     * was in flight meanwhile (a reconnect, another interface appearing) drops its result.
+     */
+    retryGeneration: number;
+    /**
+     * Task 83: on the monotonic clock, when an interface that had answered went missing - its quick
+     * attempts run for {@link START_WINDOW_MS} from here. `undefined` while it answers.
+     */
+    missingSince: number | undefined;
     /** Task 56: `init` succeeded since the last start - its failures are an outage, not a start. */
     answered: boolean;
     /**
@@ -366,6 +375,8 @@ export class InterfaceManager implements Interfaces {
     #detected: string[] = [];
     #stopping = false;
     #idle = false;
+    /** Task 83: when `start()` ran, on the monotonic clock - the info line of a found interface counts from here. */
+    #startedAt = 0;
 
     constructor(options: InterfaceManagerOptions) {
         this.#options = options;
@@ -425,6 +436,11 @@ export class InterfaceManager implements Interfaces {
     /** Read through a method, so that the check after an `await` is not narrowed away. */
     #hasStopped(): boolean {
         return this.#stopping;
+    }
+
+    /** The same for the idle flag (D-31). */
+    #isIdle(): boolean {
+        return this.#idle;
     }
 
     #network(): CallbackNetwork {
@@ -585,6 +601,7 @@ export class InterfaceManager implements Interfaces {
             }
         }
 
+        this.#startedAt = this.#monotonicNow();
         for (const target of targets) {
             this.#interfaces.set(target.resolved.name, this.#create(target));
         }
@@ -652,11 +669,13 @@ export class InterfaceManager implements Interfaces {
         this.#idle = false;
         // task 56: a resubscribe is a start too - the interface processes may have gone meanwhile.
         // B-68: except for one that was already found not present before the idle period (BidCos-Wired
-        // on a box without a wired gateway): it goes straight back to the back-off, instead of two
-        // minutes of retries every 2 s and one more "not present" warning at every session connect
+        // on a box without a wired gateway): it goes straight back to the 15 s port check (task 83),
+        // instead of the quick attempts of the start and one more "not present" warning at every
+        // session connect
         const now = this.#monotonicNow();
         for (const entry of this.#interfaces.values()) {
             entry.windowStart = entry.state.absent === true ? Number.NEGATIVE_INFINITY : now;
+            entry.missingSince = undefined;
             this.#update(entry, {idle: false});
         }
         await Promise.all([...this.#interfaces.keys()].map((name) => this.#init(name)));
@@ -893,6 +912,8 @@ export class InterfaceManager implements Interfaces {
             retryAt: 0,
             waitingAttempts: 0,
             retryTimer: undefined,
+            retryGeneration: 0,
+            missingSince: undefined,
             answered: false,
             windowStart: this.#monotonicNow(),
             lastEventMono: 0,
@@ -1020,11 +1041,16 @@ export class InterfaceManager implements Interfaces {
             const wasFailing = entry.failures > 0;
             const waited = entry.waitingAttempts;
             const wasReconnecting = entry.reconnecting;
+            const missingSince = entry.missingSince;
+            // task 83: it was not there a moment ago - at the start, after an outage or a lost subscription
+            const appeared = !entry.answered || wasFailing;
             entry.failures = 0;
             entry.retryAt = 0;
             entry.waitingAttempts = 0;
             entry.answered = true;
             entry.reconnecting = false;
+            entry.missingSince = undefined;
+            this.#clearRetryTimer(entry);
             // hmipserver re-sends every device on `init` (occu#45), so the grids are not complete
             // until the sweep below is through; the UI shows "subscribing" until then
             this.#update(entry, {
@@ -1037,8 +1063,15 @@ export class InterfaceManager implements Interfaces {
                 reconnecting: false,
             });
             this.#armLiveness(entry);
+            const now = this.#monotonicNow();
             if (wasFailing) {
-                this.#options.onNotice('info', `${interfaceName}: answering again`, interfaceName);
+                this.#options.onNotice(
+                    'info',
+                    missingSince === undefined
+                        ? `${interfaceName}: answering, ${formatSeconds(now - this.#startedAt)} after the start`
+                        : `${interfaceName}: answering again, ${formatSeconds(now - missingSince)} after it went missing`,
+                    interfaceName,
+                );
             } else if (wasReconnecting) {
                 this.#options.onNotice(
                     'info',
@@ -1050,11 +1083,15 @@ export class InterfaceManager implements Interfaces {
             } else if (waited > 0) {
                 this.#options.onNotice(
                     'info',
-                    `${interfaceName}: answering, attempt ${String(waited + 1)} at the start`,
+                    `${interfaceName}: answering, ${formatSeconds(now - this.#startedAt)} after the start ` +
+                        `(attempt ${String(waited + 1)})`,
                     interfaceName,
                 );
             }
             this.#options.onStateChanged(this.states());
+            if (appeared) {
+                this.#retryMissingNow(interfaceName);
+            }
             try {
                 await this.#options.onConnected?.(interfaceName);
             } finally {
@@ -1078,11 +1115,11 @@ export class InterfaceManager implements Interfaces {
     #noteInitFailure(entry: ManagedInterface, error: unknown): void {
         const message = errorMessage(error);
         const absent = isConnectionRefused(error);
-        const unreachable = !absent && isNotAnswering(error);
-        if ((absent || unreachable) && this.#inStartWindow(entry)) {
-            this.#noteWaiting(entry, message, absent);
+        if (absent || isNotAnswering(error)) {
+            this.#noteMissing(entry, message, absent);
             return;
         }
+        // the port answered and `init` failed all the same: a fault, not a missing process
         const first = entry.failures === 0;
         entry.failures += 1;
         entry.reconnecting = false;
@@ -1092,24 +1129,129 @@ export class InterfaceManager implements Interfaces {
         this.#update(entry, {
             connected: false,
             error: message,
-            absent,
-            unreachable,
+            absent: false,
+            unreachable: false,
             subscribing: false,
             waiting: false,
             reconnecting: false,
         });
+        if (first) {
+            this.#options.onNotice('error', `${entry.name}: ${message}`, entry.name);
+        }
+    }
+
+    /**
+     * Task 83 (D-58): the interface refused the connection or did not answer. Inside the start window
+     * it is *waiting* ({@link noteWaiting}); after it, "not present" or "not answering" is said once,
+     * and its port is tried every {@link START_RETRY_INTERVAL_MS} for {@link START_WINDOW_MS} after it
+     * went missing, then every {@link MISSING_RETRY_INTERVAL_MS} - by a timer of its own, a TCP
+     * connect first.
+     */
+    #noteMissing(entry: ManagedInterface, message: string, absent: boolean): void {
+        if (this.#inStartWindow(entry)) {
+            this.#noteWaiting(entry, message, absent);
+            return;
+        }
+        const first = entry.failures === 0;
+        if (first && entry.answered) {
+            // it was there and went away: the quick attempts again, as at a start
+            entry.missingSince = this.#monotonicNow();
+        }
+        entry.failures += 1;
+        entry.reconnecting = false;
+        this.#update(entry, {
+            connected: false,
+            error: message,
+            absent,
+            unreachable: !absent,
+            subscribing: false,
+            waiting: false,
+            reconnecting: false,
+        });
+        this.#scheduleRetry(entry, this.#missingDelay(entry));
         if (!first) {
             return;
         }
-        const minutes = Math.round(MAX_INIT_BACKOFF_MS / 60_000);
         this.#options.onNotice(
             absent ? 'warn' : 'error',
             absent
                 ? `${entry.name}: nothing is listening on ${entry.state.host}:${String(entry.state.port)} - ` +
-                      `treated as not present, retried at most every ${String(minutes)} minutes`
+                      `treated as not present until its port answers`
                 : `${entry.name}: ${message}`,
             entry.name,
         );
+    }
+
+    /** Task 83: every 3 s within 90 s of the start or of the moment it went missing, else every 15 s. */
+    #missingDelay(entry: ManagedInterface): number {
+        const window = this.#options.startWindowMs ?? START_WINDOW_MS;
+        const since = entry.missingSince ?? entry.windowStart;
+        return window > 0 && this.#monotonicNow() - since < window
+            ? START_RETRY_INTERVAL_MS
+            : MISSING_RETRY_INTERVAL_MS;
+    }
+
+    /** Task 83: the next attempt of a missing interface, on a timer the watchdog leaves alone. */
+    #scheduleRetry(entry: ManagedInterface, delay: number): void {
+        this.#clearRetryTimer(entry);
+        entry.retryAt = this.#monotonicNow() + delay;
+        if (this.#stopping || this.#idle) {
+            return;
+        }
+        const timer = setTimeout(() => {
+            entry.retryTimer = undefined;
+            void this.#retryMissing(entry);
+        }, delay);
+        if (typeof timer.unref === 'function') {
+            timer.unref();
+        }
+        entry.retryTimer = timer;
+    }
+
+    /**
+     * Task 83: one attempt at a missing interface - a TCP connect to its port, and the `init` only
+     * when the port answers. A port that is still closed (or does not answer) counts as a failed
+     * attempt without a call to the interface process.
+     */
+    async #retryMissing(entry: ManagedInterface): Promise<void> {
+        if (this.#stopping || this.#idle || this.#interfaces.get(entry.name) !== entry) {
+            return;
+        }
+        const generation = entry.retryGeneration;
+        const probe = this.#options.probe ?? ((host, port) => probePortState(host, port, {timeoutMs: 2000}));
+        const result = await probe(entry.state.host, entry.state.port);
+        if (
+            this.#hasStopped() ||
+            this.#isIdle() ||
+            generation !== entry.retryGeneration ||
+            this.#interfaces.get(entry.name) !== entry
+        ) {
+            return;
+        }
+        if (result === 'open') {
+            await this.#init(entry.name);
+            return;
+        }
+        const where = `${entry.state.host}:${String(entry.state.port)}`;
+        this.#noteMissing(
+            entry,
+            result === 'refused' ? `connect ECONNREFUSED ${where}` : `${where} does not answer`,
+            result === 'refused',
+        );
+        this.#options.onStateChanged(this.states());
+    }
+
+    /**
+     * Task 83: an interface appeared, so the others may be about to - rfd and hmipserver come up
+     * close together. Every interface that waits for its next attempt is tried at once.
+     */
+    #retryMissingNow(except: string): void {
+        for (const entry of this.#interfaces.values()) {
+            if (entry.name !== except && entry.retryTimer !== undefined && !entry.state.connected) {
+                this.#clearRetryTimer(entry);
+                void this.#retryMissing(entry);
+            }
+        }
     }
 
     /**
@@ -1122,15 +1264,13 @@ export class InterfaceManager implements Interfaces {
     }
 
     /**
-     * Task 56 (D-52): the interface refused or did not answer at the start. On openccu-lite that
+     * Task 56 (D-52, D-58): the interface refused or did not answer at the start. On openccu-lite that
      * only means its process has not started yet, so it is *waiting*, not missing: one info line,
-     * the retries at debug level, and the next attempt on a timer of its own after
-     * {@link startRetryDelay} rather than at a watchdog tick after the back-off.
+     * the retries at debug level, and the next attempt on a timer of its own every
+     * {@link START_RETRY_INTERVAL_MS} rather than at a watchdog tick after the back-off.
      */
     #noteWaiting(entry: ManagedInterface, message: string, refused: boolean): void {
         entry.waitingAttempts += 1;
-        const delay = startRetryDelay(entry.waitingAttempts);
-        entry.retryAt = this.#monotonicNow() + delay;
         this.#update(entry, {
             connected: false,
             error: message,
@@ -1157,18 +1297,7 @@ export class InterfaceManager implements Interfaces {
                 entry.name,
             );
         }
-        this.#clearRetryTimer(entry);
-        if (this.#stopping || this.#idle) {
-            return;
-        }
-        const timer = setTimeout(() => {
-            entry.retryTimer = undefined;
-            void this.#init(entry.name);
-        }, delay);
-        if (typeof timer.unref === 'function') {
-            timer.unref();
-        }
-        entry.retryTimer = timer;
+        this.#scheduleRetry(entry, START_RETRY_INTERVAL_MS);
     }
 
     /**
@@ -1257,6 +1386,7 @@ export class InterfaceManager implements Interfaces {
     }
 
     #clearRetryTimer(entry: ManagedInterface): void {
+        entry.retryGeneration += 1;
         if (entry.retryTimer !== undefined) {
             clearTimeout(entry.retryTimer);
             entry.retryTimer = undefined;
@@ -1344,6 +1474,11 @@ export class InterfaceManager implements Interfaces {
         }
         this.#watchdog = timer;
     }
+}
+
+/** Task 83: a duration for a log line, to a tenth of a second: `52.4 s`. */
+function formatSeconds(ms: number): string {
+    return `${(Math.max(0, ms) / 1000).toFixed(1)} s`;
 }
 
 /** A boolean that is present when true and absent otherwise, so a state stays small on the wire. */

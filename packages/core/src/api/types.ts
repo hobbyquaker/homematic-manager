@@ -358,8 +358,9 @@ export interface InterfaceState {
      * Nothing is listening on that port: the interface process does not exist on this system.
      *
      * A CCU without a wired gateway answers like this for BidCos-Wired, which is in the default
-     * interface list. The manager then backs off (up to five minutes between attempts) instead of
-     * retrying every 15 s, and the UI shows "not present" rather than a connection error.
+     * interface list. The manager then checks its port every 15 s (task 83, D-58) - a TCP connect,
+     * no `init` and no log line while it stays closed - and the UI shows "not present" rather than a
+     * connection error.
      */
     absent?: boolean;
     /**
@@ -376,8 +377,8 @@ export interface InterfaceState {
      */
     subscribing?: boolean;
     /**
-     * Task 56 (D-52): the interface refused or did not answer its `init` at the start, and is tried
-     * again within seconds (1, 2, 4, 8 s, then every 2 s) for the first two minutes. On
+     * Task 56, task 83 (D-58): the interface refused or did not answer its `init` at the start, and
+     * its port is tried again every 3 s for the first 90 s. On
      * openccu-lite that is the interface process not having started yet, so the UI shows "waiting"
      * rather than "not present" or "not answering". Present only when true.
      */

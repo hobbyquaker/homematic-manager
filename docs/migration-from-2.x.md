@@ -276,7 +276,7 @@ Things that are known, measured and not fixed:
 - **BidCos-Wired is shown as "not present"** on any system that has no wired gateway. It is in
   the default interface list, its port refuses the connection, and 2.x answered that with an
   error line every 15 seconds for as long as it ran. 3.0 says it once, marks the interface with
-  a grey dash instead of a red cross and retries at most every five minutes. Untick it in the
+  a grey dash instead of a red cross and only checks its port every 15 seconds. Untick it in the
   settings dialog if you would rather not see it at all.
 
 ## See also

@@ -479,8 +479,8 @@
 
             {#if retryNames.length > 0}
                 <!--
-                    B-28: an interface that does not answer is retried by the watchdog, with a wait
-                    that grows to five minutes. The button tries now. It sits under the list, not in
+                    B-28: an interface that does not answer is retried on its own (task 83: its port
+                    every 3 s for 90 s, then every 15 s). The button tries now. It sits under the list, not in
                     an item: an option that holds a second button is not an option any more.
                 -->
                 <div class="hmm-interface-foot">

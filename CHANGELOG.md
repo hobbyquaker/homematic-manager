@@ -17,6 +17,17 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   of the app no longer resets it, and the tooltip of _Since_ names the clock: the system's, the CCU's _Erste Meldung_
   or the app's own. Nothing changes on a CCU or for the addon on the system. (task 82)
 
+### Changed
+
+- **An interface that is not up yet is found within 3 seconds, and a missing one is checked quietly.** For the first
+  90 seconds after the start - or after an interface went away - its port is tried every 3 seconds, then every 15
+  seconds for as long as it is missing: a plain TCP connect first, and the `init` only once the port answers. When
+  one interface appears, every missing one is tried at once, since rfd and hmipserver come up close together. With
+  the addon started early on a Raspberry Pi 4, hmipserver answers about 50-55 seconds after the start. This replaces
+  the steps of 1, 2, 4, 8 seconds, then every 2 seconds for two minutes, then a back-off of up to five minutes. The
+  log says once how long after the start an interface was found. BidCos-Wired on a CCU
+  without a wired gateway costs one refused connection every 15 seconds and no log line. (task 83)
+
 ### Fixed
 
 - **The easy view's presets read as the CCU's do.** A Keymatic's _Lock automatically_ offered "after" six times and

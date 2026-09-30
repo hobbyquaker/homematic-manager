@@ -18,10 +18,11 @@ import type {CallbackHandler, CallbackServerSet} from '../rpc/server.js';
 import type {CallbackNetwork, LocalIPv4, PortProbe} from '../util/net.js';
 import {
     InterfaceManager,
+    MISSING_RETRY_INTERVAL_MS,
+    START_RETRY_INTERVAL_MS,
     START_WINDOW_MS,
     callbackBindHost,
     firstBidcosInterfaceAddress,
-    startRetryDelay,
 } from './manager.js';
 
 /** A callback server set that binds nothing. */
@@ -176,6 +177,14 @@ function harness(
     return {manager, states, notices, connected, servers, clients, clock};
 }
 
+/** Moves the injected clock and the fake timers together, `step` at a time. */
+async function advanceBoth(h: Harness, ms: number, step = 1000): Promise<void> {
+    for (let passed = 0; passed < ms; passed += step) {
+        h.clock.value += step;
+        await vi.advanceTimersByTimeAsync(step);
+    }
+}
+
 describe('firstBidcosInterfaceAddress', () => {
     it('takes the address of the first entry', () => {
         expect(firstBidcosInterfaceAddress([{ADDRESS: 'XEQ0123456', TYPE: 'HMIP_CCU'}])).toBe('XEQ0123456');
@@ -276,18 +285,82 @@ describe('InterfaceManager.start', () => {
         expect(h.notices.find((entry) => entry.interfaceName === 'HmIP-RF')?.level).toBe('error');
     });
 
-    it('backs off instead of re-initing a missing interface every round (task 13)', async () => {
+    it('checks the port of a missing interface every 15 s and calls it only when the port answers (task 13, task 83)', async () => {
         // this is BidCos-Wired on a CCU without a wired gateway: it is in the default interface
         // list, hs485d is not running, and 2.x's watchdog produced four ERROR lines a minute
+        vi.useFakeTimers();
+        try {
+            const probes: number[] = [];
+            const h = harness({
+                connection: {autoDetect: false},
+                answers: {'HmIP-RF': () => Object.assign(new Error('connect ECONNREFUSED'), {})},
+                probe: (_host, port) => {
+                    probes.push(port);
+                    return Promise.resolve(port === 2010 ? 'refused' : 'open');
+                },
+            });
+            await h.manager.start();
+            expect(h.clients.calls.filter((call) => call.name === 'HmIP-RF')).toHaveLength(1);
+
+            await advanceBoth(h, 300_000, 15_000);
+            // twenty port checks in five minutes, and not one more call to the process
+            expect(probes.filter((port) => port === 2010)).toHaveLength(20);
+            expect(h.clients.calls.filter((call) => call.name === 'HmIP-RF')).toHaveLength(1);
+            // and exactly one notice, however often it was tried
+            expect(h.notices.filter((entry) => entry.interfaceName === 'HmIP-RF')).toHaveLength(1);
+            expect(h.manager.states()[1]?.absent).toBe(true);
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('keeps checking every 15 s however long it is missing, and starts over when the user asks', async () => {
+        vi.useFakeTimers();
+        try {
+            let refuse = true;
+            let probes = 0;
+            const h = harness({
+                connection: {autoDetect: false},
+                answers: {
+                    'HmIP-RF': () => (refuse ? Object.assign(new Error('connect ECONNREFUSED'), {}) : ''),
+                },
+                probe: (_host, port) => {
+                    if (port === 2010) {
+                        probes += 1;
+                    }
+                    return Promise.resolve(port === 2010 && refuse ? 'refused' : 'open');
+                },
+            });
+            await h.manager.start();
+            await advanceBoth(h, 40 * 60_000, 15_000);
+            // forty minutes: four checks a minute, no back-off to five minutes any more
+            expect(probes).toBe(160);
+
+            refuse = false;
+            await h.manager.reconnect('HmIP-RF');
+            const state = h.manager.states()[1];
+            expect(state?.connected).toBe(true);
+            expect(state?.absent).toBeUndefined();
+            expect(h.notices.filter((entry) => entry.interfaceName === 'HmIP-RF' && entry.level === 'info')).toEqual([
+                {level: 'info', message: 'HmIP-RF: answering, 2400.0 s after the start', interfaceName: 'HmIP-RF'},
+            ]);
+            // the timer is gone with the answer
+            const calls = h.clients.calls.length;
+            await advanceBoth(h, 60_000, 15_000);
+            expect(h.clients.calls.length).toBe(calls);
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('keeps the back-off for an init that fails while the port answers', async () => {
         const h = harness({
-            answers: {'HmIP-RF': () => Object.assign(new Error('connect ECONNREFUSED'), {})},
+            answers: {'HmIP-RF': () => new BackendError({message: 'fault', kind: 'rpc'})},
             initBackoffMs: 15_000,
         });
         await h.manager.start();
-        const initsAfterStart = h.clients.calls.filter((call) => call.name === 'HmIP-RF').length;
-        expect(initsAfterStart).toBe(1);
-
-        // twenty watchdog rounds of 15 s: without the back-off that is twenty more attempts
         for (let round = 0; round < 20; round += 1) {
             h.clock.value += 15_000;
             await h.manager.tick();
@@ -296,35 +369,7 @@ describe('InterfaceManager.start', () => {
         // 15 s, 30 s, 60 s, 120 s, 240 s and then the 300 s ceiling: five within the five minutes
         expect(attempts).toBeGreaterThan(1);
         expect(attempts).toBeLessThan(8);
-        // and exactly one notice, however often it was tried
         expect(h.notices.filter((entry) => entry.interfaceName === 'HmIP-RF')).toHaveLength(1);
-    });
-
-    it('never waits longer than five minutes, and starts over when the user asks', async () => {
-        let refuse = true;
-        const h = harness({
-            answers: {
-                'HmIP-RF': () => (refuse ? Object.assign(new Error('connect ECONNREFUSED'), {}) : ''),
-            },
-            initBackoffMs: 15_000,
-        });
-        await h.manager.start();
-        for (let round = 0; round < 40; round += 1) {
-            h.clock.value += 60_000;
-            await h.manager.tick();
-        }
-        const attempts = h.clients.calls.filter((call) => call.name === 'HmIP-RF').length;
-        // forty minutes at the 300 s ceiling is eight attempts, plus the ones before it
-        expect(attempts).toBeGreaterThanOrEqual(8);
-
-        refuse = false;
-        await h.manager.reconnect('HmIP-RF');
-        const state = h.manager.states()[1];
-        expect(state?.connected).toBe(true);
-        expect(state?.absent).toBeUndefined();
-        expect(h.notices.filter((entry) => entry.interfaceName === 'HmIP-RF' && entry.level === 'info')).toHaveLength(
-            1,
-        );
     });
 
     it('finds the callback address itself when none is configured', () => {
@@ -1095,17 +1140,23 @@ describe('the watchdog', () => {
     });
 
     it('still retries a VirtualDevices without devices that never answered its init (B-69)', async () => {
-        const h = harness({
-            connection: {interfaces: ['VirtualDevices']},
-            listsDevices: () => false,
-            answers: {VirtualDevices: () => new Error('connect ECONNREFUSED')},
-        });
-        await h.manager.start();
-        expect(h.manager.states()[0]?.connected).toBe(false);
-        h.clients.calls.length = 0;
-        h.clock.value += 61_000;
-        await h.manager.tick();
-        expect(h.clients.calls.map((call) => call.method)).toContain('init');
+        vi.useFakeTimers();
+        try {
+            const h = harness({
+                connection: {interfaces: ['VirtualDevices']},
+                listsDevices: () => false,
+                answers: {VirtualDevices: () => new Error('connect ECONNREFUSED')},
+            });
+            await h.manager.start();
+            expect(h.manager.states()[0]?.connected).toBe(false);
+            h.clients.calls.length = 0;
+            await advanceBoth(h, 61_000);
+            await h.manager.tick();
+            expect(h.clients.calls.map((call) => call.method)).toContain('init');
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     it('judges an interface that answers pings by its events whether or not it lists devices (B-69)', async () => {
@@ -1152,11 +1203,11 @@ describe('the watchdog', () => {
         let wall = 1_000_000;
         let mono = 5000;
         let bidcosUp = false;
+        // task 83: a missing process is checked on a timer of its own now; the back-off that is left
+        // is the one of an `init` that fails while the port answers
         const clients = fakeClients({
             'BidCos-Wired': (method) =>
-                method === 'init' && !bidcosUp
-                    ? Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:32000'), {code: 'ECONNREFUSED'})
-                    : '',
+                method === 'init' && !bidcosUp ? new BackendError({message: 'init fault', kind: 'rpc'}) : '',
         });
         const manager = new InterfaceManager({
             connection: normaliseConnection({
@@ -1413,7 +1464,7 @@ describe('the background port probe', () => {
     });
 });
 
-describe('the quick retries at the start (task 56, D-52)', () => {
+describe('the quick retries at the start (task 56, task 83, D-58)', () => {
     const refused = () => Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:32010'), {code: 'ECONNREFUSED'});
 
     /** Moves the injected clock and the fake timers together, one second at a time. */
@@ -1431,10 +1482,145 @@ describe('the quick retries at the start (task 56, D-52)', () => {
         }
     }
 
-    it('waits 1, 2, 4 and 8 s and then 15 s between the attempts', () => {
-        expect([1, 2, 3, 4, 5, 6, 20].map((attempt) => startRetryDelay(attempt))).toEqual([
-            1000, 2000, 4000, 8000, 2000, 2000, 2000,
-        ]);
+    it('waits 3 s between the attempts for 90 s, then 15 s (D-58)', () => {
+        expect([START_RETRY_INTERVAL_MS, START_WINDOW_MS, MISSING_RETRY_INTERVAL_MS]).toEqual([3000, 90_000, 15_000]);
+    });
+
+    /**
+     * Task 83: on a Raspberry Pi 4 with the addon started early, hmipserver answers at about 50-55 s
+     * after the start. The port is checked every 3 s and the `init` goes out as soon as it answers.
+     */
+    it('uses an interface that appears at 52 s by 54 s, and checks every 15 s after 90 s', async () => {
+        vi.useFakeTimers();
+        try {
+            let upAt = 52_000;
+            const probes: number[] = [];
+            const h = harness({
+                connection: {interfaces: ['BidCos-RF', 'HmIP-RF'], autoDetect: false},
+                answers: {'HmIP-RF': () => (h.clock.value - started >= upAt ? '' : refused())},
+                probe: (_host, port) => {
+                    if (port === 2010) {
+                        probes.push(h.clock.value - started);
+                    }
+                    return Promise.resolve(port === 2010 && h.clock.value - started < upAt ? 'refused' : 'open');
+                },
+                startWindowMs: START_WINDOW_MS,
+            });
+            const started = h.clock.value;
+            await h.manager.start();
+            await advance(h, 54_000);
+            expect(h.manager.isConnected('HmIP-RF')).toBe(true);
+            // a TCP connect every 3 s, and the one `init` at the start plus the one that worked
+            expect(probes).toEqual(Array.from({length: 18}, (_, index) => (index + 1) * 3000));
+            expect(h.clients.calls.filter((call) => call.name === 'HmIP-RF' && call.method === 'init')).toHaveLength(2);
+            expect(h.notices.filter((entry) => entry.interfaceName === 'HmIP-RF' && entry.level === 'info')).toEqual([
+                {
+                    level: 'info',
+                    message: 'HmIP-RF: nothing is listening on ccu.lan:2010 yet - waiting for it',
+                    interfaceName: 'HmIP-RF',
+                },
+                {
+                    level: 'info',
+                    message: 'HmIP-RF: answering, 54.0 s after the start (attempt 19)',
+                    interfaceName: 'HmIP-RF',
+                },
+            ]);
+            await h.manager.stop();
+
+            // the same process never coming: every 3 s up to 90 s, then every 15 s
+            upAt = Number.POSITIVE_INFINITY;
+            probes.length = 0;
+            const again = harness({
+                connection: {interfaces: ['HmIP-RF'], autoDetect: false},
+                answers: {'HmIP-RF': () => refused()},
+                probe: (_host, port) => {
+                    probes.push(again.clock.value - since);
+                    return Promise.resolve(port === 2010 ? 'refused' : 'open');
+                },
+                startWindowMs: START_WINDOW_MS,
+            });
+            const since = again.clock.value;
+            await again.manager.start();
+            await advance(again, 150_000);
+            const quick = Array.from({length: 30}, (_, index) => (index + 1) * 3000);
+            expect(probes).toEqual([...quick, 105_000, 120_000, 135_000, 150_000]);
+            expect(again.manager.states()[0]?.absent).toBe(true);
+            expect(again.notices.filter((entry) => entry.level === 'warn')).toHaveLength(1);
+            await again.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('tries an interface that went away every 3 s again, and says how long it was gone', async () => {
+        vi.useFakeTimers();
+        try {
+            let up = true;
+            const probes: number[] = [];
+            const h = harness({
+                connection: {interfaces: ['HmIP-RF'], autoDetect: false},
+                answers: {'HmIP-RF': (method) => (method === 'init' && !up ? refused() : '')},
+                probe: (_host, port) => {
+                    probes.push(h.clock.value);
+                    return Promise.resolve(port === 2010 && !up ? 'unreachable' : 'open');
+                },
+                startWindowMs: START_WINDOW_MS,
+            });
+            await advance(h, 200_000);
+            await h.manager.start();
+            up = false;
+            await h.manager.reconnect('HmIP-RF');
+            const gone = h.clock.value;
+            // an outage, not a start: said once, and marked
+            expect(h.manager.states()[0]?.absent).toBe(true);
+            await advance(h, 9000);
+            expect(probes.map((at) => at - gone)).toEqual([3000, 6000, 9000]);
+            // the port does not answer now: the state says so, without a second notice
+            expect(h.manager.states()[0]?.unreachable).toBe(true);
+            expect(h.notices.filter((entry) => entry.level === 'warn' || entry.level === 'error')).toHaveLength(1);
+            up = true;
+            await advance(h, 3000);
+            expect(h.manager.isConnected('HmIP-RF')).toBe(true);
+            expect(h.notices.at(-1)).toEqual({
+                level: 'info',
+                message: 'HmIP-RF: answering again, 12.0 s after it went missing',
+                interfaceName: 'HmIP-RF',
+            });
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('tries every missing interface at once when another one appears', async () => {
+        vi.useFakeTimers();
+        try {
+            let bidcosUp = false;
+            let hmipUp = false;
+            const h = harness({
+                connection: {interfaces: ['BidCos-RF', 'HmIP-RF'], autoDetect: false},
+                answers: {
+                    'BidCos-RF': () => (bidcosUp ? '' : refused()),
+                    'HmIP-RF': () => (hmipUp ? '' : refused()),
+                },
+                probe: (_host, port) => Promise.resolve((port === 2001 ? bidcosUp : hmipUp) ? 'open' : 'refused'),
+                startWindowMs: START_WINDOW_MS,
+            });
+            await h.manager.start();
+            await advance(h, 4000);
+            // both come up between two attempts; rfd is found first, by the user's reconnect
+            hmipUp = true;
+            bidcosUp = true;
+            await h.manager.reconnect('BidCos-RF');
+            await vi.advanceTimersByTimeAsync(0);
+            expect(h.manager.isConnected('BidCos-RF')).toBe(true);
+            // HmIP-RF did not wait for its timer at +6 s
+            expect(h.manager.isConnected('HmIP-RF')).toBe(true);
+            expect(h.connected).toEqual(['BidCos-RF', 'HmIP-RF']);
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     it('tries a refused interface again within seconds and connects as soon as it answers', async () => {
@@ -1452,15 +1638,15 @@ describe('the quick retries at the start (task 56, D-52)', () => {
                 await advance(h, 1000);
                 initTimes(h, 'HmIP-RF', started, times);
             }
-            // 1, 2, 4, 8 s apart, then every 2 s (D-57): at +1, +3, +7, +15, +17, +19, +21
-            expect(times).toEqual([0, 1000, 3000, 7000, 15_000, 17_000, 19_000, 21_000]);
+            // every 3 s (D-58)
+            expect(times).toEqual([0, 3000, 6000, 9000, 12_000, 15_000, 18_000, 21_000]);
             const waiting = h.manager.states()[1];
             expect(waiting).toMatchObject({name: 'HmIP-RF', connected: false, waiting: true});
             expect(waiting?.absent).toBeUndefined();
             expect(waiting?.unreachable).toBeUndefined();
 
             up = true;
-            await advance(h, 2000);
+            await advance(h, 3000);
             const state = h.manager.states()[1];
             expect(state?.connected).toBe(true);
             expect(state?.waiting).toBeUndefined();
@@ -1474,7 +1660,11 @@ describe('the quick retries at the start (task 56, D-52)', () => {
                     message: 'HmIP-RF: nothing is listening on ccu.lan:2010 yet - waiting for it',
                     interfaceName: 'HmIP-RF',
                 },
-                {level: 'info', message: 'HmIP-RF: answering, attempt 9 at the start', interfaceName: 'HmIP-RF'},
+                {
+                    level: 'info',
+                    message: 'HmIP-RF: answering, 24.0 s after the start (attempt 9)',
+                    interfaceName: 'HmIP-RF',
+                },
             ]);
             expect(notices.filter((entry) => entry.level === 'debug')).toHaveLength(7);
             expect(h.notices.some((entry) => entry.level === 'warn' || entry.level === 'error')).toBe(false);
@@ -1493,7 +1683,7 @@ describe('the quick retries at the start (task 56, D-52)', () => {
                 startWindowMs: START_WINDOW_MS,
             });
             await h.manager.start();
-            await advance(h, 3000);
+            await advance(h, 6000);
             expect(h.clients.calls.filter((call) => call.name === 'HmIP-RF')).toHaveLength(3);
             expect(h.manager.states()[1]?.waiting).toBe(true);
             expect(h.notices.filter((entry) => entry.level === 'error')).toEqual([]);
@@ -1505,11 +1695,16 @@ describe('the quick retries at the start (task 56, D-52)', () => {
         }
     });
 
-    it('says "not present" once and falls back to the back-off when the window is over (task 13)', async () => {
+    it('says "not present" once and checks the port every 15 s when the window is over (task 13, task 83)', async () => {
         vi.useFakeTimers();
         try {
+            let probes = 0;
             const h = harness({
                 answers: {'HmIP-RF': () => refused()},
+                probe: (_host, port) => {
+                    probes += port === 2010 ? 1 : 0;
+                    return Promise.resolve(port === 2010 ? 'refused' : 'open');
+                },
                 startWindowMs: 60_000,
                 initBackoffMs: 15_000,
             });
@@ -1522,10 +1717,12 @@ describe('the quick retries at the start (task 56, D-52)', () => {
             expect(warnings).toHaveLength(1);
             expect(warnings[0]?.message).toContain('treated as not present');
 
-            // no timer any more: only the watchdog tries it, with the back-off
+            // a TCP connect every 15 s, and no call to the process while its port is closed
             const before = h.clients.calls.length;
+            probes = 0;
             await advance(h, 60_000);
             expect(h.clients.calls.length).toBe(before);
+            expect(probes).toBe(4);
         } finally {
             vi.useRealTimers();
         }
@@ -1624,12 +1821,13 @@ describe('the quick retries at the start (task 56, D-52)', () => {
      * but not for one already found not present - BidCos-Wired on a box without a wired gateway got
      * two more minutes of retries every 2 s and one more warning at every session connect.
      */
-    it('sends an interface found not present before the idle period straight back to the back-off', async () => {
+    it('sends an interface found not present before the idle period straight back to the 15 s check', async () => {
         vi.useFakeTimers();
         try {
             const h = harness({
                 connection: {interfaces: ['BidCos-RF', 'BidCos-Wired'], autoDetect: false},
                 answers: {'BidCos-Wired': (method) => (method === 'init' ? refused() : '')},
+                probe: (_host, port) => Promise.resolve(port === 2000 ? 'refused' : 'open'),
                 startWindowMs: 60_000,
                 initBackoffMs: 15_000,
             });
@@ -1679,7 +1877,7 @@ describe('the quick retries at the start (task 56, D-52)', () => {
             await h.manager.subscribe();
             expect(h.manager.states()[1]?.waiting).toBe(true);
             up = true;
-            await advance(h, 1000);
+            await advance(h, 3000);
             expect(h.manager.isConnected('HmIP-RF')).toBe(true);
             expect(h.notices.filter((entry) => entry.level === 'warn')).toEqual([]);
             await h.manager.stop();

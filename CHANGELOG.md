@@ -6,7 +6,7 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
-## [Unreleased]
+## [3.0.0-beta.33] — 2026-09-30
 
 ### Added
 
@@ -21,6 +21,31 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   certificate trusted. What a token may call is decided per call - a refused method names the missing scope and
   never counts as a lost connection. The addon on the system itself keeps its loopback callbacks, a profile without
   a token connects the CCU way, and nothing changes for a CCU or OpenCCU. (task 72)
+
+### Changed
+
+- **The link editor opens with the sender's parameters visible.** The sender's section of a direct link (a weather
+  station's storm thresholds, say) was collapsed behind a `+` until clicked; it is open now whenever the sender has
+  link parameters, and the `−`/`+` still closes it for the link on screen. A sender without link parameters keeps its
+  collapsed empty header. (task 80)
+- **The Create link dialog is as big as its content.** It took nearly the whole window, most of it empty below the
+  four rows, and its name and description fields were as narrow as the channel buttons. It is 720 pixels wide at
+  most now, as high as its rows, grows downwards while a channel list is open (the button you clicked stays where it
+  was) and scrolls inside past the window; name and description take the rest of their row, and the role hints wrap
+  under their button on a narrow screen. (task 81)
+
+### Fixed
+
+- **A link time with a special value can be edited again.** In the easy view of a link, times the profile starts at a
+  given value - a blind's _Duration for status "Up"_ at "unlimited", its up-delay at 0, a KeyMatic's _Lock
+  automatically_ - were shown as a greyed-out number with a greyed-out select beside it. The WebUI draws them as
+  editable choices, and so does the app now: the presets of the CCU (_continuously_ / _unendlich_, _none_ / _keine_,
+  and the time steps) with _Enter value_ for anything else. (B-81)
+- **A special value reads as the CCU names it, and alone.** In the expert view, a parameter on a special value showed
+  its raw id (`NOT_USED`) next to a disabled number and its range. The special is named now ("Unused" / "Nicht
+  benutzt"), the number and range are hidden while it is chosen, and the select's first option - an unlabelled `—`
+  that set the value to the minimum - reads _Enter value_ / _Wert eingeben_: it opens the number, prefilled with the
+  default and focused, and nothing is written until you type. (B-80, B-81)
 
 ## [3.0.0-beta.32] — 2026-09-29
 
@@ -1559,6 +1584,7 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
+[3.0.0-beta.33]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.33
 [3.0.0-beta.32]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.32
 [3.0.0-beta.31]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.31
 [3.0.0-beta.30]: https://github.com/hobbyquaker/homematic-manager/releases/tag/v3.0.0-beta.30

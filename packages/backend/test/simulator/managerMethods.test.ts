@@ -184,10 +184,13 @@ describe.skipIf(!simulatorAvailable)('the interface methods of hm-simulator 1.3.
             {batch: 50},
         );
         await expect
-            .poll(() => {
-                const log = sim.getCallbackLog().slice(start);
-                return log.length >= 11 && log.every((entry) => entry.answeredAt !== null);
-            })
+            .poll(
+                () => {
+                    const log = sim.getCallbackLog().slice(start);
+                    return log.length >= 11 && log.every((entry) => entry.answeredAt !== null);
+                },
+                {timeout: 5000},
+            )
             .toBe(true);
         const log = sim.getCallbackLog().slice(start);
         expect(log.filter((entry) => entry.method === 'newDevices')).toHaveLength(1);
@@ -195,8 +198,10 @@ describe.skipIf(!simulatorAvailable)('the interface methods of hm-simulator 1.3.
         expect(log.every((entry) => entry.error === null)).toBe(true);
         const times = log.map((entry) => (entry.answeredAt ?? Infinity) - entry.sentAt);
         // the ten batches arrive side by side and are answered one after another, so the later ones
-        // carry the earlier ones' time (and the full unit run's load): every one within 250 ms. The
-        // per-answer bound of 50 ms is callbackTiming.test.ts's, which sends one call at a time.
-        expect(Math.max(...times), `answer times in ms: ${times.join(' ')}`).toBeLessThan(250);
+        // carry the earlier ones' time and the machine's load: CI's coverage run took 58 ms for the
+        // first and 326 ms for the last (B-85). The failure this guards against is of another order -
+        // a listener that waits on the UI takes seconds - so every answer has 1 s, the bound
+        // callbackTiming.test.ts uses too; its ordering test is task 73's exact guard.
+        expect(Math.max(...times), `answer times in ms: ${times.join(' ')}`).toBeLessThan(1000);
     });
 });

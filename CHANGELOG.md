@@ -15,6 +15,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   "nothing has changed" and offered no write, so it never reached the device. The preview now lists both ends, each
   parameter marked with its end and one `putParamset` line per end that has something to write; writing sends only
   those, reads each written end back, and the pending-changes set gets the same calls. (B-87)
+- **The write preview is big enough to read.** It opens as wide as the link editor and at least tall enough for ten
+  parameter rows, so a `putParamset` call with one or two parameters stays on one line and a longer list does not
+  start as a strip; on a phone it takes the screen, and a call that is wider scrolls sideways in its own line instead
+  of breaking inside an address. (B-88)
 - **Links within one device are no longer marked as defective.** A switch actuator's own button linked to its relay, or
   a dimmer's channel linked to its virtual channels, carried the red mark in the Links list and counted in the toolbar's
   "defective" number, although the links work: the interface process reports every such link as broken on the sender

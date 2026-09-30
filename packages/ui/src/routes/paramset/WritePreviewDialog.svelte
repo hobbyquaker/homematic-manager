@@ -42,6 +42,12 @@
     const t = stores.i18n.t;
 
     const nothing = $derived(preview === undefined || preview.entries.length === 0);
+
+    /**
+     * B-88: title bar, a call line, the table's head and ten rows, the count line and the buttons -
+     * measured at the default font size, with a little to spare.
+     */
+    const PREVIEW_MIN_HEIGHT = 520;
 </script>
 
 <!--
@@ -49,7 +55,21 @@
     a write the user has not seen. 2.x sent every enabled input of the dialog, always, and the only
     feedback was a modal that said "RPC execution" while it happened.
 -->
-<Dialog bind:open title={t('Preview')} width="640px" testId="write-preview">
+<!--
+    B-88: wide enough that a call with one or two parameters stays on one line (the width of the link
+    editor, which opens it), and at least as tall as ten table rows, so the preview neither wraps its
+    calls nor opens as a strip. The window bounds both: on a phone the dialog takes the screen, the
+    body is still the one vertical scroller (D-34), and a call scrolls sideways in its own line
+    instead of breaking inside an address.
+-->
+<Dialog
+    bind:open
+    title={t('Preview')}
+    width="960px"
+    minWidth={360}
+    minHeight={PREVIEW_MIN_HEIGHT}
+    testId="write-preview"
+>
     {#if preview}
         <!--
             The exact call, with the exact struct: task 6 found that both interface processes take
@@ -191,11 +211,15 @@
 </Dialog>
 
 <style>
+    /* B-88: one line per call; one that is wider than the dialog (a phone, a long struct) scrolls
+       sideways in its own line rather than breaking in the middle of an address */
     .hmm-preview-call {
         margin-top: 0;
         font-family: var(--hmm-font-mono);
         color: var(--hmm-fg-muted);
-        word-break: break-all;
+        white-space: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
     }
 
     .hmm-preview-table {

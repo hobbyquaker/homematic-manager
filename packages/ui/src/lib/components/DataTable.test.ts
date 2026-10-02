@@ -1839,3 +1839,128 @@ describe('the copy button (task 47)', () => {
         },
     );
 });
+
+describe('a column with an activation of its own (task 85)', () => {
+    function cellOf(row: HTMLElement, key: string): HTMLElement {
+        const cell = row.querySelector<HTMLElement>(`[data-column-key="${key}"]`);
+        expect(cell).not.toBeNull();
+        return cell!;
+    }
+
+    it('takes the double click on its cell, and leaves the other cells to the row and the name to the rename', async () => {
+        const onactivate = vi.fn();
+        const onrename = vi.fn();
+        const onType = vi.fn();
+        const withAction: DataTableColumn<Row>[] = columns.map((column) =>
+            column.key === 'type' ? {...column, onactivate: onType} : column,
+        );
+        render(DataTable, {props: {...base, columns: withAction, rows: makeRows(3), onactivate, onrename}});
+
+        await fireEvent.dblClick(cellOf(rowsInDom()[1]!, 'type'));
+        expect(onType).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00001'}));
+        expect(onactivate).not.toHaveBeenCalled();
+        expect(onrename).not.toHaveBeenCalled();
+
+        await fireEvent.dblClick(cellOf(rowsInDom()[2]!, 'address'));
+        expect(onactivate).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00002'}));
+        expect(onType).toHaveBeenCalledOnce();
+
+        await fireEvent.dblClick(cellOf(rowsInDom()[0]!, 'name'));
+        expect(onrename).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00000'}));
+        expect(onType).toHaveBeenCalledOnce();
+        expect(onactivate).toHaveBeenCalledOnce();
+    });
+
+    it('asks the sub-columns for a channel row, and lets go of the word the double click selected', async () => {
+        const onactivate = vi.fn();
+        const onDeviceType = vi.fn();
+        const onChannelType = vi.fn();
+        const withAction: DataTableColumn<Row>[] = columns.map((column) =>
+            column.key === 'type' ? {...column, onactivate: onDeviceType} : column,
+        );
+        const subColumns: DataTableColumn<Row>[] = [
+            {key: 'address', label: 'ADDRESS', width: 120, mono: true},
+            {key: 'type', label: 'CHANNEL TYPE', onactivate: onChannelType},
+        ];
+        render(DataTable, {
+            props: {
+                ...base,
+                columns: withAction,
+                rows: makeRows(1),
+                subRows: (row: Row) => row.channels ?? [],
+                subColumns,
+                onactivate,
+            },
+        });
+        await fireEvent.click(screen.getByRole('button', {name: 'Expand row'}));
+
+        const channel = rowsInDom()[2]!;
+        expect(channel.dataset['rowId']).toBe('ADDR00000:1');
+        const typeCell = cellOf(channel, 'type');
+        window.getSelection()?.selectAllChildren(typeCell);
+        expect(window.getSelection()?.toString()).not.toBe('');
+        await fireEvent.dblClick(typeCell);
+        expect(onChannelType).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00000:1'}));
+        expect(onDeviceType).not.toHaveBeenCalled();
+        expect(window.getSelection()?.toString()).toBe('');
+
+        // the sub-grid's address column has no action of its own: the row activates, as before
+        await fireEvent.dblClick(cellOf(channel, 'address'));
+        expect(onactivate).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00000:1'}));
+        expect(onChannelType).toHaveBeenCalledOnce();
+    });
+
+    it('leaves a double click from a control inside the cell with the control', async () => {
+        const onactivate = vi.fn();
+        const onType = vi.fn();
+        const withAction: DataTableColumn<Row>[] = columns.map((column) =>
+            column.key === 'type' ? {...column, onactivate: onType} : column,
+        );
+        const cell = createRawSnippet((row: () => Row, column: () => DataTableColumn<Row>) => ({
+            render: () =>
+                column().key === 'type'
+                    ? `<span><span>${row().type}</span><button type="button">go</button></span>`
+                    : `<span>${cellText(row(), column())}</span>`,
+        }));
+        render(DataTable, {props: {...base, columns: withAction, rows: makeRows(2), cell, onactivate}});
+
+        const typeCell = cellOf(rowsInDom()[1]!, 'type');
+        await fireEvent.dblClick(within(typeCell).getByRole('button', {name: 'go'}));
+        expect(onType).not.toHaveBeenCalled();
+        // ... and the row activates, as a double click from a control always did; a control that wants
+        // neither stops the event itself, as the copy button does
+        expect(onactivate).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00001'}));
+
+        await fireEvent.dblClick(within(typeCell).getByText('HM-LC-Dim1'));
+        expect(onType).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00001'}));
+    });
+    it('takes the double click into an empty cell, which has no height of its own and leaves the click on the row', async () => {
+        const onactivate = vi.fn();
+        const onType = vi.fn();
+        const withAction: DataTableColumn<Row>[] = columns.map((column) =>
+            column.key === 'type' ? {...column, onactivate: onType} : column,
+        );
+        // the second row has nothing in its type cell
+        const rows = makeRows(2).map((row, index) => (index === 1 ? {...row, type: ''} : row));
+        render(DataTable, {props: {...base, columns: withAction, rows, onactivate}});
+
+        const row = rowsInDom()[1]!;
+        const empty = cellOf(row, 'type');
+        const box = empty.getBoundingClientRect();
+        expect(box.height).toBe(0);
+        const rowBox = row.getBoundingClientRect();
+        // the pointer is in the type column's track, vertically in the middle of the row: the row is the target
+        const clientX = box.left + box.width / 2;
+        const clientY = rowBox.top + rowBox.height / 2;
+        expect(document.elementFromPoint(clientX, clientY)).toBe(row);
+
+        await fireEvent.dblClick(row, {clientX, clientY});
+        expect(onType).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00001'}));
+        expect(onactivate).not.toHaveBeenCalled();
+
+        // the same double click left of every cell, in the expander's place, is the row's
+        await fireEvent.dblClick(row, {clientX: rowBox.left + 1, clientY});
+        expect(onactivate).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({address: 'ADDR00001'}));
+        expect(onType).toHaveBeenCalledOnce();
+    });
+});

@@ -437,9 +437,22 @@
         // Task 47: both carry the copy button, the full name and the address whatever the cell shows
         {key: 'name', label: t('Name'), width: 170, copy: 'name', value: (device) => nameOfRow(device.ADDRESS)},
         {key: 'ADDRESS', label: 'ADDRESS', width: 150, mono: true, copy: 'address'},
-        // Task 25: the taxonomy of the store, as the arrays of names ReGa's rooms always were
-        {key: 'rooms', label: t('Rooms'), width: 120, value: (device) => taxonomyText(device, 'room')},
-        {key: 'functions', label: t('Functions'), width: 110, value: (device) => taxonomyText(device, 'function')},
+        // Task 25: the taxonomy of the store, as the arrays of names ReGa's rooms always were;
+        // task 85: a double click on the cell opens its dialog for the row
+        {
+            key: 'rooms',
+            label: t('Rooms'),
+            width: 120,
+            value: (device) => taxonomyText(device, 'room'),
+            onactivate: (device) => openAssignFor('room', device.ADDRESS),
+        },
+        {
+            key: 'functions',
+            label: t('Functions'),
+            width: 110,
+            value: (device) => taxonomyText(device, 'function'),
+            onactivate: (device) => openAssignFor('function', device.ADDRESS),
+        },
         // Task 58: which smoke group a detector is in, and how many detectors a group has. Only
         // where the interface has a smoke group at all - a BidCos team or an HmIP GROUP_n in use.
         {
@@ -526,8 +539,20 @@
     const subColumns = $derived<DataTableColumn<DeviceDescription>[]>([
         {key: 'name', label: t('Name'), width: 170, copy: 'name', value: (channel) => stores.nameOf(channel.ADDRESS)},
         {key: 'ADDRESS', label: 'ADDRESS', width: 150, mono: true, copy: 'address'},
-        {key: 'rooms', label: t('Rooms'), width: 120, value: (channel) => taxonomyText(channel, 'room')},
-        {key: 'functions', label: t('Functions'), width: 110, value: (channel) => taxonomyText(channel, 'function')},
+        {
+            key: 'rooms',
+            label: t('Rooms'),
+            width: 120,
+            value: (channel) => taxonomyText(channel, 'room'),
+            onactivate: (channel) => openAssignFor('room', channel.ADDRESS),
+        },
+        {
+            key: 'functions',
+            label: t('Functions'),
+            width: 110,
+            value: (channel) => taxonomyText(channel, 'function'),
+            onactivate: (channel) => openAssignFor('function', channel.ADDRESS),
+        },
         {
             key: 'smokeGroup',
             label: t('Smoke group'),
@@ -656,6 +681,21 @@
         if (assignRefs.length === 0) {
             return;
         }
+        assignOpen = true;
+    }
+
+    /**
+     * Task 85: a double click on a Rooms or Functions cell. The dialog is for the row under the
+     * pointer alone - the two clicks in front of it have reduced the selection to that row anyway,
+     * unless a modifier was held, and one row is what the double click points at. Nothing while the
+     * store takes no writes, as the menu entries are disabled then.
+     */
+    function openAssignFor(enumId: TaxonomyId, address: string): void {
+        if (!taxonomy.writable) {
+            return;
+        }
+        assignEnum = enumId;
+        assignRefs = [assignTargetOf(address)];
         assignOpen = true;
     }
 

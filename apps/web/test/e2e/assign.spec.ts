@@ -307,3 +307,72 @@ test('filters by keyboard without saving, cancels with Escape, and makes a new r
         await stack.close();
     }
 });
+
+test('a double click on a Rooms or Functions cell opens the dialog for that row (task 85)', async ({page}) => {
+    const stack = await startWithRooms();
+    try {
+        await page.goto(`${stack.host.url}#/BidCos-RF/devices`);
+        const table = page.getByTestId('devices-table');
+        const device = table.locator(`[data-row-id="${BIDCOS_SWITCH}"]`);
+        await expect(device).toContainText('Steckdose');
+        await device.getByRole('button', {name: 'Expand row'}).click();
+        const channel = table.locator(`[data-row-id="${BIDCOS_SWITCH}:1"]`);
+        await expect(channel).toContainText(ROOM_NAMES[1]!);
+        const dialog = page.getByTestId('assign-dialog');
+
+        // Rooms: the room dialog for the channel, the room it is in checked, nothing else selected
+        await channel.locator('[data-column-key="rooms"]').dblclick();
+        await expect(dialog).toHaveAttribute('open', '');
+        await expect(page.getByTestId('assign-count')).toHaveText('One row selected');
+        await expect(dialog.getByTestId('assign-row')).toHaveCount(24);
+        await expect(assignRow(page, 'room/r02')).toHaveAttribute('data-state', 'on');
+        // the word the double click selected in the grid is let go again
+        expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).toBe('');
+        await page.keyboard.press('Escape');
+        await expect(dialog).not.toHaveAttribute('open');
+        expect(await stack.memberships(SWITCH_CHANNEL)).toEqual(['function/licht', 'room/r02']);
+
+        // Functions: the other dialog, and what it saves is the channel's
+        await channel.locator('[data-column-key="functions"]').dblclick();
+        await expect(dialog).toHaveAttribute('open', '');
+        await expect(dialog.getByTestId('assign-row')).toHaveCount(2);
+        await expect(assignRow(page, 'function/licht')).toHaveAttribute('data-state', 'on');
+        await assignRow(page, 'function/heizung').getByTestId('assign-check').click();
+        await dialog.getByTestId('assign-apply').click();
+        await expect(dialog).not.toHaveAttribute('open');
+        await expect(channel).toContainText('Heizung');
+        await expect
+            .poll(() => stack.memberships(SWITCH_CHANNEL))
+            .toEqual(['function/heizung', 'function/licht', 'room/r02']);
+
+        // the device row's Rooms cell: the device's dialog, one row
+        await device.locator('[data-column-key="rooms"]').dblclick();
+        await expect(dialog).toHaveAttribute('open', '');
+        await expect(page.getByTestId('assign-count')).toHaveText('One row selected');
+        await expect(assignRow(page, 'room/r02')).toHaveAttribute('data-state', 'on');
+        await page.keyboard.press('Escape');
+        await expect(dialog).not.toHaveAttribute('open');
+
+        // the maintenance channel has no rooms: its Rooms cell is empty and has no height of its own, so a
+        // real pointer lands on the row - the column under the pointer still opens the dialog (seen in the lab)
+        const maintenance = table.locator(`[data-row-id="${BIDCOS_SWITCH}:0"]`);
+        const emptyCell = (await maintenance.locator('[data-column-key="rooms"]').boundingBox())!;
+        const rowBox = (await maintenance.boundingBox())!;
+        expect(emptyCell.height).toBe(0);
+        await page.mouse.dblclick(emptyCell.x + emptyCell.width / 2, rowBox.y + rowBox.height / 2);
+        await expect(dialog).toHaveAttribute('open', '');
+        await expect(page.getByTestId('assign-count')).toHaveText('One row selected');
+        await expect(dialog.getByTestId('assign-row')).toHaveCount(24);
+        await expect(assignRow(page, 'room/r02')).toHaveAttribute('data-state', 'off');
+        await page.keyboard.press('Escape');
+        await expect(dialog).not.toHaveAttribute('open');
+
+        // another column: as before - the row is selected, neither this dialog nor the rename one opens
+        await channel.locator('[data-column-key="ADDRESS"]').dblclick();
+        await expect(channel).toHaveAttribute('aria-selected', 'true');
+        await expect(dialog).not.toHaveAttribute('open');
+        await expect(page.getByTestId('rename-dialog')).not.toHaveAttribute('open');
+    } finally {
+        await stack.close();
+    }
+});

@@ -341,6 +341,70 @@ describe('assigning the selection', () => {
         await waitFor(() => expect(taxonomyCells('MEQ0123456').rooms).toBe(''));
     });
 
+    /*
+     * Task 85: a double click on a Rooms or Functions cell opens that dialog for the row.
+     */
+
+    function taxonomyCell(address: string, key: 'rooms' | 'functions' | 'ADDRESS'): HTMLElement {
+        const cell = rowOf(address).querySelector<HTMLElement>(`[data-column-key="${key}"]`);
+        expect(cell, `no ${key} cell for ${address}`).not.toBeNull();
+        return cell!;
+    }
+
+    it('opens the room dialog on a double click on a Rooms cell, the function dialog on a Functions cell', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        // a device row: its dialog, with the room its channel is in
+        await fireEvent.dblClick(taxonomyCell('MEQ0123456', 'rooms'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(true));
+        expect(screen.getByTestId('assign-count').textContent).toBe('Eine Zeile ausgewählt');
+        expect(rowState('room/eg/kueche')).toBe('on');
+        expect(assignDialog().querySelector('[data-path="function/licht"]')).toBeNull();
+        await fireEvent.click(within(assignDialog()).getByText('Abbrechen'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+
+        // a channel's Functions cell: the other taxonomy, and the save is the channel's
+        await expand('MEQ0123456');
+        await fireEvent.dblClick(taxonomyCell('MEQ0123456:1', 'functions'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(true));
+        expect(screen.getByTestId('assign-count').textContent).toBe('Eine Zeile ausgewählt');
+        expect(rowState('function/licht')).toBe('on');
+        expect(assignDialog().querySelector('[data-path="room/eg/kueche"]')).toBeNull();
+        await fireEvent.click(checkOf('function/licht'));
+        transport.reset();
+        await fireEvent.click(screen.getByTestId('assign-apply'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+        expect(assignCalls(transport)).toEqual([[['BidCos-RF.MEQ0123456:1'], 'function/licht', false]]);
+    });
+
+    it('is for the double-clicked row alone, and opens nothing on another cell or while the store is read-only', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await select('KEQ0345678');
+        await select('LEQ0456789', true);
+        // the two clicks of a real double click reduce the selection to the row; a synthetic one does not
+        await fireEvent.dblClick(taxonomyCell('KEQ0345678', 'rooms'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(true));
+        expect(screen.getByTestId('assign-count').textContent).toBe('Eine Zeile ausgewählt');
+        await fireEvent.click(within(assignDialog()).getByText('Abbrechen'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+
+        // the ADDRESS cell: as before, neither this dialog nor the rename one
+        await fireEvent.dblClick(taxonomyCell('KEQ0345678', 'ADDRESS'));
+        expect(assignDialog().hasAttribute('open')).toBe(false);
+        expect(screen.getByTestId('rename-dialog').hasAttribute('open')).toBe(false);
+
+        // a store that takes no writes: the menu entry is disabled, the double click opens nothing
+        transport.emit('meta.changed', {
+            provider: 'occulite',
+            reachable: true,
+            writable: false,
+            revision: 1,
+            objects: 0,
+        });
+        await waitFor(() => expect(screen.getByTestId<HTMLButtonElement>('devices-assign-room').disabled).toBe(true));
+        await fireEvent.dblClick(taxonomyCell('KEQ0345678', 'rooms'));
+        expect(assignDialog().hasAttribute('open')).toBe(false);
+    });
+
     it('filters a long list; Enter in the filter neither saves nor toggles, Enter on a box saves', async () => {
         const {stores} = await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const names = ['Arbeitszimmer', 'Bad', 'Büro', 'Dachboden', 'Esszimmer', 'Flur', 'Garage', 'Gäste-WC'];

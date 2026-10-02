@@ -6,6 +6,15 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Added
+
+- **A double click on a Rooms or Functions cell opens its dialog.** In the device list, a double click on the Rooms cell
+  of a device or a channel opens "Assign to room" for that row, one on the Functions cell "Assign to function" - the
+  dialogs the toolbar buttons and the row's menu open, here for the row under the pointer alone. Nothing happens while
+  the store takes no writes, as with the menu entries. (task 85)
+
 ## [3.0.1] — 2026-10-01
 
 ### Fixed

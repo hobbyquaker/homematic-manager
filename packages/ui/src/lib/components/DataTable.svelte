@@ -422,18 +422,54 @@
      * name of a row that cannot be renamed - it is the row's activation, as before. The two clicks
      * in front of it have selected the row the way a single click does, so the dialog acts on exactly
      * the row that is highlighted. A sub-grid's label row, where the resize handles are, is neither.
+     *
+     * Task 85: a column with an `onactivate` of its own - Rooms, Functions - takes the double click
+     * on its cell the same way, before the row's activation; a sub-row's cell asks the sub-columns.
      */
     function onRowDblClick(row: FlatRow<T>, event: MouseEvent): void {
         if (row.kind !== 'row') {
             return;
         }
-        const cell = event.target instanceof Element ? event.target.closest<HTMLElement>('[data-column-key]') : null;
-        if (cell?.dataset['columnKey'] === renameColumn && !fromControl(event) && renamable(row)) {
+        const key = cellAt(event)?.dataset['columnKey'];
+        if (key === renameColumn && !fromControl(event) && renamable(row)) {
             window.getSelection()?.removeAllRanges();
             onrename?.(row.row);
             return;
         }
+        const column = (row.depth > 0 ? visibleSubColumns : visibleColumns).find((entry) => entry.key === key);
+        if (column?.onactivate !== undefined && !fromControl(event)) {
+            window.getSelection()?.removeAllRanges();
+            column.onactivate(row.row);
+            return;
+        }
         onactivate?.(row.row);
+    }
+
+    /**
+     * The cell a pointer event is in. An empty cell has no height of its own - the row's grid centres
+     * every cell on its content - so a double click into the Rooms column of a device without rooms
+     * lands on the row, not on a cell (seen on a lab system, task 85). The column is then the one
+     * whose track spans the pointer's x.
+     */
+    function cellAt(event: MouseEvent): HTMLElement | null {
+        if (!(event.target instanceof Element)) {
+            return null;
+        }
+        const direct = event.target.closest<HTMLElement>('[data-column-key]');
+        if (direct !== null) {
+            return direct;
+        }
+        const rowElement = event.target.closest<HTMLElement>('[data-row-id]');
+        if (rowElement === null) {
+            return null;
+        }
+        for (const cell of rowElement.querySelectorAll<HTMLElement>('[data-column-key]')) {
+            const box = cell.getBoundingClientRect();
+            if (event.clientX >= box.left && event.clientX < box.right) {
+                return cell;
+            }
+        }
+        return null;
     }
 
     /**

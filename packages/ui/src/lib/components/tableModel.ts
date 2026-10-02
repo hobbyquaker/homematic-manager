@@ -50,6 +50,12 @@ export interface DataTableColumn<T> {
      * label: "Copy name" or "Copy address". Only on a real row with a value.
      */
     readonly copy?: 'name' | 'address';
+    /**
+     * Task 85: what a double click on a cell of this column does instead of activating the row -
+     * the Rooms and Functions cells open their assignment dialog. Only on a real row, and never
+     * from a control inside the cell; the rename of the name column (task 46) comes first.
+     */
+    readonly onactivate?: (row: T) => void;
     /** Reads the value; defaults to `row[key]`. */
     readonly value?: (row: T) => CellValue;
 }

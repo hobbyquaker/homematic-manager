@@ -136,14 +136,14 @@ test('shows all 24 rooms at once in a 1080 px window, without radios, and saves 
 
         const dialog = page.getByTestId('assign-dialog');
         await expect(dialog).toHaveAttribute('open', '');
-        const rows = dialog.getByTestId('assign-row');
+        const rows = dialog.getByTestId('assign-side-room').getByTestId('assign-row');
         await expect(rows).toHaveCount(24);
         await expect(dialog.locator('input[type="radio"]')).toHaveCount(0);
         await expect(dialog.locator('select')).toHaveCount(0);
-        await expect(dialog.getByTestId('assign-check')).toHaveCount(24);
+        await expect(dialog.getByTestId('assign-side-room').getByTestId('assign-check')).toHaveCount(24);
 
         // nothing scrolls: the list is as tall as its rows, and every row and both buttons are in the window
-        const list = dialog.getByTestId('assign-list');
+        const list = dialog.getByTestId('assign-list-room');
         const scroll = await list.evaluate((element) => ({
             scrollHeight: element.scrollHeight,
             clientHeight: element.clientHeight,
@@ -161,7 +161,7 @@ test('shows all 24 rooms at once in a 1080 px window, without radios, and saves 
         const longRow = await assignRow(page, 'room/r24').boundingBox();
         expect(longRow!.x + longRow!.width).toBeLessThanOrEqual(box!.x + box!.width);
         // more than ten rooms: the filter is there
-        await expect(dialog.getByTestId('assign-filter')).toBeVisible();
+        await expect(dialog.getByTestId('assign-filter-room')).toBeVisible();
 
         await expect(assignRow(page, 'room/r02')).toHaveAttribute('data-state', 'on');
         await expect(assignRow(page, 'room/r02').getByTestId('assign-check')).toBeChecked();
@@ -268,9 +268,9 @@ test('filters by keyboard without saving, cancels with Escape, and makes a new r
         await expect(dialog).toHaveAttribute('open', '');
 
         // accent-insensitive, and Enter in the field hands the focus to the box instead of saving
-        await dialog.getByTestId('assign-filter').fill('kuche');
-        await expect(dialog.getByTestId('assign-row')).toHaveCount(1);
-        await dialog.getByTestId('assign-filter').press('Enter');
+        await dialog.getByTestId('assign-filter-room').fill('kuche');
+        await expect(dialog.getByTestId('assign-side-room').getByTestId('assign-row')).toHaveCount(1);
+        await dialog.getByTestId('assign-filter-room').press('Enter');
         await expect(dialog).toHaveAttribute('open', '');
         const kitchen = assignRow(page, 'room/r15').getByTestId('assign-check');
         await expect(kitchen).toBeFocused();
@@ -285,11 +285,11 @@ test('filters by keyboard without saving, cancels with Escape, and makes a new r
         // opened again: the filter is empty, the kitchen unchecked
         await page.getByTestId('devices-assign-room').click();
         await expect(dialog).toHaveAttribute('open', '');
-        await expect(dialog.getByTestId('assign-filter')).toHaveValue('');
+        await expect(dialog.getByTestId('assign-filter-room')).toHaveValue('');
         await expect(assignRow(page, 'room/r15')).toHaveAttribute('data-state', 'off');
 
-        await dialog.getByTestId('assign-new').click();
-        await expect(dialog.getByTestId('assign-new-name')).toBeFocused();
+        await dialog.getByTestId('assign-new-room').click();
+        await expect(dialog.getByTestId('assign-new-name-room')).toBeFocused();
         await page.keyboard.type('Weinkeller');
         await page.keyboard.press('Enter');
         const cellar = dialog.locator('[data-testid="assign-row"]', {hasText: 'Weinkeller'});
@@ -324,7 +324,7 @@ test('a double click on a Rooms or Functions cell opens the dialog for that row 
         await channel.locator('[data-column-key="rooms"]').dblclick();
         await expect(dialog).toHaveAttribute('open', '');
         await expect(page.getByTestId('assign-count')).toHaveText('One row selected');
-        await expect(dialog.getByTestId('assign-row')).toHaveCount(24);
+        await expect(dialog.getByTestId('assign-side-room').getByTestId('assign-row')).toHaveCount(24);
         await expect(assignRow(page, 'room/r02')).toHaveAttribute('data-state', 'on');
         // the word the double click selected in the grid is let go again
         expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).toBe('');
@@ -335,7 +335,7 @@ test('a double click on a Rooms or Functions cell opens the dialog for that row 
         // Functions: the other dialog, and what it saves is the channel's
         await channel.locator('[data-column-key="functions"]').dblclick();
         await expect(dialog).toHaveAttribute('open', '');
-        await expect(dialog.getByTestId('assign-row')).toHaveCount(2);
+        await expect(dialog.getByTestId('assign-side-function').getByTestId('assign-row')).toHaveCount(2);
         await expect(assignRow(page, 'function/licht')).toHaveAttribute('data-state', 'on');
         await assignRow(page, 'function/heizung').getByTestId('assign-check').click();
         await dialog.getByTestId('assign-apply').click();
@@ -362,7 +362,7 @@ test('a double click on a Rooms or Functions cell opens the dialog for that row 
         await page.mouse.dblclick(emptyCell.x + emptyCell.width / 2, rowBox.y + rowBox.height / 2);
         await expect(dialog).toHaveAttribute('open', '');
         await expect(page.getByTestId('assign-count')).toHaveText('One row selected');
-        await expect(dialog.getByTestId('assign-row')).toHaveCount(24);
+        await expect(dialog.getByTestId('assign-side-room').getByTestId('assign-row')).toHaveCount(24);
         await expect(assignRow(page, 'room/r02')).toHaveAttribute('data-state', 'off');
         await page.keyboard.press('Escape');
         await expect(dialog).not.toHaveAttribute('open');
@@ -372,6 +372,78 @@ test('a double click on a Rooms or Functions cell opens the dialog for that row 
         await expect(channel).toHaveAttribute('aria-selected', 'true');
         await expect(dialog).not.toHaveAttribute('open');
         await expect(page.getByTestId('rename-dialog')).not.toHaveAttribute('open');
+    } finally {
+        await stack.close();
+    }
+});
+
+test('one dialog for the name, rooms and functions: all three with one Apply, the halves stacked on a phone (task 86)', async ({
+    page,
+}) => {
+    const stack = await startWithRooms();
+    try {
+        await page.goto(`${stack.host.url}#/BidCos-RF/devices`);
+        const table = page.getByTestId('devices-table');
+        const device = table.locator(`[data-row-id="${BIDCOS_SWITCH}"]`);
+        await expect(device).toContainText('Steckdose');
+        await device.getByRole('button', {name: 'Expand row'}).click();
+        const channel = table.locator(`[data-row-id="${BIDCOS_SWITCH}:1"]`);
+        await channel.locator('[data-column-key="functions"]').dblclick();
+        const dialog = page.getByTestId('assign-dialog');
+        await expect(dialog).toHaveAttribute('open', '');
+
+        // both halves, rooms left and functions right, and the double-clicked side has the focus
+        const roomSide = dialog.getByTestId('assign-side-room');
+        const functionSide = dialog.getByTestId('assign-side-function');
+        await expect(roomSide.getByTestId('assign-row')).toHaveCount(24);
+        await expect(functionSide.getByTestId('assign-row')).toHaveCount(2);
+        const roomBox = (await roomSide.boundingBox())!;
+        const functionBox = (await functionSide.boundingBox())!;
+        expect(functionBox.x).toBeGreaterThanOrEqual(roomBox.x + roomBox.width);
+        expect(Math.round(functionBox.y)).toBe(Math.round(roomBox.y));
+        await expect(functionSide.getByTestId('assign-check').first()).toBeFocused();
+
+        // the name, a room and a function in one go
+        await expect(dialog.getByTestId('assign-address')).toHaveText(`${BIDCOS_SWITCH}:1`);
+        await expect(page.getByTestId('assign-name')).toHaveValue('Steckdose:1');
+        await page.getByTestId('assign-name').fill('Kitchen socket');
+        await assignRow(page, 'room/r07').getByTestId('assign-check').click();
+        await assignRow(page, 'function/heizung').getByTestId('assign-check').click();
+        await dialog.getByTestId('assign-apply').click();
+        await expect(dialog).not.toHaveAttribute('open');
+        await expect(channel).toContainText('Kitchen socket');
+        await expect(channel).toContainText(ROOM_NAMES[6]!);
+        await expect(channel).toContainText('Heizung');
+        await expect
+            .poll(() => stack.memberships(SWITCH_CHANNEL))
+            .toEqual(['function/heizung', 'function/licht', 'room/r02', 'room/r07']);
+
+        // a phone: the halves stack, rooms above functions, the dialog inside the window, Apply on the screen
+        await expect(channel).toHaveAttribute('aria-selected', 'true');
+        await page.getByTestId('devices-assign-room').click();
+        await expect(dialog).toHaveAttribute('open', '');
+        // the room side was asked for; with 24 rooms it has a filter, and that is where the focus goes
+        await expect(roomSide.getByTestId('assign-filter-room')).toBeFocused();
+        await page.setViewportSize({width: 360, height: 640});
+        await expect
+            .poll(async () => {
+                const room = await roomSide.boundingBox();
+                const func = await functionSide.boundingBox();
+                return room !== null && func !== null && func.y >= room.y + room.height - 1 && func.x < room.x + 1;
+            })
+            .toBe(true);
+        const box = (await dialog.boundingBox())!;
+        expect(box.x).toBeGreaterThanOrEqual(0);
+        expect(box.x + box.width).toBeLessThanOrEqual(360);
+        await expect(dialog.getByTestId('assign-apply')).toBeInViewport();
+        await page.keyboard.press('Escape');
+        await expect(dialog).not.toHaveAttribute('open');
+        expect(await stack.memberships(SWITCH_CHANNEL)).toEqual([
+            'function/heizung',
+            'function/licht',
+            'room/r02',
+            'room/r07',
+        ]);
     } finally {
         await stack.close();
     }

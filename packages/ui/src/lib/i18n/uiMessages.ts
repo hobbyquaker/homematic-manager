@@ -1000,6 +1000,8 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Name of the new room': {de: 'Name des neuen Raums', en: 'Name of the new room'},
     'Name of the new function': {de: 'Name des neuen Gewerks', en: 'Name of the new function'},
     'Not saved: {message}': {de: 'Nicht gespeichert: {message}', en: 'Not saved: {message}'},
+    // Task 86: the name field of the one dialog for rooms, functions and the name
+    'The name was not saved': {de: 'Der Name wurde nicht gespeichert', en: 'The name was not saved'},
     '{count} changes were not saved': {
         de: {
             one: 'Eine Änderung wurde nicht gespeichert. Sie ist markiert; Übernehmen versucht sie erneut.',

@@ -241,7 +241,11 @@ describe('assigning the selection', () => {
         expect(dialog.querySelector('select')).toBeNull();
         expect(screen.getByTestId('assign-count').textContent).toBe('Eine Zeile ausgewählt');
         // every node of the tree in tree order, the floors too; eight of them need no filter
-        expect(screen.getAllByTestId('assign-row').map((row) => [row.dataset['path'], row.dataset['state']])).toEqual([
+        expect(
+            within(screen.getByTestId('assign-side-room'))
+                .getAllByTestId('assign-row')
+                .map((row) => [row.dataset['path'], row.dataset['state']]),
+        ).toEqual([
             ['room/eg', 'off'],
             ['room/eg/kueche', 'on'],
             ['room/eg/wohnzimmer', 'off'],
@@ -251,7 +255,7 @@ describe('assigning the selection', () => {
             ['room/og/schlafzimmer', 'off'],
             ['room/aussen', 'off'],
         ]);
-        expect(screen.queryByTestId('assign-filter')).toBeNull();
+        expect(screen.queryByTestId('assign-filter-room')).toBeNull();
         expect(checkOf('room/eg/kueche').checked).toBe(true);
         expect(checkOf('room/aussen').checked).toBe(false);
 
@@ -358,7 +362,9 @@ describe('assigning the selection', () => {
         await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(true));
         expect(screen.getByTestId('assign-count').textContent).toBe('Eine Zeile ausgewählt');
         expect(rowState('room/eg/kueche')).toBe('on');
-        expect(assignDialog().querySelector('[data-path="function/licht"]')).toBeNull();
+        // task 86: both sides are there; the one that was double-clicked has the focus
+        expect(rowState('function/licht')).toBe('on');
+        await waitFor(() => expect(document.activeElement?.closest('[data-testid="assign-side-room"]')).not.toBeNull());
         await fireEvent.click(within(assignDialog()).getByText('Abbrechen'));
         await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
 
@@ -368,7 +374,9 @@ describe('assigning the selection', () => {
         await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(true));
         expect(screen.getByTestId('assign-count').textContent).toBe('Eine Zeile ausgewählt');
         expect(rowState('function/licht')).toBe('on');
-        expect(assignDialog().querySelector('[data-path="room/eg/kueche"]')).toBeNull();
+        await waitFor(() =>
+            expect(document.activeElement?.closest('[data-testid="assign-side-function"]')).not.toBeNull(),
+        );
         await fireEvent.click(checkOf('function/licht'));
         transport.reset();
         await fireEvent.click(screen.getByTestId('assign-apply'));
@@ -405,6 +413,139 @@ describe('assigning the selection', () => {
         expect(assignDialog().hasAttribute('open')).toBe(false);
     });
 
+    /*
+     * Task 86: one dialog for rooms, functions and the name.
+     */
+
+    it('shows rooms and functions side by side and saves both, and the name, with one Apply', async () => {
+        const {stores} = await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await expand('MEQ0123456');
+        await select('MEQ0123456:1');
+        await openAssign('devices-assign-room');
+        expect(rowState('room/eg/kueche')).toBe('on');
+        expect(rowState('function/licht')).toBe('on');
+        // the two halves sit next to each other at this width, rooms on the left
+        const room = screen.getByTestId('assign-side-room').getBoundingClientRect();
+        const func = screen.getByTestId('assign-side-function').getBoundingClientRect();
+        expect(func.left).toBeGreaterThanOrEqual(room.right);
+        expect(Math.round(func.top)).toBe(Math.round(room.top));
+        expect(screen.getByTestId('assign-address').textContent).toBe('MEQ0123456:1');
+        // a channel: the name field without the device's channel box
+        const nameField = screen.getByTestId<HTMLInputElement>('assign-name');
+        expect(nameField.value).toBe(stores.names.name('MEQ0123456:1'));
+        expect(screen.queryByTestId('assign-rename-children')).toBeNull();
+
+        await fireEvent.input(nameField, {target: {value: 'Küche Steckdose'}});
+        await fireEvent.click(checkOf('room/aussen'));
+        await fireEvent.click(checkOf('function/licht'));
+        transport.reset();
+        await fireEvent.click(screen.getByTestId('assign-apply'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+        expect(transport.lastCall('names.set')).toEqual([[{address: 'MEQ0123456:1', name: 'Küche Steckdose'}]]);
+        expect(assignCalls(transport)).toEqual([
+            [['BidCos-RF.MEQ0123456:1'], 'room/aussen', true],
+            [['BidCos-RF.MEQ0123456:1'], 'function/licht', false],
+        ]);
+        await waitFor(() => expect(taxonomyCells('MEQ0123456:1')).toEqual({rooms: 'Küche, Außen', functions: ''}));
+        await waitFor(() => expect(stores.names.name('MEQ0123456:1')).toBe('Küche Steckdose'));
+
+        // opened again and applied unchanged: nothing is sent, the dialog just closes
+        await openAssign('devices-assign-function');
+        expect(screen.getByTestId<HTMLInputElement>('assign-name').value).toBe('Küche Steckdose');
+        transport.reset();
+        await fireEvent.click(screen.getByTestId('assign-apply'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+        expect(transport.lastCall('names.set')).toBeUndefined();
+        expect(assignCalls(transport)).toEqual([]);
+    });
+
+    it('renames a device with its channels from the dialog, and keeps them when unticked', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await select('MEQ0123456');
+        await openAssign('devices-assign-room');
+        const children = screen.getByTestId<HTMLInputElement>('assign-rename-children');
+        expect(children.checked).toBe(true);
+        await fireEvent.input(screen.getByTestId('assign-name'), {target: {value: 'Dose'}});
+        transport.reset();
+        await fireEvent.click(screen.getByTestId('assign-apply'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+        const [entries] = transport.lastCall('names.set') as [Array<{address: string; name: string}>];
+        expect(entries).toEqual(
+            expect.arrayContaining([
+                {address: 'MEQ0123456', name: 'Dose'},
+                {address: 'MEQ0123456:0', name: 'Dose:0'},
+                {address: 'MEQ0123456:1', name: 'Dose:1'},
+            ]),
+        );
+        expect(assignCalls(transport)).toEqual([]);
+
+        await openAssign('devices-assign-room');
+        await fireEvent.click(screen.getByTestId('assign-rename-children'));
+        await fireEvent.input(screen.getByTestId('assign-name'), {target: {value: 'Steckdose'}});
+        transport.reset();
+        await fireEvent.click(screen.getByTestId('assign-apply'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+        expect(transport.lastCall('names.set')).toEqual([
+            [
+                {address: 'MEQ0123456', name: 'Steckdose'},
+                {address: 'MEQ0123456:0', name: 'Steckdose:0'},
+            ],
+        ]);
+    });
+
+    it('has no name field for several rows or the maintenance channel, and focuses the side that was asked for', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await select('KEQ0345678');
+        await select('LEQ0456789', true);
+        await openAssign('devices-assign-function');
+        expect(screen.queryByTestId('assign-name')).toBeNull();
+        expect(screen.queryByTestId('assign-address')).toBeNull();
+        expect(screen.getByTestId('assign-count').textContent).toBe('2 Zeilen ausgewählt');
+        await waitFor(() =>
+            expect(document.activeElement?.closest('[data-testid="assign-side-function"]')).not.toBeNull(),
+        );
+        await fireEvent.click(within(assignDialog()).getByText('Abbrechen'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+
+        // `:0` has no name of its own (task 65): the address line, no field
+        await expand('MEQ0123456');
+        await select('MEQ0123456:0');
+        await openAssign('devices-assign-room');
+        expect(screen.getByTestId('assign-address').textContent).toBe('MEQ0123456:0');
+        expect(screen.queryByTestId('assign-name')).toBeNull();
+        await waitFor(() => expect(document.activeElement?.closest('[data-testid="assign-side-room"]')).not.toBeNull());
+    });
+
+    it('keeps the dialog open with the reason when the name is refused, and still saves the rooms', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        transport.respond('names.set', () => {
+            throw new ApiRequestError({message: 'ReGa is not answering', kind: 'validation'});
+        });
+        await expand('MEQ0123456');
+        await select('MEQ0123456:1');
+        await openAssign('devices-assign-room');
+        await fireEvent.input(screen.getByTestId('assign-name'), {target: {value: 'Neu'}});
+        await fireEvent.click(checkOf('room/aussen'));
+        transport.reset();
+        await fireEvent.click(screen.getByTestId('assign-apply'));
+
+        await waitFor(() =>
+            expect(screen.getByTestId('assign-name-error').textContent.trim()).toBe('Der Name wurde nicht gespeichert'),
+        );
+        expect(assignDialog().hasAttribute('open')).toBe(true);
+        expect(assignCalls(transport)).toEqual([[['BidCos-RF.MEQ0123456:1'], 'room/aussen', true]]);
+        // the room went through: applied again, only the name is sent
+        transport.respond('names.set', (entries) => {
+            const list = entries as Array<{address: string; name: string}>;
+            return Object.fromEntries(list.map((entry) => [entry.address, entry.name]));
+        });
+        transport.reset();
+        await fireEvent.click(screen.getByTestId('assign-apply'));
+        await waitFor(() => expect(assignDialog().hasAttribute('open')).toBe(false));
+        expect(transport.lastCall('names.set')).toEqual([[{address: 'MEQ0123456:1', name: 'Neu'}]]);
+        expect(assignCalls(transport)).toEqual([]);
+    });
+
     it('filters a long list; Enter in the filter neither saves nor toggles, Enter on a box saves', async () => {
         const {stores} = await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const names = ['Arbeitszimmer', 'Bad', 'Büro', 'Dachboden', 'Esszimmer', 'Flur', 'Garage', 'Gäste-WC'];
@@ -424,10 +565,14 @@ describe('assigning the selection', () => {
         await select('MEQ0123456:1');
         await openAssign('devices-assign-room');
 
-        const filter = screen.getByTestId<HTMLInputElement>('assign-filter');
-        expect(screen.getAllByTestId('assign-row')).toHaveLength(11);
+        const filter = screen.getByTestId<HTMLInputElement>('assign-filter-room');
+        expect(within(screen.getByTestId('assign-side-room')).getAllByTestId('assign-row')).toHaveLength(11);
         await fireEvent.input(filter, {target: {value: 'kuche'}});
-        expect(screen.getAllByTestId('assign-row').map((row) => row.dataset['path'])).toEqual(['room/r9']);
+        expect(
+            within(screen.getByTestId('assign-side-room'))
+                .getAllByTestId('assign-row')
+                .map((row) => row.dataset['path']),
+        ).toEqual(['room/r9']);
 
         await fireEvent.keyDown(filter, {key: 'Enter'});
         expect(assignDialog().hasAttribute('open')).toBe(true);
@@ -436,7 +581,7 @@ describe('assigning the selection', () => {
         expect(transport.countOf('meta.assign')).toBe(0);
 
         await fireEvent.input(filter, {target: {value: 'zzz'}});
-        expect(screen.getByTestId('assign-list').textContent).toContain('Kein Treffer');
+        expect(screen.getByTestId('assign-list-room').textContent).toContain('Kein Treffer');
         await fireEvent.input(filter, {target: {value: 'Küche'}});
         await fireEvent.click(checkOf('room/r9'));
         await fireEvent.keyDown(checkOf('room/r9'), {key: 'Enter'});
@@ -451,8 +596,8 @@ describe('assigning the selection', () => {
         await select('MEQ0123456:1');
         await openAssign('devices-assign-room');
 
-        await fireEvent.click(screen.getByTestId('assign-new'));
-        const name = await waitFor(() => screen.getByTestId<HTMLInputElement>('assign-new-name'));
+        await fireEvent.click(screen.getByTestId('assign-new-room'));
+        const name = await waitFor(() => screen.getByTestId<HTMLInputElement>('assign-new-name-room'));
         expect(document.activeElement).toBe(name);
         await fireEvent.input(name, {target: {value: 'Keller'}});
         transport.reset();

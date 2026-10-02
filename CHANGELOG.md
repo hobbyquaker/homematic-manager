@@ -15,6 +15,14 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   dialogs the toolbar buttons and the row's menu open, here for the row under the pointer alone. Nothing happens while
   the store takes no writes, as with the menu entries. (task 85)
 
+### Changed
+
+- **One dialog for the name, the rooms and the functions.** "Assign to room" and "Assign to function" open the same
+  dialog now: rooms on the left, functions on the right - a channel filed into a room usually wants a function too - and,
+  for a single row, its name above them, with a device's "Overwrite channel names" as in Rename. One Apply saves all
+  three and sends only what changed; the side that was asked for - the toolbar button, the menu entry, the double click
+  on the cell - has the focus. On a phone the halves stack, rooms above functions. (task 86)
+
 ## [3.0.1] — 2026-10-01
 
 ### Fixed

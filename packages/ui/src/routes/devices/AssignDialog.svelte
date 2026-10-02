@@ -1,261 +1,251 @@
 <script lang="ts">
+    import {isDeviceAddress, renameEntries} from '@homematic-manager/core';
     import {tick, untrack} from 'svelte';
 
     import Dialog from '../../lib/components/Dialog.svelte';
     import {getStores} from '../../lib/stores/context.js';
     import {
-        FILTER_THRESHOLD,
         assignRequests,
         changedPaths,
-        filterOptions,
         membershipStates,
-        nextState,
+        type AssignRequest,
         type AssignTarget,
         type CheckState,
     } from '../../lib/util/assignment.js';
     import type {TaxonomyId} from '../../lib/util/taxonomy.js';
+    import AssignSide from './AssignSide.svelte';
+
+    /**
+     * Task 49's "Assign to room" / "Assign to function" - since task 86 one dialog for both: rooms on
+     * the left, functions on the right (a channel filed into a room usually wants a function too) and,
+     * for one row, its name above them (the maintainer, 2026-10-02). One Apply saves all three. What
+     * the store refuses stays marked and the dialog open, so Apply can send just that again.
+     */
+
+    type States = Record<TaxonomyId, Record<string, CheckState>>;
+    type Failures = Record<TaxonomyId, Record<string, string>>;
+    const SIDES: readonly TaxonomyId[] = ['room', 'function'];
 
     interface Props {
         open?: boolean;
-        /** Which taxonomy the dialog assigns to; the title and the list follow it. */
-        enumId?: TaxonomyId;
         /** The selected rows: the ref of each, and the channel refs of a device row. */
         targets?: readonly AssignTarget[];
+        /** The one row's address when exactly one is selected - the name field is its; `''` otherwise. */
+        address?: string;
+        /** Whether that row can be renamed at all - the grid's rule: not `:0`, not a smoke group row. */
+        canRename?: boolean;
+        /** Where the focus goes when the dialog opens: the side that was asked for, or the name. */
+        focus?: TaxonomyId | 'name';
     }
 
-    let {open = $bindable(false), enumId = 'room', targets = []}: Props = $props();
+    let {open = $bindable(false), targets = [], address = '', canRename = false, focus = 'room'}: Props = $props();
 
     const stores = getStores();
     const t = stores.i18n.t;
     const taxonomy = stores.taxonomy;
 
+    const none = (): States => ({room: {}, function: {}});
     /** Every box as it was when the dialog opened - and, for a node whose save went through, since. */
-    let initial = $state<Record<string, CheckState>>({});
+    let initial = $state<States>(none());
     /** What the user made of each box. */
-    let desired = $state<Record<string, CheckState>>({});
+    let desired = $state<States>(none());
     /** The store's refusal of a node's last save, by path. */
-    let failures = $state<Record<string, string>>({});
-    let query = $state('');
+    let failures = $state<Failures>({room: {}, function: {}});
+    let name = $state('');
+    /** Task 65: ticked at every opening - renaming a device names its channels too, unless unticked. */
+    let renameChildren = $state(true);
+    let nameFailed = $state(false);
     let saving = $state(false);
-    let naming = $state(false);
-    let newName = $state('');
-    let creatingNode = $state(false);
-    let listElement = $state<HTMLElement | undefined>(undefined);
     let nameInput = $state<HTMLInputElement | undefined>(undefined);
-    /** The list's height when the filter was first used: a filtered list does not shrink the dialog (D-34). */
-    let lockedHeight = $state<number | undefined>(undefined);
+    let roomSide = $state<AssignSide | undefined>(undefined);
+    let functionSide = $state<AssignSide | undefined>(undefined);
     let wasOpen = false;
 
-    const options = $derived(taxonomy.options(enumId));
-    const visible = $derived(filterOptions(options, query));
-    const showFilter = $derived(options.length > FILTER_THRESHOLD);
-    const failedCount = $derived(Object.keys(failures).length);
-    const isRoom = $derived(enumId === 'room');
-    const title = $derived(isRoom ? t('Assign to room') : t('Assign to function'));
+    const showName = $derived(address !== '' && canRename);
+    const isDevice = $derived(address !== '' && isDeviceAddress(address));
+    const children = $derived(
+        isDevice ? stores.devices.channels(stores.app.selectedInterface, address).map((c) => c.ADDRESS) : [],
+    );
+    const failedCount = $derived(SIDES.reduce((sum, id) => sum + Object.keys(failures[id]).length, 0));
 
     const lookup = (ref: string) => taxonomy.view(ref);
 
-    /** The nodes of the list plus one made in the dialog whose tree has not arrived yet. */
-    function allPaths(): string[] {
-        const listed = options.map((option) => option.path);
-        return [...listed, ...Object.keys(desired).filter((path) => !listed.includes(path))];
+    function listedPaths(id: TaxonomyId): string[] {
+        return taxonomy.options(id).map((option) => option.path);
     }
 
-    function stateOf(path: string): CheckState {
-        return desired[path] ?? initial[path] ?? 'off';
+    /** The nodes of the list plus one made in the dialog whose tree has not arrived yet. */
+    function allPaths(id: TaxonomyId): string[] {
+        const listed = listedPaths(id);
+        return [...listed, ...Object.keys(desired[id]).filter((path) => !listed.includes(path))];
+    }
+
+    function stateOf(id: TaxonomyId, path: string): CheckState {
+        return desired[id][path] ?? initial[id][path] ?? 'off';
     }
 
     $effect(() => {
         if (open && !wasOpen) {
             // what the selection is in right now; later changes of the store do not move the boxes
             untrack(() => {
-                initial = membershipStates(
-                    targets,
-                    options.map((option) => option.path),
-                    lookup,
-                );
-                desired = {...initial};
-                failures = {};
-                query = '';
-                lockedHeight = undefined;
-                naming = false;
-                newName = '';
+                const opened = none();
+                for (const id of SIDES) {
+                    opened[id] = membershipStates(targets, listedPaths(id), lookup);
+                }
+                initial = opened;
+                desired = {room: {...opened.room}, function: {...opened.function}};
+                failures = {room: {}, function: {}};
+                name = address === '' ? '' : (stores.names.name(address) ?? '');
+                renameChildren = true;
+                nameFailed = false;
+                roomSide?.reset();
+                functionSide?.reset();
+                void focusOpened();
             });
         }
         wasOpen = open;
     });
 
-    /** `checked` and `indeterminate` from the state: the second is a property, never an attribute. */
-    function checkState(node: HTMLInputElement, state: CheckState): {update: (state: CheckState) => void} {
-        const apply = (value: CheckState): void => {
-            node.checked = value === 'on';
-            node.indeterminate = value === 'mixed';
-        };
-        apply(state);
-        return {update: apply};
-    }
-
-    /** A click or Space: the browser has flipped the box already, the cycle decides what it shows. */
-    function toggle(path: string, input: HTMLInputElement): void {
-        const next = nextState(initial[path] ?? 'off', stateOf(path));
-        desired = {...desired, [path]: next};
-        if (failures[path] !== undefined) {
-            failures = Object.fromEntries(Object.entries(failures).filter(([key]) => key !== path));
+    /** After the native dialog has opened and put the focus on its first control: the part that was asked for. */
+    async function focusOpened(): Promise<void> {
+        await tick();
+        if (focus === 'name' && showName) {
+            nameInput?.focus();
+            return;
         }
-        input.checked = next === 'on';
-        input.indeterminate = next === 'mixed';
+        (focus === 'function' ? functionSide : roomSide)?.focus();
     }
 
     /**
-     * Only the difference, one `meta.assign` per changed node. What went through is done; a node the
-     * store refused keeps the user's choice and its reason, and the dialog stays open so Apply can
-     * send just those again.
+     * The name, only when it was changed: the 2.x rule with the `:0` convention (task 65), in core so
+     * the rename dialog writes the same - a device renames its `:0` with it and, "overwrite channels"
+     * ticked, every other child to `<name>:<channel index>`.
+     */
+    function plannedRename(): Array<{address: string; name: string}> {
+        const next = name.trim();
+        if (!showName || next === '' || next === (stores.names.name(address) ?? '')) {
+            return [];
+        }
+        return renameEntries(address, next, children, {channels: renameChildren});
+    }
+
+    /**
+     * Only the differences: the name through the names store (which reports its own refusal), then one
+     * `meta.assign` per changed node of either side. What went through is done; a node the store
+     * refused keeps the user's choice and its reason, and the dialog stays open so Apply can send just
+     * those again.
      */
     async function save(): Promise<void> {
         if (saving) {
             return;
         }
-        const changed = changedPaths(allPaths(), initial, desired);
-        const requests = assignRequests(targets, changed, desired, lookup);
-        const outcomes = requests.length === 0 ? [] : await runSave(requests);
-        const nextInitial = {...initial};
-        const nextFailures: Record<string, string> = {};
-        for (const path of changed) {
-            const outcome = outcomes.find((entry) => entry.path === path);
-            if (outcome !== undefined && !outcome.ok) {
-                nextFailures[path] = outcome.message;
-            } else {
-                nextInitial[path] = stateOf(path);
-            }
-        }
-        initial = nextInitial;
-        failures = nextFailures;
-        if (Object.keys(nextFailures).length === 0) {
-            open = false;
-        }
-    }
-
-    async function runSave(requests: Parameters<typeof taxonomy.assignEach>[0]) {
         saving = true;
         try {
-            return await taxonomy.assignEach(requests);
+            const rename = plannedRename();
+            const nameOk = rename.length === 0 ? true : await stores.names.rename(rename);
+            nameFailed = !nameOk;
+
+            const changed: Record<TaxonomyId, string[]> = {room: [], function: []};
+            const requests: AssignRequest[] = [];
+            for (const id of SIDES) {
+                changed[id] = changedPaths(allPaths(id), initial[id], desired[id]);
+                requests.push(...assignRequests(targets, changed[id], desired[id], lookup));
+            }
+            const outcomes = requests.length === 0 ? [] : await taxonomy.assignEach(requests);
+            const nextInitial: States = {room: {...initial.room}, function: {...initial.function}};
+            const nextFailures: Failures = {room: {}, function: {}};
+            for (const id of SIDES) {
+                for (const path of changed[id]) {
+                    const outcome = outcomes.find((entry) => entry.path === path);
+                    if (outcome !== undefined && !outcome.ok) {
+                        nextFailures[id][path] = outcome.message;
+                    } else {
+                        nextInitial[id][path] = stateOf(id, path);
+                    }
+                }
+            }
+            initial = nextInitial;
+            failures = nextFailures;
+            if (nameOk && SIDES.every((id) => Object.keys(nextFailures[id]).length === 0)) {
+                open = false;
+            }
         } finally {
             saving = false;
         }
     }
 
-    /** Enter on a box saves; Space stays the browser's toggle. */
-    function onCheckKeydown(event: KeyboardEvent): void {
+    function onNameKeydown(event: KeyboardEvent): void {
         if (event.key === 'Enter') {
             event.preventDefault();
             void save();
         }
     }
-
-    function onFilterInput(event: Event): void {
-        // measured before the list changes, so the dialog keeps its height while filtering
-        if (lockedHeight === undefined && listElement !== undefined && listElement.offsetHeight > 0) {
-            lockedHeight = listElement.offsetHeight;
-        }
-        query = (event.currentTarget as HTMLInputElement).value;
-    }
-
-    /** Enter in the filter never saves and never toggles: it hands the focus to the first box shown. */
-    function onFilterKeydown(event: KeyboardEvent): void {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            listElement?.querySelector<HTMLInputElement>('input[type="checkbox"]')?.focus();
-        }
-    }
-
-    async function startNaming(): Promise<void> {
-        naming = true;
-        await tick();
-        nameInput?.focus();
-    }
-
-    /** A node at the root, made at once like the metadata editor's; the dialog checks it for Apply. */
-    async function createNode(): Promise<void> {
-        const name = newName.trim();
-        if (name === '' || creatingNode) {
-            return;
-        }
-        creatingNode = true;
-        const path = await taxonomy.createNode(enumId, undefined, name);
-        creatingNode = false;
-        if (path === undefined) {
-            return;
-        }
-        desired = {...desired, [path]: 'on'};
-        newName = '';
-        naming = false;
-        await tick();
-        listElement?.querySelector<HTMLInputElement>(`[data-path="${CSS.escape(path)}"] input`)?.focus();
-    }
-
-    function onNameKeydown(event: KeyboardEvent): void {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            void createNode();
-        }
-    }
 </script>
 
-<Dialog bind:open {title} width="560px" closable={!saving} closeLabel={t('Close')} testId="assign-dialog">
+<Dialog
+    bind:open
+    title={t('Rooms and functions')}
+    width="760px"
+    minWidth={320}
+    closable={!saving}
+    closeLabel={t('Close')}
+    testId="assign-dialog"
+>
+    {#if address !== ''}
+        <p class="hmm-assign-address" data-testid="assign-address">{address}</p>
+    {/if}
+    {#if showName}
+        <div class="hmm-assign-name-row">
+            <label class="hmm-assign-name-field">
+                <span>{t('Name')}</span>
+                <input
+                    class="hmm-input"
+                    bind:this={nameInput}
+                    bind:value={name}
+                    disabled={saving}
+                    data-testid="assign-name"
+                    onkeydown={onNameKeydown}
+                />
+            </label>
+            {#if isDevice}
+                <label class="hmm-assign-children">
+                    <input
+                        type="checkbox"
+                        bind:checked={renameChildren}
+                        disabled={saving}
+                        data-testid="assign-rename-children"
+                    />
+                    <span>{t('Overwrite channel names')}</span>
+                </label>
+            {/if}
+        </div>
+        {#if nameFailed}
+            <p class="hmm-assign-summary hmm-assign-name-error" role="alert" data-testid="assign-name-error">
+                {t('The name was not saved')}
+            </p>
+        {/if}
+    {/if}
     <p class="hmm-assign-count" data-testid="assign-count">{t('{count} rows selected', {}, targets.length)}</p>
 
-    {#if showFilter}
-        <input
-            type="text"
-            class="hmm-input hmm-assign-filter"
-            value={query}
-            placeholder={isRoom ? t('Filter rooms') : t('Filter functions')}
-            aria-label={isRoom ? t('Filter rooms') : t('Filter functions')}
-            data-testid="assign-filter"
-            oninput={onFilterInput}
-            onkeydown={onFilterKeydown}
+    <div class="hmm-assign-sides">
+        <AssignSide
+            bind:this={roomSide}
+            enumId="room"
+            initial={initial.room}
+            bind:desired={desired.room}
+            bind:failures={failures.room}
+            {saving}
+            onsave={() => void save()}
         />
-    {/if}
-
-    <div
-        class="hmm-assign-list"
-        role="group"
-        aria-label={isRoom ? t('Rooms') : t('Functions')}
-        style:min-height={lockedHeight === undefined ? undefined : `${String(lockedHeight)}px`}
-        bind:this={listElement}
-        data-testid="assign-list"
-    >
-        {#each visible as option (option.path)}
-            {@const state = stateOf(option.path)}
-            {@const failure = failures[option.path]}
-            <label
-                class="hmm-assign-row"
-                class:hmm-assign-row-failed={failure !== undefined}
-                style:padding-inline-start={`${String(6 + (option.depth - 1) * 18)}px`}
-                data-testid="assign-row"
-                data-path={option.path}
-                data-state={state}
-            >
-                <input
-                    type="checkbox"
-                    use:checkState={state}
-                    disabled={saving}
-                    data-testid="assign-check"
-                    onchange={(event) => toggle(option.path, event.currentTarget)}
-                    onkeydown={onCheckKeydown}
-                />
-                <span class="hmm-assign-name">{option.label}</span>
-                {#if failure !== undefined}
-                    <span class="hmm-assign-error" data-testid="assign-error">
-                        {t('Not saved: {message}', {message: failure})}
-                    </span>
-                {/if}
-            </label>
-        {:else}
-            <p class="hmm-assign-empty">
-                {options.length > 0 ? t('No match') : isRoom ? t('No rooms yet') : t('No functions yet')}
-            </p>
-        {/each}
+        <AssignSide
+            bind:this={functionSide}
+            enumId="function"
+            initial={initial.function}
+            bind:desired={desired.function}
+            bind:failures={failures.function}
+            {saving}
+            onsave={() => void save()}
+        />
     </div>
 
     {#if failedCount > 0}
@@ -263,33 +253,6 @@
             {t('{count} changes were not saved', {}, failedCount)}
         </p>
     {/if}
-
-    <div class="hmm-assign-new">
-        {#if naming}
-            <input
-                type="text"
-                class="hmm-input"
-                bind:this={nameInput}
-                bind:value={newName}
-                aria-label={isRoom ? t('Name of the new room') : t('Name of the new function')}
-                placeholder={isRoom ? t('Name of the new room') : t('Name of the new function')}
-                disabled={creatingNode}
-                data-testid="assign-new-name"
-                onkeydown={onNameKeydown}
-            />
-            <button
-                type="button"
-                class="hmm-button"
-                disabled={creatingNode || newName.trim() === ''}
-                data-testid="assign-create"
-                onclick={() => void createNode()}>{t('Create')}</button
-            >
-        {:else}
-            <button type="button" class="hmm-button" data-testid="assign-new" onclick={() => void startNaming()}
-                >{isRoom ? t('New room…') : t('New function…')}</button
-            >
-        {/if}
-    </div>
 
     {#snippet buttons()}
         <button type="button" class="hmm-button" disabled={saving} onclick={() => (open = false)}>{t('Cancel')}</button>
@@ -304,59 +267,54 @@
 </Dialog>
 
 <style>
+    .hmm-assign-address {
+        margin: 0 0 6px;
+        font-family: var(--hmm-font-mono);
+        color: var(--hmm-fg-muted);
+    }
+
+    .hmm-assign-name-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 12px;
+        margin-bottom: 8px;
+    }
+
+    .hmm-assign-name-field {
+        display: flex;
+        flex: 1 1 240px;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .hmm-assign-name-field input {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .hmm-assign-children {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
     .hmm-assign-count {
         margin: 0 0 8px;
         color: var(--hmm-fg-muted);
     }
 
-    .hmm-assign-filter {
-        box-sizing: border-box;
-        width: 100%;
-        margin-bottom: 6px;
-    }
-
-    /* The one part that scrolls, and only when the window is too short for every node: the element
-       in the selector outweighs the dialog body's "children keep their height" rule. */
-    div.hmm-assign-list {
-        flex: 0 1 auto;
-        min-height: 0;
-        overflow-y: auto;
-        padding: 2px 0;
-        border: 1px solid var(--hmm-border);
-        border-radius: var(--hmm-radius);
-        background: var(--hmm-input-bg);
-    }
-
-    .hmm-assign-row {
+    /* The two halves side by side, each at least 260 px wide, and one above the other when the dialog
+       is too narrow for both - a phone (the halves wrap in source order: rooms, then functions). They
+       shrink with a short window so their lists scroll; the element in the selector outweighs the
+       dialog body's "children keep their height" rule. */
+    div.hmm-assign-sides {
         display: flex;
+        flex: 0 1 auto;
         flex-wrap: wrap;
-        align-items: center;
-        gap: 2px 6px;
-        padding-block: 2px;
-        padding-inline-end: 6px;
-        cursor: pointer;
-    }
-
-    .hmm-assign-row:hover {
-        background: var(--hmm-accent-bg);
-    }
-
-    .hmm-assign-row input {
-        flex: 0 0 auto;
-        margin: 0;
-    }
-
-    /* A long name wraps rather than widening the dialog or being cut off. */
-    .hmm-assign-name {
-        flex: 1 1 0;
-        min-width: 0;
-        overflow-wrap: anywhere;
-    }
-
-    .hmm-assign-error {
-        flex: 1 0 100%;
-        padding-inline-start: 19px;
-        color: var(--hmm-error);
+        gap: 10px 12px;
+        min-height: 0;
     }
 
     .hmm-assign-summary {
@@ -364,19 +322,7 @@
         color: var(--hmm-error);
     }
 
-    .hmm-assign-empty {
-        margin: 4px 6px;
-        color: var(--hmm-fg-muted);
-    }
-
-    .hmm-assign-new {
-        display: flex;
-        gap: 6px;
-        margin-top: 8px;
-    }
-
-    .hmm-assign-new input {
-        flex: 1 1 auto;
-        min-width: 0;
+    .hmm-assign-name-error {
+        margin: 0 0 8px;
     }
 </style>

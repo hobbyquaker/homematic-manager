@@ -106,8 +106,11 @@
 
     /** Task 25: the assign dialog for the selection. */
     let assignOpen = $state(false);
-    let assignEnum = $state<TaxonomyId>('room');
+    /** Task 86: the side of the dialog - rooms, functions - or the name that gets the focus. */
+    let assignFocus = $state<TaxonomyId | 'name'>('room');
     let assignRefs = $state<AssignTarget[]>([]);
+    /** The one row's address when the dialog is for one row, whose name it then edits too; `''` for several. */
+    let assignAddress = $state('');
     /** The filter above the grid: a node path per taxonomy, `''` for everything. */
     let roomFilter = $state('');
     let functionFilter = $state('');
@@ -669,19 +672,23 @@
         };
     }
 
-    /** The rows the assign dialog works on: the selection, or the row the menu was opened on. */
-    function assignTargets(address: string): AssignTarget[] {
-        const rows = selected.includes(address) ? selected : [address];
-        return rows.map((entry) => assignTargetOf(entry));
+    /**
+     * Task 86: the one dialog for rooms, functions and - for a single row - the name, opened on the side
+     * that was asked for. The toolbar buttons work on the selection, the menu entries on the selection
+     * when it holds the row the menu was opened on and on that row alone otherwise.
+     */
+    function openAssignRows(focus: TaxonomyId, rows: readonly string[]): void {
+        if (rows.length === 0) {
+            return;
+        }
+        assignFocus = focus;
+        assignRefs = rows.map((entry) => assignTargetOf(entry));
+        assignAddress = rows.length === 1 ? (rows[0] ?? '') : '';
+        assignOpen = true;
     }
 
     function openAssign(enumId: TaxonomyId, address?: string): void {
-        assignEnum = enumId;
-        assignRefs = address === undefined ? selected.map((entry) => assignTargetOf(entry)) : assignTargets(address);
-        if (assignRefs.length === 0) {
-            return;
-        }
-        assignOpen = true;
+        openAssignRows(enumId, address === undefined || selected.includes(address) ? selected : [address]);
     }
 
     /**
@@ -694,9 +701,7 @@
         if (!taxonomy.writable) {
             return;
         }
-        assignEnum = enumId;
-        assignRefs = [assignTargetOf(address)];
-        assignOpen = true;
+        openAssignRows(enumId, [address]);
     }
 
     const canAssign = $derived(selected.length > 0 && taxonomy.writable);
@@ -1250,7 +1255,13 @@
 <TeamDialog bind:open={teamOpen} address={actionAddress} />
 <SmokeGroupDialog bind:open={smokeGroupOpen} group={smokeGroupDialogTarget} isNew={smokeGroupNew !== undefined} />
 <RepairConfigDialog bind:open={repairOpen} address={actionAddress} />
-<AssignDialog bind:open={assignOpen} enumId={assignEnum} targets={assignRefs} />
+<AssignDialog
+    bind:open={assignOpen}
+    focus={assignFocus}
+    targets={assignRefs}
+    address={assignAddress}
+    canRename={renamable(assignAddress)}
+/>
 <ParamsetDialog bind:open={paramsetOpen} {interfaceName} address={paramsetAddress} paramset={paramsetName} />
 
 <style>

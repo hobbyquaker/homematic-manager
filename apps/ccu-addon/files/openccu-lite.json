@@ -3,8 +3,8 @@
   "id": "hmm",
   "name": "Homematic Manager",
   "description": {
-    "de": "Geräte anlernen, Paramsets bearbeiten, Direktverknüpfungen, Namen und Räume — das Frontend für ein openccu-lite-System.",
-    "en": "Pair devices, edit paramsets, direct links, names and rooms — the frontend for an openccu-lite system."
+    "de": "Geräte anlernen und konfigurieren, Direktverknüpfungen verwalten.",
+    "en": "Pair and configure devices, manage direct links."
   },
   "homepage": "https://github.com/hobbyquaker/homematic-manager",
   "licence": "AGPL-3.0-or-later",

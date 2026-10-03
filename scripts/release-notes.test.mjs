@@ -6,7 +6,7 @@
 
 import {describe, expect, it} from 'vitest';
 
-import {absoluteLinks, changelogSection, hint, releaseNotes, unwrap, versionOf} from './release-notes.mjs';
+import {absoluteLinks, changelogSection, releaseNotes, unwrap, versionOf} from './release-notes.mjs';
 
 const CHANGELOG = [
     '# Changelog',
@@ -117,20 +117,8 @@ describe('absoluteLinks', () => {
     });
 });
 
-describe('hint', () => {
-    it('says "for testing" for a pre-release only, in both languages', () => {
-        const beta = hint('3.0.0-beta.5', BASE);
-        expect(beta).toContain('Diese Beta ist zum Testen gedacht.');
-        expect(beta).toContain('This beta is for testing.');
-        expect(beta).toContain(`[CHANGELOG.md](${BASE}/CHANGELOG.md)`);
-        const final = hint('3.0.0', BASE.replace('v3.0.0-beta.5', 'v3.0.0'));
-        expect(final).not.toContain('Beta');
-        expect(final).not.toContain('beta');
-    });
-});
-
 describe('releaseNotes', () => {
-    it('is the hint, the changelog section and the generated notes, in that order', () => {
+    it('is the changelog section and the generated notes, in that order, without the 3.0 paragraph', () => {
         const {name, body, missingSection} = releaseNotes({
             tag: 'v3.0.0-beta.5',
             repository: 'hobbyquaker/homematic-manager',
@@ -140,9 +128,9 @@ describe('releaseNotes', () => {
         expect(name).toBe('v3.0.0-beta.5');
         expect(missingSection).toBe(false);
         const i = (needle) => body.indexOf(needle);
-        expect(i('**Homematic Manager 3.0 ist')).toBe(0);
-        expect(i('**Homematic Manager 3.0 is a complete')).toBeGreaterThan(0);
-        expect(i('## 3.0.0-beta.5 — 2026-09-08')).toBeGreaterThan(i('**Homematic Manager 3.0 is a complete'));
+        expect(body).not.toContain('kompletter Neubau');
+        expect(body).not.toContain('complete rebuild');
+        expect(i('## 3.0.0-beta.5 — 2026-09-08')).toBe(0);
         expect(i(`[the docs](${BASE}/docs/openccu-lite.md)`)).toBeGreaterThan(i('## 3.0.0-beta.5'));
         expect(i('**Full Changelog**')).toBeGreaterThan(i('```'));
         expect(body.endsWith('compare/a...b\n')).toBe(true);

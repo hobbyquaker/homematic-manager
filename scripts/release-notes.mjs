@@ -8,11 +8,10 @@
  * GitHub's generated notes - and on every later attach it *replaces* name and body with whatever
  * that workflow hands it. So all four have to hand it the same thing, computed here from the tag:
  *
- *   1. the 3.0 hint, the paragraph every 3.0 pre-release opened with (German, then English),
- *   2. the CHANGELOG.md section of the version - the text between `## [<version>]` and the next
+ *   1. the CHANGELOG.md section of the version - the text between `## [<version>]` and the next
  *      `## [` - with its paragraphs unwrapped (a release body renders a newline as a line break,
  *      the changelog is wrapped at 100 columns) and its relative links pointed at the tag,
- *   3. GitHub's generated notes for the tag (the "Full Changelog" compare link, and the pull
+ *   2. GitHub's generated notes for the tag (the "Full Changelog" compare link, and the pull
  *      requests when there are any), fetched from the API the way `generate_release_notes` did.
  *
  * A missing changelog section or an unreachable API is said in the body and warned about, never
@@ -112,34 +111,9 @@ export function absoluteLinks(markdown, base) {
 }
 
 /**
- * The paragraph every 3.0 pre-release opened with, in both languages. The "for testing" sentence
- * is a pre-release thing and is dropped for a plain version.
- *
- * @param {string} version
- * @param {string} base `https://github.com/<owner>/<repo>/blob/<tag>`
- */
-export function hint(version, base) {
-    const prerelease = version.includes('-');
-    const migration = `${base}/docs/migration-from-2.x.md`;
-    const changelog = `${base}/CHANGELOG.md`;
-    const de =
-        '**Homematic Manager 3.0 ist ein kompletter Neubau** von 2.7.1: aktuelles Electron, Svelte 5, ein getesteter ' +
-        'TypeScript-Kern, ein Node-Backend — und dieselben Reiter, Tabellen, Dialoge und Arbeitsabläufe wie bisher.' +
-        (prerelease ? ' Diese Beta ist zum Testen gedacht.' : '') +
-        ` Was sich für 2.x-Nutzer ändert: [docs/migration-from-2.x.md](${migration}); alles Weitere: ` +
-        `[CHANGELOG.md](${changelog}).`;
-    const en =
-        '**Homematic Manager 3.0 is a complete rebuild** of 2.7.1 on current Electron, Svelte 5, a tested TypeScript ' +
-        'core and a Node backend, keeping the tabs, grids, dialogs and workflows of 2.x.' +
-        (prerelease ? ' This beta is for testing.' : '') +
-        ` What changed for 2.x users: [docs/migration-from-2.x.md](${migration}); everything: ` +
-        `[CHANGELOG.md](${changelog}).`;
-    return `${de}\n\n${en}`;
-}
-
-/**
- * Assembles the body: hint, changelog section, generated notes. Each part is optional except the
- * hint, and a missing changelog section is stated in its place.
+ * Assembles the body: changelog section, generated notes. A missing changelog section is stated
+ * in its place. The 3.0 rebuild paragraph that opened every release up to 3.1.3 is gone (the
+ * maintainer, 2026-10-03).
  *
  * @param {{tag: string, repository: string, changelog: string, generated?: string}} input
  * @returns {{name: string, body: string, missingSection: boolean}}
@@ -148,7 +122,7 @@ export function releaseNotes({tag, repository, changelog, generated}) {
     const version = versionOf(tag);
     const base = `https://github.com/${repository}/blob/${tag}`;
     const section = changelogSection(changelog, version);
-    const parts = [hint(version, base)];
+    const parts = [];
     if (section) {
         parts.push(`${section.heading}\n\n${absoluteLinks(unwrap(section.body), base)}`);
     } else {

@@ -39,9 +39,9 @@
       {
         "id": 2,
         "key": "switch_open",
-        "name": {"de": "T%FCr %F6ffnen", "en": "Open door"},
+        "name": {"de": "Tür öffnen", "en": "Open door"},
         "description": {
-          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird die T%FCr ge%F6ffnet.",
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird die Tür geöffnet.",
           "en": "If authorisation is granted and the correct code is entered, the door is opened"
         },
         "params": {
@@ -66,9 +66,9 @@
       {
         "id": 3,
         "key": "switch_unlock",
-        "name": {"de": "T%FCrschloss entriegeln", "en": "Unlock door lock"},
+        "name": {"de": "Türschloss entriegeln", "en": "Unlock door lock"},
         "description": {
-          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das T%FCrschloss entriegelt.",
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das Türschloss entriegelt.",
           "en": "If authorisation is granted and the correct code is entered, the lock is unlocked."
         },
         "params": {
@@ -93,9 +93,9 @@
       {
         "id": 4,
         "key": "switch_lock",
-        "name": {"de": "T%FCrschloss verriegeln", "en": "Lock door lock"},
+        "name": {"de": "Türschloss verriegeln", "en": "Lock door lock"},
         "description": {
-          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das T%FCrschloss verriegelt.",
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das Türschloss verriegelt.",
           "en": "If authorisation is granted and the correct code is entered, the lock is locked."
         },
         "params": {
@@ -180,9 +180,9 @@
       {
         "id": 2,
         "key": "switch_open",
-        "name": {"de": "T%FCr %F6ffnen", "en": "Open door"},
+        "name": {"de": "Tür öffnen", "en": "Open door"},
         "description": {
-          "de": "Bei Empfang des gewählten Entscheidungswertes wird T%FCr ge%F6ffnet.",
+          "de": "Bei Empfang des gewählten Entscheidungswertes wird Tür geöffnet.",
           "en": "When receiving the decision value defined, the door is opened"
         },
         "params": {
@@ -207,9 +207,9 @@
       {
         "id": 3,
         "key": "switch_unlock",
-        "name": {"de": "T%FCrschloss entriegeln", "en": "Unlock door lock"},
+        "name": {"de": "Türschloss entriegeln", "en": "Unlock door lock"},
         "description": {
-          "de": "Bei Empfang des gewählten Entscheidungswertes wird das T%FCrschloss entriegelt.",
+          "de": "Bei Empfang des gewählten Entscheidungswertes wird das Türschloss entriegelt.",
           "en": "When receiving the decision value defined, the lock is unlocked."
         },
         "params": {
@@ -234,9 +234,9 @@
       {
         "id": 4,
         "key": "switch_lock",
-        "name": {"de": "T%FCrschloss verriegeln", "en": "Lock door lock"},
+        "name": {"de": "Türschloss verriegeln", "en": "Lock door lock"},
         "description": {
-          "de": "Bei Empfang des gewählten Entscheidungswertes wird das T%FCrschloss verriegelt.",
+          "de": "Bei Empfang des gewählten Entscheidungswertes wird das Türschloss verriegelt.",
           "en": "When receiving the decision value defined, the lock is locked."
         },
         "params": {
@@ -374,7 +374,7 @@
         "key": "toggle",
         "name": {"de": "Toggle", "en": "Toggle"},
         "description": {
-          "de": "Mit einem langen Tastendruck wird die T%FCr ge%F6ffnet. Ein kurzer Tastendruck toggelt den Zustand des Schlosses (entriegeln / verriegeln)",
+          "de": "Mit einem langen Tastendruck wird die Tür geöffnet. Ein kurzer Tastendruck toggelt den Zustand des Schlosses (entriegeln / verriegeln)",
           "en": "With a long button press the door is opened. With a short button press, the status of the lock toggles (unlocked/locked)."
         },
         "params": {
@@ -426,9 +426,9 @@
       {
         "id": 3,
         "key": "switch_open",
-        "name": {"de": "T%FCr %F6ffnen", "en": "Open door"},
+        "name": {"de": "Tür öffnen", "en": "Open door"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck wird die T%FCr ge%F6ffnet.",
+          "de": "Mit einem kurzen oder langen Tastendruck wird die Tür geöffnet.",
           "en": "With a short or long button press, the door is opened."
         },
         "params": {
@@ -453,9 +453,9 @@
       {
         "id": 4,
         "key": "switch_unlock",
-        "name": {"de": "T%FCrschloss entriegeln", "en": "Unlock door lock"},
+        "name": {"de": "Türschloss entriegeln", "en": "Unlock door lock"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck wird das T%FCrschloss entriegelt.",
+          "de": "Mit einem kurzen oder langen Tastendruck wird das Türschloss entriegelt.",
           "en": "With a short or long button press, the lock is unlocked."
         },
         "params": {
@@ -480,9 +480,9 @@
       {
         "id": 5,
         "key": "switch_lock",
-        "name": {"de": "T%FCrschloss verriegeln", "en": "Lock door lock"},
+        "name": {"de": "Türschloss verriegeln", "en": "Lock door lock"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck wird das T%FCrschloss verriegelt.",
+          "de": "Mit einem kurzen oder langen Tastendruck wird das Türschloss verriegelt.",
           "en": "With a short or long button press, the lock is locked."
         },
         "params": {
@@ -673,7 +673,7 @@
         "key": "toggle",
         "name": {"de": "Toggle", "en": "Toggle"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters toggelt der Zustand des Schlosses (entriegelt / verriegelt).",
+          "de": "Bei Betätigung des Schalters toggelt der Zustand des Schlosses (entriegelt / verriegelt).",
           "en": "When actuating the switch, the status of the lock toggles (unlocked/locked)."
         },
         "params": {
@@ -698,9 +698,9 @@
       {
         "id": 2,
         "key": "switch_open",
-        "name": {"de": "T%FCr %F6ffnen", "en": "Open door"},
+        "name": {"de": "Tür öffnen", "en": "Open door"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird die T%FCr ge%F6ffnet.",
+          "de": "Bei Betätigung des Schalters wird die Tür geöffnet.",
           "en": "When actuating the switch, the door is opened"
         },
         "params": {
@@ -725,9 +725,9 @@
       {
         "id": 3,
         "key": "switch_unlock",
-        "name": {"de": "T%FCrschloss entriegeln", "en": "Unlock door lock"},
+        "name": {"de": "Türschloss entriegeln", "en": "Unlock door lock"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird das T%FCrschloss entriegelt.",
+          "de": "Bei Betätigung des Schalters wird das Türschloss entriegelt.",
           "en": "When actuating the switch, the lock is unlocked."
         },
         "params": {
@@ -752,9 +752,9 @@
       {
         "id": 4,
         "key": "switch_lock",
-        "name": {"de": "T%FCrschloss verriegeln", "en": "Lock door lock"},
+        "name": {"de": "Türschloss verriegeln", "en": "Lock door lock"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird das T%FCrschloss verriegelt.",
+          "de": "Bei Betätigung des Schalters wird das Türschloss verriegelt.",
           "en": "When actuating the switch, the lock is locked."
         },
         "params": {

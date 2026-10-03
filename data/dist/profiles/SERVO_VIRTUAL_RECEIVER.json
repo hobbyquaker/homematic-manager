@@ -328,7 +328,7 @@
         "key": "servo_toggle",
         "name": {"de": "Servo Position", "en": "Servo Position"},
         "description": {
-          "de": "Mit einem kurzen Tastendruck f%E4hrt das Servo abwechselnd auf die jeweils festgelegte Position gefahren. Ein langer Tastendruck fährt das Servo abwechselnd schrittweise bis zur gewählten Pegelbegrenzung.",
+          "de": "Mit einem kurzen Tastendruck fährt das Servo abwechselnd auf die jeweils festgelegte Position gefahren. Ein langer Tastendruck fährt das Servo abwechselnd schrittweise bis zur gewählten Pegelbegrenzung.",
           "en": "A short key press moves the servo alternately to the specified position. A long key press moves the servo alternately step by step to the selected level limit.n. Ein langer Tastendruck fährt das Servo abwechselnd schrittweise bis zur gewählten Pegelbegrenzung."
         },
         "params": {

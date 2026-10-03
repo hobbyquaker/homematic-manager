@@ -889,7 +889,7 @@
         "key": "switch_on_off",
         "name": {"de": "Beleuchtung ein / aus", "en": "Lights on / off"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird die Beleuchtung des Garagentorantriebes ein- oder ausgeschaltet (Toggle-Funktion).",
+          "de": "Bei Betätigung des Schalters wird die Beleuchtung des Garagentorantriebes ein- oder ausgeschaltet (Toggle-Funktion).",
           "en": "When activating the switch, the light of the garage door drive is switched on or off (toggle function)."
         },
         "params": {
@@ -914,7 +914,7 @@
         "key": "switch_on",
         "name": {"de": "Beleuchtung ein", "en": "Lights on"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird die Beleuchtung des Garagentorantriebes eingeschaltet.",
+          "de": "Bei Betätigung des Schalters wird die Beleuchtung des Garagentorantriebes eingeschaltet.",
           "en": "When activating the switch, the light of the garage door drive is switched on."
         },
         "params": {
@@ -939,7 +939,7 @@
         "key": "switch_off",
         "name": {"de": "Beleuchtung aus", "en": "Lights off"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird die Beleuchtung des Garagentorantriebes ausgeschaltet.",
+          "de": "Bei Betätigung des Schalters wird die Beleuchtung des Garagentorantriebes ausgeschaltet.",
           "en": "When activating the switch, the light of the garage door drive is switched off."
         },
         "params": {

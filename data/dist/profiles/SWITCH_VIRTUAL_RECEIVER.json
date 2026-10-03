@@ -1794,7 +1794,7 @@
             "subsets": [1, 2],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
+              {"de": "Überschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
               {
                 "de": "Unterschreiten der unteren Helligkeitsschwelle",
                 "en": "Value falls below lower brightness threshold"
@@ -1852,7 +1852,7 @@
             "subsets": [1, 2],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
+              {"de": "Überschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
               {
                 "de": "Unterschreiten der unteren Helligkeitsschwelle",
                 "en": "Value falls below lower brightness threshold"
@@ -1910,17 +1910,17 @@
             "subsets": [1, 2, 3, 4],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
+              {"de": "Überschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
               {
                 "de": "Unterschreiten der unteren Helligkeitsschwelle",
                 "en": "Value falls below lower brightness threshold"
               },
               {
-                "de": "Obere Helligkeitsschwelle %FCberschritten ein / untere -schwelle unterschritten aus",
+                "de": "Obere Helligkeitsschwelle überschritten ein / untere -schwelle unterschritten aus",
                 "en": "Reaching the upper value threshold on - Value falls below lower threshold off"
               },
               {
-                "de": "Obere Helligkeitsschwelle %FCberschritten aus / untere -schwelle unterschritten ein",
+                "de": "Obere Helligkeitsschwelle überschritten aus / untere -schwelle unterschritten ein",
                 "en": "Reaching the upper value threshold off - Value falls below lower threshold on"
               }
             ]
@@ -2011,7 +2011,7 @@
             "subsets": [1, 2],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen CO2-Schwelle", "en": "Reaching the upper CO2 threshold"},
+              {"de": "Überschreiten der oberen CO2-Schwelle", "en": "Reaching the upper CO2 threshold"},
               {"de": "Unterschreiten der unteren CO2-Schwelle", "en": "Value falls below lower CO2 threshold"}
             ]
           },
@@ -2066,7 +2066,7 @@
             "subsets": [1, 2],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen CO2-Schwelle", "en": "Reaching the upper CO2 threshold"},
+              {"de": "Überschreiten der oberen CO2-Schwelle", "en": "Reaching the upper CO2 threshold"},
               {"de": "Unterschreiten der unteren CO2-Schwelle", "en": "Value falls below lower CO2 threshold"}
             ]
           },
@@ -2121,14 +2121,14 @@
             "subsets": [1, 2, 3, 4],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen CO2-Schwelle", "en": "Reaching the upper CO2 threshold"},
+              {"de": "Überschreiten der oberen CO2-Schwelle", "en": "Reaching the upper CO2 threshold"},
               {"de": "Unterschreiten der unteren CO2-Schwelle", "en": "Value falls below lower CO2 threshold"},
               {
-                "de": "Obere CO2-Schwelle %FCberschritten ein / untere -schwelle unterschritten aus",
+                "de": "Obere CO2-Schwelle überschritten ein / untere -schwelle unterschritten aus",
                 "en": "Reaching the upper CO2 threshold on - Value falls below lower threshold off"
               },
               {
-                "de": "Obere CO2-Schwelle %FCberschritten aus / untere -schwelle unterschritten ein",
+                "de": "Obere CO2-Schwelle überschritten aus / untere -schwelle unterschritten ein",
                 "en": "Reaching the upper CO2 threshold off - Value falls below lower threshold on"
               }
             ]
@@ -2219,7 +2219,7 @@
             "subsets": [1, 2],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Feuchtigkeitsschwelle", "en": "Reaching the upper humidity threshold"},
+              {"de": "Überschreiten der oberen Feuchtigkeitsschwelle", "en": "Reaching the upper humidity threshold"},
               {
                 "de": "Unterschreiten der unteren Feuchtigkeitsschwelle",
                 "en": "Value falls below lower humidity threshold"
@@ -2277,7 +2277,7 @@
             "subsets": [1, 2],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Feuchtigkeitsschwelle", "en": "Reaching the upper humidity threshold"},
+              {"de": "Überschreiten der oberen Feuchtigkeitsschwelle", "en": "Reaching the upper humidity threshold"},
               {
                 "de": "Unterschreiten der unteren Feuchtigkeitsschwelle",
                 "en": "Value falls below lower humidity threshold"
@@ -2335,17 +2335,17 @@
             "subsets": [1, 2, 3, 4],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Feuchtigkeitsschwelle", "en": "Reaching the upper humidity threshold"},
+              {"de": "Überschreiten der oberen Feuchtigkeitsschwelle", "en": "Reaching the upper humidity threshold"},
               {
                 "de": "Unterschreiten der unteren Feuchtigkeitsschwelle",
                 "en": "Value falls below lower humidity threshold"
               },
               {
-                "de": "Obere Feuchtigkeitsschwelle %FCberschritten ein / untere -schwelle unterschritten aus",
+                "de": "Obere Feuchtigkeitsschwelle überschritten ein / untere -schwelle unterschritten aus",
                 "en": "Reaching the upper humidity threshold on - Value falls below lower threshold off"
               },
               {
-                "de": "Obere Feuchtigkeitsschwelle %FCberschritten aus / untere -schwelle unterschritten ein",
+                "de": "Obere Feuchtigkeitsschwelle überschritten aus / untere -schwelle unterschritten ein",
                 "en": "Reaching the upper humidity threshold off - Value falls below lower threshold on"
               }
             ]
@@ -2437,7 +2437,7 @@
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
               {
-                "de": "%DCberschreiten der oberen Feinstaubkonzentration",
+                "de": "Überschreiten der oberen Feinstaubkonzentration",
                 "en": "Reaching the upper particulate matter threshold"
               },
               {
@@ -2498,7 +2498,7 @@
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
               {
-                "de": "%DCberschreiten der oberen Feinstaubkonzentration",
+                "de": "Überschreiten der oberen Feinstaubkonzentration",
                 "en": "Reaching the upper particulate matter threshold"
               },
               {
@@ -2559,7 +2559,7 @@
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
               {
-                "de": "%DCberschreiten der oberen Feinstaubkonzentration",
+                "de": "Überschreiten der oberen Feinstaubkonzentration",
                 "en": "Reaching the upper particulate matter threshold"
               },
               {
@@ -2567,11 +2567,11 @@
                 "en": "Value falls below lower particulate matter threshold"
               },
               {
-                "de": "Obere Feinstaubkonzentration %FCberschritten ein / untere -schwelle unterschritten aus",
+                "de": "Obere Feinstaubkonzentration überschritten ein / untere -schwelle unterschritten aus",
                 "en": "Reaching the upper particulate matter threshold on - Value falls below lower threshold off"
               },
               {
-                "de": "Obere Feinstaubkonzentration %FCberschritten aus / untere -schwelle unterschritten ein",
+                "de": "Obere Feinstaubkonzentration überschritten aus / untere -schwelle unterschritten ein",
                 "en": "Reaching the upper particulate matter threshold off - Value falls below lower threshold on"
               }
             ]
@@ -3025,7 +3025,7 @@
             "subsets": [1, 2],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
+              {"de": "Überschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
               {
                 "de": "Unterschreiten der unteren Temperaturschwelle",
                 "en": "Value falls below lower temperature threshold"
@@ -3083,7 +3083,7 @@
             "subsets": [1, 2],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
+              {"de": "Überschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
               {
                 "de": "Unterschreiten der unteren Temperaturschwelle",
                 "en": "Value falls below lower temperature threshold"
@@ -3141,17 +3141,17 @@
             "subsets": [1, 2, 3, 4],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
+              {"de": "Überschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
               {
                 "de": "Unterschreiten der unteren Temperaturschwelle",
                 "en": "Value falls below lower temperature threshold"
               },
               {
-                "de": "Obere Temperaturschwelle %FCberschritten ein / untere -schwelle unterschritten aus",
+                "de": "Obere Temperaturschwelle überschritten ein / untere -schwelle unterschritten aus",
                 "en": "Reaching the upper temperature threshold on - Value falls below lower threshold off"
               },
               {
-                "de": "Obere Temperaturschwelle %FCberschritten aus / untere -schwelle unterschritten ein",
+                "de": "Obere Temperaturschwelle überschritten aus / untere -schwelle unterschritten ein",
                 "en": "Reaching the upper temperature threshold off - Value falls below lower threshold on"
               }
             ]
@@ -3242,7 +3242,7 @@
             "subsets": [1, 2],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten des oberen Wertes", "en": "Reaching the upper value"},
+              {"de": "Überschreiten des oberen Wertes", "en": "Reaching the upper value"},
               {"de": "Unterschreiten des unteren Wertes", "en": "Reaching the lower value"}
             ]
           },
@@ -3297,7 +3297,7 @@
             "subsets": [1, 2],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten des oberen Wertes", "en": "Reaching the upper value"},
+              {"de": "Überschreiten des oberen Wertes", "en": "Reaching the upper value"},
               {"de": "Unterschreiten des unteren Wertes", "en": "Reaching the lower value"}
             ]
           },
@@ -3352,14 +3352,14 @@
             "subsets": [1, 2, 3, 4],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten des oberen Wertes", "en": "Reaching the upper value"},
+              {"de": "Überschreiten des oberen Wertes", "en": "Reaching the upper value"},
               {"de": "Unterschreiten des unteren Wertes", "en": "Reaching the lower value"},
               {
-                "de": "Oberen Wert %FCberschritten ein / unteren Wert unterschritten aus",
+                "de": "Oberen Wert überschritten ein / unteren Wert unterschritten aus",
                 "en": "Reaching the upper value threshold on - Value falls below lower threshold off"
               },
               {
-                "de": "Oberen Wert %FCberschritten aus / untere Wert unterschritten ein",
+                "de": "Oberen Wert überschritten aus / untere Wert unterschritten ein",
                 "en": "Reaching the upper value threshold off - Value falls below lower threshold on"
               }
             ]
@@ -3450,7 +3450,7 @@
             "subsets": [1, 2],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshhold"},
+              {"de": "Überschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshhold"},
               {"de": "Unterschreiten der unteren Windschwelle", "en": "Reaching the lower wind threshold"}
             ]
           },
@@ -3504,7 +3504,7 @@
             "subsets": [1, 2],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshhold"},
+              {"de": "Überschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshhold"},
               {"de": "Unterschreiten der unteren Windschwelle", "en": "Reaching the lower wind threshold"}
             ]
           },
@@ -3559,14 +3559,14 @@
             "subsets": [1, 2, 3, 4],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshhold"},
+              {"de": "Überschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshhold"},
               {"de": "Unterschreiten der unteren Windschwelle", "en": "Reaching the lower wind threshold"},
               {
-                "de": "Obere Windschwelle %FCberschritten ein / untere -schwelle unterschritten aus",
+                "de": "Obere Windschwelle überschritten ein / untere -schwelle unterschritten aus",
                 "en": "Reaching the upper wind threshold on - Value falls below lower threshold off"
               },
               {
-                "de": "Obere Windschwelle %FCberschritten aus / untere -schwelle unterschritten ein",
+                "de": "Obere Windschwelle überschritten aus / untere -schwelle unterschritten ein",
                 "en": "Reaching the upper wind threshold off - Value falls below lower threshold on"
               }
             ]
@@ -8913,7 +8913,7 @@
         "key": "switch_on",
         "name": {"de": "Schalter ein", "en": "Switch - on"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird der Schaltaktor für die festgelegte Zeit eingeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "de": "Bei Betätigung des Schalters wird der Schaltaktor für die festgelegte Zeit eingeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
           "en": "When closing the switch the switch actuator will be switched on for the set time. If a delay is set switching will be performed after the delay time has expired."
         },
         "params": {
@@ -8988,7 +8988,7 @@
         "key": "switch_off",
         "name": {"de": "Schalter aus", "en": "Switch - off"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird der Schaltaktor für die festgelegte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "de": "Bei Betätigung des Schalters wird der Schaltaktor für die festgelegte Zeit ausgeschaltet. Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
           "en": "When closing the switch the switch actuator will be switched off for the set time. If a delay time is set switching will be performed after the time has expired."
         },
         "params": {
@@ -9069,7 +9069,7 @@
         "key": "switch_on_off",
         "name": {"de": "Schalter ein / aus", "en": "Switch - on / off"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird der Schaltaktor für die festgelegte Zeit ein- oder ausgeschaltet (Toggle-Funktion). Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
+          "de": "Bei Betätigung des Schalters wird der Schaltaktor für die festgelegte Zeit ein- oder ausgeschaltet (Toggle-Funktion). Ist eine Verzögerungszeit eingestellt, erfolgt eine Schaltung erst nach Ablauf dieser Zeit .",
           "en": "If the switch is closed the switch actuator will be switched on or off for the time set (toggle function). If a delay time is set switching will be performed after the time has expired."
         },
         "params": {

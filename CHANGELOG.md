@@ -6,6 +6,16 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **Umlauts in the easy mode's labels.** Some link profiles showed their German labels, names and descriptions with the
+  CCU's escapes instead of the letters - "Herunterfahrverz%F6gerungszeit" for "Herunterfahrverzögerungszeit",
+  "%DCberschreiten" for "Überschreiten", "T%FCr" for "Tür" - in the blind, shutter, dimmer, light, switch, door lock and
+  threshold profiles among others. The device data now carries the letters, and a test keeps every shipped string
+  free of such escapes. (B-90)
+
 ## [3.1.2] — 2026-10-03
 
 ### Changed

@@ -6,6 +6,8 @@ import {describe, expect, it} from 'vitest';
 
 import {
     branchWays,
+    decodeLatin1Escapes,
+    decodeLatin1EscapesDeep,
     extractForms,
     extractMasterBranches,
     extractMasterControls,
@@ -371,6 +373,24 @@ proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
             {kind: 'param', param: 'AVERAGING'},
             {kind: 'param', param: 'TX_THRESHOLD_POWER'},
         ]);
+    });
+
+    it('decodes Latin-1 escapes as Latin-1 and leaves a literal percent before digits (B-90)', () => {
+        expect(decodeLatin1Escapes('Herunterfahrverz%F6gerungszeit')).toBe('Herunterfahrverzögerungszeit');
+        expect(decodeLatin1Escapes('%D6ffnen / Schlie%DFen, %DCberschreiten, %e4')).toBe(
+            'Öffnen / Schließen, Überschreiten, ä',
+        );
+        expect(decodeLatin1Escapes('havalandirma konumunda (%100) acilir, %10, 100%')).toBe(
+            'havalandirma konumunda (%100) acilir, %10, 100%',
+        );
+        expect(
+            decodeLatin1EscapesDeep({label: {de: 'Verz%F6gerung'}, names: [{de: 'T%FCr'}, undefined], n: 3}),
+        ).toEqual({
+            label: {de: 'Verzögerung'},
+            names: [{de: 'Tür'}, undefined],
+            n: 3,
+        });
+        expect(decodeLatin1EscapesDeep(undefined)).toBeUndefined();
     });
 
     it('decodes the %XX escapes of the WebUI language files', () => {

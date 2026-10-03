@@ -12,9 +12,9 @@
       {
         "id": 1,
         "key": "switch_open_close",
-        "name": {"de": "%D6ffnen / Schlie%DFen", "en": "Opening / Closing"},
+        "name": {"de": "Öffnen / Schließen", "en": "Opening / Closing"},
         "description": {
-          "de": "Bei Empfang des gewählten Entscheidungswertes wird das Garagentoor in den entgegengesetzten Zustand gefahren (ge%F6ffnet oder geschlossen - Toggle-Funktion).",
+          "de": "Bei Empfang des gewählten Entscheidungswertes wird das Garagentoor in den entgegengesetzten Zustand gefahren (geöffnet oder geschlossen - Toggle-Funktion).",
           "en": "When receiving the selected decision value the garage door is moved into the opposite position (open or closed - toggle function)."
         },
         "params": {
@@ -49,9 +49,9 @@
       {
         "id": 2,
         "key": "switch_open",
-        "name": {"de": "%D6ffnen", "en": "Opening"},
+        "name": {"de": "Öffnen", "en": "Opening"},
         "description": {
-          "de": "Bei Empfang des gewählten Entscheidungswertes wird das Garagentor ge%F6ffnet.",
+          "de": "Bei Empfang des gewählten Entscheidungswertes wird das Garagentor geöffnet.",
           "en": "When receiving the decision value defined, the garage door will be opened."
         },
         "params": {
@@ -86,7 +86,7 @@
       {
         "id": 3,
         "key": "switch_close",
-        "name": {"de": "Schlie%DFen", "en": "Closing"},
+        "name": {"de": "Schließen", "en": "Closing"},
         "description": {
           "de": "Bei Empfang des gewählten Entscheidungswertes wird das Garagentor geschlossen.",
           "en": "When receiving the decision value defined, the garage door will be closed."
@@ -123,9 +123,9 @@
       {
         "id": 4,
         "key": "switch_partialOpen",
-        "name": {"de": "L%FCften", "en": "Ventilation"},
+        "name": {"de": "Lüften", "en": "Ventilation"},
         "description": {
-          "de": "Bei Empfang des gewählten Entscheidungswertes f%E4hrt das Garagentor in die L%FCftungsposition.",
+          "de": "Bei Empfang des gewählten Entscheidungswertes fährt das Garagentor in die Lüftungsposition.",
           "en": "When receiving the decision value defined, the garage door will be moved into ventilation position."
         },
         "params": {
@@ -547,9 +547,9 @@
       {
         "id": 1,
         "key": "switch_open_close",
-        "name": {"de": "%D6ffnen / Schlie%DFen", "en": "Opening / Closing"},
+        "name": {"de": "Öffnen / Schließen", "en": "Opening / Closing"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck wird das Garagentor in den entgegengesetzten Zustand gefahren (ge%F6ffnet oder geschlossen). Ein weiterer Tastendruck h%E4lt das Tor an, der n%E4chste Tastendruck l%E4sst das Tor bis zur Endlage weiterfahren.",
+          "de": "Mit einem kurzen oder langen Tastendruck wird das Garagentor in den entgegengesetzten Zustand gefahren (geöffnet oder geschlossen). Ein weiterer Tastendruck hält das Tor an, der nächste Tastendruck lässt das Tor bis zur Endlage weiterfahren.",
           "en": "With a short or long button press the garage door is moved into the opposite position (open or closed). A further keystroke stops the door, the next keystroke allows the garage door to move to the end position."
         },
         "params": {
@@ -582,7 +582,7 @@
         "key": "toggle",
         "name": {"de": "Toggle", "en": "Toggle"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck wird das Garagentor in den entgegengesetzten Zustand gefahren (ge%F6ffnet oder geschlossen). Ein weiterer Tastendruck h%E4lt das Tor an, der n%E4chste Tastendruck l%E4sst das Tor wieder bis zur vorherigen Endlage zur%FCckfahren.",
+          "de": "Mit einem kurzen oder langen Tastendruck wird das Garagentor in den entgegengesetzten Zustand gefahren (geöffnet oder geschlossen). Ein weiterer Tastendruck hält das Tor an, der nächste Tastendruck lässt das Tor wieder bis zur vorherigen Endlage zurückfahren.",
           "en": "With a short or long button press the garage door is moved into the opposite position (open or closed). A further keystroke stops the door, the next keystroke causes the garage door to move back to the previous end position."
         },
         "params": {
@@ -613,9 +613,9 @@
       {
         "id": 3,
         "key": "switch_open",
-        "name": {"de": "%D6ffnen", "en": "Opening"},
+        "name": {"de": "Öffnen", "en": "Opening"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck wird das Garagentor ge%F6ffnet.",
+          "de": "Mit einem kurzen oder langen Tastendruck wird das Garagentor geöffnet.",
           "en": "With a short or long button press the garage door will be opened."
         },
         "params": {
@@ -646,7 +646,7 @@
       {
         "id": 4,
         "key": "switch_close",
-        "name": {"de": "Schlie%DFen", "en": "Closing"},
+        "name": {"de": "Schließen", "en": "Closing"},
         "description": {
           "de": "Mit einem kurzen oder langen Tastendruck wird das Garagentor geschlossen.",
           "en": "With a short or long button press the garage door will be closed."
@@ -712,9 +712,9 @@
       {
         "id": 6,
         "key": "switch_partialOpen",
-        "name": {"de": "L%FCften", "en": "Ventilation"},
+        "name": {"de": "Lüften", "en": "Ventilation"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck f%E4hrt das Garagentor in die L%FCftungsposition.",
+          "de": "Mit einem kurzen oder langen Tastendruck fährt das Garagentor in die Lüftungsposition.",
           "en": "With a short or long button press the garage door is moved into ventilation position."
         },
         "params": {
@@ -1424,9 +1424,9 @@
       {
         "id": 1,
         "key": "switch_open_close",
-        "name": {"de": "%D6ffnen / Schlie%DFen", "en": "Opening / Closing"},
+        "name": {"de": "Öffnen / Schließen", "en": "Opening / Closing"},
         "description": {
-          "de": "Beim Öffnen des Kontakts wird das Garagentoor in den entgegengesetzten Zustand gefahren (ge%F6ffnet oder geschlossen - Toggle-Funktion). Diese Funktion lässt sich auch umkehren.",
+          "de": "Beim Öffnen des Kontakts wird das Garagentoor in den entgegengesetzten Zustand gefahren (geöffnet oder geschlossen - Toggle-Funktion). Diese Funktion lässt sich auch umkehren.",
           "en": "When opening the contact the garage door is moved into the opposite position (open or closed - toggle function).  This function can be reversed."
         },
         "params": {
@@ -1457,7 +1457,7 @@
       {
         "id": 2,
         "key": "switch_open",
-        "name": {"de": "%D6ffnen", "en": "Opening"},
+        "name": {"de": "Öffnen", "en": "Opening"},
         "description": {
           "de": "Beim Öffnen des Kontakts wird das Garagentor hoch- und beim Schließen herunter gefahren. Diese Funktion lässt sich auch umkehren.",
           "en": "When opening the contact the garage door is moved up. If the contact is closed, the garage door is moved down. This function can be reversed."
@@ -1533,9 +1533,9 @@
       {
         "id": 1,
         "key": "switch_open_close",
-        "name": {"de": "%D6ffnen / Schlie%DFen", "en": "Opening / Closing"},
+        "name": {"de": "Öffnen / Schließen", "en": "Opening / Closing"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird das Garagentor in den entgegengesetzten Zustand gefahren (ge%F6ffnet oder geschlossen). Ein weiterer Tastendruck h%E4lt das Tor an, der n%E4chste Tastendruck l%E4sst das Tor bis zur Endlage weiterfahren.",
+          "de": "Bei Betätigung des Schalters wird das Garagentor in den entgegengesetzten Zustand gefahren (geöffnet oder geschlossen). Ein weiterer Tastendruck hält das Tor an, der nächste Tastendruck lässt das Tor bis zur Endlage weiterfahren.",
           "en": "When activating the switch the garage door is moved into the opposite position (open or closed). A further keystroke stops the door, the next keystroke allows the garage door to move to the end position."
         },
         "params": {
@@ -1568,7 +1568,7 @@
         "key": "toggle",
         "name": {"de": "Toggle", "en": "Toggle"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird das Garagentor in den entgegengesetzten Zustand gefahren (ge%F6ffnet oder geschlossen). Ein weiterer Tastendruck h%E4lt das Tor an, der n%E4chste Tastendruck l%E4sst das Tor wieder bis zur vorherigen Endlage zur%FCckfahren.",
+          "de": "Bei Betätigung des Schalters wird das Garagentor in den entgegengesetzten Zustand gefahren (geöffnet oder geschlossen). Ein weiterer Tastendruck hält das Tor an, der nächste Tastendruck lässt das Tor wieder bis zur vorherigen Endlage zurückfahren.",
           "en": "When activating the switch the garage door is moved into the opposite position (open or closed). A further keystroke stops the door, the next keystroke causes the garage door to move back to the previous end position."
         },
         "params": {
@@ -1599,9 +1599,9 @@
       {
         "id": 3,
         "key": "switch_open",
-        "name": {"de": "%D6ffnen", "en": "Opening"},
+        "name": {"de": "Öffnen", "en": "Opening"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird das Garagentor ge%F6ffnet.",
+          "de": "Bei Betätigung des Schalters wird das Garagentor geöffnet.",
           "en": "When activating the switch the garage door will be opened."
         },
         "params": {
@@ -1632,9 +1632,9 @@
       {
         "id": 4,
         "key": "switch_close",
-        "name": {"de": "Schlie%DFen", "en": "Closing"},
+        "name": {"de": "Schließen", "en": "Closing"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird das Garagentor geschlossen.",
+          "de": "Bei Betätigung des Schalters wird das Garagentor geschlossen.",
           "en": "When activating the switch the garage door will be closed."
         },
         "params": {
@@ -1667,7 +1667,7 @@
         "key": "switch_stop",
         "name": {"de": "Stop", "en": "Stop"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters wird die Fahrt des Garagentores angehalten.",
+          "de": "Bei Betätigung des Schalters wird die Fahrt des Garagentores angehalten.",
           "en": "When activating the switch, the garage door is stopped."
         },
         "params": {
@@ -1698,9 +1698,9 @@
       {
         "id": 6,
         "key": "switch_partialOpen",
-        "name": {"de": "L%FCften", "en": "Ventilation"},
+        "name": {"de": "Lüften", "en": "Ventilation"},
         "description": {
-          "de": "Bei Bet%E4tigung des Schalters f%E4hrt das Garagentor in die L%FCftungsposition.",
+          "de": "Bei Betätigung des Schalters fährt das Garagentor in die Lüftungsposition.",
           "en": "When activating the switch the garage door is moved into ventilation position."
         },
         "params": {

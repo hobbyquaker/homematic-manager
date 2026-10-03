@@ -121,7 +121,7 @@
         "key": "switch_on",
         "name": {"de": "Alarm ein", "en": "Alarm activated"},
         "description": {
-          "de": "Sollte der Sabotagekontakt ausgel%F6st werden, wird der gewünschte Alarm für die festgelegte Zeit eingeschaltet.",
+          "de": "Sollte der Sabotagekontakt ausgelöst werden, wird der gewünschte Alarm für die festgelegte Zeit eingeschaltet.",
           "en": "If the sabotage contact is triggered, the desired alarm is activated for the specified time."
         },
         "params": {
@@ -144,7 +144,7 @@
         "key": "switch_off",
         "name": {"de": "Alarm aus", "en": "Alarm deactivated"},
         "description": {
-          "de": "Der Sabotagekontakt wird f%FCr diese Verkn%FCpfung nicht genutzt.",
+          "de": "Der Sabotagekontakt wird für diese Verknüpfung nicht genutzt.",
           "en": "The sabotage contact is not in use for this link."
         },
         "params": {

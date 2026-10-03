@@ -14,7 +14,7 @@
         "key": "switch_toggle",
         "name": {"de": "Toggle", "en": "Toggle"},
         "description": {
-          "de": "Bei Empfang des gewählten Entscheidungswertes wird ein geschlossenes Fenster für die festgelegte Zeit ge%F6ffnet bzw. ein göffnetes Fenster geschlossen (Toggle-Funktion). Ist eine Verzögerungszeit eingestellt, erfolgt das %D6ffnen/Schlie%DFen erst nach Ablauf dieser Zeit.",
+          "de": "Bei Empfang des gewählten Entscheidungswertes wird ein geschlossenes Fenster für die festgelegte Zeit geöffnet bzw. ein göffnetes Fenster geschlossen (Toggle-Funktion). Ist eine Verzögerungszeit eingestellt, erfolgt das Öffnen/Schließen erst nach Ablauf dieser Zeit.",
           "en": "When receiving the selected decision value, a closed window is opened for the specified time or an open window is closed (toggle function). If a delay time is set, opening/closing will be performed only after this time has expired."
         },
         "params": {
@@ -61,7 +61,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",
@@ -74,7 +74,7 @@
       {
         "id": 2,
         "key": "switch_on_off",
-        "name": {"de": "Fenster %F6ffnen/schlie%DFen", "en": "Open/Close window"},
+        "name": {"de": "Fenster öffnen/schließen", "en": "Open/Close window"},
         "description": {
           "de": "Bei Empfang des gewählten Entscheidungswertes wird das Fenster für die festgelegte Zeit je nach Einstellung des Parameters 'Entscheidungswert' geöffnet oder geschlossen.",
           "en": "When receiving the selected decision value, the window is opened or closed for the specified time according to the setting of the 'Decision value' parameter."
@@ -125,7 +125,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",
@@ -138,7 +138,7 @@
       {
         "id": 3,
         "key": "profile_3",
-        "name": {"de": "Fenster schlie%DFen", "en": "Close window"},
+        "name": {"de": "Fenster schließen", "en": "Close window"},
         "description": {},
         "params": {
           "SHORT_COND_VALUE_HI": {"kind": "fixed", "value": 200},
@@ -236,7 +236,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",
@@ -248,7 +248,7 @@
             "kind": "time",
             "prefix": "LONG_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",
@@ -318,7 +318,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",
@@ -330,7 +330,7 @@
             "kind": "time",
             "prefix": "LONG_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",
@@ -400,7 +400,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",
@@ -412,7 +412,7 @@
             "kind": "time",
             "prefix": "LONG_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",
@@ -436,7 +436,7 @@
         "key": "switch_toggle",
         "name": {"de": "Toggle", "en": "Toggle"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck wird das Fenster für die festgelegte Zeit ge%F6ffnet oder geschlossen (Toggle-Funktion). Ist eine Verzögerungszeit eingestellt, erfolgt das %D6ffnen/Schlie%DFen erst nach Ablauf dieser Zeit.",
+          "de": "Mit einem kurzen oder langen Tastendruck wird das Fenster für die festgelegte Zeit geöffnet oder geschlossen (Toggle-Funktion). Ist eine Verzögerungszeit eingestellt, erfolgt das Öffnen/Schließen erst nach Ablauf dieser Zeit.",
           "en": "Short or long pressing of the button opens or closes the window for the specified time (toggle function). If a delay time is set, opening/closing will be performed only after this time has expired."
         },
         "params": {
@@ -494,7 +494,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",
@@ -506,7 +506,7 @@
             "kind": "time",
             "prefix": "LONG_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",
@@ -519,9 +519,9 @@
       {
         "id": 2,
         "key": "switch_on",
-        "name": {"de": "Fenster %F6ffnen", "en": "Open window"},
+        "name": {"de": "Fenster öffnen", "en": "Open window"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck wird das Fenster für die festgelegte Zeit ge%F6ffnet. Ist eine Verzögerungszeit eingestellt, erfolgt das %D6ffnen erst nach Ablauf dieser Zeit.",
+          "de": "Mit einem kurzen oder langen Tastendruck wird das Fenster für die festgelegte Zeit geöffnet. Ist eine Verzögerungszeit eingestellt, erfolgt das Öffnen erst nach Ablauf dieser Zeit.",
           "en": "Short or long pressing of the button opens the window for the specified time. If a delay time is set, opening will be performed only after this time has expired."
         },
         "params": {
@@ -579,7 +579,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",
@@ -591,7 +591,7 @@
             "kind": "time",
             "prefix": "LONG_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",
@@ -604,9 +604,9 @@
       {
         "id": 3,
         "key": "switch_off",
-        "name": {"de": "Fenster schlie%DFen", "en": "Close window"},
+        "name": {"de": "Fenster schließen", "en": "Close window"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck wird das Fenster für die festgelegte Zeit geschlossen. Ist eine Verzögerungszeit eingestellt, erfolgt das Schlie%DFen erst nach Ablauf dieser Zeit.",
+          "de": "Mit einem kurzen oder langen Tastendruck wird das Fenster für die festgelegte Zeit geschlossen. Ist eine Verzögerungszeit eingestellt, erfolgt das Schließen erst nach Ablauf dieser Zeit.",
           "en": "Short or long pressing of the button closes the window for the specified time. If a delay time is set, closing will be performed only after this time has expired."
         },
         "params": {
@@ -664,7 +664,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",
@@ -676,7 +676,7 @@
             "kind": "time",
             "prefix": "LONG_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Verz%F6gerung", "en": "Delay"}
+            "label": {"de": "Verzögerung", "en": "Delay"}
           },
           {
             "kind": "time",

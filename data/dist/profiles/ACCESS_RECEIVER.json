@@ -14,7 +14,7 @@
         "key": "toggle",
         "name": {"de": "Toggle", "en": "Toggle"},
         "description": {
-          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das T%FCrschloss in den entgegengesetzten Zustand versetzt (verriegelt oder entriegelt/ge%F6ffnet).",
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das Türschloss in den entgegengesetzten Zustand versetzt (verriegelt oder entriegelt/geöffnet).",
           "en": "If authorisation is granted and the correct code is entered, the door lock is set to the opposite state (locked or unlocked/opened)."
         },
         "params": {
@@ -35,7 +35,7 @@
         "key": "switch_unlocked",
         "name": {"de": "Entriegeln", "en": "Unlock"},
         "description": {
-          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das T%FCrschloss entriegelt.",
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das Türschloss entriegelt.",
           "en": "If authorisation is granted and the correct code is entered, the door lock is unlocked."
         },
         "params": {
@@ -55,7 +55,7 @@
         "key": "switch_locked",
         "name": {"de": "Verriegeln", "en": "Lock"},
         "description": {
-          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das T%FCrschloss verriegelt.",
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird das Türschloss verriegelt.",
           "en": "If authorisation is granted and the correct code is entered, the door lock is locked."
         },
         "params": {
@@ -73,9 +73,9 @@
       {
         "id": 4,
         "key": "switch_open",
-        "name": {"de": "%D6ffnen", "en": "Open"},
+        "name": {"de": "Öffnen", "en": "Open"},
         "description": {
-          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird die T%FCr ge%F6ffnet.",
+          "de": "Bei erteilter Berechtigung und Eingabe des korrekten Codes wird die Tür geöffnet.",
           "en": "If authorisation is granted and the correct code is entered, the door is opened."
         },
         "params": {
@@ -387,7 +387,7 @@
         "key": "toggle",
         "name": {"de": "Toggle", "en": "Toggle"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck wird das T%FCrschloss in den entgegengesetzten Zustand versetzt (verriegelt oder entriegelt/ge%F6ffnet).",
+          "de": "Mit einem kurzen oder langen Tastendruck wird das Türschloss in den entgegengesetzten Zustand versetzt (verriegelt oder entriegelt/geöffnet).",
           "en": "With a short or long button press, the door lock is set to the opposite status (locked or unlocked/opened)."
         },
         "params": {
@@ -415,7 +415,7 @@
         "key": "switch_unlocked",
         "name": {"de": "Entriegeln", "en": "Unlock"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck wird das T%FCrschloss entriegelt.",
+          "de": "Mit einem kurzen oder langen Tastendruck wird das Türschloss entriegelt.",
           "en": "With a short or long button press, the door lock is unlocked."
         },
         "params": {
@@ -442,7 +442,7 @@
         "key": "switch_locked",
         "name": {"de": "Verriegeln", "en": "Lock"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck wird das T%FCrschloss verriegelt.",
+          "de": "Mit einem kurzen oder langen Tastendruck wird das Türschloss verriegelt.",
           "en": "With a short or long button press, the door lock is locked."
         },
         "params": {
@@ -467,9 +467,9 @@
       {
         "id": 4,
         "key": "switch_open",
-        "name": {"de": "%D6ffnen", "en": "Open"},
+        "name": {"de": "Öffnen", "en": "Open"},
         "description": {
-          "de": "Mit einem kurzen oder langen Tastendruck wird die T%FCr ge%F6ffnet.",
+          "de": "Mit einem kurzen oder langen Tastendruck wird die Tür geöffnet.",
           "en": "With a short or long button press, the door is opened."
         },
         "params": {
@@ -815,7 +815,7 @@
         "key": "toggle",
         "name": {"de": "Toggle", "en": "Toggle"},
         "description": {
-          "de": "Beim Öffnen des Kontakts wird das T%FCrschloss in den entgegengesetzten Zustand versetzt (verriegelt oder entriegelt/ge%F6ffnet).",
+          "de": "Beim Öffnen des Kontakts wird das Türschloss in den entgegengesetzten Zustand versetzt (verriegelt oder entriegelt/geöffnet).",
           "en": "When the contact is opened, the door lock is set to the opposite status (locked or unlocked/opened)."
         },
         "params": {
@@ -835,7 +835,7 @@
         "key": "switch_locked",
         "name": {"de": "Verriegeln", "en": "Lock"},
         "description": {
-          "de": "Beim Schlie%DFen des Kontakts wird das T%FCrschloss verriegelt.",
+          "de": "Beim Schließen des Kontakts wird das Türschloss verriegelt.",
           "en": "When the contact is closed, the door lock is locked."
         },
         "params": {

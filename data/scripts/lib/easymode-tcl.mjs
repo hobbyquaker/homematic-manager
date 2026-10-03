@@ -284,6 +284,37 @@ export function timeOptionMeaning(key) {
 }
 
 /**
+ * B-90: the WebUI escapes ISO-8859-1 as `%XX` ("Verz%F6gerung" is "Verzögerung"), in its own language
+ * files, in the easymodes' localization and in what openccu-data extracted from them. Only the upper
+ * half (`%A0`-`%FF`, the Latin-1 letters) is decoded, as Latin-1 and not as UTF-8: a literal percent
+ * before digits ("(%100)" in the Turkish texts, "%10") is text and stays.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+export function decodeLatin1Escapes(text) {
+    return text.replace(/%([A-Fa-f][0-9A-Fa-f])/gu, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+}
+
+/**
+ * Every string inside `value` (objects and arrays, recursively) with its Latin-1 escapes decoded.
+ *
+ * @template T
+ * @param {T} value
+ * @returns {T}
+ */
+export function decodeLatin1EscapesDeep(value) {
+    if (typeof value === 'string') return /** @type {T} */ (decodeLatin1Escapes(value));
+    if (Array.isArray(value)) return /** @type {T} */ (value.map((item) => decodeLatin1EscapesDeep(item)));
+    if (value !== null && typeof value === 'object') {
+        return /** @type {T} */ (
+            Object.fromEntries(Object.entries(value).map(([key, item]) => [key, decodeLatin1EscapesDeep(item)]))
+        );
+    }
+    return value;
+}
+
+/**
  * The `"key" : "value",` lines of a WebUI localization file, with the HTML wrapper and the entities
  * the WebUI uses taken out; `percent` also decodes the %XX escapes of `/www/webui/js/lang`.
  *
@@ -294,9 +325,7 @@ export function parseLocalization(text, {percent = false} = {}) {
     const result = {};
     for (const match of text.matchAll(/^\s*"([A-Za-z0-9_]+)"\s*:\s*"((?:[^"\\]|\\.)*)"/gmu)) {
         // the WebUI's own language files escape ISO-8859-1 as %XX ("%FCr" is "für")
-        const raw = percent
-            ? match[2].replace(/%([0-9A-F]{2})/gu, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
-            : match[2];
+        const raw = percent ? decodeLatin1Escapes(match[2]) : match[2];
         const value = decodeEntities(raw.replace(/\\"/gu, '"').replace(/<[^>]+>/gu, ''))
             .replace(/\s+/gu, ' ')
             .trim();

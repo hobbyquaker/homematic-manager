@@ -501,3 +501,46 @@ describe('bundled webp subset (D-10)', () => {
         expect(bytes).toBeLessThan(3 * 1024 * 1024);
     });
 });
+
+// B-90: the WebUI escapes Latin-1 as %XX ("Herunterfahrverz%F6gerungszeit"), and openccu-data's
+// profiles, the 2.7.1 localization and the extracted easymode labels carried those escapes through.
+describe('no Latin-1 %XX escapes (B-90)', () => {
+    /** Every string of a JSON value with the path it sits at. */
+    function* strings(value, at) {
+        if (typeof value === 'string') yield [at, value];
+        else if (Array.isArray(value)) for (const [i, item] of value.entries()) yield* strings(item, `${at}[${i}]`);
+        else if (value !== null && typeof value === 'object') {
+            for (const [key, item] of Object.entries(value)) yield* strings(item, `${at}.${key}`);
+        }
+    }
+    const files = [
+        ...receiverTypes.map((type) => [`profiles/${type}.json`, profiles[type]]),
+        ...Object.entries(translations).map(([language, t]) => [`translations/${language}.json`, t]),
+        ['master-metadata.json', masterMetadata],
+        ['master-forms.json', read('master-forms.json')],
+        ['option-presets.json', optionPresets],
+        ['easymode-time-selectors.json', read('easymode-time-selectors.json')],
+    ];
+
+    it('ships no %XX escape in any profile, form, preset or translation string', () => {
+        const escaped = [];
+        for (const [file, json] of files) {
+            for (const [at, text] of strings(json, file)) {
+                // a literal percent before digits is text: the Turkish "(%100)", "%10"
+                const rest = text.replace(/%1\d\d\b/gu, '').replace(/%\d\d\b/gu, '');
+                if (/%[0-9A-F]{2}/iu.test(rest)) escaped.push(`${at}: ${text}`);
+            }
+        }
+        expect(escaped).toEqual([]);
+    });
+
+    it('decodes the labels the screenshots showed', () => {
+        const blind = profiles.BLIND_VIRTUAL_RECEIVER.senders;
+        const labels = Object.values(blind)
+            .flat()
+            .flatMap((profile) => profile.controls ?? [])
+            .map((control) => control.label?.de);
+        expect(labels).toContain('Herunterfahrverzögerungszeit');
+        expect(labels).not.toContain('Herunterfahrverz%F6gerungszeit');
+    });
+});

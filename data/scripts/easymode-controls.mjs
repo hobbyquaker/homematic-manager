@@ -80,7 +80,8 @@ function localizationOf(directory) {
             .filter((file) => file.endsWith('.txt'))
             .sort();
         byLanguage[language] = Object.fromEntries(
-            files.map((file) => [file, parseLocalization(read(path.join(dir, file)))]),
+            // B-90: the easymodes' localization escapes Latin-1 as %XX like the WebUI's own files
+            files.map((file) => [file, parseLocalization(read(path.join(dir, file)), {percent: true})]),
         );
     }
     return byLanguage;

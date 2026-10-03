@@ -25,6 +25,7 @@ import path from 'node:path';
 import {gunzipSync} from 'node:zlib';
 
 import {toConstraint} from './lib/constraints.mjs';
+import {decodeLatin1Escapes, decodeLatin1EscapesDeep} from './lib/easymode-tcl.mjs';
 import {legacyEasymodesDir, legacyLocalization, legacyProfiles, legacyReceiverTypes} from './lib/legacy.mjs';
 import {
     dataDir,
@@ -159,7 +160,8 @@ function localized(candidates) {
     const out = {};
     for (const language of LANGUAGES) {
         const value = candidates[language];
-        if (typeof value === 'string' && value.trim() !== '') out[language] = value;
+        // B-90: openccu-data's profiles and the 2.7.1 localization keep the WebUI's %XX escapes
+        if (typeof value === 'string' && value.trim() !== '') out[language] = decodeLatin1Escapes(value);
     }
     return out;
 }
@@ -225,7 +227,10 @@ for (const receiverType of receiverTypes) {
                 en: p?.description?.en || legacyText.en?.[id],
                 tr: legacyText.tr?.[id],
             });
-            const controls = easymodeControls?.receivers[receiverType]?.[senderType]?.[String(id)];
+            // B-90: the easymodes' localization files escape their labels as %XX as well
+            const controls = decodeLatin1EscapesDeep(
+                easymodeControls?.receivers[receiverType]?.[senderType]?.[String(id)],
+            );
             if (controls) profilesWithControls += 1;
             list.push({
                 id,

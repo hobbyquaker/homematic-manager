@@ -66,7 +66,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -127,7 +127,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -188,7 +188,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -200,7 +200,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -294,13 +294,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -361,7 +361,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -373,7 +373,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       }
@@ -456,7 +456,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -530,7 +530,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -604,7 +604,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -616,7 +616,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -723,13 +723,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -789,7 +789,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
+              {"de": "Überschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
               {
                 "de": "Unterschreiten der unteren Helligkeitsschwelle",
                 "en": "Value falls below lower brightness threshold"
@@ -806,7 +806,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -857,7 +857,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
+              {"de": "Überschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
               {
                 "de": "Unterschreiten der unteren Helligkeitsschwelle",
                 "en": "Value falls below lower brightness threshold"
@@ -874,7 +874,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -925,7 +925,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
+              {"de": "Überschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"},
               {
                 "de": "Unterschreiten der unteren Helligkeitsschwelle",
                 "en": "Value falls below lower brightness threshold"
@@ -942,7 +942,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -954,7 +954,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -1009,7 +1009,7 @@
                 "de": "Unterschreiten der unteren Helligkeitsschwelle",
                 "en": "Value falls below lower brightness threshold"
               },
-              {"de": "%DCberschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"}
+              {"de": "Überschreiten der oberen Helligkeitsschwelle", "en": "Reaching the upper brightness threshold"}
             ]
           },
           {
@@ -1055,13 +1055,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -1121,7 +1121,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Feuchtigkeitsschwelle"},
+              {"de": "Überschreiten der oberen Feuchtigkeitsschwelle"},
               {
                 "de": "Unterschreiten der unteren Feuchtigkeitsschwelle",
                 "en": "Value falls below lower humidity threshold"
@@ -1138,7 +1138,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -1189,7 +1189,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Feuchtigkeitsschwelle"},
+              {"de": "Überschreiten der oberen Feuchtigkeitsschwelle"},
               {
                 "de": "Unterschreiten der unteren Feuchtigkeitsschwelle",
                 "en": "Value falls below lower humidity threshold"
@@ -1206,7 +1206,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -1257,7 +1257,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Feuchtigkeitsschwelle"},
+              {"de": "Überschreiten der oberen Feuchtigkeitsschwelle"},
               {
                 "de": "Unterschreiten der unteren Feuchtigkeitsschwelle",
                 "en": "Value falls below lower humidity threshold"
@@ -1274,7 +1274,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -1286,7 +1286,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -1341,7 +1341,7 @@
                 "de": "Unterschreiten der unteren Feuchtigkeitsschwelle",
                 "en": "Value falls below lower humidity threshold"
               },
-              {"de": "%DCberschreiten der oberen Feuchtigkeitsschwelle", "en": "Reaching the upper humidity threshold"}
+              {"de": "Überschreiten der oberen Feuchtigkeitsschwelle", "en": "Reaching the upper humidity threshold"}
             ]
           },
           {
@@ -1387,13 +1387,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -1454,7 +1454,7 @@
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
               {
-                "de": "%DCberschreiten der oberen Feinstaubkonzentration",
+                "de": "Überschreiten der oberen Feinstaubkonzentration",
                 "en": "Reaching the upper particulate matter threshold"
               },
               {
@@ -1473,7 +1473,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -1525,7 +1525,7 @@
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
               {
-                "de": "%DCberschreiten der oberen Feinstaubkonzentration",
+                "de": "Überschreiten der oberen Feinstaubkonzentration",
                 "en": "Reaching the upper particulate matter threshold"
               },
               {
@@ -1544,7 +1544,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -1596,7 +1596,7 @@
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
               {
-                "de": "%DCberschreiten der oberen Feinstaubkonzentration",
+                "de": "Überschreiten der oberen Feinstaubkonzentration",
                 "en": "Reaching the upper particulate matter threshold"
               },
               {
@@ -1615,7 +1615,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -1627,7 +1627,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -1683,7 +1683,7 @@
                 "en": "Value falls below lower particulate matter threshold"
               },
               {
-                "de": "%DCberschreiten der oberen Feinstaubkonzentration",
+                "de": "Überschreiten der oberen Feinstaubkonzentration",
                 "en": "Reaching the upper particulate matter threshold"
               }
             ]
@@ -1731,13 +1731,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -1811,7 +1811,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -1876,7 +1876,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -1941,7 +1941,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -1953,7 +1953,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -2048,13 +2048,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -2119,7 +2119,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -2175,7 +2175,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -2231,7 +2231,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -2243,7 +2243,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -2332,13 +2332,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -2398,7 +2398,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
+              {"de": "Überschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
               {
                 "de": "Unterschreiten der unteren Temperaturschwelle",
                 "en": "Value falls below lower temperature threshold"
@@ -2415,7 +2415,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -2466,7 +2466,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
+              {"de": "Überschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
               {
                 "de": "Unterschreiten der unteren Temperaturschwelle",
                 "en": "Value falls below lower temperature threshold"
@@ -2483,7 +2483,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -2534,7 +2534,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
+              {"de": "Überschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"},
               {
                 "de": "Unterschreiten der unteren Temperaturschwelle",
                 "en": "Value falls below lower temperature threshold"
@@ -2551,7 +2551,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -2563,7 +2563,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -2618,7 +2618,7 @@
                 "de": "Unterschreiten der unteren Temperaturschwelle",
                 "en": "Value falls below lower temperature threshold"
               },
-              {"de": "%DCberschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"}
+              {"de": "Überschreiten der oberen Temperaturschwelle", "en": "Reaching the upper temperature threshold"}
             ]
           },
           {
@@ -2664,13 +2664,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -2730,7 +2730,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten des oberen Wertes", "en": "Reaching the upper value"},
+              {"de": "Überschreiten des oberen Wertes", "en": "Reaching the upper value"},
               {"de": "Unterschreiten des unteren Wertes", "en": "Reaching the lower value"}
             ]
           },
@@ -2744,7 +2744,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -2795,7 +2795,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten des oberen Wertes", "en": "Reaching the upper value"},
+              {"de": "Überschreiten des oberen Wertes", "en": "Reaching the upper value"},
               {"de": "Unterschreiten des unteren Wertes", "en": "Reaching the lower value"}
             ]
           },
@@ -2809,7 +2809,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -2860,7 +2860,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten des oberen Wertes", "en": "Reaching the upper value"},
+              {"de": "Überschreiten des oberen Wertes", "en": "Reaching the upper value"},
               {"de": "Unterschreiten des unteren Wertes", "en": "Reaching the lower value"}
             ]
           },
@@ -2874,7 +2874,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -2886,7 +2886,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -2938,7 +2938,7 @@
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
               {"de": "Unterschreiten des unteren Wertes", "en": "Reaching the lower value"},
-              {"de": "%DCberschreiten des oberen Wertes", "en": "Reaching the upper value"}
+              {"de": "Überschreiten des oberen Wertes", "en": "Reaching the upper value"}
             ]
           },
           {
@@ -2984,13 +2984,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -3050,7 +3050,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshold"},
+              {"de": "Überschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshold"},
               {"de": "Unterschreiten der unteren Windschwelle", "en": "Value falls below lower wind threshold"}
             ]
           },
@@ -3064,7 +3064,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -3115,7 +3115,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshold"},
+              {"de": "Überschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshold"},
               {"de": "Unterschreiten der unteren Windschwelle", "en": "Value falls below lower wind threshold"}
             ]
           },
@@ -3129,7 +3129,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -3180,7 +3180,7 @@
             "subsets": [6, 7],
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
-              {"de": "%DCberschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshold"},
+              {"de": "Überschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshold"},
               {"de": "Unterschreiten der unteren Windschwelle", "en": "Value falls below lower wind threshold"}
             ]
           },
@@ -3194,7 +3194,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -3206,7 +3206,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -3258,7 +3258,7 @@
             "label": {"de": "Schalten bei", "en": "Switching at"},
             "names": [
               {"de": "Unterschreiten der unteren Windschwelle", "en": "Value falls below lower wind threshold"},
-              {"de": "%DCberschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshold"}
+              {"de": "Überschreiten der oberen Windschwelle", "en": "Reaching the upper wind threshold"}
             ]
           },
           {
@@ -3304,13 +3304,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -3412,7 +3412,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -3506,7 +3506,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -3600,7 +3600,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -3612,7 +3612,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -3739,13 +3739,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -3839,7 +3839,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -3851,7 +3851,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       }
@@ -3953,7 +3953,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -4047,7 +4047,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -4141,7 +4141,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -4153,7 +4153,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -4280,13 +4280,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -4380,7 +4380,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -4392,7 +4392,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       }
@@ -4497,7 +4497,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -4594,7 +4594,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -4691,7 +4691,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -4703,7 +4703,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -4833,13 +4833,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -4936,7 +4936,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -4948,7 +4948,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       }
@@ -5050,7 +5050,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -5144,7 +5144,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -5238,7 +5238,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -5250,7 +5250,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -5376,13 +5376,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -5484,7 +5484,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -5578,7 +5578,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -5672,7 +5672,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -5684,7 +5684,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -5810,13 +5810,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -5921,7 +5921,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -6015,7 +6015,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -6109,7 +6109,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -6121,7 +6121,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -6248,13 +6248,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -6346,7 +6346,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -6358,7 +6358,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       }
@@ -6425,7 +6425,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -6483,7 +6483,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -6541,7 +6541,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -6553,7 +6553,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -6644,13 +6644,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "param",
@@ -6775,7 +6775,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -6879,7 +6879,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -6983,7 +6983,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -6995,7 +6995,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -7132,13 +7132,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "param",
@@ -7252,7 +7252,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -7346,7 +7346,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -7440,7 +7440,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -7452,7 +7452,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -7579,13 +7579,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -7679,7 +7679,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -7691,7 +7691,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       }
@@ -7771,7 +7771,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -7842,7 +7842,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -7913,7 +7913,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -7925,7 +7925,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -8029,13 +8029,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -8128,7 +8128,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -8212,7 +8212,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -8296,7 +8296,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -8308,7 +8308,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -8425,13 +8425,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -8510,7 +8510,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -8566,7 +8566,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -8622,7 +8622,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -8634,7 +8634,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -8723,13 +8723,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -8813,7 +8813,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -8874,7 +8874,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -8935,7 +8935,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -8947,7 +8947,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -9041,13 +9041,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -9141,7 +9141,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -9212,7 +9212,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -9283,7 +9283,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -9295,7 +9295,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -9399,13 +9399,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -9521,7 +9521,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -9615,7 +9615,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -9709,7 +9709,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -9721,7 +9721,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -9848,13 +9848,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -9948,7 +9948,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -9960,7 +9960,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -10076,7 +10076,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -10170,7 +10170,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -10264,7 +10264,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -10276,7 +10276,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -10403,13 +10403,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -10503,7 +10503,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -10515,7 +10515,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -10605,7 +10605,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -10672,7 +10672,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -10739,7 +10739,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -10751,7 +10751,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -10851,13 +10851,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -10969,7 +10969,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -11072,7 +11072,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -11175,7 +11175,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -11187,7 +11187,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -11323,13 +11323,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -11347,7 +11347,7 @@
         "key": "OpenUp",
         "name": {"de": "auf / hoch", "en": "open / up"},
         "description": {
-          "de": "Mit Schlie%DFen des Schalters fährt die Markise / der Rollladen für die festgelegte Zeit ganz hoch. Ist eine Hochfahrverzögerungszeit eingestellt, wird die Jalousie erst nach Ablauf dieser Zeit hochgefahren."
+          "de": "Mit Schließen des Schalters fährt die Markise / der Rollladen für die festgelegte Zeit ganz hoch. Ist eine Hochfahrverzögerungszeit eingestellt, wird die Jalousie erst nach Ablauf dieser Zeit hochgefahren."
         },
         "params": {
           "LONG_COND_VALUE_LO": {"kind": "fixed", "value": 50},
@@ -11433,7 +11433,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -11442,7 +11442,7 @@
         "key": "CloseDown",
         "name": {"de": "zu / herunter", "en": "closed / down"},
         "description": {
-          "de": "Mit Schlie%DFen des Schalter fährt die Markise / der Rollladen für die festgelegte Zeit ganz herunter. Ist eine Herunterfahrverzögerungszeit eingestellt, wird die Jalousie erst nach Ablauf dieser Zeit runtergefahren."
+          "de": "Mit Schließen des Schalter fährt die Markise / der Rollladen für die festgelegte Zeit ganz herunter. Ist eine Herunterfahrverzögerungszeit eingestellt, wird die Jalousie erst nach Ablauf dieser Zeit runtergefahren."
         },
         "params": {
           "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
@@ -11529,7 +11529,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -11538,7 +11538,7 @@
         "key": "OpenClose_UpDown",
         "name": {"de": "auf / zu & hoch / herunter", "en": "open / closed & up / down"},
         "description": {
-          "de": "Mit Schlie%DFen des Schalter fährt die Markise / der Rollladen im Wechsel ganz hoch bzw. ganz herunter (Toggle-Funktion). Ist eine Verzögerungszeit eingestellt, wird die Beschattung erst nach Ablauf dieser Zeit gefahren."
+          "de": "Mit Schließen des Schalter fährt die Markise / der Rollladen im Wechsel ganz hoch bzw. ganz herunter (Toggle-Funktion). Ist eine Verzögerungszeit eingestellt, wird die Beschattung erst nach Ablauf dieser Zeit gefahren."
         },
         "params": {
           "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
@@ -11625,7 +11625,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -11637,7 +11637,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -11646,7 +11646,7 @@
         "key": "TargetPosition",
         "name": {"de": "Position anfahren", "en": "move to position"},
         "description": {
-          "de": "Mit Schlie%DFen des Schalter fährt die Markise / der Rollladen für die festgelegte Zeit zur gewünschten Position. Ist eine entsprechende Verzögerungszeit eingestellt, wird die Beschattung erst nach Ablauf dieser Zeit gefahren."
+          "de": "Mit Schließen des Schalter fährt die Markise / der Rollladen für die festgelegte Zeit zur gewünschten Position. Ist eine entsprechende Verzögerungszeit eingestellt, wird die Beschattung erst nach Ablauf dieser Zeit gefahren."
         },
         "params": {
           "LONG_COND_VALUE_HI": {"kind": "fixed", "value": 100},
@@ -11762,13 +11762,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }
@@ -11849,7 +11849,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -11921,7 +11921,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       },
@@ -11993,7 +11993,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           },
           {
             "kind": "time",
@@ -12005,7 +12005,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           }
         ]
       },
@@ -12110,13 +12110,13 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Hochfahrverz%F6gerungszeit", "en": "Up-delay"}
+            "label": {"de": "Hochfahrverzögerungszeit", "en": "Up-delay"}
           },
           {
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Herunterfahrverz%F6gerungszeit", "en": "Down-delay"}
+            "label": {"de": "Herunterfahrverzögerungszeit", "en": "Down-delay"}
           }
         ]
       }

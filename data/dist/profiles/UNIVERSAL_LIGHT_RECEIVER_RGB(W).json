@@ -151,7 +151,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -192,7 +192,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -523,7 +523,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -564,7 +564,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -1374,7 +1374,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -1535,7 +1535,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -2376,7 +2376,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -2417,7 +2417,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -2748,7 +2748,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -2789,7 +2789,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -3120,7 +3120,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -3161,7 +3161,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -3492,7 +3492,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -3533,7 +3533,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -4310,7 +4310,7 @@
             "kind": "time",
             "prefix": "SHORT_ONDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",
@@ -4463,7 +4463,7 @@
             "kind": "time",
             "prefix": "SHORT_OFFDELAY_TIME",
             "selector": "delay",
-            "label": {"de": "Farbwechselverz%F6gerung", "en": "Color change delay"}
+            "label": {"de": "Farbwechselverzögerung", "en": "Color change delay"}
           },
           {
             "kind": "time",

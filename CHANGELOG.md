@@ -6,6 +6,14 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [3.1.2] — 2026-10-03
+
+### Changed
+
+- **An icon for openccu-lite.** The addon manifest declares the app's icon (`www/icon.png`), so openccu-lite shows it
+  in its addon menu, tab bar, Services rows, Addons page and catalogue instead of the addon's initial. The application
+  is the same as in 3.1.1.
+
 ## [3.1.1] — 2026-10-02
 
 ### Changed
@@ -1707,6 +1715,7 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
+[3.1.2]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.1...v3.1.2
 [3.1.1]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.0...v3.1.1
 [3.1.0]: https://github.com/hobbyquaker/homematic-manager/compare/v3.0.1...v3.1.0
 [3.0.1]: https://github.com/hobbyquaker/homematic-manager/compare/v3.0.0...v3.0.1

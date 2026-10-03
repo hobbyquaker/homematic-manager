@@ -481,14 +481,6 @@ test('a declined HmIP key is said as such, with the way to the key entry (task 8
  * the key as a cause. The German text is the unit test's.
  */
 test('a CCU names the key as a cause when an HmIP start with a key ran out (task 88)', async ({page, host, sim}) => {
-    // hm-simulator (1.3) has no `setInstallModeWithWhitelist` and faults it; here it opens the
-    // same timed window `setInstallMode` does, which is all hmipserver's answer amounts to
-    const setInstallMode = sim.rpcMethods['setInstallMode'];
-    if (setInstallMode === undefined) {
-        throw new Error('hm-simulator has no setInstallMode');
-    }
-    sim.rpcMethods['setInstallModeWithWhitelist'] = (iface, params) => setInstallMode(iface, params.slice(0, 2));
-
     await page.goto(`${host.url}#/HmIP-RF/devices`);
     await page.getByTestId('devices-add').click();
     await page.getByTestId('add-device-hmip-mode').selectOption('KEY');
@@ -497,7 +489,11 @@ test('a CCU names the key as a cause when an HmIP start with a key ran out (task
     await page.getByTestId('add-device-dialog').locator('.hmm-add-seconds').fill('10');
     await page.getByTestId('add-device-start').click();
     await expect(page.getByTestId('add-device-countdown')).toBeVisible();
+    // hm-simulator 1.4.0 opens hmipserver's install mode for the whitelist
     expect(sim.getInstallMode('hmip')).toBeGreaterThan(0);
+    expect(sim.getInstallWhitelist('hmip')).toEqual([
+        {ADDRESS: '3014F711A000000000001234', KEY_MODE: 'LOCAL', KEY: expect.stringMatching(/^[0-9A-F]{32}$/i)},
+    ]);
 
     // the window runs out and nothing joined
     const notice = page.getByTestId('add-device-nothing-joined');

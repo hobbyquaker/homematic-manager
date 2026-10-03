@@ -39,6 +39,8 @@ test.beforeAll(async () => {
 
 test('a new switch takes over the old one it replaces (task 8)', async ({page, host, sim}) => {
     sim.addDevice('rfd', ...sameTypeAs(sim, BIDCOS_SWITCH, NEW_SWITCH));
+    // rfd offers only a device of the same type that no longer answers (hm-simulator 1.3.1, as measured)
+    sim.setReachable('rfd', BIDCOS_SWITCH, false);
     await page.goto(`${host.url}#/BidCos-RF/devices`);
     const row = page.locator(`[data-row-id="${NEW_SWITCH}"]`);
     await expect(row).toBeVisible();

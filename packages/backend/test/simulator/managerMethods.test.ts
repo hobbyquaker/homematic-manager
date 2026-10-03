@@ -95,10 +95,11 @@ describe.skipIf(!simulatorAvailable)('the interface methods of hm-simulator 1.3.
             .poll(async () => (await harness.backend.request('devices.list', 'BidCos-RF')).length)
             .toBeGreaterThanOrEqual(6);
 
+        // rfd offers only a device of the same type that no longer answers (hm-simulator 1.3.1, as measured)
+        expect(await harness.backend.request('devices.replaceable', 'BidCos-RF', 'LEQ0000002')).toEqual([]);
+        sim.setReachable('rfd', 'LEQ0000001', false);
         const replaceable = await harness.backend.request('devices.replaceable', 'BidCos-RF', 'LEQ0000002');
         expect(replaceable.map((device) => device.ADDRESS)).toEqual(['LEQ0000001']);
-        // (hm-simulator answers replaceDevice with '' where the specification says a boolean, so the
-        // backend's answer is not asserted; what happened on the interface is)
         await harness.backend.request('devices.replace', 'BidCos-RF', 'LEQ0000001', 'LEQ0000002');
         expect(sim.getDevice('rfd', 'LEQ0000001')).toBe(false);
         // hmipserver answers the method with an empty body: no candidates, and no error

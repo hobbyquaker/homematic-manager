@@ -15,26 +15,6 @@ Eine ausführliche Beschreibung der 2.x-Oberfläche steht im
 
 <br clear="left"/>
 
-> **Version 3.0.0 ist erschienen.**
-> Das letzte 2.x-Release ist **2.7.1** (2023-01-28), eine reine Electron-App. Version
-> 3.0 ist ein Neubau auf aktuellem Electron, Svelte 5 und einem getesteten TypeScript-Kern und
-> läuft zusätzlich als Server und als CCU-Addon. Die Entwicklung findet auf `master` statt, der
-> 2.7.1-Stand ist der Tag [`2.7.1`](https://github.com/hobbyquaker/homematic-manager/tree/2.7.1).
-> Das aktuelle Release steht unter [Releases](https://github.com/hobbyquaker/homematic-manager/releases/latest), mit
-> Installern für Windows, macOS und Linux, den drei CCU-Addon-Paketen, dem Docker-Image und dem npm-Paket
-> (`npm install -g homematic-manager`). Bekannte Probleme stehen in den Release-Notes.
-
-| hell | dunkel (D-22) |
-| --- | --- |
-| [![Geräte](docs/hmm1.png)](docs/hmm1.png) | [![Geräte, dunkel](docs/hmm1-dark.png)](docs/hmm1-dark.png) |
-| [![Paramset-Editor mit Vorschau](docs/hmm2.png)](docs/hmm2.png) | [![Paramset-Editor mit Vorschau, dunkel](docs/hmm2-dark.png)](docs/hmm2-dark.png) |
-| [![Verknüpfungen](docs/hmm3.png)](docs/hmm3.png) | [![Verknüpfungen, dunkel](docs/hmm3-dark.png)](docs/hmm3-dark.png) |
-
-_Oben die Geräteliste mit aufgeklappter Kanaltabelle, in der Mitte der Paramset-Editor mit der
-Schreibvorschau (es wird nur geschrieben, was geändert wurde), unten die Verknüpfungen mit dem
-Easy-Mode-Dialog. Die Bilder entstehen aus der laufenden 3.0-Oberfläche im Demo-Modus
-(`npm run screenshots`), nicht aus einer Installation — die Geräte darin sind erfunden._
-
 ## Installation
 
 Alle Installationsarten führen **dasselbe Backend und dieselbe Oberfläche** aus und benutzen
@@ -72,6 +52,20 @@ reines Node.
   im LAN, damit erreicht die CCU den Callback ohne NAT und ohne Portfreigabe.
 - **Docker** geht auch, ist aber wegen des Callbacks der fummeligste Weg — die Seite dazu sagt,
   worauf zu achten ist.
+
+## Bilder
+
+| hell | dunkel |
+| --- | --- |
+| [![Geräte](docs/hmm1.png)](docs/hmm1.png) | [![Geräte, dunkel](docs/hmm1-dark.png)](docs/hmm1-dark.png) |
+| [![Direktverknüpfung im Easy Mode](docs/hmm2.png)](docs/hmm2.png) | [![Direktverknüpfung im Easy Mode, dunkel](docs/hmm2-dark.png)](docs/hmm2-dark.png) |
+| [![Wochenprogramm eines Heizkörperthermostats](docs/hmm3.png)](docs/hmm3.png) | [![Wochenprogramm eines Heizkörperthermostats, dunkel](docs/hmm3-dark.png)](docs/hmm3-dark.png) |
+
+_Oben die Geräteliste mit aufgeklappter Kanaltabelle, in der Mitte eine Direktverknüpfung
+(Wandtaster → Jalousieaktor) im Easy Mode, unten das Wochenprogramm eines Heizkörperthermostats
+(HM-CC-RT-DN). Die oberen beiden Bilder stammen aus einer Laborinstallation mit echten Geräten, das
+Wochenprogramm aus dem [hm-simulator](https://github.com/hobbyquaker/hm-simulator) mit den
+Paramset-Beschreibungen des echten Geräts._
 
 ## Funktionsübersicht
 
@@ -200,13 +194,6 @@ HomematicIP devices: pair and unpair devices, edit device and channel configurat
 create and maintain direct links, judge radio quality (RSSI), acknowledge service messages, watch
 the live event stream and call any RPC method by hand. The user interface is German and English.
 
-**Version 3.0.0 is released.** 2.7.1 (2023-01-28) is the last 2.x release and is a
-desktop app only; 3.0 is a rebuild on current Electron, Svelte 5 and a tested
-TypeScript core that additionally runs as a server and as a CCU addon. Work happens on `master`;
-the 2.7.1 sources are the tag [`2.7.1`](https://github.com/hobbyquaker/homematic-manager/tree/2.7.1). The current release is on the
-[releases](https://github.com/hobbyquaker/homematic-manager/releases/latest) page, with the Windows, macOS and Linux
-installers, the three CCU addon packages, the Docker image and the npm package (`npm install -g homematic-manager`).
-
 Every install type runs the same backend and the same UI and shares one configuration format, so
 moving between them is a copy (D-25):
 
@@ -214,7 +201,7 @@ moving between them is a copy (D-25):
 | --- | --- | --- | --- |
 | [CCU addon](docs/install-addon.md) | CCU3, ELV-Charly, OpenCCU — `armv7l`, `aarch64`, `x86_64` | `hmm-ccu-<arch>-<version>.tar.gz`, uploaded in _Systemsteuerung → Zusatzsoftware_ | `/usr/local/hmm/config.json` |
 | [Addon on openccu-lite](docs/openccu-lite.md) | [openccu-lite](https://github.com/hobbyquaker/openccu-lite), the CCU firmware without ReGaHSS — `aarch64`, `x86_64` | installed from the system's addon catalogue (_Addons → Catalogue_); the same package as on a CCU | `/usr/local/hmm/config.json` |
-| [Desktop app](docs/install-electron.md) | Windows 10+, macOS 12+, Linux glibc 2.31+ | installer / AppImage / deb / dmg from the release | `%APPDATA%\Homematic Manager`, `~/Library/Application Support/Homematic Manager`, `~/.config/Homematic Manager` |
+| [Desktop app](docs/install-electron.md) | Windows 10+, macOS 12+, Linux glibc 2.31+ | installer / AppImage / deb / dmg from the [release](https://github.com/hobbyquaker/homematic-manager/releases/latest) | `%APPDATA%\Homematic Manager`, `~/Library/Application Support/Homematic Manager`, `~/.config/Homematic Manager` |
 | [Server in an LXC](docs/install-lxc.md) (recommended) | Proxmox / Debian 12+ / any Linux with Node ≥ 22.12 | `npm install -g homematic-manager` then `homematic-manager-web --install` | `/var/lib/homematic-manager/config.json` |
 | [Docker](docs/install-docker.md) | `amd64`, `arm64`, `arm/v7` | `docker run … ghcr.io/hobbyquaker/homematic-manager:latest` | `/data/config.json` |
 

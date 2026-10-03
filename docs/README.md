@@ -76,8 +76,12 @@ For the maintainer; nothing here is run by an agent.
 ## Screenshots
 
 `hmm1.png`, `hmm2.png` and `hmm3.png` in this directory are the ones the README shows, and
-`hmm1-dark.png`, `hmm2-dark.png`, `hmm3-dark.png` are the same three in the dark theme (D-22).
-They are taken from the running 3.0 UI by [`../tools/screenshots.mjs`](../tools/screenshots.mjs)
-(`npm run screenshots`), which starts `apps/web` in `--demo` mode and drives chromium through the
-three workflows at 1280×800 in German. Nothing in them comes from a real installation. Re-run the
-script rather than editing an image; the header of the script says what each shot shows.
+`hmm1-dark.png`, `hmm2-dark.png`, `hmm3-dark.png` are the same three in the dark theme (D-22), all
+1280×800 in German. Since 3.1.2 they come from real devices rather than the demo fixture:
+`hmm1` is the Devices tab with an HmIP-WRC2's channels open and `hmm2` a WRC2 → HmIP-BBL direct
+link in easy mode, both from the addon on a lab installation; `hmm3` is the week programme of an
+HM-CC-RT-DN, from the web host against [hm-simulator](https://github.com/hobbyquaker/hm-simulator)'s
+fixture with the device's real paramset descriptions, because no thermostat was paired in the lab.
+[`../tools/screenshots.mjs`](../tools/screenshots.mjs) (`npm run screenshots`) still takes the
+earlier demo-mode set (`apps/web` in `--demo` mode); it overwrites these files unless given
+`--out <dir>`.

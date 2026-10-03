@@ -867,6 +867,20 @@ export const UI_MESSAGES: MessageCatalogue = {
             de: 'Der Anlernmodus ist abgelaufen, und kein Gerät hat sich angemeldet. Ein Gerät, das noch an einer anderen Zentrale angelernt ist, sendet keine Anlernanfrage: Gerät auf Werkseinstellungen zurücksetzen und erneut starten.',
             en: 'The install mode has ended and no device has joined. A device that is still paired with another central sends no inclusion request: reset it to factory state and start again.',
         },
+    // Task 88: an HmIP start with a key, where nothing can say that hmipserver declined it - the key is the first suspect.
+    'The install mode has ended and no device has joined. If the device did try (its LED lit up red), the key given does not match it: check the key (QR code / KEY) and start again. A device that is still paired with another central sends no inclusion request: reset it to factory state and start again.':
+        {
+            de: 'Der Anlernmodus ist abgelaufen, und kein Gerät hat sich angemeldet. Hat das Gerät es versucht (seine LED leuchtete rot), passt der angegebene Schlüssel nicht zu ihm: Schlüssel prüfen (QR-Code / KEY) und erneut starten. Ein Gerät, das noch an einer anderen Zentrale angelernt ist, sendet keine Anlernanfrage: Gerät auf Werkseinstellungen zurücksetzen und erneut starten.',
+            en: 'The install mode has ended and no device has joined. If the device did try (its LED lit up red), the key given does not match it: check the key (QR code / KEY) and start again. A device that is still paired with another central sends no inclusion request: reset it to factory state and start again.',
+        },
+    // Task 88: openccu-lite's warning hmip-key-declined during the install mode - the device did answer.
+    'The device key does not match': {de: 'Der Geräteschlüssel passt nicht', en: 'The device key does not match'},
+    'The device {sgtin} did answer, but its device key does not match. Check the key (QR code / KEY) and pair it again.':
+        {
+            de: 'Das Gerät {sgtin} hat sich gemeldet, aber der Geräteschlüssel passt nicht. Schlüssel prüfen (QR-Code / KEY) und erneut anlernen.',
+            en: 'The device {sgtin} did answer, but its device key does not match. Check the key (QR code / KEY) and pair it again.',
+        },
+    'Enter the key': {de: 'Schlüssel eingeben', en: 'Enter the key'},
     // Task 76: the BidCos text - a device with another system's key does ask; rfd refuses it and the dialog asks for the key.
     "The install mode has ended and no device has joined. Put the device into its pairing mode and start again. A device that holds another system's security key is reported here and that key asked for; a factory reset does not remove it.":
         {

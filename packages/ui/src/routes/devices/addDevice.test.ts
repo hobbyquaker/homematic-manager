@@ -381,6 +381,137 @@ describe('the add-device dialog', () => {
         expect(screen.queryByTestId('add-device-nothing-joined')).toBeNull();
     });
 
+    /*
+     * Task 88: an HmIP device that answers with a key hmipserver declines. On openccu-lite the
+     * system shows that as its warning `hmip-key-declined`; the dialog takes what the system knew
+     * when the window opened, asks again every fifth tick, and a decline that is new is this
+     * window's: the device did answer, so "nothing joined" is not said.
+     */
+    const SGTIN = '3014F711A000000000000088';
+    const OLD_DECLINE = {sgtin: '3014F711A000000000000002', variant: '3014F711A000000000000002@2026-10-03T09:00:00Z'};
+    const DECLINE = {
+        sgtin: SGTIN,
+        address: '00000000000088',
+        at: '2026-10-03T10:45:12Z',
+        variant: `${SGTIN}@2026-10-03T10:45:12Z`,
+    };
+
+    async function startWithKey(): Promise<void> {
+        await fireEvent.input(screen.getByTestId('add-device-sgtin'), {target: {value: SGTIN}});
+        // B-72: a printed key (made up)
+        await fireEvent.input(screen.getByTestId('add-device-key'), {
+            target: {value: '1TGJ8-Y1FAE-4UW1R-1EFFF-9E9EHZ'},
+        });
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLButtonElement>('add-device-start').disabled).toBe(false);
+        });
+        await fireEvent.click(screen.getByTestId('add-device-start'));
+    }
+
+    it('says the device key does not match when the system declined it during the window (task 88)', async () => {
+        vi.useFakeTimers({shouldAdvanceTime: true, toFake: ['setInterval', 'clearInterval']});
+        try {
+            let left = 60;
+            transport.respond('devices.installMode.get', () => {
+                left -= 1;
+                return left;
+            });
+            // the system already knew a decline of another device when the window opened
+            let declines: unknown[] = [OLD_DECLINE];
+            transport.respond('meta.keyDeclines', () => declines as never);
+            await openOnHmip();
+            await startWithKey();
+            await waitFor(() => {
+                expect(screen.getByTestId('add-device-countdown')).toBeTruthy();
+            });
+            expect(transport.countOf('meta.keyDeclines')).toBe(1);
+
+            // five ticks: asked again, only the old decline - nothing to say
+            await vi.advanceTimersByTimeAsync(5000);
+            await waitFor(() => {
+                expect(transport.countOf('meta.keyDeclines')).toBe(2);
+            });
+            expect(screen.queryByTestId('add-device-key-declined')).toBeNull();
+
+            // the device asks and is declined: the next fifth tick says so, the window keeps running
+            declines = [OLD_DECLINE, DECLINE];
+            await vi.advanceTimersByTimeAsync(5000);
+            const block = await waitFor(() => screen.getByTestId('add-device-key-declined'));
+            expect(block.textContent).toContain('Der Geräteschlüssel passt nicht');
+            expect(block.textContent).toContain(
+                `Das Gerät ${SGTIN} hat sich gemeldet, aber der Geräteschlüssel passt nicht. Schlüssel prüfen (QR-Code / KEY) und erneut anlernen.`,
+            );
+            expect(screen.getByTestId('add-device-countdown')).toBeTruthy();
+
+            // to the key entry: the window is stopped, the SGTIN kept, the key field focused
+            await fireEvent.click(screen.getByTestId('add-device-key-declined-enter'));
+            await waitFor(() => {
+                expect(transport.lastCall('devices.installMode.set')).toEqual(['HmIP-RF', false, undefined]);
+            });
+            await waitFor(() => {
+                expect(document.activeElement).toBe(screen.getByTestId('add-device-key'));
+            });
+            expect(screen.getByTestId<HTMLInputElement>('add-device-sgtin').value).toBe(SGTIN);
+            expect(screen.queryByTestId('add-device-countdown')).toBeNull();
+            expect(screen.getByTestId('add-device-key-declined')).toBeTruthy();
+            expect(screen.queryByTestId('add-device-nothing-joined')).toBeNull();
+
+            // a new start takes it away; the decline it knew is the new window's baseline
+            await fireEvent.click(screen.getByTestId('add-device-start'));
+            await waitFor(() => {
+                expect(screen.queryByTestId('add-device-key-declined')).toBeNull();
+            });
+            await vi.advanceTimersByTimeAsync(5000);
+            await waitFor(() => {
+                expect(transport.countOf('meta.keyDeclines')).toBeGreaterThanOrEqual(5);
+            });
+            expect(screen.queryByTestId('add-device-key-declined')).toBeNull();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('says the decline instead of nothing joined when the window closes on it (task 88)', async () => {
+        // getInstallMode answers 0: the first tick finds the window closed, and the last look finds the decline
+        let declines: unknown[] = [];
+        transport.respond('meta.keyDeclines', () => declines as never);
+        await openOnHmip();
+        await startAnyDevice();
+        await waitFor(() => {
+            expect(transport.countOf('meta.keyDeclines')).toBe(1);
+        });
+        declines = [DECLINE];
+        const block = await waitFor(() => screen.getByTestId('add-device-key-declined'), {timeout: 3000});
+        expect(block.textContent).toContain(SGTIN);
+        expect(screen.queryByTestId('add-device-nothing-joined')).toBeNull();
+
+        // the button leads to the key entry, from "any device" to "with SGTIN and key"
+        await fireEvent.click(screen.getByTestId('add-device-key-declined-enter'));
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLSelectElement>('add-device-hmip-mode').value).toBe('KEY');
+        });
+        expect(screen.getByTestId<HTMLInputElement>('add-device-sgtin').value).toBe(SGTIN);
+        // the window had closed already: nothing is stopped
+        expect(transport.countOf('devices.installMode.set')).toBe(1);
+    });
+
+    it('names the key as a cause when a key was given and nothing can say it was declined (task 88)', async () => {
+        // a CCU: no warnings API, so nothing is asked during the window
+        await openOnHmip();
+        await startWithKey();
+        const notice = await waitFor(() => screen.getByTestId('add-device-nothing-joined'), {timeout: 3000});
+        expect(notice.textContent).toContain('passt der angegebene Schlüssel nicht zu ihm');
+        expect(notice.textContent).toContain('Werkseinstellungen');
+        expect(transport.countOf('meta.keyDeclines')).toBe(1);
+
+        // without a key, the old text
+        await startAnyDevice();
+        await waitFor(() => {
+            expect(screen.getByTestId('add-device-nothing-joined').textContent).not.toContain('Schlüssel');
+        });
+        expect(screen.queryByTestId('add-device-key-declined')).toBeNull();
+    });
+
     /**
      * Task 76: a BidCos device that holds another system's security key does ask to join; rfd
      * refuses it quietly and only `getKeyMismatchDevice(true)` tells. The dialog asks every fifth

@@ -49,7 +49,7 @@ interface Recorded {
 }
 
 /** A box made of a function: `/version`, `/snapshot`, an event stream that never sends anything. */
-function fakeBox(options: {version?: unknown; status?: number} = {}): {
+function fakeBox(options: {version?: unknown; status?: number; warnings?: () => Response} = {}): {
     fetch: typeof globalThis.fetch;
     calls: Recorded[];
 } {
@@ -87,6 +87,9 @@ function fakeBox(options: {version?: unknown; status?: number} = {}): {
         }
         if (address.endsWith('/snapshot')) {
             return Promise.resolve(json(SNAPSHOT));
+        }
+        if (address.endsWith('/api/system/v1/warnings')) {
+            return Promise.resolve(options.warnings?.() ?? json({error: 'unknown-path', message: 'no'}, 404));
         }
         return Promise.resolve(json({revision: 5}));
     }) as unknown as typeof globalThis.fetch;
@@ -293,6 +296,54 @@ describe('the detection', () => {
         const ccu = fakeBox({status: 404});
         const local = await service({metaUrl: 'http://ccu'}, ccu.fetch);
         await expect(local.hmipPairing()).resolves.toBeUndefined();
+        expect(ccu.calls.length).toBe(1);
+    });
+
+    /**
+     * Task 88: the declined keys are the system's warning `hmip-key-declined`, read from its
+     * warnings API with the system API's credential; a system without the route, a credential it
+     * refuses and a CCU all have nothing to say.
+     */
+    it("reads the declined HmIP keys from the system's warnings, and has none without a system", async () => {
+        const json = (body: unknown, status = 200): Response =>
+            new Response(JSON.stringify(body), {status, headers: {'Content-Type': 'application/json'}});
+        const decline = {
+            id: 'hmip-key-declined',
+            variant: '3014F711A000000000000088@2026-10-03T10:45:12Z',
+            severity: 'warning',
+            params: {sgtin: '3014F711A000000000000088', address: '00000000000088', at: '2026-10-03T10:45:12Z'},
+        };
+        let answer = (): Response => json({warnings: [decline]});
+        const box = fakeBox({warnings: () => answer()});
+        const meta = await service(
+            {metaUrl: 'http://box', metaToken: 'olt_0123456789abcdef0123456789abcdef'},
+            box.fetch,
+        );
+        await expect(meta.hmipKeyDeclines()).resolves.toEqual([
+            {
+                sgtin: '3014F711A000000000000088',
+                address: '00000000000088',
+                at: '2026-10-03T10:45:12Z',
+                variant: '3014F711A000000000000088@2026-10-03T10:45:12Z',
+            },
+        ]);
+        const call = box.calls.find((entry) => entry.url.endsWith('/api/system/v1/warnings'));
+        expect(call?.method).toBe('GET');
+        expect(call?.authorization).toBe('Bearer olt_0123456789abcdef0123456789abcdef');
+
+        answer = () => json({warnings: []});
+        await expect(meta.hmipKeyDeclines()).resolves.toEqual([]);
+        // a credential the system refuses, a system without the route: nothing to say
+        answer = () => json({error: 'forbidden', message: 'system:read'}, 403);
+        await expect(meta.hmipKeyDeclines()).resolves.toBeUndefined();
+        answer = () => json({error: 'unknown-path', message: 'no'}, 404);
+        await expect(meta.hmipKeyDeclines()).resolves.toBeUndefined();
+        answer = () => new Response('<html>', {status: 200, headers: {'Content-Type': 'text/html'}});
+        await expect(meta.hmipKeyDeclines()).resolves.toBeUndefined();
+
+        const ccu = fakeBox({status: 404});
+        const local = await service({metaUrl: 'http://ccu'}, ccu.fetch);
+        await expect(local.hmipKeyDeclines()).resolves.toBeUndefined();
         expect(ccu.calls.length).toBe(1);
     });
 

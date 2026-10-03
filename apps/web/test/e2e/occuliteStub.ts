@@ -48,6 +48,13 @@ export interface OcculiteStub {
     readonly groups: StubGroup[];
     /** Every request under the groups API, oldest first: `PUT /groups/1 {"members":[]}`. */
     readonly requests: string[];
+    /**
+     * Task 88: what `GET /api/system/v1/warnings` answers now - a test pushes a warning into it
+     * while the install mode runs, as occulited would once hmipserver logs a decline.
+     */
+    readonly warnings: StubWarning[];
+    /** Task 88: how often the warnings were read. */
+    readonly warningReads: () => number;
     close(): Promise<void>;
 }
 
@@ -67,12 +74,24 @@ export interface StubPairing {
     offline_pairing: boolean;
 }
 
+/** One Status page warning, as occulited's `GET /warnings` lists it (task 88: `hmip-key-declined`). */
+export interface StubWarning {
+    id: string;
+    variant: string;
+    severity: 'error' | 'warning';
+    params?: Record<string, unknown>;
+    href?: string;
+}
+
 export async function startOcculiteStub(options: {
     devices: StubDevice[];
     groups?: StubGroup[];
     hmip?: StubPairing;
+    warnings?: StubWarning[];
 }): Promise<OcculiteStub> {
     const groups: StubGroup[] = structuredClone(options.groups ?? []);
+    const warnings: StubWarning[] = structuredClone(options.warnings ?? []);
+    let warningReads = 0;
     const requests: string[] = [];
     const sockets = new Set<Socket>();
     let nextId = groups.reduce((max, group) => Math.max(max, group.id), 0) + 1;
@@ -161,6 +180,17 @@ export async function startOcculiteStub(options: {
                 } else {
                     json(response, 200, {revision, changed: false});
                 }
+                return;
+            }
+
+            if (url.pathname === '/api/system/v1/warnings' && method === 'GET') {
+                // task 88: occulited answers any session with system:read; the stub knows one token
+                if (request.headers.authorization !== `Bearer ${STUB_TOKEN}`) {
+                    json(response, 401, {error: 'unauthenticated', message: 'login required'});
+                    return;
+                }
+                warningReads += 1;
+                json(response, 200, {warnings});
                 return;
             }
 
@@ -259,6 +289,8 @@ export async function startOcculiteStub(options: {
         url: `http://127.0.0.1:${String(port)}`,
         groups,
         requests,
+        warnings,
+        warningReads: () => warningReads,
         close: () =>
             new Promise<void>((resolve) => {
                 // the event stream holds its socket open; a plain close would wait for it forever

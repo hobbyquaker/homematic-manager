@@ -190,6 +190,26 @@ export interface MetaHmipPairing {
     readonly offline_pairing: boolean;
 }
 
+/**
+ * Task 88: hmipserver turned an HmIP device's inclusion request down because the key it holds for
+ * the device is not that device's key - openccu-lite's Status page warning `hmip-key-declined`
+ * (`GET /api/system/v1/warnings`, openccu-lite task 201). One per device, for its newest decline.
+ */
+export interface MetaHmipKeyDecline {
+    /** The device's SGTIN, as on its sticker. */
+    readonly sgtin: string;
+    /** The device's address, when the system says it. */
+    readonly address?: string;
+    /** When the newest decline was (RFC 3339), when the system says it. */
+    readonly at?: string;
+    /**
+     * The warning's variant, `<sgtin>@<at>`: a later decline of the same device is a new variant,
+     * which is how the pairing dialog tells a decline of its own window from an older one without
+     * comparing two clocks.
+     */
+    readonly variant: string;
+}
+
 /** What `GET /api/meta/v1/version` answers - the runtime detection of the porting kit. */
 export interface MetaVersion {
     readonly api: string;

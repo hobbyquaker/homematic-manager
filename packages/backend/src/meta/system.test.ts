@@ -27,6 +27,7 @@ import {
     SystemLink,
     certificateProblemOf,
     detectSystem,
+    hmipKeyDeclinesOf,
     hmipPairingOf,
     httpsRedirectTarget,
     metaErrorOf,
@@ -372,6 +373,68 @@ describe('the detection', () => {
         expect(hmipPairingOf({...fact, device_keys: -1})).toBeUndefined();
         expect(hmipPairingOf({...fact, offline_pairing: 'yes'})).toBeUndefined();
         expect(hmipPairingOf(null)).toBeUndefined();
+    });
+});
+
+/**
+ * Task 88: openccu-lite's warning `hmip-key-declined` (task 201) in the shape occulited's
+ * `GET /warnings` answers - other warnings around it, an entry without `at` (a journal line without
+ * a timestamp), and what is not that answer at all.
+ */
+describe('the declined HmIP keys of the warnings answer (task 88)', () => {
+    it('keeps the hmip-key-declined entries with their SGTIN, address, time and variant', () => {
+        const answer = {
+            warnings: [
+                {id: 'firewall', variant: 'ipv4', severity: 'error', params: {families: 'ipv4'}},
+                {
+                    id: 'hmip-key-declined',
+                    variant: '3014F711A000000000000088@2026-10-03T10:45:12+02:00',
+                    severity: 'warning',
+                    params: {
+                        sgtin: '3014F711A000000000000088',
+                        address: '00000000000088',
+                        at: '2026-10-03T10:45:12+02:00',
+                    },
+                    href: '/system/keys#device-keys',
+                },
+                {
+                    id: 'hmip-key-declined',
+                    variant: '3014F711A000000000000002@',
+                    severity: 'warning',
+                    params: {sgtin: '3014F711A000000000000002'},
+                },
+                {
+                    id: 'hmip-key-declined',
+                    severity: 'warning',
+                    params: {sgtin: '3014F711A000000000000003', at: '2026-10-03T11:00:00Z'},
+                },
+                {id: 'hmip-key-declined', variant: 'x@y', severity: 'warning', params: {sgtin: ''}},
+                {id: 'hmip-key-declined', variant: 'x@y', severity: 'warning'},
+                null,
+            ],
+        };
+        expect(hmipKeyDeclinesOf(answer)).toEqual([
+            {
+                sgtin: '3014F711A000000000000088',
+                address: '00000000000088',
+                at: '2026-10-03T10:45:12+02:00',
+                variant: '3014F711A000000000000088@2026-10-03T10:45:12+02:00',
+            },
+            {sgtin: '3014F711A000000000000002', variant: '3014F711A000000000000002@'},
+            // no variant from the system: made the way occulited makes it
+            {
+                sgtin: '3014F711A000000000000003',
+                at: '2026-10-03T11:00:00Z',
+                variant: '3014F711A000000000000003@2026-10-03T11:00:00Z',
+            },
+        ]);
+    });
+
+    it('answers an empty list for no warning, and undefined for what is not the answer', () => {
+        expect(hmipKeyDeclinesOf({warnings: []})).toEqual([]);
+        expect(hmipKeyDeclinesOf({warnings: null})).toBeUndefined();
+        expect(hmipKeyDeclinesOf('<html>')).toBeUndefined();
+        expect(hmipKeyDeclinesOf(null)).toBeUndefined();
     });
 });
 

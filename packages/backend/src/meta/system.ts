@@ -40,6 +40,7 @@ import {
     type MetaDocument,
     type MetaErrorCode,
     type MetaEvent,
+    type MetaHmipKeyDecline,
     type MetaHmipPairing,
     type MetaVersion,
     type SystemCertificate,
@@ -333,6 +334,47 @@ export function hmipPairingOf(value: unknown): MetaHmipPairing | undefined {
         return undefined;
     }
     return {keyserver_mode: keyserver_mode as MetaHmipPairing['keyserver_mode'], device_keys, offline_pairing};
+}
+
+/** Task 88: the id of openccu-lite's warning for an HmIP inclusion declined for a wrong key (task 201). */
+export const HMIP_KEY_DECLINED = 'hmip-key-declined';
+
+/**
+ * Task 88: the `hmip-key-declined` entries of a `GET /api/system/v1/warnings` answer, or
+ * `undefined` when the body is not that answer at all (then the system says nothing, which the
+ * pairing dialog treats like a CCU). An entry without a usable SGTIN is skipped, not fatal; `at`
+ * and `address` are kept only as strings.
+ */
+export function hmipKeyDeclinesOf(body: unknown): MetaHmipKeyDecline[] | undefined {
+    if (typeof body !== 'object' || body === null) {
+        return undefined;
+    }
+    const {warnings} = body as {warnings?: unknown};
+    if (!Array.isArray(warnings)) {
+        return undefined;
+    }
+    const declines: MetaHmipKeyDecline[] = [];
+    for (const warning of warnings as unknown[]) {
+        if (typeof warning !== 'object' || warning === null) {
+            continue;
+        }
+        const {id, variant, params} = warning as {id?: unknown; variant?: unknown; params?: unknown};
+        if (id !== HMIP_KEY_DECLINED || typeof params !== 'object' || params === null) {
+            continue;
+        }
+        const {sgtin, address, at} = params as Record<string, unknown>;
+        if (typeof sgtin !== 'string' || sgtin === '') {
+            continue;
+        }
+        const when = typeof at === 'string' && at !== '' ? at : undefined;
+        declines.push({
+            sgtin,
+            ...(typeof address === 'string' && address !== '' ? {address} : {}),
+            ...(when === undefined ? {} : {at: when}),
+            variant: typeof variant === 'string' && variant !== '' ? variant : `${sgtin}@${when ?? ''}`,
+        });
+    }
+    return declines;
 }
 
 /** The version answer in a response body, when it is one. */

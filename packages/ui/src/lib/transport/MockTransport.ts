@@ -496,6 +496,8 @@ export class MockTransport implements Transport {
         });
         // task 66: the demo is a CCU as far as pairing goes; a test that wants a system's answer overrides this
         this.result('meta.pairing', null);
+        // task 88: and it has no warnings API to tell a declined key
+        this.result('meta.keyDeclines', null);
         this.respond('meta.export', () => store.document());
         this.respond('meta.import', (document, mode) => {
             store.import(document, mode ?? 'replace');

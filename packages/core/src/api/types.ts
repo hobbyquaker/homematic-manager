@@ -12,7 +12,14 @@ import type {RpcProtocol, UserDefinedInterface} from '../interfaces/table.js';
 import type {ParamsetDescription} from '../paramset/description.js';
 import type {Paramset, ParamsetWrite, RpcWriteValue} from '../rpc/values.js';
 import type {LanguageChoice} from '../data/types.js';
-import type {MetaDocument, MetaEnum, MetaHmipPairing, MetaImportMode, MetaNodePatch} from '../meta/types.js';
+import type {
+    MetaDocument,
+    MetaEnum,
+    MetaHmipKeyDecline,
+    MetaHmipPairing,
+    MetaImportMode,
+    MetaNodePatch,
+} from '../meta/types.js';
 
 /** Any value an interface process returns: XML-RPC / BIN-RPC scalars, arrays and structs. */
 export type RpcValue = boolean | number | string | RpcValue[] | {[key: string]: RpcValue};
@@ -1099,6 +1106,12 @@ export interface ApiMethods {
      * system from before openccu-lite task 192, a system that does not answer, no connection.
      */
     'meta.pairing': {params: []; result: MetaHmipPairing | null};
+    /**
+     * Task 88: the devices whose HmIP inclusion the system declined for a wrong key (openccu-lite's
+     * warning `hmip-key-declined`), asked afresh each time. `null` wherever nothing can say it: a
+     * CCU, no connection, a system without the warnings API, a credential it refuses, no answer.
+     */
+    'meta.keyDeclines': {params: []; result: MetaHmipKeyDecline[] | null};
     /** The whole document, for a backup or a move between installations. */
     'meta.export': {params: []; result: MetaDocument};
     'meta.import': {params: [document: unknown, mode?: MetaImportMode]; result: null};

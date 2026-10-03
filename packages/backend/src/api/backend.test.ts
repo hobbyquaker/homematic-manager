@@ -1243,6 +1243,75 @@ describe('the HmIP pairing fact of openccu-lite (task 66)', () => {
     });
 });
 
+/**
+ * Task 88: the HmIP inclusions the system declined for a wrong key reach the pairing dialog as
+ * `meta.keyDeclines`, read afresh from the system's warnings each time, and `null` wherever
+ * nothing says anything.
+ */
+describe('the declined HmIP keys of openccu-lite (task 88)', () => {
+    it('is null before a connection and on a CCU', async () => {
+        const backend = await Backend.open({dataDir: dir, importLegacy: false});
+        expect(await backend.request('meta.keyDeclines')).toBeNull();
+        await backend.stop();
+
+        const h = await harness({
+            backend: {metaOptions: {fetch: () => Promise.resolve(new Response('not found', {status: 404}))}},
+        });
+        expect(await h.backend.request('meta.keyDeclines')).toBeNull();
+        await h.backend.stop();
+    });
+
+    it('relays the warnings of a system, asked of the system each time', async () => {
+        const json = (body: unknown): Response =>
+            new Response(JSON.stringify(body), {status: 200, headers: {'Content-Type': 'application/json'}});
+        let warnings: unknown[] = [];
+        let reads = 0;
+        const fetchImpl = ((input: string | URL) => {
+            const url = new URL(String(input));
+            switch (url.pathname) {
+                case '/api/meta/v1/version':
+                    return Promise.resolve(json({api: 'meta', version: 1, format: 1, revision: 3}));
+                case '/api/meta/v1/snapshot':
+                    return Promise.resolve(json({format: 1, revision: 3, objects: {}, enums: {}}));
+                case '/api/meta/v1/events/sse':
+                    return Promise.resolve(
+                        new Response(new ReadableStream({start: () => undefined}), {
+                            headers: {'Content-Type': 'text/event-stream'},
+                        }),
+                    );
+                case '/api/system/v1/warnings':
+                    reads += 1;
+                    return Promise.resolve(json({warnings}));
+                default:
+                    return Promise.resolve(new Response('not found', {status: 404}));
+            }
+        }) as unknown as typeof globalThis.fetch;
+        const h = await harness({
+            connection: {metaUrl: 'http://box', metaToken: 'olt_0123456789abcdef0123456789abcdef'},
+            backend: {metaOptions: {fetch: fetchImpl}},
+        });
+        expect(await h.backend.request('meta.keyDeclines')).toEqual([]);
+        warnings = [
+            {
+                id: 'hmip-key-declined',
+                variant: '3014F711A000000000000088@2026-10-03T10:45:12Z',
+                severity: 'warning',
+                params: {sgtin: '3014F711A000000000000088', address: '00000000000088', at: '2026-10-03T10:45:12Z'},
+            },
+        ];
+        expect(await h.backend.request('meta.keyDeclines')).toEqual([
+            {
+                sgtin: '3014F711A000000000000088',
+                address: '00000000000088',
+                at: '2026-10-03T10:45:12Z',
+                variant: '3014F711A000000000000088@2026-10-03T10:45:12Z',
+            },
+        ]);
+        expect(reads).toBe(2);
+        await h.backend.stop();
+    });
+});
+
 describe('rooms and functions through ReGa (task 27)', () => {
     /**
      * A CCU: no metadata API, and the detection answered at once rather than by a timeout. The

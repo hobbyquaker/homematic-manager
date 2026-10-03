@@ -665,6 +665,11 @@ export class Backend {
                 await this.#metaReady?.catch(() => undefined);
                 return (await this.#meta?.hmipPairing()) ?? null;
             }
+            case 'meta.keyDeclines': {
+                // task 88: as `meta.pairing` - no store yet, or not the system's, has nothing to say
+                await this.#metaReady?.catch(() => undefined);
+                return (await this.#meta?.hmipKeyDeclines()) ?? null;
+            }
             case 'meta.export':
                 return (await this.#requireMeta()).document();
             case 'meta.import':

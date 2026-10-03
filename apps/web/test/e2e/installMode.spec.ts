@@ -400,3 +400,108 @@ test('the printed HmIP key starts the whitelist pairing (B-72)', async ({page, h
         'true, 60, [{"ADDRESS":"3014F711A000000000001234","KEY_MODE":"LOCAL","KEY":"***"}]',
     );
 });
+
+/**
+ * Task 88: an HmIP device answers with a key hmipserver declines - the maintainer's case in
+ * openccu-lite task 201's lab run, where the dialog said after its 60 s that no device had answered.
+ * On openccu-lite the system shows the decline as its warning `hmip-key-declined`; here the stub
+ * holds one decline of another device from before the window, and gets this device's while the
+ * install mode runs. The dialog says the key does not match, the button stops the window and leads
+ * to the key entry; in both themes.
+ */
+test('a declined HmIP key is said as such, with the way to the key entry (task 88)', async ({page}) => {
+    const sgtin = '3014F711A000000000000088';
+    const stub = await startOcculiteStub({
+        devices: [{address: BIDCOS_SWITCH, type: 'HM-LC-Sw1-Pl', name: 'Steckdose'}],
+        warnings: [
+            {
+                id: 'hmip-key-declined',
+                variant: '3014F711A000000000000002@2026-10-03T09:00:00Z',
+                severity: 'warning',
+                params: {sgtin: '3014F711A000000000000002', address: '000000000002AB', at: '2026-10-03T09:00:00Z'},
+                href: '/system/keys#device-keys',
+            },
+        ],
+    });
+    const box = await startForTest({
+        simulator: true,
+        simulatorOptions: structuredClone(SIMULATOR_FIXTURE),
+        connection: {rega: true, language: 'en', metaUrl: stub.url, metaToken: STUB_TOKEN},
+    });
+    const sim = box.simulator as Simulator;
+    try {
+        await page.goto(`${box.url}#/HmIP-RF/devices`);
+        await page.getByTestId('devices-add').click();
+        await page.getByTestId('add-device-hmip-mode').selectOption('ANY');
+        await page.getByTestId('add-device-start').click();
+        await expect(page.getByTestId('add-device-countdown')).toBeVisible();
+        expect(sim.getInstallMode('hmip')).toBeGreaterThan(0);
+        // the decline the system already knew is not this window's
+        await expect.poll(() => stub.warningReads(), {timeout: 10_000}).toBeGreaterThanOrEqual(2);
+        await expect(page.getByTestId('add-device-key-declined')).toHaveCount(0);
+
+        // the device asks, hmipserver declines it, occulited reads the line
+        stub.warnings.push({
+            id: 'hmip-key-declined',
+            variant: `${sgtin}@2026-10-03T10:45:12Z`,
+            severity: 'warning',
+            params: {sgtin, address: '00000000000088', at: '2026-10-03T10:45:12Z'},
+            href: '/system/keys#device-keys',
+        });
+        const block = page.getByTestId('add-device-key-declined');
+        await expect(block).toBeVisible({timeout: 10_000});
+        await expect(block).toContainText('The device key does not match');
+        await expect(block).toContainText(
+            `The device ${sgtin} did answer, but its device key does not match. Check the key (QR code / KEY) and pair it again.`,
+        );
+        await expect(page.getByTestId('add-device-nothing-joined')).toHaveCount(0);
+
+        // the warning colour is the theme's, in light and in dark
+        const border = async (): Promise<string> => block.evaluate((element) => getComputedStyle(element).borderColor);
+        const light = await border();
+        await page.emulateMedia({colorScheme: 'dark'});
+        await expect.poll(border).not.toBe(light);
+        await page.emulateMedia({colorScheme: 'light'});
+
+        // to the key entry: the window is stopped, the SGTIN filled in, the key field waits
+        await page.getByTestId('add-device-key-declined-enter').click();
+        await expect(page.getByTestId('add-device-countdown')).toHaveCount(0);
+        expect(sim.getInstallMode('hmip')).toBe(0);
+        await expect(page.getByTestId('add-device-hmip-mode')).toHaveValue('KEY');
+        await expect(page.getByTestId('add-device-sgtin')).toHaveValue(sgtin);
+        await expect(page.getByTestId('add-device-key')).toBeFocused();
+    } finally {
+        await box.close();
+        await stub.close();
+    }
+});
+
+/**
+ * Task 88, on a CCU (nothing says that a key was declined): a start with a key that runs out names
+ * the key as a cause. The German text is the unit test's.
+ */
+test('a CCU names the key as a cause when an HmIP start with a key ran out (task 88)', async ({page, host, sim}) => {
+    // hm-simulator (1.3) has no `setInstallModeWithWhitelist` and faults it; here it opens the
+    // same timed window `setInstallMode` does, which is all hmipserver's answer amounts to
+    const setInstallMode = sim.rpcMethods['setInstallMode'];
+    if (setInstallMode === undefined) {
+        throw new Error('hm-simulator has no setInstallMode');
+    }
+    sim.rpcMethods['setInstallModeWithWhitelist'] = (iface, params) => setInstallMode(iface, params.slice(0, 2));
+
+    await page.goto(`${host.url}#/HmIP-RF/devices`);
+    await page.getByTestId('devices-add').click();
+    await page.getByTestId('add-device-hmip-mode').selectOption('KEY');
+    await page.getByTestId('add-device-sgtin').fill('3014-F711-A000-0000-0000-1234');
+    await page.getByTestId('add-device-key').fill('1TGJ8-Y1FAE-4UW1R-1EFFF-9E9EHZ');
+    await page.getByTestId('add-device-dialog').locator('.hmm-add-seconds').fill('10');
+    await page.getByTestId('add-device-start').click();
+    await expect(page.getByTestId('add-device-countdown')).toBeVisible();
+    expect(sim.getInstallMode('hmip')).toBeGreaterThan(0);
+
+    // the window runs out and nothing joined
+    const notice = page.getByTestId('add-device-nothing-joined');
+    await expect(notice).toBeVisible({timeout: 20_000});
+    await expect(notice).toContainText('If the device did try (its LED lit up red), the key given does not match it');
+    await expect(page.getByTestId('add-device-key-declined')).toHaveCount(0);
+});

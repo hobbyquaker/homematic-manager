@@ -27,6 +27,7 @@ import {
     type ConnectionConfig,
     type MetaDocument,
     type MetaEnum,
+    type MetaHmipKeyDecline,
     type MetaHmipPairing,
     type MetaImportMode,
     type MetaNodePatch,
@@ -44,7 +45,19 @@ import {LocalMetaProvider} from './localProvider.js';
 import {OcculiteProvider} from './occuliteProvider.js';
 import type {MetadataProvider, MetaMembershipEntry} from './provider.js';
 import {RegaMetaProvider, type RegaScriptRunner} from './regaProvider.js';
-import {DETECT_TIMEOUT_MS, SystemLink, detectSystem, transportFor, type MetaDetection} from './system.js';
+import {
+    DETECT_TIMEOUT_MS,
+    SystemLink,
+    detectSystem,
+    hmipKeyDeclinesOf,
+    transportFor,
+    type MetaDetection,
+} from './system.js';
+
+/** Task 88: openccu-lite's Status page warnings, where `hmip-key-declined` is one. */
+const WARNINGS_PATH = '/api/system/v1/warnings';
+/** Task 88: the pairing dialog asks every five seconds; an answer later than that is no use to it. */
+const WARNINGS_TIMEOUT_MS = 5_000;
 
 /** What the service needs to know about ReGa to offer it as a provider (task 27). */
 export interface MetaRegaLink {
@@ -592,6 +605,28 @@ export class MetaService {
         }
         const found = await detectSystem(this.#transport, baseUrl, this.#options.detectTimeoutMs ?? DETECT_TIMEOUT_MS);
         return found.version?.hmip;
+    }
+
+    /**
+     * Task 88: the devices whose HmIP inclusion the system declined for a wrong key - its warning
+     * `hmip-key-declined` (openccu-lite task 201), read afresh from `GET /api/system/v1/warnings`
+     * with the system API's credential (the person's session, else the profile's token; the
+     * addon's local token is refused there, and that is "nothing to say" as well). `undefined` on
+     * every connection without a system, on a system without the route and on one that does not
+     * answer: the pairing dialog then says what it always said. Never throws.
+     */
+    async hmipKeyDeclines(): Promise<MetaHmipKeyDecline[] | undefined> {
+        const link = this.boxLink();
+        if (link === undefined) {
+            return undefined;
+        }
+        try {
+            return hmipKeyDeclinesOf(
+                await link.client('write').request('GET', WARNINGS_PATH, undefined, {timeout: WARNINGS_TIMEOUT_MS}),
+            );
+        } catch {
+            return undefined;
+        }
     }
 
     /**

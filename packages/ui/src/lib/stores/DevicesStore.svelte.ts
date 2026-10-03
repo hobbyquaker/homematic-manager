@@ -2,6 +2,7 @@ import type {
     ApiError,
     DeviceDescription,
     InstallModeOptions,
+    MetaHmipKeyDecline,
     MetaHmipPairing,
     RepairConfigOptions,
     RepairConfigResult,
@@ -420,6 +421,20 @@ export class DevicesStore {
     async hmipPairing(): Promise<MetaHmipPairing | undefined> {
         try {
             return (await this.#transport.request('meta.pairing')) ?? undefined;
+        } catch {
+            return undefined;
+        }
+    }
+
+    /**
+     * Task 88: the devices whose HmIP inclusion the system declined for a wrong key (openccu-lite's
+     * warning `hmip-key-declined`), or `undefined` where nothing says it (a CCU, an older system, a
+     * credential the system refuses, no answer) - the dialog then says what it always said, so a
+     * failure here is no notice either.
+     */
+    async hmipKeyDeclines(): Promise<MetaHmipKeyDecline[] | undefined> {
+        try {
+            return (await this.#transport.request('meta.keyDeclines')) ?? undefined;
         } catch {
             return undefined;
         }

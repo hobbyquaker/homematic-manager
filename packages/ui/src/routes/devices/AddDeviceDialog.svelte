@@ -6,6 +6,7 @@
         parseHmipCode,
         renameEntries,
         type InstallModeOptions,
+        type MetaHmipKeyDecline,
         type MetaHmipPairing,
     } from '@homematic-manager/core';
 
@@ -36,6 +37,12 @@
      * and the CCU WebUI asks every five seconds while its install mode runs.
      */
     const KEY_MISMATCH_EVERY = 5;
+    /**
+     * Task 88: every how-many-th countdown tick asks an openccu-lite system whether hmipserver
+     * declined a device's inclusion for a wrong key. hmipserver tells no RPC client about it; the
+     * system reads the line from its log and shows it as the warning `hmip-key-declined`.
+     */
+    const KEY_DECLINE_EVERY = 5;
 
     let seconds = $state(60);
     let bidcosMode = $state(1);
@@ -87,6 +94,24 @@
      */
     let tempKeySent = false;
     let tempKeyField = $state<HTMLInputElement | undefined>(undefined);
+    /**
+     * Task 88: the HmIP device whose inclusion the system declined during this window because the
+     * key it got for the device is wrong - the device did answer, so "nothing joined" would send
+     * the user the wrong way. `undefined` while there is none.
+     */
+    let keyDeclined = $state<MetaHmipKeyDecline | undefined>(undefined);
+    /**
+     * Task 88: the last HmIP start carried a key typed or scanned here. Where no system can say that
+     * the key was declined (a CCU, an older system), the timeout text then names the key as a cause.
+     */
+    let keyGiven = $state(false);
+    /**
+     * Task 88: the declines the system already knew when the window opened, by their variant
+     * (`<sgtin>@<time>`) - a decline that is not among them happened in this window. `undefined`
+     * while there is no answer, and for good where nothing can say it: then nothing is asked.
+     */
+    let declineBaseline: Set<string> | undefined;
+    let deviceKeyField = $state<HTMLInputElement | undefined>(undefined);
     /**
      * Task 76: the countdown ticks of the current window. Kept outside the countdown effect, which
      * re-runs (and restarts its interval) whenever `remaining` changes - every second, against a
@@ -169,6 +194,9 @@
         inboxConfirmed = '';
         nothingJoined = false;
         keyMismatch = '';
+        keyDeclined = undefined;
+        keyGiven = false;
+        declineBaseline = undefined;
         tempKey = '';
         void clearTempKey();
     });
@@ -194,6 +222,10 @@
                 paired = [...paired, ...fresh];
                 // task 76: the pairing the key was for is done
                 keyMismatch = '';
+                // task 88: the declined device has come after all
+                if (keyDeclined?.address !== undefined && fresh.includes(keyDeclined.address)) {
+                    keyDeclined = undefined;
+                }
                 void clearTempKey();
             }
         });
@@ -215,11 +247,15 @@
                 if (left <= 0) {
                     // task 28: the window closed by itself and nobody came
                     if (paired.length === 0) {
-                        nothingJoined = true;
+                        void sayNothingJoined(current);
                     }
                     void clearTempKey();
                 }
             });
+            // task 88: an HmIP device did ask, and the system declined it for its key
+            if (isHmip && declineBaseline !== undefined && countdownTicks % KEY_DECLINE_EVERY === 0) {
+                void checkKeyDeclines(current);
+            }
             // task 76: a device with another system's key did ask to join; rfd refused it quietly
             if (!isHmip && countdownTicks % KEY_MISMATCH_EVERY === 0) {
                 void stores.devices.keyMismatchDevice(interfaceName).then((serial) => {
@@ -247,8 +283,13 @@
         busy = true;
         nothingJoined = false;
         keyMismatch = '';
+        keyDeclined = undefined;
         installWindow += 1;
         countdownTicks = 0;
+        if (isHmip && options.address === undefined) {
+            watchKeyDeclines(installWindow);
+            keyGiven = (options.hmipKey?.key ?? '') !== '';
+        }
         const {tempKey: key, ...withoutKey} = options;
         lastStart = withoutKey;
         if (key !== undefined) {
@@ -276,6 +317,68 @@
         await stores.devices.setInstallMode(interfaceName, false);
         remaining = 0;
         await clearTempKey();
+    }
+
+    /**
+     * Task 88: what the system knows of declined keys as the window opens. Asked before the install
+     * mode starts and not awaited: until it answers the countdown asks nothing, and where it never
+     * answers (a CCU) it never does.
+     */
+    function watchKeyDeclines(windowId: number): void {
+        declineBaseline = undefined;
+        void stores.devices.hmipKeyDeclines().then((found) => {
+            if (windowId === installWindow && found !== undefined) {
+                declineBaseline = new Set(found.map((decline) => decline.variant));
+            }
+        });
+    }
+
+    /** Task 88: a decline the system did not know when the window opened is this window's. */
+    async function checkKeyDeclines(windowId: number): Promise<void> {
+        const baseline = declineBaseline;
+        if (baseline === undefined) {
+            return;
+        }
+        const found = await stores.devices.hmipKeyDeclines();
+        const fresh = found?.find((decline) => !baseline.has(decline.variant));
+        if (fresh !== undefined && windowId === installWindow && keyDeclined === undefined) {
+            keyDeclined = fresh;
+            nothingJoined = false;
+        }
+    }
+
+    /**
+     * Task 28: the window ran out and nobody came. Task 88: on a system that can say it, ask once
+     * more first - a decline in the window's last seconds is the better answer.
+     */
+    async function sayNothingJoined(windowId: number): Promise<void> {
+        if (isHmip) {
+            await checkKeyDeclines(windowId);
+        }
+        if (windowId === installWindow && keyDeclined === undefined && paired.length === 0) {
+            nothingJoined = true;
+        }
+    }
+
+    /**
+     * Task 88: from the declined device to the key entry - the window is stopped (the device keeps
+     * asking and is declined every time), the SGTIN put into its field and the key field focused,
+     * its text selected so the right key replaces it.
+     */
+    async function enterKey(): Promise<void> {
+        const decline = keyDeclined;
+        if (decline === undefined) {
+            return;
+        }
+        if (remaining > 0) {
+            await stop();
+        }
+        hmipMode = 'KEY';
+        sgtin = normaliseKeyText(decline.sgtin);
+        scanning = false;
+        await tick();
+        deviceKeyField?.focus();
+        deviceKeyField?.select();
     }
 
     /** Task 76: did rfd just refuse a device for its key? Then ask for that key. */
@@ -432,6 +535,7 @@
                         class="hmm-input hmm-mono"
                         class:hmm-add-invalid={deviceKey !== '' && !isDeviceKey(deviceKey)}
                         value={deviceKey}
+                        bind:this={deviceKeyField}
                         data-testid="add-device-key"
                         oninput={(event) => (deviceKey = normaliseKeyText(event.currentTarget.value))}
                     />
@@ -589,6 +693,27 @@
                 >
             {/if}
         </div>
+        {#if keyDeclined !== undefined}
+            <!--
+                Task 88: the device did answer - hmipserver declined it because the key it got for
+                the device is not that device's key (openccu-lite's warning hmip-key-declined).
+            -->
+            <section class="hmm-add-key-question" role="alert" data-testid="add-device-key-declined">
+                <h4>{t('The device key does not match')}</h4>
+                <p>
+                    {t(
+                        'The device {sgtin} did answer, but its device key does not match. Check the key (QR code / KEY) and pair it again.',
+                        {sgtin: keyDeclined.sgtin},
+                    )}
+                </p>
+                <button
+                    type="button"
+                    class="hmm-button"
+                    data-testid="add-device-key-declined-enter"
+                    onclick={() => void enterKey()}>{t('Enter the key')}</button
+                >
+            </section>
+        {/if}
         {#if nothingJoined}
             <!--
                 Task 76: two texts, because the two radio systems fail differently. An HmIP device
@@ -599,9 +724,14 @@
             -->
             <p class="hmm-add-notice" role="status" data-testid="add-device-nothing-joined">
                 {isHmip
-                    ? t(
-                          'The install mode has ended and no device has joined. A device that is still paired with another central sends no inclusion request: reset it to factory state and start again.',
-                      )
+                    ? keyGiven
+                        ? // task 88: where nothing can say that the key was declined, the key is the first suspect
+                          t(
+                              'The install mode has ended and no device has joined. If the device did try (its LED lit up red), the key given does not match it: check the key (QR code / KEY) and start again. A device that is still paired with another central sends no inclusion request: reset it to factory state and start again.',
+                          )
+                        : t(
+                              'The install mode has ended and no device has joined. A device that is still paired with another central sends no inclusion request: reset it to factory state and start again.',
+                          )
                     : t(
                           "The install mode has ended and no device has joined. Put the device into its pairing mode and start again. A device that holds another system's security key is reported here and that key asked for; a factory reset does not remove it.",
                       )}

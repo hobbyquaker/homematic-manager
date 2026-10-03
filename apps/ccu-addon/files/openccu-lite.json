@@ -17,6 +17,7 @@
     "architectures": ["armv7l", "aarch64", "x86_64"]
   },
   "ui": {
+    "icon": "hmm/www/icon.png",
     "settings_url": "/addons/hmm/settings.cgi?cmd=config",
     "session_header": true
   },

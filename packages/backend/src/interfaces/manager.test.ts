@@ -17,7 +17,9 @@ import {RpcClient, type RpcClientOptions} from '../rpc/client.js';
 import type {CallbackHandler, CallbackServerSet} from '../rpc/server.js';
 import type {CallbackNetwork, LocalIPv4, PortProbe} from '../util/net.js';
 import {
+    INIT_TIMEOUT_BACKOFF_MS,
     InterfaceManager,
+    MAX_INIT_BACKOFF_MS,
     MISSING_RETRY_INTERVAL_MS,
     START_RETRY_INTERVAL_MS,
     START_WINDOW_MS,
@@ -1683,8 +1685,12 @@ describe('the quick retries at the start (task 56, task 83, D-58)', () => {
                 startWindowMs: START_WINDOW_MS,
             });
             await h.manager.start();
-            await advance(h, 6000);
-            expect(h.clients.calls.filter((call) => call.name === 'HmIP-RF')).toHaveLength(3);
+            // B-89: the port answers and the init does not come back - busy, not missing, so the
+            // next attempt waits 15 s instead of the 3 s of a closed port
+            await advance(h, 14_000);
+            expect(h.clients.calls.filter((call) => call.name === 'HmIP-RF')).toHaveLength(1);
+            await advance(h, 1000);
+            expect(h.clients.calls.filter((call) => call.name === 'HmIP-RF')).toHaveLength(2);
             expect(h.manager.states()[1]?.waiting).toBe(true);
             expect(h.notices.filter((entry) => entry.level === 'error')).toEqual([]);
             expect(h.notices.find((entry) => entry.interfaceName === 'HmIP-RF')?.message).toBe(
@@ -1902,6 +1908,180 @@ describe('the quick retries at the start (task 56, task 83, D-58)', () => {
             const afterStop = h.clients.calls.length;
             await advance(h, 30_000);
             expect(h.clients.calls.length).toBe(afterStop);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+});
+
+describe('one init at a time, and a back-off for a busy interface (B-89)', () => {
+    const timedOut = () => new BackendError({message: 'init timed out after 20000 ms', kind: 'connection'});
+    const refused = () => Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:39292'), {code: 'ECONNREFUSED'});
+
+    /** An answer that comes when the test says so. */
+    function pending(): {answer: () => RpcValue; release: (value: RpcValue | Error) => void; waiting: () => number} {
+        const open: ((value: RpcValue | Error) => void)[] = [];
+        return {
+            answer: () =>
+                new Promise<RpcValue>((resolve, reject) => {
+                    open.push((value) => {
+                        if (value instanceof Error) reject(value);
+                        else resolve(value);
+                    });
+                }) as unknown as RpcValue,
+            release: (value) => {
+                for (const settle of open.splice(0)) settle(value);
+            },
+            waiting: () => open.length,
+        };
+    }
+
+    const inits = (h: Harness, name = 'VirtualDevices') =>
+        h.clients.calls.filter((call) => call.name === name && call.method === 'init' && call.params[1] !== '');
+
+    it('waits 15 s after an init that timed out, doubling up to 5 min', () => {
+        expect([INIT_TIMEOUT_BACKOFF_MS, MAX_INIT_BACKOFF_MS]).toEqual([15_000, 300_000]);
+    });
+
+    it('never sends a second init while one is in flight: the watchdog, a reconnect and a lost subscription join it', async () => {
+        vi.useFakeTimers();
+        try {
+            const slow = pending();
+            let hang = true;
+            const h = harness({
+                connection: {interfaces: ['VirtualDevices'], autoDetect: false},
+                answers: {VirtualDevices: (method) => (method === 'init' && hang ? slow.answer() : '')},
+                startWindowMs: START_WINDOW_MS,
+            });
+            const started = h.manager.start();
+            await vi.advanceTimersByTimeAsync(0);
+            expect(inits(h)).toHaveLength(1);
+            // the group process takes its time; everything that would subscribe again meanwhile
+            h.clock.value += 600_000;
+            const ticked = h.manager.tick();
+            const reconnected = h.manager.reconnect('VirtualDevices');
+            await advanceBoth(h, 30_000);
+            expect(inits(h)).toHaveLength(1);
+            expect(slow.waiting()).toBe(1);
+            hang = false;
+            slow.release('');
+            await Promise.all([started, ticked, reconnected]);
+            expect(h.manager.isConnected('VirtualDevices')).toBe(true);
+            expect(h.connected).toEqual(['VirtualDevices']);
+            // once it is through, the next attempt is a new init again
+            await h.manager.reconnect('VirtualDevices');
+            expect(inits(h)).toHaveLength(2);
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('backs off 15, 30, 60 s ... up to 5 min while the port answers and init times out, and resets on success', async () => {
+        vi.useFakeTimers();
+        try {
+            let up = false;
+            const h = harness({
+                connection: {interfaces: ['VirtualDevices'], autoDetect: false},
+                answers: {VirtualDevices: (method) => (method !== 'init' || up ? '' : timedOut())},
+                startWindowMs: START_WINDOW_MS,
+            });
+            const start = h.clock.value;
+            await h.manager.start();
+            const times: number[] = [];
+            for (let passed = 0; passed < 1_200_000; passed += 1000) {
+                await advanceBoth(h, 1000);
+                await h.manager.tick();
+                while (times.length < inits(h).length - 1) times.push(h.clock.value - start);
+            }
+            // the gaps between the attempts: never the 3 s of a closed port, never shorter than the one before
+            const gaps = times.map((at, index) => at - (index === 0 ? 0 : (times[index - 1] ?? 0)));
+            expect(gaps.slice(0, 6)).toEqual([15_000, 30_000, 60_000, 120_000, 240_000, 300_000]);
+            expect(Math.max(...gaps)).toBe(300_000);
+            // said once, as waiting; no error line per attempt
+            expect(h.notices.filter((entry) => entry.level === 'error')).toHaveLength(1);
+
+            up = true;
+            await h.manager.reconnect('VirtualDevices');
+            expect(h.manager.isConnected('VirtualDevices')).toBe(true);
+            // a later timeout starts over at 15 s
+            up = false;
+            await h.manager.reconnect('VirtualDevices');
+            const before = inits(h).length;
+            await advanceBoth(h, 15_000);
+            expect(inits(h)).toHaveLength(before + 1);
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('goes back to the quick schedule when the port closes, and is not hurried by another interface appearing', async () => {
+        vi.useFakeTimers();
+        try {
+            let port: PortProbe = 'open';
+            let hmipUp = false;
+            const h = harness({
+                connection: {interfaces: ['HmIP-RF', 'VirtualDevices'], autoDetect: false},
+                answers: {
+                    VirtualDevices: (method) => (method === 'init' ? timedOut() : ''),
+                    'HmIP-RF': () => (hmipUp ? '' : refused()),
+                },
+                probe: (_host, probed) =>
+                    Promise.resolve<PortProbe>(probed === 9292 ? port : hmipUp ? 'open' : 'refused'),
+                startWindowMs: START_WINDOW_MS,
+            });
+            await h.manager.start();
+            expect(inits(h)).toHaveLength(1);
+            // HmIP-RF appears at 4 s: VirtualDevices keeps its 15 s
+            await advanceBoth(h, 4000);
+            hmipUp = true;
+            await advanceBoth(h, 3000);
+            expect(h.manager.isConnected('HmIP-RF')).toBe(true);
+            expect(inits(h)).toHaveLength(1);
+            await advanceBoth(h, 8000);
+            expect(inits(h)).toHaveLength(2);
+            // the process goes away: its port is checked every 3 s again, and its init follows at once
+            port = 'refused';
+            await advanceBoth(h, 30_000);
+            const probedAt = inits(h).length;
+            port = 'open';
+            await advanceBoth(h, 3000);
+            expect(inits(h)).toHaveLength(probedAt + 1);
+            await h.manager.stop();
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it('subscribes afresh after the idle period even when an init was still in flight', async () => {
+        vi.useFakeTimers();
+        try {
+            const slow = pending();
+            let hang = false;
+            const h = harness({
+                connection: {interfaces: ['VirtualDevices'], autoDetect: false},
+                answers: {
+                    VirtualDevices: (method, params) =>
+                        method === 'init' && params[1] !== '' && hang ? slow.answer() : '',
+                },
+            });
+            await h.manager.start();
+            hang = true;
+            const lost = h.manager.reconnect('VirtualDevices');
+            await vi.advanceTimersByTimeAsync(0);
+            await h.manager.unsubscribe();
+            hang = false;
+            const resubscribed = h.manager.subscribe();
+            await vi.advanceTimersByTimeAsync(0);
+            // the resubscribe waits for the init in flight instead of joining it ...
+            expect(inits(h)).toHaveLength(2);
+            slow.release('');
+            await Promise.all([lost, resubscribed]);
+            // ... and sends its own after it
+            expect(inits(h)).toHaveLength(3);
+            expect(h.manager.isConnected('VirtualDevices')).toBe(true);
+            await h.manager.stop();
         } finally {
             vi.useRealTimers();
         }

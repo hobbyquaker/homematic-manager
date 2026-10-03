@@ -14,6 +14,9 @@
  *    D-58): its port is tried every 3 s for 90 s after the start (or after it went missing) and then
  *    every 15 s, a TCP connect first and the `init` only when the port answers; at the start the
  *    interface shows *waiting*, and when another interface appears every missing one is tried at once.
+ *    An `init` that times out while the port answers is a busy process, not a missing one (B-89): the
+ *    next attempt waits 15 s, doubling up to 5 min. There is never more than one `init` per interface
+ *    in flight; whatever asks for another one meanwhile joins it.
  *    HmIP-RF has a liveness ping of its own besides (B-56, D-53): after 30 s of silence it is
  *    pinged, and a missing PONG 10 s later means hmipserver has restarted - it reads its handler
  *    list back but sends nothing until the client calls `init` again - so the interface shows
@@ -126,6 +129,18 @@ export const START_RETRY_INTERVAL_MS = 3000;
 export const MISSING_RETRY_INTERVAL_MS = 15_000;
 
 /**
+ * B-89: the first wait after an `init` that timed out while the port answers; it doubles per further
+ * timeout up to {@link MAX_INIT_BACKOFF_MS}.
+ *
+ * Such an interface is there and busy, not missing. Seen on an openccu-lite system where the group
+ * process behind VirtualDevices ran without HmIP-RF: an `init` took about 10 s to come back there,
+ * the quick retries of a missing interface (3 s) and the watchdog sent the next ones before the
+ * earlier ones were through, they queued up past the RPC timeout, and the app subscribed again
+ * every 10 s - for as long as it ran.
+ */
+export const INIT_TIMEOUT_BACKOFF_MS = 15_000;
+
+/**
  * Task 56, task 83 (D-58): how long after `start()` (or a D-31 resubscribe, or the moment an interface
  * went missing) it is tried every {@link START_RETRY_INTERVAL_MS}. At the start an interface that
  * has not answered yet is *waiting* rather than missing for this long; after it, it is "not present"
@@ -158,6 +173,13 @@ export interface ManagedInterface {
     lastSeenMono: number;
     /** Consecutive failed `init` calls; 0 as soon as one succeeds. */
     failures: number;
+    /**
+     * B-89: the `init` call in flight, which every other attempt joins instead of sending another
+     * one - the watchdog, a retry timer, another interface appearing, a lost PONG, the user.
+     */
+    initInFlight: Promise<void> | undefined;
+    /** B-89: consecutive `init` calls that timed out while the port answered; 0 once one succeeds or the port closes. */
+    initTimeouts: number;
     /** On the monotonic clock (B-65): the moment before which the watchdog does not try `init` again. */
     retryAt: number;
     /** Task 56: failed attempts (a closed port or a failed `init`) while waiting at the start; 0 once it answered. */
@@ -349,6 +371,11 @@ export interface Interfaces {
     reconnect(interfaceName?: string): Promise<void>;
     /** An event or a device callback arrived; the interface is alive. */
     noteEvent(interfaceName: string, kind?: 'event' | 'device'): void;
+}
+
+/** B-89: the `init` in flight, read through a function so that a check after an `await` is not narrowed away. */
+function inFlight(entry: ManagedInterface): Promise<void> | undefined {
+    return entry.initInFlight;
 }
 
 /** Connects, watches and disconnects every configured interface. */
@@ -645,6 +672,7 @@ export class InterfaceManager implements Interfaces {
             if (entry.state.absent !== true) {
                 entry.failures = 0;
             }
+            entry.initTimeouts = 0;
             entry.retryAt = 0;
             entry.waitingAttempts = 0;
             entry.answered = false;
@@ -678,7 +706,9 @@ export class InterfaceManager implements Interfaces {
             entry.missingSince = undefined;
             this.#update(entry, {idle: false});
         }
-        await Promise.all([...this.#interfaces.keys()].map((name) => this.#init(name)));
+        // B-89: an `init` still in flight from before the idle period may have reached the interface
+        // before the de-registration did, so it does not count
+        await Promise.all([...this.#interfaces.keys()].map((name) => this.#init(name, {fresh: true})));
         this.#startWatchdog();
         this.#options.onStateChanged(this.states());
     }
@@ -909,6 +939,8 @@ export class InterfaceManager implements Interfaces {
             lastEvent: 0,
             lastSeenMono: Number.NEGATIVE_INFINITY,
             failures: 0,
+            initInFlight: undefined,
+            initTimeouts: 0,
             retryAt: 0,
             waitingAttempts: 0,
             retryTimer: undefined,
@@ -1006,7 +1038,39 @@ export class InterfaceManager implements Interfaces {
         this.#options.onStateChanged(this.states());
     }
 
-    async #init(interfaceName: string): Promise<void> {
+    /**
+     * Subscribes one interface. B-89: never twice at once - an attempt while an `init` for the same
+     * interface is in flight joins that one. `fresh` waits for it and sends a new one: a resubscribe
+     * after the idle period must not count an `init` that the de-registration may have overtaken.
+     */
+    async #init(interfaceName: string, {fresh = false}: {fresh?: boolean} = {}): Promise<void> {
+        const entry = this.#interfaces.get(interfaceName);
+        if (entry?.initInFlight !== undefined) {
+            if (!fresh) {
+                return entry.initInFlight;
+            }
+            await entry.initInFlight.catch(() => undefined);
+            const next = inFlight(entry);
+            if (next !== undefined) {
+                // someone else started a new one meanwhile, after the wait: that one is fresh
+                return next;
+            }
+        }
+        const attempt = this.#initOnce(interfaceName);
+        if (entry === undefined) {
+            return attempt;
+        }
+        entry.initInFlight = attempt;
+        try {
+            await attempt;
+        } finally {
+            if (entry.initInFlight === attempt) {
+                entry.initInFlight = undefined;
+            }
+        }
+    }
+
+    async #initOnce(interfaceName: string): Promise<void> {
         const entry = this.#interfaces.get(interfaceName);
         if (!entry || this.#stopping) {
             return;
@@ -1045,6 +1109,7 @@ export class InterfaceManager implements Interfaces {
             // task 83: it was not there a moment ago - at the start, after an outage or a lost subscription
             const appeared = !entry.answered || wasFailing;
             entry.failures = 0;
+            entry.initTimeouts = 0;
             entry.retryAt = 0;
             entry.waitingAttempts = 0;
             entry.answered = true;
@@ -1116,6 +1181,8 @@ export class InterfaceManager implements Interfaces {
         const message = errorMessage(error);
         const absent = isConnectionRefused(error);
         if (absent || isNotAnswering(error)) {
+            // B-89: an `init` that did not come back in time; the next one waits longer each time
+            entry.initTimeouts = absent ? 0 : entry.initTimeouts + 1;
             this.#noteMissing(entry, message, absent);
             return;
         }
@@ -1186,9 +1253,21 @@ export class InterfaceManager implements Interfaces {
     #missingDelay(entry: ManagedInterface): number {
         const window = this.#options.startWindowMs ?? START_WINDOW_MS;
         const since = entry.missingSince ?? entry.windowStart;
-        return window > 0 && this.#monotonicNow() - since < window
-            ? START_RETRY_INTERVAL_MS
-            : MISSING_RETRY_INTERVAL_MS;
+        return this.#timeoutDelay(
+            entry,
+            window > 0 && this.#monotonicNow() - since < window ? START_RETRY_INTERVAL_MS : MISSING_RETRY_INTERVAL_MS,
+        );
+    }
+
+    /**
+     * B-89: after an `init` that timed out while the port answered, the process is busy rather than
+     * missing - {@link INIT_TIMEOUT_BACKOFF_MS}, doubling per further timeout, instead of `delay`.
+     */
+    #timeoutDelay(entry: ManagedInterface, delay: number): number {
+        if (entry.initTimeouts === 0) {
+            return delay;
+        }
+        return Math.max(delay, Math.min(INIT_TIMEOUT_BACKOFF_MS * 2 ** (entry.initTimeouts - 1), MAX_INIT_BACKOFF_MS));
     }
 
     /** Task 83: the next attempt of a missing interface, on a timer the watchdog leaves alone. */
@@ -1232,6 +1311,8 @@ export class InterfaceManager implements Interfaces {
             await this.#init(entry.name);
             return;
         }
+        // B-89: the port itself is gone now - a missing process, on the quick schedule again
+        entry.initTimeouts = 0;
         const where = `${entry.state.host}:${String(entry.state.port)}`;
         this.#noteMissing(
             entry,
@@ -1247,7 +1328,13 @@ export class InterfaceManager implements Interfaces {
      */
     #retryMissingNow(except: string): void {
         for (const entry of this.#interfaces.values()) {
-            if (entry.name !== except && entry.retryTimer !== undefined && !entry.state.connected) {
+            // B-89: not one whose `init` timed out - it is busy, and the other one appearing changes nothing
+            if (
+                entry.name !== except &&
+                entry.retryTimer !== undefined &&
+                !entry.state.connected &&
+                entry.initTimeouts === 0
+            ) {
                 this.#clearRetryTimer(entry);
                 void this.#retryMissing(entry);
             }
@@ -1297,7 +1384,7 @@ export class InterfaceManager implements Interfaces {
                 entry.name,
             );
         }
-        this.#scheduleRetry(entry, START_RETRY_INTERVAL_MS);
+        this.#scheduleRetry(entry, this.#timeoutDelay(entry, START_RETRY_INTERVAL_MS));
     }
 
     /**

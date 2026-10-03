@@ -10,6 +10,11 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Fixed
 
+- **No more subscribing again every few seconds to a slow VirtualDevices.** Where the group process behind VirtualDevices
+  took long to answer the subscription - seen on openccu-lite while it ran without HmIP-RF - the app sent the next one
+  before the first was through, every 10 s for as long as it ran, and kept the process busy with them. There is now
+  never more than one subscription per interface on its way, and one that does not come back in time is repeated after
+  15 s, then 30 s, 60 s and so on up to 5 minutes, instead of every 3 s. (B-89)
 - **Umlauts in the easy mode's labels.** Some link profiles showed their German labels, names and descriptions with the
   CCU's escapes instead of the letters - "Herunterfahrverz%F6gerungszeit" for "Herunterfahrverzögerungszeit",
   "%DCberschreiten" for "Überschreiten", "T%FCr" for "Tür" - in the blind, shutter, dimmer, light, switch, door lock and

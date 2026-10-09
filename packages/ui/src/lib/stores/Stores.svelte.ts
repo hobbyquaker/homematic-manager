@@ -4,6 +4,7 @@ import type {DataSource} from '@homematic-manager/core';
 
 import type {HostBridge} from '../host/types.js';
 import {I18n} from '../i18n/i18n.svelte.js';
+import {LOCAL_NETWORK_HINT, looksLikeLocalNetworkBlock} from '../util/localNetwork.js';
 
 import {AppStore, type AppStoreOptions} from './AppStore.svelte.js';
 import {ChangeSetStore} from './ChangeSetStore.svelte.js';
@@ -81,7 +82,14 @@ export class Stores {
 
     constructor(transport: Transport, options: StoresOptions = {}) {
         this.transport = transport;
-        this.notices = new NoticesStore(transport);
+        // B-91 (#169): on macOS a blocked local network reads as EHOSTUNREACH; say where to allow it.
+        // `host` and `i18n` are read when a notice arrives, long after both are set below.
+        this.notices = new NoticesStore(transport, {
+            hintFor: (message) =>
+                looksLikeLocalNetworkBlock(this.host.info?.platform, message)
+                    ? this.i18n.t(LOCAL_NETWORK_HINT)
+                    : undefined,
+        });
         this.app = new AppStore(transport, this.notices, options);
         this.i18n = new I18n(this.app.language);
         this.interfaces = new InterfacesStore(transport, this.notices);

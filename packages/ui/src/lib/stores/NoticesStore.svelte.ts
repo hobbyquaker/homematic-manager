@@ -28,6 +28,12 @@ export interface NoticesStoreOptions {
     readonly infoTtlMs?: number;
     /** Lifetime of a `warn` toast in ms; `0` keeps it until it is dismissed. */
     readonly warnTtlMs?: number;
+    /**
+     * B-91 (#169): the hint a warning or an error calls for, or `undefined`. The store shows it
+     * once per session as a toast of its own, after the notice that called for it: the Local
+     * Network hint on macOS, which every interface's failure would otherwise repeat.
+     */
+    readonly hintFor?: (message: string) => string | undefined;
 }
 
 /**
@@ -58,6 +64,10 @@ export class NoticesStore {
     readonly #now: () => number;
     readonly #infoTtlMs: number;
     readonly #warnTtlMs: number;
+    readonly #hintFor: ((message: string) => string | undefined) | undefined;
+    /** The hints already shown in this session (B-91). Not reactive: nothing renders from it. */
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- see above
+    readonly #hintsShown = new Set<string>();
     readonly #unsubscribe: () => void;
     // Bookkeeping for the expiry timers, deliberately not reactive: nothing renders from it, and a
     // SvelteMap here would invalidate the toast stack on every timer that starts or is cleared.
@@ -70,6 +80,7 @@ export class NoticesStore {
         this.#now = options.now ?? (() => Date.now());
         this.#infoTtlMs = options.infoTtlMs ?? INFO_TTL_MS;
         this.#warnTtlMs = options.warnTtlMs ?? WARN_TTL_MS;
+        this.#hintFor = options.hintFor;
         this.#unsubscribe = transport.on('notice', (notice) => {
             // task 56: `debug` is for the host's log (the start retries), never a toast
             if (notice.level !== 'debug') {
@@ -106,7 +117,20 @@ export class NoticesStore {
         }
         this.items = dropped.length > 0 ? items.slice(dropped.length) : items;
         this.#startTimer(id, level);
+        if (level !== 'info') {
+            this.#hint(message);
+        }
         return id;
+    }
+
+    /** B-91: the hint a notice calls for, once per session; it stays until it is dismissed. */
+    #hint(message: string): void {
+        const hint = this.#hintFor?.(message);
+        if (hint === undefined || hint === '' || this.#hintsShown.has(hint)) {
+            return;
+        }
+        this.#hintsShown.add(hint);
+        this.push('error', hint);
     }
 
     /**

@@ -1089,6 +1089,12 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Unter {url} antwortet nichts ({reason})',
         en: 'Nothing answers at {url} ({reason})',
     },
+    // B-91 (#169): macOS 15+ Local Network privacy; added to the connection test and once as a toast
+    'macOS may be blocking the local network: allow Homematic Manager under System Settings → Privacy & Security → Local Network, then quit and restart it':
+        {
+            de: 'macOS blockiert womöglich das lokale Netzwerk: Homematic Manager unter Systemeinstellungen → Datenschutz & Sicherheit → Lokales Netzwerk erlauben, dann die App beenden und neu starten',
+            en: 'macOS may be blocking the local network: allow Homematic Manager under System Settings → Privacy & Security → Local Network, then quit and restart it',
+        },
     'The certificate of {url} is not trusted ({code}); it can be trusted under Names and rooms': {
         de: 'Dem Zertifikat von {url} wird nicht vertraut ({code}); unter Namen und Räume kann es vertraut werden',
         en: 'The certificate of {url} is not trusted ({code}); it can be trusted under Names and rooms',

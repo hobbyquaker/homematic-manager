@@ -3,7 +3,7 @@ import {expect} from 'vitest';
 
 import App from './App.svelte';
 import type {StorageLike} from './lib/stores/AppStore.svelte.js';
-import type {HostBridge} from './lib/host/types.js';
+import type {HostBridge, HostInfo} from './lib/host/types.js';
 import {createStores, type Stores} from './lib/stores/Stores.svelte.js';
 import {MockTransport} from './lib/transport/MockTransport.js';
 
@@ -57,6 +57,33 @@ export function fakeRouter(initial = ''): FakeRouter {
                 handler();
             }
         },
+    };
+}
+
+/**
+ * A host bridge that only says which platform it runs on: what the B-91 tests need (the Local
+ * Network hint is for macOS only). Updates stay idle, menus and themes do nothing.
+ */
+export function stubHost(platform: string): HostBridge {
+    const info: HostInfo = {
+        version: '3.1.4',
+        electron: '44.2.0',
+        chrome: '140.0.0',
+        node: '24.0.0',
+        platform,
+        arch: 'arm64',
+        packaged: true,
+        userData: '/Users/u/Library/Application Support/Homematic Manager',
+        logFile: '/Users/u/Library/Logs/Homematic Manager/error.log',
+    };
+    const idle = () => Promise.resolve({phase: 'idle' as const, dismissed: false});
+    return {
+        info: () => Promise.resolve(info),
+        deviceImageUrl: (type: string) => `hmm-image://device/${type}`,
+        setTheme: () => Promise.resolve(),
+        onSystemTheme: () => () => {},
+        onMenuAction: () => () => {},
+        update: {state: idle, check: idle, download: idle, installOnQuit: idle, dismiss: idle, on: () => () => {}},
     };
 }
 

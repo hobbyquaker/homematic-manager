@@ -8,6 +8,7 @@ import type {StorageLike} from '../lib/stores/AppStore.svelte.js';
 import {createStores, type Stores} from '../lib/stores/Stores.svelte.js';
 import {DEMO_CONFIG, DEMO_INTERFACE_STATES, demoCallbackAddresses} from '../lib/transport/demoData.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
+import {mountApp, stubHost} from '../testHarness.js';
 
 class MemoryStorage implements StorageLike {
     readonly map = new Map<string, string>();
@@ -623,6 +624,44 @@ describe('ConfigDialog', () => {
             ),
         );
         expect(screen.getByTestId('config-test-result').classList.contains('hmm-config-warning')).toBe(true);
+    });
+
+    it.each([
+        ['darwin', true],
+        ['linux', false],
+    ])('on %s, a test that times out names the Local Network setting: %s (B-91, #169)', async (platform, hint) => {
+        await mountApp({transport, hostBridge: stubHost(platform)});
+        await fireEvent.click(screen.getByTestId('settings-button'));
+        await waitFor(() => expect(screen.getByTestId('config-dialog')).toBeTruthy());
+        // what #169's openccu-lite test said: occulite-client calls EHOSTUNREACH a timeout
+        transport.result('connection.test', {
+            kind: 'unreachable',
+            reachable: false,
+            reason: 'timeout',
+            url: 'http://demo.local',
+        });
+        await fireEvent.click(screen.getByTestId('config-test'));
+        const nothing = 'Unter http://demo.local antwortet nichts (timeout)';
+        await waitFor(() => expect(screen.getByTestId('config-test-result').textContent).toContain(nothing));
+        expect(screen.getByTestId('config-test-result').textContent).toBe(
+            hint
+                ? `${nothing}. macOS blockiert womöglich das lokale Netzwerk: Homematic Manager unter Systemeinstellungen → Datenschutz & Sicherheit → Lokales Netzwerk erlauben, dann die App beenden und neu starten`
+                : nothing,
+        );
+
+        // a refused connection got an answer: no hint, on macOS either
+        transport.result('connection.test', {
+            kind: 'unreachable',
+            reachable: false,
+            reason: 'refused',
+            url: 'http://demo.local',
+        });
+        await fireEvent.click(screen.getByTestId('config-test'));
+        await waitFor(() =>
+            expect(screen.getByTestId('config-test-result').textContent).toBe(
+                'Unter http://demo.local antwortet nichts (refused)',
+            ),
+        );
     });
 
     it('shows the certificate a test found untrusted, with the same trust buttons (task 72, B-67)', async () => {

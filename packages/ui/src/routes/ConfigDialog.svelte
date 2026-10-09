@@ -20,6 +20,7 @@
     import MultiSelect from '../lib/components/MultiSelect.svelte';
     import {getStores} from '../lib/stores/context.js';
     import {isHmipInterface} from '../lib/stores/suppression.js';
+    import {LOCAL_NETWORK_HINT, testMayBeLocalNetworkBlock} from '../lib/util/localNetwork.js';
     import {interfaceChoices, removeExtraTick, renameExtraTick} from './extraInterfaceTicks.js';
     import {IDLE_DEFAULT, idleChoices, idleDuration, idleSelectValue} from './idleChoices.js';
     import StickyUnreachQuestion from './StickyUnreachQuestion.svelte';
@@ -439,12 +440,20 @@
             return '';
         }
         if (tested.kind === 'unreachable') {
-            return tested.reason === 'certificate' && tested.certificate !== undefined
-                ? t('The certificate of {url} is not trusted ({code}); it can be trusted under Names and rooms', {
-                      url: tested.certificate.url,
-                      code: tested.certificate.code,
-                  })
-                : t('Nothing answers at {url} ({reason})', {url: tested.url, reason: tested.reason ?? 'error'});
+            if (tested.reason === 'certificate' && tested.certificate !== undefined) {
+                return t('The certificate of {url} is not trusted ({code}); it can be trusted under Names and rooms', {
+                    url: tested.certificate.url,
+                    code: tested.certificate.code,
+                });
+            }
+            const nothing = t('Nothing answers at {url} ({reason})', {
+                url: tested.url,
+                reason: tested.reason ?? 'error',
+            });
+            // B-91 (#169): on macOS a timeout may be the Local Network permission that was never given
+            return testMayBeLocalNetworkBlock(hostInfo?.platform, tested.reason)
+                ? `${nothing}. ${t(LOCAL_NETWORK_HINT)}`
+                : nothing;
         }
         if (tested.kind === 'ccu') {
             return t('A CCU or OpenCCU at {url}: XML-RPC with callbacks', {url: tested.url});

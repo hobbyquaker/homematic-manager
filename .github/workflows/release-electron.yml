@@ -131,6 +131,14 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: false
         run: npx electron-builder ${{ matrix.target }} --publish never
 
+      # B-91 (#169): the app macOS gets carries the Local Network usage description and UUIDs of
+      # its own (scripts/mac-identity.mjs, the afterPack hook); without them macOS 15+ may never ask
+      # for the permission, and every connection to the CCU fails with EHOSTUNREACH.
+      - name: Check the macOS app's Local Network identity
+        if: matrix.os == 'macos-latest'
+        working-directory: apps/electron
+        run: node scripts/mac-identity.mjs check dist-electron/mac-universal
+
       # B-47 (#163): electron-updater downloads exactly the name a `latest*.yml` gives, so every
       # name in them has to be a file here, under a name the release upload keeps as it is.
       - name: Check the update manifests against the installers

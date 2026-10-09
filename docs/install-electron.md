@@ -6,7 +6,8 @@ install type to pick when you administer a CCU from a workstation now and then.
 
 Contents: [Requirements](#requirements) · [Download](#download) ·
 [Windows: the SmartScreen warning](#windows-the-smartscreen-warning) ·
-[macOS: signing and notarisation](#macos-signing-and-notarisation) · [Linux](#linux) ·
+[macOS: signing and notarisation](#macos-signing-and-notarisation) ·
+[macOS: the Local Network permission](#macos-the-local-network-permission) · [Linux](#linux) ·
 [Where the app keeps its things](#where-the-app-keeps-its-things) · [Updates](#updates-d-16) ·
 [The CCU's firewall](#the-ccus-firewall) · [Troubleshooting](#troubleshooting)
 
@@ -73,8 +74,9 @@ That is the whole workaround, and it is needed once per downloaded file. Check t
 
 The release and build workflows sign and notarise **when the Apple secrets are present**
 (`APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID` and the certificate secrets). D-9 says a
-Developer ID is the plan. Without those secrets the build still succeeds and produces **unsigned**
-artifacts — which is also what a fork gets.
+Developer ID is the plan. Without those secrets the build still succeeds and produces artifacts
+that are signed **ad hoc** only (no Developer ID, not notarised; B-91: up to 3.1.3 they
+were not signed at all) — which is also what a fork gets.
 
 An unsigned build is opened **once** with right-click → **Open** (_Öffnen_) and confirming the
 dialog; double-clicking it produces Gatekeeper's "cannot be opened because the developer cannot be
@@ -83,6 +85,26 @@ verified" instead.
 Whether the release builds will be notarised depends on the Apple Developer membership; the workflow
 is ready for it either way. Issue #137 (macOS Sonoma: 2.7.1 does not open) is answered by this build,
 not by a 2.x fix.
+
+## macOS: the Local Network permission
+
+Since macOS 15 (Sequoia, and Tahoe after it) an app needs your permission to connect to devices in
+the local network, and the CCU is one. macOS asks once, on the first connection: **"Homematic
+Manager" would like to find and connect to devices on your local network.** Choose **Allow**.
+
+Without the permission every connection to the CCU fails before it leaves the Mac, and the app shows
+`EHOSTUNREACH` (or, for an openccu-lite system, a timeout), even though the CCU answers the browser
+and the old 2.7. The app then adds a hint naming the setting. To give the permission afterwards:
+
+1. **System Settings → Privacy & Security → Local Network** (_Systemeinstellungen → Datenschutz &
+   Sicherheit → Lokales Netzwerk_),
+2. switch **Homematic Manager** on (with more than one entry, all of them),
+3. quit the app with ⌘Q and start it again.
+
+Up to 3.1.3 macOS often did not ask at all: the app had no usage description, and its executable
+had the same build UUID as every other app on the same Electron version, which macOS uses to find
+the app's permission (B-91, #169). The releases after 3.1.3 have both. As long as the builds are signed ad
+hoc rather than with a Developer ID, macOS may treat an update as a new app and ask again.
 
 ## Linux
 
@@ -216,6 +238,7 @@ same warning.
 | --- | --- |
 | "Windows protected your PC" on the installer | Expected until the Windows signing is in place; **More info → Run anyway**. See [above](#windows-the-smartscreen-warning). |
 | macOS: "cannot be opened because the developer cannot be verified" | Unsigned build; right-click → **Open** once. |
+| macOS: `EHOSTUNREACH` for every interface, or the connection test times out | The Local Network permission. **System Settings → Privacy & Security → Local Network**, switch Homematic Manager on, quit with ⌘Q and start again. See [above](#macos-the-local-network-permission). |
 | The app starts but no device list appears | The CCU's XML-RPC API firewall setting, or the wrong address. The settings dialog has a discovery button (UDP broadcast) that finds CCUs on the same subnet. |
 | Interfaces show as connected, but nothing ever updates | The callback. The CCU could reach the app but not the other way round: check the local firewall, and the callback address in the settings dialog - *Automatic* names the address it uses; a ⚠ beside the interface picker means a chosen address does not fit (see [above](#which-address-the-ccu-calls-back-to)). |
 | Names are missing, a ReGa indicator is red | ReGa is optional (D-2): the app carries on with local names. Enable "Remote Homematic-Script API" in the CCU's firewall to get the CCU's names back. |

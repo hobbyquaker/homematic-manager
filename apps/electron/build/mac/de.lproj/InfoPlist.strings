@@ -1,0 +1,2 @@
+/* B-91 (#169): the German text of the Local Network alert (electron-builder.yml, mac.extendInfo) */
+"NSLocalNetworkUsageDescription" = "Homematic Manager verbindet sich im lokalen Netzwerk mit Ihrer CCU und deren Schnittstellenprozessen und sucht im Netzwerk nach CCUs.";

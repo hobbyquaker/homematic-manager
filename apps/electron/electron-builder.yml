@@ -62,6 +62,11 @@ asar: true
 # No native modules anywhere in the tree: rebuilding for every arch would only cost minutes.
 npmRebuild: false
 
+# B-91 (#169): gives the macOS executables a UUID of their own, so that Local Network privacy can
+# tell this app from every other one built on the same Electron (scripts/mac-identity.mjs). Does
+# nothing for Windows and Linux.
+afterPack: ./scripts/mac-identity.mjs
+
 publish:
   provider: github
   owner: hobbyquaker
@@ -79,6 +84,17 @@ mac:
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
+  # B-91 (#169): since macOS 15 every connection into the local network needs the user's permission
+  # (TN3179), and the alert asking for it shows this text. German comes from
+  # build/mac/de.lproj/InfoPlist.strings below. No `NSBonjourServices`: the CCU discovery is a UDP
+  # broadcast, not Bonjour, and macOS needs no multicast entitlement for it (that is iOS only).
+  extendInfo:
+    NSLocalNetworkUsageDescription: >-
+      Homematic Manager connects to your CCU and its interface processes in the local network, and
+      searches the network for CCUs.
+  extraResources:
+    - from: build/mac/de.lproj
+      to: de.lproj
   # D-9: turned on from the workflow with `-c.mac.notarize=true` when APPLE_ID,
   # APPLE_APP_SPECIFIC_PASSWORD and APPLE_TEAM_ID are all set. A build without them is unsigned
   # and un-notarised, and says so in the README.

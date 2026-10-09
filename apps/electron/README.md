@@ -218,8 +218,16 @@ to every artefact would be a false statement.
 
 - **macOS**: the release and build workflows sign and notarise when `APPLE_ID`,
   `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID` and the certificate secrets are all present.
-  Without them the build still succeeds and produces unsigned artifacts, which is what a fork gets.
-  An unsigned build is opened with right-click → Open, once.
+  Without them the build still succeeds and its app is signed ad hoc only, which is what a fork gets.
+  Such a build is opened with right-click → Open, once.
+- **macOS Local Network privacy** (B-91, #169): `mac.extendInfo` gives the alert its text
+  (`NSLocalNetworkUsageDescription`, German in `build/mac/de.lproj/InfoPlist.strings`), and the
+  `afterPack` hook `scripts/mac-identity.mjs` writes a UUID of this app into the app's and the
+  helpers' executables, which electron-builder otherwise copies unchanged from Electron - every
+  Electron app of a version shares those UUIDs, and macOS finds an app's permission by them. The
+  hook then signs the app ad hoc (Developer ID signing, when it runs, replaces that). It works on
+  macOS only (it needs `codesign`); a mac build on Linux keeps Electron's UUIDs. Both workflows run
+  `node scripts/mac-identity.mjs check dist-electron/mac-universal` after packaging.
 - **Windows**: signing goes through SignPath once the open-source project application is accepted.
   The step is in both workflows, commented out, with the shape it will have. Until then SmartScreen
   shows "Windows protected your PC" on the first run of the installer: **More info → Run anyway**.

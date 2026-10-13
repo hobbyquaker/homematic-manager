@@ -86,6 +86,12 @@ export const RSSI_BANDS: readonly RssiBand[] = [
  *   offset of 256 or with the sign dropped. `130…255` is `value - 256`, `-255…-130` is
  *   `-value - 256` (which is what turns the maintainer's `-208` into a perfectly ordinary
  *   -48 dBm), and a bare positive `2…126` is the same level without its minus.
+ * - The same two shapes come **from rfd itself**, without ReGa
+ *   (https://github.com/OpenCCU/OpenCCU-Base/issues/185): it reads the RSSI byte of the module's
+ *   send status (the ACK) into a `char` and negates it like an event's magnitude, so `RSSI_PEER`
+ *   and `rssiInfo` carry a positive `2…126` on x86_64 (`char` is signed; `55` is -55 dBm) and
+ *   `-130…-255` on ARM (`char` is unsigned; `-236` is -20 dBm). The same two branches catch
+ *   them, and they stay after an upstream fix, for older firmware.
  *
  * The mapping is the one Home Assistant's `aiohomematic` applies (`model/generic/sensor.py`,
  * `_fix_rssi`); OpenCCU's WebUI does the `- 256` half in

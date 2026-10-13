@@ -37,6 +37,13 @@ describe('normaliseRssiValue', () => {
         expect(normaliseRssiValue(-255)).toBe(-1);
     });
 
+    it("rfd's ACK RSSI with the wrong sign, on x86_64 and on ARM", () => {
+        // https://github.com/OpenCCU/OpenCCU-Base/issues/185
+        // x86_64's rfd (signed char) hands out a positive level, ARM's (unsigned char) one off by 256
+        expect(normaliseRssiValue(55)).toBe(-55);
+        expect(normaliseRssiValue(-236)).toBe(-20);
+    });
+
     it('#154: every placeholder is "no value", not a level', () => {
         // 65536 is eQ-3's documented one, 0x80 the radio chip's "no RSSI available",
         // 0 and 1 "nothing received in this direction since the start"

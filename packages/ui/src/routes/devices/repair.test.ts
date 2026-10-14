@@ -45,9 +45,9 @@ describe('the two meanings of CONFIG_PENDING', () => {
 
         const row = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
         await waitFor(() => {
-            expect(within(row).getByLabelText('CONFIG_PENDING')).toBeTruthy();
+            expect(within(row).getByLabelText('Konfiguration ausstehend')).toBeTruthy();
         });
-        expect(within(row).getByLabelText('CONFIG_PENDING').getAttribute('title')).toContain('Aufwachen');
+        expect(within(row).getByLabelText('Konfiguration ausstehend').getAttribute('title')).toContain('Aufwachen');
         expect(screen.queryByTestId('repair-MEQ0123456')).toBeNull();
     });
 
@@ -61,9 +61,9 @@ describe('the two meanings of CONFIG_PENDING', () => {
 
         const row = document.querySelector<HTMLElement>('[data-row-id="000A1B2C3D4E5F"]')!;
         await waitFor(() => {
-            expect(within(row).getByLabelText('CONFIG_PENDING')).toBeTruthy();
+            expect(within(row).getByLabelText('Konfiguration ausstehend')).toBeTruthy();
         });
-        expect(within(row).getByLabelText('CONFIG_PENDING').getAttribute('title')).toContain('übertragen');
+        expect(within(row).getByLabelText('Konfiguration ausstehend').getAttribute('title')).toContain('übertragen');
         expect(screen.getByTestId('repair-000A1B2C3D4E5F')).toBeTruthy();
     });
 });

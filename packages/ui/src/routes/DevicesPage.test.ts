@@ -1,7 +1,9 @@
 import type {DeviceDescription, ParamsetDescription, ServiceMessage} from '@homematic-manager/core';
+import {deviceAddress} from '@homematic-manager/core';
 import {fireEvent, screen, waitFor, within} from '@testing-library/svelte';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
+import {UI_MESSAGES} from '../lib/i18n/uiMessages.js';
 import {DEMO_DEVICES, isDemoInterface} from '../lib/transport/demoData.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
 import {
@@ -397,8 +399,71 @@ describe('the service-message marks', () => {
         ]);
     });
 
-    it('gives every mark a severity so both themes stay legible (D-22)', () => {
-        expect(serviceMarks('A', messages, 99).map((mark) => mark.level)).toEqual(['error', 'warn', 'warn']);
+    it('gives every mark a tone so both themes stay legible (D-22)', () => {
+        expect(serviceMarks('A', messages, 99).map((mark) => mark.tone)).toEqual(['red', 'orange', 'blue']);
+    });
+
+    it('task 92: one icon per message, UNREACH and STICKY_UNREACH apart, the faults apart', () => {
+        const all = [
+            'UNREACH',
+            'STICKY_UNREACH',
+            'ERROR',
+            'ERROR_CODE',
+            'SABOTAGE',
+            'FAULT_REPORTING',
+            'LOWBAT',
+            'LOW_BAT',
+            'CONFIG_PENDING',
+            'UPDATE_PENDING',
+        ].map((datapoint): ServiceMessage => ({
+            interfaceName: 'BidCos-RF',
+            address: `${datapoint}:0`,
+            datapoint,
+            value: true,
+            since: 0,
+        }));
+        const marks = all.map((message) => serviceMarks(deviceAddress(message.address), [message])[0]);
+        expect(marks.map((mark) => [mark?.datapoint, mark?.icon, mark?.tone, mark?.label])).toEqual([
+            ['UNREACH', 'unlink', 'red', 'Communication disturbed'],
+            ['STICKY_UNREACH', 'history', 'grey', 'Communication was disturbed'],
+            ['ERROR', 'alert', 'red', 'Fault'],
+            ['ERROR_CODE', 'alert', 'red', 'Fault'],
+            ['SABOTAGE', 'shield', 'red', 'Sabotage'],
+            ['FAULT_REPORTING', 'x-circle', 'red', 'Fault report'],
+            ['LOWBAT', 'battery', 'orange', 'Low battery'],
+            ['LOW_BAT', 'battery', 'orange', 'Low battery'],
+            ['CONFIG_PENDING', 'settings', 'blue', 'Configuration pending'],
+            ['UPDATE_PENDING', 'arrow-up', 'blue', 'Update pending'],
+        ]);
+        // every label is translated
+        for (const mark of marks) {
+            expect(UI_MESSAGES[mark?.label ?? '']?.de, mark?.label).toBeTruthy();
+        }
+    });
+
+    it('task 92: leaves STICKY_UNREACH out beside UNREACH, sorts by severity and lists a message once', () => {
+        const message = (address: string, datapoint: string): ServiceMessage => ({
+            interfaceName: 'BidCos-RF',
+            address,
+            datapoint,
+            value: true,
+            since: 0,
+        });
+        expect(
+            serviceMarks('D', [
+                message('D:0', 'STICKY_UNREACH'),
+                message('D:0', 'LOWBAT'),
+                message('D:0', 'UNREACH'),
+            ]).map((mark) => mark.datapoint),
+        ).toEqual(['UNREACH', 'LOWBAT']);
+        expect(
+            serviceMarks('E', [message('E:0', 'STICKY_UNREACH'), message('E:0', 'CONFIG_PENDING')]).map(
+                (mark) => mark.datapoint,
+            ),
+        ).toEqual(['CONFIG_PENDING', 'STICKY_UNREACH']);
+        expect(
+            serviceMarks('F', [message('F:1', 'ERROR'), message('F:2', 'ERROR')], 99).map((mark) => mark.address),
+        ).toEqual(['F:1']);
     });
 
     it('B-24: marks a thermostat whose transceiver channel reports a fault', () => {
@@ -410,7 +475,13 @@ describe('the service-message marks', () => {
             since: 0,
         };
         expect(serviceMarks('LEQ0853419', [fault])).toEqual([
-            {datapoint: 'FAULT_REPORTING', symbol: '⚠', level: 'error', title: 'FAULT_REPORTING LEQ0853419:4'},
+            {
+                datapoint: 'FAULT_REPORTING',
+                icon: 'x-circle',
+                tone: 'red',
+                label: 'Fault report',
+                address: 'LEQ0853419:4',
+            },
         ]);
     });
 
@@ -418,9 +489,17 @@ describe('the service-message marks', () => {
         it(`marks a device with a service message in the ${theme} theme`, async () => {
             document.documentElement.setAttribute('data-theme', theme);
             await mountApp({hash: '#/BidCos-RF/devices'});
-            // The demo fixture has LOWBAT on LEQ0456789:0 and STICKY_UNREACH on KEQ0345678:0.
-            expect(within(rowOf('LEQ0456789')).getByLabelText('LOWBAT').classList).toContain('hmm-msg-warn');
-            expect(within(rowOf('KEQ0345678')).getByLabelText('STICKY_UNREACH').classList).toContain('hmm-msg-error');
+            // The demo fixture has LOWBAT on LEQ0456789:0 and STICKY_UNREACH on KEQ0345678:0, in German.
+            const lowbat = within(rowOf('LEQ0456789')).getByRole('img', {name: 'Batterie schwach'});
+            expect(lowbat.dataset['tone']).toBe('orange');
+            expect(lowbat.title).toContain('LOWBAT LEQ0456789:0');
+            const sticky = within(rowOf('KEQ0345678')).getByRole('img', {name: 'Kommunikation war gestört'});
+            expect(sticky.dataset['tone']).toBe('grey');
+            // one size for every badge, whatever the icon (task 92)
+            for (const badge of [lowbat, sticky]) {
+                const box = badge.getBoundingClientRect();
+                expect([Math.round(box.width), Math.round(box.height)]).toEqual([20, 20]);
+            }
             document.documentElement.removeAttribute('data-theme');
         });
     }

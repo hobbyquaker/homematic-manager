@@ -94,7 +94,9 @@ test('the Msgs column shows two marks and the repair button whole, is resized, k
     // One after the other: every setValue sends all values of the channel, each in a callback of
     // its own, and the first one's `CONFIG_PENDING: false` arriving last would clear the second.
     sim.api.emit('setValue', 'hmip', maintenance, 'STICKY_UNREACH', true);
-    await expect(table.locator(`[data-row-id="${HMIP_DIMMER}"]`).getByLabel('STICKY_UNREACH')).toBeVisible();
+    await expect(
+        table.locator(`[data-row-id="${HMIP_DIMMER}"]`).getByLabel('Communication was disturbed'),
+    ).toBeVisible();
     sim.setConfigPending('hmip', maintenance, {sticky: true});
 
     const header = (): Locator => table.getByRole('columnheader', {name: 'Msgs', exact: true});
@@ -102,7 +104,9 @@ test('the Msgs column shows two marks and the repair button whole, is resized, k
     const layoutOfCell = (): Promise<{items: number; inside: boolean; cutOff: boolean}> =>
         cell().evaluate((element) => {
             const box = element.getBoundingClientRect();
-            const items = [...element.children].map((child) => child.getBoundingClientRect());
+            // task 92: the badges and the button sit in one row of their own inside the cell
+            const row = element.querySelector('.hmm-msg-cell') ?? element;
+            const items = [...row.children].map((child) => child.getBoundingClientRect());
             return {
                 items: items.length,
                 inside: items.every((item) => item.left >= box.left - 0.5 && item.right <= box.right + 0.5),

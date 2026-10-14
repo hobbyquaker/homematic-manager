@@ -11,27 +11,53 @@ import {asStringList, deviceAddress} from '@homematic-manager/core';
  * the rules are pure functions and the grid re-renders from them.
  */
 
-/** One mark in the Msgs column. `level` picks the colour token, so both themes stay legible. */
+/**
+ * The icon of a mark (task 92): the line icons openccu-lite's status page draws for the same messages,
+ * drawn by `ServiceBadge.svelte` with the same 24x24 paths, so one message looks the same in both.
+ */
+export type ServiceMarkIcon =
+    'unlink' | 'history' | 'battery' | 'alert' | 'shield' | 'x-circle' | 'settings' | 'arrow-up';
+
+/**
+ * The colour of a mark, as openccu-lite's status page colours the message kinds: red what is wrong
+ * now, orange what needs a hand soon, blue what the system is still doing, grey what is over.
+ */
+export type ServiceMarkTone = 'red' | 'orange' | 'blue' | 'grey';
+
+/** One mark in the Msgs column. `tone` picks the colour token, so both themes stay legible. */
 export interface ServiceMark {
     readonly datapoint: string;
-    readonly symbol: string;
-    readonly level: 'warn' | 'error';
-    readonly title: string;
+    readonly icon: ServiceMarkIcon;
+    readonly tone: ServiceMarkTone;
+    /** The message's name, a message key: the tooltip and the screen reader's text. */
+    readonly label: string;
+    /** The channel that reports it, for the tooltip. */
+    readonly address: string;
 }
 
-const MARKS: Readonly<Record<string, {symbol: string; level: 'warn' | 'error'}>> = {
-    UNREACH: {symbol: '✖', level: 'error'},
-    STICKY_UNREACH: {symbol: '✖', level: 'error'},
-    LOWBAT: {symbol: '▮', level: 'warn'},
-    LOW_BAT: {symbol: '▮', level: 'warn'},
-    ERROR: {symbol: '⚠', level: 'error'},
-    ERROR_CODE: {symbol: '⚠', level: 'error'},
-    SABOTAGE: {symbol: '⚠', level: 'error'},
+/**
+ * Task 92 (the maintainer, 2026-10-11): one icon per message in a badge of one size, not text glyphs
+ * whose widths and baselines differ per font. `UNREACH` and `STICKY_UNREACH` look different - the
+ * device is away now, or it was away and nobody has confirmed that yet - and the faults have an icon
+ * each. Icons and colours are openccu-lite's status page's (occulited task 27); `SABOTAGE` takes the
+ * shield of its card badges.
+ */
+const MARKS: Readonly<Record<string, {icon: ServiceMarkIcon; tone: ServiceMarkTone; label: string}>> = {
+    UNREACH: {icon: 'unlink', tone: 'red', label: 'Communication disturbed'},
+    STICKY_UNREACH: {icon: 'history', tone: 'grey', label: 'Communication was disturbed'},
+    ERROR: {icon: 'alert', tone: 'red', label: 'Fault'},
+    ERROR_CODE: {icon: 'alert', tone: 'red', label: 'Fault'},
+    SABOTAGE: {icon: 'shield', tone: 'red', label: 'Sabotage'},
     // B-24: the HM-CC-RT-DN's fault report - a communication error, a stuck valve
-    FAULT_REPORTING: {symbol: '⚠', level: 'error'},
-    CONFIG_PENDING: {symbol: '⚙', level: 'warn'},
-    UPDATE_PENDING: {symbol: '⇩', level: 'warn'},
+    FAULT_REPORTING: {icon: 'x-circle', tone: 'red', label: 'Fault report'},
+    LOWBAT: {icon: 'battery', tone: 'orange', label: 'Low battery'},
+    LOW_BAT: {icon: 'battery', tone: 'orange', label: 'Low battery'},
+    CONFIG_PENDING: {icon: 'settings', tone: 'blue', label: 'Configuration pending'},
+    UPDATE_PENDING: {icon: 'arrow-up', tone: 'blue', label: 'Update pending'},
 };
+
+/** Most severe first, as the status page sorts its kinds. */
+const TONE_RANK: Readonly<Record<ServiceMarkTone, number>> = {red: 0, orange: 1, blue: 2, grey: 3};
 
 /**
  * The width the Msgs column is designed with, and the narrowest it is drawn or dragged (B-34): two
@@ -60,9 +86,10 @@ export const PARAMSETS_COLUMN_WIDTH = 150;
 export const SUPPRESS_COLUMN_WIDTH = 180;
 
 /**
- * The marks for one device, from the service messages of its channels. Unreachable first and at
+ * The marks for one device, from the service messages of its channels. Most severe first and at
  * most two of them, as 2.x did; {@link SERVICE_MARKS_COLUMN_WIDTH} has room for those two and the
- * repair button.
+ * repair button. `STICKY_UNREACH` beside `UNREACH` says nothing the red mark does not, and would take
+ * the second place: it is left out then, as on openccu-lite's status page and card badges.
  */
 export function serviceMarks(address: string, messages: readonly ServiceMessage[], limit = 2): ServiceMark[] {
     const marks: ServiceMark[] = [];
@@ -71,22 +98,16 @@ export function serviceMarks(address: string, messages: readonly ServiceMessage[
             continue;
         }
         const mark = MARKS[message.datapoint];
-        if (!mark) {
+        if (!mark || marks.some((known) => known.datapoint === message.datapoint)) {
             continue;
         }
-        const entry: ServiceMark = {
-            datapoint: message.datapoint,
-            symbol: mark.symbol,
-            level: mark.level,
-            title: `${message.datapoint} ${message.address}`,
-        };
-        if (mark.level === 'error') {
-            marks.unshift(entry);
-        } else {
-            marks.push(entry);
-        }
+        marks.push({datapoint: message.datapoint, ...mark, address: message.address});
     }
-    return marks.slice(0, limit);
+    const unreach = marks.some((mark) => mark.datapoint === 'UNREACH');
+    return marks
+        .filter((mark) => !(unreach && mark.datapoint === 'STICKY_UNREACH'))
+        .sort((a, b) => TONE_RANK[a.tone] - TONE_RANK[b.tone])
+        .slice(0, limit);
 }
 
 /**

@@ -660,6 +660,15 @@ export const UI_MESSAGES: MessageCatalogue = {
 
     // What the lab measured about CONFIG_PENDING and the repair (task 6, docs/config-pending.md).
     'Repair configuration': {de: 'Konfiguration reparieren', en: 'Repair configuration'},
+    // Task 92: the names of the service-message badges in the device table, as openccu-lite's status page words them
+    'Communication disturbed': {de: 'Kommunikation gestört', en: 'Communication disturbed'},
+    'Communication was disturbed': {de: 'Kommunikation war gestört', en: 'Communication was disturbed'},
+    'Low battery': {de: 'Batterie schwach', en: 'Low battery'},
+    'Configuration pending': {de: 'Konfiguration ausstehend', en: 'Configuration pending'},
+    'Update pending': {de: 'Update ausstehend', en: 'Update pending'},
+    Sabotage: {de: 'Sabotage', en: 'Sabotage'},
+    Fault: {de: 'Fehler', en: 'Fault'},
+    'Fault report': {de: 'Fehlermeldung', en: 'Fault report'},
     'The configuration could not be transferred to the device': {
         de: 'Die Konfiguration konnte nicht zum Gerät übertragen werden',
         en: 'The configuration could not be transferred to the device',

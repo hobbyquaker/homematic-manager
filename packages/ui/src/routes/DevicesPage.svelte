@@ -29,6 +29,7 @@
     import type {ContextMenuItem} from '../lib/components/contextMenu.js';
     import DataTable from '../lib/components/DataTable.svelte';
     import DeviceImage from '../lib/components/DeviceImage.svelte';
+    import ServiceBadge from '../lib/components/ServiceBadge.svelte';
     import {ICON_COLUMN_WIDTH} from '../lib/components/metrics.js';
     import PrimaryToolbarButton from '../lib/components/PrimaryToolbarButton.svelte';
     import ToolbarButton from '../lib/components/ToolbarButton.svelte';
@@ -1156,29 +1157,28 @@
                     >
                     <span data-testid={`smoke-group-${row.ADDRESS}`}>{smokeGroupText(row)}</span>
                 {:else if column.key === 'msgs' && flatRow.depth === 0}
-                    {#each marksOf(row) as mark (mark.datapoint)}
-                        {@const explanation = serviceMessageExplanation(mark.datapoint, !isBidcos)}
-                        <span
-                            class="hmm-msg-mark"
-                            class:hmm-msg-error={mark.level === 'error'}
-                            class:hmm-msg-warn={mark.level === 'warn'}
-                            title={explanation === undefined ? mark.title : `${mark.title} — ${t(explanation)}`}
-                            aria-label={mark.datapoint}
-                            role="img">{mark.symbol}</span
-                        >
-                        {#if offersRepair(mark.datapoint, !isBidcos)}
-                            <button
-                                type="button"
-                                class="hmm-inline-button"
-                                data-testid={`repair-${row.ADDRESS}`}
-                                title={t('Repair configuration')}
-                                onclick={(event) => {
-                                    event.stopPropagation();
-                                    openRepair(row.ADDRESS);
-                                }}>⚒</button
-                            >
-                        {/if}
-                    {/each}
+                    <span class="hmm-msg-cell" data-testid={`msgs-${row.ADDRESS}`}>
+                        {#each marksOf(row) as mark (mark.datapoint)}
+                            {@const explanation = serviceMessageExplanation(mark.datapoint, !isBidcos)}
+                            <ServiceBadge
+                                {mark}
+                                label={t(mark.label)}
+                                title={`${t(mark.label)} (${mark.datapoint} ${mark.address})${explanation === undefined ? '' : ` — ${t(explanation)}`}`}
+                            />
+                            {#if offersRepair(mark.datapoint, !isBidcos)}
+                                <button
+                                    type="button"
+                                    class="hmm-inline-button"
+                                    data-testid={`repair-${row.ADDRESS}`}
+                                    title={t('Repair configuration')}
+                                    onclick={(event) => {
+                                        event.stopPropagation();
+                                        openRepair(row.ADDRESS);
+                                    }}>⚒</button
+                                >
+                            {/if}
+                        {/each}
+                    </span>
                 {:else if column.key === 'FIRMWARE' && flatRow.depth === 0}
                     {@const cellState = firmwareOf(row)}
                     <span>{cellState.firmware}</span>
@@ -1285,16 +1285,16 @@
         font-size: var(--hmm-font-size-small);
     }
 
-    .hmm-msg-mark {
-        padding: 0 1px;
+    /* task 92: the badges of one row stand at one distance, the repair button after them */
+    .hmm-msg-cell {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        vertical-align: middle;
     }
 
-    .hmm-msg-error {
-        color: var(--hmm-error);
-    }
-
-    .hmm-msg-warn {
-        color: var(--hmm-warn);
+    .hmm-msg-cell .hmm-inline-button {
+        margin-left: 0;
     }
 
     .hmm-roaming {

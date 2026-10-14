@@ -157,6 +157,11 @@ export class AppStore {
     readonly #unsubscribe: Array<() => void> = [];
     readonly #routedListeners: Array<(previous: string) => void> = [];
 
+    /** The browser storage this app keeps its settings in; `undefined` where the browser refuses it. */
+    get storage(): StorageLike | undefined {
+        return this.#storage;
+    }
+
     constructor(transport: Transport, notices: NoticesStore, options: AppStoreOptions = {}) {
         this.#transport = transport;
         this.#notices = notices;

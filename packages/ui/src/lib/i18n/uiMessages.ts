@@ -1207,6 +1207,44 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Einmal direkt vom Gerät gelesen: kostet Duty Cycle',
         en: 'Read once from the device itself: costs duty cycle',
     },
+    // Task 98: the routing tables of all routers as one graph of the HmIP network.
+    List: {de: 'Liste', en: 'List'},
+    Graph: {de: 'Graph', en: 'Graph'},
+    'Access point': {de: 'Access Point', en: 'Access point'},
+    Routes: {de: 'Routen', en: 'Routes'},
+    'Routing graph': {de: 'Routing-Graph', en: 'Routing graph'},
+    'Read routing tables': {de: 'Routing-Tabellen lesen', en: 'Read routing tables'},
+    'No router that routes offers its routing table': {
+        de: 'Kein routender Router bietet seine Routing-Tabelle an',
+        en: 'No router that routes offers its routing table',
+    },
+    'Each table is read from its router over the air, one after the other': {
+        de: 'Jede Tabelle wird per Funk von ihrem Router gelesen, eine nach der anderen',
+        en: 'Each table is read from its router over the air, one after the other',
+    },
+    'Reading {done} of {total}…': {de: 'Lese {done} von {total}…', en: 'Reading {done} of {total}…'},
+    'Last read {time}': {de: 'Zuletzt gelesen {time}', en: 'Last read {time}'},
+    'Not read yet: the graph shows every device directly at the access point.': {
+        de: 'Noch nicht gelesen: der Graph zeigt jedes Gerät direkt am Access Point.',
+        en: 'Not read yet: the graph shows every device directly at the access point.',
+    },
+    'Each router is asked once per read, over the air, with a pause between them; the result is kept until the next read. Entries of battery devices are what the router last heard and may be stale.':
+        {
+            de: 'Jeder Router wird pro Lesen einmal per Funk gefragt, mit einer Pause dazwischen; das Ergebnis bleibt bis zum nächsten Lesen. Einträge von Batteriegeräten sind, was der Router zuletzt gehört hat, und können veraltet sein.',
+            en: 'Each router is asked once per read, over the air, with a pause between them; the result is kept until the next read. Entries of battery devices are what the router last heard and may be stale.',
+        },
+    'Not answered': {de: 'Nicht geantwortet', en: 'Not answered'},
+    'Route from a table': {de: 'Route aus einer Tabelle', en: 'Route from a table'},
+    'Assumed: no table lists it': {de: 'Angenommen: keine Tabelle nennt sie', en: 'Assumed: no table lists it'},
+    'No routes read yet': {de: 'Noch keine Routen gelesen', en: 'No routes read yet'},
+    'The router did not answer: {error}': {
+        de: 'Der Router hat nicht geantwortet: {error}',
+        en: 'The router did not answer: {error}',
+    },
+    'Read from the device at {time}; not read again here.': {
+        de: 'Am {time} vom Gerät gelesen; hier nicht erneut gelesen.',
+        en: 'Read from the device at {time}; not read again here.',
+    },
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

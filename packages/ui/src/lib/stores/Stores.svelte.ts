@@ -8,6 +8,7 @@ import {LOCAL_NETWORK_HINT, looksLikeLocalNetworkBlock} from '../util/localNetwo
 
 import {AppStore, type AppStoreOptions} from './AppStore.svelte.js';
 import {ChangeSetStore} from './ChangeSetStore.svelte.js';
+import {profileKey} from './ColumnWidthsStore.svelte.js';
 import {ConsoleStore} from './ConsoleStore.svelte.js';
 import {DevicesStore} from './DevicesStore.svelte.js';
 import {EventsStore} from './EventsStore.svelte.js';
@@ -113,7 +114,10 @@ export class Stores {
         this.smokeGroups = new SmokeGroupsStore(transport, this.notices);
         this.paramsets = new ParamsetStore(transport, this.notices);
         this.radio = new RadioStore(transport, this.notices);
-        this.routers = new RoutersStore(transport, this.notices, this.devices);
+        this.routers = new RoutersStore(transport, this.notices, this.devices, {
+            storage: this.app.storage,
+            profile: () => profileKey(this.app.config?.connection.host ?? ''),
+        });
         this.console = new ConsoleStore(transport, this.notices);
         this.changeSet = new ChangeSetStore(transport, this.notices, this.rpcLog);
         // B-42: the address bar, back and forward switch the interface through the hash; the

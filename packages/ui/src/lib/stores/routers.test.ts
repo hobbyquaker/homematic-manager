@@ -196,3 +196,119 @@ describe('the routers store (task 97)', () => {
         expect(routers.writing).toBe('');
     });
 });
+
+class Storage {
+    readonly items = new Map<string, string>();
+    getItem(key: string): string | null {
+        return this.items.get(key) ?? null;
+    }
+    setItem(key: string, value: string): void {
+        this.items.set(key, value);
+    }
+    removeItem(key: string): void {
+        this.items.delete(key);
+    }
+}
+
+function tableReads(transport: MockTransport): string[] {
+    return transport.calls
+        .filter((call) => call.method === 'paramset.get' && call.params[2] === 'ROUTING_TABLE')
+        .map((call) => String(call.params[1]));
+}
+
+describe('the routing tables (task 98)', () => {
+    function withStorage(storage: Storage, profile = 'ccu-a') {
+        const transport = new MockTransport({demo: true});
+        const notices = new NoticesStore(transport);
+        const devices = new DevicesStore(transport, notices);
+        const routers = new RoutersStore(transport, notices, devices, {storage, profile: () => profile, pauseMs: 0});
+        return {transport, notices, devices, routers};
+    }
+
+    it('reads nothing on air by itself: not on ensure, not on load', async () => {
+        const {transport, devices, routers} = withStorage(new Storage());
+        await devices.load('HmIP-RF');
+        await routers.ensure('HmIP-RF');
+        await routers.load('HmIP-RF');
+        expect(tableReads(transport)).toEqual([]);
+        expect(routers.tablesOf('HmIP-RF')).toBeUndefined();
+    });
+
+    it('reads the table of each router that routes and offers one, keeps it with its time, and in the browser', async () => {
+        const storage = new Storage();
+        const {transport, devices, routers} = withStorage(storage);
+        await devices.load('HmIP-RF');
+        await routers.ensure('HmIP-RF');
+        expect(routers.tableTargets('HmIP-RF')).toEqual([{router: BSM, address: `${BSM}:0`}]);
+
+        const before = Date.now();
+        const reading = routers.readTables('HmIP-RF');
+        expect(routers.isReadingTables('HmIP-RF')).toBe(true);
+        // a second click while it runs starts nothing
+        await routers.readTables('HmIP-RF');
+        await reading;
+        expect(routers.isReadingTables('HmIP-RF')).toBe(false);
+        // the PSM-2 does not route: its table is not asked for
+        expect(tableReads(transport)).toEqual([`${BSM}:0`]);
+
+        const tables = routers.tablesOf('HmIP-RF');
+        expect(tables?.readAt).toBeGreaterThanOrEqual(before);
+        expect(tables?.tables[BSM]?.entries?.map((entry) => entry.destination)).toEqual([
+            '3014F711A0000418971558',
+            '0011D3C9A1B2C3',
+            '0001D8A9B7C6D5',
+            '3014F711A0001F',
+        ]);
+        expect([...storage.items.keys()]).toEqual(['hmm.routingTables.ccu-a.HmIP-RF']);
+
+        // a new session with the same profile finds them without a read
+        const next = withStorage(storage);
+        expect(next.routers.tablesOf('HmIP-RF')?.tables[BSM]?.entries).toHaveLength(4);
+        await Promise.resolve();
+        expect(next.routers.tables['HmIP-RF']?.readAt).toBe(tables?.readAt);
+        expect(tableReads(next.transport)).toEqual([]);
+        // another system's profile does not
+        expect(withStorage(storage, 'ccu-b').routers.tablesOf('HmIP-RF')).toBeUndefined();
+    });
+
+    it('keeps a router that did not answer with its error, and warns once', async () => {
+        const {transport, devices, routers, notices} = withStorage(new Storage());
+        await devices.load('HmIP-RF');
+        await routers.ensure('HmIP-RF');
+        transport.fail('paramset.get', 'timeout');
+        await routers.readTables('HmIP-RF');
+        expect(routers.tablesOf('HmIP-RF')?.tables[BSM]).toMatchObject({address: `${BSM}:0`, error: 'timeout'});
+        expect(notices.items).toHaveLength(1);
+        expect(notices.items[0]?.level).toBe('warn');
+    });
+
+    it('pauses between two routers', async () => {
+        const transport = new MockTransport({demo: true});
+        // the PSM-2 offers its table too, for this test
+        const list = transport.handlerFor('devices.list');
+        transport.respond('devices.list', async (...params) =>
+            (await list(...params)).map((device) =>
+                device.ADDRESS === `${PSM}:0` ? {...device, PARAMSETS: ['MASTER', 'VALUES', 'ROUTING_TABLE']} : device,
+            ),
+        );
+        const times: number[] = [];
+        const get = transport.handlerFor('paramset.get');
+        transport.respond('paramset.get', (...params) => {
+            if (params[2] === 'ROUTING_TABLE') {
+                times.push(Date.now());
+            }
+            return get(...params);
+        });
+        const notices = new NoticesStore(transport);
+        const devices = new DevicesStore(transport, notices);
+        const routers = new RoutersStore(transport, notices, devices, {pauseMs: 60});
+        await devices.load('HmIP-RF');
+        await routers.ensure('HmIP-RF');
+        await routers.setRouting('HmIP-RF', PSM, true);
+        expect(routers.tableTargets('HmIP-RF').map((target) => target.router)).toEqual([PSM, BSM]);
+
+        await routers.readTables('HmIP-RF');
+        expect(times).toHaveLength(2);
+        expect((times[1] ?? 0) - (times[0] ?? 0)).toBeGreaterThanOrEqual(50);
+    });
+});

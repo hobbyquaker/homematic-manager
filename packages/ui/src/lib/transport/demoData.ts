@@ -1220,6 +1220,48 @@ const ROUTER_MASTER_DESCRIPTION: ParamsetDescription = {
     ENABLE_ROUTING: {TYPE: 'BOOL', OPERATIONS: 3, FLAGS: 1, DEFAULT: true, MIN: false, MAX: true},
 };
 
+/**
+ * Task 98: the routing table of the demo's router, the HmIP-BSM - the access point, two neighbours
+ * and one device reached through the wall remote, in eQ-3's numbered `DYNAMIC_ROUTE_*` fields.
+ */
+const BSM_ROUTES: ReadonlyArray<{destination: string; nextHop: string; distance: number; rssi?: number; ac?: boolean}> =
+    [
+        {destination: '3014F711A0000418971558', nextHop: '3014F711A0000418971558', distance: 1, rssi: -55, ac: true},
+        {destination: '0011D3C9A1B2C3', nextHop: '0011D3C9A1B2C3', distance: 1, rssi: -71},
+        {destination: '0001D8A9B7C6D5', nextHop: '0001D8A9B7C6D5', distance: 1, rssi: -78},
+        {destination: '3014F711A0001F', nextHop: '0001D8A9B7C6D5', distance: 2},
+    ];
+const ROUTE_FIELDS = {
+    IP_DESTINATION_ADDRESS: {TYPE: 'STRING', OPERATIONS: 1, FLAGS: 1, DEFAULT: ''},
+    NEXT_HOP_ADDRESS: {TYPE: 'STRING', OPERATIONS: 1, FLAGS: 1, DEFAULT: ''},
+    DISTANCE: {TYPE: 'INTEGER', OPERATIONS: 1, FLAGS: 1, DEFAULT: 0, MIN: 0, MAX: 255},
+    RSSI: {TYPE: 'INTEGER', OPERATIONS: 1, FLAGS: 1, DEFAULT: 0, MIN: -128, MAX: 0},
+    IS_NEIGHBOUR: {TYPE: 'BOOL', OPERATIONS: 1, FLAGS: 1, DEFAULT: false},
+    IS_STATIC_ROUTE: {TYPE: 'BOOL', OPERATIONS: 1, FLAGS: 1, DEFAULT: false},
+    OM_ACCESS_CONTROLLER: {TYPE: 'BOOL', OPERATIONS: 1, FLAGS: 1, DEFAULT: false},
+} as const;
+const BSM_ROUTING_TABLE_DESCRIPTION: ParamsetDescription = Object.fromEntries(
+    BSM_ROUTES.flatMap((_, index) =>
+        Object.entries(ROUTE_FIELDS).map(([field, description]) => [
+            `DYNAMIC_ROUTE_${field}_${String(index)}`,
+            description,
+        ]),
+    ),
+) as ParamsetDescription;
+const BSM_ROUTING_TABLE: Paramset = Object.fromEntries(
+    BSM_ROUTES.flatMap((route, index): Array<[string, string | number | boolean]> => [
+        [`DYNAMIC_ROUTE_IP_DESTINATION_ADDRESS_${String(index)}`, route.destination],
+        [`DYNAMIC_ROUTE_NEXT_HOP_ADDRESS_${String(index)}`, route.nextHop],
+        [`DYNAMIC_ROUTE_DISTANCE_${String(index)}`, route.distance],
+        ...(route.rssi === undefined
+            ? []
+            : [[`DYNAMIC_ROUTE_RSSI_${String(index)}`, route.rssi] satisfies [string, number]]),
+        [`DYNAMIC_ROUTE_IS_NEIGHBOUR_${String(index)}`, route.distance === 1],
+        [`DYNAMIC_ROUTE_IS_STATIC_ROUTE_${String(index)}`, false],
+        [`DYNAMIC_ROUTE_OM_ACCESS_CONTROLLER_${String(index)}`, route.ac === true],
+    ]),
+);
+
 export const DEMO_DESCRIPTIONS: Readonly<Record<string, ParamsetDescription>> = {
     'SWITCH|MASTER': {
         LOGGING: {TYPE: 'ENUM', OPERATIONS: 3, FLAGS: 1, VALUE_LIST: ['OFF', 'ON'], DEFAULT: 1, TAB_ORDER: 1},
@@ -1318,6 +1360,7 @@ export const DEMO_DESCRIPTIONS: Readonly<Record<string, ParamsetDescription>> = 
     // Task 97: the maintenance channel of the two router-capable devices
     '000A1B2C3D4E5F:0|MASTER': ROUTER_MASTER_DESCRIPTION,
     '0001D709A1B2C3:0|MASTER': ROUTER_MASTER_DESCRIPTION,
+    '000A1B2C3D4E5F:0|ROUTING_TABLE': BSM_ROUTING_TABLE_DESCRIPTION,
     // Task 58: the HmIP-SWSD smoke channel, by address (see DEMO_PARAMSET_VALUES)
     '0001D3C9000001:1|MASTER': SWSD_MASTER_DESCRIPTION,
     '0001D3C9000002:1|MASTER': SWSD_MASTER_DESCRIPTION,
@@ -1357,6 +1400,8 @@ export const DEMO_PARAMSET_VALUES: Readonly<Record<string, Paramset>> = {
     // Task 97: the BSM routes, the PSM-2 could but does not
     '000A1B2C3D4E5F:0|MASTER': {ROUTER_MODULE_ENABLED: true, ENABLE_ROUTING: true},
     '0001D709A1B2C3:0|MASTER': {ROUTER_MODULE_ENABLED: false, ENABLE_ROUTING: true},
+    // Task 98: what the BSM reports as its routes
+    '000A1B2C3D4E5F:0|ROUTING_TABLE': BSM_ROUTING_TABLE,
     // Task 58: the HmIP-SWSD smoke channels - by address, because the BidCos detectors' channel is
     // a SMOKE_DETECTOR too and has no GROUP_n
     '0001D3C9000001:1|MASTER': {...SWSD_MASTER, GROUP_1: true},

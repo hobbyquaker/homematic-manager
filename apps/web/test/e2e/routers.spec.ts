@@ -19,7 +19,15 @@ const WRC2 = '0001D8A9B7C601';
 
 const BOOL = {TYPE: 'BOOL', OPERATIONS: 3, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true};
 
-function device(serial: string, type: string, firmware: string, rxMode: number, channel: string): unknown[] {
+function device(
+    serial: string,
+    type: string,
+    firmware: string,
+    rxMode: number,
+    channel: string,
+    radio: number,
+    maintenance: string[] = ['MASTER', 'VALUES'],
+): unknown[] {
     return [
         {
             ADDRESS: serial,
@@ -29,6 +37,7 @@ function device(serial: string, type: string, firmware: string, rxMode: number, 
             CHILDREN: [`${serial}:0`, `${serial}:1`],
             PARAMSETS: ['MASTER'],
             RX_MODE: rxMode,
+            RF_ADDRESS: radio,
         },
         {
             ADDRESS: `${serial}:0`,
@@ -36,7 +45,7 @@ function device(serial: string, type: string, firmware: string, rxMode: number, 
             VERSION: 1,
             PARENT: serial,
             PARENT_TYPE: type,
-            PARAMSETS: ['MASTER', 'VALUES'],
+            PARAMSETS: maintenance,
             INDEX: 0,
         },
         {
@@ -61,9 +70,14 @@ const ROUTER_FIXTURE: Record<string, unknown> = {
         rfd: {devices: []},
         hmip: {
             devices: [
-                ...device(BSM, 'HmIP-BSM', '2.10.4', 1, 'SWITCH_VIRTUAL_RECEIVER'),
-                ...device(PSM, 'HmIP-PSM-2', '1.0.22', 1, 'SWITCH_VIRTUAL_RECEIVER'),
-                ...device(WRC2, 'HmIP-WRC2', '1.2.6', 8, 'KEY_TRANSCEIVER'),
+                // task 98: the BSM's server lists its routing table
+                ...device(BSM, 'HmIP-BSM', '2.10.4', 1, 'SWITCH_VIRTUAL_RECEIVER', 0x10_20_30, [
+                    'MASTER',
+                    'VALUES',
+                    'ROUTING_TABLE',
+                ]),
+                ...device(PSM, 'HmIP-PSM-2', '1.0.22', 1, 'SWITCH_VIRTUAL_RECEIVER', 0x1a_2b_3c),
+                ...device(WRC2, 'HmIP-WRC2', '1.2.6', 8, 'KEY_TRANSCEIVER', 0x4d_5e_6f),
             ],
         },
     },
@@ -149,8 +163,9 @@ test('the Routers view lists the capable devices and switches one after asking',
     await expect(table).toContainText('1 of 2 route');
     await expect(page.getByTestId(`routing-switch-${BSM}`)).toHaveAttribute('aria-checked', 'true');
     await expect(page.getByTestId(`routing-switch-${PSM}`)).toHaveAttribute('aria-checked', 'false');
-    // the simulator offers no ROUTING_TABLE for these: nothing to open
-    await expect(page.getByTestId(`routing-table-${BSM}`)).toBeDisabled();
+    // the BSM's server offers its table, the PSM-2's does not
+    await expect(page.getByTestId(`routing-table-${BSM}`)).toBeEnabled();
+    await expect(page.getByTestId(`routing-table-${PSM}`)).toBeDisabled();
     await page.screenshot({path: testInfo.outputPath('routers-light.png')});
 
     // cancel writes nothing
@@ -186,4 +201,39 @@ test('the Routers view lists the capable devices and switches one after asking',
     await page.getByTestId('radio-view-routers').click();
     await expect(page.getByTestId(`routing-switch-${BSM}`)).toBeVisible();
     await page.screenshot({path: testInfo.outputPath('routers-dark-phone.png')});
+});
+
+test('the Graph reads the routing tables on the click only, and a router that does not answer is named', async ({
+    page,
+}, testInfo) => {
+    // hm-simulator 1.4 has no ROUTING_TABLE paramset (it answers with a fault, as a router out of
+    // reach would end); the network drawn from a table that was read is covered by the component
+    // tests against the demo transport
+    await page.goto(`${host.url}#/HmIP-RF/rssi`);
+    await page.getByTestId('radio-view-routers').click();
+    await page.getByTestId('routers-mode-graph').click();
+    const status = page.getByTestId('routing-read-status');
+    await expect(status).toContainText('Not read yet');
+    await expect(page.getByTestId('routing-read')).toBeEnabled();
+    // before the read every device hangs on the access point, assumed
+    await expect(page.locator(`[data-testid$="-${WRC2}"].hmm-network-assumed`)).toHaveCount(1);
+    await expect(page.locator(`[data-testid$="-${PSM}"].hmm-network-assumed`)).toHaveCount(1);
+    await expect(page.getByTestId(`node-${BSM}`)).toHaveClass(/hmm-network-router/);
+    await expect(page.getByTestId('routing-routes')).toContainText('No routes read yet');
+
+    await page.getByTestId('routing-read').click();
+    await expect(status).toContainText('Last read');
+    await expect(page.getByTestId('routing-read-failures')).toContainText('Not answered: Schaltaktor Terrasse');
+    await page.screenshot({path: testInfo.outputPath('routing-graph-light.png')});
+
+    // the router's node opens what the read brought: here the error
+    await page.getByTestId(`node-${BSM}`).click();
+    await expect(page.getByTestId('router-table-error')).toContainText('The router did not answer');
+    await page.keyboard.press('Escape');
+
+    await page.emulateMedia({colorScheme: 'dark'});
+    await page.screenshot({path: testInfo.outputPath('routing-graph-dark.png')});
+    await page.setViewportSize({width: 390, height: 900});
+    await expect(page.getByTestId('routing-graph')).toBeVisible();
+    await page.screenshot({path: testInfo.outputPath('routing-graph-dark-phone.png'), fullPage: true});
 });

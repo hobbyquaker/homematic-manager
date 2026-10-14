@@ -2,7 +2,8 @@
     import type {Paramset} from '@homematic-manager/core';
     import {SvelteMap} from 'svelte/reactivity';
     import {getStores} from '../../lib/stores/context.js';
-    import {parseRoutingTable, routingGraph} from '../../lib/util/routingTable.js';
+    import {formatDateTime} from '../../lib/util/format.js';
+    import {parseRoutingTable, routingGraph, type RoutingEntry} from '../../lib/util/routingTable.js';
 
     /**
      * Task 26 (openccu-lite 28.9): the ROUTING_TABLE paramset of an HmIP router, as the table
@@ -10,14 +11,18 @@
      * next hops on a ring, everything routed through them on an outer ring.
      */
     interface Props {
-        values: Paramset;
+        values?: Paramset;
+        /** Task 98: the entries of a table read earlier, instead of `values`. */
+        cached?: readonly RoutingEntry[] | undefined;
+        /** Task 98: when `cached` was read; the hint then says so instead of "read when this opens". */
+        readAt?: number | undefined;
         /** The device address (the channel's device part). */
         self: string;
     }
-    let {values, self}: Props = $props();
+    let {values = {}, cached = undefined, readAt = undefined, self}: Props = $props();
     const stores = getStores();
     const t = stores.i18n.t;
-    const entries = $derived(parseRoutingTable(values));
+    const entries = $derived(cached === undefined ? parseRoutingTable(values) : [...cached]);
     const graph = $derived(routingGraph(self, entries));
     const name = (address: string): string => {
         const label = stores.nameOf(address);
@@ -48,7 +53,11 @@
 
 <div class="hmm-routing" data-testid="routing-table">
     <p class="hmm-routing-hint">
-        {t('Read from the device itself; every read costs duty cycle, so it is read once when this opens.')}
+        {readAt === undefined
+            ? t('Read from the device itself; every read costs duty cycle, so it is read once when this opens.')
+            : t('Read from the device at {time}; not read again here.', {
+                  time: formatDateTime(readAt, stores.i18n.language),
+              })}
     </p>
     {#if entries.length === 0}
         <p>{t('No routes: the device reported an empty table.')}</p>

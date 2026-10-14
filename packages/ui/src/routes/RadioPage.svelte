@@ -12,6 +12,7 @@
 
     import BestReceiverDialog from './radio/BestReceiverDialog.svelte';
     import RoutersView from './radio/RoutersView.svelte';
+    import RoutingNetworkView from './radio/RoutingNetworkView.svelte';
     import SetInterfaceDialog from './radio/SetInterfaceDialog.svelte';
 
     const stores = getStores();
@@ -40,6 +41,8 @@
      */
     const isHmipRadio = $derived(stores.interfaces.typeOf(interfaceName) === 'HmIP-RF');
     let view = $state<'rssi' | 'routers'>('rssi');
+    /** Task 98: the routers as a list, or the network their routing tables draw. */
+    let routersMode = $state<'list' | 'graph'>('list');
     const shown = $derived(isHmipRadio ? view : 'rssi');
 
     function openSetInterface(address: string, preset = ''): void {
@@ -277,12 +280,33 @@
                 data-testid="radio-view-routers"
                 onclick={() => (view = 'routers')}>{t('Routers')}</button
             >
+            {#if shown === 'routers'}
+                <span class="hmm-radio-views-gap"></span>
+                <button
+                    type="button"
+                    class="hmm-radio-view"
+                    aria-pressed={routersMode === 'list'}
+                    data-testid="routers-mode-list"
+                    onclick={() => (routersMode = 'list')}>{t('List')}</button
+                >
+                <button
+                    type="button"
+                    class="hmm-radio-view"
+                    aria-pressed={routersMode === 'graph'}
+                    data-testid="routers-mode-graph"
+                    onclick={() => (routersMode = 'graph')}>{t('Graph')}</button
+                >
+            {/if}
         </div>
     {/if}
 
     {#if shown === 'routers'}
         <div class="hmm-page-grid">
-            <RoutersView {interfaceName} />
+            {#if routersMode === 'graph'}
+                <RoutingNetworkView {interfaceName} />
+            {:else}
+                <RoutersView {interfaceName} />
+            {/if}
         </div>
     {:else}
         <div class="hmm-page-grid">
@@ -425,13 +449,19 @@
         cursor: pointer;
     }
 
-    .hmm-radio-view:first-child {
+    /* each pair: rounded on its outer ends, one border between its two halves */
+    .hmm-radio-view:first-child,
+    .hmm-radio-views-gap + .hmm-radio-view {
         border-radius: var(--hmm-radius) 0 0 var(--hmm-radius);
     }
 
-    .hmm-radio-view:last-child {
+    .hmm-radio-view + .hmm-radio-view {
         border-left: none;
         border-radius: 0 var(--hmm-radius) var(--hmm-radius) 0;
+    }
+
+    .hmm-radio-views-gap {
+        flex: 1 1 auto;
     }
 
     .hmm-radio-view:hover {

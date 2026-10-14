@@ -126,6 +126,9 @@ export const SERVICE_MESSAGE_POLL_MS = 300_000;
  */
 export const REGA_CONNECT_WAIT_MS = 3000;
 
+/** The paramset keys that are names; any other key of a description request is a link's peer. */
+const OWN_PARAMSETS: ReadonlySet<string> = new Set(['MASTER', 'VALUES', 'SERVICE', 'ROUTING_TABLE']);
+
 /** How long the HmIP `getParamset(:0, VALUES)` sweep waits for the device list to settle. */
 export const HMIP_SWEEP_DELAY_MS = 1000;
 
@@ -1806,7 +1809,9 @@ export class Backend {
     async #describe(interfaceName: string, address: string, paramset: string): Promise<ParamsetDescription> {
         const index = this.#caches.devices.index(interfaceName);
         const description = index.get(address);
-        const isLink = paramset !== 'MASTER' && paramset !== 'VALUES' && paramset !== 'SERVICE';
+        // task 97: an HmIP router's ROUTING_TABLE is a paramset of its own (eQ-3's addendum), not a
+        // peer address - asked as LINK it is refused, and the routing table dialog could not open
+        const isLink = !OWN_PARAMSETS.has(paramset);
         const identity = description
             ? this.#caches.descriptions.identity(
                   interfaceName,

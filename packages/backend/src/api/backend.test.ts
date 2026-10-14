@@ -1591,6 +1591,16 @@ describe('paramsets, values and links', () => {
         await h.backend.stop();
     });
 
+    it('asks for a ROUTING_TABLE description by its own name, not as a link (task 97)', async () => {
+        const h = await harness();
+        h.calls.length = 0;
+        await h.backend.request('paramset.description', 'HmIP-RF', 'ABC1:0', 'ROUTING_TABLE').catch(() => undefined);
+        expect(h.calls.filter((call) => call.method === 'getParamsetDescription').map((call) => call.params)).toEqual([
+            ['ABC1:0', 'ROUTING_TABLE'],
+        ]);
+        await h.backend.stop();
+    });
+
     it('writes only what changed and logs it', async () => {
         const h = await harness();
         const results = await h.backend.request('paramset.put', 'HmIP-RF', ['ABC1:1'], 'MASTER', {LOGGING: true});

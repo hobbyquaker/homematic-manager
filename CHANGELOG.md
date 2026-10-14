@@ -6,6 +6,38 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [3.2.0] — 2026-10-14
+
+### Added
+
+- **HmIP routers at a glance.** On HmIP-RF the Radio tab has a second view, _Routers_: every device that can route for
+  others (a router module in its channel-0 settings), with a switch to turn routing on or off - asked first, since it
+  changes how the network routes -, its receive levels against the access point, a button to its routing table and
+  "n of m route" on top. In the device table a device whose router module is on carries a router badge in its TYPE
+  cell. (task 97)
+- **The HmIP network as one graph.** The Routers view can show a graph that merges the routing tables of every router
+  that routes: the access point in the middle, the routers, and the devices each one serves, with the receive level
+  the router reported on each measured link. A device no table lists hangs on the access point on a dotted "assumed"
+  line, so the picture never claims more than the tables say. A routing table is read from the router over the air,
+  so nothing is read until _Read routing tables_ is clicked - one router after the other, never on a timer - and the
+  result is kept with the time it was read. A table of the routes sits beside the graph. (task 98)
+
+### Changed
+
+- **The firmware column in plain words.** Instead of hmipserver's states it says _queued for transfer_,
+  _transferring_ (the background transfer takes 8 to 42 hours per device; the tooltip says so, and that the install
+  button appears once it is through), _installing_ and _up to date_. An access point whose new firmware is ready offers
+  the install button too. (task 96)
+
+### Fixed
+
+- **The routing table of an HmIP router opens again.** The app asked for its description the wrong way, and real
+  routers refused it. (task 97)
+- **No device list every 10 s while an HmIP firmware is pending.** While any device was transferring a firmware in the
+  background - hours, days for a sleeping battery device - or waited for its install, the Devices page re-read the
+  whole device list every 10 s. It now does so every 10 s only during an install, every 60 s during the background
+  transfer, and not at all while a firmware just waits to be installed. (B-92)
+
 ## [3.1.5] — 2026-10-14
 
 ### Changed
@@ -1764,6 +1796,7 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
+[3.2.0]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.5...v3.2.0
 [3.1.5]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.4...v3.1.5
 [3.1.4]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.3...v3.1.4
 [3.1.3]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.2...v3.1.3

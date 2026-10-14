@@ -198,14 +198,44 @@ export interface FirmwareCell {
     /** The version the button offers, when there is one. */
     readonly available?: string;
     readonly action?: FirmwareAction;
-    /** `deliver firmware image`, `performing update`, `update pending` - hmipserver's own words, a message key (task 93). */
+    /**
+     * What is going on, in the app's own words - a message key (task 93, task 96): `queued for
+     * transfer`, `transferring`, `waiting for the device`, `installing`, `up to date`, `update pending`.
+     */
     readonly status?: string;
+    /** The tooltip of the status, a message key, when the status needs explaining. */
+    readonly hint?: string;
+    /** How far the background transfer is, when openccu-lite's daemon reported it (task 96). */
+    readonly percent?: number;
     /** An update this session asked for has not shown up in `listDevices` yet. */
     readonly busy: boolean;
 }
 
-/** hmipserver's `FIRMWARE_UPDATE_STATE` values that are worth printing next to the version. */
-const HMIP_STATUS = ['UP_TO_DATE', 'NEW_FIRMWARE_AVAILABLE', 'DELIVER_FIRMWARE_IMAGE', 'PERFORMING_UPDATE'];
+/**
+ * The background transfer of a firmware to a device, as openccu-lite's daemon reports it on its
+ * event stream (occulited task 44): hmipserver's journal says how far the transfer is, which no
+ * RPC does. `interrupted`: hmipserver gave the device up for now and continues by itself later.
+ */
+export interface FirmwareTransfer {
+    readonly state: 'running' | 'interrupted' | 'done';
+    /** bytes of size in whole numbers; -1 until a progress line was seen */
+    readonly percent: number;
+}
+
+/**
+ * hmipserver's `FIRMWARE_UPDATE_STATE` in the app's words (task 96): the states of the background
+ * transfer - `NEW_FIRMWARE_AVAILABLE` waits for its turn, `DELIVER_FIRMWARE_IMAGE` is on its way,
+ * 8 to 42 hours per device - and of the install, `DO_UPDATE_PENDING` and `PERFORMING_UPDATE`, which
+ * an access point does in one go (`LIVE_DELIVER_FIRMWARE_IMAGE`).
+ */
+const HMIP_STATUS: Record<string, {status: string; hint?: string}> = {
+    UP_TO_DATE: {status: 'up to date'},
+    NEW_FIRMWARE_AVAILABLE: {status: 'queued for transfer', hint: 'firmware queued hint'},
+    DELIVER_FIRMWARE_IMAGE: {status: 'transferring', hint: 'firmware transfer hint'},
+    DO_UPDATE_PENDING: {status: 'installing', hint: 'firmware install pending hint'},
+    PERFORMING_UPDATE: {status: 'installing'},
+    LIVE_DELIVER_FIRMWARE_IMAGE: {status: 'installing'},
+};
 
 /**
  * Is there really a new firmware on offer?
@@ -220,7 +250,7 @@ function hasOffer(available: string | undefined, firmware: string): available is
 
 export function firmwareCell(
     device: DeviceDescription,
-    options: {readonly busy?: boolean; readonly updatePending?: boolean} = {},
+    options: {readonly busy?: boolean; readonly updatePending?: boolean; readonly transfer?: FirmwareTransfer} = {},
 ): FirmwareCell {
     const firmware = device.FIRMWARE ?? '';
     const available = device.AVAILABLE_FIRMWARE;
@@ -228,7 +258,12 @@ export function firmwareCell(
     const state = device.FIRMWARE_UPDATE_STATE;
 
     if (state !== undefined && state !== '') {
-        if (state === 'READY_FOR_UPDATE' && hasOffer(available, firmware)) {
+        // READY_FOR_UPDATE: the image is on the access point, installFirmware flashes it; an access
+        // point's LIVE_NEW_FIRMWARE_AVAILABLE: installFirmware transfers and flashes in one go
+        if (
+            (state === 'READY_FOR_UPDATE' || state === 'LIVE_NEW_FIRMWARE_AVAILABLE') &&
+            hasOffer(available, firmware)
+        ) {
             return {
                 firmware,
                 available,
@@ -236,8 +271,31 @@ export function firmwareCell(
                 busy,
             };
         }
-        if (HMIP_STATUS.includes(state)) {
-            return {firmware, status: state.toLowerCase().replace(/_/g, ' '), busy};
+        const words = HMIP_STATUS[state];
+        if (words !== undefined) {
+            const transfer = options.transfer;
+            if (state === 'DELIVER_FIRMWARE_IMAGE' && transfer !== undefined && transfer.state !== 'done') {
+                // task 96: openccu-lite's daemon says how far the transfer is, and whether the
+                // device answers at all
+                const percent = transfer.percent >= 0 ? {percent: transfer.percent} : {};
+                if (transfer.state === 'interrupted') {
+                    return {
+                        firmware,
+                        status: 'waiting for the device',
+                        hint: 'firmware interrupted hint',
+                        ...percent,
+                        busy,
+                    };
+                }
+                return {
+                    firmware,
+                    status: words.status,
+                    ...(words.hint === undefined ? {} : {hint: words.hint}),
+                    ...percent,
+                    busy,
+                };
+            }
+            return {firmware, status: words.status, ...(words.hint === undefined ? {} : {hint: words.hint}), busy};
         }
     }
     if (options.updatePending === true) {

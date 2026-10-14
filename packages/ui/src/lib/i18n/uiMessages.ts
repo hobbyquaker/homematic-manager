@@ -240,12 +240,30 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Show RPC log': {de: 'RPC-Protokoll anzeigen', en: 'Show RPC log'},
     'No RPC calls yet': {de: 'Noch keine RPC-Aufrufe', en: 'No RPC calls yet'},
     'in progress': {de: 'läuft', en: 'in progress'},
-    // Task 93: hmipserver's FIRMWARE_UPDATE_STATE in the device table's firmware column, and rfd's update pending
+    // Task 93: hmipserver's FIRMWARE_UPDATE_STATE in the device table's firmware column, and rfd's update pending;
+    // task 96: in the app's own words, with a tooltip where the state needs explaining
     'up to date': {de: 'aktuell', en: 'up to date'},
-    'new firmware available': {de: 'neue Firmware verfügbar', en: 'new firmware available'},
-    'deliver firmware image': {de: 'Firmware wird übertragen', en: 'deliver firmware image'},
-    'performing update': {de: 'Update läuft', en: 'performing update'},
+    'queued for transfer': {de: 'wartet auf die Übertragung', en: 'queued for transfer'},
+    transferring: {de: 'wird übertragen', en: 'transferring'},
+    'waiting for the device': {de: 'wartet auf das Gerät', en: 'waiting for the device'},
+    installing: {de: 'wird installiert', en: 'installing'},
     'update pending': {de: 'Update ausstehend', en: 'update pending'},
+    'firmware queued hint': {
+        de: 'Die Firmware liegt auf dem System und wartet, bis sie an der Reihe ist: Die Schnittstelle überträgt an ein Gerät nach dem anderen.',
+        en: 'The firmware is on the system and waits for its turn: the interface transfers to one device at a time.',
+    },
+    'firmware transfer hint': {
+        de: 'Die Firmware wird im Hintergrund an das Gerät übertragen, an ein Gerät nach dem anderen. Ein Batteriegerät empfängt sie nur, solange es wach ist; das kann 8 bis 42 Stunden dauern. Danach erscheint der Button zum Installieren.',
+        en: 'The firmware is being transferred to the device in the background, one device after the other. A battery device receives it only while awake; this can take 8 to 42 hours. The install button appears once it is through.',
+    },
+    'firmware interrupted hint': {
+        de: 'Das Gerät hat nicht geantwortet; die Übertragung wird von selbst dort fortgesetzt, wo sie stehen geblieben ist, sobald das Gerät wieder erreichbar ist.',
+        en: 'The device did not answer; the transfer continues by itself from where it stopped once the device is reachable again.',
+    },
+    'firmware install pending hint': {
+        de: 'Das Gerät wartet auf die Installation. Bei einem Batteriegerät muss eventuell die Systemtaste gedrückt werden.',
+        en: 'The device waits for the install. A battery device may need its system button pressed.',
+    },
     Duration: {de: 'Dauer', en: 'Duration'},
     Method: {de: 'Methode', en: 'Method'},
     Result: {de: 'Ergebnis', en: 'Result'},

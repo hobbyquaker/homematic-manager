@@ -569,12 +569,105 @@ describe('the firmware cell', () => {
         });
         expect(firmwareCell(device({FIRMWARE_UPDATE_STATE: 'PERFORMING_UPDATE'}))).toEqual({
             firmware: '1.0',
-            status: 'performing update',
+            status: 'installing',
             busy: false,
         });
         // An unknown state is not printed at all, as 2.x's switch default did nothing.
         expect(firmwareCell(device({FIRMWARE_UPDATE_STATE: 'BACKGROUND_BURN_IN'}))).toEqual({
             firmware: '1.0',
+            busy: false,
+        });
+    });
+
+    it("task 96: the background transfer and the install in the app's words, with a tooltip", () => {
+        expect(
+            firmwareCell(device({FIRMWARE_UPDATE_STATE: 'NEW_FIRMWARE_AVAILABLE', AVAILABLE_FIRMWARE: '2.0'})),
+        ).toEqual({
+            firmware: '1.0',
+            status: 'queued for transfer',
+            hint: 'firmware queued hint',
+            busy: false,
+        });
+        expect(
+            firmwareCell(device({FIRMWARE_UPDATE_STATE: 'DELIVER_FIRMWARE_IMAGE', AVAILABLE_FIRMWARE: '2.0'})),
+        ).toEqual({
+            firmware: '1.0',
+            status: 'transferring',
+            hint: 'firmware transfer hint',
+            busy: false,
+        });
+        expect(firmwareCell(device({FIRMWARE_UPDATE_STATE: 'DO_UPDATE_PENDING'}))).toEqual({
+            firmware: '1.0',
+            status: 'installing',
+            hint: 'firmware install pending hint',
+            busy: false,
+        });
+        expect(firmwareCell(device({FIRMWARE_UPDATE_STATE: 'LIVE_DELIVER_FIRMWARE_IMAGE'}))).toEqual({
+            firmware: '1.0',
+            status: 'installing',
+            busy: false,
+        });
+        expect(firmwareCell(device({FIRMWARE_UPDATE_STATE: 'UP_TO_DATE'}))).toEqual({
+            firmware: '1.0',
+            status: 'up to date',
+            busy: false,
+        });
+        // an access point's live update: one call transfers and flashes
+        expect(
+            firmwareCell(
+                device({
+                    FIRMWARE: '2.2.18',
+                    FIRMWARE_UPDATE_STATE: 'LIVE_NEW_FIRMWARE_AVAILABLE',
+                    AVAILABLE_FIRMWARE: '3.0.18',
+                }),
+            ),
+        ).toEqual({
+            firmware: '2.2.18',
+            available: '3.0.18',
+            action: 'install',
+            busy: false,
+        });
+    });
+
+    it('task 96: on openccu-lite the transfer carries its percent, and an interrupted one waits for the device', () => {
+        const transferring = device({FIRMWARE_UPDATE_STATE: 'DELIVER_FIRMWARE_IMAGE', AVAILABLE_FIRMWARE: '2.0'});
+        expect(firmwareCell(transferring, {transfer: {state: 'running', percent: 42}})).toEqual({
+            firmware: '1.0',
+            status: 'transferring',
+            hint: 'firmware transfer hint',
+            percent: 42,
+            busy: false,
+        });
+        // no progress line seen yet: no percent
+        expect(firmwareCell(transferring, {transfer: {state: 'running', percent: -1}})).toEqual({
+            firmware: '1.0',
+            status: 'transferring',
+            hint: 'firmware transfer hint',
+            busy: false,
+        });
+        expect(firmwareCell(transferring, {transfer: {state: 'interrupted', percent: 26}})).toEqual({
+            firmware: '1.0',
+            status: 'waiting for the device',
+            hint: 'firmware interrupted hint',
+            percent: 26,
+            busy: false,
+        });
+        // a transfer the daemon calls done while the interface still says delivering: the state wins
+        expect(firmwareCell(transferring, {transfer: {state: 'done', percent: 100}})).toEqual({
+            firmware: '1.0',
+            status: 'transferring',
+            hint: 'firmware transfer hint',
+            busy: false,
+        });
+        // the percent never rides on another state
+        expect(
+            firmwareCell(device({FIRMWARE_UPDATE_STATE: 'READY_FOR_UPDATE', AVAILABLE_FIRMWARE: '2.0'}), {
+                transfer: {state: 'done', percent: 100},
+            }),
+        ).toEqual({
+            firmware: '1.0',
+            available: '2.0',
+            action: 'install',
             busy: false,
         });
     });
@@ -672,10 +765,10 @@ describe('the firmware button', () => {
 
         const cells = screen.getAllByTestId(/^firmware-cell-/);
         const seconds = cells.map((cell) => cell.children[1]).filter((child) => child !== undefined);
-        // the button, "aktuell" (up to date, translated), "neue Firmware verfügbar", "Update läuft"
+        // the button, "aktuell" (up to date, translated), "wartet auf die Übertragung", "wird installiert" (task 96's words)
         expect(seconds.length).toBeGreaterThanOrEqual(4);
         expect(seconds.map((child) => child.textContent.trim())).toEqual(
-            expect.arrayContaining(['aktuell', 'neue Firmware verfügbar', 'Update läuft']),
+            expect.arrayContaining(['aktuell', 'wartet auf die Übertragung', 'wird installiert']),
         );
         const lefts = new Set(seconds.map((child) => Math.round(child.getBoundingClientRect().left)));
         expect([...lefts]).toHaveLength(1);

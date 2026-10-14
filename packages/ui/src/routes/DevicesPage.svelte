@@ -1223,7 +1223,15 @@
                                 }}>{t('install')} {cellState.available ?? ''}</button
                             >
                         {:else if cellState.status}
-                            <span class="hmm-firmware-status" title={t(cellState.status)}>{t(cellState.status)}</span>
+                            <!-- task 96: the state in the app's words, the percent when openccu-lite reports the transfer -->
+                            <span
+                                class="hmm-firmware-status"
+                                title={t(cellState.hint ?? cellState.status)}
+                                data-testid={`firmware-status-${row.ADDRESS}`}
+                                >{t(
+                                    cellState.status,
+                                )}{#if cellState.percent !== undefined}{` · ${String(cellState.percent)} %`}{/if}</span
+                            >
                         {/if}
                     </span>
                 {:else if column.key === 'PARAMSETS'}

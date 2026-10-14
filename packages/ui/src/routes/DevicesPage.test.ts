@@ -650,6 +650,42 @@ describe('the firmware button', () => {
         expect(stores.devices.firmwareBusy).toEqual([]);
     });
 
+    it('task 93: the label and the button start at one x in every row, the version in tabular figures', async () => {
+        const states: Record<string, string> = {
+            '000A1B2C3D4E5F': 'READY_FOR_UPDATE',
+            '0011D3C9A1B2C3': 'NEW_FIRMWARE_AVAILABLE',
+            '3014F711A0001F': 'PERFORMING_UPDATE',
+        };
+        transport.respond('devices.list', (name) =>
+            name === 'HmIP-RF'
+                ? DEMO_DEVICES['HmIP-RF'].map((device) =>
+                      device.FIRMWARE === undefined || device.ADDRESS.includes(':')
+                          ? device
+                          : {...device, FIRMWARE_UPDATE_STATE: states[device.ADDRESS] ?? 'UP_TO_DATE'},
+                  )
+                : [],
+        );
+        await mountApp({transport, hash: '#/HmIP-RF/devices'});
+        await waitFor(() => {
+            expect(screen.getByTestId('firmware-000A1B2C3D4E5F')).toBeTruthy();
+        });
+
+        const cells = screen.getAllByTestId(/^firmware-cell-/);
+        const seconds = cells.map((cell) => cell.children[1]).filter((child) => child !== undefined);
+        // the button, "aktuell" (up to date, translated), "neue Firmware verfügbar", "Update läuft"
+        expect(seconds.length).toBeGreaterThanOrEqual(4);
+        expect(seconds.map((child) => child.textContent.trim())).toEqual(
+            expect.arrayContaining(['aktuell', 'neue Firmware verfügbar', 'Update läuft']),
+        );
+        const lefts = new Set(seconds.map((child) => Math.round(child.getBoundingClientRect().left)));
+        expect([...lefts]).toHaveLength(1);
+        // the same box for the label and the button
+        const heights = new Set(seconds.map((child) => Math.round(child.getBoundingClientRect().height)));
+        expect([...heights]).toEqual([18]);
+        const version = cells[0]?.children[0] as HTMLElement;
+        expect(getComputedStyle(version).fontVariantNumeric).toBe('tabular-nums');
+    });
+
     it('uses installFirmware for a HmIP device that is ready for it', async () => {
         transport.respond('devices.list', (name) =>
             name === 'HmIP-RF'

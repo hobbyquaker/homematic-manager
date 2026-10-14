@@ -240,6 +240,12 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Show RPC log': {de: 'RPC-Protokoll anzeigen', en: 'Show RPC log'},
     'No RPC calls yet': {de: 'Noch keine RPC-Aufrufe', en: 'No RPC calls yet'},
     'in progress': {de: 'läuft', en: 'in progress'},
+    // Task 93: hmipserver's FIRMWARE_UPDATE_STATE in the device table's firmware column, and rfd's update pending
+    'up to date': {de: 'aktuell', en: 'up to date'},
+    'new firmware available': {de: 'neue Firmware verfügbar', en: 'new firmware available'},
+    'deliver firmware image': {de: 'Firmware wird übertragen', en: 'deliver firmware image'},
+    'performing update': {de: 'Update läuft', en: 'performing update'},
+    'update pending': {de: 'Update ausstehend', en: 'update pending'},
     Duration: {de: 'Dauer', en: 'Duration'},
     Method: {de: 'Methode', en: 'Method'},
     Result: {de: 'Ergebnis', en: 'Result'},

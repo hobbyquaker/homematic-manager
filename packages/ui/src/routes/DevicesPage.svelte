@@ -716,6 +716,13 @@
 
     // ---------------------------------------------------------------- firmware
 
+    /**
+     * Task 93: the width of the firmware column's version slot, in `ch` - the longest version of the
+     * table, at least three characters. With tabular figures a digit is one `ch` and a dot less, so
+     * the label or button after it starts at one x in every row without a wide gap after `1.4`.
+     */
+    const firmwareSlot = $derived(Math.max(3, ...devices.map((device) => (device.FIRMWARE ?? '').length)));
+
     /** A device is "update pending" when one of its channels reports the service message. */
     function updatePending(address: string): boolean {
         return serviceMarks(address, messages, 99).some((mark) => mark.datapoint === 'UPDATE_PENDING');
@@ -1180,24 +1187,32 @@
                         {/each}
                     </span>
                 {:else if column.key === 'FIRMWARE' && flatRow.depth === 0}
+                    <!-- task 93: the version in a slot of its own with tabular figures, the label or the
+                         button in a second one, so both start at the same x in every row -->
                     {@const cellState = firmwareOf(row)}
-                    <span>{cellState.firmware}</span>
-                    {#if cellState.busy}
-                        <span class="hmm-firmware-status">{t('in progress')}</span>
-                    {:else if cellState.action}
-                        <button
-                            type="button"
-                            class="hmm-inline-button"
-                            data-testid={`firmware-${row.ADDRESS}`}
-                            title={t('Install firmware {version}', {version: cellState.available ?? ''})}
-                            onclick={(event) => {
-                                event.stopPropagation();
-                                void startFirmware(row);
-                            }}>{t('install')} {cellState.available ?? ''}</button
-                        >
-                    {:else if cellState.status}
-                        <span class="hmm-firmware-status">{cellState.status}</span>
-                    {/if}
+                    <span
+                        class="hmm-firmware-cell"
+                        style:grid-template-columns={`${firmwareSlot}ch minmax(0, max-content)`}
+                        data-testid={`firmware-cell-${row.ADDRESS}`}
+                    >
+                        <span class="hmm-firmware-version">{cellState.firmware}</span>
+                        {#if cellState.busy}
+                            <span class="hmm-firmware-status">{t('in progress')}</span>
+                        {:else if cellState.action}
+                            <button
+                                type="button"
+                                class="hmm-inline-button hmm-firmware-action"
+                                data-testid={`firmware-${row.ADDRESS}`}
+                                title={t('Install firmware {version}', {version: cellState.available ?? ''})}
+                                onclick={(event) => {
+                                    event.stopPropagation();
+                                    void startFirmware(row);
+                                }}>{t('install')} {cellState.available ?? ''}</button
+                            >
+                        {:else if cellState.status}
+                            <span class="hmm-firmware-status" title={t(cellState.status)}>{t(cellState.status)}</span>
+                        {/if}
+                    </span>
                 {:else if column.key === 'PARAMSETS'}
                     <!-- #143: `offeredParamsets` reads the list with `asStringList`: a value that is
                          not a list at all (the group process sends `PARAMSETS` as a string on some
@@ -1302,10 +1317,43 @@
         color: var(--hmm-fg-muted);
     }
 
+    /* task 93: two slots - the version, as wide as the table's longest in tabular figures, then the label or
+       the button. Both of those take the inline button's box, so their text starts at one x. */
+    .hmm-firmware-cell {
+        display: grid;
+        align-items: center;
+        column-gap: 6px;
+        width: 100%;
+    }
+
+    .hmm-firmware-version {
+        overflow: hidden;
+        font-variant-numeric: tabular-nums;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .hmm-firmware-status,
+    .hmm-firmware-action {
+        box-sizing: border-box;
+        height: 18px;
+        min-width: 0;
+        padding: 0 4px;
+        overflow: hidden;
+        border: 1px solid transparent;
+        line-height: 16px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
     .hmm-firmware-status {
         color: var(--hmm-fg-muted);
         font-size: var(--hmm-font-size-small);
-        padding-left: 4px;
+    }
+
+    .hmm-firmware-cell .hmm-firmware-action {
+        margin-left: 0;
+        border-color: var(--hmm-border);
     }
 
     .hmm-inline-button {

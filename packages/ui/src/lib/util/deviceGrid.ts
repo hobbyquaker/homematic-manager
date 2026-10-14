@@ -198,7 +198,7 @@ export interface FirmwareCell {
     /** The version the button offers, when there is one. */
     readonly available?: string;
     readonly action?: FirmwareAction;
-    /** `deliver firmware image`, `performing update`, `update pending` - hmipserver's own words. */
+    /** `deliver firmware image`, `performing update`, `update pending` - hmipserver's own words, a message key (task 93). */
     readonly status?: string;
     /** An update this session asked for has not shown up in `listDevices` yet. */
     readonly busy: boolean;

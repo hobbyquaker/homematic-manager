@@ -29,6 +29,7 @@
     import type {ContextMenuItem} from '../lib/components/contextMenu.js';
     import DataTable from '../lib/components/DataTable.svelte';
     import DeviceImage from '../lib/components/DeviceImage.svelte';
+    import RouterBadge from '../lib/components/RouterBadge.svelte';
     import ServiceBadge from '../lib/components/ServiceBadge.svelte';
     import {ICON_COLUMN_WIDTH} from '../lib/components/metrics.js';
     import PrimaryToolbarButton from '../lib/components/PrimaryToolbarButton.svelte';
@@ -144,6 +145,18 @@
         const name = interfaceName;
         const channels = smokeChannels;
         untrack(() => void stores.smokeGroups.sync(name, channels));
+    });
+
+    // Task 97: which devices route for others, for the marker in the TYPE cell. Read once per
+    // device (channel 0's MASTER description and values, both from hmipserver's cache - no frame
+    // on air); a device that arrives later is read when the list changes, the rest is not asked again.
+    const isHmipRadio = $derived(interfaceType === 'HmIP-RF');
+    $effect(() => {
+        if (interfaceName === '' || index === undefined || !isHmipRadio) {
+            return;
+        }
+        const name = interfaceName;
+        untrack(() => void stores.routers.ensure(name));
     });
 
     const memberships = $derived(stores.smokeGroups.of(interfaceName));
@@ -1237,6 +1250,17 @@
                     {#if row.AES_ACTIVE}
                         <span title="AES_ACTIVE" aria-label="AES_ACTIVE" role="img">🔑</span>
                     {/if}
+                {:else if column.key === 'TYPE' && flatRow.depth === 0 && isHmipRadio && stores.routers.isRouting(interfaceName, row.ADDRESS)}
+                    <!-- task 97: a device whose router module is on forwards frames for other HmIP
+                         devices; capable devices with the module off show only in the Radio tab -->
+                    <span class="hmm-type-cell">
+                        <span class="hmm-type-text">{row.TYPE}</span>
+                        <RouterBadge
+                            title={t('Routes for other HmIP devices')}
+                            label={t('Router')}
+                            testId={`router-${row.ADDRESS}`}
+                        />
+                    </span>
                 {:else if column.key === 'INTERFACE' && flatRow.depth === 0}
                     <span data-testid={`receiver-${row.ADDRESS}`}>{receiverLabel(row, gateways)}</span>
                     {#if isRoaming(row)}
@@ -1310,6 +1334,20 @@
 
     .hmm-msg-cell .hmm-inline-button {
         margin-left: 0;
+    }
+
+    /* task 97: the type, cut off with an ellipsis if need be, and the router badge always whole after it */
+    .hmm-type-cell {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        max-width: 100%;
+        vertical-align: middle;
+    }
+
+    .hmm-type-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .hmm-roaming {

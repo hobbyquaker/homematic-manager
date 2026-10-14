@@ -169,8 +169,13 @@ describe('HmIP smoke groups in the device list', () => {
         expect(groupCellOf(SWSD_1)).toBe('Rauchmeldergruppe 1');
         expect(groupCellOf(SWSD_2)).toBe('Rauchmeldergruppe 1');
         expect(groupCellOf(SWSD_3)).toBe('');
-        // one getParamset per smoke channel, none for the other channels of the interface
-        const reads = transport.countOf('paramset.get');
+        // one getParamset per smoke channel, none for the other channels of the interface (task 97's
+        // router marker reads channel 0's MASTER of the router-capable devices, which are not smoke
+        // channels and are left out of the count)
+        const smokeReads = (): number =>
+            transport.calls.filter((call) => call.method === 'paramset.get' && !String(call.params[1]).endsWith(':0'))
+                .length;
+        const reads = smokeReads();
         expect(reads).toBe(3);
         // the group expands to its detectors' smoke channels
         await expand('*GROUP_1');
@@ -178,7 +183,7 @@ describe('HmIP smoke groups in the device list', () => {
         expect(rowOf(`${SWSD_2}:1`).textContent).toContain('Rauchmelder Kinderzimmer:1');
         expect(rowsOf(`${SWSD_3}:1`)).toHaveLength(0);
         // expanding read nothing more
-        expect(transport.countOf('paramset.get')).toBe(reads);
+        expect(smokeReads()).toBe(reads);
     });
 
     it('keeps the device actions off a synthesised row and its menu to the members', async () => {

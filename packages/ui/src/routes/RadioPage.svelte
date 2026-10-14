@@ -11,6 +11,7 @@
     import {getStores} from '../lib/stores/context.js';
 
     import BestReceiverDialog from './radio/BestReceiverDialog.svelte';
+    import RoutersView from './radio/RoutersView.svelte';
     import SetInterfaceDialog from './radio/SetInterfaceDialog.svelte';
 
     const stores = getStores();
@@ -33,6 +34,13 @@
      * The levels, the duty cycle and the unreach counters are the same on both.
      */
     const isBidcos = $derived(stores.interfaces.typeOf(interfaceName).startsWith('BidCos'));
+    /**
+     * Task 97: on HmIP-RF the lower half is either the RSSI grid or the list of the devices that
+     * can route. The choice is kept for the session; another interface shows the RSSI grid.
+     */
+    const isHmipRadio = $derived(stores.interfaces.typeOf(interfaceName) === 'HmIP-RF');
+    let view = $state<'rssi' | 'routers'>('rssi');
+    const shown = $derived(isHmipRadio ? view : 'rssi');
 
     function openSetInterface(address: string, preset = ''): void {
         setInterfaceAddress = address;
@@ -253,110 +261,135 @@
         />
     </div>
 
-    <div class="hmm-page-grid">
-        <DataTable
-            rows={devices}
-            columns={rssiColumns}
-            {columnGroups}
-            subColumns={peerColumns}
-            scope={interfaceName}
-            getId={(device) => device.ADDRESS}
-            subRows={peersOf}
-            bind:selected
-            bind:expanded
-            caption={t('RSSI')}
-            filterLabel={t('Filter')}
-            emptyText={t('No data')}
-            noMatchText={t('No row matches the filter')}
-            clearFilterLabel={t('Clear filter')}
-            showingText={(shown, total) => t('Showing {shown} of {total}', {shown, total})}
-            onactivate={(device) => openSetInterface(device.ADDRESS)}
-            toolbarLabel={t('RSSI')}
-            countText={t('{count} devices', {}, devices.length)}
-            tableId="radio"
-            subTableId="radio-peers"
-            testId="radio-table"
-        >
-            {#snippet toolbar()}
-                <!-- #146: the button turns while `rssiInfo` and the device list are being read. -->
-                <ToolbarButton
-                    title={t('Refresh')}
-                    icon="⟳"
-                    busy={stores.radio.loading || stores.devices.isLoading(interfaceName)}
-                    testId="radio-refresh"
-                    onclick={() => void refresh()}
-                />
-                {#if isBidcos}
-                    <ToolbarButton
-                        title="setBidcosInterface"
-                        icon="⇄"
-                        disabled={one === ''}
-                        reason={t('Select a device')}
-                        testId="radio-set-interface"
-                        onclick={() => openSetInterface(one)}
-                    />
-                    <ToolbarButton
-                        title={t('Assign the best receiver')}
-                        icon="⇶"
-                        disabled={gateways.length < 2}
-                        reason={t('Only one interface')}
-                        testId="radio-best-receivers"
-                        onclick={() => (bestReceiverOpen = true)}
-                    />
-                {/if}
-                <ToolbarButton
-                    title={t('Reset the unreach counters')}
-                    icon="⟲"
-                    disabled={stores.unreach.of(interfaceName).length === 0}
-                    reason={t('No data')}
-                    testId="radio-reset-unreach"
-                    onclick={() => void stores.unreach.reset(interfaceName)}
-                />
-            {/snippet}
+    {#if isHmipRadio}
+        <div class="hmm-radio-views" role="group" aria-label={t('View')} data-testid="radio-views">
+            <button
+                type="button"
+                class="hmm-radio-view"
+                aria-pressed={shown === 'rssi'}
+                data-testid="radio-view-rssi"
+                onclick={() => (view = 'rssi')}>{t('RSSI')}</button
+            >
+            <button
+                type="button"
+                class="hmm-radio-view"
+                aria-pressed={shown === 'routers'}
+                data-testid="radio-view-routers"
+                onclick={() => (view = 'routers')}>{t('Routers')}</button
+            >
+        </div>
+    {/if}
 
-            {#snippet cell(row, column, flatRow)}
-                {#if column.key === 'icon'}
-                    <DeviceImage deviceType={row.TYPE} src={stores.host.deviceImageUrl(row.TYPE)} />
-                {:else if flatRow.depth > 0 && (column.key === 'rx' || column.key === 'tx')}
-                    {@const measured = stores.radio.pair(interfaceName, rootOf(flatRow.rootId), row.ADDRESS)}
-                    <RssiCell
-                        value={column.key === 'rx' ? measured?.rx : measured?.tx}
-                        labelOf={(band) => t(band.label)}
-                        testId={`rssi-${flatRow.rootId}-${row.ADDRESS}-${column.key}`}
+    {#if shown === 'routers'}
+        <div class="hmm-page-grid">
+            <RoutersView {interfaceName} />
+        </div>
+    {:else}
+        <div class="hmm-page-grid">
+            <DataTable
+                rows={devices}
+                columns={rssiColumns}
+                {columnGroups}
+                subColumns={peerColumns}
+                scope={interfaceName}
+                getId={(device) => device.ADDRESS}
+                subRows={peersOf}
+                bind:selected
+                bind:expanded
+                caption={t('RSSI')}
+                filterLabel={t('Filter')}
+                emptyText={t('No data')}
+                noMatchText={t('No row matches the filter')}
+                clearFilterLabel={t('Clear filter')}
+                showingText={(shown, total) => t('Showing {shown} of {total}', {shown, total})}
+                onactivate={(device) => openSetInterface(device.ADDRESS)}
+                toolbarLabel={t('RSSI')}
+                countText={t('{count} devices', {}, devices.length)}
+                tableId="radio"
+                subTableId="radio-peers"
+                testId="radio-table"
+            >
+                {#snippet toolbar()}
+                    <!-- #146: the button turns while `rssiInfo` and the device list are being read. -->
+                    <ToolbarButton
+                        title={t('Refresh')}
+                        icon="⟳"
+                        busy={stores.radio.loading || stores.devices.isLoading(interfaceName)}
+                        testId="radio-refresh"
+                        onclick={() => void refresh()}
                     />
-                {:else if column.key.startsWith('set:') && flatRow.depth === 0}
-                    {@const gateway = column.key.slice(4)}
-                    {@const configured = row.INTERFACE === gateway}
-                    <button
-                        type="button"
-                        class="hmm-receiver-mark"
-                        class:hmm-receiver-configured={configured}
-                        aria-pressed={configured}
-                        title={configured
-                            ? `${t('Configured')}: ${gateway}`
-                            : t('Use {interface} as receiver', {interface: gateway})}
-                        data-testid={`receiver-${row.ADDRESS}-${gateway}`}
-                        onclick={(event) => {
-                            event.stopPropagation();
-                            openSetInterface(row.ADDRESS, gateway);
-                        }}>{configured ? '◉' : '○'}</button
-                    >
-                {:else if column.key.startsWith('rx:') || column.key.startsWith('tx:')}
-                    {@const gateway = column.key.slice(3)}
-                    {@const measured = stores.radio.pair(interfaceName, row.ADDRESS, gateway)}
-                    <RssiCell
-                        value={column.key.startsWith('rx:') ? measured?.rx : measured?.tx}
-                        labelOf={(band) => t(band.label)}
-                        testId={`rssi-${row.ADDRESS}-${gateway}-${column.key.slice(0, 2)}`}
+                    {#if isBidcos}
+                        <ToolbarButton
+                            title="setBidcosInterface"
+                            icon="⇄"
+                            disabled={one === ''}
+                            reason={t('Select a device')}
+                            testId="radio-set-interface"
+                            onclick={() => openSetInterface(one)}
+                        />
+                        <ToolbarButton
+                            title={t('Assign the best receiver')}
+                            icon="⇶"
+                            disabled={gateways.length < 2}
+                            reason={t('Only one interface')}
+                            testId="radio-best-receivers"
+                            onclick={() => (bestReceiverOpen = true)}
+                        />
+                    {/if}
+                    <ToolbarButton
+                        title={t('Reset the unreach counters')}
+                        icon="⟲"
+                        disabled={stores.unreach.of(interfaceName).length === 0}
+                        reason={t('No data')}
+                        testId="radio-reset-unreach"
+                        onclick={() => void stores.unreach.reset(interfaceName)}
                     />
-                {:else}
-                    {column.value
-                        ? (column.value(row) ?? '')
-                        : ((row as unknown as Record<string, string>)[column.key] ?? '')}
-                {/if}
-            {/snippet}
-        </DataTable>
-    </div>
+                {/snippet}
+
+                {#snippet cell(row, column, flatRow)}
+                    {#if column.key === 'icon'}
+                        <DeviceImage deviceType={row.TYPE} src={stores.host.deviceImageUrl(row.TYPE)} />
+                    {:else if flatRow.depth > 0 && (column.key === 'rx' || column.key === 'tx')}
+                        {@const measured = stores.radio.pair(interfaceName, rootOf(flatRow.rootId), row.ADDRESS)}
+                        <RssiCell
+                            value={column.key === 'rx' ? measured?.rx : measured?.tx}
+                            labelOf={(band) => t(band.label)}
+                            testId={`rssi-${flatRow.rootId}-${row.ADDRESS}-${column.key}`}
+                        />
+                    {:else if column.key.startsWith('set:') && flatRow.depth === 0}
+                        {@const gateway = column.key.slice(4)}
+                        {@const configured = row.INTERFACE === gateway}
+                        <button
+                            type="button"
+                            class="hmm-receiver-mark"
+                            class:hmm-receiver-configured={configured}
+                            aria-pressed={configured}
+                            title={configured
+                                ? `${t('Configured')}: ${gateway}`
+                                : t('Use {interface} as receiver', {interface: gateway})}
+                            data-testid={`receiver-${row.ADDRESS}-${gateway}`}
+                            onclick={(event) => {
+                                event.stopPropagation();
+                                openSetInterface(row.ADDRESS, gateway);
+                            }}>{configured ? '◉' : '○'}</button
+                        >
+                    {:else if column.key.startsWith('rx:') || column.key.startsWith('tx:')}
+                        {@const gateway = column.key.slice(3)}
+                        {@const measured = stores.radio.pair(interfaceName, row.ADDRESS, gateway)}
+                        <RssiCell
+                            value={column.key.startsWith('rx:') ? measured?.rx : measured?.tx}
+                            labelOf={(band) => t(band.label)}
+                            testId={`rssi-${row.ADDRESS}-${gateway}-${column.key.slice(0, 2)}`}
+                        />
+                    {:else}
+                        {column.value
+                            ? (column.value(row) ?? '')
+                            : ((row as unknown as Record<string, string>)[column.key] ?? '')}
+                    {/if}
+                {/snippet}
+            </DataTable>
+        </div>
+    {/if}
 </div>
 
 <SetInterfaceDialog bind:open={setInterfaceOpen} address={setInterfaceAddress} preset={setInterfacePreset} />
@@ -374,6 +407,45 @@
     .hmm-radio-gateways {
         flex: 0 0 auto;
         height: 150px;
+    }
+
+    /* Task 97: the two views of an HmIP-RF interface, as a pair of pressed/unpressed buttons. */
+    .hmm-radio-views {
+        display: flex;
+        flex: 0 0 auto;
+        gap: 0;
+    }
+
+    .hmm-radio-view {
+        padding: 3px 12px;
+        border: 1px solid var(--hmm-border);
+        background: var(--hmm-control-bg);
+        color: var(--hmm-fg);
+        font: inherit;
+        cursor: pointer;
+    }
+
+    .hmm-radio-view:first-child {
+        border-radius: var(--hmm-radius) 0 0 var(--hmm-radius);
+    }
+
+    .hmm-radio-view:last-child {
+        border-left: none;
+        border-radius: 0 var(--hmm-radius) var(--hmm-radius) 0;
+    }
+
+    .hmm-radio-view:hover {
+        background: var(--hmm-control-bg-hover);
+    }
+
+    .hmm-radio-view[aria-pressed='true'] {
+        border-color: var(--hmm-accent);
+        background: var(--hmm-accent-bg);
+    }
+
+    .hmm-radio-view:focus-visible {
+        outline: 2px solid var(--hmm-focus);
+        outline-offset: 1px;
     }
 
     .hmm-page-grid {

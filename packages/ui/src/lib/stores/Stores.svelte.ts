@@ -20,6 +20,7 @@ import {NamesStore} from './NamesStore.svelte.js';
 import {NoticesStore} from './NoticesStore.svelte.js';
 import {ParamsetStore} from './ParamsetStore.svelte.js';
 import {RadioStore} from './RadioStore.svelte.js';
+import {RoutersStore} from './RoutersStore.svelte.js';
 import {ServiceMessagesStore} from './ServiceMessagesStore.svelte.js';
 import {ShellEmbedding} from './ShellEmbedding.svelte.js';
 import {SmokeGroupsStore} from './SmokeGroupsStore.svelte.js';
@@ -72,6 +73,8 @@ export class Stores {
     readonly smokeGroups: SmokeGroupsStore;
     readonly paramsets: ParamsetStore;
     readonly radio: RadioStore;
+    /** Task 97: the HmIP devices that can route, and whether they do. */
+    readonly routers: RoutersStore;
     readonly console: ConsoleStore;
     /** Issue #124: what is staged and not written yet. */
     readonly changeSet: ChangeSetStore;
@@ -110,6 +113,7 @@ export class Stores {
         this.smokeGroups = new SmokeGroupsStore(transport, this.notices);
         this.paramsets = new ParamsetStore(transport, this.notices);
         this.radio = new RadioStore(transport, this.notices);
+        this.routers = new RoutersStore(transport, this.notices, this.devices);
         this.console = new ConsoleStore(transport, this.notices);
         this.changeSet = new ChangeSetStore(transport, this.notices, this.rpcLog);
         // B-42: the address bar, back and forward switch the interface through the hash; the

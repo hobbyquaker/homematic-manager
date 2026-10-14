@@ -1162,6 +1162,51 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Revision {revision}, {count} Objekte',
         en: 'revision {revision}, {count} objects',
     },
+    // Task 97: the HmIP routers - the Radio tab's list, its switch, and the marker in the device table.
+    Routers: {de: 'Router', en: 'Routers'},
+    Routing: {de: 'Routing', en: 'Routing'},
+    View: {de: 'Ansicht', en: 'View'},
+    on: {de: 'an', en: 'on'},
+    off: {de: 'aus', en: 'off'},
+    unknown: {de: 'unbekannt', en: 'unknown'},
+    'Reading…': {de: 'Wird gelesen…', en: 'Reading…'},
+    'Routes for other HmIP devices': {de: 'Leitet für andere HmIP-Geräte weiter', en: 'Routes for other HmIP devices'},
+    'No device of this interface can route': {
+        de: 'Kein Gerät dieser Schnittstelle kann routen',
+        en: 'No device of this interface can route',
+    },
+    '{routing} of {capable} route': {
+        de: {one: '{routing} von {capable} routet', other: '{routing} von {capable} routen'},
+        en: {one: '{routing} of {capable} routes', other: '{routing} of {capable} route'},
+    },
+    'Switch routing on': {de: 'Routing einschalten', en: 'Switch routing on'},
+    'Switch routing off': {de: 'Routing ausschalten', en: 'Switch routing off'},
+    'Switch routing on?': {de: 'Routing einschalten?', en: 'Switch routing on?'},
+    'Switch routing off?': {de: 'Routing ausschalten?', en: 'Switch routing off?'},
+    'Switch on': {de: 'Einschalten', en: 'Switch on'},
+    'Switch off': {de: 'Ausschalten', en: 'Switch off'},
+    'The device then forwards frames for other HmIP devices that cannot reach the access point directly. The routes of the network change over the next minutes.':
+        {
+            de: 'Das Gerät leitet dann Funktelegramme anderer HmIP-Geräte weiter, die den Access Point nicht direkt erreichen. Die Routen des Netzes ändern sich in den nächsten Minuten.',
+            en: 'The device then forwards frames for other HmIP devices that cannot reach the access point directly. The routes of the network change over the next minutes.',
+        },
+    'Devices that reach the access point through this one have to find another route; until they do they may be unreachable.':
+        {
+            de: 'Geräte, die den Access Point über dieses Gerät erreichen, müssen eine andere Route finden; bis dahin sind sie womöglich nicht erreichbar.',
+            en: 'Devices that reach the access point through this one have to find another route; until they do they may be unreachable.',
+        },
+    'Writes ROUTER_MODULE_ENABLED = {value} to the MASTER paramset of {address}.': {
+        de: 'Schreibt ROUTER_MODULE_ENABLED = {value} in den MASTER-Parametersatz von {address}.',
+        en: 'Writes ROUTER_MODULE_ENABLED = {value} to the MASTER paramset of {address}.',
+    },
+    'The interface offers no routing table for this device': {
+        de: 'Die Schnittstelle bietet für dieses Gerät keine Routing-Tabelle an',
+        en: 'The interface offers no routing table for this device',
+    },
+    'Read once from the device itself: costs duty cycle': {
+        de: 'Einmal direkt vom Gerät gelesen: kostet Duty Cycle',
+        en: 'Read once from the device itself: costs duty cycle',
+    },
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

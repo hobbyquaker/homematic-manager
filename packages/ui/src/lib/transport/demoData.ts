@@ -462,7 +462,8 @@ const HMIP_DEVICES: DeviceDescription[] = [
         TYPE: 'MAINTENANCE',
         PARENT: '000A1B2C3D4E5F',
         PARENT_TYPE: 'HmIP-BSM',
-        PARAMSETS: ['MASTER', 'VALUES'],
+        // task 97/98: a router whose server offers its routing table
+        PARAMSETS: ['MASTER', 'VALUES', 'ROUTING_TABLE'],
         INDEX: 0,
         DIRECTION: 0,
         FLAGS: 3,
@@ -612,6 +613,44 @@ const HMIP_DEVICES: DeviceDescription[] = [
         FLAGS: 1,
         VERSION: 10,
     },
+    // Task 97: a switch actuator for plug mounting, a router-capable mains device with its router
+    // module switched off (the BSM routes, see DEMO_PARAMSET_VALUES)
+    {
+        ADDRESS: '0001D709A1B2C3',
+        TYPE: 'HmIP-PSM-2',
+        SUBTYPE: 'PSM',
+        PARENT: '',
+        CHILDREN: ['0001D709A1B2C3:0', '0001D709A1B2C3:3'],
+        PARAMSETS: ['MASTER'],
+        FIRMWARE: '1.0.22',
+        VERSION: 9,
+        FLAGS: 1,
+        RX_MODE: 1,
+        INTERFACE: 'HmIP-RF',
+    },
+    {
+        ADDRESS: '0001D709A1B2C3:0',
+        TYPE: 'MAINTENANCE',
+        PARENT: '0001D709A1B2C3',
+        PARENT_TYPE: 'HmIP-PSM-2',
+        PARAMSETS: ['MASTER', 'VALUES'],
+        INDEX: 0,
+        DIRECTION: 0,
+        FLAGS: 3,
+        VERSION: 9,
+    },
+    {
+        ADDRESS: '0001D709A1B2C3:3',
+        TYPE: 'SWITCH_VIRTUAL_RECEIVER',
+        PARENT: '0001D709A1B2C3',
+        PARENT_TYPE: 'HmIP-PSM-2',
+        PARAMSETS: ['MASTER', 'LINK', 'VALUES'],
+        INDEX: 3,
+        DIRECTION: 2,
+        LINK_TARGET_ROLES: 'SWITCH',
+        FLAGS: 1,
+        VERSION: 9,
+    },
     // Task 58: three HmIP smoke detectors. Their smoke channel's MASTER carries GROUP_1 … GROUP_8;
     // the first two share GROUP_1, the third is in no group. The rows `*GROUP_n` the device list
     // draws for them are synthesised from these values - hmipserver has no group object.
@@ -678,6 +717,7 @@ export const DEMO_NAMES: NameMap = {
     '0011D3C9A1B2C3': 'Fenster Arbeitszimmer',
     '3014F711A0001F': 'Heizung Arbeitszimmer',
     '0001D8A9B7C6D5': 'Wandtaster Diele',
+    '0001D709A1B2C3': 'Steckdose Wohnzimmer',
     NEQ1000001: 'Rauchmelder Flur',
     'NEQ1000001:1': 'Rauchmelder Flur:1',
     NEQ1000002: 'Rauchmelder Küche',
@@ -749,6 +789,7 @@ export const DEMO_RSSI: Readonly<Record<DemoInterfaceName, RssiInfo>> = {
     'HmIP-RF': {
         '000A1B2C3D4E5F': {'3014F711A0000418971558': [-55, -61]},
         '0001D3C99C1234': {'3014F711A0000418971558': [-73, 65_536]},
+        '0001D709A1B2C3': {'3014F711A0000418971558': [-64, -66]},
     },
 };
 
@@ -1170,6 +1211,15 @@ const SWSD_MASTER_DESCRIPTION: ParamsetDescription = Object.fromEntries([
     ]),
 ]) as ParamsetDescription;
 
+/**
+ * Task 97: channel 0's MASTER of a router-capable HmIP device, cut to the two routing switches -
+ * `ROUTER_MODULE_ENABLED` (forwards for others) and `ENABLE_ROUTING` (may use a router itself).
+ */
+const ROUTER_MASTER_DESCRIPTION: ParamsetDescription = {
+    ROUTER_MODULE_ENABLED: {TYPE: 'BOOL', OPERATIONS: 3, FLAGS: 1, DEFAULT: false, MIN: false, MAX: true},
+    ENABLE_ROUTING: {TYPE: 'BOOL', OPERATIONS: 3, FLAGS: 1, DEFAULT: true, MIN: false, MAX: true},
+};
+
 export const DEMO_DESCRIPTIONS: Readonly<Record<string, ParamsetDescription>> = {
     'SWITCH|MASTER': {
         LOGGING: {TYPE: 'ENUM', OPERATIONS: 3, FLAGS: 1, VALUE_LIST: ['OFF', 'ON'], DEFAULT: 1, TAB_ORDER: 1},
@@ -1265,6 +1315,9 @@ export const DEMO_DESCRIPTIONS: Readonly<Record<string, ParamsetDescription>> = 
     '|MASTER': {
         ARR_TIMEOUT: {TYPE: 'INTEGER', OPERATIONS: 3, FLAGS: 1, MIN: 1, MAX: 20, DEFAULT: 10},
     },
+    // Task 97: the maintenance channel of the two router-capable devices
+    '000A1B2C3D4E5F:0|MASTER': ROUTER_MASTER_DESCRIPTION,
+    '0001D709A1B2C3:0|MASTER': ROUTER_MASTER_DESCRIPTION,
     // Task 58: the HmIP-SWSD smoke channel, by address (see DEMO_PARAMSET_VALUES)
     '0001D3C9000001:1|MASTER': SWSD_MASTER_DESCRIPTION,
     '0001D3C9000002:1|MASTER': SWSD_MASTER_DESCRIPTION,
@@ -1301,6 +1354,9 @@ export const DEMO_PARAMSET_VALUES: Readonly<Record<string, Paramset>> = {
     'KEY_TRANSCEIVER|LINK': {LONG_PRESS_TIME: 0.4},
     'MAINTENANCE|VALUES': {UNREACH: false, STICKY_UNREACH: false, LOWBAT: false},
     '|MASTER': {ARR_TIMEOUT: 10},
+    // Task 97: the BSM routes, the PSM-2 could but does not
+    '000A1B2C3D4E5F:0|MASTER': {ROUTER_MODULE_ENABLED: true, ENABLE_ROUTING: true},
+    '0001D709A1B2C3:0|MASTER': {ROUTER_MODULE_ENABLED: false, ENABLE_ROUTING: true},
     // Task 58: the HmIP-SWSD smoke channels - by address, because the BidCos detectors' channel is
     // a SMOKE_DETECTOR too and has no GROUP_n
     '0001D3C9000001:1|MASTER': {...SWSD_MASTER, GROUP_1: true},

@@ -230,7 +230,8 @@ describe('the Groups tab', () => {
         expect(text).toContain('INT0000001');
         expect(screen.getByTestId('group-members-1').textContent).toContain('Fenster Bad (KEQ0165114)');
         expect(screen.getByTestId('groups-table-count').textContent).toBe('1 Gruppe');
-        expect(transport.countOf('groups.list')).toBe(1);
+        // once with the probe, for the device table's names (task 94), once as the tab opens
+        expect(transport.countOf('groups.list')).toBe(2);
     });
 
     it('creates a group with a name, a type and a ticked member, and lists it', async () => {
@@ -370,5 +371,68 @@ describe('the Groups tab', () => {
         expect(screen.getByTestId('groups-new-tooltip').getAttribute('data-tooltip')).toContain(
             'Erfordert die Administratorrolle auf dem System',
         );
+    });
+});
+
+describe('task 94: a group device named after its group', () => {
+    let transport: MockTransport;
+
+    beforeEach(() => {
+        ({transport} = boxTransport());
+        transport.respond('devices.list', (name) =>
+            name === 'VirtualDevices'
+                ? ([
+                      {
+                          ADDRESS: 'INT0000001',
+                          TYPE: 'HmIP-HEATING',
+                          PARENT: '',
+                          CHILDREN: ['INT0000001:0', 'INT0000001:1'],
+                      },
+                      {ADDRESS: 'INT0000001:0', TYPE: 'MAINTENANCE', PARENT: 'INT0000001', PARENT_TYPE: 'HmIP-HEATING'},
+                      {
+                          ADDRESS: 'INT0000001:1',
+                          TYPE: 'HEATING_CLIMATECONTROL_TRANSCEIVER',
+                          PARENT: 'INT0000001',
+                          PARENT_TYPE: 'HmIP-HEATING',
+                      },
+                  ] as never)
+                : [],
+        );
+    });
+
+    it('shows the CCU’s "<group> INT0000001" where nothing names the device, and for its channels', async () => {
+        const {stores} = await mountApp({transport, hash: '#/VirtualDevices/devices'});
+        await waitFor(() => expect(row('INT0000001').textContent).toContain('Bad INT0000001'));
+        expect(stores.nameOf('INT0000001:1')).toBe('Bad INT0000001:1');
+        // an address that is no group's keeps the old fallback
+        expect(stores.nameOf('INT0000099')).toBe('INT0000099');
+        expect(stores.knownName('INT0000099')).toBeUndefined();
+        // read with the probe, the Groups tab was never opened
+        expect(transport.countOf('groups.list')).toBe(1);
+    });
+
+    it('lets a name in the store win: a device renamed in the device table keeps its name, as on the CCU', async () => {
+        transport.respond('names.get', () => ({INT0000001: 'Heizung Bad'}));
+        const {stores} = await mountApp({transport, hash: '#/VirtualDevices/devices'});
+        await waitFor(() => expect(stores.groups.loaded).toBe(true));
+        await waitFor(() => expect(row('INT0000001').textContent).toContain('Heizung Bad'));
+        expect(stores.nameOf('INT0000001')).toBe('Heizung Bad');
+        // the channel has no name of its own: the group's
+        expect(stores.nameOf('INT0000001:1')).toBe('Bad INT0000001:1');
+    });
+
+    it('follows a group renamed in the Groups tab without a reload', async () => {
+        const {stores} = await mountApp({transport, hash: '#/VirtualDevices/devices'});
+        await waitFor(() => expect(stores.nameOf('INT0000001')).toBe('Bad INT0000001'));
+        await stores.groups.update(1, 'Badezimmer', undefined);
+        expect(stores.nameOf('INT0000001')).toBe('Badezimmer INT0000001');
+    });
+
+    it('costs nothing but the fallback when the list cannot be read', async () => {
+        transport.fail('groups.list', 'group process gone');
+        const {stores} = await mountApp({transport, hash: '#/VirtualDevices/devices'});
+        await waitFor(() => expect(stores.groups.offered).toBe(true));
+        expect(stores.nameOf('INT0000001')).toBe('INT0000001');
+        expect(stores.notices.items).toEqual([]);
     });
 });

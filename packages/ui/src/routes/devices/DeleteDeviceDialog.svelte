@@ -23,7 +23,7 @@
     let deleting = $state(false);
 
     const flags = $derived(reset + unreachable);
-    const name = $derived(stores.names.nameOf(address));
+    const name = $derived(stores.nameOf(address));
 
     $effect(() => {
         if (open) {

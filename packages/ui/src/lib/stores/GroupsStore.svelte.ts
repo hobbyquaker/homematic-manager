@@ -56,6 +56,20 @@ export class GroupsStore {
         );
     }
 
+    /**
+     * Task 94: the name a group device or one of its channels has before anybody named it - the
+     * CCU's own, `<group name> INT0000001` and `<group name> INT0000001:1`, as the WebUI writes them
+     * when a group is created or renamed (`GroupEditPage.ftl`). Only the fallback: a name in the
+     * metadata store wins, so a device renamed in the device table keeps its name, as on the CCU.
+     * `undefined` for an address that is no group's.
+     */
+    fallbackName(address: string): string | undefined {
+        const colon = address.indexOf(':');
+        const device = colon === -1 ? address : address.slice(0, colon);
+        const group = this.groups.find((candidate) => candidate.device === device);
+        return group === undefined || group.name === '' ? undefined : `${group.name} ${address}`;
+    }
+
     /** The connection has the groups API and the credential may read it: the tab is shown. */
     get offered(): boolean {
         return this.state?.available === true;
@@ -95,6 +109,23 @@ export class GroupsStore {
         } catch (error) {
             // a transport without the method (an older backend) is a connection without groups
             this.state = {available: false, reason: 'error', message: toApiRequestError(error).message};
+        }
+        // task 94: the device table names a group device after its group where nobody named it, so
+        // the list is read with the probe, not only when the Groups tab opens. Quietly: a failure
+        // here costs only the fallback names, and the tab reports its own.
+        if (this.state.available) {
+            await this.#loadQuietly();
+        }
+    }
+
+    async #loadQuietly(): Promise<void> {
+        try {
+            const list = await this.#transport.request('groups.list');
+            this.groups = list.groups;
+            this.devicesToConfigure = list.devicesToConfigure;
+            this.loaded = true;
+        } catch {
+            // the fallback names stay away; the Groups tab reads the list again and says why
         }
     }
 

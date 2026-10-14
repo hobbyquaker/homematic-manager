@@ -140,8 +140,15 @@ export class Stores {
         });
     }
 
+    /**
+     * The friendly name of an address, or `undefined` when nothing names it: the metadata store's (or
+     * ReGa's) name, else a heating group's for its group device and channels (task 94).
+     */
+    readonly knownName = (address: string): string | undefined =>
+        this.names.name(address) ?? this.groups.fallbackName(address);
+
     /** The friendly name of an address, or the address - the Name column of every grid. */
-    readonly nameOf = (address: string): string => this.names.nameOf(address);
+    readonly nameOf = (address: string): string => this.knownName(address) ?? address;
 
     /**
      * Start-up, in the order 2.x used: configuration first (it decides the interfaces and the

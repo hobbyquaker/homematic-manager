@@ -10,7 +10,15 @@
 
 import {startForTest, type TestHost} from 'homematic-manager';
 
-import {BIDCOS_SWITCH, HMIP_BUTTON, SIMULATOR_FIXTURE, expect, simulatorReady, test} from './fixtures.js';
+import {
+    BIDCOS_SWITCH,
+    HEATING_GROUP,
+    HMIP_BUTTON,
+    SIMULATOR_FIXTURE,
+    expect,
+    simulatorReady,
+    test,
+} from './fixtures.js';
 import {STUB_TOKEN, startOcculiteStub, type OcculiteStub} from './occuliteStub.js';
 
 test.beforeAll(async () => {
@@ -164,6 +172,29 @@ test('a group is created with a member, its members changed as a whole, and dele
         await expect(page.getByTestId('groups-table-count')).toHaveText('1 group');
         expect(stack.stub.requests).toContain('DELETE /groups/2');
         expect(stack.stub.groups.map((group) => group.id)).toEqual([1]);
+    } finally {
+        await stack.close();
+    }
+});
+
+test('task 94: the device table names a group device the CCU way after its group, and follows a group rename', async ({
+    page,
+}) => {
+    const stack = await startWithBox();
+    try {
+        await page.goto(`${stack.host.url}#/VirtualDevices/devices`);
+        // the system's store has no name for the group device: the CCU's "<group> INT0000001"
+        const row = page.locator(`[data-row-id="${HEATING_GROUP}"]`);
+        await expect(row).toContainText(`Bad ${HEATING_GROUP}`);
+
+        // renamed in the Groups tab: the device table follows without a reload
+        await page.getByRole('tab', {name: 'Groups'}).click();
+        await page.getByTestId('groups-table').locator('[data-row-id="1"]').dblclick();
+        await page.getByTestId('group-name').fill('Bad oben');
+        await page.getByTestId('group-save').click();
+        await expect(page.getByTestId('groups-table').locator('[data-row-id="1"]')).toContainText('Bad oben');
+        await page.getByRole('tab', {name: 'Devices'}).click();
+        await expect(row).toContainText(`Bad oben ${HEATING_GROUP}`);
     } finally {
         await stack.close();
     }

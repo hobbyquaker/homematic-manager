@@ -95,7 +95,7 @@
                 initial = opened;
                 desired = {room: {...opened.room}, function: {...opened.function}};
                 failures = {room: {}, function: {}};
-                name = address === '' ? '' : (stores.names.name(address) ?? '');
+                name = address === '' ? '' : (stores.knownName(address) ?? '');
                 renameChildren = true;
                 nameFailed = false;
                 roomSide?.reset();
@@ -123,7 +123,7 @@
      */
     function plannedRename(): Array<{address: string; name: string}> {
         const next = name.trim();
-        if (!showName || next === '' || next === (stores.names.name(address) ?? '')) {
+        if (!showName || next === '' || next === (stores.knownName(address) ?? '')) {
             return [];
         }
         return renameEntries(address, next, children, {channels: renameChildren});

@@ -27,7 +27,7 @@
 
     $effect(() => {
         if (open) {
-            name = stores.names.name(address) ?? '';
+            name = stores.knownName(address) ?? '';
             renameChildren = true;
         }
     });

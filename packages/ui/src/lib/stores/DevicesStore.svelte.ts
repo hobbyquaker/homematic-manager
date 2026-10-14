@@ -20,6 +20,15 @@ import type {NoticesStore} from './NoticesStore.svelte.js';
  * devices into one index. Here every interface has its own index, and a late answer for an
  * interface is still stored under that interface - never under the one that happens to be selected.
  */
+/** The device list is re-read this often while an install runs (#95, #113). */
+export const FIRMWARE_POLL_FAST_MS = 10_000;
+/** ... and this often while hmipserver transfers a firmware in the background (B-92). */
+export const FIRMWARE_POLL_SLOW_MS = 60_000;
+/** The states of an install: seconds to a few minutes. */
+const FIRMWARE_FAST_STATES = ['DO_UPDATE_PENDING', 'PERFORMING_UPDATE', 'LIVE_DELIVER_FIRMWARE_IMAGE'];
+/** The states of the background transfer: hours, or days for a sleeping device. */
+const FIRMWARE_SLOW_STATES = ['NEW_FIRMWARE_AVAILABLE', 'DELIVER_FIRMWARE_IMAGE'];
+
 export class DevicesStore {
     /** Interface name -> index. Reassigned on every change so the components re-render. */
     indexes = $state<Record<string, DeviceIndex>>({});
@@ -172,14 +181,36 @@ export class DevicesStore {
      * showed the state it had read at start-up until the user switched interfaces and back).
      */
     firmwarePending(interfaceName: string): boolean {
+        return this.firmwarePollMs(interfaceName) > 0;
+    }
+
+    /**
+     * How often the page should re-read the device list, 0 for not at all (B-92). Neither rfd nor
+     * hmipserver sends an `updateDevice` when only the firmware state changes (measured on
+     * openccu-lite, 2026-10-14), so the page polls - but at the pace of what is going on:
+     * - fast: an install (`DO_UPDATE_PENDING`, `PERFORMING_UPDATE`, an access point's
+     *   `LIVE_DELIVER_FIRMWARE_IMAGE`) lasts seconds to minutes, and so does an update or install
+     *   this session asked for ({@link firmwareBusy});
+     * - slow: hmipserver's background transfer (`DELIVER_FIRMWARE_IMAGE`) takes 8 to 42 hours per
+     *   device, days for a battery device that sleeps, and `NEW_FIRMWARE_AVAILABLE` waits behind it;
+     * - never for `READY_FOR_UPDATE` alone: it lasts until the user installs, possibly forever, and
+     *   the grid shows the Install button already.
+     */
+    firmwarePollMs(interfaceName: string): number {
         if (this.firmwareBusy.length > 0) {
-            return true;
+            return FIRMWARE_POLL_FAST_MS;
         }
-        return this.devices(interfaceName).some((device) =>
-            ['DELIVER_FIRMWARE_IMAGE', 'PERFORMING_UPDATE', 'READY_FOR_UPDATE'].includes(
-                device.FIRMWARE_UPDATE_STATE ?? '',
-            ),
-        );
+        let slow = false;
+        for (const device of this.devices(interfaceName)) {
+            const state = device.FIRMWARE_UPDATE_STATE ?? '';
+            if (FIRMWARE_FAST_STATES.includes(state)) {
+                return FIRMWARE_POLL_FAST_MS;
+            }
+            if (FIRMWARE_SLOW_STATES.includes(state)) {
+                slow = true;
+            }
+        }
+        return slow ? FIRMWARE_POLL_SLOW_MS : 0;
     }
 
     /**

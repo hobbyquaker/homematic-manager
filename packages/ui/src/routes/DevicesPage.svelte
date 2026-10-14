@@ -74,9 +74,6 @@
     const stores = getStores();
     const t = stores.i18n.t;
 
-    /** How often the grid re-reads `listDevices` while a firmware update is in flight (#95, #113). */
-    const FIRMWARE_POLL_MS = 10_000;
-
     let selected = $state<string[]>([]);
     let expanded = $state<string[]>([]);
 
@@ -759,17 +756,20 @@
 
     /**
      * While an update is in flight the grid re-reads the device list, because neither rfd nor
-     * hmipserver pushes a `newDevices` when only the firmware changed. The poll stops by itself as
-     * soon as nothing is pending any more.
+     * hmipserver pushes a `newDevices` when only the firmware changed. The pace is the store's
+     * (B-92): fast for an install, slow for hmipserver's background transfer, not at all for a
+     * device that merely waits for the user to install. The poll stops by itself as soon as
+     * nothing is pending any more.
      */
     $effect(() => {
         const name = interfaceName;
-        if (name === '' || !stores.devices.firmwarePending(name)) {
+        const every = name === '' ? 0 : stores.devices.firmwarePollMs(name);
+        if (every <= 0) {
             return;
         }
         const timer = setInterval(() => {
             void stores.devices.load(name, {refresh: true});
-        }, FIRMWARE_POLL_MS);
+        }, every);
         return () => {
             clearInterval(timer);
         };

@@ -4,7 +4,7 @@ import {describe, expect, it, vi} from 'vitest';
 import {MockTransport} from '../transport/MockTransport.js';
 
 import {ConsoleStore} from './ConsoleStore.svelte.js';
-import {DevicesStore} from './DevicesStore.svelte.js';
+import {DevicesStore, FIRMWARE_POLL_FAST_MS, FIRMWARE_POLL_SLOW_MS} from './DevicesStore.svelte.js';
 import {LinksStore} from './LinksStore.svelte.js';
 import {NoticesStore} from './NoticesStore.svelte.js';
 import {ParamsetStore} from './ParamsetStore.svelte.js';
@@ -251,6 +251,48 @@ describe('DevicesStore actions', () => {
         await store.load('BidCos-RF', {refresh: true});
         expect(store.firmwareBusy).toEqual([]);
         expect(store.firmwarePending('BidCos-RF')).toBe(false);
+    });
+
+    it('B-92: polls fast for an install, slowly for the background transfer, never for ready-to-install alone', async () => {
+        const {transport, notices} = setup();
+        const store = new DevicesStore(transport, notices);
+        const withState = (state: string) => [
+            {
+                ADDRESS: '000A1B2C3D4E5F',
+                TYPE: 'HmIP-PDT',
+                FIRMWARE: '1.0',
+                AVAILABLE_FIRMWARE: '2.0',
+                FIRMWARE_UPDATE_STATE: state,
+            },
+        ];
+        for (const [state, every] of [
+            ['DO_UPDATE_PENDING', FIRMWARE_POLL_FAST_MS],
+            ['PERFORMING_UPDATE', FIRMWARE_POLL_FAST_MS],
+            ['LIVE_DELIVER_FIRMWARE_IMAGE', FIRMWARE_POLL_FAST_MS],
+            ['DELIVER_FIRMWARE_IMAGE', FIRMWARE_POLL_SLOW_MS],
+            ['NEW_FIRMWARE_AVAILABLE', FIRMWARE_POLL_SLOW_MS],
+            ['READY_FOR_UPDATE', 0],
+            ['UP_TO_DATE', 0],
+            ['', 0],
+        ] as const) {
+            transport.respond('devices.list', () => withState(state));
+            await store.load('HmIP-RF', {refresh: true});
+            expect(store.firmwarePollMs('HmIP-RF'), state).toBe(every);
+            expect(store.firmwarePending('HmIP-RF'), state).toBe(every > 0);
+        }
+        // an install and a transfer side by side: the install's pace wins
+        transport.respond('devices.list', () => [
+            ...withState('DELIVER_FIRMWARE_IMAGE'),
+            {ADDRESS: '000B1B2C3D4E5F', TYPE: 'HmIP-PDT', FIRMWARE: '1.0', FIRMWARE_UPDATE_STATE: 'PERFORMING_UPDATE'},
+        ]);
+        await store.load('HmIP-RF', {refresh: true});
+        expect(store.firmwarePollMs('HmIP-RF')).toBe(FIRMWARE_POLL_FAST_MS);
+        // this session's own install is fast whatever the states say
+        transport.respond('devices.list', () => withState('READY_FOR_UPDATE'));
+        await store.load('HmIP-RF', {refresh: true});
+        transport.result('devices.installFirmware', true);
+        await store.installFirmware('HmIP-RF', '000A1B2C3D4E5F');
+        expect(store.firmwarePollMs('HmIP-RF')).toBe(FIRMWARE_POLL_FAST_MS);
     });
 
     it('settles nothing for an interface it has never loaded', () => {

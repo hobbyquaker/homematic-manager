@@ -726,6 +726,37 @@ describe('the firmware button', () => {
         await vi.advanceTimersByTimeAsync(10_500);
         expect(transport.countOf('devices.list')).toBeGreaterThan(before);
     });
+
+    it('B-92: a device waiting for the user to install causes no poll, a background transfer a slow one', async () => {
+        vi.useFakeTimers({shouldAdvanceTime: true});
+        let state = 'READY_FOR_UPDATE';
+        transport.respond('devices.list', (name) =>
+            name === 'HmIP-RF'
+                ? DEMO_DEVICES['HmIP-RF'].map((device) =>
+                      device.ADDRESS === '000A1B2C3D4E5F'
+                          ? {...device, FIRMWARE_UPDATE_STATE: state, AVAILABLE_FIRMWARE: '2.0'}
+                          : device,
+                  )
+                : [],
+        );
+
+        const app = await mountApp({transport, hash: '#/HmIP-RF/devices'});
+        await waitFor(() => {
+            expect(screen.getByTestId('firmware-000A1B2C3D4E5F')).toBeTruthy();
+        });
+        const before = transport.countOf('devices.list');
+        await vi.advanceTimersByTimeAsync(65_000);
+        expect(transport.countOf('devices.list')).toBe(before);
+
+        // the transfer is read again once a minute, not every ten seconds
+        state = 'DELIVER_FIRMWARE_IMAGE';
+        await app.stores.devices.load('HmIP-RF', {refresh: true});
+        const loaded = transport.countOf('devices.list');
+        await vi.advanceTimersByTimeAsync(10_500);
+        expect(transport.countOf('devices.list')).toBe(loaded);
+        await vi.advanceTimersByTimeAsync(55_000);
+        expect(transport.countOf('devices.list')).toBeGreaterThan(loaded);
+    });
 });
 
 describe('an empty device list', () => {

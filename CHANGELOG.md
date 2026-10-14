@@ -6,6 +6,27 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [3.1.5] — 2026-10-14
+
+### Changed
+
+- **Service messages in the device table as badges.** The marks in the Msgs column were text characters of different
+  widths that never lined up, and some looked alike. Every message is now a round badge of one size with an icon of its
+  own, the icons and colours of openccu-lite's status page: _communication disturbed_ (UNREACH) is a filled red badge,
+  _communication was disturbed_ (STICKY_UNREACH) an outlined grey one; low battery orange; configuration and update
+  pending blue; a fault, sabotage and a fault report each red with an icon of their own. The tooltip names the message
+  in German or English, then the datapoint and the channel. (task 92)
+- **The firmware column lines up.** The version now has a slot of its own in figures of equal width, so the "up to
+  date" label and the update button start at the same place in every row. hmipserver's update states are translated.
+  (task 93)
+
+### Fixed
+
+- **openccu-lite: a heating group's device has a name.** A VirtualDevices group device that has no name in the
+  system's store - and its channels - now shows the name the CCU gives it, `<group name> INT0000001`, and follows a
+  rename in the Groups tab at once. As on the CCU, it stays an ordinary device name: one set in the device table wins
+  and does not rename the group. (task 94)
+
 ## [3.1.4] — 2026-10-09
 
 ### Fixed
@@ -1743,6 +1764,7 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
+[3.1.5]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.4...v3.1.5
 [3.1.4]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.3...v3.1.4
 [3.1.3]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.2...v3.1.3
 [3.1.2]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.1...v3.1.2

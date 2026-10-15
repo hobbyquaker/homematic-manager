@@ -730,7 +730,38 @@ describe('the firmware button', () => {
         await waitFor(() => {
             expect(stores.devices.firmwareBusy).toEqual(['KEQ0345678']);
         });
-        expect(rowOf('KEQ0345678').textContent).toContain('läuft');
+        // task 99: asked for, not reported yet - "angefordert", not a bare "läuft"
+        expect(rowOf('KEQ0345678').textContent).toContain('angefordert …');
+        expect(rowOf('KEQ0345678').textContent).not.toContain('läuft');
+        expect(screen.getByTestId('firmware-status-KEQ0345678').getAttribute('title')).toContain('Batteriegerät');
+    });
+
+    it('task 99: once the interface reports the install, its state replaces "angefordert"', async () => {
+        let state = 'READY_FOR_UPDATE';
+        transport.respond('devices.list', (name) =>
+            name === 'HmIP-RF'
+                ? DEMO_DEVICES['HmIP-RF'].map((device) =>
+                      device.ADDRESS === '000A1B2C3D4E5F'
+                          ? {...device, FIRMWARE_UPDATE_STATE: state, AVAILABLE_FIRMWARE: '2.0'}
+                          : device,
+                  )
+                : [],
+        );
+        transport.result('devices.installFirmware', true);
+        const {stores} = await mountApp({transport, hash: '#/HmIP-RF/devices'});
+        await waitFor(() => {
+            expect(screen.getByTestId('firmware-000A1B2C3D4E5F')).toBeTruthy();
+        });
+        await fireEvent.click(screen.getByTestId('firmware-000A1B2C3D4E5F'));
+        await waitFor(() => {
+            expect(screen.getByTestId('firmware-status-000A1B2C3D4E5F').textContent).toBe('angefordert …');
+        });
+        state = 'PERFORMING_UPDATE';
+        await stores.devices.load('HmIP-RF', {refresh: true});
+        await waitFor(() => {
+            expect(screen.getByTestId('firmware-status-000A1B2C3D4E5F').textContent).toBe('wird installiert');
+        });
+        expect(stores.devices.firmwareBusy).toEqual(['000A1B2C3D4E5F']);
     });
 
     it('B-93: a long version without a button does not push the Install buttons away from their versions', async () => {

@@ -248,6 +248,12 @@ export const UI_MESSAGES: MessageCatalogue = {
     'waiting for the device': {de: 'wartet auf das Gerät', en: 'waiting for the device'},
     installing: {de: 'wird installiert', en: 'installing'},
     'update pending': {de: 'Update ausstehend', en: 'update pending'},
+    // task 99: the update or install was asked for and the interface does not report it yet (it was "in progress")
+    'firmware requested': {de: 'angefordert …', en: 'requested …'},
+    'firmware requested hint': {
+        de: 'Das Update ist angefordert. Ein Batteriegerät beginnt erst, wenn es das nächste Mal wach ist; manche Geräte wollen dafür ihre Systemtaste gedrückt bekommen.',
+        en: 'The update has been requested. A battery device starts only when it is awake the next time; some want their system button pressed for it.',
+    },
     'firmware queued hint': {
         de: 'Die Firmware liegt auf dem System und wartet, bis sie an der Reihe ist: Die Schnittstelle überträgt an ein Gerät nach dem anderen.',
         en: 'The firmware is on the system and waits for its turn: the interface transfers to one device at a time.',

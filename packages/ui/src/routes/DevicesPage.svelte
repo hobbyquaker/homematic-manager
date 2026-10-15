@@ -1226,9 +1226,15 @@
                         data-testid={`firmware-cell-${row.ADDRESS}`}
                     >
                         <span class="hmm-firmware-version">{cellState.firmware}</span>
-                        {#if cellState.busy}
-                            <span class="hmm-firmware-status">{t('in progress')}</span>
-                        {:else if cellState.action}
+                        {#if cellState.busy && cellState.status === undefined}
+                            <!-- task 99: asked for, and the interface does not report it yet; once it
+                                 does (installing, update pending) its state is shown -->
+                            <span
+                                class="hmm-firmware-status"
+                                title={t('firmware requested hint')}
+                                data-testid={`firmware-status-${row.ADDRESS}`}>{t('firmware requested')}</span
+                            >
+                        {:else if cellState.action && !cellState.busy}
                             <button
                                 type="button"
                                 class="hmm-inline-button hmm-firmware-action"

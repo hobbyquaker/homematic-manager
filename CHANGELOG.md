@@ -6,6 +6,13 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [3.2.2] — 2026-10-15
+
+### Fixed
+
+- **A long firmware version is shown in full again.** 3.2.1 cut a version with nothing beside it - the radio module's
+  `3.89.11.20260919` on BidCos-RF - to the width of the short versions next to install buttons. (B-93)
+
 ## [3.2.1] — 2026-10-15
 
 ### Changed
@@ -1815,6 +1822,7 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
+[3.2.2]: https://github.com/hobbyquaker/homematic-manager/compare/v3.2.1...v3.2.2
 [3.2.1]: https://github.com/hobbyquaker/homematic-manager/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.5...v3.2.0
 [3.1.5]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.4...v3.1.5

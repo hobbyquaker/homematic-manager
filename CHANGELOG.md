@@ -6,6 +6,25 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [3.2.1] — 2026-10-15
+
+### Changed
+
+- **"requested …" after an install click.** Until the interface reports the update, the firmware cell said
+  _in progress_ ("läuft") - and kept saying it over the states that followed. It now says _requested …_
+  ("angefordert …"), with a tooltip that a battery device starts on its next wake-up, and as soon as the interface
+  reports a state (_installing_, _update pending_) the cell shows that. (task 99)
+
+### Fixed
+
+- **The install button right after its version.** On BidCos-RF the button sat far right of the version, pushed there
+  by the radio module's long version in another row, and the column was so narrow that it could be cut off. It now
+  follows its version with a small gap, and the column is wide enough for both and not squeezed below that. (B-93)
+- **The other device of the same type keeps its install button.** After one HmIP device was installed, its twin could
+  show _up to date_ and no button until the tab was visited again: the page stopped re-reading the device list the
+  moment the install was over, and kept a passing state it had read in that moment. It now reads on for two minutes
+  after an install ends. (B-94)
+
 ## [3.2.0] — 2026-10-14
 
 ### Added
@@ -1796,6 +1815,7 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
+[3.2.1]: https://github.com/hobbyquaker/homematic-manager/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.5...v3.2.0
 [3.1.5]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.4...v3.1.5
 [3.1.4]: https://github.com/hobbyquaker/homematic-manager/compare/v3.1.3...v3.1.4

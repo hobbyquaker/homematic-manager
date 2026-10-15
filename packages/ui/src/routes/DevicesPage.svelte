@@ -39,6 +39,7 @@
     import {STORE_INTERFACE} from '../lib/stores/routing.js';
     import {isHmipInterface} from '../lib/stores/suppression.js';
     import {
+        FIRMWARE_COLUMN_WIDTH,
         firmwareCell,
         offeredParamsets,
         offersRepair,
@@ -502,7 +503,11 @@
         {
             key: 'FIRMWARE',
             label: 'FIRMWARE',
-            width: 170,
+            // B-93: the version and the Install button side by side, not narrower than they are - a
+            // squeezed column hid the button, the one thing in it to click (as B-35 for PARAMSETS)
+            width: FIRMWARE_COLUMN_WIDTH,
+            minWidth: FIRMWARE_COLUMN_WIDTH,
+            keepMinWidth: true,
             value: (device) => `${device.FIRMWARE ?? ''} ${device.AVAILABLE_FIRMWARE ?? ''}`.trim(),
         },
         {
@@ -727,11 +732,23 @@
     // ---------------------------------------------------------------- firmware
 
     /**
-     * Task 93: the width of the firmware column's version slot, in `ch` - the longest version of the
-     * table, at least three characters. With tabular figures a digit is one `ch` and a dot less, so
-     * the label or button after it starts at one x in every row without a wide gap after `1.4`.
+     * Task 93: the width of the firmware column's version slot, in `ch`, at least three characters.
+     * With tabular figures a digit is one `ch` and a dot less, so the label or button after it starts
+     * at one x in every row without a wide gap after `1.4`.
+     *
+     * B-93: the longest version of the rows that show a label or a button, not of the whole table -
+     * one long version without either (the radio module's `3.89.11.20260919` on BidCos) pushed every
+     * Install button far from its version and out of the column.
      */
-    const firmwareSlot = $derived(Math.max(3, ...devices.map((device) => (device.FIRMWARE ?? '').length)));
+    const firmwareSlot = $derived(
+        Math.max(
+            3,
+            ...devices.map((device) => {
+                const cell = firmwareOf(device);
+                return cell.busy || cell.action !== undefined || cell.status !== undefined ? cell.firmware.length : 0;
+            }),
+        ),
+    );
 
     /** A device is "update pending" when one of its channels reports the service message. */
     function updatePending(address: string): boolean {

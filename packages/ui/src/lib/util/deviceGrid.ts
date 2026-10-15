@@ -78,6 +78,16 @@ export const SERVICE_MARKS_COLUMN_WIDTH = 84;
 export const PARAMSETS_COLUMN_WIDTH = 150;
 
 /**
+ * The width the FIRMWARE column is designed with, and the narrowest it is drawn or dragged (B-93): a
+ * version and the Install button side by side, at their longest a `2.2.10` and the German
+ * "installieren 2.2.12", 172.8 px with the cell's padding in Chromium with the system-ui fallback
+ * font; the rest is room for other platforms' fonts. The column was a proportional 170 that a window
+ * squeezed until the button was cut off; a label (a state) that does not fit is cut off with its
+ * tooltip instead.
+ */
+export const FIRMWARE_COLUMN_WIDTH = 190;
+
+/**
  * The width of the suppress column of the service-message tab on HmIP (task 26), and the narrowest
  * it is drawn or dragged (B-35): its one button, at its longest the German "Unterdrückung aufheben" -
  * 159.5 px with the cell's padding in Chromium with the system-ui fallback font, which the fixed

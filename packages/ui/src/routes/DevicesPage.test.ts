@@ -7,6 +7,7 @@ import {UI_MESSAGES} from '../lib/i18n/uiMessages.js';
 import {DEMO_DEVICES, isDemoInterface} from '../lib/transport/demoData.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
 import {
+    FIRMWARE_COLUMN_WIDTH,
     firmwareCell,
     offeredParamsets,
     PARAMSETS_COLUMN_WIDTH,
@@ -730,6 +731,49 @@ describe('the firmware button', () => {
             expect(stores.devices.firmwareBusy).toEqual(['KEQ0345678']);
         });
         expect(rowOf('KEQ0345678').textContent).toContain('läuft');
+    });
+
+    it('B-93: a long version without a button does not push the Install buttons away from their versions', async () => {
+        transport.respond('devices.list', (name) =>
+            name === 'BidCos-RF'
+                ? DEMO_DEVICES['BidCos-RF'].map((device, index) =>
+                      index === 0 && !device.ADDRESS.includes(':') ? {...device, FIRMWARE: '3.89.11.20260919'} : device,
+                  )
+                : [],
+        );
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await waitFor(() => {
+            expect(screen.getByTestId('firmware-KEQ0345678')).toBeTruthy();
+        });
+        const cell = screen.getByTestId('firmware-cell-KEQ0345678');
+        // the slot is as wide as the versions next to a label or a button, not the radio module's
+        expect(cell.style.gridTemplateColumns.startsWith('16ch')).toBe(false);
+        expect(cell.style.gridTemplateColumns).toMatch(/^[3-6]ch /);
+    });
+
+    it('B-93: a six-character version and "installieren 2.2.12" fit the column at its narrowest', async () => {
+        transport.respond('devices.list', (name) =>
+            name === 'BidCos-RF'
+                ? DEMO_DEVICES['BidCos-RF'].map((device) =>
+                      device.ADDRESS === 'KEQ0345678'
+                          ? {...device, FIRMWARE: '2.2.10', AVAILABLE_FIRMWARE: '2.2.12'}
+                          : device,
+                  )
+                : [],
+        );
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await waitFor(() => {
+            expect(screen.getByTestId('firmware-KEQ0345678')).toBeTruthy();
+        });
+        const cell = screen.getByTestId('firmware-cell-KEQ0345678');
+        const version = cell.children[0] as HTMLElement;
+        const button = screen.getByTestId('firmware-KEQ0345678');
+        expect(button.textContent.trim()).toBe('installieren 2.2.12');
+        // the version slot, the gap, the button at its natural width and the cell's padding of 6 px a side
+        const needed = version.getBoundingClientRect().width + 6 + button.scrollWidth + 2 + 12;
+        expect(needed).toBeLessThanOrEqual(FIRMWARE_COLUMN_WIDTH);
+        // and the button starts right after the version, not at the cell's far end
+        expect(button.getBoundingClientRect().left - version.getBoundingClientRect().right).toBeLessThanOrEqual(8);
     });
 
     it('reports a failing updateFirmware and drops the busy mark again', async () => {

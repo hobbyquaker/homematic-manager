@@ -1220,9 +1220,15 @@
                     <!-- task 93: the version in a slot of its own with tabular figures, the label or the
                          button in a second one, so both start at the same x in every row -->
                     {@const cellState = firmwareOf(row)}
+                    <!-- a version alone is not held to the slot: the radio module's 3.89.11.20260919 sets no
+                         slot width (B-93) and must not be cut to it either -->
                     <span
                         class="hmm-firmware-cell"
-                        style:grid-template-columns={`${firmwareSlot}ch minmax(0, max-content)`}
+                        style:grid-template-columns={cellState.busy ||
+                        cellState.action !== undefined ||
+                        cellState.status !== undefined
+                            ? `${firmwareSlot}ch minmax(0, max-content)`
+                            : 'minmax(0, max-content)'}
                         data-testid={`firmware-cell-${row.ADDRESS}`}
                     >
                         <span class="hmm-firmware-version">{cellState.firmware}</span>

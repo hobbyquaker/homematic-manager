@@ -780,6 +780,11 @@ describe('the firmware button', () => {
         // the slot is as wide as the versions next to a label or a button, not the radio module's
         expect(cell.style.gridTemplateColumns.startsWith('16ch')).toBe(false);
         expect(cell.style.gridTemplateColumns).toMatch(/^[3-6]ch /);
+        // and the long version itself is not cut to that slot
+        const radio = screen.getByTestId('firmware-cell-BidCoS-RF');
+        const long = radio.children[0] as HTMLElement;
+        expect(long.textContent).toBe('3.89.11.20260919');
+        expect(long.scrollWidth).toBeLessThanOrEqual(long.clientWidth);
     });
 
     it('B-93: a six-character version and "installieren 2.2.12" fit the column at its narrowest', async () => {

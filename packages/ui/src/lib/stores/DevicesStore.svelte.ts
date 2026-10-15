@@ -28,6 +28,14 @@ export const FIRMWARE_POLL_SLOW_MS = 60_000;
 const FIRMWARE_FAST_STATES = ['DO_UPDATE_PENDING', 'PERFORMING_UPDATE', 'LIVE_DELIVER_FIRMWARE_IMAGE'];
 /** The states of the background transfer: hours, or days for a sleeping device. */
 const FIRMWARE_SLOW_STATES = ['NEW_FIRMWARE_AVAILABLE', 'DELIVER_FIRMWARE_IMAGE'];
+/**
+ * B-94: how long the fast poll goes on after the last install of an interface has finished.
+ * hmipserver checks every device for updates again when an install is over, and in that moment it
+ * reported the other device of the same type `UP_TO_DATE` - the read that happened to be the last
+ * one, because nothing was installing any more. The grid kept it: the twin lost its Install button
+ * until the next visit of the tab. A few more reads after the end let the state settle.
+ */
+export const FIRMWARE_POLL_TAIL_MS = 120_000;
 
 export class DevicesStore {
     /** Interface name -> index. Reassigned on every change so the components re-render. */
@@ -41,6 +49,8 @@ export class DevicesStore {
     failed = $state<Record<string, boolean>>({});
     /** Addresses whose firmware update was asked for and has not finished; the grid marks them. */
     firmwareBusy = $state<string[]>([]);
+    /** B-94: interface name -> until when the fast poll goes on after its last install ended. */
+    firmwareTail = $state<Record<string, number>>({});
 
     readonly #transport: Transport;
     readonly #notices: NoticesStore;
@@ -90,9 +100,13 @@ export class DevicesStore {
             const descriptions = await this.#transport.request('devices.list', interfaceName, {
                 refresh: options.refresh ?? false,
             });
+            const installing = this.#installing(interfaceName);
             this.indexes = {...this.indexes, [interfaceName]: new DeviceIndex(interfaceName, descriptions)};
             this.failed = {...this.failed, [interfaceName]: false};
             this.settleFirmware(interfaceName);
+            if (installing && !this.#installing(interfaceName)) {
+                this.firmwareTail = {...this.firmwareTail, [interfaceName]: Date.now() + FIRMWARE_POLL_TAIL_MS};
+            }
         } catch (error) {
             this.failed = {...this.failed, [interfaceName]: true};
             this.#notices.fromError(error, `devices.list ${interfaceName}`);
@@ -194,23 +208,32 @@ export class DevicesStore {
      * - slow: hmipserver's background transfer (`DELIVER_FIRMWARE_IMAGE`) takes 8 to 42 hours per
      *   device, days for a battery device that sleeps, and `NEW_FIRMWARE_AVAILABLE` waits behind it;
      * - never for `READY_FOR_UPDATE` alone: it lasts until the user installs, possibly forever, and
-     *   the grid shows the Install button already.
+     *   the grid shows the Install button already;
+     * - fast again for {@link FIRMWARE_POLL_TAIL_MS} after the last install ended (B-94): hmipserver
+     *   re-checks the other devices of the type then, and the last read must not be that moment.
      */
     firmwarePollMs(interfaceName: string): number {
-        if (this.firmwareBusy.length > 0) {
+        if (this.#installing(interfaceName)) {
             return FIRMWARE_POLL_FAST_MS;
         }
-        let slow = false;
-        for (const device of this.devices(interfaceName)) {
-            const state = device.FIRMWARE_UPDATE_STATE ?? '';
-            if (FIRMWARE_FAST_STATES.includes(state)) {
-                return FIRMWARE_POLL_FAST_MS;
-            }
-            if (FIRMWARE_SLOW_STATES.includes(state)) {
-                slow = true;
-            }
+        // B-94: a few more reads after the last install ended, until hmipserver's states settle
+        if ((this.firmwareTail[interfaceName] ?? 0) > Date.now()) {
+            return FIRMWARE_POLL_FAST_MS;
         }
+        const slow = this.devices(interfaceName).some((device) =>
+            FIRMWARE_SLOW_STATES.includes(device.FIRMWARE_UPDATE_STATE ?? ''),
+        );
         return slow ? FIRMWARE_POLL_SLOW_MS : 0;
+    }
+
+    /** An update or install this session asked for, or one the interface reports, is going on. */
+    #installing(interfaceName: string): boolean {
+        if (this.firmwareBusy.length > 0) {
+            return true;
+        }
+        return this.devices(interfaceName).some((device) =>
+            FIRMWARE_FAST_STATES.includes(device.FIRMWARE_UPDATE_STATE ?? ''),
+        );
     }
 
     /**

@@ -4,7 +4,12 @@ import {describe, expect, it, vi} from 'vitest';
 import {MockTransport} from '../transport/MockTransport.js';
 
 import {ConsoleStore} from './ConsoleStore.svelte.js';
-import {DevicesStore, FIRMWARE_POLL_FAST_MS, FIRMWARE_POLL_SLOW_MS} from './DevicesStore.svelte.js';
+import {
+    DevicesStore,
+    FIRMWARE_POLL_FAST_MS,
+    FIRMWARE_POLL_SLOW_MS,
+    FIRMWARE_POLL_TAIL_MS,
+} from './DevicesStore.svelte.js';
 import {LinksStore} from './LinksStore.svelte.js';
 import {NoticesStore} from './NoticesStore.svelte.js';
 import {ParamsetStore} from './ParamsetStore.svelte.js';
@@ -250,7 +255,9 @@ describe('DevicesStore actions', () => {
         transport.respond('devices.list', () => [{ADDRESS: 'KEQ0345678', TYPE: 'HM-CC-RT-DN', FIRMWARE: '1.11'}]);
         await store.load('BidCos-RF', {refresh: true});
         expect(store.firmwareBusy).toEqual([]);
-        expect(store.firmwarePending('BidCos-RF')).toBe(false);
+        // B-94: a few more reads after the end of it
+        expect(store.firmwarePending('BidCos-RF')).toBe(true);
+        expect(store.firmwareTail['BidCos-RF']).toBeGreaterThan(Date.now());
     });
 
     it('B-92: polls fast for an install, slowly for the background transfer, never for ready-to-install alone', async () => {
@@ -275,10 +282,12 @@ describe('DevicesStore actions', () => {
             ['UP_TO_DATE', 0],
             ['', 0],
         ] as const) {
+            // a fresh store each time: after an install state the next read would be in B-94's tail
+            const fresh = new DevicesStore(transport, notices);
             transport.respond('devices.list', () => withState(state));
-            await store.load('HmIP-RF', {refresh: true});
-            expect(store.firmwarePollMs('HmIP-RF'), state).toBe(every);
-            expect(store.firmwarePending('HmIP-RF'), state).toBe(every > 0);
+            await fresh.load('HmIP-RF', {refresh: true});
+            expect(fresh.firmwarePollMs('HmIP-RF'), state).toBe(every);
+            expect(fresh.firmwarePending('HmIP-RF'), state).toBe(every > 0);
         }
         // an install and a transfer side by side: the install's pace wins
         transport.respond('devices.list', () => [
@@ -293,6 +302,57 @@ describe('DevicesStore actions', () => {
         transport.result('devices.installFirmware', true);
         await store.installFirmware('HmIP-RF', '000A1B2C3D4E5F');
         expect(store.firmwarePollMs('HmIP-RF')).toBe(FIRMWARE_POLL_FAST_MS);
+    });
+
+    it('B-94: polls on for a while after the last install ended, so a passing state of the twin is not kept', async () => {
+        vi.useFakeTimers({toFake: ['Date']});
+        try {
+            vi.setSystemTime(new Date('2026-10-15T23:00:00Z'));
+            const {transport, notices} = setup();
+            const store = new DevicesStore(transport, notices);
+            const eTrv = (address: string, firmware: string, state: string) => ({
+                ADDRESS: address,
+                TYPE: 'HMIP-eTRV',
+                FIRMWARE: firmware,
+                AVAILABLE_FIRMWARE: '2.2.12',
+                FIRMWARE_UPDATE_STATE: state,
+            });
+            transport.respond('devices.list', () => [
+                eTrv('0001D3C9A00001', '2.2.10', 'READY_FOR_UPDATE'),
+                eTrv('0001D3C9A00002', '2.2.10', 'READY_FOR_UPDATE'),
+            ]);
+            await store.load('HmIP-RF');
+            transport.result('devices.installFirmware', true);
+            await store.installFirmware('HmIP-RF', '0001D3C9A00001');
+            transport.respond('devices.list', () => [
+                eTrv('0001D3C9A00001', '2.2.10', 'PERFORMING_UPDATE'),
+                eTrv('0001D3C9A00002', '2.2.10', 'READY_FOR_UPDATE'),
+            ]);
+            await store.load('HmIP-RF', {refresh: true});
+            expect(store.firmwarePollMs('HmIP-RF')).toBe(FIRMWARE_POLL_FAST_MS);
+            // the install is over, and in that moment hmipserver calls the twin up to date
+            transport.respond('devices.list', () => [
+                eTrv('0001D3C9A00001', '2.2.12', 'UP_TO_DATE'),
+                eTrv('0001D3C9A00002', '2.2.10', 'UP_TO_DATE'),
+            ]);
+            await store.load('HmIP-RF', {refresh: true});
+            expect(store.firmwareBusy).toEqual([]);
+            expect(store.firmwarePollMs('HmIP-RF')).toBe(FIRMWARE_POLL_FAST_MS);
+            // the next read shows the twin's offer again
+            transport.respond('devices.list', () => [
+                eTrv('0001D3C9A00001', '2.2.12', 'UP_TO_DATE'),
+                eTrv('0001D3C9A00002', '2.2.10', 'READY_FOR_UPDATE'),
+            ]);
+            await store.load('HmIP-RF', {refresh: true});
+            const twin = store.devices('HmIP-RF').find((device) => device.ADDRESS === '0001D3C9A00002');
+            expect(twin?.FIRMWARE_UPDATE_STATE).toBe('READY_FOR_UPDATE');
+            expect(store.firmwarePollMs('HmIP-RF')).toBe(FIRMWARE_POLL_FAST_MS);
+            // and the poll stops once the tail is over
+            vi.setSystemTime(new Date(Date.now() + FIRMWARE_POLL_TAIL_MS + 1));
+            expect(store.firmwarePollMs('HmIP-RF')).toBe(0);
+        } finally {
+            vi.useRealTimers();
+        }
     });
 
     it('settles nothing for an interface it has never loaded', () => {

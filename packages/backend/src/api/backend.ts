@@ -1417,7 +1417,7 @@ export class Backend {
             ...(pins === undefined ? {} : {callbackPinned: {...pins}}),
             ...(publish ? {publishCallbackPorts: true} : {}),
             // B-70: only a host that goes idle offers the time; the default of an unpinned host is
-            // D-31's five minutes, whatever it was started with, so "the default" means one thing
+            // D-31's default (never, since B-95), whatever it was started with, so "the default" means one thing
             ...(idle === undefined
                 ? {}
                 : {

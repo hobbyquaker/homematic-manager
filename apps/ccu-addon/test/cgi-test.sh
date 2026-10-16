@@ -542,7 +542,7 @@ case "$out" in
     *) fail "and the page says so" "$out" ;;
 esac
 out="$(POST_BODY='idle=default' cgi settings.cgi 'sid=@1234567890@&cmd=config')"
-if [ "$(grep -E '^ *#? *HMM_IDLE_UNSUBSCRIBE=' "$TREE/etc/hmm.env")" = '#HMM_IDLE_UNSUBSCRIBE=5m' ] && [ "$(cat "$RC_CALLS")" = restart ]; then
+if [ "$(grep -E '^ *#? *HMM_IDLE_UNSUBSCRIBE=' "$TREE/etc/hmm.env")" = '#HMM_IDLE_UNSUBSCRIBE=0' ] && [ "$(cat "$RC_CALLS")" = restart ]; then
     pass "the default comments the line out again and restarts"
 else
     fail "the default comments the line out again and restarts" "$(grep -n 'HMM_IDLE_UNSUBSCRIBE' "$TREE/etc/hmm.env"; cat "$RC_CALLS")"

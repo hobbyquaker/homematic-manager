@@ -150,9 +150,10 @@ export const START_WINDOW_MS = 90_000;
 
 /**
  * D-31: the grace period a server install waits, with no UI session connected, before it drops its
- * event subscriptions. Five minutes; `0` turns the whole thing off, which is what Electron uses.
+ * event subscriptions: never, since B-95 (each page load after the idle time sent an `init` that
+ * blocked hmipserver for seconds). A host or a profile can still choose a time.
  */
-export const DEFAULT_IDLE_UNSUBSCRIBE_MS = 300_000;
+export const DEFAULT_IDLE_UNSUBSCRIBE_MS = 0;
 
 export interface ManagedInterface {
     readonly name: string;

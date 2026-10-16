@@ -244,7 +244,8 @@ describe('parseDuration and --idle-unsubscribe (D-31)', () => {
     });
 
     it('defaults to five minutes for every server install type, and 0 turns it off', () => {
-        expect(parseOptions([], noEnv).idleUnsubscribeMs).toBe(300_000);
+        // B-95: never by default - every page load after the idle time re-registered and blocked hmipserver
+        expect(parseOptions([], noEnv).idleUnsubscribeMs).toBe(0);
         expect(parseOptions(['--idle-unsubscribe', '30s'], noEnv).idleUnsubscribeMs).toBe(30_000);
         expect(parseOptions([], {...noEnv, HMM_IDLE_UNSUBSCRIBE: '2m'}).idleUnsubscribeMs).toBe(120_000);
         expect(parseOptions(['--idle-unsubscribe', '0'], noEnv).idleUnsubscribeMs).toBe(0);

@@ -152,7 +152,7 @@ if {[string equal $cmd "config"]} {
 
     # B-70 (D-31): how long the backend stays subscribed with no page open, written into hmm.env as
     # HMM_IDLE_UNSUBSCRIBE like the two settings above. `default` comments the line out again: the
-    # host's five minutes then apply, or the time chosen in the app's own settings dialog, which a
+    # host's default (never, B-95) then applies, or the time chosen in the app's own settings dialog, which a
     # line here overrides. Only these values are written - the host refuses a duration it cannot
     # parse, and a typo here would keep the service from starting.
     set idle_choices {15m 30m 1h 4h 0}
@@ -167,7 +167,7 @@ if {[string equal $cmd "config"]} {
             }
             if {![string equal $target $idlechoice]} {
                 if {[string equal $target ""]} {
-                    write_env HMM_IDLE_UNSUBSCRIBE 5m 1
+                    write_env HMM_IDLE_UNSUBSCRIBE 0 1
                 } else {
                     write_env HMM_IDLE_UNSUBSCRIBE $target
                 }
@@ -308,10 +308,10 @@ if {[string equal $cmd "config"]} {
         }
     }
     puts "<form class=\"choice\" method=\"post\" action=\"$action\"><p>[join $entries { }]</p></form>"
-    puts "<p class=\"note\">Voreinstellung: 5 Minuten, oder die Zeit aus den Einstellungen der App."
+    puts "<p class=\"note\">Voreinstellung: nie, oder die Zeit aus den Einstellungen der App."
     puts "Eine Wahl hier schreibt HMM_IDLE_UNSUBSCRIBE nach /usr/local/addons/hmm/etc/hmm.env, gilt"
     puts "vor der Einstellung der App und startet den Dienst neu."
-    puts "<br>Default: 5 minutes, or the time from the app's settings. A choice here writes"
+    puts "<br>Default: never, or the time from the app's settings. A choice here writes"
     puts "HMM_IDLE_UNSUBSCRIBE to /usr/local/addons/hmm/etc/hmm.env, wins over the app's setting and"
     puts "restarts the service.</p>"
     if {![string equal $sid ""]} {

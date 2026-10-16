@@ -7,7 +7,7 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import type {ApiEventName, AppConfig, DeviceDescription, RpcValue} from '@homematic-manager/core';
 
 import {BackendError, connectionError, rpcFaultError} from '../errors.js';
-import {InterfaceManager, type InterfaceManagerOptions} from '../interfaces/manager.js';
+import {DEFAULT_IDLE_UNSUBSCRIBE_MS, InterfaceManager, type InterfaceManagerOptions} from '../interfaces/manager.js';
 import {META_READ_SCRIPT} from '../rega/scripts.js';
 import {
     RpcClient,
@@ -746,6 +746,23 @@ describe('idle unsubscribe (D-31)', () => {
         await h.backend.stop();
     });
 
+    it('B-95: with the default, pages come and go for a day and the interfaces get one init only', async () => {
+        // every page load after an idle time sent an init, and hmipserver was blocked for seconds by each
+        expect(DEFAULT_IDLE_UNSUBSCRIBE_MS).toBe(0);
+        const h = await harness({backend: {idleUnsubscribeMs: DEFAULT_IDLE_UNSUBSCRIBE_MS}});
+        for (let page = 0; page < 24; page++) {
+            h.backend.noteSessions(1);
+            await vi.advanceTimersByTimeAsync(60_000);
+            h.backend.noteSessions(0);
+            await vi.advanceTimersByTimeAsync(3_540_000);
+        }
+        expect(inits(h)).toEqual(['hmm_HmIP-RF']);
+        expect(
+            (await h.backend.request('interfaces.list')).find((state) => state.name === 'HmIP-RF')?.idle,
+        ).toBeUndefined();
+        await h.backend.stop();
+    });
+
     it('cancels the grace period when a session comes back inside it', async () => {
         const h = await harness({backend: {idleUnsubscribeMs: 60_000}});
         h.backend.noteSessions(1);
@@ -832,7 +849,7 @@ describe('idle unsubscribe (D-31)', () => {
         await plain.backend.stop();
         const pinned = await harness({backend: {idleUnsubscribeMs: 0, idleUnsubscribePinned: true}});
         expect((await pinned.backend.request('config.get')).idleUnsubscribe).toEqual({
-            defaultMs: 300_000,
+            defaultMs: DEFAULT_IDLE_UNSUBSCRIBE_MS,
             pinnedMs: 0,
         });
         await pinned.backend.stop();

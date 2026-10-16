@@ -152,14 +152,14 @@ behind a proxy that issues the token that is the right setting anyway.
 
 ## Idle unsubscribe (D-31)
 
-After five minutes with no browser page open, the backend de-registers from the CCU's interface
-processes (`init('')` per interface) and stops polling for service messages; the next page load
-subscribes again and shows "subscribing" in the header for a moment while the devices are re-read.
-Configuration, names and caches are untouched. The time also runs from the start when no page is
-opened after it. It is on by default; the settings dialog's *Unsubscribe when idle* changes the time
-or chooses *never*, and `--idle-unsubscribe 0` / `HMM_IDLE_UNSUBSCRIBE=0` keeps the subscriptions up
-permanently from the start (a value given at start wins over the dialog), which is what to do if the
-point of the installation is to watch events around the clock.
+Off by default since 3.2.3. With an idle time set (the settings dialog's *Unsubscribe when idle*, or
+`--idle-unsubscribe 15m` / `HMM_IDLE_UNSUBSCRIBE=15m`; a value given at start wins over the dialog)
+and no browser page open for that long, the backend de-registers from the CCU's interface processes
+(`init('')` per interface) and stops polling for service messages; the next page load subscribes
+again and shows "subscribing" in the header for a moment while the devices are re-read.
+Configuration, names and caches are untouched. Up to 3.2.2 this was on by default with five minutes;
+it is off now because `hmipserver` handles every `init` on its single event loop, and each page load
+after the idle time blocked it for seconds on a CCU3.
 
 ## State, updates, logs
 

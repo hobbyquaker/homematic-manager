@@ -77,7 +77,8 @@ interface processes want - with a five second bound, so a `systemctl restart` ca
 
 ## Idle unsubscribe (D-31)
 
-After five minutes with no page open, the backend sends `init(url, '')` to every interface and
+Off by default since 3.2.3 (B-95). With an idle time set and no page open for that long, the
+backend sends `init(url, '')` to every interface and
 stops its service-message poll: an interface process should not push events at a browser tab that
 does not exist, and on the CCU those events cost the CCU's own CPU. Nothing else is torn down - the
 configuration, the names and every cache stay, the sockets stay, and the next page that connects
@@ -88,8 +89,9 @@ until their first `listDevices` sweep is through, because `hmipserver` re-sends 
 The time also runs from the start when no page is opened after it (B-70). The settings dialog
 offers it (*Unsubscribe when idle*: the default, 15 minutes to 4 hours, or never), saved in the
 profile. `--idle-unsubscribe <duration>` / `HMM_IDLE_UNSUBSCRIBE` sets it at start instead (`5m`,
-`300s`, `90`, `0` for never) and then wins over the dialog, which shows it read-only. It is on by
-default for every server install type - npm, Docker and the CCU addon all run unattended for days. The Electron app never does this: its in-process
+`300s`, `90`, `0` for never) and then wins over the dialog, which shows it read-only. Up to 3.2.2 it
+was on by default with five minutes; since 3.2.3 the default is never, because `hmipserver` handles
+every `init` on its single event loop and each page load after the idle time blocked it for seconds. The Electron app never does this: its in-process
 transport reports no sessions at all, so nothing there can ever be counted as idle.
 
 What is **not** replayed after a resubscribe are the events and service messages of the idle

@@ -17,11 +17,13 @@ export const ENV_PREFIX = 'HMM';
 
 /**
  * D-31: how long a server install waits with no page open before it de-registers from the interface
- * processes. On by default for every server install type - npm, Docker and the CCU addon all run
- * unattended for days, and an interface process pushing events at nobody costs the CCU's own CPU.
- * `0` disables it; Electron never gets here (its transport reports no sessions).
+ * processes. Off by default since B-95: every page opened after the idle time sent a new `init` to
+ * every interface, and hmipserver does that work on its single event loop - 2.4 to 3.4 s blocked on
+ * a CCU3 with some 450 devices and channels, for each page load. The registration now stays up, and
+ * the ping watchdog re-registers after a restart of an interface as before. A duration turns it on;
+ * Electron never gets here (its transport reports no sessions).
  */
-export const DEFAULT_IDLE_UNSUBSCRIBE = '5m';
+export const DEFAULT_IDLE_UNSUBSCRIBE = '0';
 
 /**
  * D-32/D-40: how a browser is let in. `token` is what every install type but the CCU addon uses, and
@@ -187,7 +189,7 @@ export const OPTIONS = {
     },
     'idle-unsubscribe': {
         type: 'string',
-        describe: 'drop the event subscriptions after this long with no page open (5m, 300s, 0 to disable)',
+        describe: 'drop the event subscriptions after this long with no page open (15m, 900s; 0, the default, never)',
         default: DEFAULT_IDLE_UNSUBSCRIBE,
     },
     demo: {

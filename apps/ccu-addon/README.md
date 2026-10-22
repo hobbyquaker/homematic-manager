@@ -1,7 +1,7 @@
 # @homematic-manager/ccu-addon
 
 The Homematic Manager as a **CCU3 / OpenCCU addon**: the same backend and the same UI as every other
-deliverable (D-25), running on the CCU itself behind the CCU's own lighttpd. No second installation,
+deliverable, running on the CCU itself behind the CCU's own lighttpd. No second installation,
 no port to open, no configuration dialog — the app is opened from _Systemsteuerung_ and is already
 connected, because it is running on the box it configures.
 
@@ -29,7 +29,7 @@ _Einstellungen → Systemsteuerung → Zusatzsoftware_:
 The **architecture** decides, not the firmware — `uname -m` on the CCU says which one it is; a CCU3
 with the original eQ-3 firmware is always `armv7l`. A package uploaded to the wrong architecture
 refuses to install with `Error (13)`. Each package has a `.sha256` and a CycloneDX SBOM
-(`.tar.gz.cdx.json`, D-27) next to it, and both the package and the SBOM are signed as GitHub
+(`.tar.gz.cdx.json`) next to it, and both the package and the SBOM are signed as GitHub
 attestations:
 
 ```sh
@@ -43,7 +43,7 @@ chroot — so there a first install really does need the reboot the WebUI asks f
 Afterwards a **Homematic Manager** button appears in _Systemsteuerung_. It opens the app. There is
 nothing else to configure: the addon talks to the interface processes on the CCU's own loopback and
 takes the device pictures from the CCU's `/config/img/devices/`. Everything the app itself offers —
-extra interfaces (D-13), pacing, language — is in its own settings dialog and is stored in
+extra interfaces, pacing, language — is in its own settings dialog and is stored in
 `/usr/local/hmm/config.json`.
 
 Manual install over ssh, which is what the firmware does minus the reboot:
@@ -84,7 +84,7 @@ armv7l package is the small one because Alpine's musl build is stripped and the 
 are not. Inodes are what a CCU3 is short of - it has 96k on `/usr/local` and a stock box with a few
 addons already uses half of them - and 500 of those is what this costs.
 
-**OQ-13** was decided here: the generated metadata (`data/dist`, 74 JSON files and 121 webp icons)
+The generated metadata (`data/dist`, 74 JSON files and 121 webp icons)
 ships **minified, not pre-gzipped**. Measured on the tree this package is built from:
 
 | | bytes | on disk | inodes |
@@ -100,7 +100,7 @@ for the metadata part of it).
 
 ## The token and the cookie
 
-The backend's API socket is guarded by a token (task 12). The browser cannot set a header on a
+The backend's API socket is guarded by a token. The browser cannot set a header on a
 `WebSocket`, and the CCU's own login is a ReGaHSS session that the backend knows nothing about — so
 the two are bridged by the one thing that can check a WebUI session, `settings.cgi`:
 
@@ -128,28 +128,27 @@ GET /addons/hmm/api   (upgrade)  ->  no cookie            ->  401
 - `SameSite=Strict` means a foreign page cannot make the browser send it, which is what makes the
   missing Origin check on the socket harmless.
 
-**On openccu-lite the same page is opened without `?sid=`** (task 50). The box's lighttpd gate lets
+**On openccu-lite the same page is opened without `?sid=`**. The box's lighttpd gate lets
 no request under `/addons/` through without a live session and hands the CGI the id of that session
 as `X-Occulite-Session` (`HTTP_X_OCCULITE_SESSION`), after removing any copy a client sent. The
 header is a claim until the box confirms it: `settings.cgi` asks `GET http://127.0.0.1/api/auth/v1/state`
 with the id as Bearer (5 s timeout), and the answer has to say `"authenticated": true` and name that
 very `sid` — an API token (authenticated, no `sid`), another session, a non-200 or a box that cannot
 be asked all mean *refused*. Only an id of one of the two shapes of occulited's session ids (26
-characters of base32, or ten alphanumerics on images from before their task 125) goes into a
+characters of base32, or ten alphanumerics on older images) goes into a
 header. The header is read on openccu-lite only (a `LITE=` line in `/VERSION` or occulited, the rule of
 `rc.d/hmm`): a CCU's lighttpd passes a client's header straight through, so there it counts for
 nothing. The order is header, then `?sid=` through ReGa (on openccu-lite the `tclrega.so` shim
 answers the session's legacy alias), then the token cookie; a header the box does not confirm falls
-through to `?sid=`. Because both the frontend (task 45) and this page read the header, the catalogue
+through to `?sid=`. Because both the frontend and this page read the header, the catalogue
 can declare `session.header_since` for the addon and the box stops putting `?sid=` into its URLs.
 
-**On openccu-lite the settings page, the hand-over and `service.cgi` are for administrators** (B-37,
-D-49; the hand-over since the maintainer's word of 2026-09-24). `settings.cgi` with or without
+**On openccu-lite the settings page, the hand-over and `service.cgi` are for administrators**. `settings.cgi` with or without
 `?cmd=config` and every command of `service.cgi` want the box to name the session's role as `admin`, and only the
 box can: the state answer for the header's session has to say `"role": "admin"` as well, and a
 header it confirms decides — a `?sid=` next to it is not asked. Only where the box does not confirm
-the header is the id in `?sid=` asked about the same way; on an image from before openccu-lite's
-task 125 that is the session id itself. The legacy alias of a current image is refused by the box's
+the header is the id in `?sid=` asked about the same way; on an older openccu-lite image that is
+the session id itself. The legacy alias of a current image is refused by the box's
 API, and the `tclrega.so` shim knows the user name behind it and no role, so `?sid=@alias@` proves a
 session and never an administrator. The `hmm_token` cookie is one secret for everybody the hand-over
 let into the app and opens neither page there. A session that is not a confirmed administrator's
@@ -159,7 +158,7 @@ token cookie); what such a session gets in the app itself, opened from the box's
 decided there, not here. Without
 any session the answers stay as before. A CCU and OpenCCU are unchanged: any WebUI session.
 
-## The optional login (D-32)
+## The optional login
 
 `HMM_AUTH_MODE=rega` in `etc/hmm.env` puts a login page in front of the UI for everybody who does
 _not_ arrive through `settings.cgi` — a bookmark straight to `http://<ccu>/addons/hmm/`, a second
@@ -176,7 +175,7 @@ GET  /addons/hmm/api    Cookie: hmm_session=…  ->  101, exactly like the token
 GET  /addons/hmm/logout ends the session, clears the cookie
 ```
 
-- the two services are the CCU's own — no JSON-API (D-1), no second password, no user list of our
+- the two services are the CCU's own — no JSON-API, no second password, no user list of our
   own. Both are loopback-only, so `--auth-mode rega` is refused with a clear message unless the
   host runs with `--local`, which is what the rc.d script does and no npm or Docker install does;
 - **`settings.cgi` is untouched**: a browser with the token cookie is let in without ever seeing
@@ -203,15 +202,14 @@ echo 'HMM_AUTH_MODE=rega' >> /usr/local/addons/hmm/etc/hmm.env
 
 The settings page takes a WebUI `sid` or the addon's own token cookie — both are proof of the same
 ReGaHSS session check — so the link works from Systemsteuerung and from a browser that has the app
-open. On openccu-lite it takes the gate's `X-Occulite-Session` first (task 50, above), so the box
-frames it without `?sid=`, and it is for administrators only there (B-37, above): the token cookie
+open. On openccu-lite it takes the gate's `X-Occulite-Session` first (above), so the box
+frames it without `?sid=`, and it is for administrators only there (above): the token cookie
 does not open it on openccu-lite.
 
 `HMM_AUTH_MODE` is the CCU's setting. On openccu-lite the rc.d script reads `HMM_AUTH_MODE_LITE`
 instead (`occulite`, the box's own login, unless it says `token`) and never `HMM_AUTH_MODE`: every
 install from the CCU days has `HMM_AUTH_MODE=token` in its `hmm.env`, and a `/usr/local` upgraded to
-openccu-lite with that line kept the addon in token mode, where the box's shell can never get in
-(B-22). Each firmware has its own line, each is ignored on the other, so the same `/usr/local` can
+openccu-lite with that line kept the addon in token mode, where the box's shell can never get in. Each firmware has its own line, each is ignored on the other, so the same `/usr/local` can
 move between them; the settings page writes the line of the firmware it runs on. A lite line that is
 neither `token` nor `occulite` runs `occulite`, and the syslog says so.
 
@@ -249,7 +247,7 @@ until an F5 (#141). An update whose rule is unchanged does not touch lighttpd at
 init script has no `reload`, the restart is detached and delayed until the answer is out. The
 uninstall removes the file and reloads the same way.
 
-**On openccu-lite the addon does not write that directory** (task 69). There lighttpd reads only
+**On openccu-lite the addon does not write that directory**. There lighttpd reads only
 the system's own copy of `etc/lighttpd.conf`: it checks the rule against the directives a
 frontend may use, writes the copy with a header line of its own, and does so again at every start
 and reload of lighttpd and after every install; when the addon is uninstalled and its
@@ -313,7 +311,7 @@ overwritten again:
 HMM_PORT=8090        # loopback only; change hmm.conf with it, or re-run update_script
 HMM_LOG_LEVEL=info   # error, warn, info, debug
 HMM_ADDON_LOG=varlog # varlog (/var/log/hmm.log, default) or addon (var/hmm.log) - see "Troubleshooting"
-HMM_AUTH_MODE=token  # on a CCU: token (default) or rega - see "The optional login (D-32)"
+HMM_AUTH_MODE=token  # on a CCU: token (default) or rega - see "The optional login"
 HMM_AUTH_MODE_LITE=occulite  # on openccu-lite: occulite (default) or token - not read on a CCU, and vice versa
 HMM_SESSION_TTL=24h  # with rega or occulite: how long a login lasts without being used
 HMM_CALLBACK_XMLRPC_DEFAULT_PORT=2031  # the callback ports while the settings say 0, see "Callback ports"
@@ -331,8 +329,8 @@ but the definition of "we are the addon".
 
 The interface processes call the backend back on two ports, one for XML-RPC (`hmipserver`, the group
 process behind `VirtualDevices`) and one for BIN-RPC (`rfd`, `hs485d`). In the addon they are **fixed by
-default: 2031 for XML-RPC, 2032 for BIN-RPC** (D-43, #144). The Docker image fixes the same pair since
-3.0.0-beta.16 (task 38; 2126/2127 before); the desktop app and npm keep the free port the kernel picks.
+default: 2031 for XML-RPC, 2032 for BIN-RPC** (#144). The Docker image fixes the same pair since
+3.0.0-beta.16 (2126/2127 before); the desktop app and npm keep the free port the kernel picks.
 
 Why fixed: the group process behind `VirtualDevices` keeps its handlers by URL and does not drop the
 entry of a backend that ended without `init(url, '')` — a `kill -9` after the 15 s of `rc.d/hmm stop`,
@@ -388,8 +386,8 @@ backend de-registers from `rfd`, `hmipserver` and the rest with `init('')` and s
 service messages; the next page load subscribes again and the header shows "subscribing" until the
 first device sweep is through. Up to 3.2.2 that was the default, with five minutes; it is off since
 3.2.3, because `hmipserver` handles every `init` on its single event loop and a page load after the
-idle time blocked it for seconds on a CCU3 (D-31, B-95). The time also runs from the start when no
-page is opened after it (B-70). It is a setting in two places: the app's settings dialog
+idle time blocked it for seconds on a CCU3. The time also runs from the start when no
+page is opened after it. It is a setting in two places: the app's settings dialog
 (*Unsubscribe when idle*, saved in the profile) and the addon's settings page, which writes
 `HMM_IDLE_UNSUBSCRIBE` into `etc/hmm.env` (15 minutes to 4 hours, or `0` for never) and restarts
 the service; a line there wins over the dialog, which then shows it read-only. Caches, names and
@@ -397,8 +395,7 @@ the service; a line there wins over the dialog, which then shows it read-only. C
 
 ## Memory
 
-Since 3.0.0-beta.17 `rc.d/hmm` starts node with `--max-semi-space-size=1 --optimize-for-size` (B-32,
-task 44): a young generation of 1 MB instead of V8's default, which grows with a page and is never given
+Since 3.0.0-beta.17 `rc.d/hmm` starts node with `--max-semi-space-size=1 --optimize-for-size`: a young generation of 1 MB instead of V8's default, which grows with a page and is never given
 back, and V8's heuristics for a small heap. The backend allocates little, so the more frequent
 collections cost next to nothing. `HMM_NODE_FLAGS=` in `etc/hmm.env` starts node without flags, and
 any other value replaces the default.
@@ -437,7 +434,7 @@ takes to load there.
 | The button opens a page saying the session is invalid | The WebUI session expired. Reload the WebUI and open the addon again. |
 | The button opens a 503 page | The service is not running: `service.cgi?…&cmd=log`, or `/var/log/hmm.log` (`/usr/local/addons/hmm/var/hmm.log` with `HMM_ADDON_LOG=addon`); on openccu-lite the box's Log page with unit `addon-hmm`, or `journalctl -t addon-hmm`. Start it with the _Neu starten_ button. |
 | The UI loads but stays disconnected | The WebSocket did not get through. `grep hmm /var/log/messages`, and check that `/usr/local/etc/config/lighttpd/hmm.conf` exists, carries the port of `etc/hmm.env`, and lighttpd has read it (`/etc/init.d/S50lighttpd reload`). CCU3 firmware older than 3.61.5 does not read that directory at all. On openccu-lite a `hmm.conf.rejected` beside it says why the system refused the rule. |
-| No devices, interfaces marked red | The interface processes answer on the CCU's loopback only (D-28). `netstat -tlnp` should show 32001 / 32010; a CCU in safe mode or with `HM_MODE` other than `NORMAL` starts neither them nor addons. |
+| No devices, interfaces marked red | The interface processes answer on the CCU's loopback only. `netstat -tlnp` should show 32001 / 32010; a CCU in safe mode or with `HM_MODE` other than `NORMAL` starts neither them nor addons. |
 | Device pictures are missing | They come from the CCU's own `/config/img/devices/`; the app falls back to the pictures that ship in `app/data/icons/`. |
 | `BidCos-Wired ... init failed` every 15 seconds in the log | `hs485d` only runs on a CCU that has a BidCos-Wired gateway. Untick BidCos-Wired in the app's settings dialog and the retries stop. |
 | The QR scanner says the camera needs https | `getUserMedia` exists only in a secure context, and the addon is reached as `http://<ccu>/addons/hmm/`. Open the same page over the CCU's https port (`https://<ccu>/addons/hmm/`, accepting the certificate warning) and the scanner works; otherwise type the SGTIN and the key in by hand. |
@@ -447,7 +444,7 @@ takes to load there.
 Log lines are tagged `hmm` in `/var/log/messages`; the process's own output is
 `/var/log/hmm.log` by default, rotated at 1 MB.
 
-On a CCU and OpenCCU the location is a setting (task 43, #159): the _Log_ section of the addon's
+On a CCU and OpenCCU the location is a setting (#159): the _Log_ section of the addon's
 settings page (`settings.cgi?cmd=config`), or `HMM_ADDON_LOG` in `etc/hmm.env`.
 
 | `HMM_ADDON_LOG`             | File                                | Trade-off                                                            |
@@ -465,7 +462,7 @@ settings page (`settings.cgi?cmd=config`), or `HMM_ADDON_LOG` in `etc/hmm.env`.
   the other one when only that one exists.
 - **An uninstall** removes `/var/log/hmm.log` too.
 
-On openccu-lite there is no log file (task 41, following openccu-lite's rule that everything logs to
+On openccu-lite there is no log file (following openccu-lite's rule that everything logs to
 the journal): the process's output goes to the journal under the unit's identifier `addon-hmm`. The
 box's Log page shows it with the unit `addon-hmm` chosen, `journalctl -t addon-hmm` on the box, and
 `service.cgi?…&cmd=log` sends the browser to that Log page. A `var/hmm.log` from an earlier version is
@@ -500,14 +497,14 @@ npm run test:container -w apps/ccu-addon -- --idle                   # needs doc
 - **cgi-test.sh** runs every CGI against a Tcl stub for `tclrega.so`: the cookie and its attributes,
   a valid, an expired, a malformed and a percent-encoded session id, a query string that tries to
   make the decoder execute commands, the service commands, and a grep for Tcl constructs newer than
-  8.2 (the CCU3 firmware's interpreter) and for paths outside `/usr/local`. Since task 50 it also
+  8.2 (the CCU3 firmware's interpreter) and for paths outside `/usr/local`. It also
   runs `occulite-state-stub.tcl`, a stub `/api/auth/v1/state` with a request log, and drives the
   openccu-lite session header through `settings.cgi` and `service.cgi`: the hand-over and the
   settings page with the header alone, a header the box does not confirm, an answer without a `sid`,
   one naming another session, a 500, garbage, a box that cannot be asked (all refused after one
   call), an `@`-wrapped, line-broken, doubled, colon-carrying, token-shaped, over-long and empty
   header (refused with no call), the fall-through to `?sid=` and to the token cookie, and a CCU
-  and a firmware without `/VERSION` ignoring the header with no call. Since B-37 the stub answers
+  and a firmware without `/VERSION` ignoring the header with no call. The stub answers
   both roles, and on a lite tree an administrator's session opens the settings page and
   `service.cgi` while a user's gets the 403 through each way in - the header (also with an
   administrator's id in `?sid=` next to it), `?sid=` with a user's session id or with an alias the
@@ -525,17 +522,17 @@ npm run test:container -w apps/ccu-addon -- --idle                   # needs doc
   install (exit 10), the links, the token's mode, the session check over HTTP with a right and a
   wrong sid, the UI and the metadata through the proxy rule, the CGIs *not* being proxied, the
   WebSocket upgrade, a socket left idle past lighttpd's 60 second timeout, an update (exit 0, the
-  profile and the token kept), uninstall, reinstall and purge. Since task 18 it also switches the
+  profile and the token kept), uninstall, reinstall and purge. It also switches the
   installed addon to `HMM_AUTH_MODE=rega` against `ccu-auth-stub.mjs` — a stub ReGa on 8183 and a
   stub authentication daemon on udp 1998, run by the *bundled* node — and drives the whole login
   through lighttpd: the login page instead of the UI, a 401 for the metadata, a wrong password, an
   unknown user, the right credentials (whose password contains a colon and a backslash, so the
   datagram escaping is exercised), the cookie's attributes, the WebSocket and `session.info` on it,
   the `settings.cgi` hand-over still bypassing the login, the settings page, logout, the rate limit,
-  and the way back to `token`. Since task 43 it also follows the log: `/var/log/hmm.log` after the
+  and the way back to `token`. It also follows the log: `/var/log/hmm.log` after the
   install, the settings page's switch to the addon directory and back with `service.cgi`'s log view
   following, the 1 MB rotation of both files, the fallback when `/var/log/hmm.log` cannot be written,
-  and the file going with an uninstall. Since task 50 the openccu-lite part also proxies
+  and the file going with an uninstall. The openccu-lite part also proxies
   `/api/auth/` to the stub box and opens the hand-over, the settings page and `service.cgi` through
   lighttpd with only `X-Occulite-Session` (the CGI's real state URL), refuses an unconfirmed and an
   `@`-wrapped header, falls through to `?sid=`, and shows a CCU ignoring a client-sent header.
@@ -546,10 +543,10 @@ and otherwise inside the `hmm-addon-test` image, built from `test/Dockerfile` on
 checkout mounted at its own path and the script running as the calling user
 (`HMM_TEST_IN=host|image` forces the place). Called directly, `cgi-test.sh` fails without shellcheck
 instead of skipping it; `SKIP_SHELLCHECK=1` turns that back into a skip for a machine with neither
-shellcheck nor Docker (B-50).
+shellcheck nor Docker.
 
 `.github/workflows/addon.yml` runs all of it for the three architectures on every push,
-`release-addon.yml` for a `v*` tag (D-24: no `needs:` on any other workflow).
+`release-addon.yml` for a `v*` tag (no `needs:` on any other workflow).
 
 Beyond that there is only hardware. All three packages were installed on real boxes for 3.0.0-dev.0
 — CCU3 firmware 3.89.8 on armv7l (the reboot install, Tcl 8.2.3, lighttpd 1.4.50), OpenCCU 3.89.8 on
@@ -559,9 +556,9 @@ WebSocket upgrade and an ApiFrame round trip, a socket left idle for ten minutes
 restart, and the device list filling from `rfd` and `HmIPServer` on the loopback. The lookahead in
 the proxy rule works on lighttpd 1.4.50 (CCU3 firmware) and 1.4.82 (OpenCCU) alike.
 
-### The optional login on hardware (D-32, task 18) — **checked 2026-09-05**
+### The optional login on hardware — **checked 2026-09-05**
 
-All eight steps below were run in task 17's hardware pass on the OpenCCU x86_64 box against the
+All eight steps below were run in a hardware pass on the OpenCCU x86_64 box against the
 real ReGaHSS and the real authentication daemon on UDP 1998, and the settings page plus one login
 round on the CCU3-firmware box (Tcl 8.2.3). Everything passed, ReGa reports **level 8** for the
 lab's admin user, and both boxes were left in `token` mode. The results are in
@@ -569,7 +566,7 @@ lab's admin user, and both boxes were left in `token` mode. The results are in
 user at a *lower* ReGa level. The recipe stays here because it is how the check is repeated:
 
 ```sh
-# the log is /var/log/hmm.log since task 43; with HMM_ADDON_LOG=addon it is /usr/local/addons/hmm/var/hmm.log
+# the log is /var/log/hmm.log; with HMM_ADDON_LOG=addon it is /usr/local/addons/hmm/var/hmm.log
 # 1. switch the addon over and restart it
 ssh root@<box> "echo 'HMM_AUTH_MODE=rega' >> /usr/local/addons/hmm/etc/hmm.env; \
     /usr/local/etc/config/rc.d/hmm restart; sleep 3; grep -c 'login:' /var/log/hmm.log"

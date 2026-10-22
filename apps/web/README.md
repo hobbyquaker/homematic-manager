@@ -7,13 +7,13 @@ It has three jobs, and they are the same program:
 
 - **development** - `npm run dev` puts a vite dev server behind this host, so the UI hot-reloads
   against a real backend and a real CCU or hm-simulator;
-- **the e2e target** of task 14 - `startForTest()` starts the whole stack on a free port with a
+- **the e2e target** - `startForTest()` starts the whole stack on a free port with a
   temporary profile directory, optionally against hm-simulator, and Playwright drives a browser
   against it in a fraction of the time an Electron run takes;
-- **the third deliverable** (D-24) - published to npm as `homematic-manager` (D-33: the name the
+- **the third deliverable** - published to npm as `homematic-manager` (the name the
   2.x desktop app had there), so `npm install -g` gives a Homematic Manager server on a Raspberry Pi
-  next to the CCU, on a NAS or in a container; and the exact same process is what the CCU addon of
-  task 13 runs behind the CCU's lighttpd.
+  next to the CCU, on a NAS or in a container; and the exact same process is what the CCU addon
+  runs behind the CCU's lighttpd.
 
 The directory is `apps/web` and the package is `homematic-manager`, which is also the name of the
 workspace root - so address this package by path, `-w apps/web`, in anything that has to keep
@@ -46,7 +46,7 @@ Every option is also an environment variable with the `HMM_` prefix (`--data-dir
 `HMM_DATA_DIR`, `--no-auth` is `HMM_AUTH=false`); the command line wins over the environment. There
 is no configuration file - what this host needs is a port and a few paths, and everything about the
 CCU lives in the backend's `config.json`. `--config-schema` prints the whole option set as JSON
-Schema, which is what a configuration UI (and task 13's `settings.cgi`) should read instead of
+Schema, which is what a configuration UI (and the addon's `settings.cgi`) should read instead of
 hard-coding it.
 
 | option | default | what it does |
@@ -56,7 +56,7 @@ hard-coding it.
 | `--base` | `/` | URL prefix everything is served under, e.g. `/addons/hmm/` |
 | `--data-dir`, `--profile` | `~/.config/homematic-manager` | profile directory: `config.json` and the caches |
 | `--ui-dir` | `packages/ui/dist`, or `ui/` next to the host | the built UI |
-| `--metadata-dir` | `data/dist`, or `data/` next to the host | generated device metadata (task 9) |
+| `--metadata-dir` | `data/dist`, or `data/` next to the host | generated device metadata |
 | `--ui-dev-server` | - | proxy everything but the API to a vite dev server |
 | `--token` | random | the token clients have to present |
 | `--auth` / `--no-auth` | on | require a token on the API socket |
@@ -75,9 +75,9 @@ hard-coding it.
 `SIGINT` and `SIGTERM` stop the host and run `backend.stop()` - the de-registration the CCU's
 interface processes want - with a five second bound, so a `systemctl restart` cannot hang.
 
-## Idle unsubscribe (D-31)
+## Idle unsubscribe
 
-Off by default since 3.2.3 (B-95). With an idle time set and no page open for that long, the
+Off by default since 3.2.3. With an idle time set and no page open for that long, the
 backend sends `init(url, '')` to every interface and
 stops its service-message poll: an interface process should not push events at a browser tab that
 does not exist, and on the CCU those events cost the CCU's own CPU. Nothing else is torn down - the
@@ -86,7 +86,7 @@ subscribes again with one `init` per interface. That page sees the interfaces ma
 until their first `listDevices` sweep is through, because `hmipserver` re-sends every device on
 `init` (occu#45).
 
-The time also runs from the start when no page is opened after it (B-70). The settings dialog
+The time also runs from the start when no page is opened after it. The settings dialog
 offers it (*Unsubscribe when idle*: the default, 15 minutes to 4 hours, or never), saved in the
 profile. `--idle-unsubscribe <duration>` / `HMM_IDLE_UNSUBSCRIBE` sets it at start instead (`5m`,
 `300s`, `90`, `0` for never) and then wins over the dialog, which shows it read-only. Up to 3.2.2 it
@@ -107,17 +107,17 @@ does. If that matters - watching a duty cycle overnight, say - set `0`.
 | `<base>data/...` | `data/dist` as plain files: metadata, profiles, translations, icons |
 | `<base>...` | the built UI |
 
-**Device images** (D-10) are the backend's `DeviceImageService` (`packages/backend/src/images/`),
-which every host shares since task 15; this one wraps it in an HTTP route, the Electron host in an
+**Device images** are the backend's `DeviceImageService` (`packages/backend/src/images/`),
+which every host shares; this one wraps it in an HTTP route, the Electron host in an
 `hmm-image://` protocol handler. They resolve memory → disk → CCU → bundled → 404. `data/dist/device-icons.json`
 maps the (upper-cased) device type to a file name; the CCU serves it as
 `/config/img/devices/250/<file>` (or `250/coupling/<file>`, or as `50/<base>_thumb<ext>` - the `50`
 directory holds the WebUI's list thumbnails and suffixes every name, which is why the single
-`50/<file>` this asked for until task 13 measured it on hardware found nothing at all: 0 of 278
+`50/<file>` this asked for until a measurement on hardware found nothing at all: 0 of 278
 mapped files, against 278 of 278 for the four candidates now tried in turn). What comes back is
 cached under `<data-dir>/images/`. When
 there is no CCU - Homegear, a bare rfd, or one that is simply off - the webp subset that ships in
-`data/dist/icons/` answers instead, so the app is never without pictures (D-2). The response says
+`data/dist/icons/` answers instead, so the app is never without pictures. The response says
 which of the four it was in `X-Hmm-Image-Source`. Known limitation: with `tls` the CCU's
 certificate is self-signed and `fetch` cannot be told to accept it, so such a request falls through
 to the bundled picture; the addon talks plain HTTP to `127.0.0.1` and is unaffected.
@@ -161,7 +161,7 @@ Who may be *handed* a cookie is the part that matters:
   machine boundary is the only thing between a caller and the socket anyway, and development and
   the Playwright suites need the browser to just work.
 - On any other bind - and behind the CCU's lighttpd - the cookie has to come from something that
-  checked who is asking. Task 13's `settings.cgi` does the `tclrega.so` session check and sets the
+  checked who is asking. The addon's `settings.cgi` does the `tclrega.so` session check and sets the
   same cookie (`hmm_token`, `Path=/addons/hmm/`, `HttpOnly`, `SameSite=Strict`, `Secure`); this
   process then only *accepts* it and never issues one. Start it with `--no-issue-cookie`.
 - `?token=` keeps working for everything that is not a browser: `curl`, the e2e helper, and a CGI
@@ -172,7 +172,7 @@ There is **no Origin check**, deliberately: a reverse proxy forwards the browser
 own `Host`, and the token - not the origin - is what guards this socket. The cookie is
 `SameSite=Strict`, so a foreign page cannot make the browser send it.
 
-## Behind a reverse proxy (task 13)
+## Behind a reverse proxy
 
 `--base /addons/hmm` serves the UI, the images, the metadata *and* the API socket under that
 prefix; `/addons/hmm` without the trailing slash redirects to `/addons/hmm/`, and anything outside
@@ -230,7 +230,7 @@ nobody to talk to.
 `--demo` is the opposite: the UI on its fixture and no backend at all, for a bug report or a look
 at the app without a CCU.
 
-## For the e2e suites (task 14)
+## For the e2e suites
 
 ```ts
 import {startForTest, simulatorAvailable} from 'homematic-manager';
@@ -242,7 +242,7 @@ await host.close();        // backend, simulator and the temporary profile direc
 
 Port `0`, a temporary profile directory, and `simulator: true` starts an in-process hm-simulator
 with two devices and points the backend at it in `local` mode - which is the only way to reach the
-simulator's rfd, because BIN-RPC exists on a CCU's loopback only (D-28). hm-simulator is not
+simulator's rfd, because BIN-RPC exists on a CCU's loopback only. hm-simulator is not
 published yet, so it is imported lazily; `await simulatorAvailable()` is what a suite gates itself
 on, the same `describe.skipIf` arrangement `packages/backend/test/simulator` uses.
 
@@ -266,7 +266,7 @@ compressed:
   as dependencies of this package, so npm installs them normally. A fresh install pulls six
   packages in total.
 
-`npm run sbom` writes a CycloneDX 1.6 document next to the tarball (D-27). It is taken from the
+`npm run sbom` writes a CycloneDX 1.6 document next to the tarball. It is taken from the
 tree the tarball really installs - the tarball is unpacked into a temporary directory first - so
 the bundled workspace packages are in it, which a plain `cyclonedx-npm` run against the repository
 would never show. `release-npm.yml` publishes with npm trusted publishing (OIDC, no token secret)
@@ -285,4 +285,4 @@ token on the upgrade in all three forms, an `ApiFrame` round trip over a real We
 real `Backend`, the image proxy against a fake CCU, the base path behind a real reverse proxy in
 the test, the dev-server proxy including its upgrade, the CLI and its environment variables, the
 systemd installer against a fake root with a stubbed `systemctl`, and the graceful shutdown.
-Coverage is reported, never enforced (D-12).
+Coverage is reported, never enforced.

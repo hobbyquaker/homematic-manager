@@ -4,7 +4,7 @@ Entwurf für den Beitrag im [Homematic-Forum](https://homematic-forum.de/forum/v
 Unterforum _Software / Sonstige_ bzw. als Antwort im bestehenden Thread zum Homematic Manager.
 
 **Vor dem Posten anzupassen:** die Versionsnummer (`3.0.0-beta.N`), der Link auf das Release und die
-Zeile zum Docker-Cookie (OQ-15 ist entschieden, D-41: der Standard bleibt, der Host warnt beim Start). Der npm-Paketname steht fest (D-33):
+Zeile zum Docker-Cookie (entschieden: der Standard bleibt, der Host warnt beim Start). Der npm-Paketname steht fest:
 `homematic-manager`. Alles darunter ist der Text, so wie er gepostet werden kann.
 
 ---

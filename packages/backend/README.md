@@ -6,8 +6,8 @@ UDP discovery, the paced write queue, and one transport-agnostic API.
 
 It implements the contract in `packages/core/src/api/types.ts` - every method of `ApiMethods`, every
 event of `ApiEvents`, every rejection an `ApiError` - and nothing above it ever sees a socket, a file
-or an RPC library. Electron main (task 11) hosts it in-process, `apps/web` (task 12) serves it over
-a WebSocket, and the CCU addon (task 13) runs the same process on the CCU.
+or an RPC library. Electron main hosts it in-process, `apps/web` serves it over
+a WebSocket, and the CCU addon runs the same process on the CCU.
 
 ## Architecture
 
@@ -34,8 +34,8 @@ a WebSocket, and the CCU addon (task 13) runs the same process on the CCU.
 | `api/transport.ts` | `InProcessTransport`: the `Transport` without a wire (Electron main, tests) |
 | `transport/codec.ts` | `ApiFrame` as JSON, strict about what it accepts |
 | `transport/wsServer.ts` | `ApiWebSocketServer`: the contract over `ws`, with token auth |
-| `config/defaults.ts` | defaults, normalisation, validation, interface resolution (D-13) |
-| `config/legacyImport.ts` | the one-time import of the 2.x configuration (D-17) |
+| `config/defaults.ts` | defaults, normalisation, validation, interface resolution |
+| `config/legacyImport.ts` | the one-time import of the 2.x configuration |
 | `config/store.ts` | `config.json`, the profile directory, the per-host cache directory |
 | `config/linkTemplates.ts` | `link-templates.json`: the tuned link profiles of #21, in the profile directory |
 | `rpc/client.ts` | one promise-shaped RPC client per interface: timeout, faults, call log |
@@ -43,7 +43,7 @@ a WebSocket, and the CCU addon (task 13) runs the same process on the CCU.
 | `interfaces/manager.ts` | `init`, the ping watchdog, re-init, `init('')`, the background port probe |
 | `cache/devices.ts` | device descriptions per interface, and the core's `DeviceIndex` |
 | `cache/descriptions.ts` | paramset descriptions by `paramsetIdentity()` |
-| `cache/names.ts` | the local name store, with ReGa as an overlay (D-2) |
+| `cache/names.ts` | the local name store, with ReGa as an overlay |
 | `cache/unreach.ts` | how often each device went unreachable (#26), edge-counted and persisted |
 | `cache/store.ts` | all caches of one connection, and what of them is persisted |
 | `rega/client.ts` | names and renames through ReGa; every failure is a state, never an exception |
@@ -52,10 +52,10 @@ a WebSocket, and the CCU addon (task 13) runs the same process on the CCU.
 | `write/queue.ts` | one paced queue per interface, cancellable |
 | `write/log.ts` | the session write log and the 2.x `rpcLogFolder` dumps |
 | `write/paramset.ts` | the changed-only `putParamset`, multi-apply, link writes, `setValue` |
-| `write/repair.ts` | `devices.repairConfig`: the recovery task 6 measured, per channel |
+| `write/repair.ts` | `devices.repairConfig`: the measured recovery, per channel |
 | `devices/installMode.ts` | install mode in all its variants, incl. the HmIP key conversion |
 | `data/files.ts` | `data.file`: reads from injected roots and nothing else |
-| `images/deviceImages.ts` | device pictures (D-10): memory, disk, the CCU's four candidate URLs, the bundled webp subset |
+| `images/deviceImages.ts` | device pictures: memory, disk, the CCU's four candidate URLs, the bundled webp subset |
 | `util/*` | the typed event emitter, atomic and debounced JSON files, net helpers |
 | `errors.ts` | `ApiError` as a throwable, and the classification of anything thrown |
 
@@ -85,7 +85,7 @@ Three rules run through the whole class:
 - **nothing rejects except as `ApiError`.** A CCU that is off, a ReGa that wants a password, a cache
   file that cannot be written - each is a typed rejection or a `notice` event, never an exception in
   the host process.
-- **nothing invalid reaches an interface process.** Not as a courtesy: the lab study of task 6
+- **nothing invalid reaches an interface process.** Not as a courtesy: the lab study
   ([`docs/config-pending.md`](../../docs/config-pending.md)) found that hmipserver **stores what it
   rejects**, so one `putParamset` with a parameter the channel does not have leaves that channel
   unwritable for the life of the pairing, and that **neither** interface process checks
@@ -125,7 +125,7 @@ is not on the list.
 basic auth, the callbacks, `dropConnection()`, the caches, the ReGa mock, the write path, the
 `CONFIG_PENDING` modes and both transports.
 
-Since task 6 the simulator's `hmip` and `bidcos` modes are what the two interface processes of a
+The simulator's `hmip` and `bidcos` modes are what the two interface processes of a
 CCU on firmware 3.89.8 were **measured** to do, and the suites run against those by default: the
 wrong type that sticks in `CONFIG_PENDING`, the unknown parameter that makes a channel unwritable
 for good, and `devices.repairConfig` on both. `configPendingMode: 'strict'` in
@@ -164,7 +164,7 @@ queue because it changes the device.
 
 **HmIP is not covered.** An HmIP-SWSD is not teamed with `setTeam`; the CCU builds an HmIP smoke
 alarm group through its group process (the `VirtualDevices` interface on `/groups`), with calls that
-are not part of the 51-method catalogue this application speaks (D-1: XML-RPC/BIN-RPC to the
+are not part of the 51-method catalogue this application speaks (XML-RPC/BIN-RPC to the
 interface processes, no CCU JSON-API). Doing it would need a surface we deliberately do not use, so
 it is not done and not faked: on an HmIP channel the team entry stays disabled, because HmIP channels
 carry no `TEAM_TAG`.
@@ -192,7 +192,7 @@ this package does about it, and what it cannot:
   `homematic-xmlrpc`**.
 - **Requests are sent as UTF-8, always.** `homematic-xmlrpc` writes the body with `request.write(xml,
   'utf8')` and emits `<?xml version="1.0"?>` with no encoding declaration; `binrpc` writes `latin1`.
-  **Measured in the lab on 2026-09-05** (task 6, `docs/config-pending.md`), by writing
+  **Measured in the lab on 2026-09-05** (`docs/config-pending.md`), by writing
   `Tür Küche äöüß °C` into device metadata and reading the raw bytes back over both transports:
   rfd stores what XML-RPC sends, so the string lands on the CCU as **UTF-8 bytes in an ISO-8859-1
   world** and the WebUI shows mojibake. A value stored correctly comes back correctly through our
@@ -203,7 +203,7 @@ this package does about it, and what it cannot:
   `toString()`, i.e. UTF-8, so `0xFC` comes back as U+FFFD and the character is gone. Verified by
   running the round trip on the CCU itself, because **BIN-RPC is not reachable from outside a stock
   CCU at all**: port 2001 is lighttpd and speaks XML-RPC over HTTP only, and rfd's own port 32001 is
-  `local-only` in the CCU firewall. BIN-RPC is in practice an addon transport (task 13).
+  `local-only` in the CCU firewall. BIN-RPC is in practice an addon transport.
 
 ## Tests
 

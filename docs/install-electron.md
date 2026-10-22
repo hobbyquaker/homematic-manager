@@ -46,7 +46,7 @@ From the [latest release](https://github.com/hobbyquaker/homematic-manager/relea
 Up to 3.0.0-beta.18 the files were called `Homematic.Manager-…` (and the x64 AppImage had no arch in
 its name).
 
-Every installer has a CycloneDX 1.6 SBOM next to it (`<installer>.cdx.json`, D-27) that lists what
+Every installer has a CycloneDX 1.6 SBOM next to it (`<installer>.cdx.json`) that lists what
 is really inside — including Electron, its Chromium, Node and V8 as separate components, so a CVE
 feed can be searched for "chromium 152" rather than for "electron 44" — and both are signed as
 GitHub artifact attestations:
@@ -58,7 +58,7 @@ gh attestation verify Homematic-Manager-3.0.0-x86_64.AppImage --repo hobbyquaker
 ## Windows: the SmartScreen warning
 
 **The Windows builds are not code-signed yet.** Signing goes through
-[SignPath](https://signpath.io/) once their open-source project application is accepted (D-9); the
+[SignPath](https://signpath.io/) once their open-source project application is accepted; the
 step exists in both workflows, commented out, with the shape it will have.
 
 Until then Windows shows **"Windows protected your PC"** on the first run of the installer and of
@@ -73,9 +73,9 @@ That is the whole workaround, and it is needed once per downloaded file. Check t
 ## macOS: signing and notarisation
 
 The release and build workflows sign and notarise **when the Apple secrets are present**
-(`APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID` and the certificate secrets). D-9 says a
+(`APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID` and the certificate secrets). A
 Developer ID is the plan. Without those secrets the build still succeeds and produces artifacts
-that are signed **ad hoc** only (no Developer ID, not notarised; B-91: up to 3.1.3 they
+that are signed **ad hoc** only (no Developer ID, not notarised; up to 3.1.3 they
 were not signed at all) — which is also what a fork gets.
 
 An unsigned build is opened **once** with right-click → **Open** (_Öffnen_) and confirming the
@@ -103,7 +103,7 @@ and the old 2.7. The app then adds a hint naming the setting. To give the permis
 
 Up to 3.1.3 macOS often did not ask at all: the app had no usage description, and its executable
 had the same build UUID as every other app on the same Electron version, which macOS uses to find
-the app's permission (B-91, #169). The releases after 3.1.3 have both. As long as the builds are signed ad
+the app's permission (#169). The releases after 3.1.3 have both. As long as the builds are signed ad
 hoc rather than with a Developer ID, macOS may treat an update as a new app and ask again.
 
 ## Linux
@@ -137,7 +137,7 @@ Everything is under Electron's `userData` directory for the product name **Homem
 | --- | --- |
 | `config.json` | the profile: the CCU connection and nothing else — the same format every install type uses |
 | `cache/<host>/*.json` | device descriptions, paramset descriptions, names, write log, one directory per CCU |
-| `images/` | device pictures fetched from the CCU (D-10) |
+| `images/` | device pictures fetched from the CCU |
 | `logs/main.log` | unhandled errors of the main process, one generation rotated as `.log.1` |
 | `window-state.json` | size, position and maximised state of the window |
 | `host.json` | host settings; today only `disableAutoUpdate` |
@@ -152,7 +152,7 @@ Coming from 2.x, the configuration is imported once on the very first start — 
 [migration-from-2.x.md](migration-from-2.x.md). Moving the profile to a server install or to the CCU
 addon is [moving-between-installs.md](moving-between-installs.md).
 
-## Updates (D-16)
+## Updates
 
 `electron-updater` against the GitHub releases of this repository. The app checks ten seconds after
 it has settled, and then every six hours; when a newer version exists, a bar under the header says so
@@ -190,7 +190,7 @@ running app an update it cannot download.
 
 ## The CCU's firewall
 
-The desktop app talks XML-RPC to the CCU (D-28: BIN-RPC exists on a CCU's loopback only) and the
+The desktop app talks XML-RPC to the CCU (BIN-RPC exists on a CCU's loopback only) and the
 interface processes push their events **back** to the app, so both directions have to work.
 
 In the CCU's WebUI, `Settings → Control panel → Security → Firewall`:
@@ -198,7 +198,7 @@ In the CCU's WebUI, `Settings → Control panel → Security → Firewall`:
 - **XML-RPC API**: `Restricted access` with this machine's address in the list, or `Full access` on
   a trusted LAN. Without it the interface processes refuse the connection.
 - **Remote Homematic-Script API**: the same, *if* ReGa should supply the friendly names. ReGa is
-  optional (D-2) — without it the app works fully and uses locally stored names, with a status
+  optional — without it the app works fully and uses locally stored names, with a status
   indicator saying so.
 
 The event direction needs nothing opened on the CCU: the CCU connects *out* to the app. What it does
@@ -241,9 +241,9 @@ same warning.
 | macOS: `EHOSTUNREACH` for every interface, or the connection test times out | The Local Network permission. **System Settings → Privacy & Security → Local Network**, switch Homematic Manager on, quit with ⌘Q and start again. See [above](#macos-the-local-network-permission). |
 | The app starts but no device list appears | The CCU's XML-RPC API firewall setting, or the wrong address. The settings dialog has a discovery button (UDP broadcast) that finds CCUs on the same subnet. |
 | Interfaces show as connected, but nothing ever updates | The callback. The CCU could reach the app but not the other way round: check the local firewall, and the callback address in the settings dialog - *Automatic* names the address it uses; a ⚠ beside the interface picker means a chosen address does not fit (see [above](#which-address-the-ccu-calls-back-to)). |
-| Names are missing, a ReGa indicator is red | ReGa is optional (D-2): the app carries on with local names. Enable "Remote Homematic-Script API" in the CCU's firewall to get the CCU's names back. |
+| Names are missing, a ReGa indicator is red | ReGa is optional: the app carries on with local names. Enable "Remote Homematic-Script API" in the CCU's firewall to get the CCU's names back. |
 | `BidCos-Wired` shows as "not present" | `hs485d` runs only on a CCU that has a wired gateway. The app waits for it for the first 90 seconds (shown as "waiting", tried every 3 seconds), then says once that it is not there and only checks its port every 15 seconds. Untick BidCos-Wired in the settings dialog to hide it. |
-| Device pictures are missing | They are fetched from the CCU (D-10). Without a reachable CCU a small bundled set answers instead; with TLS the CCU's self-signed certificate cannot be accepted by the fetch, so the bundled picture is used. |
+| Device pictures are missing | They are fetched from the CCU. Without a reachable CCU a small bundled set answers instead; with TLS the CCU's self-signed certificate cannot be accepted by the fetch, so the bundled picture is used. |
 | Something crashed | `logs/main.log` in the profile directory above; the Help menu opens the folder. |
 
 ## See also

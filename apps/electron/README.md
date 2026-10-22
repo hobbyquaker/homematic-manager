@@ -44,7 +44,7 @@ It cannot cover `src/renderer`, which imports `.svelte` modules; `svelte-check` 
 | --- | --- |
 | `config.json` | the backend's `AppConfig`: the CCU connection and nothing else |
 | `cache/<host>/*.json` | device descriptions, paramset descriptions, names, write log, per CCU |
-| `images/` | device pictures fetched from the CCU (D-10) |
+| `images/` | device pictures fetched from the CCU |
 | `logs/main.log` | unhandled errors of the main process, one generation rotated as `.log.1` |
 | `window-state.json` | size, position and maximised state of the window |
 | `host.json` | host settings; today only `disableAutoUpdate` |
@@ -53,9 +53,9 @@ Delete `cache/` to force a full re-read from the CCU; delete `config.json` to st
 outside this directory is written but electron-updater's download folder `homematic-manager-updater` in
 the user's cache directory (`%LOCALAPPDATA%`, `~/Library/Caches`, `~/.cache`), where the Windows
 installer also keeps a copy of itself - which is why the Windows installer is per-user and needs no
-administrator. The folder is named by `extraMetadata.name` in `electron-builder.yml` (B-49).
+administrator. The folder is named by `extraMetadata.name` in `electron-builder.yml`.
 
-## The 2.x configuration is imported once (D-17)
+## The 2.x configuration is imported once
 
 On the very first start - when there is no `config.json` yet - the backend looks for the
 configuration of Homematic Manager 2.x and takes the CCU address, TLS, authentication, language,
@@ -80,15 +80,15 @@ fresh read from the CCU takes seconds. The import happens once and says so with 
 - **Unhandled errors are always logged**, not only when `showUnhandled` was set in the
   configuration - and the dialog appears once, not once per error.
 - **Dark mode** follows the OS by default with a manual switch, and the switch is pushed to
-  `nativeTheme` so that the title bar, the menus and the native dialogs follow the page (D-22).
+  `nativeTheme` so that the title bar, the menus and the native dialogs follow the page.
 
-## Device images (D-10)
+## Device images
 
 The pictures in the device grid come from the CCU's own web server and are cached under
 `userData/images`. A small webp subset ships inside the app for people running Homegear or a bare
 rfd, who have no CCU to ask.
 
-**Where they really are, measured on hardware in task 13**: the plain file names of
+**Where they really are, measured on hardware**: the plain file names of
 `device-icons.json` live in `/config/img/devices/250/` (and `250/coupling/` for ten of them); the
 `50/` directory holds the WebUI's list thumbnails, whose names carry a `_thumb` suffix. On both lab
 firmwares the four candidates `250/<file>`, `250/coupling/<file>`, `50/<base>_thumb<ext>` and
@@ -109,13 +109,13 @@ the five `update.*` commands; its shape is `HostBridge` in `src/shared/ipc.ts`. 
 such host, so everything the UI uses from it degrades when the global is absent - a labelled
 placeholder instead of a picture, the version without the host information in the About dialog.
 
-## Updates (D-16)
+## Updates
 
 `electron-updater` against the GitHub releases of this repository. What it does:
 
 1. checks ten seconds after the app settled, and then every six hours;
 2. when a newer version is there, it says so - and downloads nothing;
-3. then it depends on the platform (task 53, #163; `updateInstall()` in `src/main/updater.ts`):
+3. then it depends on the platform (#163; `updateInstall()` in `src/main/updater.ts`):
    - **AppImage** (the only in-app install): the user asks for the download and watches the
      progress, then confirms **install on quit**, and the AppImage replaces itself the next time the
      app is quit - by the user, never by the app;
@@ -163,7 +163,7 @@ cache for this platform.
 | Windows 10+ | nsis, portable, x64 + arm64 | `Homematic-Manager-Setup-<version>.exe` (both archs), `Homematic-Manager-<version>-portable-<arch>.exe` and `...-portable.exe` (both archs) |
 | Linux glibc 2.31+ | AppImage, deb, x64 + arm64 | `Homematic-Manager-<version>-<arch>.AppImage` (`x86_64`, `arm64`), `homematic-manager_<version>_<arch>.deb` |
 
-**No space in any of these names** (B-47, #163). electron-updater downloads the file a
+**No space in any of these names** (#163). electron-updater downloads the file a
 `latest*.yml` names, and electron-builder writes a name with a space into it with a dash while the
 file keeps the space - and the release upload makes a dot of it. Up to 3.0.0-beta.18 that was every
 name but the deb's, and no in-app download worked. `npm run check:update-names` checks the
@@ -175,10 +175,10 @@ the macOS universal build needs a macOS runner. Windows installers are built on 
 
 **armv7l is gone.** Issues #115 and #139 asked for 32-bit ARM Linux builds and the roadmap still
 lists them, but Electron 44 publishes `linux-x64` and `linux-arm64` only - there is no armv7l
-binary to package. A 32-bit ARM machine can run the CCU addon (task 13) or the npm package
-(`apps/web`, D-24) instead; both are plain Node.
+binary to package. A 32-bit ARM machine can run the CCU addon or the npm package
+(`apps/web`) instead; both are plain Node.
 
-## SBOMs (D-27)
+## SBOMs
 
 Every installer gets a CycloneDX 1.6 SBOM next to it, `<installer>.cdx.json`:
 
@@ -214,13 +214,13 @@ The attestation uses `sbom.cdx.json`, a copy without the per-installer `metadata
 action takes many subjects but one SBOM file, and attaching one that names a *different* installer
 to every artefact would be a false statement.
 
-## Signing (D-9)
+## Signing
 
 - **macOS**: the release and build workflows sign and notarise when `APPLE_ID`,
   `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID` and the certificate secrets are all present.
   Without them the build still succeeds and its app is signed ad hoc only, which is what a fork gets.
   Such a build is opened with right-click → Open, once.
-- **macOS Local Network privacy** (B-91, #169): `mac.extendInfo` gives the alert its text
+- **macOS Local Network privacy** (#169): `mac.extendInfo` gives the alert its text
   (`NSLocalNetworkUsageDescription`, German in `build/mac/de.lproj/InfoPlist.strings`), and the
   `afterPack` hook `scripts/mac-identity.mjs` writes a UUID of this app into the app's and the
   helpers' executables, which electron-builder otherwise copies unchanged from Electron - every
@@ -237,10 +237,10 @@ to every artefact would be a false statement.
 
 | file | trigger | what it does |
 | --- | --- | --- |
-| `.github/workflows/build.yml` | push to `master` (not when it changes only Markdown, `docs/` or `roadmap-archive/`), manual | packages all three platforms, checks the update manifests and writes the SBOMs, uploads the artifacts for 14 days, then runs the Electron smoke test, which is reported but never withholds the artifacts; publishes nothing (D-21) |
+| `.github/workflows/build.yml` | push to `master` (not when it changes only Markdown, `docs/` or `roadmap-archive/`), manual | packages all three platforms, checks the update manifests and writes the SBOMs, uploads the artifacts for 14 days, then runs the Electron smoke test, which is reported but never withholds the artifacts; publishes nothing |
 | `.github/workflows/release-electron.yml` | `v*` tag, manual with a tag input | the same packaging, manifest check and SBOMs without the smoke test, plus the build-provenance and SBOM attestations; the assets go to a **draft** GitHub release, titled and described by `scripts/release-notes.mjs` |
 
-Per D-24 the release workflow is one of four independent ones (with `release-npm.yml`,
+The release workflow is one of four independent ones (with `release-npm.yml`,
 `release-docker.yml` and `release-addon.yml`) and has no `needs:` on any other.
 The release is created as a draft and published by the maintainer, because `electron-updater` polls
 the latest *published* release: publishing one whose `latest*.yml` and installers are still
@@ -259,7 +259,7 @@ src/
     windowState.ts    size, position, maximised, with an off-screen check
     images.ts         the device image cache: disk, CCU, bundled subset
     protocol.ts       the hmm-image:// handler and the renderer's CSP
-    updater.ts        the D-16 state machine
+    updater.ts        the update state machine
     menu.ts           the application menu as plain data
     errorLog.ts       userData/logs/main.log, and the dialog that appears once
     paths.ts          development and packaged layouts
@@ -270,7 +270,7 @@ src/
   renderer/
     index.html        the CSP
     src/main.ts       mounts App and createStores from @homematic-manager/ui
-test/e2e/             the Playwright `_electron` suites of task 14 (README only for now)
+test/e2e/             the Playwright `_electron` suites (README only for now)
 ```
 
 Every module in `main/` except `index.ts` takes its Electron objects as interfaces, which is why

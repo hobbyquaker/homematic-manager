@@ -23,13 +23,13 @@ Currently 196 files, 9.3 MB, built from openccu-data **2026.7.2**.
 | `profiles/<RECEIVER_TYPE>.json` | `ReceiverProfiles` | 65 files, 7.5 MB, 3521 link profiles over 725 receiver/sender combinations; the largest is `SHUTTER_VIRTUAL_RECEIVER.json` at 624 KB, the smallest `WS_TH.json` at 435 B. The core loads one file per receiver type, lazily |
 | `receiver-type-aliases.json` | `ReceiverTypeAliases` | 3 receiver types that reuse another type's profiles |
 | `master-metadata.json` | `Record<channelType, MasterMetadata>` | 40 KB, 54 channel types: display order, conditional visibility, option-preset assignment, parameter groups |
-| `master-forms.json` | `MasterForms` | 83 KB, 71 MASTER forms keyed by paramset id (task 64), 9 of them with the channel's internal key |
-| `option-presets.json` | `Record<id, OptionPreset>` | 89 dropdowns of typical values (`DELAY`: `${none}`/5s/…/1h plus a free value), each entry the WebUI's template (`${after} 1min`, B-82) |
+| `master-forms.json` | `MasterForms` | 83 KB, 71 MASTER forms keyed by paramset id, 9 of them with the channel's internal key |
+| `option-presets.json` | `Record<id, OptionPreset>` | 89 dropdowns of typical values (`DELAY`: `${none}`/5s/…/1h plus a free value), each entry the WebUI's template (`${after} 1min`) |
 | `cross-validations.json` | `CrossValidationRule[]` | 5 rules between parameters of one paramset (`DIM_MAX_LEVEL >= DIM_MIN_LEVEL`, …) |
 | `translations/de.json`, `en.json` | `Translations` | 767 KB / 746 KB: 253 channel types, 488 device models, 2359 parameters, ~3040 parameter values, 167 help texts, ~5470 UI labels |
-| `translations/tr.json` | `Translations` | 4 KB, the 2015 Turkish easy-mode strings as a fallback locale (D-15) |
+| `translations/tr.json` | `Translations` | 4 KB, the 2015 Turkish easy-mode strings as a fallback locale |
 | `device-icons.json` | `DeviceIcons` | 535 device type → image file name |
-| `icons/<name>.webp` | — | 121 images, 79 KB: the BidCos-only fallback subset for installations without a CCU (D-10) |
+| `icons/<name>.webp` | — | 121 images, 79 KB: the BidCos-only fallback subset for installations without a CCU |
 
 Turkish profile names and descriptions do not live in `translations/tr.json` - a profile carries its
 own `Localized` name and description, so they sit in `profiles/*.json` next to `de` and `en` (1050
@@ -74,10 +74,10 @@ Three sources overlap, and they do not agree. The order below is what the conver
    the ~25 000 shared constraints. A value that still does not resolve is **dropped**, not shipped -
    a half-resolved constraint would end up in a `putParamset`.
 3. **`easymodes-2.7.1/`** (the 2.7.1 code's `www/easymodes`) fills descriptions the first two have
-   none for, supplies every Turkish string (D-15), and supplies the name key of the ten profiles that
+   none for, supplies every Turkish string, and supplies the name key of the ten profiles that
    only exist in the profiles files.
 
-### The CCU easy mode's form of each profile (task 62, D-54)
+### The CCU easy mode's form of each profile
 
 Neither source says which parameters the CCU's easy mode puts on a profile's form; that is only in
 the WebUI's `set_htmlParams` Tcl, which builds each form by hand. `scripts/easymode-controls.mjs`
@@ -90,7 +90,7 @@ for (`requires`). The time selectors' presets go to `easymode-time-selectors.jso
 extract is from OpenCCU 3.89.8.20260719: 609 easymodes, 2205 profiles with a form; the rest keep the
 dialog's full list. Unlike `upstream/`, `extracted/` is committed, because it cannot be downloaded.
 
-The combo boxes' **option sets** come from the same tree (B-82): `proc option` in `etc/options.tcl`,
+The combo boxes' **option sets** come from the same tree: `proc option` in `etc/options.tcl`,
 each entry the text the WebUI's page gets - the units of `EnterFreeValue.tcl` substituted (`1$m` is
 `1min`, the same in every language), each `${key}` left for the app to translate from `uiLabels`
 (`${after} 1min` is "nach 1min"), sorted as `get_ComboBox2` sorts them, the "enter value" entries
@@ -101,7 +101,7 @@ label or key as the template. The one deliberate deviation is in `convert.mjs`'s
 names all three from the WebUI's stringtable. The converter warns about any set that still lists one
 text twice.
 
-The same script reads the **MASTER forms** of the HmIP channel types (task 63, D-55): the
+The same script reads the **MASTER forms** of the HmIP channel types: the
 `set_htmlParams` of `hmip/<CHANNEL_TYPE>.tcl` and the procedure of `etc/hmipChannelConfigDialogs.tcl`
 it calls (`getKeyTransceiver`, `getDimmerVirtualReceiver`, ...), into `master-metadata.json` as
 `controls` for that channel type - 63 channel types, 339 controls, a time being the `X_UNIT` /
@@ -110,7 +110,7 @@ the WebUI's own `stringTable...` keys, so the script also takes `--webui-lang` (
 `/www/webui/js/lang` directory, whose strings are %XX-escaped ISO-8859-1).
 
 Where a form's `set_htmlParams` chooses what to draw by something the description does not say, the
-channel type also gets **`branches`** (task 75): one entry per way through its `if` / `elseif` / `else`
+channel type also gets **`branches`**: one entry per way through its `if` / `elseif` / `else`
 chains, with the tests that lead there (`when`, all of which hold) and that way's own `controls`. The
 tests read are the channel's `channelMode` metadata (the blind actuators' `blind` / `shutter`), the
 device type (equal, or containing a part) and the channel number, each possibly negated; a chain on
@@ -118,9 +118,9 @@ anything else (a firmware version) stays whole. OpenCCU 3.89.8 has five such for
 `BLIND_VIRTUAL_RECEIVER`, `BLIND_TRANSMITTER`, `ACCELERATION_TRANSCEIVER` (HmIP-DLP),
 `ENERGIE_METER_TRANSMITTER` (HmIP-ESI, HmIP-ESI-IND by channel) and `KEY_TRANSCEIVER` (an HmIP-ASIR's
 sabotage contact has no form). `controls` stays the union of the ways, each control once, from its
-first way (B-73).
+first way.
 
-The forms the WebUI picks by **paramset id** go to `master-forms.json` (task 64): the app asks
+The forms the WebUI picks by **paramset id** go to `master-forms.json`: the app asks
 `getParamsetId(address, MASTER)` and, as `ic_deviceparameters.cgi` does, takes that id's form before
 the channel type's - the BidCos channel and device forms (`easymodes/<paramid>.tcl`: `getCheckBox
 $DEVICE '$param'`, `getTextField $CHANNEL '$param'`, `getComboBox $param $prn`) and the HmIP
@@ -162,13 +162,13 @@ list, so a seventh one would fail the build.
 The three `cross_validation.*` error messages are the only hand-written strings in
 `dist/translations/`: openccu-data defines the rule ids but no texts for them.
 
-## Device images (D-10)
+## Device images
 
 `device-icons.json` maps a device type to the bare file name the CCU serves under
 `/config/img/devices/<size>/`. Ten of the 535 entries live in the CCU's `coupling/` subdirectory;
 the contract asks for a bare name, so `scripts/icons-from-ccu.mjs` retries that path.
 
-**Which `<size>` directory, measured on two CCUs in task 13**: the plain names live in `250/` (267
+**Which `<size>` directory, measured on two CCUs**: the plain names live in `250/` (267
 files, plus 11 in `250/coupling/`), while `50/` holds the WebUI's list thumbnails and suffixes every
 name with `_thumb` (254 files). The union of the four candidates `250/<file>`,
 `250/coupling/<file>`, `50/<base>_thumb<ext>` and `50/<file>` resolves 278 of 278 mapped types.
@@ -192,8 +192,8 @@ committed.
 | `npm run convert` | write `dist/` from `upstream/` |
 | `npm run update` | fetch + convert |
 | `npm run compare-legacy` | write `COMPARISON.md` from `dist/` and `easymodes-2.7.1/` |
-| `node scripts/easymode-controls.mjs <easymodes dir> --source "<firmware>" --webui-lang <lang dir>` | rebuild `extracted/easymode_controls.json.gz` from a WebUI easymode tree and its language files (tasks 62, 63); `npm run convert` afterwards |
-| `npm run icons-subset -- --ccu <dir>` | rebuild `dist/icons/` from a CCU's `www/config/img/devices` (its `50/` thumbnails, `250/` scaled down where a thumbnail is missing; D-51); `--ccu` is required since `legacy/` and its 2.7.1 device images are gone |
+| `node scripts/easymode-controls.mjs <easymodes dir> --source "<firmware>" --webui-lang <lang dir>` | rebuild `extracted/easymode_controls.json.gz` from a WebUI easymode tree and its language files (63); `npm run convert` afterwards |
+| `npm run icons-subset -- --ccu <dir>` | rebuild `dist/icons/` from a CCU's `www/config/img/devices` (its `50/` thumbnails, `250/` scaled down where a thumbnail is missing); `--ccu` is required since `legacy/` and its 2.7.1 device images are gone |
 | `npm test` | validate `dist/` against the contract and against the facts in `docs/analysis-2026-09.md` |
 
 ## Licensing

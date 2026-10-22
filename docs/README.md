@@ -5,7 +5,7 @@ The user-facing documentation of the Homematic Manager. The starting point is th
 
 ## Installing
 
-One page per install type of D-25. All four run the same backend and the same UI and share one
+One page per install type. All four run the same backend and the same UI and share one
 `config.json` format.
 
 | Page | For |
@@ -76,7 +76,7 @@ For the maintainer; nothing here is run by an agent.
 ## Screenshots
 
 `hmm1.png`, `hmm2.png` and `hmm3.png` in this directory are the ones the README shows, and
-`hmm1-dark.png`, `hmm2-dark.png`, `hmm3-dark.png` are the same three in the dark theme (D-22), all
+`hmm1-dark.png`, `hmm2-dark.png`, `hmm3-dark.png` are the same three in the dark theme, all
 1280×800 in German. Since 3.1.2 they come from real devices rather than the demo fixture:
 `hmm1` is the Devices tab with an HmIP-WRC2's channels open and `hmm2` a WRC2 → HmIP-BBL direct
 link in easy mode, both from the addon on a lab installation; `hmm3` is the week programme of an

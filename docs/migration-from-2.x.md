@@ -2,7 +2,7 @@
 
 Homematic Manager 3.0 is a rebuild, not an upgrade of the 2.7.1 code: a tested TypeScript core, a
 Svelte 5 user interface, a Node backend that also runs as a server and as a CCU addon. The tabs, the
-grids, the dialogs and the workflows are deliberately the same (D-3) — what changed is underneath,
+grids, the dialogs and the workflows are deliberately the same — what changed is underneath,
 and in a handful of places the behaviour changed on purpose.
 
 This page is what a 2.x user needs to know: where the old configuration is, what is taken over,
@@ -40,7 +40,7 @@ Next to it sat the caches, one file per CCU: `devices_<ccu>`, `names_<ccu>` and
 `%APPDATA%\Homematic Manager\`, `~/Library/Application Support/Homematic Manager/` or
 `~/.config/Homematic Manager/`.
 
-## The one-time import (D-17)
+## The one-time import
 
 **On the very first start** — that is, when there is no `config.json` in 3.0's own profile directory
 yet — the backend looks for the 2.x configuration and takes over:
@@ -120,7 +120,7 @@ therefore destroyed channels irreversibly.
   all answer `-1` on hmipserver) and says plainly when a channel is beyond repair and needs
   re-pairing.
 
-### No BIN-RPC off the CCU (D-28)
+### No BIN-RPC off the CCU
 
 2.x could be told to prefer BIN-RPC. That option is gone, and the settings dialog has no protocol
 choice any more. The reason is that **no CCU listens for BIN-RPC on the LAN**: `rfd` and `hs485d`
@@ -129,9 +129,9 @@ lighttpd's XML-RPC proxies. Verified on a stock CCU — port 32001 is firewalled
 
 So off the CCU every built-in interface speaks XML-RPC. BIN-RPC is used by the CCU addon in local
 mode, and for CUxD, which is its own daemon with its own BIN-RPC listener on 8701 (2.x did the same).
-A user-defined interface (D-13) may still declare `binrpc` for a non-CCU peer.
+A user-defined interface may still declare `binrpc` for a non-CCU peer.
 
-### ReGa is optional (D-2)
+### ReGa is optional
 
 The CCU's logic layer supplies the friendly names. In 3.0 it is strictly optional: a system without
 ReGa — Homegear, a bare `rfd`/`hmipserver`, or a CCU whose Homematic-Script API is firewalled — works
@@ -145,15 +145,15 @@ encodings and both **read back the index**, so 3.0 sends the index everywhere. T
 is that an enum parameter no longer looks changed on every single write, which is what kept
 unnecessary parameters in the payload.
 
-### The HVL addon is not supported (D-19)
+### The HVL addon is not supported
 
 Issue #123 asked for HVL devices. The HVL project is dead, and 3.0 does not support it. The issue is
 closed with that note.
 
-### No Homegear-specific code (D-20)
+### No Homegear-specific code
 
 Homegear keeps working through the generic XML-RPC path wherever it behaves like a CCU — per-interface
-host, port, TLS and authentication are configurable (#106), and a user-defined interface (D-13) can
+host, port, TLS and authentication are configurable (#106), and a user-defined interface can
 be pointed at anything that speaks XML-RPC. What is gone is Homegear-*specific* work: the `setName`
 special case of #41 is dropped, and #41, #59, #60, #100 and #106 are closed with that note. Checked
 on 2026-09-05: Homegear's last release is 0.7.40 from 2019, the project gets build-system commits but
@@ -164,10 +164,10 @@ programme of #100 is one of the five device-specific editors, and the `TIMEOUT`/
 with 24 slots that a Max! thermostat answers through Homegear is one of the four naming shapes that
 editor recognises — recognised from the paramset description, not from who is answering.
 
-### `npm install -g homematic-manager` gives the server now (D-33)
+### `npm install -g homematic-manager` gives the server now
 
 `homematic-manager` on npm was the 2.x desktop app, installed globally and started from a shell.
-3.0 keeps that name for the **npm deliverable of D-25** — which is the headless server, not the
+3.0 keeps that name for the **npm deliverable** — which is the headless server, not the
 desktop app: it starts an HTTP host on port 8090 and you open the UI in a browser. `--install` turns
 it into a systemd service ([install-lxc.md](install-lxc.md)).
 
@@ -187,7 +187,7 @@ The old 1.x versions under that name are deprecated on npm. Every 3.0 version is
 - **Quitting waits for the backend** to de-register its callbacks at the interface processes,
   bounded to eight seconds, instead of racing a 15 s timer against `process.exit(0)`.
 - **Success pop-ups are gone** (#77, #102): writes report through toasts and an RPC log drawer.
-- **Dark mode** follows the OS setting by default, with a manual switch that is remembered (D-22).
+- **Dark mode** follows the OS setting by default, with a manual switch that is remembered.
 - **Cut, copy and paste work on Windows and Linux.** 2.x built its Edit menu from macOS-only
   `selector:` strings, so those three items did nothing anywhere else.
 - **There is a View menu** (reload, developer tools, zoom) and a Help menu with the issue tracker and
@@ -269,7 +269,7 @@ Things that are known, measured and not fixed:
   only thing that removes it is deleting and re-pairing the device, or restoring a CCU backup from
   before the damage. 3.0 will tell you which of the two `CONFIG_PENDING` cases you are looking at,
   and will not make it worse.
-- **The HmIP switching programme's weekday bit order is unverified** (OQ-16). Nothing in the paramset
+- **The HmIP switching programme's weekday bit order is unverified**. Nothing in the paramset
   descriptions or in the metadata says which bit is which weekday; the editor took bit 0 = Sunday
   from the documented HmIP weekday enums (BidCos enums start at Saturday) and always prints the raw
   mask next to the checkboxes so you can check it against the WebUI.
@@ -286,4 +286,4 @@ Things that are known, measured and not fixed:
 - [moving-between-installs.md](moving-between-installs.md) — moving a 3.0 profile between install
   types
 - [../CHANGELOG.md](../CHANGELOG.md) — the full list of changes
-- the roadmap (kept outside this repository) — the plan, the decisions D-1..D-30 and the open questions
+- the roadmap (kept outside this repository) — the plan, the decisions and the open questions

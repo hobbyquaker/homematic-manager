@@ -22,7 +22,7 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 ### Fixed
 
 - **A long firmware version is shown in full again.** 3.2.1 cut a version with nothing beside it - the radio module's
-  `3.89.11.20260919` on BidCos-RF - to the width of the short versions next to install buttons. (B-93)
+  `3.89.11.20260919` on BidCos-RF - to the width of the short versions next to install buttons.
 
 ## [3.2.1] — 2026-10-15
 
@@ -31,17 +31,17 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 - **"requested …" after an install click.** Until the interface reports the update, the firmware cell said
   _in progress_ ("läuft") - and kept saying it over the states that followed. It now says _requested …_
   ("angefordert …"), with a tooltip that a battery device starts on its next wake-up, and as soon as the interface
-  reports a state (_installing_, _update pending_) the cell shows that. (task 99)
+  reports a state (_installing_, _update pending_) the cell shows that.
 
 ### Fixed
 
 - **The install button right after its version.** On BidCos-RF the button sat far right of the version, pushed there
   by the radio module's long version in another row, and the column was so narrow that it could be cut off. It now
-  follows its version with a small gap, and the column is wide enough for both and not squeezed below that. (B-93)
+  follows its version with a small gap, and the column is wide enough for both and not squeezed below that.
 - **The other device of the same type keeps its install button.** After one HmIP device was installed, its twin could
   show _up to date_ and no button until the tab was visited again: the page stopped re-reading the device list the
   moment the install was over, and kept a passing state it had read in that moment. It now reads on for two minutes
-  after an install ends. (B-94)
+  after an install ends.
 
 ## [3.2.0] — 2026-10-14
 
@@ -51,29 +51,29 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   others (a router module in its channel-0 settings), with a switch to turn routing on or off - asked first, since it
   changes how the network routes -, its receive levels against the access point, a button to its routing table and
   "n of m route" on top. In the device table a device whose router module is on carries a router badge in its TYPE
-  cell. (task 97)
+  cell.
 - **The HmIP network as one graph.** The Routers view can show a graph that merges the routing tables of every router
   that routes: the access point in the middle, the routers, and the devices each one serves, with the receive level
   the router reported on each measured link. A device no table lists hangs on the access point on a dotted "assumed"
   line, so the picture never claims more than the tables say. A routing table is read from the router over the air,
   so nothing is read until _Read routing tables_ is clicked - one router after the other, never on a timer - and the
-  result is kept with the time it was read. A table of the routes sits beside the graph. (task 98)
+  result is kept with the time it was read. A table of the routes sits beside the graph.
 
 ### Changed
 
 - **The firmware column in plain words.** Instead of hmipserver's states it says _queued for transfer_,
   _transferring_ (the background transfer takes 8 to 42 hours per device; the tooltip says so, and that the install
   button appears once it is through), _installing_ and _up to date_. An access point whose new firmware is ready offers
-  the install button too. (task 96)
+  the install button too.
 
 ### Fixed
 
 - **The routing table of an HmIP router opens again.** The app asked for its description the wrong way, and real
-  routers refused it. (task 97)
+  routers refused it.
 - **No device list every 10 s while an HmIP firmware is pending.** While any device was transferring a firmware in the
   background - hours, days for a sleeping battery device - or waited for its install, the Devices page re-read the
   whole device list every 10 s. It now does so every 10 s only during an install, every 60 s during the background
-  transfer, and not at all while a firmware just waits to be installed. (B-92)
+  transfer, and not at all while a firmware just waits to be installed.
 
 ## [3.1.5] — 2026-10-14
 
@@ -84,17 +84,16 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   own, the icons and colours of openccu-lite's status page: _communication disturbed_ (UNREACH) is a filled red badge,
   _communication was disturbed_ (STICKY_UNREACH) an outlined grey one; low battery orange; configuration and update
   pending blue; a fault, sabotage and a fault report each red with an icon of their own. The tooltip names the message
-  in German or English, then the datapoint and the channel. (task 92)
+  in German or English, then the datapoint and the channel.
 - **The firmware column lines up.** The version now has a slot of its own in figures of equal width, so the "up to
   date" label and the update button start at the same place in every row. hmipserver's update states are translated.
-  (task 93)
 
 ### Fixed
 
 - **openccu-lite: a heating group's device has a name.** A VirtualDevices group device that has no name in the
   system's store - and its channels - now shows the name the CCU gives it, `<group name> INT0000001`, and follows a
   rename in the Groups tab at once. As on the CCU, it stays an ordinary device name: one set in the device table wins
-  and does not rename the group. (task 94)
+  and does not rename the group.
 
 ## [3.1.4] — 2026-10-09
 
@@ -107,7 +106,7 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   network for, so macOS asks on the first connection: choose _Allow_. If the question was missed, or the app still
   cannot reach the CCU, the app now names the place to switch it on: _System Settings → Privacy & Security → Local
   Network_, switch on Homematic Manager, then quit it and start it again. As long as the macOS builds are not signed,
-  macOS may ask again after an update. (B-91, #169, @esbol42)
+  macOS may ask again after an update. (#169, @esbol42)
 
 ## [3.1.3] — 2026-10-03
 
@@ -117,12 +116,12 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   took long to answer the subscription - seen on openccu-lite while it ran without HmIP-RF - the app sent the next one
   before the first was through, every 10 s for as long as it ran, and kept the process busy with them. There is now
   never more than one subscription per interface on its way, and one that does not come back in time is repeated after
-  15 s, then 30 s, 60 s and so on up to 5 minutes, instead of every 3 s. (B-89)
+  15 s, then 30 s, 60 s and so on up to 5 minutes, instead of every 3 s.
 - **Umlauts in the easy mode's labels.** Some link profiles showed their German labels, names and descriptions with the
   CCU's escapes instead of the letters - "Herunterfahrverz%F6gerungszeit" for "Herunterfahrverzögerungszeit",
   "%DCberschreiten" for "Überschreiten", "T%FCr" for "Tür" - in the blind, shutter, dimmer, light, switch, door lock and
   threshold profiles among others. The device data now carries the letters, and a test keeps every shipped string
-  free of such escapes. (B-90)
+  free of such escapes.
 
 ## [3.1.2] — 2026-10-03
 
@@ -147,7 +146,7 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 - **A double click on a Rooms or Functions cell opens its dialog.** In the device list, a double click on the Rooms cell
   of a device or a channel opens "Assign to room" for that row, one on the Functions cell "Assign to function" - the
   dialogs the toolbar buttons and the row's menu open, here for the row under the pointer alone. Nothing happens while
-  the store takes no writes, as with the menu entries. (task 85)
+  the store takes no writes, as with the menu entries.
 
 ### Changed
 
@@ -155,7 +154,7 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   dialog now: rooms on the left, functions on the right - a channel filed into a room usually wants a function too - and,
   for a single row, its name above them, with a device's "Overwrite channel names" as in Rename. One Apply saves all
   three and sends only what changed; the side that was asked for - the toolbar button, the menu entry, the double click
-  on the cell - has the focus. On a phone the halves stack, rooms above functions. (task 86)
+  on the cell - has the focus. On a phone the halves stack, rooms above functions.
 
 ## [3.0.1] — 2026-10-01
 
@@ -165,16 +164,16 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   (`PEER_NEEDS_BURST`) or any other parameter of the sender's side of the link - was missing from the preview, which said
   "nothing has changed" and offered no write, so it never reached the device. The preview now lists both ends, each
   parameter marked with its end and one `putParamset` line per end that has something to write; writing sends only
-  those, reads each written end back, and the pending-changes set gets the same calls. (B-87)
+  those, reads each written end back, and the pending-changes set gets the same calls.
 - **The write preview is big enough to read.** It opens as wide as the link editor and at least tall enough for ten
   parameter rows, so a `putParamset` call with one or two parameters stays on one line and a longer list does not
   start as a strip; on a phone it takes the screen, and a call that is wider scrolls sideways in its own line instead
-  of breaking inside an address. (B-88)
+  of breaking inside an address.
 - **Links within one device are no longer marked as defective.** A switch actuator's own button linked to its relay, or
   a dimmer's channel linked to its virtual channels, carried the red mark in the Links list and counted in the toolbar's
   "defective" number, although the links work: the interface process reports every such link as broken on the sender
   side. The mark now stays on links to or from a peer that is not a device of the interface (`@1A2B3C:14`) and on links
-  between two devices whose flags say one side was not written. (B-86)
+  between two devices whose flags say one side was not written.
 
 ### Removed
 
@@ -233,7 +232,7 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   the tooltip - and greys a value the system restored from its own file that no device has reported since it
   started. The service-message list dates a message by the last change of its datapoint on the system, so a restart
   of the app no longer resets it, and the tooltip of _Since_ names the clock: the system's, the CCU's _Erste Meldung_
-  or the app's own. Nothing changes on a CCU or for the addon on the system. (task 82)
+  or the app's own. Nothing changes on a CCU or for the addon on the system.
 
 #### Changed
 
@@ -244,7 +243,7 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   the addon started early on a Raspberry Pi 4, hmipserver answers about 50-55 seconds after the start. This replaces
   the steps of 1, 2, 4, 8 seconds, then every 2 seconds for two minutes, then a back-off of up to five minutes. The
   log says once how long after the start an interface was found. BidCos-Wired on a CCU
-  without a wired gateway costs one refused connection every 15 seconds and no log line. (task 83)
+  without a wired gateway costs one refused connection every 15 seconds and no log line.
 
 #### Fixed
 
@@ -253,7 +252,7 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   kept. Every option set now comes from the WebUI's own `options.tcl` and is rendered from the string table in the
   current language - "nach 1min" … "nach 1h", "Inaktiv". The time bases no longer list DELAY's values, a switch
   actuator's current-detection behaviour names its three choices apart, and the dimmer step widths of the
-  universal-light forms get their preset lists. (B-82)
+  universal-light forms get their preset lists.
 
 ## [3.0.0-beta.33] — 2026-09-30
 
@@ -269,19 +268,19 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   system's Status page, one click by an administrator there, and the token is in the profile with the system's
   certificate trusted. What a token may call is decided per call - a refused method names the missing scope and
   never counts as a lost connection. The addon on the system itself keeps its loopback callbacks, a profile without
-  a token connects the CCU way, and nothing changes for a CCU or OpenCCU. (task 72)
+  a token connects the CCU way, and nothing changes for a CCU or OpenCCU.
 
 ### Changed
 
 - **The link editor opens with the sender's parameters visible.** The sender's section of a direct link (a weather
   station's storm thresholds, say) was collapsed behind a `+` until clicked; it is open now whenever the sender has
   link parameters, and the `−`/`+` still closes it for the link on screen. A sender without link parameters keeps its
-  collapsed empty header. (task 80)
+  collapsed empty header.
 - **The Create link dialog is as big as its content.** It took nearly the whole window, most of it empty below the
   four rows, and its name and description fields were as narrow as the channel buttons. It is 720 pixels wide at
   most now, as high as its rows, grows downwards while a channel list is open (the button you clicked stays where it
   was) and scrolls inside past the window; name and description take the rest of their row, and the role hints wrap
-  under their button on a narrow screen. (task 81)
+  under their button on a narrow screen.
 
 ### Fixed
 
@@ -289,12 +288,12 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   given value - a blind's _Duration for status "Up"_ at "unlimited", its up-delay at 0, a KeyMatic's _Lock
   automatically_ - were shown as a greyed-out number with a greyed-out select beside it. The WebUI draws them as
   editable choices, and so does the app now: the presets of the CCU (_continuously_ / _unendlich_, _none_ / _keine_,
-  and the time steps) with _Enter value_ for anything else. (B-81)
+  and the time steps) with _Enter value_ for anything else.
 - **A special value reads as the CCU names it, and alone.** In the expert view, a parameter on a special value showed
   its raw id (`NOT_USED`) next to a disabled number and its range. The special is named now ("Unused" / "Nicht
   benutzt"), the number and range are hidden while it is chosen, and the select's first option - an unlabelled `—`
   that set the value to the minimum - reads _Enter value_ / _Wert eingeben_: it opens the number, prefilled with the
-  default and focused, and nothing is written until you type. (B-80, B-81)
+  default and focused, and nothing is written until you type.
 
 ## [3.0.0-beta.32] — 2026-09-29
 
@@ -306,7 +305,7 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   second for a listener that keeps it waiting. The answer goes out first now, and the tabs get the events right after,
   in the same order. A test drives both callback servers with a burst of 500 events and a `newDevices` of 100 devices
   while twenty tabs are connected, one of which never reads: the answers take a few milliseconds, and each tab still
-  sees an event its own request caused before the answer to that request. (task 73)
+  sees an event its own request caused before the answer to that request.
 - **Names, rooms and heating groups on openccu-lite go through occulite-client.** The app talked to an openccu-lite
   system's metadata and system APIs with a client of its own - its own HTTP requests, its own reader of the change
   stream, its own certificate check. It now uses [occulite-client](https://www.npmjs.com/package/occulite-client),
@@ -314,14 +313,14 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   are gone. Nothing changes in what you see: the store is detected, read, followed and written as before, a
   certificate or CA you trusted stays trusted, and the addon still reads with its local token and writes as the person
   looking at the page. occulite-client is a new dependency of the npm package, the desktop app and the addon; it has no
-  dependencies of its own. (task 72)
+  dependencies of its own.
 
 ### Fixed
 
 - **An addon update stops only the old backend.** The installer's update script took every process whose command
   line named the addon's `app/` directory for the backend and stopped it - an ssh session that ran the install with a
   version check in its command line, a `tail -f` of a file in there, an editor. It now stops a process only when it is
-  a node running the addon's app. (B-79)
+  a node running the addon's app.
 
 ## [3.0.0-beta.31] — 2026-09-29
 
@@ -331,7 +330,7 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   parameters a profile fixes alone, and the one with the most of them won; the WebUI checks every parameter a profile
   names, lists and ranges too. An HmIP toggle link ("Schalter ein / aus") was therefore shown as "Switch - on", with
   its permanent on time as "Enter value": the two profiles differ only in the jump table, and "Switch - on" fixes more
-  parameters. The profile the CCU's hint names is taken only while the link's values still fit it. (B-77)
+  parameters. The profile the CCU's hint names is taken only while the link's values still fit it.
 
 ## [3.0.0-beta.30] — 2026-09-29
 
@@ -533,7 +532,7 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   because the group process has no RPC for any of it. The tab goes through the system's own HTTP API for the
   groups (`/api/system/v1/groups`), with the login the application already has for the system's metadata store
   (the session on the system, the API token off it), and it exists only where that API answers; on a CCU there is
-  no such API and no tab, and the CCU JSON-API stays out (D-1). After a change the members whose configuration is
+  no such API and no tab, and the CCU JSON-API stays out. After a change the members whose configuration is
   still pending are named beside the count, as the WebUI's popup named them. Only an administrator changes groups
   on the system; the buttons say so. The tab reads the system's API and not the group process, so it works from
   the desktop as well - even while the `VirtualDevices` interface itself shows as not connected there.
@@ -727,7 +726,7 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   1000 entries, 4 MiB in total, an answer over 8 KiB kept as a preview with its size; a passphrase (`changeKey`,
   `setTempKey`) or a whitelist device key is logged as `***`. Only the writes are still persisted across sessions
   (`write-log.json`) and the 2.x `rpcLogFolder` dump of `putParamset` is unchanged. For the API: `writeLog.*` is
-  `rpcLog.*`, the entry carries `origin`, and the drawer's labels are in German now too. (task 48)
+  `rpcLog.*`, the entry carries `origin`, and the drawer's labels are in German now too.
 
 - **CCU addon on openccu-lite: the settings page and the Systemsteuerung hand-over take the box's session header.**
   `settings.cgi` (and `service.cgi`) read the `X-Occulite-Session` that openccu-lite's gate sets behind a session it
@@ -736,12 +735,12 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   token cookie. With the frontend reading the header since beta.16, the whole addon now works without `?sid=` in its
   URLs, and the openccu-lite addon catalogue can declare `session.header_since` for it, after which the box stops
   putting the session id into the addon's addresses (history, bookmarks, referrers). The header is read on openccu-lite
-  only; a CCU passes a client's header through and ignores it. (task 50)
+  only; a CCU passes a client's header through and ignores it.
 - **A double click on a device or channel name in the device grid opens the rename dialog** for exactly that row -
   the same dialog as the ✎ button and _Rename_ in the row menu. **F2** opens it for the selected row, and so does
   **Enter**. A single click still only selects, the double click neither opens nor closes the channels, and a double
   click anywhere else in the row or on a column edge does what it did before. The `:0` channel, which has no name of
-  its own to change, opens nothing. (task 46)
+  its own to change, opens nothing.
 - **A tiny copy button on names and addresses.** Every grid cell with the name or the address of a device, a channel
   or an interface - Devices and its channels, both ends of a link, the Funk tab's gateways, devices and peers, the
   service messages and the events - has a small copy icon at its end. It appears when the pointer is over the row
@@ -752,13 +751,12 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   opened over plain HTTP - it copies the old way, and if that fails too it says so and selects the text for Ctrl+C.
   On the way, Space and Enter on a focused button inside a grid (a paramset button, the repair button) press that
   button instead of selecting the row or opening its dialog, and a space can be typed into a column filter again.
-  (task 47)
 
 ### Changed
 
 - **_Assign to room_ and _Assign to function_ are a list of checkboxes** instead of "Add to" / "Remove from" and a
   small list to pick one room from. The dialog is as tall as its rooms need, up to the window, so every room is seen at
-  once; only in a window too short for all of them does the list scroll, and the buttons stay in view. (task 49)
+  once; only in a window too short for all of them does the list scroll, and the buttons stay in view.
   - **A checkbox per room:** checked when the selected row is in it. For several rows, a room that holds only some of
     them shows a dash; a click puts all of them in, the next takes all out, a third leaves it as it was. A device row
     counts as in a room when all its channels are (the `:0` channel aside).
@@ -778,7 +776,7 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   addon's `hmm_token` cookie cannot tell whose role they carry, so they do not open these pages there. Any other
   session gets a 403 page, "Nur für Administratoren / Administrators only", and nothing is changed. The hand-over into
   the app (`settings.cgi` without `?cmd=config`) is unchanged, and so is a CCU or OpenCCU, where any WebUI session
-  keeps its access. (B-37)
+  keeps its access.
 - **RSSI values are coloured in eight steps instead of three, with signal bars.** Until now nearly every real link
   (-40 to -90 dBm) was the same yellow "medium", because the steps came from the 2.x gradient (good from -20 dBm, bad
   below -100). The new scale has a step every 10 dB from -30 to -90 dBm, and OpenCCU's edges at -70 and -90 dBm are
@@ -796,7 +794,7 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
 - **Escape closes a dialog on the Devices and the Links tab again.** While one of those two tabs was shown, Escape
   closed no dialog at all - rename, create link, and the settings dialog as well - in the browser and in the desktop
   app alike; only the ✕ button and Cancel did. The row menu of the two grids took every Escape, also while it was not
-  open. It now takes Escape only when it is open. (B-38)
+  open. It now takes Escape only when it is open.
 
 - **CCU addon on openccu-lite: an `HMM_AUTH_MODE=token` left in `etc/hmm.env` by a CCU install no longer keeps the
   addon out of the box's login.** Every install from the CCU days has that line, `hmm.env` survives updates, and a
@@ -810,7 +808,7 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
     names a CCU line it found in the file.
   - **If you chose `token` on an openccu-lite box with 3.0.0-beta.17 or earlier**, that choice was written as
     `HMM_AUTH_MODE=token`, which is indistinguishable from the CCU's line: the box runs `occulite` after this update, and
-    the settings page puts `token` back as `HMM_AUTH_MODE_LITE=token`. (B-22)
+    the settings page puts `token` back as `HMM_AUTH_MODE_LITE=token`.
 - **On openccu-lite the addon takes the session of the box's gate before a `?sid=` on the URL.**
   - **Before:** a `?sid=` was checked first. Since openccu-lite's session ids have 26 characters, the ten-character
     `?sid=` its shell put on the URL is only an alias the box's API refuses, so Homematic Manager sent its frame back to
@@ -820,11 +818,10 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
     the URL. Without a confirmed header the `?sid=` hand-over works as before, for boxes from before the header.
   - **Not asked at all:** a `?sid=` or header that cannot be an openccu-lite session (neither 26 characters of base32
     nor ten alphanumerics, an API token among them), and a ten-character `?sid=` next to a header of the long shape.
-    (B-36)
 - **On openccu-lite the gear of Homematic Manager opens the addon settings, not the app.** The install and
   `rc.d/hmm info` name `/addons/hmm/settings.cgi?cmd=config` as the Config-Url there, because openccu-lite's shell
   frames the Config-Url behind the gear and the _Settings_ button, and the app has its own entry in the addon menu. On
-  a CCU the Systemsteuerung button still opens the app. (B-36)
+  a CCU the Systemsteuerung button still opens the app.
 - **The device grid offers only the paramsets that have something in them.**
   - **The rule:** a button in the PARAMSETS column, and an entry in the context menu of a device or a channel, is there
     when the device or channel lists the paramset and the interface describes it with parameters.
@@ -835,7 +832,7 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
     device's own five service parameters, so a channel, channel 0 included, gets no SERVICE button or menu entry.
   - **Channel 0 of an HmIP device** keeps its MASTER button when the dialog has service messages to suppress.
   - **One description per kind of device and channel** is asked for, only for the rows on screen. A description that
-    cannot be read keeps its button, and the dialog says why. (B-33)
+    cannot be read keeps its button, and the dialog says why.
 - **The Msgs column of the device grid is wide enough for two service-message marks and the repair button**, which it
   used to cut off.
   - **Resizing:** it can be dragged wider like the other columns, keeps its width over a reload, and "Reset column
@@ -843,7 +840,7 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
   - **Never narrower than the marks and the button:** neither a narrow window nor a drag makes it narrower than that,
     like the PARAMSETS column, so the repair button stays whole and takes its click. A width stored narrower by an
     earlier build of this version is drawn at that minimum.
-  - **Tooltip:** a cell that is cut off shows its content when the pointer rests on it. (B-34)
+  - **Tooltip:** a cell that is cut off shows its content when the pointer rests on it.
 - **The PARAMSETS column of the device grid can be resized** (#157, @Herbert-Testmann).
   - **Resizing:** it can be dragged wider, keeps its width over a reload, and "Reset column widths" and "Fit column to
     content" include it.
@@ -853,7 +850,7 @@ closes, and to @mbronk and @ngehrsitz, whose pull requests (#130, #138) are in i
     Links tab, the Devices and Channels counts of the metadata store, and the suppress button of the HmIP service
     messages. That button column is never narrower than its button either, and now fits the German
     "Unterdrückung aufheben", which it used to cut off.
-  - **Still fixed:** the device pictures and the receiver marks of the Funk tab. (B-35)
+  - **Still fixed:** the device pictures and the receiver marks of the Funk tab.
 
 ## [3.0.0-beta.17] — 2026-09-13
 
@@ -875,7 +872,7 @@ the addon uses its new memory flags.
   less PSS after the start and 5–35 MiB less with a page open, about the same after the idle unsubscribe, and far less
   scatter from garbage collection (the addon's README, "Memory"). `--lite-mode` and `--jitless` are dropped from
   `HMM_NODE_FLAGS` wherever they are set, with a line in the log, and the update takes them out of `etc/hmm.env`; any
-  other flag set there stays, and so does an empty `HMM_NODE_FLAGS=`. (B-32)
+  other flag set there stays, and so does an empty `HMM_NODE_FLAGS=`.
 
 ## [3.0.0-beta.16] — 2026-09-12
 
@@ -1034,7 +1031,7 @@ started, and the callback settings of the Docker image that the settings dialog 
 ## [3.0.0-beta.13] — 2026-09-12
 
 The decisions of the issue round of 2026-09-12 (#147, #144, #150), the two reports that came in on
-beta.12 (#156, #150), and the maintainer's wishes for the link dialog, the pairing and link buttons
+beta.12 (#156, #150), and changes to the link dialog, the pairing and link buttons
 and the RPC console.
 
 ### Fixed
@@ -1080,7 +1077,7 @@ and the RPC console.
 - **The RPC console's response field uses the height of the window** instead of a fixed 220 px box;
   the history stays below it with a capped height, and a long method help scrolls on its own.
 - **The service messages band counts the whole box** (#150): "4 of 7 on this box" while other
-  interfaces have messages too. The list stays per interface, as the maintainer decided; a click on
+  interfaces have messages too. The list stays per interface; a click on
   the total switches to the next interface that has messages, and its tooltip lists them. "First
   reported" from ReGa, the other half of that decision, is not in this release.
 - **The "Create link" dialog is larger**: at least 650 px tall and 920 px wide, clamped to the
@@ -1089,7 +1086,7 @@ and the RPC console.
   device's name after it, and the channel index with its type on a second line
   (`3: VIRTUAL_SWITCH_TRANSMITTER`). The address is no longer printed; the filter still finds a
   channel by it.
-- **"Pair device" and "Add link" are real buttons** (the maintainer's wish): larger than the toolbar
+- **"Pair device" and "Add link" are real buttons**: larger than the toolbar
   icons, with the `+` and a caption ("Pair device" / "Gerät anlernen", "Add link" / "Verknüpfung
   anlegen"), in the accent colour at the start of the band. When the band runs out of room they
   shrink to their icon. "Pair device" is disabled on VirtualDevices and CUxD, which have no install
@@ -1139,8 +1136,7 @@ beta.11 round left over. Fixes only, nothing new.
 
 ### Changed
 
-- **The metadata store is an entry of the interface picker with pages of its own** (the maintainer,
-  2026-09-10: "mach ReGaHSS doch zu einem eigenen interface"). The store line under the host in the
+- **The metadata store is an entry of the interface picker with pages of its own**. The store line under the host in the
   picker — `ReGaHSS`, `occulited`, "This profile" — is selectable now, like an interface: half the
   height of an interface item, with its dot and its state in the tooltip, reached by the arrow keys
   above the first interface, and marked as current when it is the selection. A store that does not
@@ -1176,7 +1172,7 @@ beta.11 round left over. Fixes only, nothing new.
 
 ## [3.0.0-beta.11] — 2026-09-10
 
-Two reports from Baxxy13 against beta.10 and one change the maintainer asked for. Fixes only,
+Two reports from Baxxy13 against beta.10 and one change of our own. Fixes only,
 nothing new.
 
 - **RSSI values that cannot be a receive level are read for what they are** (#154). A level in dBm
@@ -1205,7 +1201,7 @@ nothing new.
 
 ### Changed
 
-- **The store the names come from is said inside the interface picker** (the maintainer). It was a
+- **The store the names come from is said inside the interface picker**. It was a
   second control beside the picker — a dot and one word. It is now one line inside the picker,
   under the host it belongs to and above the interfaces, half the height of an interface item and
   separated by a rule: something to read, not to click. The settings, where the store is chosen,
@@ -1304,8 +1300,8 @@ VirtualDevices (#143), the tooltips (#145), the refresh button (#146) and a dot 
   with the keyboard, on disabled buttons as well, positioned so no toolbar can clip it and closed
   by Escape, a click or the pointer leaving.
 
-- **The room and the function filter belong to the interface they were set on** (#143). B-1 gave
-  the column filters of a grid to their interface in 3.0.0-beta.7; the two selects above the
+- **The room and the function filter belong to the interface they were set on** (#143). 3.0.0-beta.7 gave
+  the column filters of a grid to their interface; the two selects above the
   device grid still outlived a switch, and they are applied to the rows before the table sees
   them, so not even the table's own "0 von 31" could report them. A grid narrowed to a room of
   BidCos-RF was therefore empty on VirtualDevices, whose groups are in no room - and the empty
@@ -1365,14 +1361,14 @@ confirmed as a user-defined interface (#135).
   it. With a single interface the button is off. Core's `proposeReceivers` is the pure part, with
   its own tests; the dialog is tested against the mock transport. Not tried against hardware with
   two receivers - the lab has none.
-- **The Zusatzsoftware page shows the addon's umlauts as `GerÃ¤te`** (#140, `BUGS.md` B-3). The
+- **The Zusatzsoftware page shows the addon's umlauts as `GerÃ¤te`** (#140). The
   WebUI reads an addon's `rc.d/<name> info` lines through a Tcl pipe whose system encoding is
   Latin-1 on the CCU3 and OpenCCU alike and prints them into its Latin-1 page as they are, so the
   UTF-8 umlauts of the `Info:` line - and of the description in `hm_addons.cfg`, which the
   Systemsteuerung page renders the same way - came out as two characters each. Both now spell
   their umlauts as HTML entities (`Ger&auml;te`), which every encoding survives; the package test
   and the container test check that nothing outside ASCII is in either.
-- **The WebUI now reports an addon update as finished** (#141, `BUGS.md` B-4). On OpenCCU the
+- **The WebUI now reports an addon update as finished** (#141). On OpenCCU the
   WebUI runs `/bin/install_addon` inside its own `cp_software.cgi` request and shows its
   "installation successful" popup only when that has returned. The addon's `update_script` ran
   `/etc/init.d/S50lighttpd restart` on every install - even an update whose proxy rule was byte
@@ -1411,7 +1407,7 @@ Two reports from the first tester of beta.5 (NickHM, in the forum thread of the 
 then as #142 and #143), both about what the grids say - fixed the way 2.7 had it.
 
 - **The receiver of a BidCos-RF device is named in the device grid and over its Funk columns**
-  (#142, `BUGS.md` B-2). The device grid on BidCos-RF has an `INTERFACE` column that names the
+  (#142). The device grid on BidCos-RF has an `INTERFACE` column that names the
   receiver a device is routed through - the CCU's own radio module, a LAN gateway - as
   `listBidcosInterfaces` describes it, and by serial when the gateway has no description; `⇄`
   behind it says roaming is on. The Funk grid has 2.7's second header row back: one cell per
@@ -1421,7 +1417,7 @@ then as #142 and #143), both about what the grids say - fixed the way 2.7 had it
   set to, `○` for the others; clicking a marker opens `setBidcosInterface` on that gateway. In
   that dialog the bold row is now the configured receiver; it was the one heard best, which is
   still named under the table. HmIP and Wired have no receivers and show none of this.
-- **VirtualDevices: the grid lists what the header counts** (#143, `BUGS.md` B-1). A filter typed
+- **VirtualDevices: the grid lists what the header counts** (#143). A filter typed
   into a column of the device grid outlived the switch to another interface: the reporter's 31
   groups were counted in the popup, hidden by a filter typed for BidCos-RF addresses, and the
   empty grid said the interface had reported nothing. The column filters and the scroll position
@@ -1446,7 +1442,7 @@ then as #142 and #143), both about what the grids say - fixed the way 2.7 had it
 Rooms and functions - in the grids, in a dialog, and on a CCU straight from ReGa - plus the
 reworked HmIP service-message suppression, and the Docker cookie question answered.
 
-- **Rooms and functions can be edited** (task 25, D-40). The device and channel grids gain a
+- **Rooms and functions can be edited**. The device and channel grids gain a
   _Rooms_ and a _Functions_ column; select rows and use _Assign to room_ / _Assign to function_
   (toolbar or context menu) to put them into, or take them out of, a node - one write for the
   whole selection. A filter by room and by function sits above the grid; a floor - a room with
@@ -1455,7 +1451,7 @@ reworked HmIP service-message suppression, and the Docker cookie question answer
   goes. Beside the interface mark a small indicator says where names and rooms come from (this
   profile, an openccu-lite box, or ReGa) and whether the store answers and takes writes; the
   settings dialog has a _Names and rooms_ section for the provider choice and the API token.
-- **Rooms and functions on a CCU come from ReGa** (task 27). With ReGa switched on and no
+- **Rooms and functions on a CCU come from ReGa**. With ReGa switched on and no
   openccu-lite box, the rooms and functions are the CCU's own - read and written through ReGa's
   objects, so what is assigned here is what the WebUI shows, and the other way round. ReGa's
   rooms are a flat list: the dialog says so and offers no floors there. A ⟳ in the dialog reads
@@ -1465,12 +1461,12 @@ reworked HmIP service-message suppression, and the Docker cookie question answer
   has the run. Found there and fixed: the rooms and functions a CCU comes with are stored under
   translation keys (`roomKitchen`), which the WebUI translates on display - the list here now
   shows them the same way (German, or English when the profile's language is English).
-- **The Docker image's cookie default is decided (D-41, OQ-15):** the image keeps
+- **The Docker image's cookie default is decided:** the image keeps
   `HMM_ISSUE_COOKIE=true`, and the host now prints one warning line at start whenever it hands
   the token cookie to every browser on a non-loopback bind - whoever reaches that port is in -
   with the three ways to lock it down. `HMM_ISSUE_COOKIE=false` silences it.
 
-- **HmIP service-message suppression, reworked after the maintainer's look at beta.5.** The
+- **HmIP service-message suppression, reworked after a look at beta.5.** The
   _Service messages_ box on top of the VALUES dialog is gone. Instead, the paramset dialog of
   channel 0 on an HmIP interface shows a _suppressed_ checkbox per service parameter inside the
   parameter table: in the MASTER dialog as rows of their own at the end (the parameters live in
@@ -1493,10 +1489,9 @@ rega` still insists), and a rename goes through the name service for every objec
 
 ### Known issues
 
-- **Not seen on hardware yet:** the suppression checkboxes and the per-row action (task 26) have
+- **Not seen on hardware yet:** the suppression checkboxes and the per-row action have
   only met the demo transport - no real HmIP server has answered `getSuppressedServiceMessages`
-  here - and `ROUTING_TABLE` has not been read from a real router. The rooms and functions dialog
-  (task 25) was not clicked through against a CCU; the ReGa provider behind it was.
+  here - and `ROUTING_TABLE` has not been read from a real router. The rooms and functions dialog was not clicked through against a CCU; the ReGa provider behind it was.
 - **ReGa behind the CCU's firewall:** a desktop or Docker install reaches ReGa's port 8181 only
   from a network the CCU's firewall lists (`restricted` is the CCU's default for that port). The
   header's indicator then says ReGa did not answer, and rooms and functions stay in the profile.
@@ -1535,23 +1530,23 @@ The first beta that talks to the HmIP addendum, and a smaller change for a box.
 
 ## [3.0.0-beta.3] — 2026-09-06
 
-Rooms and functions, and openccu-lite (D-40, task 24).
+Rooms and functions, and openccu-lite.
 
 - **Rooms, functions, floors — and any other taxonomy you make.** The Homematic Manager now keeps a
   taxonomy of its own in the profile (`meta.json`), so a user on Homegear, on a bare `rfd` or on
   the desktop has one for the first time. It is reachable through the API today; the grid column,
-  the "assign to room" of a multi-selection and the tree dialog are task 25.
+  the "assign to room" of a multi-selection and the tree dialog follow in a later beta.
 - **[openccu-lite](docs/openccu-lite.md) support.** On that CCU firmware without ReGaHSS, names,
   rooms and functions come from the box's metadata store and are **written back** to it: a rename
   in the grid, a new room, a channel moved into one. A change made anywhere else on the box is in
   the grid within a second, over the box's change stream. Which store is used is decided at
   runtime by one call (`GET /api/meta/v1/version`) on the host that is configured — a profile that
-  moves between a CCU and a box needs no edit, and on a CCU nothing about ReGa changes (D-2).
+  moves between a CCU and a box needs no edit, and on a CCU nothing about ReGa changes.
 - **The addon's login on openccu-lite** (`--auth-mode occulite`, the default there): the box's
   shell hands the addon the user's session, the addon checks it against the box and takes it from
   there; there is no second login page, because the users are the box's. Reads use the box's
   read-only local token, writes use that user's session — so a rename is attributed to a person.
-  The ReGa login of D-32 on a CCU is untouched.
+  The ReGa login on a CCU is untouched.
 - Off the box (desktop, npm, Docker) the store needs an API token from the box's _Users_ page,
   pasted into the connection settings; without one the app runs on its own names and says so.
 - New connection options: `metaProvider` (`auto`, `local`, `occulite`), `metaToken`, `metaUrl`.
@@ -1560,7 +1555,7 @@ Rooms and functions, and openccu-lite (D-40, task 24).
 
 ## [3.0.0-beta.2] — 2026-09-06
 
-The second public pre-release, cut from `master` (D-38). Everything of beta.0 plus:
+The second public pre-release, cut from `master`. Everything of beta.0 plus:
 
 - No "unknown method setReadyConfig" notices at start: the callback every interface process sends
   after `init` is known now, and a genuinely unknown method is reported once per session.
@@ -1584,7 +1579,7 @@ replaced by a tested TypeScript core, a Svelte 5 user interface and a Node backe
 dialogs and workflows are deliberately the same as 2.7 — the implementation changed, not the design.
 The 2.7.1 sources stay under `legacy/` for reference until 3.0 ships.
 
-Development runs on `master` (D-38) with the `3.0.0-beta.n` counter. **3.0.0-beta.0 is a
+Development runs on `master` with the `3.0.0-beta.n` counter. **3.0.0-beta.0 is a
 published pre-release** (2026-09-06) with the desktop installers, the CCU addon packages and the
 Docker image; the beta's npm package follows. What a 2.x user should read first is
 [docs/migration-from-2.x.md](docs/migration-from-2.x.md).
@@ -1606,7 +1601,7 @@ Docker image; the beta's npm package follows. What a 2.x user should read first 
 **32-bit ARM desktop builds are gone**: Electron 44 publishes no `linux-armv7l` binary. Such a
 machine runs the CCU addon or the npm package, both of which are plain Node [#115, #139].
 
-The **npm package is `homematic-manager`** (D-33) — the name 2.x had on npm. `npm install -g
+The **npm package is `homematic-manager`** — the name 2.x had on npm. `npm install -g
 homematic-manager` used to give the 2.x desktop app and now gives the server; the desktop app is an
 installer from the release. The 1.x versions under that name stay deprecated, and until 3.0.0 moves
 the `latest` tag a pre-release has to be asked for by name: `npm install -g homematic-manager@next`.
@@ -1733,9 +1728,9 @@ This is the change with the largest consequence, and it comes out of a measureme
 - **Quitting waits for the backend** to de-register its callbacks at the interface processes, bounded
   to eight seconds, instead of racing a 15 s timer against `process.exit(0)`.
 - CCU discovery over UDP as a button in the settings dialog.
-- **User-defined extra interfaces** (name, host, port, protocol, path) with validation [#135, D-13];
+- **User-defined extra interfaces** (name, host, port, protocol, path) with validation [#135];
   CUxD and VirtualDevices are configured explicitly instead of only being port-probed [#128].
-- **ReGa is optional** [D-2]: a system without it works fully on locally stored names and shows a
+- **ReGa is optional**: a system without it works fully on locally stored names and shows a
   status indicator. A ReGa 401 no longer crashes the app [#127]. Where it is there it can also
   confirm new devices in the inbox [#54].
 - **An interface whose port refuses backs off** from 15 seconds to five minutes with one notice per
@@ -1743,11 +1738,11 @@ This is the change with the largest consequence, and it comes out of a measureme
   enabled in the default interface list and does exactly this on every system without a wired
   gateway.
 - **The web host and the addon de-register from the interface processes while no browser is
-  connected** and re-subscribe on the next page load (`init('')` after five minutes; D-31). Default
+  connected** and re-subscribe on the next page load (`init('')` after five minutes). Default
   on for the addon, the npm install and Docker, off in the desktop app, and configurable with
   `--idle-unsubscribe` / `HMM_IDLE_UNSUBSCRIBE`.
 - Per-interface host, port, TLS and authentication [#106].
-- **The CCU addon can ask for a CCU login** (D-32): the button in _Systemsteuerung_ opens the app
+- **The CCU addon can ask for a CCU login**: the button in _Systemsteuerung_ opens the app
   directly as before, but a bookmark straight to `/addons/hmm/` gets a login page checked against
   the CCU's own users, with a session cookie, a logout, and five failed attempts a minute before
   the CCU is asked no further. Off by default, switched on from the addon's own settings page.
@@ -1774,7 +1769,7 @@ This is the change with the largest consequence, and it comes out of a measureme
   asks for the download, the user confirms install-on-quit. It can be switched off through
   `host.json` or `HMM_DISABLE_AUTO_UPDATE`. The "install update" exception is gone [#90].
 - Every release artefact ships a **CycloneDX 1.6 SBOM** and a signed GitHub attestation, so
-  `gh attestation verify` works offline against a downloaded file [D-27]. The SBOMs list the runtime
+  `gh attestation verify` works offline against a downloaded file. The SBOMs list the runtime
   that is not an npm dependency — Electron with its Chromium, Node and V8, the bundled Node and
   Alpine packages of the addon, the base image of the Docker build — so a CVE in one of them is
   searchable per release.
@@ -1785,10 +1780,10 @@ This is the change with the largest consequence, and it comes out of a measureme
 - **The "prefer BIN-RPC" option** and any protocol choice in the settings dialog. No CCU listens for
   BIN-RPC on the LAN: `rfd` and `hs485d` take it on the loopback (32001/32000) and the public ports
   2001/2000 are lighttpd's XML-RPC proxies. Off the CCU everything built-in is XML-RPC; BIN-RPC
-  remains for the addon's local mode and for CUxD on 8701 [D-28].
-- **Support for the HVL addon** — the project is dead [#123, D-19].
+  remains for the addon's local mode and for CUxD on 8701.
+- **Support for the HVL addon** — the project is dead [#123].
 - **Homegear-specific code**, including the `setName` special case. Homegear keeps working through
-  the generic XML-RPC path where it behaves like a CCU [#41, #59, #60, #100, #106, D-20].
+  the generic XML-RPC path where it behaves like a CCU [#41, #59, #60, #100, #106].
 - **32-bit ARM desktop builds** (see above).
 - The 2015 easy-mode conversion, the bundled 34 MB of device images and the hand-maintained string
   table, all replaced by pinned openccu-data artifacts. No receiver type and no sender combination
@@ -1800,7 +1795,7 @@ This is the change with the largest consequence, and it comes out of a measureme
 - On the very first start the 2.x configuration is imported **once** — CCU address, TLS,
   authentication, language, RPC pacing, RPC log folder and callback address — from
   `%APPDATA%\hm-manager\config`, `~/Library/Preferences/hm-manager/config` or `~/.hm-manager/config`.
-  The 2.x caches are discarded on purpose, and 2.x itself is left untouched [D-17].
+  The 2.x caches are discarded on purpose, and 2.x itself is left untouched.
 - Details, and everything that changed in behaviour, in
   [docs/migration-from-2.x.md](docs/migration-from-2.x.md).
 
@@ -1809,14 +1804,14 @@ This is the change with the largest consequence, and it comes out of a measureme
 - The 3.0 code base is **AGPL-3.0-or-later**; 2.x was GPL-3.0. The 2.x sources under `legacy/` keep
   the contributions of others and stay **GPL-3.0-or-later**, which GPLv3 section 13 lets the AGPL
   work combine with. The generated device data under `data/dist/` is eQ-3 data and stays under the
-  **Homematic Software License 2.0** — see [data/NOTICE.md](data/NOTICE.md) [D-26].
+  **Homematic Software License 2.0** — see [data/NOTICE.md](data/NOTICE.md).
 
 ### Known issues
 
 - A `°` from `rfd` or CUxD over **BIN-RPC** arrives as U+FFFD: `binrpc@4.2` decodes strings as UTF-8.
   This affects the CCU addon and CUxD, not the XML-RPC path; the fix is a one-line change upstream.
 - The **Docker image issues its session cookie on a non-loopback bind** (`HMM_ISSUE_COOKIE=true`),
-  so whoever reaches the published port is in. This is still an open question (OQ-15) and
+  so whoever reaches the published port is in. This is still an open question and
   [docs/install-docker.md](docs/install-docker.md) names three ways to lock it down; the warning line
   the recommendation asks for is not implemented yet.
 - The **beta.0 desktop build** shows harmless "unknown method setReadyConfig" notices at start and

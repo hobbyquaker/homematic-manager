@@ -1,7 +1,7 @@
 # Homematic Manager as a CCU addon
 
 The Homematic Manager running **on the CCU itself**, behind the CCU's own lighttpd, opened from
-_Systemsteuerung_. Same backend, same UI and same `config.json` as every other install type (D-25) —
+_Systemsteuerung_. Same backend, same UI and same `config.json` as every other install type —
 but no second machine, no port to open, no firewall rule and no CCU address to configure, because
 it is running on the box it configures.
 
@@ -76,7 +76,7 @@ ssh root@ccu /bin/install_addon        # the exact path the WebUI takes; prints 
 
 Exit code 10 means "fresh install", 0 means "update".
 
-## Verifying the download (D-27)
+## Verifying the download
 
 Every package has a `.sha256` next to it and a CycloneDX 1.6 SBOM (`<package>.tar.gz.cdx.json`)
 listing what is really inside — including the bundled Node.js and, on `armv7l`, the Alpine packages
@@ -140,7 +140,7 @@ POST /addons/hmm/login      user + password
 GET /addons/hmm/logout      ends the session and clears the cookie
 ```
 
-Those are the same two services the CCU's own WebUI uses; there is no JSON-API involved (D-1) and no
+Those are the same two services the CCU's own WebUI uses; there is no JSON-API involved and no
 second password anywhere — **the users are the CCU's users**, and changing one on the CCU changes it
 here. Both services listen on the CCU's loopback only, which is why this exists for the addon and
 nowhere else: an npm or Docker install that asks for `--auth-mode rega` refuses to start and says
@@ -251,8 +251,7 @@ callbacks.
 
 ## Configuration
 
-There is nothing to configure for the addon to work. Everything the *app* offers — extra interfaces
-(D-13), the write pace, the language, ReGa on or off — is in its own settings dialog and is stored
+There is nothing to configure for the addon to work. Everything the *app* offers — extra interfaces, the write pace, the language, ReGa on or off — is in its own settings dialog and is stored
 in `/usr/local/hmm/config.json`.
 
 The *host process* reads `/usr/local/addons/hmm/etc/hmm.env`, which is copied from `etc/default.env`
@@ -282,7 +281,7 @@ settings but the definition of "we are the addon".
 | The button opens a page saying the session is invalid | The WebUI session expired. Reload the WebUI and open the addon again. |
 | The button opens a 503 page | The service is not running: `service.cgi?…&cmd=log`, or `/var/log/hmm.log` (`/usr/local/addons/hmm/var/hmm.log` when the log is set to the addon directory); on openccu-lite the box's Log page with unit `addon-hmm`, or `journalctl -t addon-hmm`. Start it with the _Neu starten_ button. |
 | The UI loads but stays disconnected | The WebSocket did not get through. `grep hmm /var/log/messages`, and check that `/usr/local/etc/config/lighttpd/hmm.conf` exists and lighttpd has read it (`/etc/init.d/S50lighttpd reload`). **CCU3 firmware older than 3.61.5 does not read that directory at all.** |
-| No devices, interfaces marked red | The interface processes answer on the CCU's loopback only (D-28). `netstat -tlnp` should show 32001 / 32010; a CCU in safe mode or with `HM_MODE` other than `NORMAL` starts neither them nor addons. |
+| No devices, interfaces marked red | The interface processes answer on the CCU's loopback only. `netstat -tlnp` should show 32001 / 32010; a CCU in safe mode or with `HM_MODE` other than `NORMAL` starts neither them nor addons. |
 | Device pictures are missing | They come from the CCU's own `/config/img/devices/`; the app falls back to the pictures that ship in `app/data/icons/`. |
 | `BidCos-Wired` shows as "not present" | `hs485d` only runs on a CCU that has a BidCos-Wired gateway, and the default interface list enables it anyway. Its port refuses the connection, so the app says so once, marks the interface as not present in the header and checks its port every 15 seconds without calling it. Nothing is wrong; untick BidCos-Wired in the settings dialog to be rid of the entry. |
 | An interface shows as "waiting" | In the first 90 seconds after the app started, an interface whose port refuses or does not answer is tried again every 3 seconds, because its process may simply not be up yet - on a system that is still booting, or on openccu-lite where the app starts before the interface processes. It connects as soon as the process answers. One that still does not answer after 90 seconds shows as "not present" or "not answering", and its port is checked every 15 seconds; when one interface appears, every missing one is tried at once. |
@@ -309,7 +308,7 @@ On a CCU and OpenCCU you choose where that log goes, in the _Log_ section of the
   follow the setting.
 - An uninstall removes `/var/log/hmm.log` as well.
 
-On openccu-lite there is no log file (task 41, following openccu-lite's rule that everything logs to
+On openccu-lite there is no log file (following openccu-lite's rule that everything logs to
 the journal): the process's output goes to the journal under the unit's identifier `addon-hmm`. The
 box's Log page shows it with the unit `addon-hmm` chosen, `journalctl -t addon-hmm` on the box, and
 `service.cgi?…&cmd=log` sends the browser to that Log page. A `var/hmm.log` from an earlier version is
@@ -338,7 +337,7 @@ binaries are not.
 with a few addons already uses half of them. The install cost **519** of them on the lab CCU3 and
 72 MB of the 2 GB partition. Backend RSS during operation was 71–100 MB depending on the box.
 
-The generated device metadata ships **minified, not pre-gzipped** (D-30, decided by measuring this):
+The generated device metadata ships **minified, not pre-gzipped** (decided by measuring this):
 pretty-printed 9.62 MB, minified 7.45 MB, gzipped 0.64 MB — but all three cost the same 199 inodes,
 the download differs by 50 KB because the package is a `.tar.gz` anyway, and pre-gzipping would need
 a `Content-Encoding` branch in the static server that all install types share.

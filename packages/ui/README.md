@@ -5,13 +5,13 @@ reusable components the tabs are built from, the stores, and the transports that
 backend. It never touches Node, a socket or a file - everything goes through the `Transport` of the
 API contract in `packages/core/src/api/types.ts`.
 
-Task 7 built the foundation, task 8 filled the six tabs: the device grid with its channel sub-grid,
+The six tabs: the device grid with its channel sub-grid,
 the generic paramset editor, the link editor with the easy-mode profiles, the RPC console, the RSSI
-matrix, the service messages, the events and the pairing dialog. Task 10 added the device-specific
+matrix, the service messages, the events and the pairing dialog, and the device-specific
 editors that plug into the paramset dialog. A toolbar button that is disabled always says why in
 its tooltip.
 
-A tab with a grid has no toolbar strip of its own (task 20). Its actions and its row count are the
+A tab with a grid has no toolbar strip of its own. Its actions and its row count are the
 `DataTable`'s **header band**: the actions on the left, "4 Geräte" on the right, the column labels
 in the row beneath, and the per-column filter fields under those - the whole block above the one
 part that scrolls. There is no tab-wide "filter everything" box; a grid is filtered per column, as
@@ -20,17 +20,17 @@ console.
 
 ## What the tabs do
 
-- **Devices**: the 2.7 columns with the channel sub-grid of `subGridChannels`, device images (D-10),
+- **Devices**: the 2.7 columns with the channel sub-grid of `subGridChannels`, device images,
   flags, RX_MODE, service-message marks, and a firmware column whose button really disappears when
   the update has arrived (#95, #113). Context menu and toolbar: rename, reportValueUsage over a
-  whole selection (#18), `restoreConfigToDevice`, `clearConfigCache`, repair configuration
-  (task 6.7), replace, delete with the two flag dropdowns, and the paramset buttons.
-- **Paramset editor**: description-driven, with the metadata of task 9 on top (order, conditional
+  whole selection (#18), `restoreConfigToDevice`, `clearConfigCache`, repair configuration,
+  replace, delete with the two flag dropdowns, and the paramset buttons.
+- **Paramset editor**: description-driven, with the metadata on top (order, conditional
   visibility, option presets, cross-validation, labels, enum names and help texts). Multi-apply only
-  across an identical paramset description (task 6.3), a preview of the changed-only payload before
+  across an identical paramset description, a preview of the changed-only payload before
   every write, `writeAll` as the explicit opt-out, `setValue` per datapoint of VALUES, and the
   read-back afterwards - `ok` means nothing on BidCos (`docs/config-pending.md`).
-- **Device-specific editors** (task 10): plug-ins on top of that dialog for the paramsets that are
+- **Device-specific editors**: plug-ins on top of that dialog for the paramsets that are
   really one procedural dialog - the heating week programme, the HmIP switching programme, the
   blind calibration, the duration pairs and the enums the description alone cannot render. Each one
   either recognises the description or stands down, draws exactly the parameters it lists in
@@ -49,7 +49,7 @@ console.
 - **RPC console**: a generated argument form for all 51 catalogue methods including structs
   (#27, #136), a history and the raw response.
 - **Service messages**: acknowledge one or all, the two meanings of `CONFIG_PENDING`, toasts instead
-  of 2.x's modal (#77), and on HmIP eQ-3's per-message suppression (task 26).
+  of 2.x's modal (#77), and on HmIP eQ-3's per-message suppression.
 - **Events**: the two filter boxes over core's event filter, a pause, and the per-device counter of
   #129.
 - **Teams** (#97): a BidCos smoke detector is not linked to the others, it belongs to a team - a
@@ -69,7 +69,7 @@ console.
   write is a plan, and a plan that outlives the page would be applied against a device state nobody
   has looked at since.
 
-## Device-specific editors (task 10)
+## Device-specific editors
 
 The generic paramset editor draws one row per parameter. For a handful of paramsets that is
 useless: a heating week programme is 546 numbered parameters, an HmIP switching programme 750, a
@@ -96,7 +96,7 @@ descriptions they are tested against.
 
 ## The host bridge
 
-`window.__HMM_HOST__` (Electron, task 11) is read through `HostStore` and nowhere else. Without it -
+`window.__HMM_HOST__` (Electron) is read through `HostStore` and nowhere else. Without it -
 `apps/web`, the CCU addon, demo mode - `available` is false, every method is a no-op that resolves,
 the update notice never appears, the GitHub icon in the header (and the update notice's link to the
 release list) is a plain `target="_blank"` link instead of a `shell.openExternal` through the bridge, the settings dialog's info line shows the
@@ -129,9 +129,9 @@ npm run build -w @homematic-manager/ui
 writes a static bundle to `dist/`: `index.html` plus hashed assets, with `base: './'` so the same
 output works
 
-- from the Electron custom protocol (task 11),
-- at `/` behind `apps/web` (task 12),
-- and under `/addons/hmm/` behind the CCU's lighttpd (task 13),
+- from the Electron custom protocol,
+- at `/` behind `apps/web`,
+- and under `/addons/hmm/` behind the CCU's lighttpd,
 
 without a build-time base URL. The package also exports its components and stores as a library
 (`src/index.ts`, `svelte` condition) so the Electron renderer imports the sources and compiles them
@@ -157,11 +157,11 @@ src/
   App.svelte            the shell: header, tabs, drawer, dialogs, overlays
   main.ts               browser entry (apps/web, the CCU addon, demo mode)
   index.ts              library entry for the Electron renderer
-  app.css               the theme tokens, light and dark (D-22)
+  app.css               the theme tokens, light and dark
   routes/               one component per tab, plus the settings dialog
   routes/devices/       rename, delete, replace, repair, add device and the QR scanner
   routes/paramset/      the generic paramset editor, one parameter row, the write preview
-  routes/paramset/editors/  the device-specific editors of task 10 and their dispatch
+  routes/paramset/editors/  the device-specific editors and their dispatch
   routes/links/         add link, remove links, the link paramset editor
   routes/radio/         setBidcosInterface
   lib/components/       DataTable, Dialog, MultiSelect, ContextMenu, Tabs, Toolbar, Loader,
@@ -178,7 +178,7 @@ src/
   testHarness.ts        `mountApp()` and the three doubles every tab test starts with
 ```
 
-## Theme (D-22)
+## Theme
 
 Light and dark are both requirements. Every colour is a custom property on `:root`, redefined once
 under `@media (prefers-color-scheme: dark)` (guarded by `:root:not([data-theme='light'])`, so an
@@ -197,7 +197,7 @@ npm test -w @homematic-manager/ui             # (the root `npm test` runs every 
 npm run test:jsdom -w @homematic-manager/ui   # the fallback, no browser download
 ```
 
-The suite runs in a real headless chromium (D-23, flipped by task 14): jsdom has no layout, so it
+The suite runs in a real headless chromium: jsdom has no layout, so it
 measures every element as 0 x 0 and implements `showModal()` as a flag, and the virtualised table,
 the dialog stacking and the focus handling are exactly what needs a browser. It is also about four
 times faster, because there is no DOM shim to build per test file.
@@ -210,4 +210,4 @@ CI reports on browser mode, so a test that only passes in jsdom is not a passing
 ## Routing
 
 The hash route is 2.7's, unchanged: `#/<interface>/<tab>` with the tab ids `devices`, `links`,
-`rssi`, `console`, `messages`, `events`. Bookmarks and links from the forum keep working (D-3).
+`rssi`, `console`, `messages`, `events`. Bookmarks and links from the forum keep working.

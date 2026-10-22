@@ -23,7 +23,7 @@ immediately.
 | Rooms, functions, floors | ReGa's own rooms and functions when ReGa is on (a flat list, no floors), else this profile's own store | the box's, as trees; shared with every other program on the box |
 | The login of the addon | the WebUI session (`settings.cgi`), optionally a CCU user (`--auth-mode rega`) | the session openccu-lite's shell hands over (`--auth-mode occulite`) |
 | Device images | fetched from the CCU | the bundled subset — the box has no `/config/img/devices/` |
-| Heating groups (the `VirtualDevices` group devices) | shown and their paramsets edited; created, changed and deleted in the WebUI only — the group process has no RPC for it and its own pages need a WebUI session (D-1) | the **Groups** tab of `VirtualDevices`: list, create, rename, add and remove members, delete — through the box's `/api/system/v1/groups`, with the same login as the metadata store; administrators only |
+| Heating groups (the `VirtualDevices` group devices) | shown and their paramsets edited; created, changed and deleted in the WebUI only — the group process has no RPC for it and its own pages need a WebUI session | the **Groups** tab of `VirtualDevices`: list, create, rename, add and remove members, delete — through the box's `/api/system/v1/groups`, with the same login as the metadata store; administrators only |
 | Pairing an HmIP device | the three ways (SGTIN and key, SGTIN only through eQ-3's key server, any device) on every CCU alike | the same three — unless the system's key mode is _local_ and never asks the key server: then _SGTIN only_ is not offered and _any device_ pairs only a device whose key is stored on the system (the count is shown). Read from the system's `GET /api/meta/v1/version` (`hmip`) each time the dialog opens; no key leaves the system |
 | System variables, programs, HM-Script | ReGa | **not available** — see below |
 
@@ -34,7 +34,7 @@ the rooms and functions come from ReGa when it is on (and answered), else from t
 same grid columns, the same filter and the same dialog work against all three; the indicator
 beside the interface mark says which one it is. A profile that is moved from one to the other and back needs no
 edit — which is the point, because moving between OpenCCU and openccu-lite in both directions is a
-supported operation of that project (its D-17).
+supported operation of that project.
 
 An openccu-lite system answers `http://` with a redirect to `https://`. The Homematic Manager follows
 it and uses the `https://` address for everything it asks the system from then on. When the
@@ -58,7 +58,7 @@ answers that save a round trip:
   gone. The Tcl form `rega_script` used by addon settings pages for the **session check** keeps
   working through openccu-lite's `tclrega.so` shim, and this addon's `settings.cgi` uses exactly
   that one call and no other. Since 3.0.0-beta.18 the settings page reads the gate's
-  `X-Occulite-Session` first (task 50), confirmed with `GET /api/auth/v1/state`, and needs no
+  `X-Occulite-Session` first, confirmed with `GET /api/auth/v1/state`, and needs no
   `?sid=` on openccu-lite at all; the shim answers the `?sid=` of older shells as before.
 - **ReGa ids** (`dom.GetObject(1234)`): there are none. The identity of an object is its **ref**,
   `<interface>.<address>` — `BidCos-RF.JEQ0230153:1` for a channel, `HmIP-RF.0001D3C99C7D4B` for a
@@ -67,7 +67,7 @@ answers that save a round trip:
   Homematic Manager reads service messages from the interface processes anyway, so its list is the
   same on both firmwares; what it cannot do on openccu-lite is acknowledge the CCU's *own* alarm
   afterwards, because there is none.
-- **The CCU WebUI's JSON-RPC API**: not present, and never used by this application (D-1).
+- **The CCU WebUI's JSON-RPC API**: not present, and never used by this application.
 - **The CCU's inbox** (issue #54, "confirm newly paired devices"): a ReGa concept. The option stays
   in the settings and does nothing on openccu-lite.
 
@@ -87,22 +87,22 @@ longer counts (the rule every addon for openccu-lite follows):
   its own — the users are the box's — so a browser that arrives without a session is sent to the
   box's login. The token hand-over of `settings.cgi` keeps working unchanged next to it. Since
   3.0.0-beta.16 the addon also accepts the session openccu-lite's lighttpd gate passes as the
-  `X-Occulite-Session` header on every request it lets through (openccu-lite B-94, D-65; the gate
+  `X-Occulite-Session` header on every request it lets through (the gate
   removes a copy a browser sent). The header is only a claim until `GET /api/auth/v1/state`
   confirms it, and the confirmation is kept for a minute; so a bookmark without `?sid=` opens the UI
   on an image that sets the header, and nothing changes on one that does not. The other two auth
   modes never read it, because a CCU's lighttpd passes a client's header through. Since
-  3.0.0-beta.18 a confirmed header also comes **before** a `?sid=` on the URL: since openccu-lite's
-  task 125 what a shell puts there is the session's ten-character legacy alias, which the box's API
+  3.0.0-beta.18 a confirmed header also comes **before** a `?sid=` on the URL: on current openccu-lite
+  images what a shell puts there is the session's ten-character legacy alias, which the box's API
   refuses, so the header signs the request in and the `?sid=` only comes off the URL. A `?sid=` that
   cannot be an openccu-lite session is not asked about at all: anything but 26 characters of base32
-  (the session ids since task 125) or ten alphanumerics (before), and a ten-character one when the
+  (the current session ids) or ten alphanumerics (before), and a ten-character one when the
   gate names a 26-character session.
 - **the Config-Url**: on a CCU it is the Systemsteuerung button that opens the app, and the settings
   page is linked from the description. On openccu-lite the app has its own entry in the addon menu
   and the shell frames the Config-Url behind ⚙ and the *Settings* button, so there the install
   (`update_script`) and `rc.d/hmm info` name the settings page, `/addons/hmm/settings.cgi?cmd=config`.
-- **the settings page is for administrators** (since 3.0.0-beta.18, B-37): the settings page and
+- **the settings page is for administrators** (since 3.0.0-beta.18): the settings page and
   `service.cgi` (start, stop, restart, status, the log view) want a session the box names as `admin`
   in `GET /api/auth/v1/state` - the gate's header, or where the box does not confirm it, the session
   id in `?sid=`. A `user` account, the session's legacy alias (which carries no role the addon can
@@ -121,15 +121,14 @@ there: `HMM_AUTH_MODE` is the CCU's and is not read on openccu-lite, `HMM_AUTH_M
 openccu-lite's (`occulite` unless it says `token`) and is not read on a CCU — so the same
 `/usr/local` can move between the two firmwares and each keeps its own choice, and the
 `HMM_AUTH_MODE=token` every install from the CCU days carries does not keep the addon out of the
-box's login after an upgrade (B-22). The addon's settings page
+box's login after an upgrade. The addon's settings page
 (`/addons/hmm/settings.cgi?cmd=config`) offers the two modes that fit the firmware it is running
 on and writes that firmware's line.
 
 ## Off the system: a desktop, a server, Docker
 
 The same detection applies wherever the Homematic Manager runs: point it at the system's address
-and it finds the metadata API. An openccu-lite system never calls a remote client back (its
-D-70), so from off the system the interfaces are not reached the CCU way. Since 3.0.0-beta.33 the
+and it finds the metadata API. An openccu-lite system never calls a remote client back, so from off the system the interfaces are not reached the CCU way. Since 3.0.0-beta.33 the
 app uses the system's **lite-rpc** instead, through
 [occulite-client](https://www.npmjs.com/package/occulite-client): every request goes to the
 system's web port (`/api/rpc/v1/json/<interface>`) with an **API token**, and the events come
@@ -164,7 +163,7 @@ connection state, and tries again on the next reconnect. It never fails to start
 refused a credential.
 
 **The system's clock.** The system keeps the time of every datapoint it stores (its state store):
-the last report and the last change. The app shows them on such a connection (task 82).
+the last report and the last change. The app shows them on such a connection.
 A VALUES dialog says *since …* beside a value — its last change, the tooltip adds the last report —
 and greys a value the system restored from its own file that no device has reported since the
 system started (*restored*). The service-message list dates a message by the last change of its
@@ -204,7 +203,7 @@ credentials). The wire itself - the requests, the change stream, the certificate
 [occulite-client](https://www.npmjs.com/package/occulite-client), openccu-lite's own package for
 programs that talk to such a system; a new integration should start there. Both halves run
 openccu-lite's **conformance
-corpus** — its D-16 contract between the Go implementation and this one — from
+corpus** — the contract between the Go implementation and this one — from
 `packages/core/test/fixtures/meta/`, refreshed with `node scripts/sync-meta-fixtures.mjs
 <checkout>`, and there is an integration test against a real `occulited` in
 `packages/backend/test/occulite/`.

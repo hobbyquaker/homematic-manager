@@ -93,7 +93,7 @@ import {
 } from '../interfaces/manager.js';
 import {LiteInterfaces, type LiteInterfacesOptions} from '../interfaces/lite.js';
 import {HeatingGroupsClient} from '../groups/client.js';
-import {MetaService, hostBaseUrl, type HostProbe, type MetaServiceOptions} from '../meta/service.js';
+import {MetaService, hostBaseUrl, metaBaseUrl, type HostProbe, type MetaServiceOptions} from '../meta/service.js';
 import {
     DETECT_TIMEOUT_MS,
     detectSystem,
@@ -102,6 +102,8 @@ import {
     transportFor,
     type PairWithSystemOptions,
 } from '../meta/system.js';
+import {nodeAuth} from 'occulite-client/node';
+
 import {RegaService, type RegaServiceOptions} from '../rega/client.js';
 import type {RegaAlarm} from '../rega/scripts.js';
 import type {RpcCallRecord, RpcOutValue} from '../rpc/client.js';
@@ -131,6 +133,9 @@ const OWN_PARAMSETS: ReadonlySet<string> = new Set(['MASTER', 'VALUES', 'SERVICE
 
 /** How long the HmIP `getParamset(:0, VALUES)` sweep waits for the device list to settle. */
 export const HMIP_SWEEP_DELAY_MS = 1000;
+
+/** Task 107: the addon's id on openccu-lite (`files/openccu-lite.json`), whose token the system mints. */
+export const ADDON_ID = 'hmm';
 
 /**
  * An HmIP interface, by name or by interface type - the same rule the UI's settings dialog uses to
@@ -201,6 +206,14 @@ export interface BackendOptions extends Omit<ConfigStoreOptions, 'version'> {
     /** Task 72: the same for the openccu-lite path of a remote connection. */
     readonly createLiteInterfaces?: (options: LiteInterfacesOptions) => LiteInterfaces;
     readonly liteOptions?: Partial<LiteInterfacesOptions>;
+    /**
+     * Task 107: the addon's id on openccu-lite, whose own API token the system mints from the
+     * manifest's `api_scopes` into `<addonTokenDir>/<id>.api`. Read when the connection is `local`:
+     * the token found there is what makes the interfaces go through lite-rpc on the system itself.
+     * `hmm` unless a test says otherwise; the directory is occulite-client's default.
+     */
+    readonly addonId?: string;
+    readonly addonTokenDir?: string;
     /** Task 72: occulite-client's `pair()`, replaced by the tests. */
     readonly pair?: PairWithSystemOptions['pair'];
     readonly createRega?: (options: RegaServiceOptions) => RegaService;
@@ -237,6 +250,12 @@ export class Backend {
     #manager: Interfaces | undefined;
     /** Task 72: counts the connects, so a connect that waited for the probe knows it is still the current one. */
     #connectSeq = 0;
+    /**
+     * Task 107: the addon's own API token, read at every connect of a `local` connection. Found,
+     * the host is an openccu-lite system that minted it (nothing else writes that directory), and
+     * the settings dialog may offer the choice between lite-rpc and the direct connection.
+     */
+    #addonToken: string | undefined;
     /** Task 72: the pairing with an openccu-lite system that is running, if any. */
     #pairing: AbortController | undefined;
     #rega: RegaService | undefined;
@@ -799,7 +818,7 @@ export class Backend {
     }
 
     async #connectNow(): Promise<void> {
-        const connection = this.#config.connection;
+        const configured = this.#config.connection;
         const seq = ++this.#connectSeq;
         this.#paramsetIds.clear();
         this.#noServiceMessages.clear();
@@ -813,7 +832,31 @@ export class Backend {
         // the probe waited for - for everybody else (the addon on the system, a profile without a
         // token, every CCU) it runs alongside the interface start as before (D-40's rule: a host
         // that swallows the packet holds up the names, never the interfaces).
-        const token = (connection.metaToken ?? '').trim();
+        // Task 107: on the system itself the addon's own token decides. The system mints it from
+        // the manifest's scopes at every start, so finding it means "this is openccu-lite, and
+        // lite-rpc is open to us": the profile is moved to lite-rpc once (the marker says whether
+        // that happened before), and then its choice holds - `direct` keeps the callbacks.
+        let localLite = false;
+        if (configured.local === true) {
+            this.#addonToken = await this.#readAddonToken();
+            if (this.#superseded(seq)) {
+                return;
+            }
+            if (this.#addonToken !== undefined) {
+                await this.#migrateLocalRpc();
+                if (this.#superseded(seq)) {
+                    return;
+                }
+                localLite = this.#config.connection.localRpc !== 'direct';
+            } else if (configured.localRpc === 'lite') {
+                this.#notice(
+                    'info',
+                    'the profile asks for lite-rpc, but the system minted no API token for this addon (an openccu-lite before task 107, or a CCU): the interfaces are reached directly, with callbacks',
+                );
+            }
+        }
+        const connection = this.#config.connection;
+        const token = localLite ? (this.#addonToken as string) : (connection.metaToken ?? '').trim();
         const mayBeRemoteLite = connection.local !== true && token !== '';
         let hostProbe: Promise<HostProbe>;
         let liteProbe: HostProbe | undefined;
@@ -827,6 +870,7 @@ export class Backend {
         } else {
             hostProbe = this.#probeHost(connection);
         }
+        const useLite = localLite || liteProbe?.answer !== undefined;
 
         const shared = {
             connection,
@@ -844,43 +888,46 @@ export class Backend {
             },
             originOf: currentOrigin,
         };
-        const manager: Interfaces =
-            liteProbe?.answer !== undefined
-                ? (this.#options.createLiteInterfaces ?? ((options) => new LiteInterfaces(options)))({
-                      ...shared,
-                      baseUrl: liteProbe.baseUrl ?? hostBaseUrl(connection),
-                      token,
-                      transport: transportFor({
-                          fetch: this.#options.metaOptions?.fetch,
-                          trust: connection.systemTrust,
-                      }),
-                      ...(this.#options.rpcTimeoutMs === undefined ? {} : {rpcTimeoutMs: this.#options.rpcTimeoutMs}),
-                      ...(this.#options.now === undefined ? {} : {now: this.#options.now}),
-                      ...this.#options.liteOptions,
-                  })
-                : (this.#options.createInterfaceManager ?? ((options) => new InterfaceManager(options)))({
-                      ...shared,
-                      ...(this.#options.callbackHost === undefined ? {} : {callbackHost: this.#options.callbackHost}),
-                      ...(this.#options.defaultCallbackPorts === undefined
-                          ? {}
-                          : {defaultCallbackPorts: this.#options.defaultCallbackPorts}),
-                      ...(this.#config.callbackPins === undefined ? {} : {callbackPins: this.#config.callbackPins}),
-                      // B-69: read at every watchdog round - the cache is replaced when the host changes
-                      listsDevices: (interfaceName) => this.#caches.devices.size(interfaceName) > 0,
-                      ...(this.#options.rpcTimeoutMs === undefined ? {} : {rpcTimeoutMs: this.#options.rpcTimeoutMs}),
-                      ...(this.#options.watchdogIntervalMs === undefined
-                          ? {}
-                          : {watchdogIntervalMs: this.#options.watchdogIntervalMs}),
-                      ...(this.#options.localAddresses === undefined
-                          ? {}
-                          : {localAddresses: this.#options.localAddresses}),
-                      ...(this.#options.network === undefined ? {} : {network: this.#options.network}),
-                      ...(this.#keepsConfiguredCallbackIp() ? {keepConfiguredCallbackIp: true} : {}),
-                      ...(this.#options.now === undefined ? {} : {now: this.#options.now}),
-                      ...this.#options.interfaceManagerOptions,
-                  });
+        const manager: Interfaces = useLite
+            ? (this.#options.createLiteInterfaces ?? ((options) => new LiteInterfaces(options)))({
+                  ...shared,
+                  // on the system: the loopback lighttpd (or `metaUrl`, the integration tests' door)
+                  baseUrl: localLite ? metaBaseUrl(connection) : (liteProbe?.baseUrl ?? hostBaseUrl(connection)),
+                  token,
+                  transport: transportFor({
+                      fetch: this.#options.metaOptions?.fetch,
+                      trust: connection.systemTrust,
+                  }),
+                  ...(this.#options.rpcTimeoutMs === undefined ? {} : {rpcTimeoutMs: this.#options.rpcTimeoutMs}),
+                  ...(this.#options.now === undefined ? {} : {now: this.#options.now}),
+                  ...this.#options.liteOptions,
+              })
+            : (this.#options.createInterfaceManager ?? ((options) => new InterfaceManager(options)))({
+                  ...shared,
+                  ...(this.#options.callbackHost === undefined ? {} : {callbackHost: this.#options.callbackHost}),
+                  ...(this.#options.defaultCallbackPorts === undefined
+                      ? {}
+                      : {defaultCallbackPorts: this.#options.defaultCallbackPorts}),
+                  ...(this.#config.callbackPins === undefined ? {} : {callbackPins: this.#config.callbackPins}),
+                  // B-69: read at every watchdog round - the cache is replaced when the host changes
+                  listsDevices: (interfaceName) => this.#caches.devices.size(interfaceName) > 0,
+                  ...(this.#options.rpcTimeoutMs === undefined ? {} : {rpcTimeoutMs: this.#options.rpcTimeoutMs}),
+                  ...(this.#options.watchdogIntervalMs === undefined
+                      ? {}
+                      : {watchdogIntervalMs: this.#options.watchdogIntervalMs}),
+                  ...(this.#options.localAddresses === undefined ? {} : {localAddresses: this.#options.localAddresses}),
+                  ...(this.#options.network === undefined ? {} : {network: this.#options.network}),
+                  ...(this.#keepsConfiguredCallbackIp() ? {keepConfiguredCallbackIp: true} : {}),
+                  ...(this.#options.now === undefined ? {} : {now: this.#options.now}),
+                  ...this.#options.interfaceManagerOptions,
+              });
         this.#manager = manager;
-        if (liteProbe?.answer !== undefined) {
+        if (localLite) {
+            this.#notice(
+                'info',
+                "this openccu-lite system: the interfaces are reached through its lite-rpc with the addon's own token, without callbacks (the direct connection is selectable in the settings)",
+            );
+        } else if (liteProbe?.answer !== undefined) {
             this.#notice(
                 'info',
                 `${connection.host}: an openccu-lite system - the interfaces are reached through its lite-rpc with the API token, without callbacks`,
@@ -952,6 +999,50 @@ export class Backend {
         this.#startServiceMessagePolling();
         // B-70: counted from the start (or the reconnect of a save) when no page is open
         this.#armIdleTimer();
+    }
+
+    /** Disconnected, or another connect started, while this one was waiting (read through a call, so an `await` cannot narrow it away). */
+    #superseded(seq: number): boolean {
+        return this.#stopped || seq !== this.#connectSeq;
+    }
+
+    /** Task 107: the addon's own API token on openccu-lite, or `undefined` everywhere else. */
+    async #readAddonToken(): Promise<string | undefined> {
+        const found = await nodeAuth(
+            {addon: this.#options.addonId ?? ADDON_ID},
+            this.#options.addonTokenDir === undefined ? {} : {addonTokenDir: this.#options.addonTokenDir},
+        ).resolve('start');
+        const token = found.token?.trim() ?? '';
+        return token === '' ? undefined : token;
+    }
+
+    /**
+     * Task 107: the one-time move of a `local` profile to lite-rpc, on the first connect on
+     * openccu-lite that found the addon's token. A profile that was never moved - every one of an
+     * earlier version, which connected directly, and a fresh one - gets `localRpc: 'lite'` and the
+     * marker; a profile that carries the marker is left exactly as it is, whatever it says, so a
+     * `direct` the user chose afterwards survives every restart and update.
+     */
+    async #migrateLocalRpc(): Promise<void> {
+        const connection = this.#config.connection;
+        if (connection.connectionMigrated === 1) {
+            return;
+        }
+        const moved = connection.localRpc === undefined;
+        const config = this.#withHostFacts(
+            await this.#config.setConnection({
+                ...connection,
+                ...(moved ? {localRpc: 'lite' as const} : {}),
+                connectionMigrated: 1,
+            }),
+        );
+        this.events.emit('config.changed', config);
+        if (moved) {
+            this.#notice(
+                'info',
+                'connection: moved to lite-rpc, the default on openccu-lite - once; the direct connection with callbacks stays selectable in the settings and is never changed again',
+            );
+        }
     }
 
     /**
@@ -1416,6 +1507,9 @@ export class Backend {
             ...(ports === undefined ? {} : {callbackDefaultPorts: {xmlrpc: ports.xmlrpc, binrpc: ports.binrpc}}),
             ...(pins === undefined ? {} : {callbackPinned: {...pins}}),
             ...(publish ? {publishCallbackPorts: true} : {}),
+            // task 107: the addon's token was found, so the host is an openccu-lite system and the
+            // settings dialog may offer lite-rpc or the direct connection
+            ...(this.#addonToken === undefined ? {} : {liteSystem: true}),
             // B-70: only a host that goes idle offers the time; the default of an unpinned host is
             // D-31's default (never, since B-95), whatever it was started with, so "the default" means one thing
             ...(idle === undefined

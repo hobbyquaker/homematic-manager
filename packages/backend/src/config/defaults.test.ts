@@ -220,6 +220,33 @@ describe('interfaceTargets', () => {
     });
 });
 
+describe("the addon's way to the interfaces on openccu-lite (task 107)", () => {
+    it('keeps the choice and the migration marker', () => {
+        const connection = normaliseConnection({
+            host: '127.0.0.1',
+            local: true,
+            localRpc: 'direct',
+            connectionMigrated: 1,
+        });
+        expect(connection.localRpc).toBe('direct');
+        expect(connection.connectionMigrated).toBe(1);
+        expect(normaliseConnection({host: 'ccu', localRpc: 'lite'}).localRpc).toBe('lite');
+    });
+
+    it('leaves both out when they are not there - the profile of every earlier version', () => {
+        const connection = normaliseConnection({host: '127.0.0.1', local: true});
+        expect(connection.localRpc).toBeUndefined();
+        expect(connection.connectionMigrated).toBeUndefined();
+    });
+
+    it('drops a choice that does not exist and a marker that is not the one this version writes', () => {
+        const connection = normaliseConnection({host: 'ccu', localRpc: 'callbacks', connectionMigrated: '1'});
+        expect(connection.localRpc).toBeUndefined();
+        expect(connection.connectionMigrated).toBeUndefined();
+        expect(normaliseConnection({host: 'ccu', connectionMigrated: 2}).connectionMigrated).toBeUndefined();
+    });
+});
+
 describe('the metadata store in the profile (D-40)', () => {
     it('keeps the three options a profile may carry', () => {
         const connection = normaliseConnection({

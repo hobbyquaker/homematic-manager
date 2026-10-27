@@ -25,6 +25,7 @@
     "daemon": true,
     "needs": ["rfd", "hmipserver"],
     "start": "early",
+    "api_scopes": ["rpc:admin"],
     "data_dirs": ["/usr/local/hmm"],
     "note": {
       "de": "Das Profil (config.json, Caches, Gerätebilder) liegt in /usr/local/hmm, außerhalb des Addon-Verzeichnisses, damit es Updates und eine Deinstallation überlebt; das System übergibt es dem Addon-Benutzer.",

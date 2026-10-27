@@ -33,6 +33,23 @@ export interface ConnectionConfig {
      * and no CCU authentication. What the addon of task 13 sets; `local` wins over `tls`.
      */
     local?: boolean;
+    /**
+     * Task 107: how the addon on an openccu-lite system (`local`) reaches the interface processes.
+     *
+     * `lite` (the default) goes through the system's lite-rpc with the addon's own API token - one
+     * subscriber at the daemons for every client, the events replayed after a break, nothing
+     * registered with `init`; `direct` keeps the CCU way, XML-RPC/BIN-RPC on the processes' own
+     * ports with callback servers, for whoever wants it (CUxD, say, which lite-rpc does not carry).
+     * Read only on a system that minted the addon's token; a CCU connects directly whatever it says.
+     */
+    localRpc?: LocalRpcChoice;
+    /**
+     * Task 107: the one-time move to lite-rpc has run (`1`). A profile that connected directly to
+     * the interfaces is moved to `lite` once, at the first start on openccu-lite that finds the
+     * addon's token; from then on the choice is the user's, and a later version never moves it
+     * again - so `direct` chosen afterwards stays `direct` across restarts and updates.
+     */
+    connectionMigrated?: number;
     auth?: {user: string; password: string};
     /** ReGa is optional (D-2): names come from ReGa when present, else from the local store. */
     rega: boolean;
@@ -238,6 +255,12 @@ export interface AppConfig {
      * Absent on a host that never goes idle (Electron).
      */
     idleUnsubscribe?: {defaultMs: number; pinnedMs?: number};
+    /**
+     * Task 107: the host runs as the addon on an openccu-lite system that minted its API token, so
+     * the settings dialog offers {@link ConnectionConfig.localRpc}. A property of the host, learnt at
+     * the connect; absent everywhere else, where the choice means nothing.
+     */
+    liteSystem?: boolean;
 }
 
 /**
@@ -487,6 +510,12 @@ export type MetaProviderChoice = 'auto' | 'local' | 'occulite' | 'rega';
 
 /** The values of {@link MetaProviderChoice} as a runtime list, for validation and a select. */
 export const META_PROVIDERS: readonly MetaProviderChoice[] = Object.freeze(['auto', 'local', 'occulite', 'rega']);
+
+/** Task 107: {@link ConnectionConfig.localRpc} - the addon's way to the interfaces on openccu-lite. */
+export type LocalRpcChoice = 'lite' | 'direct';
+
+/** The values of {@link LocalRpcChoice} as a runtime list, for validation and a select. */
+export const LOCAL_RPC_CHOICES: readonly LocalRpcChoice[] = Object.freeze(['lite', 'direct']);
 
 /**
  * D-40: which store the names, rooms and functions come from, and whether it can be written.

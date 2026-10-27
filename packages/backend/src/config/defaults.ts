@@ -10,6 +10,7 @@
 import {
     DEFAULT_INTERFACES,
     INTERFACE_NAMES,
+    LOCAL_RPC_CHOICES,
     META_PROVIDERS,
     isKnownInterface,
     resolveInterface,
@@ -18,6 +19,7 @@ import {
     type ConnectionConfig,
     type Language,
     type LanguageChoice,
+    type LocalRpcChoice,
     type MetaProviderChoice,
     type ResolvedInterface,
     type SystemTrust,
@@ -117,6 +119,12 @@ export function normaliseConnection(input: unknown): ConnectionConfig {
     );
     const metaToken = stringOr(raw.metaToken, '').trim();
     const metaUrl = stringOr(raw.metaUrl, '').trim();
+    // Task 107: the addon's way to the interfaces on openccu-lite, and the marker that the
+    // one-time move to lite-rpc has run. A value that is neither choice is dropped (the backend
+    // then treats the profile as never migrated, which is the safe reading); the marker is kept
+    // only as the `1` this version writes.
+    const localRpc: LocalRpcChoice | undefined = LOCAL_RPC_CHOICES.find((candidate) => candidate === raw.localRpc);
+    const connectionMigrated = raw.connectionMigrated === 1 ? 1 : undefined;
 
     const connection: ConnectionConfig = {
         host: stringOr(raw.host, defaults.host).trim(),
@@ -125,6 +133,8 @@ export function normaliseConnection(input: unknown): ConnectionConfig {
         extraInterfaces,
         tls: typeof raw.tls === 'boolean' ? raw.tls : defaults.tls,
         ...(raw.local === true ? {local: true} : {}),
+        ...(localRpc === undefined ? {} : {localRpc}),
+        ...(connectionMigrated === undefined ? {} : {connectionMigrated}),
         rega: typeof raw.rega === 'boolean' ? raw.rega : defaults.rega,
         callback: {
             ip: stringOr(callback['ip'], defaults.callback.ip).trim(),

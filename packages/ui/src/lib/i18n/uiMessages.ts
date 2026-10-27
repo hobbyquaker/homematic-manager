@@ -1269,6 +1269,28 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Am {time} vom Gerät gelesen; hier nicht erneut gelesen.',
         en: 'Read from the device at {time}; not read again here.',
     },
+    // task 107: the addon's way to the interfaces on openccu-lite
+    'Interfaces on openccu-lite': {
+        de: 'Schnittstellen auf openccu-lite',
+        en: 'Interfaces on openccu-lite',
+    },
+    'Through the system (lite-rpc, the default)': {
+        de: 'Über das System (lite-rpc, Voreinstellung)',
+        en: 'Through the system (lite-rpc, the default)',
+    },
+    'Directly, with callbacks (XML-RPC/BIN-RPC)': {
+        de: 'Direkt, mit Rückrufen (XML-RPC/BIN-RPC)',
+        en: 'Directly, with callbacks (XML-RPC/BIN-RPC)',
+    },
+    "lite-rpc: one subscriber at the interface processes for every program, the events replayed after a break, the addon's own token. Directly: the CCU way, for what lite-rpc does not carry (CUxD).":
+        {
+            de: 'lite-rpc: ein Abonnent an den Schnittstellenprozessen für alle Programme, die Ereignisse nach einer Unterbrechung nachgeliefert, das eigene Token des Addons. Direkt: der CCU-Weg, für das, was lite-rpc nicht trägt (CUxD).',
+            en: "lite-rpc: one subscriber at the interface processes for every program, the events replayed after a break, the addon's own token. Directly: the CCU way, for what lite-rpc does not carry (CUxD).",
+        },
+    "None: the interfaces are reached through this system's lite-rpc; the events come from its stream.": {
+        de: 'Keine: Die Schnittstellen werden über das lite-rpc dieses Systems erreicht; die Ereignisse kommen aus seinem Stream.',
+        en: "None: the interfaces are reached through this system's lite-rpc; the events come from its stream.",
+    },
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

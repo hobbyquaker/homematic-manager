@@ -5,12 +5,14 @@
         ConnectionConfig,
         ConnectionTest,
         LanguageChoice,
+        LocalRpcChoice,
         MetaProviderChoice,
         UserDefinedInterface,
     } from '@homematic-manager/core';
     import {
         callbackPinOption,
         DEFAULT_INTERFACES,
+        LOCAL_RPC_CHOICES,
         META_PROVIDERS,
         validateUserDefinedInterface,
     } from '@homematic-manager/core';
@@ -422,8 +424,12 @@
      * then, so the callback fields mean nothing, and the token is what pairing gives.
      */
     const liteHost = $derived.by(() => {
-        if (draft === undefined || draft.local === true) {
+        if (draft === undefined) {
             return false;
+        }
+        if (draft.local === true) {
+            // task 107: on the system itself, lite-rpc is the default where the system minted the addon's token
+            return localChoice && (draft.localRpc ?? 'lite') === 'lite';
         }
         const host = draft.host.trim();
         if (host === '') {
@@ -434,6 +440,20 @@
         }
         return stores.interfaces.states.some((state) => state.lite === true) && host === (stored?.host ?? '').trim();
     });
+    /**
+     * Task 107: the addon runs on an openccu-lite system that minted its API token, so the way to
+     * the interfaces is the user's choice - lite-rpc (the default) or the direct connection.
+     */
+    const localChoice = $derived(draft?.local === true && stores.app.config?.liteSystem === true);
+    const localRpcLabels: Record<LocalRpcChoice, () => string> = {
+        lite: () => t('Through the system (lite-rpc, the default)'),
+        direct: () => t('Directly, with callbacks (XML-RPC/BIN-RPC)'),
+    };
+    function setLocalRpc(value: string): void {
+        if (draft !== undefined && LOCAL_RPC_CHOICES.some((choice) => choice === value)) {
+            draft.localRpc = value as LocalRpcChoice;
+        }
+    }
     /** Task 72: the test's answer in one line, while it is about the host in the field. */
     const testLine = $derived.by(() => {
         if (draft === undefined || tested === undefined || testedHost !== draft.host.trim()) {
@@ -734,14 +754,47 @@
                         </div>
                     </section>
 
+                    {#if localChoice}
+                        <!-- task 107: on the system itself the interfaces go through lite-rpc unless the user wants the callbacks -->
+                        <section class="hmm-config-section">
+                            <h3 class="hmm-config-title">{t('Interfaces on openccu-lite')}</h3>
+                            <div class="hmm-config-grid">
+                                <label class="hmm-config-row">
+                                    <span class="hmm-config-label">{t('Connection')}</span>
+                                    <span class="hmm-config-field">
+                                        <select
+                                            class="hmm-select hmm-config-wide"
+                                            value={draft.localRpc ?? 'lite'}
+                                            data-testid="config-local-rpc"
+                                            onchange={(event) => setLocalRpc(event.currentTarget.value)}
+                                        >
+                                            {#each LOCAL_RPC_CHOICES as choice (choice)}
+                                                <option value={choice}>{localRpcLabels[choice]()}</option>
+                                            {/each}
+                                        </select>
+                                        <small class="hmm-config-help"
+                                            >{t(
+                                                "lite-rpc: one subscriber at the interface processes for every program, the events replayed after a break, the addon's own token. Directly: the CCU way, for what lite-rpc does not carry (CUxD).",
+                                            )}</small
+                                        >
+                                    </span>
+                                </label>
+                            </div>
+                        </section>
+                    {/if}
+
                     <section class="hmm-config-section">
                         <h3 class="hmm-config-title">{t('Callback')}</h3>
                         {#if liteHost}
-                            <!-- task 72: an openccu-lite system reached from off it never calls back -->
+                            <!-- task 72: an openccu-lite system reached from off it never calls back; task 107: nor on the system over lite-rpc -->
                             <small class="hmm-config-help" data-testid="config-callback-lite"
-                                >{t(
-                                    'None: an openccu-lite system does not call a remote client back; the events come from its stream.',
-                                )}</small
+                                >{draft.local === true
+                                    ? t(
+                                          "None: the interfaces are reached through this system's lite-rpc; the events come from its stream.",
+                                      )
+                                    : t(
+                                          'None: an openccu-lite system does not call a remote client back; the events come from its stream.',
+                                      )}</small
                             >
                         {:else}
                             <div class="hmm-config-grid">
@@ -999,7 +1052,7 @@
                                         {/if}
                                     </span>
                                     <small class="hmm-config-help"
-                                        >{liteHost
+                                        >{liteHost && draft.local !== true
                                             ? t("From the pairing, or the system's API tokens page")
                                             : t('Only needed off the box')}</small
                                     >

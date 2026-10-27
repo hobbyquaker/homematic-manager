@@ -109,6 +109,31 @@ async function open(options: Partial<BackendOptions> = {}): Promise<{
     };
 }
 
+/** Task 107: a manager the CCU path would build; nothing is started, and the states say "not lite". */
+function directManager(host: string): never {
+    return {
+        idle: false,
+        detected: [],
+        states: () => [{name: 'HmIP-RF', type: 'HmIP-RF', protocol: 'xmlrpc', host, port: 2010, connected: false}],
+        client: () => {
+            throw new Error('not in this test');
+        },
+        isConnected: () => false,
+        names: () => ['HmIP-RF'],
+        resolved: () => undefined,
+        start: () => Promise.resolve(),
+        stop: () => Promise.resolve(),
+        unsubscribe: () => Promise.resolve(),
+        subscribe: () => Promise.resolve(),
+        reconnect: () => Promise.resolve(),
+        noteEvent: () => undefined,
+        probeInterfaces: () => Promise.resolve([]),
+        tick: () => Promise.resolve(),
+        callbackIp: '',
+        callbackWarning: undefined,
+    } as never;
+}
+
 function liteConnection(extra: Record<string, unknown> = {}): Record<string, unknown> {
     return {
         host: new URL(fake.url).host,
@@ -120,6 +145,149 @@ function liteConnection(extra: Record<string, unknown> = {}): Record<string, unk
         ...extra,
     };
 }
+
+describe('the addon on an openccu-lite system (task 107)', () => {
+    let tokenDir: string;
+
+    beforeEach(async () => {
+        tokenDir = await fs.mkdtemp(path.join(os.tmpdir(), 'hmm-addon-tokens-'));
+    });
+
+    afterEach(async () => {
+        await fs.rm(tokenDir, {recursive: true, force: true});
+    });
+
+    /** The profile the addon of an earlier version left: `local`, no choice, no marker. */
+    function localConnection(extra: Record<string, unknown> = {}): Record<string, unknown> {
+        return {
+            host: '127.0.0.1',
+            local: true,
+            interfaces: ['HmIP-RF', 'BidCos-RF'],
+            autoDetect: false,
+            rega: false,
+            metaUrl: fake.url,
+            callback: {ip: '', xmlrpcPort: 0, binrpcPort: 0},
+            ...extra,
+        };
+    }
+
+    async function openOnSystem(options: Partial<BackendOptions> = {}): Promise<ReturnType<typeof open>> {
+        return open({
+            addonTokenDir: tokenDir,
+            createInterfaceManager: (managerOptions) => directManager(managerOptions.connection.host),
+            ...options,
+        });
+    }
+
+    it("moves a profile that connected directly to lite-rpc once, with the addon's own token, and says so", async () => {
+        await fs.writeFile(path.join(tokenDir, 'hmm.api'), 'olt_test\n');
+        const h = await openOnSystem();
+        await h.backend.request('config.set', localConnection() as never);
+        await until(() => h.events.some((event) => event.name === 'devices.changed'));
+
+        const config = await h.backend.request('config.get');
+        expect(config.connection.localRpc).toBe('lite');
+        expect(config.connection.connectionMigrated).toBe(1);
+        expect(config.liteSystem).toBe(true);
+        const states = await h.backend.request('interfaces.list');
+        expect(states.map((state) => [state.name, state.lite, state.connected])).toEqual([
+            ['HmIP-RF', true, true],
+            ['BidCos-RF', true, true],
+        ]);
+        expect(h.managers).toBe(0);
+        expect(fake.calls.some((call) => call.method === 'listDevices')).toBe(true);
+        const notices = h.events
+            .filter((event) => event.name === 'notice')
+            .map((event) => (event.payload as {message: string}).message);
+        expect(notices.some((message) => /moved to lite-rpc/.test(message))).toBe(true);
+        expect(notices.some((message) => /lite-rpc with the addon's own token/.test(message))).toBe(true);
+        // the saved profile carries both, so the next start of any version asks nothing again
+        const saved = JSON.parse(await fs.readFile(path.join(dir, 'config.json'), 'utf8')) as {
+            connection: {localRpc?: string; connectionMigrated?: number};
+        };
+        expect(saved.connection).toMatchObject({localRpc: 'lite', connectionMigrated: 1});
+    });
+
+    it('leaves a profile that chose the direct connection alone, across restarts', async () => {
+        await fs.writeFile(path.join(tokenDir, 'hmm.api'), 'olt_test\n');
+        let built = 0;
+        const options: Partial<BackendOptions> = {
+            createInterfaceManager: (managerOptions) => {
+                built += 1;
+                return directManager(managerOptions.connection.host);
+            },
+        };
+        const first = await openOnSystem(options);
+        await first.backend.request(
+            'config.set',
+            localConnection({localRpc: 'direct', connectionMigrated: 1}) as never,
+        );
+        expect(built).toBe(1);
+        expect((await first.backend.request('interfaces.list'))[0]?.lite).toBeUndefined();
+        expect(fake.streamsOpened).toBe(0);
+        let config = await first.backend.request('config.get');
+        expect(config.connection).toMatchObject({localRpc: 'direct', connectionMigrated: 1});
+        expect(config.liteSystem).toBe(true);
+        await first.backend.stop();
+
+        // the next start - of this version or a later one - finds the marker and changes nothing
+        const second = await openOnSystem(options);
+        await second.backend.start();
+        await until(() => built >= 2);
+        config = await second.backend.request('config.get');
+        expect(config.connection).toMatchObject({localRpc: 'direct', connectionMigrated: 1});
+        expect(fake.streamsOpened).toBe(0);
+        expect(
+            second.events.some((event) =>
+                /moved to lite-rpc/.test((event.payload as {message?: string}).message ?? ''),
+            ),
+        ).toBe(false);
+    });
+
+    it('keeps a direct choice made by hand and only adds the marker', async () => {
+        await fs.writeFile(path.join(tokenDir, 'hmm.api'), 'olt_test\n');
+        let built = 0;
+        const h = await openOnSystem({
+            createInterfaceManager: (managerOptions) => {
+                built += 1;
+                return directManager(managerOptions.connection.host);
+            },
+        });
+        await h.backend.request('config.set', localConnection({localRpc: 'direct'}) as never);
+        expect(built).toBe(1);
+        expect((await h.backend.request('config.get')).connection).toMatchObject({
+            localRpc: 'direct',
+            connectionMigrated: 1,
+        });
+    });
+
+    it('connects directly where the system minted no token for the addon, and moves nothing', async () => {
+        let built = 0;
+        const h = await openOnSystem({
+            createInterfaceManager: (managerOptions) => {
+                built += 1;
+                return directManager(managerOptions.connection.host);
+            },
+        });
+        await h.backend.request('config.set', localConnection() as never);
+        expect(built).toBe(1);
+        const config = await h.backend.request('config.get');
+        expect(config.connection.localRpc).toBeUndefined();
+        expect(config.connection.connectionMigrated).toBeUndefined();
+        expect(config.liteSystem).toBeUndefined();
+        expect(fake.streamsOpened).toBe(0);
+
+        // a profile that asks for lite-rpc on such a host is told why it got the callbacks
+        await h.backend.request('config.set', localConnection({localRpc: 'lite', connectionMigrated: 1}) as never);
+        expect(built).toBe(2);
+        expect(
+            h.events.some(
+                (event) =>
+                    event.name === 'notice' && /minted no API token/.test((event.payload as {message: string}).message),
+            ),
+        ).toBe(true);
+    });
+});
 
 describe('a remote openccu-lite connection (task 72)', () => {
     it('takes lite-rpc instead of callbacks, lists the devices and marks the interfaces as such', async () => {

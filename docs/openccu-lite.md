@@ -18,7 +18,7 @@ immediately.
 
 | | on a CCU / OpenCCU | on openccu-lite |
 | --- | --- | --- |
-| Devices, channels, paramsets, direct links, RSSI, service messages, events, the RPC console | XML-RPC / BIN-RPC to `rfd`, `hs485d`, `hmipserver`, with callback servers the CCU pushes its events to | **on the system** (the addon): identical — the interface processes are the same, over the loopback. **From off the system** (a desktop, a server, Docker): through the system's **lite-rpc** with an API token — the requests over its web port, the events from a stream the app opens; no callback servers, nothing to open in a firewall (see [below](#off-the-system-a-desktop-a-server-docker)) |
+| Devices, channels, paramsets, direct links, RSSI, service messages, events, the RPC console | XML-RPC / BIN-RPC to `rfd`, `hs485d`, `hmipserver`, with callback servers the CCU pushes its events to | through the system's **lite-rpc** — the requests over its web port, the events from a stream the app opens; no callback servers. **On the system** (the addon, since 3.4.0): with the addon's own token, by default; the direct connection to the interface processes over the loopback, callbacks included, stays selectable in the settings (see [below](#the-addon-on-the-box)). **From off the system** (a desktop, a server, Docker): with an API token, nothing to open in a firewall (see [below](#off-the-system-a-desktop-a-server-docker)) |
 | Friendly names | ReGa when it is on, else this profile's own store | the box's metadata store; a rename is written there |
 | Rooms, functions, floors | ReGa's own rooms and functions when ReGa is on (a flat list, no floors), else this profile's own store | the box's, as trees; shared with every other program on the box |
 | The login of the addon | the WebUI session (`settings.cgi`), optionally a CCU user (`--auth-mode rega`) | the session openccu-lite's shell hands over (`--auth-mode occulite`) |
@@ -115,6 +115,22 @@ longer counts (the rule every addon for openccu-lite follows):
   (`/usr/local/etc/occulite/local-token`, role `user`, read-only by design); writes use the session
   of the person looking at the page. A rename is therefore attributed to a user, and nothing
   renames a device unless somebody asked for it.
+- **the interfaces** (since 3.4.0): through the system's **lite-rpc**, by default, with the
+  **addon's own token** — the system mints it at every start from the scopes the addon's manifest
+  declares (`api_scopes: ["rpc:admin"]`, the tier the app needs for pairing, deleting, re-keying and
+  firmware) and hands it to the addon in `/run/occulite/addon-tokens/hmm.api`. One subscriber at the
+  interface processes serves every program on the system, the events are replayed after a break,
+  nothing is registered with `init`, and the callback ports are not used. The interface popup says
+  *lite-rpc*. Every method the app calls is carried (lite-rpc checks a `system.multicall` per inner
+  call, and an unknown method needs `rpc:admin`, which the addon has); only `init` is not, and the
+  app does not need it there. The **direct connection** — XML-RPC/BIN-RPC on the processes' own
+  ports with callback servers, as on a CCU — stays selectable in the settings dialog, *Interfaces on
+  openccu-lite*: for CUxD, which lite-rpc does not carry, or for whoever wants the old way. **A
+  profile that connected directly is moved to lite-rpc once**, at the first start of 3.4.0 or later
+  that finds the token (`localRpc: "lite"` and `connectionMigrated: 1` in `config.json`); a choice
+  made afterwards is never changed again, by any later version. Without the token — an older
+  openccu-lite, or the same `/usr/local` moved to a CCU — the addon connects directly as before and
+  says so in its log.
 
 Nothing is written into `etc/hmm.env` for any of this. The auth mode has one line per firmware
 there: `HMM_AUTH_MODE` is the CCU's and is not read on openccu-lite, `HMM_AUTH_MODE_LITE` is
@@ -186,6 +202,8 @@ on a non-standard port, and for the integration tests. It is not needed for a no
 | `metaProvider` | `auto` (the default: probe once per connect, then ReGa when it is on and answered, else this profile), `local` (never probe, keep everything in this profile), `occulite` (insist on the box and say so when it does not answer), `rega` (insist on ReGa's rooms and functions; a flat list, no floors) |
 | `metaToken` | the API token for an installation that is not on the system — from the pairing in the settings dialog, or made on the system's *API tokens* page. With it the interfaces are reached through lite-rpc; without it the CCU way |
 | `metaUrl` | the box's base URL when it is not `http(s)://<host>` |
+| `localRpc` | the addon on the system (`local`): `lite` (the default) reaches the interfaces through the system's lite-rpc with the addon's own token, `direct` the CCU way with callbacks. Read only where the system minted the addon's token |
+| `connectionMigrated` | `1` once the one-time move of a `local` profile to lite-rpc has run; from then on `localRpc` is the user's and never changed by an update |
 
 The `local` store is `meta.json` in the profile directory, next to `config.json` — the user's own
 work, like the link templates, so `config.clearCaches` never touches it and

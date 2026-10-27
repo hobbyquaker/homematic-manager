@@ -6,6 +6,17 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Changed
+
+- **On openccu-lite the addon reaches the interfaces through the system's lite-rpc by default**, with a token the
+  system mints for it, instead of registering its own callback servers with `rfd`, `hmipserver` and the group process:
+  one subscriber at the interface processes serves every program on the system, and the events are replayed after a
+  break. The direct connection with callbacks stays selectable in the settings dialog (*Interfaces on openccu-lite*),
+  for CUxD and for whoever prefers it. An existing profile is moved to lite-rpc once, at the first start that finds the
+  token; a choice made afterwards is kept by every later version. On a CCU and OpenCCU nothing changes.
+
 ## [3.3.0] — 2026-10-27
 
 ### Changed

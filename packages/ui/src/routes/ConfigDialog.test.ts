@@ -765,6 +765,38 @@ describe('ConfigDialog', () => {
         expect(screen.queryByTestId('config-pairing')).toBeNull();
     });
 
+    it('offers lite-rpc or the direct connection on an openccu-lite system, and saves the choice (task 107)', async () => {
+        transport.result('config.get', {
+            ...DEMO_CONFIG,
+            connection: {...DEMO_CONFIG.connection, local: true},
+            liteSystem: true,
+        });
+        await open(transport);
+        const select = screen.getByTestId<HTMLSelectElement>('config-local-rpc');
+        expect(select.value).toBe('lite');
+        expect([...select.options].map((option) => option.textContent)).toEqual([
+            'Über das System (lite-rpc, Voreinstellung)',
+            'Direkt, mit Rückrufen (XML-RPC/BIN-RPC)',
+        ]);
+        // nothing calls back while the interfaces go through the system
+        expect(screen.getByTestId('config-callback-lite')).toBeTruthy();
+        expect(screen.queryByTestId('config-callback-ip')).toBeNull();
+        await fireEvent.change(select, {target: {value: 'direct'}});
+        await waitFor(() => expect(screen.getByTestId('config-callback-ip')).toBeTruthy());
+        await fireEvent.click(screen.getByTestId('config-save'));
+        await waitFor(() => {
+            expect(transport.lastCall('config.set')?.[0]?.localRpc).toBe('direct');
+        });
+    });
+
+    it('offers no such choice where the system minted no token for the addon - a CCU (task 107)', async () => {
+        transport.result('config.get', {...DEMO_CONFIG, connection: {...DEMO_CONFIG.connection, local: true}});
+        await open(transport);
+        expect(screen.queryByTestId('config-local-rpc')).toBeNull();
+        expect(screen.queryByTestId('config-callback-lite')).toBeNull();
+        expect(screen.getByTestId('config-callback-ip')).toBeTruthy();
+    });
+
     it('offers no idle time where the host never goes idle, the Electron case (B-70)', async () => {
         await open(transport);
         expect(screen.queryByTestId('config-idle')).toBeNull();

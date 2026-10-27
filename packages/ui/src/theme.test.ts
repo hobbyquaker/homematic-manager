@@ -140,8 +140,8 @@ describe('the theme tokens', () => {
      *
      * The hue rotation is the half that keeps a coloured picture recognisable, and the contrast
      * and brightness are the half that stops white paper from turning into a black rectangle that
-     * is darker than the surface it sits on: measured, white lands on #1d1d1d against a #1e1e1e
-     * surface and black on #c9c9c9 against a #cccccc text colour.
+     * is darker than the surface it sits on: measured in Chromium, white lands on #1f1f1f, as light as
+     * the #1b1f26 surface, and black on #cfcfcf against a #ccd2dc text colour.
      */
     it('inverts the device pictures in dark and leaves them alone in light', () => {
         expect(tokenValue(lightBlock, '--hmm-device-image-filter')).toBe('none');

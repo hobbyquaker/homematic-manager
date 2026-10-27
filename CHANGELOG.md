@@ -6,6 +6,16 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Changed
+
+- **The dark theme is blue-grey.** The general controls, tables and dialogs now come from the
+  [occulite-ui](https://www.npmjs.com/package/occulite-ui) package, which openccu-lite's own pages and its addons use
+  as well, so the Homematic Manager looks like them: the dark palette moves from neutral grey to blue-grey of the same
+  lightness, and the device pictures in dark mode are tuned to it. The light theme is unchanged.
+- The button that opens a device's channels is now named in the UI language for screen readers ("Zeile aufklappen").
+
 ## [3.2.3] — 2026-10-16
 
 ### Changed

@@ -7,6 +7,7 @@ import {createStores, type Stores} from './lib/stores/Stores.svelte.js';
 import {DEMO_CONFIG, DEMO_INTERFACE_STATES} from './lib/transport/demoData.js';
 import {MockTransport} from './lib/transport/MockTransport.js';
 import {expandRowName} from './testHarness.js';
+import {t as kitT} from 'occulite-ui/i18n';
 
 class MemoryStorage implements StorageLike {
     readonly map = new Map<string, string>();
@@ -210,6 +211,19 @@ describe('App shell', () => {
         stores.i18n.language = 'en';
         await waitFor(() => expect(screen.getByRole('tab', {name: 'Devices'})).toBeTruthy());
         expect(document.documentElement.lang).toBe('en');
+    });
+
+    it("speaks the app's language in occulite-ui's own strings, and switches with it", async () => {
+        const {stores} = await mountApp(transport);
+        expect(kitT('Close')).toBe('Schließen');
+        await fireEvent.click(screen.getByTestId('settings-button'));
+        const dialog = await waitFor(() => screen.getByTestId('config-dialog'));
+        // The settings dialog leaves its close button to the kit's catalogue.
+        expect(within(dialog).getByRole('button', {name: 'Schließen'})).toBeTruthy();
+
+        stores.i18n.language = 'en';
+        await waitFor(() => expect(within(dialog).getByRole('button', {name: 'Close'})).toBeTruthy());
+        expect(kitT('Close')).toBe('Close');
     });
 
     it('cycles the theme and stamps it on the root element', async () => {

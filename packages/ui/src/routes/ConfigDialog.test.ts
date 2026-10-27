@@ -9,6 +9,7 @@ import {createStores, type Stores} from '../lib/stores/Stores.svelte.js';
 import {DEMO_CONFIG, DEMO_INTERFACE_STATES, demoCallbackAddresses} from '../lib/transport/demoData.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
 import {mountApp, stubHost} from '../testHarness.js';
+import {t as kitT} from 'occulite-ui/i18n';
 
 class MemoryStorage implements StorageLike {
     readonly map = new Map<string, string>();
@@ -405,7 +406,7 @@ describe('ConfigDialog', () => {
         it('leaves the switch off when the question is closed without an answer', async () => {
             await open(transport);
             const question = await tick();
-            await fireEvent.click(within(question).getByLabelText('Close'));
+            await fireEvent.click(within(question).getByLabelText(kitT('Close')));
 
             await waitFor(() => {
                 expect(screen.getByTestId<HTMLInputElement>('config-auto-ack-unreach').checked).toBe(false);

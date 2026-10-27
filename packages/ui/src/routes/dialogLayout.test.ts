@@ -826,7 +826,8 @@ describe.skipIf(!hasLayout)('a dialog the user has moved or resized', () => {
         await drag(handleOf(dialog, 'se'), 120, 80);
         const chosen = frame(dialog);
 
-        await fireEvent.click(within(dialog).getByRole('button', {name: 'Close'}));
+        // The title bar's ✕: the dialog's footer has a close button of its own with the same name.
+        await fireEvent.click(dialog.querySelector<HTMLButtonElement>('.hmm-dialog-close')!);
         await waitFor(() => {
             expect(screen.getByTestId<HTMLDialogElement>('paramset-dialog').open).toBe(false);
         });

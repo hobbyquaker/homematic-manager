@@ -16,6 +16,12 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   lightness, and the device pictures in dark mode are tuned to it. The light theme is unchanged.
 - The button that opens a device's channels is now named in the UI language for screen readers ("Zeile aufklappen").
 
+### Fixed
+
+- **The close button of a dialog is named in the UI language for screen readers** ("Schließen"); it was English in
+  every language. The labels that come with the shared controls now follow the UI language, also when it is changed in
+  the settings.
+
 ## [3.2.3] — 2026-10-16
 
 ### Changed

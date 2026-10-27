@@ -5,6 +5,7 @@
 
     import './app.css';
 
+    import {i18n as kitI18n} from 'occulite-ui/i18n';
     import {setDataTableEnvironment} from 'occulite-ui/table';
     import GithubLink from 'occulite-ui/components/GithubLink';
     import InterfacePopup from './lib/components/InterfacePopup.svelte';
@@ -165,6 +166,10 @@
 
     $effect(() => {
         document.documentElement.lang = stores.i18n.language;
+        // occulite-ui's components fall back to the kit's own strings ("Close" on a dialog, ...)
+        // in the kit's page-wide language, which nothing else sets: it follows the app's, at start
+        // and on every switch.
+        kitI18n.language = stores.i18n.language;
     });
 
     /** Task 71: inside openccu-lite's shell the shell's theme applies, and the shell's toggle changes it. */

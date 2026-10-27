@@ -1,6 +1,6 @@
 <script lang="ts">
     import type {HostUpdateState} from '../host/types.js';
-    import {followExternalLink, type OpenExternal} from '../util/externalLink.js';
+    import {followExternalLink, type OpenExternal} from 'occulite-ui';
     import {fullUpdateReason, shortUpdateReason} from '../util/updateReason.js';
 
     interface Props {

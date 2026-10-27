@@ -2,6 +2,7 @@ import {render, waitFor} from '@testing-library/svelte';
 import {expect} from 'vitest';
 
 import App from './App.svelte';
+import {createI18n, resolveLanguage} from './lib/i18n/index.js';
 import type {StorageLike} from './lib/stores/AppStore.svelte.js';
 import type {HostBridge, HostInfo} from './lib/host/types.js';
 import {createStores, type Stores} from './lib/stores/Stores.svelte.js';
@@ -129,4 +130,15 @@ export async function mountApp(options: MountOptions = {}): Promise<MountedApp> 
         expect(stores.app.loading).toBe(false);
     });
     return {stores, transport, router, storage};
+}
+
+/**
+ * The accessible name of a DataTable row's expander in the language the mounted app speaks.
+ *
+ * The app's language follows the browser's unless a profile says otherwise, so the same test runs in
+ * German on one machine and in English on another; `App` writes the language it resolved to
+ * `<html lang>`, and the name is looked up in that one instead of accepting either.
+ */
+export function expandRowName(): string {
+    return createI18n(resolveLanguage(document.documentElement.lang)).t('Expand row');
 }

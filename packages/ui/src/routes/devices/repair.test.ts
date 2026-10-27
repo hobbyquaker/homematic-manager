@@ -5,7 +5,7 @@ import {beforeEach, describe, expect, it} from 'vitest';
 import {MockTransport} from '../../lib/transport/MockTransport.js';
 import {offersRepair, serviceMessageExplanation} from '../../lib/util/deviceGrid.js';
 import {readBack} from '../../lib/util/paramsetForm.js';
-import {mountApp} from '../../testHarness.js';
+import {expandRowName, mountApp} from '../../testHarness.js';
 
 /**
  * What the lab measured in task 6 (`docs/config-pending.md`), as far as the UI is concerned:
@@ -194,7 +194,7 @@ describe('the read-back after a write', () => {
         );
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:1-MASTER'));
         await waitFor(() => {
             expect(screen.getByTestId('param-LOGGING')).toBeTruthy();
@@ -219,7 +219,7 @@ describe('the read-back after a write', () => {
         const transport = new MockTransport({demo: true});
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:1-MASTER'));
         await waitFor(() => {
             expect(screen.getByTestId('param-LOGGING')).toBeTruthy();

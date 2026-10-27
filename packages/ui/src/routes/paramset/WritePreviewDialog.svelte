@@ -1,7 +1,7 @@
 <script lang="ts">
     import type {WriteResult} from '@homematic-manager/core';
 
-    import Dialog from '../../lib/components/Dialog.svelte';
+    import Dialog from 'occulite-ui/components/Dialog';
     import {getStores} from '../../lib/stores/context.js';
     import type {ReadBackEntry, WritePreview} from '../../lib/util/paramsetForm.js';
 

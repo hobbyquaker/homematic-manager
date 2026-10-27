@@ -6,6 +6,7 @@ import type {StorageLike} from './lib/stores/AppStore.svelte.js';
 import {createStores, type Stores} from './lib/stores/Stores.svelte.js';
 import {DEMO_CONFIG, DEMO_INTERFACE_STATES} from './lib/transport/demoData.js';
 import {MockTransport} from './lib/transport/MockTransport.js';
+import {expandRowName} from './testHarness.js';
 
 class MemoryStorage implements StorageLike {
     readonly map = new Map<string, string>();
@@ -139,7 +140,7 @@ describe('App shell', () => {
         await mountApp(transport);
         // the CCU's own device; the first row is a smoke detector team since task 58
         const ccu = document.querySelector<HTMLElement>('[data-row-id="BidCoS-RF"]')!;
-        await fireEvent.click(within(ccu).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(ccu).getByRole('button', {name: expandRowName()}));
         // The channel has no friendly name, so its address shows in the Name column too.
         expect(screen.getAllByText('BidCoS-RF:0').length).toBeGreaterThan(0);
     });

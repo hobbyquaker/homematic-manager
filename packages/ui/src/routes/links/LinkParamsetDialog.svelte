@@ -10,9 +10,9 @@
     } from '@homematic-manager/core';
     import {EXPERT_PROFILE_ID, UI_HINT, easyForm, easyFormParams, paramsetIdentity} from '@homematic-manager/core';
 
-    import Dialog from '../../lib/components/Dialog.svelte';
-    import MultiSelect from '../../lib/components/MultiSelect.svelte';
-    import type {MultiSelectOption} from '../../lib/components/multiSelect.js';
+    import Dialog from 'occulite-ui/components/Dialog';
+    import MultiSelect from 'occulite-ui/components/MultiSelect';
+    import type {MultiSelectOption} from 'occulite-ui';
     import {getStores} from '../../lib/stores/context.js';
     import {linkFields, profileDescription, profileLabel, type LinkField} from '../../lib/util/linkForm.js';
     import {

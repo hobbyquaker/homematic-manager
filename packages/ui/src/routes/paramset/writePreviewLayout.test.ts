@@ -10,7 +10,7 @@ import {render, waitFor, within} from '@testing-library/svelte';
 import {beforeEach, describe, expect, it} from 'vitest';
 import {page} from 'vitest/browser';
 
-import {forgetDialogGeometry} from '../../lib/components/dialogGeometry.js';
+import {forgetDialogGeometry} from 'occulite-ui';
 import {storesContext} from '../../lib/stores/context.js';
 import {MockTransport} from '../../lib/transport/MockTransport.js';
 import type {WritePreview} from '../../lib/util/paramsetForm.js';

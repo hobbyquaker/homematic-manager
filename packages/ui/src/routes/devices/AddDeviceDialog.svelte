@@ -11,7 +11,7 @@
 
     import {tick} from 'svelte';
 
-    import Dialog from '../../lib/components/Dialog.svelte';
+    import Dialog from 'occulite-ui/components/Dialog';
     import {getStores} from '../../lib/stores/context.js';
 
     import QrScanner from './QrScanner.svelte';

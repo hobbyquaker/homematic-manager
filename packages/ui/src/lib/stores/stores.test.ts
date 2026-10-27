@@ -70,7 +70,7 @@ describe('NoticesStore', () => {
         transport.emit('notice', {level: 'warn', message: 'ReGa is not answering', interfaceName: 'ReGa'});
 
         expect(notices.items).toEqual([
-            {id: 1, level: 'warn', message: 'ReGa is not answering', interfaceName: 'ReGa', timestamp: 5},
+            {id: 1, level: 'warn', message: 'ReGa is not answering', source: 'ReGa', timestamp: 5},
         ]);
     });
 

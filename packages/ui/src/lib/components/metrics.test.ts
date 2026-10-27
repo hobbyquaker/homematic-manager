@@ -7,7 +7,11 @@
 
 import {describe, expect, it} from 'vitest';
 
-import appCss from '../../app.css?raw';
+import kitTokensCss from 'occulite-ui/tokens.css?raw';
+
+import hmmCss from '../../app.css?raw';
+
+const appCss = `${kitTokensCss}\n${hmmCss}`;
 import {DEVICE_IMAGE_SIZE, ICON_COLUMN_WIDTH, MARK_COLUMN_WIDTH, MARK_SIZE, ROW_HEIGHT} from './metrics.js';
 
 function pixels(token: string): number {

@@ -5,19 +5,19 @@
 
     import './app.css';
 
-    import {setDataTableEnvironment} from './lib/components/dataTableContext.js';
-    import GithubLink from './lib/components/GithubLink.svelte';
+    import {setDataTableEnvironment} from 'occulite-ui/table';
+    import GithubLink from 'occulite-ui/components/GithubLink';
     import InterfacePopup from './lib/components/InterfacePopup.svelte';
     import type {StoreEntry} from './lib/components/interfacePopup.js';
-    import Loader from './lib/components/Loader.svelte';
+    import Loader from 'occulite-ui/components/Loader';
     import {metaMark, metaTitle} from './lib/components/metaIndicator.js';
-    import Notices from './lib/components/Notices.svelte';
+    import Notices from 'occulite-ui/components/Notices';
     import RpcLogPanel from './lib/components/RpcLogPanel.svelte';
     import RpcProgress from './lib/components/RpcProgress.svelte';
-    import Tabs from './lib/components/Tabs.svelte';
-    import ThemeSwitch from './lib/components/ThemeSwitch.svelte';
+    import Tabs from 'occulite-ui/components/Tabs';
+    import ThemeSwitch from 'occulite-ui/components/ThemeSwitch';
     import UpdateNotice from './lib/components/UpdateNotice.svelte';
-    import ToolbarButton from './lib/components/ToolbarButton.svelte';
+    import ToolbarButton from 'occulite-ui/components/ToolbarButton';
     import {setStores} from './lib/stores/context.js';
     import {STORE_INTERFACE, type TabId} from './lib/stores/routing.js';
     import type {Stores} from './lib/stores/Stores.svelte.js';

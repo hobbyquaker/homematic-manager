@@ -3,7 +3,7 @@ import {beforeEach, describe, expect, it} from 'vitest';
 
 import {ApiRequestError} from '../../lib/transport/error.js';
 import {MockTransport} from '../../lib/transport/MockTransport.js';
-import {mountApp} from '../../testHarness.js';
+import {expandRowName, mountApp} from '../../testHarness.js';
 
 /**
  * Task 25: the rooms-and-functions UI against the demo store - the same core `MetaStore` the
@@ -36,7 +36,7 @@ function taxonomyCells(address: string): {rooms: string; functions: string} {
 }
 
 async function expand(address: string): Promise<void> {
-    const expander = within(rowOf(address)).queryByRole('button', {name: 'Expand row'});
+    const expander = within(rowOf(address)).queryByRole('button', {name: expandRowName()});
     if (expander) {
         await fireEvent.click(expander);
     }

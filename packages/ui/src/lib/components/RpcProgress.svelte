@@ -1,7 +1,7 @@
 <script lang="ts">
     import type {ApiEvents} from '@homematic-manager/core';
 
-    import Dialog from './Dialog.svelte';
+    import Dialog from 'occulite-ui/components/Dialog';
 
     interface Props {
         progress?: ApiEvents['write.progress'] | undefined;

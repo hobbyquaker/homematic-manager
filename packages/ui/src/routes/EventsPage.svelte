@@ -1,9 +1,9 @@
 <script lang="ts">
     import type {EventFilter} from '@homematic-manager/core';
 
-    import DataTable from '../lib/components/DataTable.svelte';
-    import ToolbarButton from '../lib/components/ToolbarButton.svelte';
-    import type {DataTableColumn} from '../lib/components/tableModel.js';
+    import DataTable from 'occulite-ui/components/DataTable';
+    import ToolbarButton from 'occulite-ui/components/ToolbarButton';
+    import type {DataTableColumn} from 'occulite-ui/table';
     import {getStores} from '../lib/stores/context.js';
     import type {IndexedEvent} from '../lib/stores/EventsStore.svelte.js';
     import {formatRpcValue, formatTime} from '../lib/util/format.js';

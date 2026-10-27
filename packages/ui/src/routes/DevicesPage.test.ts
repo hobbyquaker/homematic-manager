@@ -15,7 +15,7 @@ import {
     serviceMarks,
     type ParamsetContent,
 } from '../lib/util/deviceGrid.js';
-import {mountApp} from '../testHarness.js';
+import {expandRowName, mountApp} from '../testHarness.js';
 
 function rowOf(address: string): HTMLElement {
     const row = document.querySelector<HTMLElement>(`[data-row-id="${address}"]`);
@@ -125,7 +125,7 @@ describe('the channel sub-grid', () => {
     it('opens with its own columns, the 2.7 subGridChannels set', async () => {
         await mountApp({hash: '#/BidCos-RF/devices'});
         const row = rowOf('MEQ0123456');
-        await fireEvent.click(within(row).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(row).getByRole('button', {name: expandRowName()}));
 
         const header = document.querySelector<HTMLElement>('[data-row-kind="header"]');
         expect(header?.textContent).toContain('DIRECTION');
@@ -141,7 +141,7 @@ describe('the channel sub-grid', () => {
         await waitFor(() => {
             expect(stores.devices.devices('HmIP-RF').length).toBeGreaterThan(0);
         });
-        await fireEvent.click(within(rowOf('000A1B2C3D4E5F')).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(rowOf('000A1B2C3D4E5F')).getByRole('button', {name: expandRowName()}));
         const header = document.querySelector<HTMLElement>('[data-row-kind="header"]');
         expect(header?.textContent).not.toContain('AES_ACTIVE');
     });
@@ -258,7 +258,7 @@ describe('the paramset buttons (B-33)', () => {
         await waitFor(() => {
             expect(rowOf(DRS8)).toBeTruthy();
         });
-        await fireEvent.click(within(rowOf(DRS8)).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(rowOf(DRS8)).getByRole('button', {name: expandRowName()}));
         return transport;
     }
 

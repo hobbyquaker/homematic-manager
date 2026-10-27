@@ -2,12 +2,12 @@
     import type {ServiceMessage} from '@homematic-manager/core';
     import {deviceAddress, isAcknowledgeable} from '@homematic-manager/core';
 
-    import DataTable from '../lib/components/DataTable.svelte';
+    import DataTable from 'occulite-ui/components/DataTable';
     import DeviceImage from '../lib/components/DeviceImage.svelte';
     import {ICON_COLUMN_WIDTH} from '../lib/components/metrics.js';
-    import ToolbarButton from '../lib/components/ToolbarButton.svelte';
-    import Tooltip from '../lib/components/Tooltip.svelte';
-    import type {DataTableColumn} from '../lib/components/tableModel.js';
+    import ToolbarButton from 'occulite-ui/components/ToolbarButton';
+    import Tooltip from 'occulite-ui/components/Tooltip';
+    import type {DataTableColumn} from 'occulite-ui/table';
     import {getStores} from '../lib/stores/context.js';
     import {isHmipInterface} from '../lib/stores/suppression.js';
     import {serviceMessageExplanation, SUPPRESS_COLUMN_WIDTH} from '../lib/util/deviceGrid.js';

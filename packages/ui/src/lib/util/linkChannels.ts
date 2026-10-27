@@ -1,6 +1,6 @@
 import type {DeviceDescription} from '@homematic-manager/core';
 
-import type {MultiSelectOption} from '../components/multiSelect.js';
+import type {MultiSelectOption} from 'occulite-ui';
 
 /**
  * One entry of the link dialog's sender or receiver list (task 31).

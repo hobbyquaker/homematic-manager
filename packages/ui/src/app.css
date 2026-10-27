@@ -1,68 +1,11 @@
 /*
- * The theme - one file for both, light and dark (D-22, D-34).
- *
- * Until the first look at a dev build these tokens were the jQuery UI "smoothness" greys and blues
- * of 2.7: vertical gradients on every bar, pale blue borders everywhere, a bold active tab. The
- * maintainer's verdict was that it imitates 2.x and looks weird, so D-34 replaced the visual
- * language with Svelte's own defaults and the one of `she` (github.com/hobbyquaker/she): flat
- * surfaces, neutral greys, one accent, hairline separators, no gradient anywhere, and a control
- * that marks its state with colour rather than with a weight that changes its width.
- *
- * The structure of 2.7 stays exactly where it was (D-3): the same tabs, the same grids with the
- * same columns, the same dialogs, the same workflows. Only the paint is different.
- *
- * Light is the default and is defined on bare `:root`. Dark is defined twice - once under
- * `prefers-color-scheme` (guarded so an explicit light choice wins) and once under
- * `[data-theme='dark']` - so the manual switch works in both directions. Every colour in the app
- * comes from a token here; `theme.test.ts` fails the build if a component spells one out.
+ * Homematic Manager's own tokens and rules, on top of occulite-ui's theme (tokens, base rules,
+ * light and dark): the RSSI scale of the Funk tab, the device pictures, the receiver marker, the
+ * window's minimum size and the parameter table. Every other colour and metric is the kit's.
  */
+@import 'occulite-ui/app.css';
 
 :root {
-    color-scheme: light;
-
-    /* Surfaces */
-    --hmm-bg: #ffffff;
-    --hmm-bg-sunken: #f8f8f8;
-    /* Bars: the header, the toolbars, the table head, a dialog's title bar. Flat, not a gradient. */
-    --hmm-header-bg: #f3f3f3;
-    --hmm-header-solid: #ececec;
-    /* Controls: a button's face, and the field an input is typed into. */
-    --hmm-control-bg: #f0f0f0;
-    --hmm-control-bg-hover: #e4e4e4;
-    --hmm-input-bg: #ffffff;
-    --hmm-row-odd: #ffffff;
-    /* `she` gives a table no zebra at all - the row separator does the work. Kept as a token so
-       the two row states stay addressable; both are the plain surface. */
-    --hmm-row-even: #ffffff;
-    --hmm-row-hover: #f0f4f8;
-    --hmm-row-selected: #cfe4f7;
-    --hmm-row-selected-text: #12314d;
-    --hmm-overlay: rgba(255, 255, 255, 0.72);
-    --hmm-backdrop: rgba(0, 0, 0, 0.35);
-    --hmm-shadow-menu: 0 4px 12px rgb(0 0 0 / 18%);
-    --hmm-shadow-toast: 0 2px 10px rgb(0 0 0 / 16%);
-
-    /* Lines */
-    --hmm-border: #cecece;
-    --hmm-border-muted: #e6e6e6;
-    --hmm-border-strong: #b0b0b0;
-
-    /* Text */
-    --hmm-fg: #3b3b3b;
-    --hmm-fg-muted: #6d6d6d;
-    --hmm-fg-faint: #9a9a9a;
-    --hmm-link: #0070c1;
-
-    /* Accents */
-    --hmm-accent: #0070c1;
-    --hmm-accent-bg: #e2eefa;
-    /* Text on a surface painted in --hmm-accent: a tab's main action (tasks 28 and 33). */
-    --hmm-accent-fg: #ffffff;
-    --hmm-ok: #008000;
-    --hmm-warn: #a06800;
-    --hmm-error: #cd3131;
-    --hmm-focus: #0070c1;
-
     /*
      * The RSSI scale of the Funk tab (#161): the fill of each step of core's `RSSI_BANDS` and the
      * ink of its value and bars. The fills are "Variante 3" as voted on the issue and are the same
@@ -87,43 +30,11 @@
     --hmm-rssi-8: #d32f2f;
     --hmm-rssi-8-text: #ffffff;
 
-    /* Metrics. 13 px is `she`'s reading size; the grids were 12 px and one line taller than they
-       needed to be at that size. */
-    --hmm-font: system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-    --hmm-font-mono: ui-monospace, 'Cascadia Mono', Consolas, Menlo, Monaco, monospace;
-    --hmm-font-size: 13px;
-    /* The grids stay a size below the chrome, as they do in `she`: 13 px in the bars and dialogs,
-       12 px in a table that has ten columns of addresses and flags. */
-    --hmm-font-size-grid: 12px;
-    --hmm-font-size-small: 11px;
-    --hmm-font-size-tiny: 9px;
-    /* Task 22, the third look: 26 px rows with a 16 px picture in them made the CCU's device
-       drawings unreadable, so both grew by four - 30 px rows, 20 px pictures. The grid cell clips
-       (`overflow: hidden`), so the icon column is the picture plus the cell's 6 px of padding on
-       each side; `ICON_COLUMN_WIDTH` in `lib/components/metrics.ts` is that sum. */
-    --hmm-row-height: 30px;
     --hmm-device-image-size: 20px;
     /* The receiver marker of the Funk grid, the same arithmetic: `MARK_COLUMN_WIDTH` is this plus
        the cell's padding. At 30 px the 22 px button overflowed its track and the browser drew the
        ellipsis of `text-overflow` beside it, in every row (#148). */
     --hmm-mark-size: 22px;
-    --hmm-header-height: 36px;
-    --hmm-radius: 3px;
-
-    /*
-     * Form metrics, so a dialog's spacing is a decision made once (task 23: the settings dialog
-     * read badly because every row had brought its own gap). The label column is as wide as the
-     * longest German switch label needs at 13 px before it wraps to a second line, and the two
-     * field widths are the ones a *type* asks for: a port is four digits, everything else fills
-     * the row it is in.
-     */
-    --hmm-form-label-width: 210px;
-    --hmm-form-column-gap: 10px;
-    --hmm-form-row-gap: 6px;
-    --hmm-form-section-gap: 14px;
-    --hmm-form-help-gap: 2px;
-    --hmm-field-narrow: 90px;
-    --hmm-field-medium: 150px;
 
     /*
      * The CCU draws its device pictures as black line art on white paper, so on a dark surface
@@ -143,42 +54,6 @@
 
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) {
-        color-scheme: dark;
-
-        --hmm-bg: #1e1e1e;
-        --hmm-bg-sunken: #191919;
-        --hmm-header-bg: #252526;
-        --hmm-header-solid: #2d2d2d;
-        --hmm-control-bg: #333333;
-        --hmm-control-bg-hover: #3f3f3f;
-        --hmm-input-bg: #3c3c3c;
-        --hmm-row-odd: #1e1e1e;
-        --hmm-row-even: #1e1e1e;
-        --hmm-row-hover: #2a2d2e;
-        --hmm-row-selected: #264f78;
-        --hmm-row-selected-text: #e8f2fb;
-        --hmm-overlay: rgba(24, 24, 24, 0.72);
-        --hmm-backdrop: rgba(0, 0, 0, 0.6);
-        --hmm-shadow-menu: 0 4px 14px rgb(0 0 0 / 60%);
-        --hmm-shadow-toast: 0 2px 12px rgb(0 0 0 / 55%);
-
-        --hmm-border: #3c3c3c;
-        --hmm-border-muted: #303030;
-        --hmm-border-strong: #565656;
-
-        --hmm-fg: #cccccc;
-        --hmm-fg-muted: #8a8a8a;
-        --hmm-fg-faint: #6a6a6a;
-        --hmm-link: #569cd6;
-
-        --hmm-accent: #569cd6;
-        --hmm-accent-bg: #253b52;
-        --hmm-accent-fg: #1e1e1e;
-        --hmm-ok: #4ec9b0;
-        --hmm-warn: #cca700;
-        --hmm-error: #f48771;
-        --hmm-focus: #569cd6;
-
         --hmm-rssi-1: #00ff66;
         --hmm-rssi-1-text: #1a1a1a;
         --hmm-rssi-2: #00c844;
@@ -201,42 +76,6 @@
 }
 
 :root[data-theme='dark'] {
-    color-scheme: dark;
-
-    --hmm-bg: #1e1e1e;
-    --hmm-bg-sunken: #191919;
-    --hmm-header-bg: #252526;
-    --hmm-header-solid: #2d2d2d;
-    --hmm-control-bg: #333333;
-    --hmm-control-bg-hover: #3f3f3f;
-    --hmm-input-bg: #3c3c3c;
-    --hmm-row-odd: #1e1e1e;
-    --hmm-row-even: #1e1e1e;
-    --hmm-row-hover: #2a2d2e;
-    --hmm-row-selected: #264f78;
-    --hmm-row-selected-text: #e8f2fb;
-    --hmm-overlay: rgba(24, 24, 24, 0.72);
-    --hmm-backdrop: rgba(0, 0, 0, 0.6);
-    --hmm-shadow-menu: 0 4px 14px rgb(0 0 0 / 60%);
-    --hmm-shadow-toast: 0 2px 12px rgb(0 0 0 / 55%);
-
-    --hmm-border: #3c3c3c;
-    --hmm-border-muted: #303030;
-    --hmm-border-strong: #565656;
-
-    --hmm-fg: #cccccc;
-    --hmm-fg-muted: #8a8a8a;
-    --hmm-fg-faint: #6a6a6a;
-    --hmm-link: #569cd6;
-
-    --hmm-accent: #569cd6;
-    --hmm-accent-bg: #253b52;
-    --hmm-accent-fg: #1e1e1e;
-    --hmm-ok: #4ec9b0;
-    --hmm-warn: #cca700;
-    --hmm-error: #f48771;
-    --hmm-focus: #569cd6;
-
     --hmm-rssi-1: #00ff66;
     --hmm-rssi-1-text: #1a1a1a;
     --hmm-rssi-2: #00c844;
@@ -257,11 +96,6 @@
     --hmm-device-image-filter: invert(1) hue-rotate(180deg) contrast(0.75) brightness(0.9);
 }
 
-html,
-body {
-    height: 100%;
-}
-
 /*
     The mount element: without a height of its own, `.hmm-app`'s 100 % is auto and the page grows
     with its content - the RPC drawer then lengthened the document instead of taking half the
@@ -275,79 +109,9 @@ body {
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    background: var(--hmm-bg);
-    color: var(--hmm-fg);
-    font-family: var(--hmm-font);
-    font-size: var(--hmm-font-size);
     /* 2.x refused to draw below this; the layout still assumes a desktop window. */
     min-width: 1024px;
     min-height: 584px;
-}
-
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-}
-
-/* `she`'s thin scrollbars: a data grid has a lot of them, and the fat default ones were most of
-   what made the window look busy. */
-* {
-    scrollbar-width: thin;
-    scrollbar-color: var(--hmm-border-strong) transparent;
-}
-
-:focus-visible {
-    outline: 2px solid var(--hmm-focus);
-    outline-offset: -1px;
-}
-
-.hmm-mono {
-    font-family: var(--hmm-font-mono);
-}
-
-button,
-input,
-select,
-textarea {
-    font-family: inherit;
-    font-size: inherit;
-    color: inherit;
-}
-
-/* The plain form controls of the toolbars and dialogs. */
-.hmm-input,
-.hmm-select {
-    height: 24px;
-    padding: 2px 6px;
-    border: 1px solid var(--hmm-border);
-    border-radius: var(--hmm-radius);
-    background: var(--hmm-input-bg);
-}
-
-.hmm-input:focus-visible,
-.hmm-select:focus-visible {
-    border-color: var(--hmm-accent);
-}
-
-.hmm-button {
-    min-height: 24px;
-    padding: 3px 10px;
-    border: 1px solid var(--hmm-border);
-    border-radius: var(--hmm-radius);
-    background: var(--hmm-control-bg);
-    cursor: pointer;
-}
-
-.hmm-button:hover:not(:disabled) {
-    background: var(--hmm-control-bg-hover);
-}
-
-.hmm-button:disabled {
-    opacity: 0.45;
-    cursor: default;
 }
 
 /*

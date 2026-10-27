@@ -1,8 +1,8 @@
 <script lang="ts">
     import type {RpcValue} from '@homematic-manager/core';
 
-    import Toolbar from '../lib/components/Toolbar.svelte';
-    import ToolbarButton from '../lib/components/ToolbarButton.svelte';
+    import Toolbar from 'occulite-ui/components/Toolbar';
+    import ToolbarButton from 'occulite-ui/components/ToolbarButton';
     import {getStores} from '../lib/stores/context.js';
     import type {ConsoleCall, ConsoleRecall} from '../lib/stores/ConsoleStore.svelte.js';
     import {

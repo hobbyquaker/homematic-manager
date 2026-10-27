@@ -13,7 +13,7 @@ import {
     linkWriteValues,
     serviceMessageParameters,
 } from '../../lib/util/paramsetForm.js';
-import {mountApp} from '../../testHarness.js';
+import {expandRowName, mountApp} from '../../testHarness.js';
 
 const description: ParamsetDescription = {
     ON_TIME: {
@@ -212,7 +212,7 @@ describe('the paramset dialog', () => {
         const [device] = address.split(':');
         if (address.includes(':') && device !== undefined) {
             const parent = document.querySelector<HTMLElement>(`[data-row-id="${device}"]`)!;
-            await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+            await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         }
         await fireEvent.click(screen.getByTestId(`paramset-${address}-MASTER`));
         await waitFor(() => {
@@ -433,7 +433,7 @@ describe('the paramset dialog', () => {
     it('offers a setValue button per datapoint of the VALUES paramset, and never for a read-only one', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:1-VALUES'));
 
         await waitFor(() => {
@@ -467,7 +467,7 @@ describe('the paramset dialog', () => {
         );
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:1-VALUES'));
 
         const since = await waitFor(() => screen.getByTestId('since-STATE'));
@@ -489,7 +489,7 @@ describe('the paramset dialog', () => {
     it('shows no times where the connection answers none, as on a CCU (task 82)', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:1-VALUES'));
         await waitFor(() => {
             expect(screen.getByTestId('set-STATE')).toBeTruthy();
@@ -506,7 +506,7 @@ describe('the paramset dialog', () => {
     it('sends a float datapoint uncast, so the backend is the only place that casts', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="GEQ0567890"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(screen.getByTestId('paramset-GEQ0567890:1-VALUES'));
 
         // LEVEL has UNIT `100%`, so the input shows percent and the store keeps the fraction.
@@ -523,7 +523,7 @@ describe('the paramset dialog', () => {
     it('shows no multi-apply picker for VALUES - it is a MASTER affair', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:1-VALUES'));
         await waitFor(() => {
             expect(screen.getByTestId('param-STATE')).toBeTruthy();
@@ -565,7 +565,7 @@ describe('service-message suppression in the channel-0 dialog', () => {
     async function openHmip(paramset: 'MASTER' | 'VALUES'): Promise<void> {
         await mountApp({transport, hash: '#/HmIP-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="000A1B2C3D4E5F"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         // B-33: the MASTER of this channel 0 is empty in the demo; its button is offered because the
         // dialog carries the suppression rows from VALUES, which takes a second description
         await fireEvent.click(await screen.findByTestId(`paramset-000A1B2C3D4E5F:0-${paramset}`));
@@ -707,7 +707,7 @@ describe('service-message suppression in the channel-0 dialog', () => {
     it('shows none of it on BidCos, and asks the interface nothing', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:0-VALUES'));
         await waitFor(() => {
             expect(screen.getByTestId('param-UNREACH')).toBeTruthy();
@@ -750,7 +750,7 @@ describe('the CCU MASTER form (task 63, D-55)', () => {
     async function openButton(): Promise<void> {
         await mountApp({transport, hash: '#/HmIP-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="0001D8A9B7C6D5"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(await screen.findByTestId(`paramset-${CHANNEL}-MASTER`));
     }
 
@@ -862,7 +862,7 @@ describe('the CCU MASTER form (task 63, D-55)', () => {
     it('keeps the full list, without the checkbox, where the channel type has no form', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:1-MASTER'));
         await waitFor(() => {
             expect(document.querySelectorAll('[data-testid^="param-"]').length).toBeGreaterThan(0);
@@ -902,7 +902,7 @@ describe('the MASTER form by paramset id (task 64)', () => {
     async function openSwitch(): Promise<void> {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(screen.getByTestId(`paramset-${CHANNEL}-MASTER`));
     }
 
@@ -1015,7 +1015,7 @@ describe('a MASTER form whose controls repeat (B-73, #168)', () => {
     it("draws each control once, with the first branch's label, instead of failing the page", async () => {
         await mountApp({transport, hash: '#/HmIP-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="0001D8A9B7C6D5"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(await screen.findByTestId(`paramset-${CHANNEL}-MASTER`));
         const form = await screen.findByTestId('paramset-easy-form');
         expect(within(form).getAllByTestId('param-LOGIC_COMBINATION')).toHaveLength(1);
@@ -1095,7 +1095,7 @@ describe("a MASTER form drawn by the channel's channelMode (task 75)", () => {
     async function openMaster(address: string): Promise<HTMLElement> {
         await mountApp({transport, hash: '#/HmIP-RF/devices'});
         const parent = document.querySelector<HTMLElement>(`[data-row-id="${address.split(':')[0]}"]`)!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(await screen.findByTestId(`paramset-${address}-MASTER`));
         return screen.findByTestId('paramset-easy-form');
     }

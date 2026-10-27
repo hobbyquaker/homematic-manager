@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Dialog from '../../lib/components/Dialog.svelte';
+    import Dialog from 'occulite-ui/components/Dialog';
     import type {Translate} from '../../lib/util/metaTree.js';
     import {indentedLabel, type NodeOption} from '../../lib/util/taxonomy.js';
 

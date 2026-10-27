@@ -10,7 +10,7 @@
         recallPanelHeight,
         rememberPanelHeight,
         resizePanel,
-    } from './dialogGeometry.js';
+    } from 'occulite-ui';
 
     interface Props {
         open?: boolean;

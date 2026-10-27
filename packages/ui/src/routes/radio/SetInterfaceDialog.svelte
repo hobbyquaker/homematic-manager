@@ -1,7 +1,7 @@
 <script lang="ts">
     import {bidcosInterfaceLabel, isRoaming} from '@homematic-manager/core';
 
-    import Dialog from '../../lib/components/Dialog.svelte';
+    import Dialog from 'occulite-ui/components/Dialog';
     import RssiCell from '../../lib/components/RssiCell.svelte';
     import {getStores} from '../../lib/stores/context.js';
 

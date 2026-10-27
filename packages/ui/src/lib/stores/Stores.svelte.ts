@@ -23,7 +23,7 @@ import {ParamsetStore} from './ParamsetStore.svelte.js';
 import {RadioStore} from './RadioStore.svelte.js';
 import {RoutersStore} from './RoutersStore.svelte.js';
 import {ServiceMessagesStore} from './ServiceMessagesStore.svelte.js';
-import {ShellEmbedding} from './ShellEmbedding.svelte.js';
+import {ShellEmbedding} from 'occulite-ui/embedding';
 import {SmokeGroupsStore} from './SmokeGroupsStore.svelte.js';
 import {TaxonomyStore} from './TaxonomyStore.svelte.js';
 import {UnreachStore} from './UnreachStore.svelte.js';

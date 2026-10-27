@@ -25,16 +25,16 @@
 
     import {untrack} from 'svelte';
 
-    import ContextMenu from '../lib/components/ContextMenu.svelte';
-    import type {ContextMenuItem} from '../lib/components/contextMenu.js';
-    import DataTable from '../lib/components/DataTable.svelte';
+    import ContextMenu from 'occulite-ui/components/ContextMenu';
+    import type {ContextMenuItem} from 'occulite-ui';
+    import DataTable from 'occulite-ui/components/DataTable';
     import DeviceImage from '../lib/components/DeviceImage.svelte';
     import RouterBadge from '../lib/components/RouterBadge.svelte';
     import ServiceBadge from '../lib/components/ServiceBadge.svelte';
     import {ICON_COLUMN_WIDTH} from '../lib/components/metrics.js';
-    import PrimaryToolbarButton from '../lib/components/PrimaryToolbarButton.svelte';
-    import ToolbarButton from '../lib/components/ToolbarButton.svelte';
-    import type {DataTableColumn} from '../lib/components/tableModel.js';
+    import PrimaryToolbarButton from 'occulite-ui/components/PrimaryToolbarButton';
+    import ToolbarButton from 'occulite-ui/components/ToolbarButton';
+    import type {DataTableColumn} from 'occulite-ui/table';
     import {getStores} from '../lib/stores/context.js';
     import {STORE_INTERFACE} from '../lib/stores/routing.js';
     import {isHmipInterface} from '../lib/stores/suppression.js';

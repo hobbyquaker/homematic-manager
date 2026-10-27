@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Dialog from '../../lib/components/Dialog.svelte';
+    import Dialog from 'occulite-ui/components/Dialog';
     import {getStores} from '../../lib/stores/context.js';
     import type {RouterTable} from '../../lib/stores/RoutersStore.svelte.js';
 

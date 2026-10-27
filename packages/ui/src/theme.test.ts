@@ -3,7 +3,9 @@ import {fireEvent, render, screen} from '@testing-library/svelte';
 import type {Component} from 'svelte';
 import {afterEach, describe, expect, it} from 'vitest';
 
-import appCss from './app.css?raw';
+import hmmCss from './app.css?raw';
+import kitBaseCss from 'occulite-ui/base.css?raw';
+import kitTokensCss from 'occulite-ui/tokens.css?raw';
 // Applied, not only read: the picture filter below is the one theme decision that has to be
 // measured as a computed style, because a token nothing reaches is a token that does nothing.
 import './app.css';
@@ -11,9 +13,9 @@ import ConnectionIndicator from './lib/components/ConnectionIndicator.svelte';
 import DeviceImage from './lib/components/DeviceImage.svelte';
 import InterfacePopup from './lib/components/InterfacePopup.svelte';
 import rssiCellSource from './lib/components/RssiCell.svelte?raw';
-import DataTableComponent from './lib/components/DataTable.svelte';
-import Notices from './lib/components/Notices.svelte';
-import ToolbarButton from './lib/components/ToolbarButton.svelte';
+import DataTableComponent from 'occulite-ui/components/DataTable';
+import Notices from 'occulite-ui/components/Notices';
+import ToolbarButton from 'occulite-ui/components/ToolbarButton';
 import type {Notice} from './lib/stores/NoticesStore.svelte.js';
 
 /**
@@ -83,9 +85,12 @@ function tokenValue(source: string, token: string): string | undefined {
     return match?.[1]?.trim();
 }
 
-const lightBlock = block(appCss, ':root {');
-const mediaBlock = block(appCss, "@media (prefers-color-scheme: dark) {\n    :root:not([data-theme='light'])");
-const darkBlock = block(appCss, ":root[data-theme='dark'] {");
+/** The kit's theme and the app's additions: a token may come from either, the kit's first. */
+const appCss = `${kitTokensCss}\n${kitBaseCss}\n${hmmCss}`;
+const both = (selector: string): string => `${block(kitTokensCss, selector)}\n${block(hmmCss, selector)}`;
+const lightBlock = both(':root {');
+const mediaBlock = both("@media (prefers-color-scheme: dark) {\n    :root:not([data-theme='light'])");
+const darkBlock = both(":root[data-theme='dark'] {");
 
 describe('the theme tokens', () => {
     it('defines every meaningful colour in light, in the media query and under [data-theme=dark]', () => {

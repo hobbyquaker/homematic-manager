@@ -45,7 +45,7 @@ test('a device opens its channel sub-grid', async ({page, host}) => {
     await expect(page.getByTestId('devices-table')).toBeVisible();
 
     const device = page.locator(`[data-row-id="${BIDCOS_SWITCH}"]`);
-    // "Expand row" is one of the two strings the DataTable does not translate.
+    // The e2e browser speaks English (Playwright's default locale), so the expander is "Expand row".
     await device.getByRole('button', {name: 'Expand row'}).click();
 
     await expect(page.locator(`[data-row-id="${BIDCOS_SWITCH}:1"]`)).toContainText('SWITCH');

@@ -3,7 +3,7 @@ import {beforeEach, describe, expect, it} from 'vitest';
 
 import {DEMO_DEVICES, DEMO_NAMES} from '../../lib/transport/demoData.js';
 import {MockTransport} from '../../lib/transport/MockTransport.js';
-import {mountApp} from '../../testHarness.js';
+import {expandRowName, mountApp} from '../../testHarness.js';
 
 function rowOf(address: string): HTMLElement {
     const row = document.querySelector<HTMLElement>(`[data-row-id="${address}"]`);
@@ -16,7 +16,7 @@ async function select(address: string): Promise<void> {
     const [device] = address.split(':');
     if (address.includes(':') && device !== undefined) {
         const parent = rowOf(device);
-        const expander = within(parent).queryByRole('button', {name: 'Expand row'});
+        const expander = within(parent).queryByRole('button', {name: expandRowName()});
         if (expander) {
             await fireEvent.click(expander);
         }
@@ -290,7 +290,9 @@ describe('the rename dialog from the name cell (task 46)', () => {
         expect(dialogOpen()).toBe(true);
         expect(dialogAddress()).toBe('MEQ0123456:1');
         expect(screen.queryByTestId('rename-children')).toBeNull();
-        expect(within(rowOf('MEQ0123456')).getByRole('button', {name: 'Collapse row'})).toBeTruthy();
+        expect(
+            within(rowOf('MEQ0123456')).getByRole('button', {name: /^(Collapse row|Zeile zuklappen)$/}),
+        ).toBeTruthy();
 
         await fireEvent.input(screen.getByTestId('rename-input'), {target: {value: 'Kanal'}});
         await fireEvent.click(screen.getByTestId('rename-save'));
@@ -308,7 +310,9 @@ describe('the rename dialog from the name cell (task 46)', () => {
         expect(dialogOpen()).toBe(false);
 
         await fireEvent.dblClick(rowOf('MEQ0123456').querySelector<HTMLElement>('[data-column-key="ADDRESS"]')!);
-        await fireEvent.dblClick(within(rowOf('MEQ0123456')).getByRole('button', {name: 'Collapse row'}));
+        await fireEvent.dblClick(
+            within(rowOf('MEQ0123456')).getByRole('button', {name: /^(Collapse row|Zeile zuklappen)$/}),
+        );
         expect(dialogOpen()).toBe(false);
     });
 

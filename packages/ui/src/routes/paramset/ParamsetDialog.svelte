@@ -11,9 +11,9 @@
     import {easyFormOf, easyFormParams, multiApplyEligibility} from '@homematic-manager/core';
     import {untrack} from 'svelte';
 
-    import Dialog from '../../lib/components/Dialog.svelte';
-    import MultiSelect from '../../lib/components/MultiSelect.svelte';
-    import type {MultiSelectOption} from '../../lib/components/multiSelect.js';
+    import Dialog from 'occulite-ui/components/Dialog';
+    import MultiSelect from 'occulite-ui/components/MultiSelect';
+    import type {MultiSelectOption} from 'occulite-ui';
     import {getStores} from '../../lib/stores/context.js';
     import {isHmipInterface} from '../../lib/stores/suppression.js';
     import {coveredParameters, detectDeviceEditors, type EditorContext} from '../../lib/util/editors/index.js';

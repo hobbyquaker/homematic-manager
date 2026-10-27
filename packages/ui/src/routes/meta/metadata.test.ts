@@ -4,7 +4,7 @@ import {beforeEach, describe, expect, it} from 'vitest';
 
 import {STORE_INTERFACE} from '../../lib/stores/routing.js';
 import {MockTransport} from '../../lib/transport/MockTransport.js';
-import {mountApp} from '../../testHarness.js';
+import {expandRowName, mountApp} from '../../testHarness.js';
 
 /**
  * The metadata store as a selection of the interface picker with pages of its own (the
@@ -139,7 +139,11 @@ describe('the Rooms page of a flat store', () => {
         expect(screen.queryByTestId('meta-add-below')).toBeNull();
         expect(screen.queryByTestId('meta-move')).toBeNull();
         expect(screen.queryByTestId('meta-new-enum')).toBeNull();
-        expect(within(screen.getByTestId('meta-table-room')).queryByRole('button', {name: 'Expand row'})).toBeNull();
+        expect(
+            within(screen.getByTestId('meta-table-room')).queryByRole('button', {
+                name: expandRowName(),
+            }),
+        ).toBeNull();
     });
 
     it('adds a room at the root through the dialog, and the event draws it', async () => {
@@ -262,8 +266,8 @@ describe('the Metadata page of a tree store', () => {
         expect(row('room/eg/kueche').querySelector<HTMLElement>('[data-depth]')?.style.paddingLeft).toBe('14px');
         expect(screen.getByTestId('meta-table-count').textContent).toBe('3 Taxonomien');
         // an empty taxonomy has no expander
-        expect(within(row('floor')).queryByRole('button', {name: 'Expand row'})).toBeNull();
-        expect(within(row('room')).getByRole('button', {name: 'Collapse row'})).toBeTruthy();
+        expect(within(row('floor')).queryByRole('button', {name: expandRowName()})).toBeNull();
+        expect(within(row('room')).getByRole('button', {name: /^(Collapse row|Zeile zuklappen)$/})).toBeTruthy();
     });
 
     it('makes a new taxonomy from a name, with the id derived from it', async () => {

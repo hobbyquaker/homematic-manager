@@ -15,9 +15,9 @@
         validateUserDefinedInterface,
     } from '@homematic-manager/core';
 
-    import Dialog from '../lib/components/Dialog.svelte';
-    import LanguageSwitch from '../lib/components/LanguageSwitch.svelte';
-    import MultiSelect from '../lib/components/MultiSelect.svelte';
+    import Dialog from 'occulite-ui/components/Dialog';
+    import LanguageSwitch from 'occulite-ui/components/LanguageSwitch';
+    import MultiSelect from 'occulite-ui/components/MultiSelect';
     import {getStores} from '../lib/stores/context.js';
     import {isHmipInterface} from '../lib/stores/suppression.js';
     import {LOCAL_NETWORK_HINT, testMayBeLocalNetworkBlock} from '../lib/util/localNetwork.js';

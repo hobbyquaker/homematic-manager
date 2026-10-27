@@ -1,7 +1,7 @@
 <script lang="ts">
     import {isDeviceAddress, renameEntries} from '@homematic-manager/core';
 
-    import Dialog from '../../lib/components/Dialog.svelte';
+    import Dialog from 'occulite-ui/components/Dialog';
     import {getStores} from '../../lib/stores/context.js';
 
     interface Props {

@@ -24,9 +24,9 @@ import {
     type TabId,
 } from './routing.js';
 
-export type ThemeChoice = 'system' | 'light' | 'dark';
+import {THEME_CHOICES, type ThemeChoice} from 'occulite-ui/theme';
 
-export const THEME_CHOICES: readonly ThemeChoice[] = ['system', 'light', 'dark'];
+export {THEME_CHOICES, type ThemeChoice};
 
 export const THEME_STORAGE_KEY = 'hmm.theme';
 export const LANGUAGE_STORAGE_KEY = 'hmm.language';

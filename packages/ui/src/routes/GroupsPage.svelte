@@ -1,10 +1,10 @@
 <script lang="ts">
     import type {HeatingGroup, HeatingGroupMember} from '@homematic-manager/core';
 
-    import DataTable from '../lib/components/DataTable.svelte';
-    import ToolbarButton from '../lib/components/ToolbarButton.svelte';
-    import Tooltip from '../lib/components/Tooltip.svelte';
-    import type {DataTableColumn} from '../lib/components/tableModel.js';
+    import DataTable from 'occulite-ui/components/DataTable';
+    import ToolbarButton from 'occulite-ui/components/ToolbarButton';
+    import Tooltip from 'occulite-ui/components/Tooltip';
+    import type {DataTableColumn} from 'occulite-ui/table';
     import {getStores} from '../lib/stores/context.js';
 
     import DeleteGroupDialog from './groups/DeleteGroupDialog.svelte';

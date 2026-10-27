@@ -2,9 +2,9 @@
     import type {DeviceDescription} from '@homematic-manager/core';
     import {canLink, linkSenders, parseRoles} from '@homematic-manager/core';
 
-    import Dialog from '../../lib/components/Dialog.svelte';
-    import MultiSelect from '../../lib/components/MultiSelect.svelte';
-    import type {MultiSelectOption} from '../../lib/components/multiSelect.js';
+    import Dialog from 'occulite-ui/components/Dialog';
+    import MultiSelect from 'occulite-ui/components/MultiSelect';
+    import type {MultiSelectOption} from 'occulite-ui';
     import {getStores} from '../../lib/stores/context.js';
     import {channelOption} from '../../lib/util/linkChannels.js';
 

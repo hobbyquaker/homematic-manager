@@ -1,7 +1,7 @@
 import {fireEvent, waitFor, within} from '@testing-library/svelte';
 import {describe, expect, it} from 'vitest';
 
-import {mountApp} from '../testHarness.js';
+import {expandRowName, mountApp} from '../testHarness.js';
 
 /**
  * Task 47: which columns of which grid carry the copy button - every cell that shows a device's, a
@@ -36,7 +36,7 @@ describe('the copy button on names and addresses (task 47)', () => {
         const device = await rowOf('MEQ0123456');
         expect(copyButtonsOf(device)).toEqual([`name: ${NAME}`, `ADDRESS: ${ADDRESS}`]);
 
-        await fireEvent.click(within(device).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(device).getByRole('button', {name: expandRowName()}));
         expect(copyButtonsOf(await rowOf('MEQ0123456:1'))).toEqual([`name: ${NAME}`, `ADDRESS: ${ADDRESS}`]);
         // the sub-grid's label row has none
         expect(copyButtonsOf(document.querySelector('[data-row-kind="header"]')!)).toEqual([]);
@@ -65,7 +65,7 @@ describe('the copy button on names and addresses (task 47)', () => {
         // not on INTERFACE: the receiver a device is routed through is not the row's own address
         expect(copyButtonsOf(device)).toEqual([`name: ${NAME}`, `ADDRESS: ${ADDRESS}`]);
 
-        await fireEvent.click(within(device).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(device).getByRole('button', {name: expandRowName()}));
         await waitFor(() => {
             expect(table.querySelector('.hmm-tr-child')).not.toBeNull();
         });

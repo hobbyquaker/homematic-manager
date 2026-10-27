@@ -14,7 +14,7 @@ import {beforeEach, describe, expect, it} from 'vitest';
 
 import {demoParamset} from '../../lib/transport/demoData.js';
 import {MockTransport} from '../../lib/transport/MockTransport.js';
-import {mountApp} from '../../testHarness.js';
+import {expandRowName, mountApp} from '../../testHarness.js';
 
 const SWSD_1 = '0001D3C9000001';
 const SWSD_2 = '0001D3C9000002';
@@ -31,7 +31,7 @@ function rowsOf(address: string): HTMLElement[] {
 }
 
 async function expand(address: string): Promise<void> {
-    await fireEvent.click(within(rowOf(address)).getByRole('button', {name: 'Expand row'}));
+    await fireEvent.click(within(rowOf(address)).getByRole('button', {name: expandRowName()}));
 }
 
 /**

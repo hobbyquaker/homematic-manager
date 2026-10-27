@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Dialog from '../lib/components/Dialog.svelte';
+    import Dialog from 'occulite-ui/components/Dialog';
     import RpcProgress from '../lib/components/RpcProgress.svelte';
     import {getStores} from '../lib/stores/context.js';
     import type {StagedChange} from '../lib/stores/ChangeSetStore.svelte.js';

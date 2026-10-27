@@ -4,7 +4,7 @@ import {afterEach, beforeEach, describe, expect, it} from 'vitest';
 
 import RssiCell from '../../lib/components/RssiCell.svelte';
 import {MockTransport} from '../../lib/transport/MockTransport.js';
-import {mountApp} from '../../testHarness.js';
+import {expandRowName, mountApp} from '../../testHarness.js';
 
 describe('the RSSI cell', () => {
     afterEach(() => {
@@ -179,7 +179,7 @@ describe('the radio tab', () => {
         });
 
         const row = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
-        await fireEvent.click(within(row).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(row).getByRole('button', {name: expandRowName()}));
 
         await waitFor(() => {
             expect(screen.getByTestId('rssi-MEQ0123456-JEQ0234567-rx')).toBeTruthy();

@@ -1,9 +1,9 @@
 <script lang="ts">
     import {parentPath, slugId, type MetaEnum, type MetaObjectView} from '@homematic-manager/core';
 
-    import DataTable from '../../lib/components/DataTable.svelte';
-    import type {DataTableColumn} from '../../lib/components/tableModel.js';
-    import ToolbarButton from '../../lib/components/ToolbarButton.svelte';
+    import DataTable from 'occulite-ui/components/DataTable';
+    import type {DataTableColumn} from 'occulite-ui/table';
+    import ToolbarButton from 'occulite-ui/components/ToolbarButton';
     import {
         deletionMembers,
         enumNameAfterRename,

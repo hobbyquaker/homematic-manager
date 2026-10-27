@@ -20,16 +20,11 @@ import {fireEvent, render, screen, waitFor, within} from '@testing-library/svelt
 import {beforeEach, describe, expect, it} from 'vitest';
 import {page} from 'vitest/browser';
 
-import Dialog from '../lib/components/Dialog.svelte';
-import {
-    DEFAULT_LIMITS,
-    VIEWPORT_MARGIN,
-    forgetDialogGeometry,
-    recallPanelHeight,
-} from '../lib/components/dialogGeometry.js';
+import Dialog from 'occulite-ui/components/Dialog';
+import {DEFAULT_LIMITS, VIEWPORT_MARGIN, forgetDialogGeometry, recallPanelHeight} from 'occulite-ui';
 import type {Stores} from '../lib/stores/Stores.svelte.js';
 import {MockTransport} from '../lib/transport/MockTransport.js';
-import {mountApp} from '../testHarness.js';
+import {expandRowName, mountApp} from '../testHarness.js';
 
 const hasLayout = document.body.getBoundingClientRect().width > 0;
 
@@ -112,7 +107,7 @@ const handleOf = (dialog: HTMLElement, edge: string): HTMLElement =>
 async function openParamset(): Promise<HTMLElement> {
     await mountApp({transport: new MockTransport({demo: true}), hash: '#/BidCos-RF/devices'});
     const parent = document.querySelector<HTMLElement>(`[data-row-id="${SWITCH}"]`)!;
-    await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+    await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
     await fireEvent.click(screen.getByTestId(`paramset-${SWITCH_CHANNEL}-MASTER`));
     return waitFor(() => {
         const dialog = screen.getByTestId('paramset-dialog');
@@ -508,7 +503,7 @@ describe.skipIf(!hasLayout)('the paramset editor with a long expert view (task 6
     async function openExpert(): Promise<HTMLElement> {
         await mountApp({transport: longTransport(), hash: '#/HmIP-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="0001D8A9B7C6D5"]')!;
-        await fireEvent.click(within(parent).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(await screen.findByTestId(`paramset-${CHANNEL}-MASTER`));
         await screen.findByTestId('paramset-easy-form');
         await fireEvent.click(screen.getByTestId('paramset-expert'));

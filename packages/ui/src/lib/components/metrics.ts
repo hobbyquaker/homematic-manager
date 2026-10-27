@@ -12,8 +12,8 @@
  * in them, which is smaller than the CCU's own line drawings survive. Both grew by four.
  */
 
-/** `--hmm-row-height`. One row of every grid; the virtualiser needs it to be uniform. */
-export const ROW_HEIGHT = 30;
+/** `--hmm-row-height`, from occulite-ui: one row of every grid; the virtualiser needs it to be uniform. */
+export {ROW_HEIGHT} from 'occulite-ui/table';
 
 /** `--hmm-device-image-size`. The device picture in a grid row. */
 export const DEVICE_IMAGE_SIZE = 20;

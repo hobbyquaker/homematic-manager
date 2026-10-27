@@ -2,7 +2,7 @@
     import {isDeviceAddress, renameEntries} from '@homematic-manager/core';
     import {tick, untrack} from 'svelte';
 
-    import Dialog from '../../lib/components/Dialog.svelte';
+    import Dialog from 'occulite-ui/components/Dialog';
     import {getStores} from '../../lib/stores/context.js';
     import {
         assignRequests,

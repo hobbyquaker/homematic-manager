@@ -11,7 +11,7 @@ import {fireEvent, screen, waitFor, within} from '@testing-library/svelte';
 import {beforeEach, describe, expect, it} from 'vitest';
 
 import {MockTransport} from '../lib/transport/MockTransport.js';
-import {mountApp} from '../testHarness.js';
+import {expandRowName, mountApp} from '../testHarness.js';
 
 import type {StagedInput} from '../lib/stores/ChangeSetStore.svelte.js';
 
@@ -165,7 +165,7 @@ describe('what can be staged', () => {
     it('the write preview of a paramset, with the payload it printed', async () => {
         const {stores} = await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]');
-        await fireEvent.click(within(parent as HTMLElement).getByRole('button', {name: 'Expand row'}));
+        await fireEvent.click(within(parent as HTMLElement).getByRole('button', {name: expandRowName()}));
         await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:1-MASTER'));
         await waitFor(() => {
             expect(document.querySelectorAll('[data-testid^="param-"]').length).toBeGreaterThan(0);

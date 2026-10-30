@@ -1035,5 +1035,145 @@
     },
     "WS_TH": {"WEATHER": [0, 1]}
   },
-  "source": "OpenCCU-Base lite 788ad750 (www/config/easymodes)"
+  "senders": {
+    "ks550_ch_link": {
+      "hiddenForReceiver": "WS_CS",
+      "options": {
+        "1": "windForce0",
+        "2": "windForce1",
+        "5": "windForce2",
+        "12": "windForce3",
+        "25": "windForce4",
+        "29": "windForce5",
+        "39": "windForce6",
+        "50": "windForce7",
+        "62": "windForce8",
+        "75": "windForce9",
+        "89": "windForce10",
+        "103": "windForce11",
+        "118": "windForce12"
+      },
+      "presets": {
+        "1": {
+          "STORM_UPPER_THRESHOLD": [1, 2, 5, 12, 15, 25, 29, 39, 50, 62, 75, 89, 103, 118],
+          "STORM_LOWER_THRESHOLD": [1, 2, 5, 12, 15, 25, 29, 39, 50, 62, 75, 89, 103, 118]
+        }
+      },
+      "profiles": {"0": "Experte", "1": "weatherProfile1"}
+    },
+    "wa_od_ch_link": {
+      "hidesProfileSelect": true,
+      "percentOf": {"divisor": 2, "inactive": 255},
+      "presets": {
+        "0": {"FILL_LEVEL_UPPER_THRESHOLD": "0 range 0 - 255", "FILL_LEVEL_LOWER_THRESHOLD": "0 range 0 - 255"}
+      },
+      "profiles": {}
+    },
+    "wds100_ch_link": {
+      "hiddenForReceiver": "WS_CS",
+      "mirrors": {
+        "deviceType": "HM-WDS100-C6-O-2",
+        "STORM_LOWER_THRESHOLD": "SHORT_COND_VALUE_LO",
+        "STORM_UPPER_THRESHOLD": "SHORT_COND_VALUE_HI"
+      },
+      "options": {
+        "1": "windForce0",
+        "2": "windForce1",
+        "5": "windForce2",
+        "12": "windForce3",
+        "25": "windForce4",
+        "29": "windForce5",
+        "39": "windForce6",
+        "50": "windForce7",
+        "62": "windForce8",
+        "75": "windForce9",
+        "89": "windForce10",
+        "103": "windForce11",
+        "118": "windForce12"
+      },
+      "presets": {
+        "1": {
+          "STORM_UPPER_THRESHOLD": [1, 2, 5, 12, 15, 20, 25, 29, 39, 50, 62, 75, 89, 103, 118],
+          "STORM_LOWER_THRESHOLD": [1, 2, 5, 12, 15, 20, 25, 29, 39, 50, 62, 75, 89, 103, 118],
+          "PEER_NEEDS_BURST": "0 1"
+        }
+      },
+      "profiles": {"0": "Experte", "1": "weatherProfile1"},
+      "variantOptions": {"HM-WDS100-C6-O-2": {"add": 20, "remove": 25}}
+    }
+  },
+  "source": "OpenCCU-Base lite 788ad750 (www/config/easymodes)",
+  "weatherTexts": {
+    "lowerStormThreshold": {"de": "Ausschaltschwelle", "en": "Switch-off threshold"},
+    "toolTip0": {
+      "de": "Schaltbefehl bei überschreiten der eingestellten Schaltschwelle",
+      "en": "Switching command on exceeding the set threshold"
+    },
+    "toolTip1": {
+      "de": "Schaltbefehl bei Unterschreiten der eingestellten Schaltschwelle",
+      "en": "Switching command on fall below the set threshold"
+    },
+    "upperStormThreshold": {"de": "Einschaltschwelle", "en": "Switch-on threshold"},
+    "weatherProfile1": {"de": "Sturmschwelle", "en": "Storm threshold"},
+    "windDesc0": {"de": "Keine Luftbewegung, Rauch steigt senkrecht empor.", "en": "Calm, smoke rises vertically."},
+    "windDesc1": {
+      "de": "Kaum merklich, Rauch treibt leicht ab, Windflügel und Windfahnen unbewegt.",
+      "en": "Smoke drift indicates wind direction, still wind vanes."
+    },
+    "windDesc10": {
+      "de": "Bäume werden entwurzelt, Baumstämme brechen, grössere Schäden an Häusern.",
+      "en": "Trees broken or uprooted, considerable damages on houses"
+    },
+    "windDesc11": {
+      "de": "Heftige Böen, schwere Sturmschäden, schwere Waldschäden, Dächer werden abgedeckt, Autos werden aus der Spur geworfen. Selten im Landesinneren.",
+      "en": "Extreme destruction, forests flattened, shingles are blown off of roofs, devastation, cars thrown. Seldom experienced on inland"
+    },
+    "windDesc12": {
+      "de": "Schwerste Sturmschäden und Verwüstungen. Selten im Landesinneren.",
+      "en": "Heavy storm damages and destructions. Seldom experienced on inland"
+    },
+    "windDesc2": {"de": "Blätter rascheln, Wind im Gesicht spürbar.", "en": "Leaves rustle, wind felt on face."},
+    "windDesc3": {
+      "de": "Blätter und dünne Zweige bewegen sich, Wimpel werden gestreckt.",
+      "en": "Leaves and small twigs constantly moving, light flags extended"
+    },
+    "windDesc4": {
+      "de": "Zweige bewegen sich, loses Papier wird vom Boden gehoben.",
+      "en": "Leaves and loose paper lifted, small tree branches move"
+    },
+    "windDesc5": {
+      "de": "Größere Zweige und Bäume bewegen sich, Wind deutlich hörbar.",
+      "en": "Larger tree branches and trees begin to sway, wind noticeable"
+    },
+    "windDesc6": {
+      "de": "Dicke Äste bewegen sich, hörbares Pfeifen an Drahtseilen und Telefonleitungen.",
+      "en": "Larger tree branches moving, whistling in wires"
+    },
+    "windDesc7": {
+      "de": "Bäume schwanken, Widerstand beim Gehen gegen den Wind.",
+      "en": "Whole trees moving, resistance felt walking against wind"
+    },
+    "windDesc8": {
+      "de": "Grosse Bäume werden bewegt, Zweige brechen von Bäumen, erhebliche Behinderung beim Gehen.",
+      "en": "Larger tress moving, twigs breaking off trees, generally impedes progress"
+    },
+    "windDesc9": {
+      "de": "Äste brechen, kleinere Schäden an Häusern, Ziegel werden von Dächern abgehoben, Gartenmöbel werden umgeworfen und verweht.",
+      "en": "Branches breaking off trees, slight damages on houses, slate blows off roofs"
+    },
+    "windForce0": {"de": "Windstärke 0 - Windstille", "en": "Wind strength 0 - Calm"},
+    "windForce1": {"de": "Windstärke 1 - leiser Zug", "en": "Wind strength 1 - Light air"},
+    "windForce10": {"de": "Windstärke 10 - schwerer Sturm", "en": "Wind strength 10 - Strom, whole gale"},
+    "windForce11": {"de": "Windstärke 11 - orkanartiger Sturm", "en": "Wind strength 11 - Violent storm"},
+    "windForce12": {"de": "Windstärke 12 - Orkan", "en": "Wind strength 12 - Hurricane force"},
+    "windForce2": {"de": "Windstärke 2 - leichte Brise", "en": "Wind strength 2 - Light breeze"},
+    "windForce3": {"de": "Windstärke 3 - schwache Brise", "en": "Wind strength 3 - Gentle breeze"},
+    "windForce4": {"de": "Windstärke 4 - mäßige Brise", "en": "Wind strength 4 - Moderate breeze"},
+    "windForce5": {"de": "Windstärke 5 - frischer Wind", "en": "Wind strength 5 - Fresh breeze"},
+    "windForce6": {"de": "Windstärke 6 - starker Wind", "en": "Wind strength 6 - Strong breeze"},
+    "windForce7": {"de": "Windstärke 7 - steifer Wind", "en": "Wind strength 7 - High wind, moderate gale, near gale"},
+    "windForce8": {"de": "Windstärke 8 - stürmischer Wind", "en": "Wind strength 8 - Gale, fresh gale"},
+    "windForce9": {"de": "Windstärke 9 - Sturm", "en": "Wind strength 9 - Strong gale"},
+    "windInBeaufort": {"de": "Windstärke in Beaufort", "en": "Wind strength in Beaufort scale"}
+  }
 }

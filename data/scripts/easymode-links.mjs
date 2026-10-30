@@ -16,6 +16,12 @@
  *   paramset id names), how it names the receiver folder (`HMW_` + type, type + `M`, `DIMMER`) and
  *   the sender file (`_<INPUT_TYPE>`, `_PAIR`, HM-WDS100-C6-O-2's `_2`).
  *
+ * - `senders` (task 109): per `<paramid>.tcl` that draws a *sender's* form of its own (the file
+ *   `ic_setprofiles.cgi` sources for the sender part of a link, by the sender's LINK paramset id):
+ *   its profiles and presets, the threshold options, the device variant, the receiver it hides
+ *   itself for, the receiver parameters it mirrors into, the percentage it shows; `weatherTexts`
+ *   the de/en texts of the weather forms.
+ *
  * `packages/core/src/easymodes/linkTypes.ts` implements these rules; its test reads this file and
  * fails for every rule or pair the core does not resolve. Like `easymode-controls.mjs` a tool, not
  * part of `npm run update`, and the output is committed.
@@ -128,10 +134,108 @@ for (const file of readdirSync(root).sort()) {
     bidcos[file.slice(0, -4)] = sortKeys(entry);
 }
 
+// Task 109: the sender-side forms. `ic_setprofiles.cgi` sources `<sender paramid>.tcl` for the sender
+// part of a link; a few BidCos sensors have a file of their own there, which draws its own form
+// (`proc set_htmlParams`) from its own presets instead of sourcing a receiver folder's.
+const senders = {};
+for (const file of readdirSync(root).sort()) {
+    if (!file.endsWith('_link.tcl')) continue;
+    const text = code(read(path.join(root, file)));
+    if (!/proc set_htmlParams/u.test(text) || /config\/easymodes\/\$ACTOR\//u.test(text)) continue;
+    const variables = {};
+    for (const match of text.matchAll(/^\s*set ([a-z]+) \{([^}]*)\}\s*$/gmu)) {
+        variables[match[1]] = match[2].trim().split(/\s+/u).map(Number);
+    }
+    const profiles = {};
+    for (const match of text.matchAll(/^\s*set PROFILES_MAP\((\d+)\)\s+"([^"]*)"/gmu)) {
+        profiles[match[1]] = match[2].replace(/^\\\$\{(.+)\}$/u, '$1');
+    }
+    const presets = {};
+    for (const match of text.matchAll(/^\s*set PROFILE_(\d+)\(([A-Z0-9_]+)\)\s+(.+?)\s*$/gmu)) {
+        if (match[2].startsWith('UI_')) continue;
+        const raw = match[3];
+        const value = raw.startsWith('$') ? variables[raw.slice(1)] : /^\{(.*)\}$/u.test(raw) ? raw.slice(1, -1) : raw;
+        (presets[match[1]] ??= {})[match[2]] = value;
+    }
+    // the option lists of the threshold selects: value -> label key, the default branch and the
+    // values a device type puts in place of another
+    const options = {};
+    const variantOptions = {};
+    const variant =
+        /if \{ \[string first "([^"]+)" \$SENDER\] == 0 \} \{\s*set options\((\d+)\)\s+"\\\$\{([A-Za-z0-9]+)\}"\s*\} else \{\s*set options\((\d+)\)/u.exec(
+            text,
+        );
+    for (const match of text.matchAll(/set options\((\d+)\)\s+"\\\$\{([A-Za-z0-9]+)\}"/gu)) {
+        if (variant && match[1] === variant[2] && match[2] === variant[3]) continue;
+        options[match[1]] = match[2];
+    }
+    if (variant) variantOptions[variant[1]] = {add: Number(variant[2]), remove: Number(variant[4])};
+    const entry = {profiles, presets};
+    if (Object.keys(options).length > 0) entry.options = options;
+    if (variant) entry.variantOptions = variantOptions;
+    const hidesFor = /if \{\$ACTOR != "([A-Z_]+)"\}/u.exec(text);
+    if (hidesFor) entry.hiddenForReceiver = hidesFor[1];
+    if (/getElementById\('sender_profiles'\)\.style\.display = 'none'/u.test(text)) entry.hidesProfileSelect = true;
+    const mirror = /PARENT_TYPE\) == "([^"]+)"\}[\s\S]*?setActorConditions/u.exec(text);
+    if (mirror) {
+        entry.mirrors = {
+            deviceType: mirror[1],
+            STORM_LOWER_THRESHOLD: /expertCondLowElm\.val\(stormLowerThresholdElm/u.test(text)
+                ? 'SHORT_COND_VALUE_LO'
+                : '',
+            STORM_UPPER_THRESHOLD: /expertCondHiElm\.val\(stormUpperThresholdElm/u.test(text)
+                ? 'SHORT_COND_VALUE_HI'
+                : '',
+        };
+    }
+    if (/setThresholdActiv/u.test(text)) {
+        // the fill level form: a percentage of the raw value (`100.0 / (200.0/$val)`), 255 = inactive
+        const inactive = /if \{\$val == "(\d+)"\}/u.exec(text);
+        entry.percentOf = {
+            divisor: /100\.0 \/ \(200\.0\/\$val\)/u.test(text) ? 2 : 0,
+            inactive: inactive ? Number(inactive[1]) : 0,
+        };
+    }
+    senders[file.slice(0, -4)] = sortKeys(entry);
+}
+
+// the texts the weather forms use (`WEATHER/localization/lang.js`), de and en
+const weatherTexts = {};
+const weatherLang = path.join(root, 'WEATHER', 'localization', 'lang.js');
+const decode = (value) =>
+    value
+        .replace(/&auml;/gu, 'ä')
+        .replace(/&ouml;/gu, 'ö')
+        .replace(/&uuml;/gu, 'ü')
+        .replace(/&Auml;/gu, 'Ä')
+        .replace(/&Ouml;/gu, 'Ö')
+        .replace(/&Uuml;/gu, 'Ü')
+        .replace(/&szlig;/gu, 'ß')
+        .replace(/%([0-9A-F]{2})/gu, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+        .trim();
+for (const block of read(weatherLang).matchAll(/"(de|en)"\s*:\s*\{([\s\S]*?)\n\s*\}/gu)) {
+    for (const match of block[2].matchAll(/"([A-Za-z0-9]+)"\s*:\s*"([^"]*)"/gu)) {
+        if (match[1] === 'dummyWeather') continue;
+        (weatherTexts[match[1]] ??= {})[block[1]] = decode(match[2]);
+    }
+}
+
 const out = path.join(dataDir, 'extracted', 'easymode_links.json');
-await writeJson(out, sortKeys({source, pairs: sortKeys(pairs), dispatchers: sortKeys(dispatchers), hmip, bidcos}));
+await writeJson(
+    out,
+    sortKeys({
+        source,
+        pairs: sortKeys(pairs),
+        dispatchers: sortKeys(dispatchers),
+        hmip,
+        bidcos,
+        senders,
+        weatherTexts: sortKeys(weatherTexts),
+    }),
+);
 const count = (table) => Object.values(table).reduce((sum, inner) => sum + Object.keys(inner).length, 0);
 console.log(
     `${path.relative(process.cwd(), out)}: ${count(pairs)} pairs, ${count(dispatchers)} dispatchers, ` +
-        `${Object.keys(hmip).length} linkHmIP files, ${Object.keys(bidcos).length} BidCos link files`,
+        `${Object.keys(hmip).length} linkHmIP files, ${Object.keys(bidcos).length} BidCos link files, ` +
+        `${Object.keys(senders).length} sender forms`,
 );

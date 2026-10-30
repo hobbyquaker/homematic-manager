@@ -10,11 +10,17 @@
     } from '@homematic-manager/core';
     import {
         EXPERT_PROFILE_ID,
+        STORM_EXPERT,
+        STORM_PROFILE_NAMES,
+        STORM_THRESHOLD,
         UI_HINT,
+        applyStormProfile,
         easyForm,
         easyFormParams,
         linkProfileTypes,
         paramsetIdentity,
+        senderFormFor,
+        stormProfile,
         type LinkEnd,
         type LinkTypeQueries,
     } from '@homematic-manager/core';
@@ -37,6 +43,7 @@
     import WritePreviewDialog from '../paramset/WritePreviewDialog.svelte';
 
     import EasyForm from '../paramset/EasyForm.svelte';
+    import SenderEasyForm from './SenderEasyForm.svelte';
 
     interface Props {
         open?: boolean;
@@ -65,6 +72,12 @@
      * the link on screen, and the next link opens with the default again.
      */
     let senderToggled = $state<boolean | undefined>(undefined);
+    /**
+     * Task 109: the sender's LINK paramset id (`getParamsetId(sender, LINK)`), which names the
+     * sender's own form where the WebUI has one, and the profile the user picked in it.
+     */
+    let senderParamsetId = $state('');
+    let senderProfileChoice = $state<number | undefined>(undefined);
     let linkName = $state('');
     let linkDescription = $state('');
     let targets = $state<string[]>([]);
@@ -168,6 +181,46 @@
     );
     const senderFields = $derived<LinkField[]>(senderDescription ? linkFields(senderDescription, {expert: true}) : []);
     const senderOpen = $derived(senderToggled ?? senderFields.length > 0);
+    /** Task 109: the WebUI's form of the sender side, where its paramset id names one. */
+    const senderForm = $derived(
+        senderParamsetId === '' || sender === receiver ? undefined : senderFormFor(senderParamsetId, receiverType),
+    );
+    const senderDeviceType = $derived(index?.get(sender)?.PARENT_TYPE ?? '');
+    const senderCurrent = $derived<Paramset>({...senderValues, ...(senderEdited as Paramset)});
+    /** The storm form's profile: what the user picked, else what the stored thresholds follow. */
+    const senderProfile = $derived(
+        senderForm?.kind === 'storm' ? (senderProfileChoice ?? stormProfile(senderForm, senderValues)) : undefined,
+    );
+    const senderEasy = $derived(
+        senderForm !== undefined && !(senderForm.kind === 'storm' && senderProfile === STORM_EXPERT),
+    );
+
+    /**
+     * Task 109: a change in the sender's form. The HM-WDS100-C6-O-2's form copies its thresholds into
+     * the receiver's `SHORT_COND_VALUE_HI` / `_LO` as well (`setActorConditions`), where it has them.
+     */
+    function changeSender(changes: Record<string, unknown>): void {
+        senderEdited = {...senderEdited, ...changes};
+        if (senderForm?.kind !== 'storm' || !receiverDescription) {
+            return;
+        }
+        const mirrored: Record<string, unknown> = {};
+        for (const [param, target] of Object.entries(senderForm.mirrors(senderDeviceType))) {
+            if (param in changes && target in receiverDescription) {
+                mirrored[target] = changes[param];
+            }
+        }
+        if (Object.keys(mirrored).length > 0) {
+            edited = {...edited, ...mirrored};
+        }
+    }
+
+    function chooseSenderProfile(id: number): void {
+        senderProfileChoice = id;
+        if (senderForm?.kind === 'storm' && id === STORM_THRESHOLD) {
+            changeSender(applyStormProfile(senderForm, senderCurrent));
+        }
+    }
 
     /**
      * Task 62 (D-54): the CCU easy mode's form of the chosen profile on this device. With it, the
@@ -227,26 +280,33 @@
         edited = {};
         senderEdited = {};
         senderToggled = undefined;
+        senderParamsetId = '';
+        senderProfileChoice = undefined;
         // Task 108: the load runs untracked. Only the link itself (open, interface, sender, receiver)
         // starts a load; what the load reads - the device index, the stores' description cache, which
         // its own requests fill - re-ran this effect and loaded the same link again (twice per open
         // before, three times with the MASTER read of the profile rules).
         void untrack(async () => {
             const ends = {receiver: linkEnd(request.receiver), sender: linkEnd(request.sender)};
-            const [receiverDesc, receiverParamset, senderDesc, senderParamset, info, types] = await Promise.all([
-                stores.paramsets.describe(request.interfaceName, request.receiver, 'LINK'),
-                // A LINK paramset is read with the peer address in place of the paramset name.
-                stores.paramsets.read(request.interfaceName, request.receiver, request.sender),
-                stores.paramsets.describe(request.interfaceName, request.sender, 'LINK'),
-                stores.paramsets.read(request.interfaceName, request.sender, request.receiver),
-                stores.links.info(request.interfaceName, request.sender, request.receiver),
-                linkProfileTypes(
-                    request.interfaceName,
-                    ends.receiver,
-                    ends.sender,
-                    linkTypeQueries(request.interfaceName),
-                ),
-            ]);
+            const [receiverDesc, receiverParamset, senderDesc, senderParamset, info, types, senderId] =
+                await Promise.all([
+                    stores.paramsets.describe(request.interfaceName, request.receiver, 'LINK'),
+                    // A LINK paramset is read with the peer address in place of the paramset name.
+                    stores.paramsets.read(request.interfaceName, request.receiver, request.sender),
+                    stores.paramsets.describe(request.interfaceName, request.sender, 'LINK'),
+                    stores.paramsets.read(request.interfaceName, request.sender, request.receiver),
+                    stores.links.info(request.interfaceName, request.sender, request.receiver),
+                    linkProfileTypes(
+                        request.interfaceName,
+                        ends.receiver,
+                        ends.sender,
+                        linkTypeQueries(request.interfaceName),
+                    ),
+                    // task 109: the sender's form, as `ic_setprofiles.cgi` picks it
+                    request.sender === request.receiver
+                        ? Promise.resolve('')
+                        : stores.paramsets.paramsetId(request.interfaceName, request.sender, 'LINK'),
+                ]);
             if (token !== loadToken) {
                 return;
             }
@@ -263,6 +323,7 @@
             readBack = [];
             profileReceiverType = types.receiverType;
             profileSenderType = types.senderType;
+            senderParamsetId = senderId;
             loading = false;
             loadedFor = `${request.interfaceName}|${request.sender}|${request.receiver}#${String(token)}`;
         });
@@ -627,20 +688,53 @@
                     {t('Sender')}: {stores.nameOf(sender)} ({sender})
                 </h4>
                 {#if senderOpen}
-                    <div class="hmm-link-list hmm-param-table" data-testid="link-sender-params">
-                        {#each senderFields as field (field.name)}
-                            <ParameterRow
-                                {field}
-                                value={valueOf(field, senderValues, senderEdited)}
-                                label={stores.meta.parameterLabel(field.name, senderType)}
-                                help={stores.meta.parameterHelp(field.name, senderType)}
-                                changed={Object.prototype.hasOwnProperty.call(senderEdited, field.name)}
-                                valueLabel={(entry) => stores.meta.valueLabel(field.name, entry, senderType)}
-                                presetLabel={(key) => stores.meta.uiLabel(key)}
-                                onchange={(value) => (senderEdited = {...senderEdited, [field.name]: value})}
-                            />
-                        {/each}
-                    </div>
+                    {#if senderForm?.kind === 'storm'}
+                        <div class="hmm-link-row">
+                            <label>
+                                <span>{t('Sender profile')}</span>
+                                <select
+                                    class="hmm-select"
+                                    data-testid="link-sender-profile"
+                                    value={String(senderProfile)}
+                                    onchange={(event) => chooseSenderProfile(Number(event.currentTarget.value))}
+                                >
+                                    {#each [STORM_EXPERT, STORM_THRESHOLD] as id (id)}
+                                        <option value={String(id)}
+                                            >{stores.i18n.language === 'de'
+                                                ? STORM_PROFILE_NAMES[id]?.de
+                                                : STORM_PROFILE_NAMES[id]?.en}</option
+                                        >
+                                    {/each}
+                                </select>
+                            </label>
+                        </div>
+                    {/if}
+                    {#if senderForm && senderEasy && senderDescription}
+                        <SenderEasyForm
+                            form={senderForm}
+                            {senderDeviceType}
+                            channelType={senderType}
+                            description={senderDescription}
+                            values={senderCurrent}
+                            changed={(param) => Object.prototype.hasOwnProperty.call(senderEdited, param)}
+                            onchange={changeSender}
+                        />
+                    {:else}
+                        <div class="hmm-link-list hmm-param-table" data-testid="link-sender-params">
+                            {#each senderFields as field (field.name)}
+                                <ParameterRow
+                                    {field}
+                                    value={valueOf(field, senderValues, senderEdited)}
+                                    label={stores.meta.parameterLabel(field.name, senderType)}
+                                    help={stores.meta.parameterHelp(field.name, senderType)}
+                                    changed={Object.prototype.hasOwnProperty.call(senderEdited, field.name)}
+                                    valueLabel={(entry) => stores.meta.valueLabel(field.name, entry, senderType)}
+                                    presetLabel={(key) => stores.meta.uiLabel(key)}
+                                    onchange={(value) => (senderEdited = {...senderEdited, [field.name]: value})}
+                                />
+                            {/each}
+                        </div>
+                    {/if}
                 {/if}
             </section>
         {/if}

@@ -668,6 +668,9 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Defective link': {de: 'Defekte Verknüpfung', en: 'Defective link'},
     Profile: {de: 'Profil', en: 'Profile'},
     'Expert view': {de: 'Expertenansicht', en: 'Expert view'},
+    // Task 109: the sender side's own form (weather station, filling level sensor)
+    'Threshold active': {de: 'aktiv', en: 'active'},
+    'Sender profile': {de: 'Profil des Senders', en: 'Sender profile'},
     // Task 62 (D-54): the CCU easy mode's form in the link dialog.
     'Short key press': {de: 'Kurzer Tastendruck', en: 'Short key press'},
     'Long key press': {de: 'Langer Tastendruck', en: 'Long key press'},

@@ -1371,3 +1371,213 @@ describe('staging link work instead of sending it (#124)', () => {
         expect(stores.changeSet.count).toBe(0);
     });
 });
+
+describe('the sender side of a weather station or a filling level sensor (task 109)', () => {
+    // The CCU's WebUI draws the sender part of a link from `<sender paramid>.tcl`: the weather
+    // stations' storm thresholds (`ks550_ch_link`, `wds100_ch_link`) and the filling level sensor's
+    // thresholds (`wa_od_ch_link`).
+    const STATION = 'LEQ0000001';
+    const SENDER = `${STATION}:1`;
+    const ACTOR = 'LEQ0000002';
+    const RECEIVER = `${ACTOR}:1`;
+    const storm: ParamsetDescription = {
+        STORM_UPPER_THRESHOLD: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 200, DEFAULT: 0},
+        STORM_LOWER_THRESHOLD: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 200, DEFAULT: 0},
+        PEER_NEEDS_BURST: {TYPE: 'BOOL', OPERATIONS: 3, MIN: false, MAX: true, DEFAULT: false},
+    };
+    const fill: ParamsetDescription = {
+        FILL_LEVEL_UPPER_THRESHOLD: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 255, DEFAULT: 0},
+        FILL_LEVEL_LOWER_THRESHOLD: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 255, DEFAULT: 0},
+        EXPECT_AES: {TYPE: 'BOOL', OPERATIONS: 3, MIN: false, MAX: true, DEFAULT: false},
+    };
+    const switchLink: ParamsetDescription = {
+        SHORT_COND_VALUE_LO: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 255, DEFAULT: 50},
+        SHORT_COND_VALUE_HI: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 255, DEFAULT: 100},
+    };
+    let transport: MockTransport;
+
+    function setUp(
+        deviceType: string,
+        channelType: string,
+        paramsetId: string,
+        senderDescription: ParamsetDescription,
+        stored: Record<string, number | boolean>,
+        receiverType = 'SWITCH',
+    ): void {
+        transport = new MockTransport({demo: true});
+        transport.respond('devices.list', (interfaceName) =>
+            interfaceName === 'BidCos-RF'
+                ? [
+                      {ADDRESS: STATION, TYPE: deviceType, FIRMWARE: '1.6', VERSION: 18, CHILDREN: [SENDER]},
+                      {
+                          ADDRESS: SENDER,
+                          TYPE: channelType,
+                          PARENT: STATION,
+                          PARENT_TYPE: deviceType,
+                          INDEX: 1,
+                          VERSION: 18,
+                          PARAMSETS: ['MASTER', 'VALUES', 'LINK'],
+                          LINK_SOURCE_ROLES: 'CONDITIONAL_SWITCH',
+                      },
+                      {ADDRESS: ACTOR, TYPE: 'HM-LC-Sw1-Pl-2', FIRMWARE: '1.9', VERSION: 1, CHILDREN: [RECEIVER]},
+                      {
+                          ADDRESS: RECEIVER,
+                          TYPE: receiverType,
+                          PARENT: ACTOR,
+                          PARENT_TYPE: 'HM-LC-Sw1-Pl-2',
+                          INDEX: 1,
+                          VERSION: 1,
+                          PARAMSETS: ['MASTER', 'VALUES', 'LINK'],
+                          LINK_TARGET_ROLES: 'CONDITIONAL_SWITCH',
+                      },
+                  ]
+                : [],
+        );
+        transport.respond('links.list', (interfaceName) =>
+            interfaceName === 'BidCos-RF' ? [{SENDER, RECEIVER, FLAGS: 0, NAME: '', DESCRIPTION: ''}] : [],
+        );
+        transport.respond('paramset.id', (_interfaceName, address, paramset) =>
+            address === SENDER && paramset === 'LINK' ? paramsetId : '',
+        );
+        transport.respond('paramset.description', (_interfaceName, address, paramset) => {
+            if (paramset !== 'LINK') return {};
+            return address === SENDER ? senderDescription : switchLink;
+        });
+        transport.respond('paramset.get', (_interfaceName, address, paramset) => {
+            if (address === SENDER && paramset === RECEIVER) return stored;
+            if (address === RECEIVER && paramset === SENDER) return {SHORT_COND_VALUE_LO: 50, SHORT_COND_VALUE_HI: 100};
+            return {};
+        });
+    }
+
+    async function openLink(): Promise<void> {
+        const {stores} = await mountApp({transport, hash: '#/BidCos-RF/links'});
+        await waitFor(() => {
+            expect(stores.links.of('BidCos-RF').length).toBe(1);
+        });
+        await fireEvent.dblClick(document.querySelector(`[data-row-id="${SENDER}->${RECEIVER}"]`)!);
+        await waitFor(() => {
+            expect(screen.getByTestId('link-paramset-dialog')).toBeTruthy();
+        });
+    }
+
+    it('shows a KS550 link with storm thresholds as "Sturmschwelle" on a Beaufort scale', async () => {
+        setUp('KS550', 'WEATHER', 'ks550_ch_link', storm, {STORM_UPPER_THRESHOLD: 50, STORM_LOWER_THRESHOLD: 39});
+        await openLink();
+        const profile = await waitFor(() => screen.getByTestId<HTMLSelectElement>('link-sender-profile'));
+        expect(profile.value).toBe('1');
+        const upper = screen.getByTestId<HTMLSelectElement>('link-sender-STORM_UPPER_THRESHOLD');
+        expect(upper.value).toBe('50');
+        expect(upper.selectedOptions[0]?.textContent).toBe('Windstärke 7 - steifer Wind');
+        expect([...upper.options].map((option) => option.value)).toEqual([
+            '1',
+            '2',
+            '5',
+            '12',
+            '25',
+            '29',
+            '39',
+            '50',
+            '62',
+            '75',
+            '89',
+            '103',
+            '118',
+        ]);
+        expect(screen.getByTestId('link-sender-STORM_LOWER_THRESHOLD-description').textContent).toContain(
+            'Dicke Äste bewegen sich',
+        );
+        // the profile's form only - no raw rows
+        expect(screen.queryByTestId('link-sender-params')).toBeNull();
+
+        await fireEvent.change(upper, {target: {value: '62'}});
+        await fireEvent.click(screen.getByTestId('link-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('preview-call-0').textContent).toBe(
+                `putParamset(${SENDER}←${RECEIVER}, LINK, {"STORM_UPPER_THRESHOLD":62})`,
+            );
+        });
+        expect(screen.queryByTestId('preview-call-1')).toBeNull();
+    });
+
+    it('opens a fresh link in the expert view, and "Sturmschwelle" starts it on the first grade', async () => {
+        setUp('KS550', 'WEATHER', 'ks550_ch_link', storm, {STORM_UPPER_THRESHOLD: 0, STORM_LOWER_THRESHOLD: 0});
+        await openLink();
+        const profile = await waitFor(() => screen.getByTestId<HTMLSelectElement>('link-sender-profile'));
+        expect(profile.value).toBe('0');
+        expect(screen.getByTestId('link-sender-params')).toBeTruthy();
+        await fireEvent.change(profile, {target: {value: '1'}});
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLSelectElement>('link-sender-STORM_UPPER_THRESHOLD').value).toBe('1');
+        });
+        expect(screen.getByTestId<HTMLSelectElement>('link-sender-STORM_LOWER_THRESHOLD').value).toBe('1');
+    });
+
+    it('copies an HM-WDS100-C6-O-2 threshold into the receiver’s condition, with 20 as grade 4', async () => {
+        setUp('HM-WDS100-C6-O-2', 'WEATHER', 'wds100_ch_link', storm, {
+            STORM_UPPER_THRESHOLD: 39,
+            STORM_LOWER_THRESHOLD: 20,
+            PEER_NEEDS_BURST: false,
+        });
+        await openLink();
+        const lower = await waitFor(() => screen.getByTestId<HTMLSelectElement>('link-sender-STORM_LOWER_THRESHOLD'));
+        expect(lower.value).toBe('20');
+        expect(lower.selectedOptions[0]?.textContent).toBe('Windstärke 4 - mäßige Brise');
+        await fireEvent.change(lower, {target: {value: '29'}});
+        await fireEvent.click(screen.getByTestId('link-preview'));
+        await waitFor(() => {
+            const calls = [
+                screen.getByTestId('preview-call-0').textContent,
+                screen.getByTestId('preview-call-1').textContent,
+            ];
+            expect(calls).toContain(`putParamset(${SENDER}←${RECEIVER}, LINK, {"STORM_LOWER_THRESHOLD":29})`);
+            expect(calls).toContain(`putParamset(${RECEIVER}←${SENDER}, LINK, {"SHORT_COND_VALUE_LO":29})`);
+        });
+    });
+
+    it('hides the storm form for a combination sensor as the receiver', async () => {
+        setUp(
+            'KS550',
+            'WEATHER',
+            'ks550_ch_link',
+            storm,
+            {STORM_UPPER_THRESHOLD: 50, STORM_LOWER_THRESHOLD: 39},
+            'WS_CS',
+        );
+        await openLink();
+        await waitFor(() => {
+            expect(screen.getByTestId('link-sender-params')).toBeTruthy();
+        });
+        expect(screen.queryByTestId('link-sender-profile')).toBeNull();
+    });
+
+    it('shows the filling level thresholds as percentages, 255 as switched off', async () => {
+        setUp('HM-Sen-Wa-Od', 'CAPACITIVE_FILLING_LEVEL_SENSOR', 'wa_od_ch_link', fill, {
+            FILL_LEVEL_UPPER_THRESHOLD: 160,
+            FILL_LEVEL_LOWER_THRESHOLD: 255,
+            EXPECT_AES: false,
+        });
+        await openLink();
+        const upper = await waitFor(() =>
+            screen.getByTestId<HTMLInputElement>('link-sender-FILL_LEVEL_UPPER_THRESHOLD'),
+        );
+        expect(upper.value).toBe('80');
+        const lower = screen.getByTestId<HTMLInputElement>('link-sender-FILL_LEVEL_LOWER_THRESHOLD');
+        expect(lower.disabled).toBe(true);
+        expect(screen.getByTestId<HTMLInputElement>('link-sender-FILL_LEVEL_LOWER_THRESHOLD-active').checked).toBe(
+            false,
+        );
+        expect(screen.getByTestId('link-sender-EXPECT_AES')).toBeTruthy();
+        expect(screen.queryByTestId('link-sender-profile')).toBeNull();
+
+        // switching the lower one on at 90 % pushes the upper one 5 % above it, as the WebUI does
+        await fireEvent.click(screen.getByTestId('link-sender-FILL_LEVEL_LOWER_THRESHOLD-active'));
+        await fireEvent.change(lower, {target: {value: '90'}});
+        await fireEvent.click(screen.getByTestId('link-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('preview-call-0').textContent).toBe(
+                `putParamset(${SENDER}←${RECEIVER}, LINK, {"FILL_LEVEL_LOWER_THRESHOLD":180,"FILL_LEVEL_UPPER_THRESHOLD":190})`,
+            );
+        });
+    });
+});

@@ -6,6 +6,25 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Added
+
+- **The sender side of a link has the easy mode the CCU's WebUI draws for it**, where the WebUI has one, instead of
+  the raw parameters:
+  - the weather stations KS550, HM-WDS100-C6-O and HM-WDS100-C6-O-2: the profile "Sturmschwelle" with the switch-on
+    and switch-off threshold as a Beaufort grade and what it means outside; on the HM-WDS100-C6-O-2 the thresholds are
+    copied into the actuator's switching condition, as the WebUI does;
+  - the filling level sensor HM-Sen-Wa-Od: the upper and lower filling level as a percentage, each switchable off, the
+    lower one kept below the upper one.
+
+### Fixed
+
+- **Shutter and blind links made by a CCU before June 2026 show their profile** ("auf / hoch", "zu / herunter",
+  "Position anfahren", and on blind actuators "auf / zu & hoch / herunter") instead of the expert profile. eQ-3 changed
+  what the WebUI writes for the long key press of these profiles; a link made with the older WebUI is now recognised
+  too, and keeps its value when it is saved unchanged.
+
 ## [3.4.1] — 2026-10-30
 
 ### Fixed

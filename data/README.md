@@ -140,7 +140,7 @@ shutter takes `SHUTTER_VIRTUAL_RECEIVER`, an input of a wired input module
 (`MULTI_MODE_INPUT_TRANSMITTER`) the file of its `CHANNEL_OPERATION_MODE`, a rotary control the one of
 its channel, a wired actuator `HMW_<TYPE>` with the sender's `INPUT_TYPE`, and so on.
 `scripts/easymode-links.mjs` reads those rules out of a WebUI easymode tree into the committed
-`extracted/easymode_links.json` (its `pairs`, `dispatchers`, `hmip` and `bidcos` tables);
+`extracted/easymode_links.json` (its `pairs`, `dispatchers`, `hmip` and `bidcos` tables, and since task 109 the `senders` forms with their `weatherTexts`);
 `packages/core/src/easymodes/linkTypes.ts` follows them, and its test fails for every rule or pair of
 the extract it does not follow or `dist/profiles` does not ship. The current extract is from
 OpenCCU-Base's `www/config/easymodes`: 705 pairs, 28 dispatchers, 27 `linkHmIP` files.
@@ -207,7 +207,7 @@ committed.
 | `npm run update` | fetch + convert |
 | `npm run compare-legacy` | write `COMPARISON.md` from `dist/` and `easymodes-2.7.1/` |
 | `node scripts/easymode-controls.mjs <easymodes dir> --source "<firmware>" --webui-lang <lang dir>` | rebuild `extracted/easymode_controls.json.gz` from a WebUI easymode tree and its language files (63); `npm run convert` afterwards |
-| `node scripts/easymode-links.mjs <easymodes dir> --source "<firmware>"` | rebuild `extracted/easymode_links.json`, the WebUI's rules for which profile file a link opens (task 108); the core's test reads it |
+| `node scripts/easymode-links.mjs <easymodes dir> --source "<firmware>"` | rebuild `extracted/easymode_links.json`, the WebUI's rules for which profile file a link opens (task 108) and its sender-side forms (task 109); the core's tests read it |
 | `npm run icons-subset -- --ccu <dir>` | rebuild `dist/icons/` from a CCU's `www/config/img/devices` (its `50/` thumbnails, `250/` scaled down where a thumbnail is missing); `--ccu` is required since `legacy/` and its 2.7.1 device images are gone |
 | `npm test` | validate `dist/` against the contract and against the facts in `docs/analysis-2026-09.md` |
 

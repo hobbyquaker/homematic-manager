@@ -1125,9 +1125,11 @@ export interface ApiMethods {
     'paramset.valueStates': {params: [interfaceName: string, address: string]; result: Record<string, ValueState>};
     /**
      * Task 64: what `getParamsetId(address, MASTER)` answers - the key the WebUI picks a MASTER form
-     * by. `''` where the interface has no such method or refuses it; cached per address.
+     * by. `''` where the interface has no such method or refuses it; cached per address. Task 108:
+     * `paramsetType` `LINK` asks for the link easy mode's key instead (a BidCos receiver's
+     * `<paramid>.tcl`); `MASTER` when left out.
      */
-    'paramset.id': {params: [interfaceName: string, address: string]; result: string};
+    'paramset.id': {params: [interfaceName: string, address: string, paramsetType?: 'MASTER' | 'LINK']; result: string};
     /**
      * Task 75: the channel's `channelMode` metadata (`getMetadata(address, 'channelMode')`) - `blind`
      * or `shutter` on a blind actuator, which the WebUI draws its MASTER form by. `''` where it is not

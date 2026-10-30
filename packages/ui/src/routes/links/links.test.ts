@@ -1,11 +1,14 @@
-import type {LinkProfile, ParamsetDescription} from '@homematic-manager/core';
+import {EasyModeEngine, MemoryDataSource} from '@homematic-manager/core';
+import type {LinkProfile, ParamsetDescription, ReceiverProfiles} from '@homematic-manager/core';
 import {fireEvent, screen, waitFor, within} from '@testing-library/svelte';
 import {beforeEach, describe, expect, it} from 'vitest';
 
 import {MockTransport} from '../../lib/transport/MockTransport.js';
 import {linkFields, profileDescription, profileLabel} from '../../lib/util/linkForm.js';
 import {mountApp} from '../../testHarness.js';
+import hmipBlindLinkRaw from '../../../../core/test/fixtures/hmip-blind-link.json?raw';
 import hmipSwitchLinksRaw from '../../../../core/test/fixtures/hmip-switch-links.json?raw';
+import shutterVirtualReceiverRaw from '../../../../../data/dist/profiles/SHUTTER_VIRTUAL_RECEIVER.json?raw';
 import switchVirtualReceiverRaw from '../../../../../data/dist/profiles/SWITCH_VIRTUAL_RECEIVER.json?raw';
 import timeSelectorsRaw from '../../../../../data/dist/easymode-time-selectors.json?raw';
 
@@ -1128,6 +1131,126 @@ describe('an HmIP toggle link with the real profile data (B-77)', () => {
         const select = await openLink(links.on);
         await waitFor(() => {
             expect(select.value).toBe('1');
+        });
+        // task 108: one load per open (the description cache the load fills started a second one)
+        expect(transport.countOf('links.info.get')).toBe(1);
+    });
+});
+
+describe('a wired blind actuator linked to a wired input, as a CCU made it (task 108)', () => {
+    // An HmIPW-DRBL4 channel run as a shutter (no channelMode set, firmware 1.6) and an HmIPW-DRI32
+    // input in key mode. Before task 108 the dialog looked the profiles up as BLIND_VIRTUAL_RECEIVER /
+    // MULTI_MODE_INPUT_TRANSMITTER, which offers the expert profile only.
+    const DRBL4 = '0029DFFF000001';
+    const DRI32 = '0029DFFF000002';
+    const RECEIVER = `${DRBL4}:2`;
+    const SENDER = `${DRI32}:7`;
+    const blindLink = (JSON.parse(hmipBlindLinkRaw) as {description: ParamsetDescription}).description;
+    const shutter = JSON.parse(shutterVirtualReceiverRaw) as ReceiverProfiles;
+    const device = (address: string, type: string, firmware: string, children: string[]) => ({
+        ADDRESS: address,
+        TYPE: type,
+        FIRMWARE: firmware,
+        VERSION: 1,
+        CHILDREN: children,
+        PARAMSETS: ['MASTER'],
+    });
+    const channel = (address: string, type: string, parentType: string, extra: Record<string, unknown>) => ({
+        ADDRESS: address,
+        TYPE: type,
+        PARENT: address.slice(0, address.indexOf(':')),
+        PARENT_TYPE: parentType,
+        VERSION: 1,
+        INDEX: Number(address.slice(address.indexOf(':') + 1)),
+        PARAMSETS: ['MASTER', 'VALUES', 'LINK'],
+        ...extra,
+    });
+    let transport: MockTransport;
+    let channelModeAsked: string[];
+
+    /** What the CCU's WebUI writes for a profile: its presets. */
+    function written(key: string): Record<string, number | string | boolean> {
+        const profile = shutter.senders['MULTI_MODE_INPUT_TRANSMITTER_1']?.find((entry) => entry.key === key);
+        if (!profile) throw new Error(`the pipeline no longer ships ${key}`);
+        const engine = new EasyModeEngine(new MemoryDataSource());
+        return engine.applyProfile(profile, {}, blindLink, {keepCurrent: false}).values;
+    }
+
+    async function openLink(values: Record<string, number | string | boolean>): Promise<HTMLSelectElement> {
+        transport.respond('paramset.get', (_interfaceName, address, paramset) => {
+            if (address === RECEIVER && paramset === SENDER) return values;
+            if (address === SENDER && paramset === 'MASTER') return {CHANNEL_OPERATION_MODE: 1};
+            return {};
+        });
+        const {stores} = await mountApp({transport, hash: '#/HmIP-RF/links'});
+        await waitFor(() => {
+            expect(stores.links.of('HmIP-RF').length).toBe(1);
+        });
+        await fireEvent.dblClick(document.querySelector(`[data-row-id="${SENDER}->${RECEIVER}"]`)!);
+        return waitFor(() => {
+            const select = screen.getByTestId<HTMLSelectElement>('link-profile');
+            expect(select.options.length).toBeGreaterThan(1);
+            return select;
+        });
+    }
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+        channelModeAsked = [];
+        transport.respond('devices.list', (interfaceName) =>
+            interfaceName === 'HmIP-RF'
+                ? [
+                      device(DRBL4, 'HmIPW-DRBL4', '1.6.2', [`${DRBL4}:2`]),
+                      channel(RECEIVER, 'BLIND_VIRTUAL_RECEIVER', 'HmIPW-DRBL4', {LINK_TARGET_ROLES: 'SWITCH'}),
+                      device(DRI32, 'HmIPW-DRI32', '1.4.6', [`${DRI32}:7`]),
+                      channel(SENDER, 'MULTI_MODE_INPUT_TRANSMITTER', 'HmIPW-DRI32', {LINK_SOURCE_ROLES: 'SWITCH'}),
+                  ]
+                : [],
+        );
+        transport.respond('links.list', (interfaceName) =>
+            interfaceName === 'HmIP-RF' ? [{SENDER, RECEIVER, FLAGS: 0, NAME: '', DESCRIPTION: ''}] : [],
+        );
+        transport.respond('channel.mode', (_interfaceName, address) => {
+            channelModeAsked.push(address);
+            return '';
+        });
+        const demoFile = transport.handlerFor('data.file');
+        transport.respond('data.file', (path) => {
+            if (path === 'data/profiles/SHUTTER_VIRTUAL_RECEIVER.json') return JSON.parse(shutterVirtualReceiverRaw);
+            if (path === 'data/easymode-time-selectors.json') return JSON.parse(timeSelectorsRaw);
+            return demoFile(path);
+        });
+        transport.respond('paramset.description', (_interfaceName, address, paramset) => {
+            if (address === RECEIVER && paramset === 'LINK') return blindLink;
+            if (address === SENDER && paramset === 'MASTER') {
+                return {
+                    CHANNEL_OPERATION_MODE: {
+                        TYPE: 'ENUM',
+                        OPERATIONS: 7,
+                        VALUE_LIST: ['INACTIVE', 'KEY_BEHAVIOR', 'SWITCH_BEHAVIOR', 'BINARY_BEHAVIOR'],
+                    },
+                };
+            }
+            return {};
+        });
+    });
+
+    it('offers the shutter profiles of a key input and selects the one the CCU wrote', async () => {
+        const select = await openLink(written('OpenClose_UpDown'));
+        await waitFor(() => {
+            expect(select.value).toBe('3');
+        });
+        expect([...select.options].map((option) => option.value)).toEqual(['0', '1', '2', '3', '4', '5']);
+        expect(select.selectedOptions[0]?.textContent).toBe('auf / zu & hoch / herunter');
+        // one load: the reads of the profile rules do not start the dialog's load again
+        expect(transport.countOf('links.info.get')).toBe(1);
+        expect(channelModeAsked).toEqual([RECEIVER]);
+    });
+
+    it('selects "move to position" for such a link too', async () => {
+        const select = await openLink(written('TargetPosition'));
+        await waitFor(() => {
+            expect(select.value).toBe('4');
         });
     });
 });

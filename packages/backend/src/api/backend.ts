@@ -689,7 +689,7 @@ export class Backend {
             case 'paramset.valueStates':
                 return this.#manager instanceof LiteInterfaces ? this.#manager.valueStates(p[0], p[1]) : {};
             case 'paramset.id':
-                return this.#paramsetId(p[0], p[1]);
+                return this.#paramsetId(p[0], p[1], p[2]);
             case 'channel.mode':
                 return this.#channelMode(p[0], p[1]);
             case 'paramset.description':
@@ -1657,17 +1657,18 @@ export class Backend {
     /**
      * Task 64: `getParamsetId(address, MASTER)`, once per address and connection. An interface
      * without the method (CUxD, a custom one) or a refusal is `''`, remembered as well, so the
-     * dialog falls back to the channel type without asking again.
+     * dialog falls back to the channel type without asking again. Task 108: the same for `LINK`.
      */
-    async #paramsetId(interfaceName: string, address: string): Promise<string> {
-        const key = `${interfaceName}|${address}`;
+    async #paramsetId(interfaceName: string, address: string, paramsetType?: string): Promise<string> {
+        const type = paramsetType === 'LINK' ? 'LINK' : 'MASTER';
+        const key = `${interfaceName}|${address}|${type}`;
         const known = this.#paramsetIds.get(key);
         if (known !== undefined) {
             return known;
         }
         let id: string;
         try {
-            const answer = await this.#read(interfaceName, 'getParamsetId', [address, 'MASTER']);
+            const answer = await this.#read(interfaceName, 'getParamsetId', [address, type]);
             id = typeof answer === 'string' ? answer : '';
         } catch (error) {
             // a fault is the interface's answer and is kept; no answer at all is asked again

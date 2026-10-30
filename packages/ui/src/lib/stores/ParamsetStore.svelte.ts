@@ -160,10 +160,19 @@ export class ParamsetStore {
     }
 
     /** Loads description and values together - what opening the dialog needs. */
-    /** Task 64: `getParamsetId(address, MASTER)`; `''` where the interface has none or on a failure. */
-    async paramsetId(interfaceName: string, address: string): Promise<string> {
+    /**
+     * Task 64: `getParamsetId(address, MASTER)`; `''` where the interface has none or on a failure.
+     * Task 108: `LINK` for a link receiver's easy-mode key.
+     */
+    async paramsetId(
+        interfaceName: string,
+        address: string,
+        paramsetType: 'MASTER' | 'LINK' = 'MASTER',
+    ): Promise<string> {
         try {
-            return await this.#transport.request('paramset.id', interfaceName, address);
+            return paramsetType === 'MASTER'
+                ? await this.#transport.request('paramset.id', interfaceName, address)
+                : await this.#transport.request('paramset.id', interfaceName, address, paramsetType);
         } catch {
             return '';
         }

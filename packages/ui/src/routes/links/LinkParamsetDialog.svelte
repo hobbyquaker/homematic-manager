@@ -8,7 +8,18 @@
         ParamsetValue,
         WriteResult,
     } from '@homematic-manager/core';
-    import {EXPERT_PROFILE_ID, UI_HINT, easyForm, easyFormParams, paramsetIdentity} from '@homematic-manager/core';
+    import {
+        EXPERT_PROFILE_ID,
+        UI_HINT,
+        easyForm,
+        easyFormParams,
+        linkProfileTypes,
+        paramsetIdentity,
+        type LinkEnd,
+        type LinkTypeQueries,
+    } from '@homematic-manager/core';
+
+    import {untrack} from 'svelte';
 
     import Dialog from 'occulite-ui/components/Dialog';
     import MultiSelect from 'occulite-ui/components/MultiSelect';
@@ -70,6 +81,14 @@
     let loadedFor = $state('');
     let profilesFor = $state('');
     let profilesToken = 0;
+    /**
+     * Task 108: the receiver folder and sender file of the easy-mode data this link's profiles come
+     * from, as the WebUI picks them (`linkProfileTypes`): a wired input by its mode, a wired blind
+     * actuator run as a shutter by its `channelMode`, and so on. Resolved with each load; `''` while
+     * it runs.
+     */
+    let profileReceiverType = $state('');
+    let profileSenderType = $state('');
     /** Issue #21: the name the current values would be saved under, and the chosen template. */
     let templateName = $state('');
     let templateChoice = $state('');
@@ -78,6 +97,39 @@
     const index = $derived(stores.devices.index(interfaceName));
     const senderType = $derived(index?.get(sender)?.TYPE ?? '');
     const receiverType = $derived(index?.get(receiver)?.TYPE ?? '');
+    /** Task 108: what the device list says about one end of the link. */
+    function linkEnd(address: string): LinkEnd {
+        const channel = index?.get(address);
+        const device = index?.get(channel?.PARENT ?? '');
+        const group = typeof channel?.GROUP === 'string' && channel.GROUP !== '' ? channel.GROUP : undefined;
+        return {
+            address,
+            type: channel?.TYPE ?? '',
+            parentType: channel?.PARENT_TYPE ?? device?.TYPE ?? '',
+            ...(device?.FIRMWARE === undefined ? {} : {firmware: device.FIRMWARE}),
+            ...(group === undefined ? {} : {group}),
+        };
+    }
+
+    /** Task 108: the reads the WebUI's rules need, through the stores. */
+    function linkTypeQueries(interfaceName: string): LinkTypeQueries {
+        return {
+            master: async (address) => {
+                const [values, description] = await Promise.all([
+                    stores.paramsets.read(interfaceName, address, 'MASTER'),
+                    stores.paramsets.describe(interfaceName, address, 'MASTER'),
+                ]);
+                return values ? {values, ...(description ? {description} : {})} : undefined;
+            },
+            channelMode: (address) => stores.paramsets.channelMode(interfaceName, address),
+            linkParamsetId: (address) => stores.paramsets.paramsetId(interfaceName, address, 'LINK'),
+            linked: (from, to) =>
+                Promise.resolve(
+                    stores.links.of(interfaceName).some((link) => link.SENDER === from && link.RECEIVER === to),
+                ),
+        };
+    }
+
     const title = $derived(`${stores.nameOf(sender)} → ${stores.nameOf(receiver)} (${sender} ${receiver})`);
     const profile = $derived(profiles.find((entry) => entry.id === profileId));
 
@@ -166,6 +218,8 @@
         // B-58: the dialog is mounted once and reused for every link. Drop the previous link's values
         // at once, so that nothing - the profile detection above all - works on them in the meantime.
         loadedFor = '';
+        profileReceiverType = '';
+        profileSenderType = '';
         receiverDescription = undefined;
         receiverValues = {};
         senderDescription = undefined;
@@ -173,14 +227,25 @@
         edited = {};
         senderEdited = {};
         senderToggled = undefined;
-        void (async () => {
-            const [receiverDesc, receiverParamset, senderDesc, senderParamset, info] = await Promise.all([
+        // Task 108: the load runs untracked. Only the link itself (open, interface, sender, receiver)
+        // starts a load; what the load reads - the device index, the stores' description cache, which
+        // its own requests fill - re-ran this effect and loaded the same link again (twice per open
+        // before, three times with the MASTER read of the profile rules).
+        void untrack(async () => {
+            const ends = {receiver: linkEnd(request.receiver), sender: linkEnd(request.sender)};
+            const [receiverDesc, receiverParamset, senderDesc, senderParamset, info, types] = await Promise.all([
                 stores.paramsets.describe(request.interfaceName, request.receiver, 'LINK'),
                 // A LINK paramset is read with the peer address in place of the paramset name.
                 stores.paramsets.read(request.interfaceName, request.receiver, request.sender),
                 stores.paramsets.describe(request.interfaceName, request.sender, 'LINK'),
                 stores.paramsets.read(request.interfaceName, request.sender, request.receiver),
                 stores.links.info(request.interfaceName, request.sender, request.receiver),
+                linkProfileTypes(
+                    request.interfaceName,
+                    ends.receiver,
+                    ends.sender,
+                    linkTypeQueries(request.interfaceName),
+                ),
             ]);
             if (token !== loadToken) {
                 return;
@@ -196,17 +261,19 @@
             targets = [];
             results = [];
             readBack = [];
+            profileReceiverType = types.receiverType;
+            profileSenderType = types.senderType;
             loading = false;
             loadedFor = `${request.interfaceName}|${request.sender}|${request.receiver}#${String(token)}`;
-        })();
+        });
     });
 
     /** The profiles of this receiver/sender pair, plus the metadata that orders the easy mode. */
     $effect(() => {
-        if (!open || receiverType === '' || senderType === '') {
+        if (!open || profileReceiverType === '' || profileSenderType === '') {
             return;
         }
-        const types = `${receiverType}|${senderType}`;
+        const types = `${profileReceiverType}|${profileSenderType}`;
         if (types === profilesFor) {
             return;
         }
@@ -216,8 +283,8 @@
         profilesFor = '';
         profiles = [];
         void Promise.all([
-            stores.meta.profilesFor(receiverType, senderType),
-            stores.meta.linkMetadataFor(receiverType, senderType),
+            stores.meta.profilesFor(profileReceiverType, profileSenderType),
+            stores.meta.linkMetadataFor(profileReceiverType, profileSenderType),
             stores.meta.loadPresets(),
         ]).then(([list, meta]) => {
             if (token !== profilesToken) {
@@ -242,7 +309,11 @@
     /** B-59: the profile the link's stored values follow, as detected on load. */
     let followedProfileId: number | undefined;
     $effect(() => {
-        if (loadedFor === '' || profilesFor !== `${receiverType}|${senderType}` || profiles.length === 0) {
+        if (
+            loadedFor === '' ||
+            profilesFor !== `${profileReceiverType}|${profileSenderType}` ||
+            profiles.length === 0
+        ) {
             return;
         }
         const key = `${loadedFor}|${profilesFor}`;

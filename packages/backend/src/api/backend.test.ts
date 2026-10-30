@@ -1433,6 +1433,28 @@ describe('devices', () => {
         await h.backend.stop();
     });
 
+    it('asks getParamsetId for a LINK paramset too, kept apart from the MASTER one (task 108)', async () => {
+        const h = await harness({
+            answers: {
+                'BidCos-RF': (method, params) => {
+                    if (method === 'getParamsetId') {
+                        return params[1] === 'LINK' ? 'signal_led_ch_link' : 'signal_led_ch_master';
+                    }
+                    return (defaultAnswers['BidCos-RF'] as Answer)(method, params);
+                },
+            },
+        });
+        h.calls.length = 0;
+        expect(await h.backend.request('paramset.id', 'BidCos-RF', 'LEQ1:1', 'LINK')).toBe('signal_led_ch_link');
+        expect(await h.backend.request('paramset.id', 'BidCos-RF', 'LEQ1:1')).toBe('signal_led_ch_master');
+        expect(await h.backend.request('paramset.id', 'BidCos-RF', 'LEQ1:1', 'LINK')).toBe('signal_led_ch_link');
+        expect(h.calls.filter((call) => call.method === 'getParamsetId').map((call) => call.params)).toEqual([
+            ['LEQ1:1', 'LINK'],
+            ['LEQ1:1', 'MASTER'],
+        ]);
+        await h.backend.stop();
+    });
+
     it("reads a channel's channelMode metadata each time, and a refusal or a non-string as '' (task 75)", async () => {
         const h = await harness({
             answers: {

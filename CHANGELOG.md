@@ -6,6 +6,24 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **Direct links get the easy modes the CCU's WebUI offers for them**, where the Homematic Manager offered only the
+  expert profile or another device's profiles. The WebUI picks a link's profiles not by the two channel types alone,
+  and the Homematic Manager now picks them the same way:
+  - the inputs of wired input modules such as HmIPW-DRI16 and HmIPW-DRI32 (and other multi-mode inputs) by the mode
+    the input is set to - key, switch or contact - which gave the expert profile only;
+  - a wired blind actuator (HmIPW-DRBL4 and the other HmIPW actuators, HmIP-DRBLI4, HmIP-FBL) run as a shutter with the
+    shutter profiles, as a blind with the blind profiles;
+  - rotary controls by their channel, HmIP-MOD-RC8 key channels by their mode, level command senders, the universal
+    actor, the RGBW and DALI light controllers by their mode, and the wired BidCos actors by the input type of the key.
+- **An existing link shows the profile the WebUI shows** when the values fit more than one profile: the first one by
+  number, as the WebUI decides it. A shutter link from a button made on the CCU as "auf / zu & hoch / herunter" was
+  shown as "Toggle".
+- The link dialog loads a link once when it opens; it used to read it twice.
+
 ## [3.4.0] — 2026-10-27
 
 ### Changed

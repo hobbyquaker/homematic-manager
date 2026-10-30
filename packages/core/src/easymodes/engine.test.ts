@@ -224,10 +224,13 @@ describe('detectProfile', () => {
 
     it('falls back to matching when UI_HINT is empty, missing or unknown', async () => {
         const profiles = await engine.profilesFor('SWITCH', 'KEY');
+        // switch_on and light_stairway both fit; the WebUI shows the first by number (task 108)
         const stairway = {SHORT_ACTION_TYPE: 1, SHORT_JT_ON: 3, SHORT_MULTIEXECUTE: true};
-        expect(engine.detectProfile({...stairway, UI_HINT: ''}, profiles)?.key).toBe('light_stairway');
-        expect(engine.detectProfile(stairway, profiles)?.key).toBe('light_stairway');
-        expect(engine.detectProfile({...stairway, UI_HINT: '99'}, profiles)?.key).toBe('light_stairway');
+        expect(engine.detectProfile({...stairway, UI_HINT: ''}, profiles)?.key).toBe('switch_on');
+        expect(engine.detectProfile(stairway, profiles)?.key).toBe('switch_on');
+        expect(engine.detectProfile({...stairway, UI_HINT: '99'}, profiles)?.key).toBe('switch_on');
+        // the hint the CCU wrote tells the two apart
+        expect(engine.detectProfile({...stairway, UI_HINT: '4'}, profiles)?.key).toBe('light_stairway');
     });
 
     it('prefers the profile that matches the most fixed parameters', async () => {
@@ -258,7 +261,7 @@ describe('detectProfile', () => {
         expect(engine.detectProfile({SHORT_ACTION_TYPE: 1, SHORT_JT_ON: 4}, profiles)?.key).toBe('switch_off');
     });
 
-    it('keeps the better match when a weaker one comes later in the list', async () => {
+    it('takes the first fitting profile by number, whatever the order of the list (task 108)', async () => {
         const profiles = await engine.profilesFor('SWITCH', 'KEY');
         const stairway = profiles.find((entry) => entry.key === 'light_stairway');
         const on = profiles.find((entry) => entry.key === 'switch_on');
@@ -266,8 +269,8 @@ describe('detectProfile', () => {
             throw new Error('fixture changed');
         }
         const values = {SHORT_ACTION_TYPE: 1, SHORT_JT_ON: 3, SHORT_MULTIEXECUTE: true};
-        expect(engine.detectProfile(values, [stairway, on])?.key).toBe('light_stairway');
-        expect(engine.detectProfile(values, [on, stairway])?.key).toBe('light_stairway');
+        expect(engine.detectProfile(values, [stairway, on])?.key).toBe('switch_on');
+        expect(engine.detectProfile(values, [on, stairway])?.key).toBe('switch_on');
     });
 
     it('compares a boolean fixed value against the number the CCU sends', () => {
@@ -310,7 +313,11 @@ describe('detectProfile', () => {
         const values = {SHORT_ACTION_TYPE: 1, SHORT_JT_ON: 3, SHORT_MULTIEXECUTE: true, SHORT_ON_TIME: 45};
         // light_stairway's SHORT_ON_TIME is one of 5, 30, 60, 300; switch_on's range takes 45
         expect(engine.detectProfile(values, profiles)?.key).toBe('switch_on');
-        expect(engine.detectProfile({...values, SHORT_ON_TIME: 30}, profiles)?.key).toBe('light_stairway');
+        expect(engine.detectProfile({...values, SHORT_ON_TIME: 30, UI_HINT: '4'}, profiles)?.key).toBe(
+            'light_stairway',
+        );
+        // a hint whose profile the values rule out does not count
+        expect(engine.detectProfile({...values, UI_HINT: '4'}, profiles)?.key).toBe('switch_on');
     });
 
     it('rules a profile out by a value outside its range', async () => {

@@ -276,12 +276,12 @@ export class EasyModeEngine {
      * "Schalter ein" and "Schalter ein / aus" differ in the jump table (`*_JT_ON` 1/3 or 4/6) -
      * so a toggle link was shown as "switch on", which has more fixed parameters.
      *
-     * Order: `UI_HINT` when its profile fits (`0`, the expert view, is taken as it is); otherwise
-     * the fitting profile the link has the most named parameters of, then the one with more fixed
-     * parameters (a staircase light is a "switch on" with a fixed time: the more specific one), then
-     * the one that lacks fewer, then the lower id - the WebUI takes the first fitting one by id, and
-     * where only one fits, as for B-77's pair, the two agree; last a `UI_HINT` whose profile no
-     * longer fits, as before.
+     * Order: `UI_HINT` when its profile fits (`0`, the expert view, is taken as it is) - the CCU writes
+     * it on BidCos, and it names the profile the user chose where two fit; otherwise the first fitting
+     * profile by number, as `get_cur_profile2` takes it (task 108: B-77 preferred the profile with the
+     * most named, then fixed parameters, which showed a CCU-made "auf / zu & hoch / herunter" link of a
+     * wired shutter as "Toggle", where the WebUI shows the former); last a `UI_HINT` whose profile no longer
+     * fits, as before.
      *
      * `undefined` means "none of them"; the caller then shows the expert view.
      */
@@ -295,16 +295,11 @@ export class EasyModeEngine {
             return byHint;
         }
 
-        let best: LinkProfile | undefined;
-        let bestFit: ProfileFit | undefined;
-        for (const profile of [...profiles].sort((a, b) => a.id - b.id)) {
-            const fit = profileFits(profile, linkParamset);
-            if (fit !== undefined && betterFit(fit, bestFit)) {
-                bestFit = fit;
-                best = profile;
-            }
-        }
-        return best ?? byHint;
+        // task 108: the first fitting profile by number, as `get_cur_profile2` breaks on its first match
+        const first = [...profiles]
+            .sort((a, b) => a.id - b.id)
+            .find((profile) => profile.id !== EXPERT_PROFILE_ID && profileFits(profile, linkParamset) !== undefined);
+        return first ?? byHint;
     }
 
     /**
@@ -406,14 +401,6 @@ interface ProfileFit {
     readonly present: number;
     readonly fixed: number;
     readonly missing: number;
-}
-
-/** Whether a fit is the better one: more named parameters, then more fixed ones, then fewer lacking. */
-function betterFit(fit: ProfileFit, best: ProfileFit | undefined): boolean {
-    if (best === undefined) return true;
-    if (fit.present !== best.present) return fit.present > best.present;
-    if (fit.fixed !== best.fixed) return fit.fixed > best.fixed;
-    return fit.missing < best.missing;
 }
 
 function constraintHolds(constraint: ProfileConstraint, value: ParamsetValue | undefined): boolean {

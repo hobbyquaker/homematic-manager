@@ -40,6 +40,7 @@ export * from './paramset/multiApply.js';
 export * from './easymodes/engine.js';
 export * from './easymodes/form.js';
 export * from './easymodes/linkTypes.js';
+export * from './easymodes/legacyValues.js';
 
 // State the tabs show
 export * from './serviceMessages/index.js';

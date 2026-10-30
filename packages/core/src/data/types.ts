@@ -46,6 +46,12 @@ export interface LinkProfile {
      * dialog then shows every parameter.
      */
     controls?: EasyControl[];
+    /**
+     * B-98: values an older WebUI wrote for a parameter of this profile (`LONG_PROFILE_ACTION_TYPE` 5
+     * of the shutter profiles before June 2026). Detection takes them only where no profile fits the
+     * link as the data has it; applying the profile keeps such a value where the link holds it.
+     */
+    legacy?: Record<string, Array<number | string | boolean>>;
 }
 
 /**

@@ -25,6 +25,7 @@ import type {
     ProfileConstraint,
 } from '../data/types.js';
 import {parameterOrder, type ParameterDescription, type ParamsetDescription} from '../paramset/description.js';
+import {legacyProfile, withLegacyValues} from './legacyValues.js';
 import type {Paramset, ParamsetValue} from '../rpc/values.js';
 
 /** The parameter the CCU stores the chosen profile in, inside the receiver's LINK paramset. */
@@ -194,13 +195,15 @@ export class EasyModeEngine {
     /**
      * The profiles a receiver channel type offers for a given sender channel type, expert first.
      * Aliases are followed (`OPTICAL_SIGNAL_RECEIVER` -> `DIMMER_VIRTUAL_RECEIVER` -> `DIMMER`),
-     * and the expert profile is always present even when the data does not carry it.
+     * and the expert profile is always present even when the data does not carry it. B-98: where
+     * eQ-3 changed a profile, it also takes what the older WebUI wrote ({@link withLegacyValues}).
      */
     async profilesFor(receiverType: string, senderType: string): Promise<LinkProfile[]> {
         const aliases = await this.#source.receiverTypeAliases();
         const resolved = resolveAlias(receiverType, aliases);
         const profiles = await this.#source.receiverProfiles(resolved);
-        const list = [...(profiles?.senders[senderType] ?? [])];
+        // B-98: the values an older WebUI wrote, for detection where nothing else fits
+        const list = withLegacyValues(resolved, senderType, profiles?.senders[senderType] ?? []);
         if (!list.some((profile) => profile.id === EXPERT_PROFILE_ID)) {
             list.push(EXPERT_PROFILE);
         }
@@ -237,7 +240,9 @@ export class EasyModeEngine {
         const values: Record<string, ParamsetValue> = {...current};
         const problems: ProfileProblem[] = [];
 
-        for (const [param, constraint] of Object.entries(profile.params)) {
+        // B-98: a value an older WebUI wrote stays where the link holds it
+        const params = keepCurrent ? legacyProfile(profile).params : profile.params;
+        for (const [param, constraint] of Object.entries(params)) {
             if (!(param in description)) {
                 problems.push({
                     param,
@@ -296,10 +301,20 @@ export class EasyModeEngine {
         }
 
         // task 108: the first fitting profile by number, as `get_cur_profile2` breaks on its first match
-        const first = [...profiles]
-            .sort((a, b) => a.id - b.id)
-            .find((profile) => profile.id !== EXPERT_PROFILE_ID && profileFits(profile, linkParamset) !== undefined);
-        return first ?? byHint;
+        const sorted = [...profiles].sort((a, b) => a.id - b.id);
+        const first = sorted.find(
+            (profile) => profile.id !== EXPERT_PROFILE_ID && profileFits(profile, linkParamset) !== undefined,
+        );
+        // B-98: only where nothing fits, a link an older WebUI made (`legacy` values)
+        const older =
+            first ??
+            sorted.find(
+                (profile) =>
+                    profile.id !== EXPERT_PROFILE_ID &&
+                    profile.legacy !== undefined &&
+                    profileFits(legacyProfile(profile), linkParamset) !== undefined,
+            );
+        return older ?? byHint;
     }
 
     /**

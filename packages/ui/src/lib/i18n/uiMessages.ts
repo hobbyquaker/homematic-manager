@@ -692,6 +692,18 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Defective link': {de: 'Defekte Verknüpfung', en: 'Defective link'},
     Profile: {de: 'Profil', en: 'Profile'},
     'Expert view': {de: 'Expertenansicht', en: 'Expert view'},
+    // Task 118: a channel's mode changed while it has links (the CCU locks the mode then)
+    'The channel has {count} direct links. The CCU locks its mode while links exist: their profiles belong to the current mode and no longer fit after the change. Delete the links first, or set them up again afterwards.':
+        {
+            de: {
+                one: 'Der Kanal hat eine Direktverknüpfung. Die CCU sperrt seinen Modus, solange Verknüpfungen bestehen: deren Profile gehören zum jetzigen Modus und passen nach der Änderung nicht mehr. Die Verknüpfung vorher löschen oder danach neu einrichten.',
+                other: 'Der Kanal hat {count} Direktverknüpfungen. Die CCU sperrt seinen Modus, solange Verknüpfungen bestehen: deren Profile gehören zum jetzigen Modus und passen nach der Änderung nicht mehr. Die Verknüpfungen vorher löschen oder danach neu einrichten.',
+            },
+            en: {
+                one: 'The channel has a direct link. The CCU locks its mode while links exist: their profiles belong to the current mode and no longer fit after the change. Delete the link first, or set it up again afterwards.',
+                other: 'The channel has {count} direct links. The CCU locks its mode while links exist: their profiles belong to the current mode and no longer fit after the change. Delete the links first, or set them up again afterwards.',
+            },
+        },
     // Task 109: the sender side's own form (weather station, filling level sensor)
     'Threshold active': {de: 'aktiv', en: 'active'},
     'Sender profile': {de: 'Profil des Senders', en: 'Sender profile'},

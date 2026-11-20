@@ -16,6 +16,7 @@
     import type {MultiSelectOption} from 'occulite-ui';
     import {getStores} from '../../lib/stores/context.js';
     import {isHmipInterface} from '../../lib/stores/suppression.js';
+    import {changedModeParameters, modeBlockingPeers, modeParameters} from '../../lib/util/channelModeLinks.js';
     import {coveredParameters, detectDeviceEditors, type EditorContext} from '../../lib/util/editors/index.js';
     import {
         buildPreview,
@@ -276,11 +277,48 @@
             : [],
     );
 
-    const warnings = $derived(
-        (view?.problems ?? []).map(
+    /**
+     * Task 118: the link peers of a channel whose mode a MASTER parameter switches, read once per
+     * opened dialog (`getLinkPeers`) - only for such a channel. `undefined` until known; a failed read
+     * counts as none, it only feeds a warning.
+     */
+    let modePeers = $state<string[] | undefined>(undefined);
+    const modeParams = $derived(paramset === 'MASTER' ? modeParameters(description) : []);
+    $effect(() => {
+        if (!open || modeParams.length === 0) {
+            modePeers = undefined;
+            return;
+        }
+        const request = {interfaceName, address};
+        untrack(() => {
+            void stores.transport
+                .request('links.peers', request.interfaceName, request.address)
+                .catch(() => [] as string[])
+                .then((peers) => {
+                    if (request.address === address && request.interfaceName === interfaceName) {
+                        modePeers = peers;
+                    }
+                });
+        });
+    });
+    const modeWarning = $derived.by(() => {
+        const changedModes = changedModeParameters(modeParams, original, edited);
+        if (changedModes.length === 0 || modePeers === undefined) return undefined;
+        const deviceType = index?.get(address)?.PARENT_TYPE ?? '';
+        const peers = modeBlockingPeers(address, deviceType, modePeers);
+        if (peers.length === 0) return undefined;
+        return `${changedModes.join(', ')}: ${t(
+            'The channel has {count} direct links. The CCU locks its mode while links exist: their profiles belong to the current mode and no longer fit after the change. Delete the links first, or set them up again afterwards.',
+            {},
+            peers.length,
+        )}`;
+    });
+    const warnings = $derived([
+        ...(view?.problems ?? []).map(
             (problem) => `${problem.params.join(', ')}: ${stores.meta.uiLabel(problem.errorKey)}`,
         ),
-    );
+        ...(modeWarning === undefined ? [] : [modeWarning]),
+    ]);
 
     /** Loads description and values whenever the dialog is opened on another address or paramset. */
     $effect(() => {

@@ -1373,3 +1373,97 @@ describe("a power meter's thresholds in watts (task 110)", () => {
         expect(screen.getByTestId('param-COND_TX_THRESHOLD_HI').querySelector('.hmm-param-unit')).toBeNull();
     });
 });
+
+/**
+ * Task 118: the CCU locks a channel's mode while the channel has links. The Homematic Manager
+ * leaves it editable and warns, in the dialog and in the write preview.
+ */
+describe("a channel's mode changed while it has links (task 118)", () => {
+    const CHANNEL = '000A1B2C3D4E5F:1';
+    const description: ParamsetDescription = {
+        CHANNEL_OPERATION_MODE: {
+            TYPE: 'ENUM',
+            OPERATIONS: 3,
+            MIN: 0,
+            MAX: 2,
+            DEFAULT: 0,
+            VALUE_LIST: ['KEY_BEHAVIOR', 'SWITCH_BEHAVIOR', 'BINARY_BEHAVIOR'],
+        },
+        LONG_PRESS_TIME: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 25.5, DEFAULT: 0.4},
+    };
+    let transport: MockTransport;
+    let peers: string[];
+
+    async function openChannel(): Promise<void> {
+        await mountApp({transport, hash: '#/HmIP-RF/devices'});
+        const parent = document.querySelector<HTMLElement>('[data-row-id="000A1B2C3D4E5F"]')!;
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
+        await fireEvent.click(await screen.findByTestId(`paramset-${CHANNEL}-MASTER`));
+        await screen.findByTestId('param-CHANNEL_OPERATION_MODE');
+        await waitFor(() => {
+            expect(transport.lastCall('links.peers')).toEqual(['HmIP-RF', CHANNEL]);
+        });
+    }
+
+    function mode(): HTMLSelectElement {
+        return within(screen.getByTestId('param-CHANNEL_OPERATION_MODE')).getByRole<HTMLSelectElement>('combobox');
+    }
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+        peers = ['0011D3C9A1B2C3:1'];
+        const demoDescription = transport.handlerFor('paramset.description');
+        transport.respond('paramset.description', (interfaceName, address, paramset) =>
+            address === CHANNEL && paramset === 'MASTER'
+                ? description
+                : demoDescription(interfaceName, address, paramset),
+        );
+        const demoGet = transport.handlerFor('paramset.get');
+        transport.respond('paramset.get', (interfaceName, address, paramset) =>
+            address === CHANNEL && paramset === 'MASTER'
+                ? {CHANNEL_OPERATION_MODE: 0, LONG_PRESS_TIME: 0.4}
+                : demoGet(interfaceName, address, paramset),
+        );
+        transport.respond('links.peers', () => peers);
+    });
+
+    it('warns when the mode is changed, and only then', async () => {
+        await openChannel();
+        expect(screen.queryByTestId('paramset-warnings')).toBeNull();
+        await fireEvent.change(mode(), {target: {value: '1'}});
+        await waitFor(() => {
+            expect(screen.getByTestId('paramset-warnings').textContent).toContain(
+                'CHANNEL_OPERATION_MODE: Der Kanal hat eine Direktverknüpfung.',
+            );
+        });
+        await fireEvent.change(mode(), {target: {value: '0'}});
+        await waitFor(() => {
+            expect(screen.queryByTestId('paramset-warnings')).toBeNull();
+        });
+    });
+
+    it('carries the warning into the write preview, and still writes the mode', async () => {
+        await openChannel();
+        await fireEvent.change(mode(), {target: {value: '2'}});
+        await fireEvent.click(screen.getByTestId('paramset-preview'));
+        expect((await screen.findByTestId('preview-warnings')).textContent).toContain('CHANNEL_OPERATION_MODE');
+        await fireEvent.click(screen.getByTestId('write-confirm'));
+        await waitFor(() => {
+            expect(transport.lastCall('paramset.put')).toEqual([
+                'HmIP-RF',
+                [CHANNEL],
+                'MASTER',
+                {CHANNEL_OPERATION_MODE: 2},
+                undefined,
+            ]);
+        });
+    });
+
+    it('says nothing for a channel without links', async () => {
+        peers = [];
+        await openChannel();
+        await fireEvent.change(mode(), {target: {value: '1'}});
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        expect(screen.queryByTestId('paramset-warnings')).toBeNull();
+    });
+});

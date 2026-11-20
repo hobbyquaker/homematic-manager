@@ -18,6 +18,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 - **A thermostat's eco temperature above its comfort temperature is pointed out** (HM-CC-RT-DN, HM-TC-IT-WM-W-EU,
   HM-CC-VG-1 and the HmIP heating channels), as the CCU's WebUI does, and compared with the half degrees: comfort
   21.0 °C with eco 21.5 °C counts.
+- **Changing a channel's mode while the channel has direct links is warned about** (the operation mode of HmIP
+  multi-mode inputs, the channel function of the HM-MOD-EM-8, the behaviour of the Wired I/O modules), in the
+  parameter dialog and in the write preview. The CCU locks the mode in that case, because the links' profiles belong
+  to it; the Homematic Manager leaves it editable and says what the change does.
 
 ### Changed
 

@@ -6,7 +6,7 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
-## [Unreleased]
+## [3.5.0] — 2026-11-20
 
 ### Added
 
@@ -39,8 +39,6 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   parameters" in the link dialog brings the former behaviour back and is remembered in the browser. With it, the
   check after the write also shows a parameter that was not sent and reads differently afterwards.
 
-### Changed
-
 - **Device data from openccu-data 2026.9.1**: the operation modes of the HmIP door lock drive's channels are named,
   and its channel type is spelt right in German. The CCU's settings forms are read from OpenCCU-Base 3.89.13.
 
@@ -55,6 +53,14 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 - **Decimal parameters are written without floating-point residue**, and a value that was not changed is no longer
   sent because it differs from the device's in the fifteenth decimal. The number fields step by the last decimal of
   the parameter's range (0.01 W where the range is 0.01–3680 W) instead of 0.1 everywhere.
+
+- **Restoring a device's configuration and clearing its configuration cache are offered only where the interface has
+  them.** The device menu, the toolbar and the repair dialog asked every interface except HmIP-RF, so on an eQ-3 CCU3's
+  BidCos-Wired, whose hs485d lacks both, the call failed; on HmIP it was answered with an error. A greyed-out entry now
+  says that the interface does not offer the method.
+- **Service messages read from ReGa on a classic CCU survive device names with tabs or line breaks.** The script wrote
+  names and values unescaped, so such a name shifted the fields and the message landed under the wrong device or was
+  lost; they are now written URL-encoded and decoded again.
 
 ## [3.4.2] — 2026-10-30
 
@@ -1942,6 +1948,7 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
+[3.5.0]: https://github.com/hobbyquaker/homematic-manager/compare/v3.4.2...v3.5.0
 [3.4.2]: https://github.com/hobbyquaker/homematic-manager/compare/v3.4.1...v3.4.2
 [3.4.1]: https://github.com/hobbyquaker/homematic-manager/compare/v3.4.0...v3.4.1
 [3.4.0]: https://github.com/hobbyquaker/homematic-manager/compare/v3.3.0...v3.4.0

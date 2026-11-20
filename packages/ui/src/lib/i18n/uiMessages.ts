@@ -596,6 +596,22 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Alle Parameter schreiben, nicht nur die geänderten',
         en: 'Write every parameter, not only the changed ones',
     },
+    // Task 112: the create-link dialog offers the channels the CCU offers, all of them on request
+    'Show all channels': {de: 'Alle Kanäle zeigen', en: 'Show all channels'},
+    'Also the channels the CCU does not offer for a link': {
+        de: 'Auch die Kanäle, die die CCU für eine Verknüpfung nicht anbietet',
+        en: 'Also the channels the CCU does not offer for a link',
+    },
+    '{count} channels are left out, as in the CCU': {
+        de: {
+            one: '{count} Kanal ist ausgeblendet, wie in der CCU',
+            other: '{count} Kanäle sind ausgeblendet, wie in der CCU',
+        },
+        en: {
+            one: '{count} channel is left out, as in the CCU',
+            other: '{count} channels are left out, as in the CCU',
+        },
+    },
     // Task 113: link paramsets are written whole; the opt-out in the link dialog
     'Send only the changed parameters': {
         de: 'Nur die geänderten Parameter senden',

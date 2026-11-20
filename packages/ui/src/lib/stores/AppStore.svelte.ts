@@ -31,6 +31,7 @@ export {THEME_CHOICES, type ThemeChoice};
 export const THEME_STORAGE_KEY = 'hmm.theme';
 export const LANGUAGE_STORAGE_KEY = 'hmm.language';
 export const LINK_CHANGED_ONLY_STORAGE_KEY = 'hmm.linkChangedOnly';
+export const LINK_SHOW_ALL_STORAGE_KEY = 'hmm.linkShowAllChannels';
 
 /** The two `localStorage` methods this store uses; a test passes a `Map`-backed stub. */
 export interface StorageLike {
@@ -138,6 +139,11 @@ export class AppStore {
      */
     linkChangedOnly = $state(false);
     /**
+     * Task 112: the create-link dialog offers every channel the roles allow, instead of the CCU's
+     * narrower choice. Its checkbox; kept per browser like the one above.
+     */
+    linkShowAllChannels = $state(false);
+    /**
      * D-32: who is logged in, where the host has a login at all.
      *
      * `null` everywhere else - Electron, the npm install, Docker, the demo and the CCU addon in
@@ -182,6 +188,7 @@ export class AppStore {
             this.theme = stored;
         }
         this.linkChangedOnly = this.#storage?.getItem(LINK_CHANGED_ONLY_STORAGE_KEY) === '1';
+        this.linkShowAllChannels = this.#storage?.getItem(LINK_SHOW_ALL_STORAGE_KEY) === '1';
         // A local choice - the one made in the settings dialog of this browser - before the profile
         // has even been asked for, so the loading screen is already in the right language.
         const storedLanguage = this.#storage?.getItem(LANGUAGE_STORAGE_KEY);
@@ -298,6 +305,11 @@ export class AppStore {
     setLinkChangedOnly(value: boolean): void {
         this.linkChangedOnly = value;
         this.#storage?.setItem(LINK_CHANGED_ONLY_STORAGE_KEY, value ? '1' : '0');
+    }
+
+    setLinkShowAllChannels(value: boolean): void {
+        this.linkShowAllChannels = value;
+        this.#storage?.setItem(LINK_SHOW_ALL_STORAGE_KEY, value ? '1' : '0');
     }
 
     /** `system` -> `light` -> `dark` -> `system`, the order the header button cycles through. */

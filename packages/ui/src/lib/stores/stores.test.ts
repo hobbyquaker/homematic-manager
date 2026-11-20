@@ -14,6 +14,7 @@ import {
     AppStore,
     LANGUAGE_STORAGE_KEY,
     LINK_CHANGED_ONLY_STORAGE_KEY,
+    LINK_SHOW_ALL_STORAGE_KEY,
     THEME_STORAGE_KEY,
     type StorageLike,
 } from './AppStore.svelte.js';
@@ -495,6 +496,19 @@ describe('AppStore', () => {
         expect(new AppStore(transport, notices, {location: fakeRouter().location, storage}).linkChangedOnly).toBe(
             false,
         );
+    });
+
+    it('remembers "show all channels" of the create-link dialog per browser, off by default (task 112)', () => {
+        const storage = new MemoryStorage();
+        const app = new AppStore(transport, notices, {location: fakeRouter().location, storage});
+        expect(app.linkShowAllChannels).toBe(false);
+        app.setLinkShowAllChannels(true);
+        expect(storage.getItem(LINK_SHOW_ALL_STORAGE_KEY)).toBe('1');
+        expect(new AppStore(transport, notices, {location: fakeRouter().location, storage}).linkShowAllChannels).toBe(
+            true,
+        );
+        app.setLinkShowAllChannels(false);
+        expect(storage.getItem(LINK_SHOW_ALL_STORAGE_KEY)).toBe('0');
     });
 
     it('works without a storage at all', () => {

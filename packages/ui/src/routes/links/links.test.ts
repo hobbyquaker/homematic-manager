@@ -363,6 +363,130 @@ describe('the add-link dialog', () => {
     });
 });
 
+describe("the add-link dialog offers the CCU's choice of channels (task 112)", () => {
+    let transport: MockTransport;
+
+    const channel = (
+        address: string,
+        parentType: string,
+        type: string,
+        direction: 1 | 2,
+        extra: Record<string, unknown> = {},
+    ): Record<string, unknown> => ({
+        ADDRESS: address,
+        TYPE: type,
+        PARENT: address.split(':')[0],
+        PARENT_TYPE: parentType,
+        INDEX: Number(address.split(':')[1]),
+        FLAGS: 1,
+        DIRECTION: direction,
+        ...(direction === 1 ? {LINK_SOURCE_ROLES: 'REMOTE_CONTROL'} : {LINK_TARGET_ROLES: 'REMOTE_CONTROL'}),
+        ...extra,
+    });
+
+    /** A wall switch, a dimmer plug (own key, three virtual channels) and an RGBW controller. */
+    const DEVICES = [
+        {ADDRESS: 'WRC', TYPE: 'HmIP-WRC2', PARENT: '', FLAGS: 1},
+        channel('WRC:1', 'HmIP-WRC2', 'KEY_TRANSCEIVER', 1),
+        {ADDRESS: 'PDT', TYPE: 'HmIP-PDT', PARENT: '', FLAGS: 1},
+        channel('PDT:1', 'HmIP-PDT', 'KEY_TRANSCEIVER', 1),
+        channel('PDT:3', 'HmIP-PDT', 'DIMMER_VIRTUAL_RECEIVER', 2),
+        channel('PDT:4', 'HmIP-PDT', 'DIMMER_VIRTUAL_RECEIVER', 2),
+        channel('PDT:5', 'HmIP-PDT', 'DIMMER_VIRTUAL_RECEIVER', 2),
+        {ADDRESS: 'RGB', TYPE: 'HmIP-RGBW', PARENT: '', FLAGS: 1},
+        {ADDRESS: 'RGB:0', TYPE: 'MAINTENANCE', PARENT: 'RGB', PARENT_TYPE: 'HmIP-RGBW', INDEX: 0, FLAGS: 1},
+        channel('RGB:1', 'HmIP-RGBW', 'UNIVERSAL_LIGHT_RECEIVER', 2),
+        channel('RGB:2', 'HmIP-RGBW', 'UNIVERSAL_LIGHT_RECEIVER', 2),
+        channel('RGB:3', 'HmIP-RGBW', 'UNIVERSAL_LIGHT_RECEIVER', 2),
+        channel('RGB:4', 'HmIP-RGBW', 'UNIVERSAL_LIGHT_RECEIVER', 2),
+    ];
+
+    /** What a list of the dialog offers, as channel addresses. */
+    async function offered(testId: string): Promise<string[]> {
+        const list = screen.getByTestId(testId);
+        if (within(list).queryAllByRole('option').length === 0) {
+            await fireEvent.click(within(list).getByRole('button'));
+        }
+        return within(list)
+            .queryAllByRole('option')
+            .map((option) => /[A-Z]+:\d+/.exec(option.textContent)?.[0] ?? option.textContent);
+    }
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+        transport.respond('devices.list', (interfaceName) => (interfaceName === 'HmIP-RF' ? DEVICES : []) as never);
+        const read = transport.handlerFor('paramset.get');
+        transport.respond('paramset.get', (interfaceName, address, paramset) =>
+            // the controller runs as tunable white: two lights, on channels 1 and 2
+            address === 'RGB:0' && paramset === 'MASTER'
+                ? {DEVICE_OPERATION_MODE: 2}
+                : read(interfaceName, address, paramset),
+        );
+    });
+
+    it('leaves out the own key of a plug, the second and third virtual channel, and what the mode does not use', async () => {
+        await mountApp({transport, hash: '#/HmIP-RF/links'});
+        await fireEvent.click(screen.getByTestId('links-add'));
+        expect(screen.getByTestId<HTMLInputElement>('add-link-show-all').checked).toBe(false);
+
+        expect(await offered('add-link-senders')).toEqual(['WRC:1']);
+        await fireEvent.click(within(screen.getByTestId('add-link-senders')).getAllByRole('option')[0]!);
+        await waitFor(async () => {
+            expect(await offered('add-link-receivers')).toEqual(['PDT:3', 'RGB:1', 'RGB:2']);
+        });
+        // the dimmer plug's key, its channels 4 and 5, the controller's channels 3 and 4
+        expect(screen.getByTestId('add-link-hidden-count').textContent).toBe(
+            '5 Kanäle sind ausgeblendet, wie in der CCU',
+        );
+        expect(transport.calls.filter((call) => call.method === 'paramset.get').map((call) => call.params[1])).toEqual([
+            'RGB:0',
+        ]);
+    });
+
+    it('shows every channel the roles allow with "Show all channels", and remembers that', async () => {
+        const {stores} = await mountApp({transport, hash: '#/HmIP-RF/links'});
+        await fireEvent.click(screen.getByTestId('links-add'));
+        await fireEvent.click(screen.getByTestId('add-link-show-all'));
+        expect(stores.app.linkShowAllChannels).toBe(true);
+
+        expect(await offered('add-link-senders')).toEqual(['PDT:1', 'WRC:1']);
+        await fireEvent.click(within(screen.getByTestId('add-link-senders')).getAllByRole('option')[1]!);
+        expect(await offered('add-link-receivers')).toEqual([
+            'PDT:3',
+            'PDT:4',
+            'PDT:5',
+            'RGB:1',
+            'RGB:2',
+            'RGB:3',
+            'RGB:4',
+        ]);
+        expect(screen.getByTestId('add-link-hidden-count').textContent).toBe(
+            'Auch die Kanäle, die die CCU für eine Verknüpfung nicht anbietet',
+        );
+
+        // back to the CCU's choice: what is chosen stays in its list, the rest goes
+        await fireEvent.click(within(screen.getByTestId('add-link-receivers')).getAllByRole('option')[1]!);
+        await fireEvent.click(screen.getByTestId('add-link-show-all'));
+        await waitFor(async () => {
+            expect(await offered('add-link-receivers')).toEqual(['PDT:3', 'PDT:4', 'RGB:1', 'RGB:2']);
+        });
+    });
+
+    it('hides nothing by a mode it could not read, and raises no notice for it', async () => {
+        transport.respond('paramset.get', () => {
+            throw new Error('unreachable');
+        });
+        const {stores} = await mountApp({transport, hash: '#/HmIP-RF/links'});
+        await fireEvent.click(screen.getByTestId('links-add'));
+        await fireEvent.click(within(screen.getByTestId('add-link-senders')).getByRole('button'));
+        await fireEvent.click(within(screen.getByTestId('add-link-senders')).getAllByRole('option')[0]!);
+        await waitFor(async () => {
+            expect(await offered('add-link-receivers')).toEqual(['PDT:3', 'RGB:1', 'RGB:2', 'RGB:3', 'RGB:4']);
+        });
+        expect(stores.notices.items).toEqual([]);
+    });
+});
+
 describe('removing links', () => {
     let transport: MockTransport;
 

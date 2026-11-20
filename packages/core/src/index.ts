@@ -23,6 +23,7 @@ export * from './devices/index.js';
 export * from './devices/smokeGroups.js';
 export * from './devices/hmipKey.js';
 export * from './links/roles.js';
+export * from './links/partnerFilter.js';
 
 // Values and the write path (task 6)
 export * from './rpc/values.js';

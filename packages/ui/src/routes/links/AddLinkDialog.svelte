@@ -1,6 +1,15 @@
 <script lang="ts">
-    import type {DeviceDescription} from '@homematic-manager/core';
-    import {canLink, linkSenders, parseRoles} from '@homematic-manager/core';
+    import type {DeviceDescription, Paramset} from '@homematic-manager/core';
+    import {
+        canLink,
+        hiddenLinkChannels,
+        isSameDeviceClimatePair,
+        linkFilterMasters,
+        linkSenders,
+        parseRoles,
+    } from '@homematic-manager/core';
+
+    import {untrack} from 'svelte';
 
     import Dialog from 'occulite-ui/components/Dialog';
     import MultiSelect from 'occulite-ui/components/MultiSelect';
@@ -44,6 +53,25 @@
     const interfaceName = $derived(stores.app.selectedInterface);
     const index = $derived(stores.devices.index(interfaceName));
 
+    /**
+     * Task 112: the channels the CCU's WebUI does not offer for a new link (core's
+     * `hiddenLinkChannels`: a plug's own button as a sender, what a device does not use in its mode,
+     * the second and third virtual channel of an actuator channel, …) are left out here too, unless
+     * "Show all channels" is ticked - which the browser remembers.
+     *
+     * `masters` are the MASTER paramsets the mode rules need, read in the background when the dialog
+     * opens; until one has arrived its rule hides nothing.
+     */
+    const showAll = $derived(stores.app.linkShowAllChannels);
+    let masters = $state<ReadonlyMap<string, Paramset>>(new Map());
+    let mastersToken = 0;
+    const hidden = $derived(index ? hiddenLinkChannels(index, masters) : new Map<string, string>());
+
+    /** Offered: not hidden, or everything is shown, or it is chosen already (a preset from the Devices tab). */
+    function offered(channel: DeviceDescription, chosen: readonly string[]): boolean {
+        return showAll || !hidden.has(channel.ADDRESS) || chosen.includes(channel.ADDRESS);
+    }
+
     $effect(() => {
         if (open) {
             senders = [...presetSenders];
@@ -54,9 +82,32 @@
         }
     });
 
+    $effect(() => {
+        if (!open || interfaceName === '') {
+            return;
+        }
+        const token = (mastersToken += 1);
+        const from = interfaceName;
+        // only the opening starts the reads, not the device list they are derived from
+        void untrack(async () => {
+            masters = new Map();
+            const current = stores.devices.index(from);
+            for (const address of current ? linkFilterMasters(current) : []) {
+                const values = await stores.paramsets.readQuietly(from, address, 'MASTER');
+                if (token !== mastersToken) {
+                    return;
+                }
+                if (values) {
+                    masters = new Map([...masters, [address, values]]);
+                }
+            }
+        });
+    });
+
     /** Every channel that can be the sender of a link: a channel, not `:0`, with source roles. */
+    const allSenders = $derived(index ? linkSenders(index) : []);
     const senderOptions = $derived<MultiSelectOption[]>(
-        index ? linkSenders(index).map((channel) => option(channel)) : [],
+        allSenders.filter((channel) => offered(channel, senders)).map((channel) => option(channel)),
     );
 
     /**
@@ -75,8 +126,29 @@
         return current
             .channels()
             .filter((channel) => chosen.every((entry) => canLink(entry, channel)))
+            .filter(
+                (channel) =>
+                    offered(channel, receivers) &&
+                    (showAll ||
+                        receivers.includes(channel.ADDRESS) ||
+                        !chosen.some((entry) => isSameDeviceClimatePair(entry, channel))),
+            )
             .map((channel) => option(channel));
     });
+
+    /** How many sender and receiver channels the rules leave out of the two lists. */
+    const hiddenCount = $derived(
+        index
+            ? index
+                  .channels()
+                  .filter(
+                      (channel) =>
+                          hidden.has(channel.ADDRESS) &&
+                          (parseRoles(channel.LINK_SOURCE_ROLES).length > 0 ||
+                              parseRoles(channel.LINK_TARGET_ROLES).length > 0),
+                  ).length
+            : 0,
+    );
 
     const sourceRoles = $derived(
         [...new Set(senders.flatMap((address) => parseRoles(index?.get(address)?.LINK_SOURCE_ROLES)))].join(' '),
@@ -176,6 +248,25 @@
 -->
 <Dialog bind:open title={t('Create link')} width="720px" top="min(12vh, 96px)" testId="add-link-dialog">
     <div class="hmm-add-link">
+        <!-- Task 112: the CCU's choice of channels by default, everything the roles allow on request -->
+        <span></span>
+        <div class="hmm-add-link-field">
+            <label class="hmm-add-link-all">
+                <input
+                    type="checkbox"
+                    checked={showAll}
+                    data-testid="add-link-show-all"
+                    onchange={(event) => stores.app.setLinkShowAllChannels(event.currentTarget.checked)}
+                />
+                <span>{t('Show all channels')}</span>
+            </label>
+            <span class="hmm-add-link-hint" data-testid="add-link-hidden-count"
+                >{showAll
+                    ? t('Also the channels the CCU does not offer for a link')
+                    : t('{count} channels are left out, as in the CCU', {}, hiddenCount)}</span
+            >
+        </div>
+
         <span class="hmm-add-link-label">{t('Sender')}</span>
         <div class="hmm-add-link-field">
             <MultiSelect
@@ -344,6 +435,19 @@
         align-content: flex-start;
         gap: 4px 8px;
         min-width: 0;
+    }
+
+    .hmm-add-link-all {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        line-height: 24px;
+    }
+
+    .hmm-add-link-hint {
+        min-width: 0;
+        font-size: var(--hmm-font-size-small);
+        color: var(--hmm-fg-muted);
     }
 
     .hmm-add-link-input {

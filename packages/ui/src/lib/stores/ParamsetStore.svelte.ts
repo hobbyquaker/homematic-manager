@@ -159,6 +159,18 @@ export class ParamsetStore {
         }
     }
 
+    /**
+     * `getParamset` for something nobody asked for by name (task 112: the device modes the link
+     * dialog's channel filter looks at): a failure is `undefined` and raises no notice.
+     */
+    async readQuietly(interfaceName: string, address: string, paramset: string): Promise<Paramset | undefined> {
+        try {
+            return await this.#transport.request('paramset.get', interfaceName, address, paramset);
+        } catch {
+            return undefined;
+        }
+    }
+
     /** Loads description and values together - what opening the dialog needs. */
     /**
      * Task 64: `getParamsetId(address, MASTER)`; `''` where the interface has none or on a failure.

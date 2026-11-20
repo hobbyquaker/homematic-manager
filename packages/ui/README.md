@@ -36,7 +36,8 @@ console.
   either recognises the description or stands down, draws exactly the parameters it lists in
   `covers` and writes into the same changed-only diff; a checkbox puts the raw rows back.
 - **Links**: the grid with both device images and the defective mark of #79, add through core's role
-  matrix with a name and a description **per pair** (#87), remove a whole selection (#80), play
+  matrix - narrowed to the channels the CCU's WebUI offers for a link (`links/partnerFilter.ts`), all of
+  them with "Show all channels" - with a name and a description **per pair** (#87), remove a whole selection (#80), play
   short and long on BidCos-RF, and the link paramset editor with the profiles of the data set, the
   sender's full option list, an expert view and the templates of #21 - a tuned profile saved under
   a name and applied to another link of the same description identity. A link paramset that has a

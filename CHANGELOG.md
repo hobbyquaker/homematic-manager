@@ -25,6 +25,13 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ### Changed
 
+- **The dialog for a new link offers the channels the CCU's WebUI offers**, not every channel whose roles would fit.
+  Left out are, as there: the own button of a plug, dimmer plug or PCB switch as the sender of a link to another device
+  (HmIP-PS, -PSM, -PDT, -PCBS, ELV-SH-SW1-BAT), the second and third virtual channel of every actuator channel, the
+  channels an HmIP-RGBW, an HmIP-DRG-DALI or a glass switch (HmIP(W)-WGS) does not use in the mode it is set to, the
+  week program and other channels no link is made with, and the virtual channels of the BidCos dimmers. "Show all
+  channels" brings every channel back and is remembered in the browser; a line says how many are left out. Existing
+  links are shown and edited as before, whatever channels they use.
 - **A direct link is saved with all its parameters**, as the CCU's WebUI saves it, instead of only the ones that were
   changed. On some devices a link lost other settings when only the changed parameters were sent - the brightness
   thresholds went back to their defaults when the on-time was changed, for example. The preview shows the whole

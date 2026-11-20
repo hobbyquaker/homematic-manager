@@ -186,3 +186,57 @@ describe('diffParamset against a real description', () => {
         expect(diff.problems).toEqual([]);
     });
 });
+
+describe('diffParamset with full: the paramset as it stands (task 113)', () => {
+    it('sends every writable parameter as read, with the edits on top', () => {
+        const diff = diffParamset(original, {COUNT: 2}, description, {full: true});
+        expect(diff.values).toEqual({
+            COUNT: 2,
+            LEVEL: {explicitDouble: 0.5},
+            MODE: 1,
+            NAME: 'a',
+            ACTIVE: false,
+        });
+        expect(diff.skipped).toEqual([{param: 'SERIAL', reason: 'not-writable'}]);
+        expect(diff.problems).toEqual([]);
+    });
+
+    it('never falls back to the DEFAULT: a parameter neither read nor edited is left out', () => {
+        const withDefault: ParamsetDescription = {
+            ...description,
+            EXTRA: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 10, DEFAULT: 7},
+        };
+        const diff = diffParamset({COUNT: 1}, {NAME: 'b'}, withDefault, {full: true});
+        expect(diff.values).toEqual({COUNT: 1, NAME: 'b'});
+        expect(diff.skipped).toContainEqual({param: 'EXTRA', reason: 'unread'});
+        // writeAll alone still does (A-14), and full wins over it
+        expect(diffParamset({COUNT: 1}, {}, withDefault, {writeAll: true}).values).toHaveProperty('EXTRA', 7);
+        expect(diffParamset({COUNT: 1}, {}, withDefault, {writeAll: true, full: true}).values).toEqual({COUNT: 1});
+    });
+
+    it('leaves a stored value out that does not validate, without a problem', () => {
+        const diff = diffParamset({...original, COUNT: 99}, {NAME: 'b'}, description, {full: true});
+        expect(diff.values).not.toHaveProperty('COUNT');
+        expect(diff.values).toHaveProperty('NAME', 'b');
+        expect(diff.skipped).toContainEqual({param: 'COUNT', reason: 'invalid'});
+        expect(diff.problems).toEqual([]);
+    });
+
+    it('still refuses an edited value that does not validate', () => {
+        const diff = diffParamset(original, {COUNT: 99}, description, {full: true});
+        expect(diff.values).not.toHaveProperty('COUNT');
+        expect(diff.problems.map((problem) => problem.param)).toEqual(['COUNT']);
+    });
+
+    it('reports an edited parameter the description does not have, and ignores a read one', () => {
+        const diff = diffParamset({...original, STRAY: 1}, {NOPE: 1}, description, {full: true});
+        expect(diff.values).not.toHaveProperty('STRAY');
+        expect(diff.skipped).toContainEqual({param: 'NOPE', reason: 'unknown-parameter'});
+        expect(diff.problems.map((problem) => problem.param)).toEqual(['NOPE']);
+    });
+
+    it('encodes enums as the interface wants them', () => {
+        const diff = diffParamset(original, {}, description, {full: true, enumAs: 'name'});
+        expect(diff.values).toHaveProperty('MODE', 'ON');
+    });
+});

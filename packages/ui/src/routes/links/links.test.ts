@@ -1,5 +1,5 @@
 import {EasyModeEngine, MemoryDataSource} from '@homematic-manager/core';
-import type {LinkProfile, ParamsetDescription, ReceiverProfiles} from '@homematic-manager/core';
+import type {LinkProfile, ParamsetDescription, ReceiverProfiles, WriteResult} from '@homematic-manager/core';
 import {fireEvent, screen, waitFor, within} from '@testing-library/svelte';
 import {beforeEach, describe, expect, it} from 'vitest';
 
@@ -585,7 +585,7 @@ describe('the link paramset dialog', () => {
         expect(screen.queryByTestId('preview-empty')).toBeNull();
         // only the sender's call: its LINK paramset with the receiver as peer, nothing for the receiver
         expect(screen.getByTestId('preview-call-0').textContent).toBe(
-            'putParamset(0001D8A9B7C6D5:1←000A1B2C3D4E5F:4, LINK, {"EXPECT_AES":true})',
+            'putParamset(0001D8A9B7C6D5:1←000A1B2C3D4E5F:4, LINK, {"EXPECT_AES":true,"PEER_NEEDS_BURST":false})',
         );
         expect(screen.queryByTestId('preview-call-1')).toBeNull();
         expect(screen.getByTestId('preview-sender-EXPECT_AES').textContent).toContain('Sender');
@@ -601,6 +601,66 @@ describe('the link paramset dialog', () => {
             expect(stored.EXPECT_AES).toBe(true);
             const reads = transport.calls.filter((call) => call.method === 'paramset.get').map((call) => call.params);
             expect(reads.filter((params) => params[1] === '0001D8A9B7C6D5:1').length).toBeGreaterThanOrEqual(2);
+        });
+    });
+
+    it('writes the link whole by default and only the changed parameters when asked (task 113)', async () => {
+        const stored = {EXPECT_AES: false};
+        senderWithAes(stored);
+        const options: unknown[] = [];
+        const put = transport.handlerFor('paramset.putLink');
+        transport.respond('paramset.putLink', (interfaceName, links, values, given) => {
+            options.push(given);
+            // the backend answers with what it sent: the whole paramset unless told otherwise
+            const results = put(interfaceName, links, values, given) as WriteResult[];
+            return given?.changedOnly === true
+                ? results
+                : results.map((result) => ({...result, sent: {...result.sent, PEER_NEEDS_BURST: false}}));
+        });
+        await openLink();
+        const box = screen.getByTestId<HTMLInputElement>('link-changed-only');
+        expect(box.checked).toBe(false);
+        const row = await waitFor(() =>
+            within(screen.getByTestId('link-sender-params')).getByTestId('param-EXPECT_AES'),
+        );
+        await fireEvent.click(within(row).getByRole('checkbox'));
+
+        // the default: the call shows every parameter of the paramset, the table the changed one
+        await fireEvent.click(screen.getByTestId('link-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('preview-call-0').textContent).toBe(
+                'putParamset(0001D8A9B7C6D5:1←000A1B2C3D4E5F:4, LINK, {"EXPECT_AES":true,"PEER_NEEDS_BURST":false})',
+            );
+        });
+        expect(screen.queryByTestId('preview-sender-PEER_NEEDS_BURST')).toBeNull();
+        expect(screen.getByTestId('write-preview').textContent).toContain(
+            '1 Parameter ändert sich - die Verknüpfung wird mit allen ihren Parametern geschrieben',
+        );
+        await fireEvent.click(screen.getByTestId('write-confirm'));
+        await waitFor(() => {
+            expect(options).toEqual([{changedOnly: false}]);
+            expect(stored.EXPECT_AES).toBe(true);
+        });
+
+        // the opt-out: ticked, the call carries the one parameter
+        // read back as sent: the table lists the changed parameter, not the rest that went out with it
+        await waitFor(() => {
+            expect(screen.getByTestId('readback-sender-EXPECT_AES')).toBeTruthy();
+        });
+        expect(screen.queryByTestId('readback-sender-PEER_NEEDS_BURST')).toBeNull();
+        await fireEvent.click(box);
+        expect(box.checked).toBe(true);
+        await fireEvent.click(within(row).getByRole('checkbox'));
+        await fireEvent.click(screen.getByTestId('link-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('preview-call-0').textContent).toBe(
+                'putParamset(0001D8A9B7C6D5:1←000A1B2C3D4E5F:4, LINK, {"EXPECT_AES":false})',
+            );
+        });
+        expect(screen.getByTestId('write-preview').textContent).toContain('1 Parameter wird geschrieben');
+        await fireEvent.click(screen.getByTestId('write-confirm'));
+        await waitFor(() => {
+            expect(options).toEqual([{changedOnly: false}, {changedOnly: true}]);
         });
     });
 
@@ -668,9 +728,16 @@ describe('the link paramset dialog', () => {
         expect(staged).toMatchObject({
             kind: 'linkParamset',
             values: {senderToReceiver: {EXPECT_AES: true}},
-            calls: ['putParamset(0001D8A9B7C6D5:1←000A1B2C3D4E5F:4, LINK, {"EXPECT_AES":true})'],
+            // task 113: the whole paramset goes out, the changed parameter is what putLink is given
+            calls: [
+                'putParamset(0001D8A9B7C6D5:1←000A1B2C3D4E5F:4, LINK, {"EXPECT_AES":true,"PEER_NEEDS_BURST":false})',
+            ],
             lines: [{label: 'Sender: EXPECT_AES', from: 'false', to: 'true'}],
+            changedOnly: false,
         });
+        // task 113: the mode chosen when it was staged is the mode it is applied in
+        await stores.changeSet.apply();
+        expect(transport.lastCall('paramset.putLink')?.[3]).toEqual({changedOnly: false});
     });
 
     it('saves name and description through setLinkInfo', async () => {
@@ -1490,6 +1557,8 @@ describe('the sender side of a weather station or a filling level sensor (task 1
         // the profile's form only - no raw rows
         expect(screen.queryByTestId('link-sender-params')).toBeNull();
 
+        // the parameters this form changes are the point here: only those in the calls (task 113)
+        await fireEvent.click(screen.getByTestId('link-changed-only'));
         await fireEvent.change(upper, {target: {value: '62'}});
         await fireEvent.click(screen.getByTestId('link-preview'));
         await waitFor(() => {
@@ -1523,6 +1592,8 @@ describe('the sender side of a weather station or a filling level sensor (task 1
         const lower = await waitFor(() => screen.getByTestId<HTMLSelectElement>('link-sender-STORM_LOWER_THRESHOLD'));
         expect(lower.value).toBe('20');
         expect(lower.selectedOptions[0]?.textContent).toBe('Windstärke 4 - mäßige Brise');
+        // the parameters this form changes are the point here: only those in the calls (task 113)
+        await fireEvent.click(screen.getByTestId('link-changed-only'));
         await fireEvent.change(lower, {target: {value: '29'}});
         await fireEvent.click(screen.getByTestId('link-preview'));
         await waitFor(() => {
@@ -1572,6 +1643,8 @@ describe('the sender side of a weather station or a filling level sensor (task 1
 
         // switching the lower one on at 90 % pushes the upper one 5 % above it, as the WebUI does
         await fireEvent.click(screen.getByTestId('link-sender-FILL_LEVEL_LOWER_THRESHOLD-active'));
+        // the parameters this form changes are the point here: only those in the calls (task 113)
+        await fireEvent.click(screen.getByTestId('link-changed-only'));
         await fireEvent.change(lower, {target: {value: '90'}});
         await fireEvent.click(screen.getByTestId('link-preview'));
         await waitFor(() => {

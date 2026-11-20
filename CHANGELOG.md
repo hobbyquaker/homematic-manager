@@ -16,6 +16,15 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   shows the stored value. An upper threshold below the lower one is pointed out, for every device with conditional
   transmitting.
 
+### Changed
+
+- **A direct link is saved with all its parameters**, as the CCU's WebUI saves it, instead of only the ones that were
+  changed. On some devices a link lost other settings when only the changed parameters were sent - the brightness
+  thresholds went back to their defaults when the on-time was changed, for example. The preview shows the whole
+  call and lists what changes; a link in which nothing was changed is still not written. "Send only the changed
+  parameters" in the link dialog brings the former behaviour back and is remembered in the browser. With it, the
+  check after the write also shows a parameter that was not sent and reads differently afterwards.
+
 ### Fixed
 
 - **Decimal parameters are written without floating-point residue**, and a value that was not changed is no longer

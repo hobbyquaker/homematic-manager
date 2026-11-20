@@ -10,7 +10,13 @@ import {
 } from '../transport/demoData.js';
 import {MockTransport} from '../transport/MockTransport.js';
 
-import {AppStore, LANGUAGE_STORAGE_KEY, THEME_STORAGE_KEY, type StorageLike} from './AppStore.svelte.js';
+import {
+    AppStore,
+    LANGUAGE_STORAGE_KEY,
+    LINK_CHANGED_ONLY_STORAGE_KEY,
+    THEME_STORAGE_KEY,
+    type StorageLike,
+} from './AppStore.svelte.js';
 import {ConsoleStore} from './ConsoleStore.svelte.js';
 import {DevicesStore} from './DevicesStore.svelte.js';
 import {EventsStore} from './EventsStore.svelte.js';
@@ -476,6 +482,19 @@ describe('AppStore', () => {
         const app = new AppStore(transport, notices, {location: fakeRouter().location, storage});
         expect(app.theme).toBe('dark');
         expect(app.language).toBe('en');
+    });
+
+    it('remembers "only the changed link parameters" per browser, off by default (task 113)', () => {
+        const storage = new MemoryStorage();
+        const app = new AppStore(transport, notices, {location: fakeRouter().location, storage});
+        expect(app.linkChangedOnly).toBe(false);
+        app.setLinkChangedOnly(true);
+        expect(storage.getItem(LINK_CHANGED_ONLY_STORAGE_KEY)).toBe('1');
+        expect(new AppStore(transport, notices, {location: fakeRouter().location, storage}).linkChangedOnly).toBe(true);
+        app.setLinkChangedOnly(false);
+        expect(new AppStore(transport, notices, {location: fakeRouter().location, storage}).linkChangedOnly).toBe(
+            false,
+        );
     });
 
     it('works without a storage at all', () => {

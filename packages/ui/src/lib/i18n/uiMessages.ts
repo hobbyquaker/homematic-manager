@@ -596,6 +596,25 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Alle Parameter schreiben, nicht nur die geänderten',
         en: 'Write every parameter, not only the changed ones',
     },
+    // Task 113: link paramsets are written whole; the opt-out in the link dialog
+    'Send only the changed parameters': {
+        de: 'Nur die geänderten Parameter senden',
+        en: 'Send only the changed parameters',
+    },
+    '{count} parameters change - the link is written with all its parameters': {
+        de: {
+            one: '{count} Parameter ändert sich - die Verknüpfung wird mit allen ihren Parametern geschrieben',
+            other: '{count} Parameter ändern sich - die Verknüpfung wird mit allen ihren Parametern geschrieben',
+        },
+        en: {
+            one: '{count} parameter changes - the link is written with all its parameters',
+            other: '{count} parameters change - the link is written with all its parameters',
+        },
+    },
+    'By default a link is written with all its parameters, as the CCU does': {
+        de: 'Standardmäßig wird eine Verknüpfung mit allen ihren Parametern geschrieben, wie es die CCU tut',
+        en: 'By default a link is written with all its parameters, as the CCU does',
+    },
     'Show hidden parameters': {de: 'Ausgeblendete Parameter zeigen', en: 'Show hidden parameters'},
     // Task 26: HmIP service-message suppression - the rows in the channel-0 paramset dialog, the
     // Apply preview underneath, and the per-row action of the service-messages tab.

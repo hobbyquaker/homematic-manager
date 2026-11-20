@@ -118,16 +118,22 @@ test('a sender-only change is previewed and written to the sender (B-87)', async
     await expect(page.getByTestId('write-preview')).toHaveAttribute('open', '');
     await expect(page.getByTestId('preview-empty')).toHaveCount(0);
     await expect(page.getByTestId('preview-sender-EXPECT_AES')).toBeVisible();
+    // task 113: the sender's link paramset goes out whole, the table lists the one change
     await expect(page.getByTestId('preview-call-0')).toHaveText(
-        `putParamset(${SENDER}←${RECEIVER}, LINK, {"EXPECT_AES":true})`,
+        `putParamset(${SENDER}←${RECEIVER}, LINK, {"PEER_NEEDS_BURST":false,"EXPECT_AES":true})`,
     );
     await expect(page.getByTestId('preview-call-1')).toHaveCount(0);
+    await expect(page.getByTestId('preview-sender-PEER_NEEDS_BURST')).toHaveCount(0);
 
     await page.getByTestId('write-confirm').click();
     // written, read back as sent: the preview closes and the link editor lists the sender's result
     await expect(page.getByTestId('link-results')).toContainText(SENDER);
     await expect(page.getByTestId('link-results')).not.toContainText(RECEIVER);
     expect(sim.callMethod('rfd', 'getParamset', [SENDER, RECEIVER])).toMatchObject({EXPECT_AES: true});
+    expect(sim.getWriteLog().at(-1)).toMatchObject({
+        address: SENDER,
+        values: {PEER_NEEDS_BURST: false, EXPECT_AES: true},
+    });
     // nothing was sent to the receiver
     expect(sim.getWriteLog().filter((entry) => entry.address === RECEIVER)).toEqual([]);
     // the form now shows the stored value, no longer as an edit
@@ -148,11 +154,35 @@ test('a change on both ends is previewed as two calls and written to both (B-87)
     await page.getByTestId('link-preview').click();
     await expect(page.getByTestId('preview-call-0')).toContainText(`putParamset(${RECEIVER}←${SENDER}, LINK,`);
     await expect(page.getByTestId('preview-call-1')).toHaveText(
-        `putParamset(${SENDER}←${RECEIVER}, LINK, {"PEER_NEEDS_BURST":true})`,
+        `putParamset(${SENDER}←${RECEIVER}, LINK, {"PEER_NEEDS_BURST":true,"EXPECT_AES":false})`,
     );
     await page.getByTestId('write-confirm').click();
     await expect(page.getByTestId('link-results')).toContainText(SENDER);
     await expect(page.getByTestId('link-results')).toContainText(RECEIVER);
     expect(sim.callMethod('rfd', 'getParamset', [SENDER, RECEIVER])).toMatchObject({PEER_NEEDS_BURST: true});
     expect(sim.callMethod('rfd', 'getParamset', [RECEIVER, SENDER])).toMatchObject({SHORT_ON_TIME: 2});
+});
+
+test('"Send only the changed parameters" writes the one parameter, and the browser remembers it (task 113)', async ({
+    page,
+}) => {
+    const sim = await openLink(page);
+    await expect(page.getByTestId('link-changed-only')).not.toBeChecked();
+    await page.getByTestId('link-changed-only').check();
+    await page.getByTestId('link-sender-params').getByTestId('param-EXPECT_AES').getByRole('checkbox').check();
+
+    await page.getByTestId('link-preview').click();
+    await expect(page.getByTestId('preview-call-0')).toHaveText(
+        `putParamset(${SENDER}←${RECEIVER}, LINK, {"EXPECT_AES":true})`,
+    );
+    await page.getByTestId('write-confirm').click();
+    await expect(page.getByTestId('link-results')).toContainText(SENDER);
+    expect(sim.getWriteLog().at(-1)).toMatchObject({address: SENDER, values: {EXPECT_AES: true}});
+    expect(Object.keys(sim.getWriteLog().at(-1)?.values ?? {})).toEqual(['EXPECT_AES']);
+
+    // the choice is the browser's: the same page loaded again still has it
+    await page.reload();
+    await page.locator(`[data-row-id="${SENDER}->${RECEIVER}"]`).click();
+    await page.getByTestId('links-edit').click();
+    await expect(page.getByTestId('link-changed-only')).toBeChecked();
 });

@@ -263,10 +263,28 @@ describe.skipIf(!simulatorAvailable)('writing paramsets against hm-simulator', (
         const second = await harness.backend.request('paramset.putLink', 'HmIP-RF', [{sender: WRC, receiver: PDT}], {
             receiverToSender: {SHORT_ON_TIME: 7, UI_HINT: 3},
         });
-        expect(second[0]?.sent).toEqual({SHORT_ON_TIME: {explicitDouble: 7}, UI_HINT: 3});
+        expect(second[0]?.sent).toMatchObject({SHORT_ON_TIME: {explicitDouble: 7}, UI_HINT: 3});
 
         const stored = await harness.backend.request('paramset.get', 'HmIP-RF', PDT, WRC);
         expect(stored).toMatchObject({SHORT_ON_TIME: 7, UI_HINT: 3});
+
+        // task 113: the link paramset went out whole - every writable parameter the interface holds,
+        // as it holds it - and reads back as before apart from the change
+        const description = await harness.backend.request('paramset.description', 'HmIP-RF', PDT, 'LINK');
+        const writable = Object.keys(stored).filter((name) => ((description[name]?.OPERATIONS ?? 0) & 2) !== 0);
+        expect(Object.keys(second[0]?.sent ?? {}).sort()).toEqual(writable.sort());
+
+        // and with changedOnly, the one parameter (UI_HINT with it, as ever)
+        const third = await harness.backend.request(
+            'paramset.putLink',
+            'HmIP-RF',
+            [{sender: WRC, receiver: PDT}],
+            {receiverToSender: {SHORT_ON_TIME: 9, UI_HINT: 3}},
+            {changedOnly: true},
+        );
+        expect(third[0]?.sent).toEqual({SHORT_ON_TIME: {explicitDouble: 9}, UI_HINT: 3});
+        const after = await harness.backend.request('paramset.get', 'HmIP-RF', PDT, WRC);
+        expect(after).toEqual({...stored, SHORT_ON_TIME: 9});
         expect((sim.getWriteLog() as {paramset: string}[]).some((entry) => entry.paramset === WRC)).toBe(true);
     });
 

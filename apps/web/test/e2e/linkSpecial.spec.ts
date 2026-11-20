@@ -83,7 +83,9 @@ const FIXTURE: Record<string, unknown> = {
         'BidCos-RF/HM-LC-Bl1PBU-FM/1.0/1/BLIND/LINK': {
             UI_HINT: {TYPE: 'STRING', OPERATIONS: 7, FLAGS: 1, DEFAULT: ''},
             SHORT_ON_TIME: {...TIME, SPECIAL: NOT_USED},
-            LONG_ON_TIME: {...TIME, SPECIAL: NOT_USED},
+            // task 113: the link paramset is written whole, this one with it at its 111600. rfd takes a
+            // special above MAX (measured in the lab); the simulator checks MIN..MAX only, hence the range
+            LONG_ON_TIME: {...TIME, MAX: 111600, SPECIAL: NOT_USED},
             SHORT_ONDELAY_TIME: {...TIME, MAX: 111600, DEFAULT: 0},
             // the profile sets it and its form does not draw it: absent from the easy view, editable in the expert one
             SHORT_JT_ONDELAY: {TYPE: 'INTEGER', OPERATIONS: 7, FLAGS: 1, MIN: 0, MAX: 9, DEFAULT: 2},

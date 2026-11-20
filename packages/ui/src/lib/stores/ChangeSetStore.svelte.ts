@@ -37,6 +37,8 @@ export interface StagedLinkParamset extends StagedBase {
     readonly kind: 'linkParamset';
     readonly links: ReadonlyArray<{sender: string; receiver: string}>;
     readonly values: {senderToReceiver?: ParamsetWrite; receiverToSender?: ParamsetWrite};
+    /** Task 113: only the changed parameters instead of the whole link paramset; absent = whole. */
+    readonly changedOnly?: boolean;
 }
 
 /** `addLink` for every pair, with the per-pair names of #87. */
@@ -223,6 +225,7 @@ export class ChangeSetStore {
                         change.interfaceName,
                         change.links.map((link) => ({...link})),
                         change.values,
+                        {changedOnly: change.changedOnly === true},
                     );
                     return this.#fromResults(change.id, results);
                 }

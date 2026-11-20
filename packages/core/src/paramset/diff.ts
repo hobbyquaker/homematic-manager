@@ -10,6 +10,11 @@
  * Here the default is the opposite: only parameters whose value actually changed, each cast and
  * validated, and never a parameter that is unknown, read-only or out of range. `writeAll` is the
  * explicit opt-out the dialog offers (roadmap task 6.1).
+ *
+ * Link paramsets are the exception, and `full` is their mode: the CCU's WebUI went back to sending
+ * every link parameter in 2026 after "only the dirty ones" had lost settings in the field (a link's
+ * on-time changed and its brightness thresholds were back at their defaults). A `full` payload is
+ * every writable parameter with the value that was read, the edits on top - never a `DEFAULT`.
  */
 
 import {castValue, type EnumEncoding} from './cast.js';
@@ -20,6 +25,14 @@ import {sameValue, type Paramset, type ParamsetWrite, type RpcWriteValue} from '
 export interface DiffOptions {
     /** Send every writable parameter instead of only the changed ones. Off by default. */
     readonly writeAll?: boolean;
+    /**
+     * The whole paramset as it stands: every writable parameter with the value read from the
+     * device, the edited ones with their new value. Unlike `writeAll` it never falls back to the
+     * `DEFAULT` (A-14) - a parameter that was neither read nor edited is left out - and a stored
+     * value that does not validate is left out too instead of failing a write the user did not make.
+     * Wins over `writeAll`.
+     */
+    readonly full?: boolean;
     /** How to encode `ENUM`; see `enumEncodingFor(interfaceName)`. */
     readonly enumAs?: EnumEncoding;
     /** Passed to the validation. */
@@ -34,6 +47,8 @@ export type SkipReason =
     | 'not-writable'
     /** The description does not have it. */
     | 'unknown-parameter'
+    /** `full`: neither read from the device nor edited, so there is no value to send. */
+    | 'unread'
     /** It failed validation; the reason is in `problems`. */
     | 'invalid';
 
@@ -71,7 +86,8 @@ export function diffParamset(
     const skipped: SkippedParameter[] = [];
     const problems: ValidationProblem[] = [];
 
-    const writeAll = options.writeAll === true;
+    const full = options.full === true;
+    const writeAll = full || options.writeAll === true;
     const castOptions = options.enumAs === undefined ? {} : {enumAs: options.enumAs};
     const validateOptions = options.maxStringLength === undefined ? {} : {maxStringLength: options.maxStringLength};
 
@@ -94,6 +110,11 @@ export function diffParamset(
             continue;
         }
 
+        if (full && !wasEdited && !Object.prototype.hasOwnProperty.call(original, param)) {
+            skipped.push({param, reason: 'unread'});
+            continue;
+        }
+
         const raw = wasEdited ? edited[param] : (original[param] ?? parameter.DEFAULT);
         const value = castValue(raw, parameter, castOptions);
 
@@ -104,7 +125,11 @@ export function diffParamset(
 
         const found = validateValue(param, value, parameter, validateOptions);
         if (found.length > 0) {
-            problems.push(...found);
+            // a stored value the description does not allow is the device's business, not a mistake
+            // in this write: `full` leaves it where it is
+            if (!full || wasEdited) {
+                problems.push(...found);
+            }
             skipped.push({param, reason: 'invalid'});
             continue;
         }

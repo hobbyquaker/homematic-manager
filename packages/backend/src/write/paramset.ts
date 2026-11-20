@@ -16,6 +16,11 @@
  *    `NaN` never reaches the wire;
  * 4. the call goes through the paced write queue and into the write log.
  *
+ * A **link paramset is written whole** (task 113): once one of its parameters changed, every
+ * writable parameter goes out with the value just read, the edits on top. The CCU's WebUI went
+ * back to that in 2026, after sending only the changed link parameters had reset the others on
+ * devices in the field. `changedOnly` is the opt-out; MASTER and VALUES keep the changed-only rule.
+ *
  * Multi-apply is restricted to channels whose paramset description **identity** is equal
  * (`multiApplyEligibility()`, task 6.3). 2.x offered every channel with the same `TYPE` and never
  * compared descriptions, which is exactly what put more than 100 devices into `CONFIG_PENDING`.
@@ -165,6 +170,11 @@ export class ParamsetWriter {
      * A link paramset is addressed as `putParamset(<channel>, <peer address>, values)`, so
      * "sender to receiver" is written on the sender with the receiver as the key and the other way
      * round - exactly what `putLinkParamset()` of 2.x did.
+     *
+     * `values` are the edits. A direction none of whose parameters changed is not written at all;
+     * one that has a change is written whole unless `options.changedOnly` is set - per link from that
+     * link's own stored values, so applying an edit to several links never copies one link's other
+     * parameters to the next.
      */
     async putLink(
         interfaceName: string,
@@ -208,6 +218,7 @@ export class ParamsetWriter {
                 const result = await this.#putOne(interfaceName, owner, 'LINK', peer, direction.values, options, {
                     peer,
                     alwaysSend: ALWAYS_SENT_LINK_PARAMETERS,
+                    full: options.changedOnly !== true && options.writeAll !== true,
                 });
                 results.push(result);
                 done += 1;
@@ -277,7 +288,7 @@ export class ParamsetWriter {
         paramsetKey: string,
         values: ParamsetWrite,
         options: WriteOptions,
-        extra: {peer?: string; alwaysSend?: readonly string[]},
+        extra: {peer?: string; alwaysSend?: readonly string[]; full?: boolean},
     ): Promise<WriteResult> {
         const base = {
             interfaceName,
@@ -313,7 +324,7 @@ export class ParamsetWriter {
             writeAll: options.writeAll === true,
             enumAs: enumEncodingFor(interfaceName),
         });
-        const sent: ParamsetWrite = {...diff.values};
+        let sent: ParamsetWrite = {...diff.values};
         for (const parameter of extra.alwaysSend ?? []) {
             addAlwaysSent(sent, diff.values, values, description, parameter, interfaceName);
         }
@@ -324,6 +335,16 @@ export class ParamsetWriter {
         }
         if (Object.keys(sent).length === 0) {
             return {...base, sent, ok: true, skipped: true, problems: []};
+        }
+        if (extra.full === true) {
+            // something changed, so the paramset goes out whole: what was read, the edits on top.
+            // Only the payload is taken from this second pass - what is wrong with the edits the
+            // first one has already said, and a stored value that does not validate stays unsent.
+            const whole = diffParamset(original, values, description, {
+                full: true,
+                enumAs: enumEncodingFor(interfaceName),
+            });
+            sent = {...whole.values, ...sent};
         }
         if (options.dryRun === true) {
             return {...base, sent, ok: true, skipped: true, problems: []};

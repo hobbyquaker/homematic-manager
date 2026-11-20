@@ -6,6 +6,7 @@
         Paramset,
         ParamsetDescription,
         ParamsetValue,
+        ParamsetWrite,
         WriteResult,
     } from '@homematic-manager/core';
     import {
@@ -34,9 +35,10 @@
     import {linkFields, profileDescription, profileLabel, type LinkField} from '../../lib/util/linkForm.js';
     import {
         buildPreview,
+        linkReadBack,
         linkWritePreview,
         linkWriteValues,
-        readBack as computeReadBack,
+        wholeLinkPayload,
         type ReadBackEntry,
     } from '../../lib/util/paramsetForm.js';
     import ParameterRow from '../paramset/ParameterRow.svelte';
@@ -81,8 +83,24 @@
     let linkName = $state('');
     let linkDescription = $state('');
     let targets = $state<string[]>([]);
+    /**
+     * Task 113: a link paramset is written whole, as the CCU's WebUI does it; this is the opt-out,
+     * "only the changed parameters", which the browser remembers.
+     */
+    const changedOnly = $derived(stores.app.linkChangedOnly);
     let previewOpen = $state(false);
     let preview = $state<ReturnType<typeof linkWritePreview> | undefined>(undefined);
+    /**
+     * Task 113: the line under the preview's table. The table lists what changes; written is the
+     * whole paramset, and the line says so - the default "n parameters will be written" would not
+     * be true. `previewWhole` is the mode the preview on screen was built in.
+     */
+    let previewWhole = $state(false);
+    const previewCount = $derived(
+        previewWhole && preview
+            ? `${t('{count} parameters change - the link is written with all its parameters', {}, preview.entries.length)} × ${String(preview.targets.length)}`
+            : undefined,
+    );
     let results = $state<WriteResult[]>([]);
     let readBack = $state<ReadBackEntry[]>([]);
     let loading = $state(false);
@@ -547,7 +565,30 @@
                       targets: pairs.map((link) => `${link.sender}←${link.receiver}`),
                   })
                 : undefined;
-        preview = linkWritePreview(receiverPart, senderPart, pairs);
+        // task 113: the calls show the whole paramsets, as they go out
+        const whole = changedOnly
+            ? undefined
+            : {
+                  receiver: wholeLinkPayload(
+                      receiverValues,
+                      edited,
+                      receiverDescription,
+                      interfaceName,
+                      receiverPart.values,
+                  ),
+                  sender:
+                      senderPart && senderDescription
+                          ? wholeLinkPayload(
+                                senderValues,
+                                senderEdited,
+                                senderDescription,
+                                interfaceName,
+                                senderPart.values,
+                            )
+                          : {},
+              };
+        previewWhole = whole !== undefined;
+        preview = linkWritePreview(receiverPart, senderPart, pairs, whole);
         previewOpen = true;
     }
 
@@ -572,6 +613,7 @@
             title: `LINK — ${stores.nameOf(sender)} → ${stores.nameOf(receiver)}`,
             links: pairs,
             values,
+            changedOnly,
             calls: [...(payload.calls ?? [])],
             lines: payload.entries.map((entry) => ({
                 label: entry.side === 'sender' ? `${t('Sender')}: ${entry.param}` : entry.param,
@@ -592,8 +634,11 @@
         if (values.receiverToSender === undefined && values.senderToReceiver === undefined) {
             return;
         }
-        const written = await stores.paramsets.putLink(interfaceName, links(), values);
+        const written = await stores.paramsets.putLink(interfaceName, links(), values, {changedOnly});
         results = written;
+        // task 113: what went out for the link on screen - the whole paramset unless `changedOnly`
+        const sentTo = (owner: string, peer: string, fallback: ParamsetWrite): ParamsetWrite =>
+            written.find((result) => result.address === owner && result.peer === peer)?.sent ?? fallback;
         // `ok` means nothing on BidCos: read back what the interface really stored (task 6), on
         // each end that was written (B-87: the sender's too, or its form keeps the old values)
         const back: ReadBackEntry[] = [];
@@ -601,10 +646,13 @@
             const reread = await stores.paramsets.read(interfaceName, receiver, sender);
             if (reread && receiverDescription) {
                 back.push(
-                    ...computeReadBack(values.receiverToSender, reread, receiverDescription).map((entry) => ({
-                        ...entry,
-                        side: 'receiver' as const,
-                    })),
+                    ...linkReadBack(
+                        sentTo(receiver, sender, values.receiverToSender),
+                        values.receiverToSender,
+                        receiverValues,
+                        reread,
+                        receiverDescription,
+                    ).map((entry) => ({...entry, side: 'receiver' as const})),
                 );
                 receiverValues = reread;
                 edited = {};
@@ -614,10 +662,13 @@
             const reread = await stores.paramsets.read(interfaceName, sender, receiver);
             if (reread && senderDescription) {
                 back.push(
-                    ...computeReadBack(values.senderToReceiver, reread, senderDescription).map((entry) => ({
-                        ...entry,
-                        side: 'sender' as const,
-                    })),
+                    ...linkReadBack(
+                        sentTo(sender, receiver, values.senderToReceiver),
+                        values.senderToReceiver,
+                        senderValues,
+                        reread,
+                        senderDescription,
+                    ).map((entry) => ({...entry, side: 'sender' as const})),
                 );
                 senderValues = reread;
                 senderEdited = {};
@@ -673,6 +724,23 @@
                 />
             </div>
         {/if}
+
+        <!--
+            Task 113: a link paramset goes out whole by default, as the CCU's WebUI writes it; the box
+            is the way back to "only what changed", remembered in this browser.
+        -->
+        <label
+            class="hmm-link-option"
+            title={t('By default a link is written with all its parameters, as the CCU does')}
+        >
+            <input
+                type="checkbox"
+                checked={changedOnly}
+                data-testid="link-changed-only"
+                onchange={(event) => stores.app.setLinkChangedOnly(event.currentTarget.checked)}
+            />
+            <span>{t('Send only the changed parameters')}</span>
+        </label>
 
         <!-- Task 64: an internal key is the channel's link with itself; there is one paramset, the receiver's -->
         {#if sender !== receiver}
@@ -911,6 +979,7 @@
     bind:open={previewOpen}
     {preview}
     paramset="LINK"
+    countText={previewCount}
     {results}
     {readBack}
     writing={stores.paramsets.writing}
@@ -961,6 +1030,13 @@
 
     .hmm-link-targets {
         padding: 6px 0;
+    }
+
+    .hmm-link-option {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding-top: 4px;
     }
 
     .hmm-link-section h4 {

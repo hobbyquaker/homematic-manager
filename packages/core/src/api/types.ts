@@ -743,6 +743,12 @@ export interface BidcosInterfaceInfo {
 export interface WriteOptions {
     /** Send every writeable parameter, not only the changed ones (task 6, item 1). */
     writeAll?: boolean;
+    /**
+     * `paramset.putLink` only: send just the changed parameters of a link paramset. Without it a
+     * link paramset that has a change is written whole - every writable parameter as the interface
+     * returned it, the edits on top (task 113).
+     */
+    changedOnly?: boolean;
     /** Only validate and return what would be sent. */
     dryRun?: boolean;
 }

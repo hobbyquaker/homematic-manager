@@ -144,9 +144,10 @@ test("a weather station's storm thresholds are its own form, copied into the act
     await expect(page.getByTestId('write-preview')).toHaveAttribute('open', '');
     const calls = page.locator('[data-testid^="preview-call-"]');
     await expect(calls).toHaveCount(2);
+    // task 113: both link paramsets go out whole, the copied threshold and the changed one among the rest
     await expect(calls).toContainText([
-        `putParamset(${RECEIVER}←${SENDER}, LINK, {"SHORT_COND_VALUE_LO":29})`,
-        `putParamset(${SENDER}←${RECEIVER}, LINK, {"STORM_LOWER_THRESHOLD":29})`,
+        `putParamset(${RECEIVER}←${SENDER}, LINK, {"SHORT_COND_VALUE_LO":29,"SHORT_COND_VALUE_HI":100})`,
+        `putParamset(${SENDER}←${RECEIVER}, LINK, {"PEER_NEEDS_BURST":false,"STORM_LOWER_THRESHOLD":29,"STORM_UPPER_THRESHOLD":39})`,
     ]);
     await page.getByTestId('write-confirm').click();
     await expect(page.getByTestId('link-results')).toContainText(SENDER);

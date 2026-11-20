@@ -29,6 +29,14 @@ const LINK: ParamsetDescription = {
     UI_HINT: {TYPE: 'INTEGER', OPERATIONS: 7, MIN: 0, MAX: 100, DEFAULT: 0},
 };
 
+/** A link paramset with more than the one parameter a test edits (task 113). */
+const WIDE_LINK: ParamsetDescription = {
+    ...LINK,
+    LONG_ON_TIME: {TYPE: 'FLOAT', OPERATIONS: 7, MIN: 0, MAX: 100, DEFAULT: 1},
+    SHORT_JT_ON: {TYPE: 'ENUM', OPERATIONS: 7, MIN: 0, MAX: 2, DEFAULT: 0, VALUE_LIST: ['NO_JUMP', 'ONDELAY', 'ON']},
+    PEER_ID: {TYPE: 'INTEGER', OPERATIONS: 5, DEFAULT: 0},
+};
+
 const devices: DeviceDescription[] = [
     {ADDRESS: 'ABC1', TYPE: 'HmIP-PDT', FIRMWARE: '1.4.8', VERSION: 1, CHILDREN: ['ABC1:1']},
     {ADDRESS: 'ABC1:1', TYPE: 'SWITCH_TRANSCEIVER', PARENT: 'ABC1', VERSION: 1},
@@ -273,11 +281,113 @@ describe('ParamsetWriter.putLink', () => {
     });
 
     it('does not invent a UI_HINT the caller did not send', async () => {
-        const h = harness({current: {'B:1': {SHORT_ON_TIME: 1, UI_HINT: 3}}});
+        const h = harness({current: {'B:1': {SHORT_ON_TIME: 1}}});
         const [result] = await h.writer.putLink('HmIP-RF', [{sender: 'A:1', receiver: 'B:1'}], {
             receiverToSender: {SHORT_ON_TIME: 2},
         });
         expect(result?.sent).toEqual({SHORT_ON_TIME: {explicitDouble: 2}});
+    });
+
+    it('writes a link paramset whole once one parameter changed (task 113)', async () => {
+        const h = harness({
+            descriptions: {LINK: WIDE_LINK},
+            current: {'B:1': {SHORT_ON_TIME: 1, LONG_ON_TIME: 30, SHORT_JT_ON: 2, UI_HINT: 3, PEER_ID: 9, STRAY: 1}},
+        });
+        const [result] = await h.writer.putLink('HmIP-RF', [{sender: 'A:1', receiver: 'B:1'}], {
+            receiverToSender: {SHORT_ON_TIME: 2},
+        });
+        // as read, the edit on top; nothing read-only, nothing the description does not have
+        const whole = {
+            SHORT_ON_TIME: {explicitDouble: 2},
+            LONG_ON_TIME: {explicitDouble: 30},
+            SHORT_JT_ON: 2,
+            UI_HINT: 3,
+        };
+        expect(result?.sent).toEqual(whole);
+        expect(h.writes).toEqual([{method: 'putParamset', params: ['B:1', 'A:1', whole]}]);
+    });
+
+    it('never fills a parameter the interface did not return with its DEFAULT', async () => {
+        const h = harness({descriptions: {LINK: WIDE_LINK}, current: {'B:1': {SHORT_ON_TIME: 1}}});
+        const [result] = await h.writer.putLink('HmIP-RF', [{sender: 'A:1', receiver: 'B:1'}], {
+            receiverToSender: {SHORT_ON_TIME: 2},
+        });
+        expect(result?.sent).toEqual({SHORT_ON_TIME: {explicitDouble: 2}});
+    });
+
+    it('leaves a stored value out that the description does not allow, and still writes', async () => {
+        const h = harness({
+            descriptions: {LINK: WIDE_LINK},
+            current: {'B:1': {SHORT_ON_TIME: 1, LONG_ON_TIME: 5000, UI_HINT: 3}},
+        });
+        const [result] = await h.writer.putLink('HmIP-RF', [{sender: 'A:1', receiver: 'B:1'}], {
+            receiverToSender: {SHORT_ON_TIME: 2},
+        });
+        expect(result?.ok).toBe(true);
+        expect(result?.sent).toEqual({SHORT_ON_TIME: {explicitDouble: 2}, UI_HINT: 3});
+    });
+
+    it('sends only the changed parameters with changedOnly', async () => {
+        const h = harness({
+            descriptions: {LINK: WIDE_LINK},
+            current: {'B:1': {SHORT_ON_TIME: 1, LONG_ON_TIME: 30, SHORT_JT_ON: 2, UI_HINT: 3}},
+        });
+        const [result] = await h.writer.putLink(
+            'HmIP-RF',
+            [{sender: 'A:1', receiver: 'B:1'}],
+            {receiverToSender: {SHORT_ON_TIME: 2}},
+            {changedOnly: true},
+        );
+        expect(result?.sent).toEqual({SHORT_ON_TIME: {explicitDouble: 2}});
+    });
+
+    it('does not write a link none of whose parameters changed, whole or not', async () => {
+        const h = harness({
+            descriptions: {LINK: WIDE_LINK},
+            current: {'B:1': {SHORT_ON_TIME: 1, LONG_ON_TIME: 30, UI_HINT: 3}},
+        });
+        const [result] = await h.writer.putLink('HmIP-RF', [{sender: 'A:1', receiver: 'B:1'}], {
+            receiverToSender: {SHORT_ON_TIME: 1},
+        });
+        expect(result).toMatchObject({ok: true, skipped: true, sent: {}});
+        expect(h.writes).toEqual([]);
+    });
+
+    it('writes each of several links whole from its own stored values', async () => {
+        const h = harness({
+            descriptions: {LINK: WIDE_LINK},
+            current: {
+                'B:1': {SHORT_ON_TIME: 1, LONG_ON_TIME: 30},
+                'D:1': {SHORT_ON_TIME: 1, LONG_ON_TIME: 60},
+            },
+        });
+        await h.writer.putLink(
+            'HmIP-RF',
+            [
+                {sender: 'A:1', receiver: 'B:1'},
+                {sender: 'C:1', receiver: 'D:1'},
+            ],
+            {receiverToSender: {SHORT_ON_TIME: 2}},
+        );
+        expect(h.writes.map((write) => write.params)).toEqual([
+            ['B:1', 'A:1', {SHORT_ON_TIME: {explicitDouble: 2}, LONG_ON_TIME: {explicitDouble: 30}}],
+            ['D:1', 'C:1', {SHORT_ON_TIME: {explicitDouble: 2}, LONG_ON_TIME: {explicitDouble: 60}}],
+        ]);
+    });
+
+    it('shows the whole payload in a dry run and sends nothing', async () => {
+        const h = harness({
+            descriptions: {LINK: WIDE_LINK},
+            current: {'B:1': {SHORT_ON_TIME: 1, LONG_ON_TIME: 30}},
+        });
+        const [result] = await h.writer.putLink(
+            'HmIP-RF',
+            [{sender: 'A:1', receiver: 'B:1'}],
+            {receiverToSender: {SHORT_ON_TIME: 2}},
+            {dryRun: true},
+        );
+        expect(result?.sent).toEqual({SHORT_ON_TIME: {explicitDouble: 2}, LONG_ON_TIME: {explicitDouble: 30}});
+        expect(h.writes).toEqual([]);
     });
 
     it('drops a UI_HINT that the description does not have or that is invalid', async () => {

@@ -229,6 +229,31 @@ export function buildPreview(
     };
 }
 
+/**
+ * Task 113: a link paramset as it goes out whole - every writable parameter with the value read,
+ * the edits on top - once one of its parameters changed; `changed` is the changed-only payload of
+ * the same edits. The backend builds the same from its own read of the link (`ParamsetWriter`).
+ */
+export function wholeLinkPayload(
+    original: Paramset,
+    edited: Readonly<Record<string, unknown>>,
+    description: ParamsetDescription,
+    interfaceName: string,
+    changed: ParamsetWrite,
+): ParamsetWrite {
+    if (Object.keys(changed).length === 0) {
+        return {};
+    }
+    const whole = diffParamset(original, edited, description, {full: true, enumAs: enumEncodingFor(interfaceName)});
+    return {...whole.values, ...changed};
+}
+
+/** Task 113: both ends' whole payloads, for a link preview. An end without changes is `{}`. */
+export interface WholeLinkPayloads {
+    readonly receiver: ParamsetWrite;
+    readonly sender: ParamsetWrite;
+}
+
 /** The write of one direct link, sender to receiver - what `paramset.putLink` gets per link. */
 export interface LinkPair {
     readonly sender: string;
@@ -241,14 +266,31 @@ export interface LinkPair {
  * directions. The preview carries one `putParamset` line per link and end that has something to
  * write, and the table both ends' parameters, each marked with its end. `values` stays the
  * receiver's payload; the sender's is `senderValues`.
+ *
+ * Task 113: with `whole`, the calls print what really goes out - the whole paramset of the link on
+ * screen (the first pair). A further link is written whole from its own stored values, which the
+ * dialog has not read: its call shows the changed parameters and `…` for the rest. `values` and
+ * `senderValues` stay the changed parameters either way - they are what `paramset.putLink` gets,
+ * and the table lists what changes.
  */
 export function linkWritePreview(
     receiver: WritePreview,
     sender: WritePreview | undefined,
     pairs: readonly LinkPair[],
+    whole?: WholeLinkPayloads,
 ): WritePreview & {readonly senderValues: ParamsetWrite} {
-    const call = (owner: string, peer: string, values: ParamsetWrite) =>
-        `putParamset(${owner}←${peer}, LINK, ${JSON.stringify(values)})`;
+    const text = (values: ParamsetWrite, payload: ParamsetWrite | undefined, first: boolean): string => {
+        if (payload === undefined) {
+            return JSON.stringify(values);
+        }
+        return first ? JSON.stringify(payload) : `${JSON.stringify(values).slice(0, -1)},…}`;
+    };
+    const calls = (end: 'receiver' | 'sender', values: ParamsetWrite, payload: ParamsetWrite | undefined): string[] =>
+        pairs.map((pair, index) => {
+            const owner = end === 'receiver' ? pair.receiver : pair.sender;
+            const peer = end === 'receiver' ? pair.sender : pair.receiver;
+            return `putParamset(${owner}←${peer}, LINK, ${text(values, payload, index === 0)})`;
+        });
     const senderValues = sender?.values ?? {};
     const receiverWrites = Object.keys(receiver.values).length > 0;
     const senderWrites = Object.keys(senderValues).length > 0;
@@ -263,8 +305,8 @@ export function linkWritePreview(
         skipped: [...receiver.skipped, ...(sender?.skipped ?? [])],
         problems: [...receiver.problems, ...(sender?.problems ?? [])],
         calls: [
-            ...(receiverWrites ? pairs.map((pair) => call(pair.receiver, pair.sender, receiver.values)) : []),
-            ...(senderWrites ? pairs.map((pair) => call(pair.sender, pair.receiver, senderValues)) : []),
+            ...(receiverWrites ? calls('receiver', receiver.values, whole?.receiver) : []),
+            ...(senderWrites ? calls('sender', senderValues, whole?.sender) : []),
         ],
     };
 }
@@ -324,6 +366,38 @@ export interface ReadBackEntry {
  * a `FLOAT` sent as an int is ignored. `ok` therefore means nothing on BidCos, and the only
  * feedback the interface gives is the value it holds afterwards.
  */
+/**
+ * Task 113: the read-back of a link paramset. `sent` is the payload that went out - whole by
+ * default - and `changed` the parameters the user edited: the table lists those, and of everything
+ * else only what does not read as expected, so a whole write does not print sixty identical rows.
+ *
+ * With only the changed parameters sent, the rest of the paramset is compared with what was read
+ * before the write (`before`): a parameter that was not sent and reads differently afterwards is
+ * the damage the CCU's WebUI saw in the field, and it is listed with `—` under "sent".
+ */
+export function linkReadBack(
+    sent: ParamsetWrite,
+    changed: ParamsetWrite,
+    before: Paramset,
+    stored: Paramset,
+    description: ParamsetDescription,
+): ReadBackEntry[] {
+    const entries = readBack(sent, stored, description).filter(
+        (entry) => entry.differs || Object.prototype.hasOwnProperty.call(changed, entry.param),
+    );
+    for (const param of Object.keys(before)) {
+        if (Object.prototype.hasOwnProperty.call(sent, param) || description[param] === undefined) {
+            continue;
+        }
+        const was = displayValue(before[param], description[param]);
+        const stays = displayValue(stored[param], description[param]);
+        if (was !== stays) {
+            entries.push({param, sent: '—', stored: stays, differs: true});
+        }
+    }
+    return entries;
+}
+
 export function readBack(sent: ParamsetWrite, stored: Paramset, description: ParamsetDescription): ReadBackEntry[] {
     return Object.keys(sent).map((param) => {
         const sentText = displayValue(sent[param], description[param]);

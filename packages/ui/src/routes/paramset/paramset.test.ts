@@ -10,8 +10,10 @@ import {
     floatStep,
     formFields,
     displayValue,
+    linkReadBack,
     linkWritePreview,
     linkWriteValues,
+    wholeLinkPayload,
     serviceMessageParameters,
 } from '../../lib/util/paramsetForm.js';
 import {expandRowName, mountApp} from '../../testHarness.js';
@@ -218,6 +220,84 @@ describe('linkWritePreview (B-87)', () => {
         expect(none.entries).toEqual([]);
         expect(none.calls).toEqual([]);
         expect(linkWriteValues(none)).toEqual({});
+    });
+});
+
+describe('whole link paramsets (task 113)', () => {
+    const description: ParamsetDescription = {
+        SHORT_ON_TIME: {TYPE: 'FLOAT', OPERATIONS: 7, MIN: 0, MAX: 108000, DEFAULT: 0},
+        SHORT_ON_LEVEL: {TYPE: 'FLOAT', OPERATIONS: 7, MIN: 0, MAX: 1, DEFAULT: 1},
+        UI_HINT: {TYPE: 'STRING', OPERATIONS: 7, DEFAULT: ''},
+        PEER_ID: {TYPE: 'INTEGER', OPERATIONS: 5, DEFAULT: 0},
+        LONG_ON_TIME: {TYPE: 'FLOAT', OPERATIONS: 7, MIN: 0, MAX: 108000, DEFAULT: 5},
+    };
+    const stored = {SHORT_ON_TIME: 10, SHORT_ON_LEVEL: 0.8, UI_HINT: '2', PEER_ID: 4};
+    const options = {interfaceName: 'HmIP-RF', targets: []};
+
+    it('is what was read with the edits on top, and nothing the interface did not return', () => {
+        const edited = {SHORT_ON_TIME: 20};
+        const changed = buildPreview(stored, edited, description, options).values;
+        expect(wholeLinkPayload(stored, edited, description, 'HmIP-RF', changed)).toEqual({
+            SHORT_ON_TIME: {explicitDouble: 20},
+            SHORT_ON_LEVEL: {explicitDouble: 0.8},
+            UI_HINT: '2',
+        });
+    });
+
+    it('is empty when nothing changed: such a link is not written at all', () => {
+        const changed = buildPreview(stored, {SHORT_ON_TIME: 10}, description, options).values;
+        expect(wholeLinkPayload(stored, {SHORT_ON_TIME: 10}, description, 'HmIP-RF', changed)).toEqual({});
+    });
+
+    it('prints the whole paramset for the link on screen and "…" for a further link', () => {
+        const edited = {SHORT_ON_TIME: 20};
+        const receiver = buildPreview(stored, edited, description, options);
+        const whole = wholeLinkPayload(stored, edited, description, 'HmIP-RF', receiver.values);
+        const preview = linkWritePreview(
+            receiver,
+            undefined,
+            [
+                {sender: 'S:1', receiver: 'R:1'},
+                {sender: 'S:2', receiver: 'R:2'},
+            ],
+            {receiver: whole, sender: {}},
+        );
+        expect(preview.calls).toEqual([
+            `putParamset(R:1←S:1, LINK, ${JSON.stringify(whole)})`,
+            'putParamset(R:2←S:2, LINK, {"SHORT_ON_TIME":{"explicitDouble":20},…})',
+        ]);
+        // what putLink is given, and what the table lists, is still the change
+        expect(linkWriteValues(preview)).toEqual({receiverToSender: {SHORT_ON_TIME: {explicitDouble: 20}}});
+        expect(preview.entries.map((entry) => entry.param)).toEqual(['SHORT_ON_TIME']);
+    });
+
+    it('reads back the changed parameters, and of the rest only what is not as sent', () => {
+        const changed = {SHORT_ON_TIME: {explicitDouble: 20}};
+        const sent = {...changed, SHORT_ON_LEVEL: {explicitDouble: 0.8}, UI_HINT: '2'};
+        expect(linkReadBack(sent, changed, stored, {...stored, SHORT_ON_TIME: 20}, description)).toEqual([
+            {param: 'SHORT_ON_TIME', sent: '20', stored: '20', differs: false},
+        ]);
+        expect(
+            linkReadBack(sent, changed, stored, {...stored, SHORT_ON_TIME: 20, SHORT_ON_LEVEL: 1}, description),
+        ).toEqual([
+            {param: 'SHORT_ON_TIME', sent: '20', stored: '20', differs: false},
+            {param: 'SHORT_ON_LEVEL', sent: '0.8', stored: '1', differs: true},
+        ]);
+    });
+
+    it('shows a parameter that was not sent and reads differently after the write', () => {
+        const changed = {SHORT_ON_TIME: {explicitDouble: 20}};
+        // only the change went out, and the device put the level back to its default
+        expect(
+            linkReadBack(changed, changed, stored, {...stored, SHORT_ON_TIME: 20, SHORT_ON_LEVEL: 1}, description),
+        ).toEqual([
+            {param: 'SHORT_ON_TIME', sent: '20', stored: '20', differs: false},
+            {param: 'SHORT_ON_LEVEL', sent: '—', stored: '1', differs: true},
+        ]);
+        // a value the interface returns that the description does not have is not this dialog's business
+        expect(
+            linkReadBack(changed, changed, {...stored, X: 1}, {...stored, SHORT_ON_TIME: 20, X: 2}, description),
+        ).toEqual([{param: 'SHORT_ON_TIME', sent: '20', stored: '20', differs: false}]);
     });
 });
 

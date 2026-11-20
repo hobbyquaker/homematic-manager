@@ -25,7 +25,7 @@ Currently 196 files, 9.3 MB, built from openccu-data **2026.7.2**.
 | `master-metadata.json` | `Record<channelType, MasterMetadata>` | 40 KB, 54 channel types: display order, conditional visibility, option-preset assignment, parameter groups |
 | `master-forms.json` | `MasterForms` | 83 KB, 71 MASTER forms keyed by paramset id, 9 of them with the channel's internal key |
 | `option-presets.json` | `Record<id, OptionPreset>` | 89 dropdowns of typical values (`DELAY`: `${none}`/5s/…/1h plus a free value), each entry the WebUI's template (`${after} 1min`) |
-| `cross-validations.json` | `CrossValidationRule[]` | 6 rules between parameters of one paramset (`DIM_MAX_LEVEL >= DIM_MIN_LEVEL`, …): 5 from openccu-data, then ours from `scripts/lib/cross-validations.mjs` (`COND_TX_THRESHOLD_HI >= _LO`) |
+| `cross-validations.json` | `CrossValidationRule[]` | 7 rules between parameters of one paramset (`DIM_MAX_LEVEL >= DIM_MIN_LEVEL`, …): 5 from openccu-data, then ours from `scripts/lib/cross-validations.mjs` (`COND_TX_THRESHOLD_HI >= _LO`, `TEMPERATURE_COMFORT >= TEMPERATURE_LOWERING`) |
 | `translations/de.json`, `en.json` | `Translations` | 767 KB / 746 KB: 253 channel types, 488 device models, 2359 parameters, ~3040 parameter values, 167 help texts, ~5470 UI labels |
 | `translations/tr.json` | `Translations` | 4 KB, the 2015 Turkish easy-mode strings as a fallback locale |
 | `device-icons.json` | `DeviceIcons` | 535 device type → image file name |

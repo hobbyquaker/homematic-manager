@@ -17,4 +17,15 @@ export const HMM_CROSS_VALIDATIONS = [
         param_a: 'COND_TX_THRESHOLD_HI',
         param_b: 'COND_TX_THRESHOLD_LO',
     },
+    // task 117: the eco (lowering) temperature at most the comfort one - isEcoLTComfort() in the
+    // WebUI's easymodes/js/CC.js for HM-CC-RT-DN, HM-TC-IT-WM-W-EU and HM-CC-VG-1, compared as
+    // decimals since OpenCCU-Base 1f82c7b (21.0 against 21.5 passed with parseInt). The HmIP heating
+    // channels (HEATING_CLIMATECONTROL_TRANSCEIVER) carry the same pair. The message is the WebUI's.
+    {
+        id: 'temperature_comfort_gte_lowering',
+        rule: 'gte',
+        error_key: 'errorComfortLTEco',
+        param_a: 'TEMPERATURE_COMFORT',
+        param_b: 'TEMPERATURE_LOWERING',
+    },
 ];

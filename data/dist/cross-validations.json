@@ -42,5 +42,12 @@
     "errorKey": "cross_validation.hi_must_be_gte_lo",
     "paramA": "COND_TX_THRESHOLD_HI",
     "paramB": "COND_TX_THRESHOLD_LO"
+  },
+  {
+    "id": "temperature_comfort_gte_lowering",
+    "rule": "gte",
+    "errorKey": "errorcomfortlteco",
+    "paramA": "TEMPERATURE_COMFORT",
+    "paramB": "TEMPERATURE_LOWERING"
   }
 ]

@@ -479,6 +479,39 @@ describe('masterMetadataFor', () => {
         expect(good.problems).toEqual([]);
     });
 
+    it("applies the real data's thermostat rule as decimals: comfort 21.0 under eco 21.5 is reported (task 117)", async () => {
+        const rules = JSON.parse(
+            readFileSync(new URL('../../../../data/dist/cross-validations.json', import.meta.url), 'utf8'),
+        ) as MemoryData['crossValidations'];
+        const real = new EasyModeEngine(new MemoryDataSource({crossValidations: rules ?? []}));
+        const description: ParamsetDescription = {
+            TEMPERATURE_COMFORT: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 15, MAX: 30},
+            TEMPERATURE_LOWERING: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 5, MAX: 25},
+        };
+        const bad = await real.masterMetadataFor('X', description, {
+            TEMPERATURE_COMFORT: 21,
+            TEMPERATURE_LOWERING: 21.5,
+        });
+        expect(bad.problems).toEqual([
+            {
+                id: 'temperature_comfort_gte_lowering',
+                errorKey: 'errorcomfortlteco',
+                params: ['TEMPERATURE_COMFORT', 'TEMPERATURE_LOWERING'],
+            },
+        ]);
+        const equal = await real.masterMetadataFor('X', description, {
+            TEMPERATURE_COMFORT: 21,
+            TEMPERATURE_LOWERING: 21,
+        });
+        expect(equal.problems).toEqual([]);
+        // HM-CC-VG-1 (VirtualDevices) sends its temperatures as strings
+        const strings = await real.masterMetadataFor('X', description, {
+            TEMPERATURE_COMFORT: '21.0',
+            TEMPERATURE_LOWERING: '21.5',
+        });
+        expect(strings.problems.map((problem) => problem.id)).toEqual(['temperature_comfort_gte_lowering']);
+    });
+
     it('evaluates an lte rule', async () => {
         const description: ParamsetDescription = {
             STATUSINFO_MINDELAY: {TYPE: 'FLOAT', OPERATIONS: 3},

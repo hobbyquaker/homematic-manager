@@ -15,6 +15,9 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   end (3680 W, 3000 W, 1150 W or 60 W) instead of the stored hundredths and `0 … 16777215`. The expert view still
   shows the stored value. An upper threshold below the lower one is pointed out, for every device with conditional
   transmitting.
+- **A thermostat's eco temperature above its comfort temperature is pointed out** (HM-CC-RT-DN, HM-TC-IT-WM-W-EU,
+  HM-CC-VG-1 and the HmIP heating channels), as the CCU's WebUI does, and compared with the half degrees: comfort
+  21.0 °C with eco 21.5 °C counts.
 
 ### Changed
 

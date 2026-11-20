@@ -370,8 +370,8 @@ describe('master metadata, presets and cross validations', () => {
         expect(optionPresets['DIM_STEPwoLastValue_5-90'].presets.at(-1)).toEqual({template: '90%', value: 0.9});
     });
 
-    it('matches CrossValidationRule for all 6 rules: 5 from openccu-data, 1 of our own', () => {
-        expect(crossValidations).toHaveLength(6);
+    it('matches CrossValidationRule for all 7 rules: 5 from openccu-data, 2 of our own', () => {
+        expect(crossValidations).toHaveLength(7);
         for (const rule of crossValidations) {
             expect(typeof rule.id).toBe('string');
             expect(translations.de.uiLabels).toHaveProperty(rule.errorKey);
@@ -389,8 +389,11 @@ describe('master metadata, presets and cross validations', () => {
             paramA: 'DIM_MAX_LEVEL',
             paramB: 'DIM_MIN_LEVEL',
         });
-        // task 110: ours come after upstream's
-        expect(crossValidations.map((rule) => rule.id).slice(5)).toEqual(['cond_tx_threshold_hi_gte_lo']);
+        // tasks 110 and 117: ours come after upstream's
+        expect(crossValidations.map((rule) => rule.id).slice(5)).toEqual([
+            'cond_tx_threshold_hi_gte_lo',
+            'temperature_comfort_gte_lowering',
+        ]);
     });
 
     it('resolves every label key it emits', () => {

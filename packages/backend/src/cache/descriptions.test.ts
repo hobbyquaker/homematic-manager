@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest';
 
 import type {DeviceDescription, ParamsetDescription} from '@homematic-manager/core';
 
-import {ParamsetDescriptionCache} from './descriptions.js';
+import {ParamsetDescriptionCache, shardOf} from './descriptions.js';
 
 const description: ParamsetDescription = {
     STATE: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1, DEFAULT: false},
@@ -48,24 +48,63 @@ describe('ParamsetDescriptionCache', () => {
         expect(cache.has(undefined)).toBe(false);
     });
 
-    it('tracks whether anything has to be written', () => {
+    it('tracks which shards have to be written', () => {
         const cache = new ParamsetDescriptionCache();
         expect(cache.dirty).toBe(false);
         cache.set('HmIP-RF/x///y/MASTER', description);
+        cache.set('HmIP-RF/x///y/VALUES', description);
+        cache.set('BidCos-RF/z/1/1//MASTER', description);
         expect(cache.dirty).toBe(true);
-        cache.markClean();
+        expect(cache.takeDirty().sort()).toEqual(['BidCos-RF/z', 'HmIP-RF/x']);
         expect(cache.dirty).toBe(false);
+        expect(cache.takeDirty()).toEqual([]);
     });
 
-    it('clears one interface by the prefix of the identity', () => {
+    it('does not mark a shard for a description it already holds unchanged', () => {
+        const cache = new ParamsetDescriptionCache();
+        cache.set('HmIP-RF/x///y/MASTER', description);
+        cache.takeDirty();
+        cache.set('HmIP-RF/x///y/MASTER', structuredClone(description));
+        expect(cache.dirty).toBe(false);
+        cache.set('HmIP-RF/x///y/MASTER', {STATE: {TYPE: 'BOOL', OPERATIONS: 5}});
+        expect(cache.takeDirty()).toEqual(['HmIP-RF/x']);
+    });
+
+    it('splits by interface and device type', () => {
+        expect(shardOf('HmIP-RF/HmIP-PDT/1.4.8/1/SWITCH_TRANSCEIVER/VALUES')).toBe('HmIP-RF/HmIP-PDT');
+        expect(shardOf('a')).toBe('a/');
+        const cache = new ParamsetDescriptionCache();
+        cache.set('HmIP-RF/a/1/1//MASTER', description);
+        cache.set('HmIP-RF/a/2/1//MASTER', description);
+        cache.set('HmIP-RF/b/1/1//MASTER', description);
+        expect(cache.shards().sort()).toEqual(['HmIP-RF/a', 'HmIP-RF/b']);
+        expect(Object.keys(cache.shardSnapshot('HmIP-RF/a'))).toEqual([
+            'HmIP-RF/a/1/1//MASTER',
+            'HmIP-RF/a/2/1//MASTER',
+        ]);
+        expect(cache.shardSnapshot('HmIP-RF/c')).toEqual({});
+    });
+
+    it('clears one interface by the prefix of the identity, and marks its shards', () => {
         const cache = new ParamsetDescriptionCache();
         cache.set('HmIP-RF/a/1/1//MASTER', description);
         cache.set('BidCos-RF/b/1/1//MASTER', description);
+        cache.takeDirty();
         cache.clear('HmIP-RF');
         expect(cache.size).toBe(1);
         expect(cache.has('BidCos-RF/b/1/1//MASTER')).toBe(true);
+        expect(cache.takeDirty()).toEqual(['HmIP-RF/a']);
         cache.clear();
         expect(cache.size).toBe(0);
+        expect(cache.takeDirty()).toEqual(['BidCos-RF/b']);
+    });
+
+    it('merges a snapshot without marking it changed', () => {
+        const cache = new ParamsetDescriptionCache();
+        cache.load({'HmIP-RF/a/1/1//MASTER': description});
+        cache.merge({'HmIP-RF/b/1/1//MASTER': description});
+        expect(cache.size).toBe(2);
+        expect(cache.dirty).toBe(false);
     });
 
     it('round-trips through JSON and survives a broken snapshot', () => {

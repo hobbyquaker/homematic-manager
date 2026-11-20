@@ -103,9 +103,16 @@ own directory; a test: a temporary one).
 | --- | --- | --- |
 | `config.json` | the `AppConfig` (connection only; the rest is derived) | on every `config.set`, atomically |
 | `cache/<host>/devices.json` | device descriptions per interface | debounced, on every change |
-| `cache/<host>/descriptions.json` | paramset descriptions by identity | debounced, when one was fetched |
+| `cache/<host>/descriptions/<interface>/<type>.<hash>.json` | paramset descriptions by identity, one file per device type | debounced, only the type that gained one |
 | `cache/<host>/names.json` | the local names and the ReGa object ids | debounced, on every rename |
+| `cache/<host>/unreach.json` | how often each device went unreachable | a minute after an outage, and on stop |
+| `cache/<host>/occulite-meta.json` | the last metadata snapshot of openccu-lite | 5 s after a change, and on stop |
 | `cache/<host>/write-log.json` | the write log of the session | debounced, on every write |
+
+A file whose content did not change is not written again (the device list after every `init`, the
+names at every start, the metadata snapshot after every reconnect): on the addon the data directory
+is the CCU's SD card. The single `descriptions.json` of 3.5 and older is split into the per-type
+files on the first start and removed.
 
 The cache directory is keyed by host, so switching between two CCUs cannot mix their device lists.
 Every write goes through a temporary file and a rename: 2.x used `persist-json` without its

@@ -325,8 +325,9 @@ describe.skipIf(!simulatorAvailable)('connecting to hm-simulator', () => {
 
         const cacheDir = path.join(dataDir, 'cache', '127.0.0.1');
         expect(await fs.readdir(cacheDir)).toEqual(
-            expect.arrayContaining(['devices.json', 'descriptions.json', 'names.json']),
+            expect.arrayContaining(['devices.json', 'descriptions', 'names.json']),
         );
+        expect(await fs.readdir(path.join(cacheDir, 'descriptions', 'hmip-rf'))).toHaveLength(1);
 
         const second = await startBackend(sim, {dataDir, connect: false});
         running.unshift({close: () => second.close()});

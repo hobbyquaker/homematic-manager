@@ -26,7 +26,7 @@ Inside it:
 | --- | --- | --- |
 | `config.json` | the profile: CCU address, interfaces, TLS, auth, ReGa, callback, language, write pace, RPC log folder, user-defined interfaces | **yes**, with the exceptions below |
 | `cache/<host>/devices.json` | device descriptions per interface | yes, but pointless — it is re-read from the CCU in seconds |
-| `cache/<host>/descriptions.json` | paramset descriptions, keyed by description identity | same |
+| `cache/<host>/descriptions/` | paramset descriptions, one file per interface and device type (`descriptions.json` up to 3.5) | same |
 | `cache/<host>/names.json` | local names and the ReGa object ids | **worth copying** if you renamed devices locally without ReGa |
 | `cache/<host>/write-log.json` | the writes of the session's RPC log (the reads are kept in memory only) | yes, if you want the history |
 | `link-templates.json` | the saved link profile templates (#21) | **yes** — they are your own work |

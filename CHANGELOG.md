@@ -6,6 +6,16 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Changed
+
+- **Far fewer writes to the CCU's SD card.** The cache files are written only when their content changed - the device
+  list is no longer rewritten after every connect, nor the names and the metadata at every start - and the paramset
+  descriptions are kept in one file per device type, so opening a device of a new type writes that type's file instead
+  of all descriptions (several megabytes on a large installation). The existing cache is converted on the first start.
+  The unreach counters are written a minute after an outage instead of at once.
+
 ## [3.5.0] — 2026-11-20
 
 ### Added

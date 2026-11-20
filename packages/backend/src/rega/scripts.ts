@@ -154,7 +154,12 @@ Write(iDone);
  * B-74 (#150): an alarm stays oncoming until it is receipted, whatever the interface process
  * reports meanwhile - rfd forgets a `STICKY_UNREACH` at a restart, ReGa does not - so the
  * WebUI lists messages `getServiceMessages` does not. The value is what such a message is shown
- * with.
+ * with. *
+ * Task 119: the name and the value go out through `WriteURL()`, like every other name this
+ * application reads from ReGa, so a tab or a line break in either cannot shift the fields or split
+ * the line (the CCU WebUI's lists broke on such names, OpenCCU-Base #304 and others). The value is
+ * `Value().ToString()`, which prints what `Write(Value())` printed: `true`/`false`, `21.500000`,
+ * an ENUM's index (checked on the lab's stock OpenCCU 3.89.8).
  */
 export const REGA_ALARMS_SCRIPT = `string sId;
 foreach (sId, dom.GetObject(ID_SERVICES).EnumIDs()) {
@@ -163,7 +168,10 @@ foreach (sId, dom.GetObject(ID_SERVICES).EnumIDs()) {
         if (oAlarm.IsTypeOf(OT_ALARMDP) && (oAlarm.Used() == true) && (oAlarm.Enabled() == true) && (oAlarm.AlState() == asOncoming)) {
             object oTrigger = dom.GetObject(oAlarm.AlTriggerDP());
             if (oTrigger) {
-                Write(oTrigger.Name() # "\\t" # oAlarm.AlOccurrenceTime().ToInteger() # "\\t" # oAlarm.Timestamp().ToInteger() # "\\t" # oTrigger.Value() # "\\n");
+                WriteURL(oTrigger.Name());
+                Write("\\t" # oAlarm.AlOccurrenceTime().ToInteger() # "\\t" # oAlarm.Timestamp().ToInteger() # "\\t");
+                WriteURL(oTrigger.Value().ToString());
+                Write("\\n");
             }
         }
     }
@@ -182,16 +190,17 @@ export interface RegaAlarm {
 }
 
 /**
- * Reads what {@link REGA_ALARMS_SCRIPT} wrote. A line whose name is not `<interface>.<channel>.<datapoint>`
- * (a system alarm, a CUxD name with more dots) or whose time is no positive number is skipped. The
- * value column is ReGa's text of the value: `true`/`false`, a number as it prints it (an ENUM by
- * its index), anything else stays a string; a line without it means `true`.
+ * Reads what {@link REGA_ALARMS_SCRIPT} wrote. Name and value are `WriteURL()`-escaped and decoded
+ * here (task 119). A line whose name is not `<interface>.<channel>.<datapoint>` (a system alarm, a
+ * CUxD name with more dots) or whose time is no positive number is skipped. The value column is
+ * ReGa's text of the value: `true`/`false`, a number as it prints it (an ENUM by its index),
+ * anything else stays a string; a line without it means `true`.
  */
 export function parseRegaAlarms(output: string): RegaAlarm[] {
     const alarms: RegaAlarm[] = [];
     for (const line of output.split('\n')) {
         const [name, first, last, value] = line.split('\t');
-        const match = /^([^.\s]+)\.([^.\s]+)\.([^.\s]+)$/u.exec(name?.trim() ?? '');
+        const match = /^([^.\s]+)\.([^.\s]+)\.([^.\s]+)$/u.exec(unescapeRegaUrl(name?.trim() ?? ''));
         const firstSeconds = Number(first);
         const lastSeconds = Number(last);
         if (!match || !Number.isFinite(firstSeconds) || firstSeconds <= 0) {
@@ -201,7 +210,7 @@ export function parseRegaAlarms(output: string): RegaAlarm[] {
             interfaceName: match[1] ?? '',
             address: match[2] ?? '',
             datapoint: match[3] ?? '',
-            value: parseRegaValue(value),
+            value: parseRegaValue(value === undefined ? undefined : unescapeRegaUrl(value)),
             first: firstSeconds * 1000,
             last: Number.isFinite(lastSeconds) && lastSeconds > 0 ? lastSeconds * 1000 : firstSeconds * 1000,
         });

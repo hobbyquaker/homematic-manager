@@ -104,8 +104,11 @@ describe("ReGa's pending service messages (task 36)", () => {
         );
         expect(REGA_ALARMS_SCRIPT).toContain('oAlarm.AlOccurrenceTime().ToInteger()');
         expect(REGA_ALARMS_SCRIPT).toContain('oAlarm.Timestamp().ToInteger()');
-        // B-74: ReGa's value of the trigger, for the messages only ReGa lists
-        expect(REGA_ALARMS_SCRIPT).toContain('# oTrigger.Value() #');
+        // B-74: ReGa's value of the trigger, for the messages only ReGa lists; task 119: name and
+        // value through WriteURL(), so a tab or a line break in them cannot shift the fields
+        expect(REGA_ALARMS_SCRIPT).toContain('WriteURL(oTrigger.Name());');
+        expect(REGA_ALARMS_SCRIPT).toContain('WriteURL(oTrigger.Value().ToString());');
+        expect(REGA_ALARMS_SCRIPT).not.toContain('Write(oTrigger.Name()');
         // ReGa's own escapes in the script, not a raw tab
         expect(REGA_ALARMS_SCRIPT).toContain('"\\t"');
     });
@@ -164,6 +167,19 @@ describe("ReGa's pending service messages (task 36)", () => {
         ]);
         expect(parseRegaAlarms('BidCos-RF.LEQ0000001:0.ERROR\t1790000000\t1790000500\tJAMMED\n')).toMatchObject([
             {value: 'JAMMED'},
+        ]);
+    });
+    it('task 119: decodes the WriteURL() escapes of name and value, so a tab or line break shifts nothing', () => {
+        // what the lab's OpenCCU 3.89.8 prints: WriteURL() escapes ':' too
+        const output =
+            'BidCos-RF.LEQ0000001%3A0.STICKY_UNREACH\t1790000000\t1790000500\ttrue\n' +
+            'BidCos-RF.LEQ0000003%3A4.FAULT_REPORTING\t1790001500\t1790001600\t7\n' +
+            'CUxD.CUX2801001%3A1.TEXT\t1790002000\t1790002000\tline%09one%0Aline%20two\n' +
+            'Bad%09Name.X%3A0.UNREACH\t1790003000\t1790003000\ttrue\n';
+        expect(parseRegaAlarms(output)).toEqual([
+            expect.objectContaining({address: 'LEQ0000001:0', datapoint: 'STICKY_UNREACH', value: true}),
+            expect.objectContaining({address: 'LEQ0000003:4', datapoint: 'FAULT_REPORTING', value: 7}),
+            expect.objectContaining({interfaceName: 'CUxD', value: 'line\tone\nline two'}),
         ]);
     });
 });

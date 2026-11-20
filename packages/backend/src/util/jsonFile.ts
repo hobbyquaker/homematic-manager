@@ -9,11 +9,44 @@
  * rewrote the whole device cache on every `newDevices` callback; a CCU that reports 400 devices in
  * a burst wrote the file 400 times.
  *
+ * **Unchanged content is not written again.** On the addon the data directory is the CCU's SD
+ * card, and most saves repeat what is there already: the device list after every `init`, the names
+ * and the configuration at every start, the metadata snapshot after every reconnect. The hash of
+ * what was last read or written is kept per file, and a write whose text hashes the same - while
+ * the file is still there with that size - is skipped.
+ *
  * A read failure is never fatal: a missing or corrupt file means "no cache yet".
  */
 
+import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+
+/** What a file held when it was last read or written here: the hash and the size of its text. */
+interface KnownContent {
+    readonly hash: string;
+    readonly bytes: number;
+}
+
+const knownContent = new Map<string, KnownContent>();
+
+function contentOf(text: string): KnownContent {
+    return {hash: createHash('sha256').update(text).digest('base64'), bytes: Buffer.byteLength(text)};
+}
+
+/** Is the file on disk still the text that hashes to `content`? A missing file is not. */
+async function holds(file: string, content: KnownContent): Promise<boolean> {
+    const known = knownContent.get(file);
+    if (known?.hash !== content.hash || known.bytes !== content.bytes) {
+        return false;
+    }
+    try {
+        // somebody may have deleted or replaced the file behind our back; the size is the cheap check
+        return (await fs.stat(file)).size === content.bytes;
+    } catch {
+        return false;
+    }
+}
 
 /** Reads and parses a JSON file; `undefined` when it is missing, unreadable or not JSON. */
 export async function readJsonFile<T>(file: string): Promise<T | undefined> {
@@ -21,8 +54,10 @@ export async function readJsonFile<T>(file: string): Promise<T | undefined> {
     try {
         text = await fs.readFile(file, 'utf8');
     } catch {
+        knownContent.delete(file);
         return undefined;
     }
+    knownContent.set(file, contentOf(text));
     try {
         return JSON.parse(text) as T;
     } catch {
@@ -35,21 +70,29 @@ export async function readJsonFile<T>(file: string): Promise<T | undefined> {
  * the first rename took it away and the second failed with ENOENT (quick successive room
  * assignments on the metadata cache). Writes of one file now wait for each other, in call order.
  */
-const writesInProgress = new Map<string, Promise<void>>();
+const writesInProgress = new Map<string, Promise<unknown>>();
 
 /**
  * Writes a JSON file atomically, creating the directory if it does not exist. Writes of the same
  * file run one after another in call order, so the last call's value is what stays; the value is
- * serialised at the call.
+ * serialised at the call. Resolves to `false` when the file already held exactly this text and
+ * nothing was written.
  */
-export async function writeJsonFile(file: string, value: unknown): Promise<void> {
+export async function writeJsonFile(file: string, value: unknown): Promise<boolean> {
     const text = `${JSON.stringify(value, null, 2)}\n`;
+    const content = contentOf(text);
     const previous = writesInProgress.get(file) ?? Promise.resolve();
     const write = previous.then(async () => {
+        if (await holds(file, content)) {
+            return false;
+        }
+        knownContent.delete(file);
         await fs.mkdir(path.dirname(file), {recursive: true});
         const temporary = `${file}.tmp`;
         await fs.writeFile(temporary, text, 'utf8');
         await fs.rename(temporary, file);
+        knownContent.set(file, content);
+        return true;
     });
     // the next write waits for this one whether it worked or not; the caller hears the error
     const settled = write.catch(() => undefined);
@@ -64,6 +107,7 @@ export async function writeJsonFile(file: string, value: unknown): Promise<void>
 
 /** Removes a file; a missing file is not an error. */
 export async function removeFile(file: string): Promise<void> {
+    knownContent.delete(file);
     try {
         await fs.rm(file, {force: true});
     } catch {
@@ -154,7 +198,8 @@ export class DebouncedJsonFile<T> {
             this.#timer = undefined;
         }
         this.#pending = undefined;
+        // in the same chain as the writes, so a save that follows the removal is not undone by it
+        this.#writing = this.#writing.then(() => removeFile(this.file));
         await this.#writing;
-        await removeFile(this.file);
     }
 }

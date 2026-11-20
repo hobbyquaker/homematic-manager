@@ -41,7 +41,7 @@ import {
 import type {MetaCopy, MetaDocument as SystemDocument, WriteResult} from 'occulite-client';
 
 import {errorMessage} from '../errors.js';
-import {readJsonFile, writeJsonFile} from '../util/jsonFile.js';
+import {DebouncedJsonFile} from '../util/jsonFile.js';
 import type {MetadataProvider, MetaMembershipEntry, MetaNameEntry, MetaProviderEvents} from './provider.js';
 import type {SystemLink} from './system.js';
 
@@ -56,6 +56,12 @@ export interface OcculiteProviderOptions extends MetaProviderEvents {
     readonly system: SystemLink;
     /** `<cacheDir>/occulite-meta.json`: the last snapshot, so a restart without the box has names. */
     readonly cacheFile?: string;
+    /**
+     * How long changes to the cache file are collected before it is written. The box holds the
+     * store; the file is only what a restart without the box shows, so a burst of changes (an
+     * import, a room assigned to fifty channels) is one write, not fifty. `stop()` writes it.
+     */
+    readonly cacheWriteDelayMs?: number;
     /** `occulited 0.1.0`, from the detection call. */
     readonly implementation?: string;
     readonly reconnectMinMs?: number;
@@ -63,6 +69,9 @@ export interface OcculiteProviderOptions extends MetaProviderEvents {
     /** Injected by the tests in place of `setTimeout`. */
     readonly wait?: (ms: number, signal: AbortSignal) => Promise<void>;
 }
+
+/** How long changes to the cache file are collected; see `cacheWriteDelayMs`. */
+export const CACHE_WRITE_DELAY_MS = 5000;
 
 export class OcculiteProvider implements MetadataProvider {
     readonly kind = 'occulite' as const;
@@ -78,10 +87,20 @@ export class OcculiteProvider implements MetadataProvider {
     #lastNotice = '';
     /** Ends the wait between two attempts at the event stream; set while the loop is sleeping. */
     #wake: (() => void) | undefined;
+    readonly #cache: DebouncedJsonFile<MetaDocument> | undefined;
 
     constructor(options: OcculiteProviderOptions) {
         this.#options = options;
         this.#system = options.system;
+        this.#cache =
+            options.cacheFile === undefined
+                ? undefined
+                : new DebouncedJsonFile<MetaDocument>(options.cacheFile, {
+                      delayMs: options.cacheWriteDelayMs ?? CACHE_WRITE_DELAY_MS,
+                      onError: (error) => {
+                          options.onNotice('warn', `the metadata cache could not be written: ${errorMessage(error)}`);
+                      },
+                  });
     }
 
     state(): MetaState {
@@ -125,6 +144,7 @@ export class OcculiteProvider implements MetadataProvider {
             // the loop ends by being aborted; that is not a failure
         }
         this.#loop = undefined;
+        await this.#cache?.flush();
     }
 
     /**
@@ -252,7 +272,7 @@ export class OcculiteProvider implements MetadataProvider {
             // change nobody announced
             this.#options.onStateChanged(this.state());
             this.#options.onChanged();
-            await this.#saveCache();
+            this.#saveCache();
         } catch (error) {
             this.#fail(error);
         }
@@ -291,7 +311,7 @@ export class OcculiteProvider implements MetadataProvider {
                     this.#document = next;
                     this.#options.onStateChanged(this.state());
                     this.#options.onChanged();
-                    await this.#saveCache();
+                    this.#saveCache();
                 }
             } catch (error) {
                 if (aborted()) {
@@ -324,10 +344,7 @@ export class OcculiteProvider implements MetadataProvider {
     }
 
     async #loadCache(): Promise<void> {
-        if (this.#options.cacheFile === undefined) {
-            return;
-        }
-        const raw = await readJsonFile<unknown>(this.#options.cacheFile);
+        const raw: unknown = await this.#cache?.read();
         if (raw === undefined) {
             return;
         }
@@ -340,15 +357,9 @@ export class OcculiteProvider implements MetadataProvider {
         }
     }
 
-    async #saveCache(): Promise<void> {
-        if (this.#options.cacheFile === undefined) {
-            return;
-        }
-        try {
-            await writeJsonFile(this.#options.cacheFile, this.#document);
-        } catch (error) {
-            this.#options.onNotice('warn', `the metadata cache could not be written: ${errorMessage(error)}`);
-        }
+    /** Debounced; a snapshot that equals the file (every reconnect) is not written at all. */
+    #saveCache(): void {
+        this.#cache?.save(this.#document);
     }
 
     #sleep(ms: number, signal: AbortSignal): Promise<void> {

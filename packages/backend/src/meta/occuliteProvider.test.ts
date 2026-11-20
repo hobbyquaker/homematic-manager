@@ -58,7 +58,10 @@ function dropMetaStreams(box: FakeBox): void {
     streams.clear();
 }
 
-function provider(box: FakeBox, options: {cacheFile?: string; read?: string; url?: string} = {}): OcculiteProvider {
+function provider(
+    box: FakeBox,
+    options: {cacheFile?: string; read?: string; url?: string; cacheWriteDelayMs?: number} = {},
+): OcculiteProvider {
     const read = options.read ?? TOKEN;
     return new OcculiteProvider({
         system: new SystemLink({
@@ -69,6 +72,7 @@ function provider(box: FakeBox, options: {cacheFile?: string; read?: string; url
             timeoutMs: 2000,
         }),
         ...(options.cacheFile === undefined ? {} : {cacheFile: options.cacheFile}),
+        ...(options.cacheWriteDelayMs === undefined ? {} : {cacheWriteDelayMs: options.cacheWriteDelayMs}),
         implementation: 'occulited test',
         reconnectMinMs: 5,
         reconnectMaxMs: 20,
@@ -337,6 +341,50 @@ describe('the occulite provider', () => {
             expect(second.state().reachable).toBe(false);
         } finally {
             await second.stop();
+        }
+    });
+
+    it('writes a burst of changes to the cache file once, and an unchanged snapshot not at all', async () => {
+        const cacheFile = path.join(dir, 'occulite-meta.json');
+        const box = await fakeBox();
+        const store = provider(box, {cacheFile, cacheWriteDelayMs: 200});
+        const written = (): Promise<number> =>
+            fs.stat(cacheFile).then(
+                (stat) => stat.mtimeMs,
+                () => 0,
+            );
+        await store.start();
+        try {
+            await eventually(() => box.metaStreamsOpened > 0, 'the event stream to be opened');
+            // the snapshot of the start waits for the debounce
+            expect(await written()).toBe(0);
+            const before = changes;
+            for (let revision = 5; revision < 25; revision += 1) {
+                box.metaEvent({
+                    revision,
+                    kind: 'object.updated',
+                    ref: 'BidCos-RF.A:1',
+                    value: {name: `Licht ${String(revision)}`, enums: ['room/eg'], meta: {}},
+                });
+            }
+            await eventually(() => changes >= before + 20, 'the events to be applied');
+            await new Promise((resolve) => setTimeout(resolve, 400));
+            const first = await written();
+            expect(first).toBeGreaterThan(0);
+            const cached = JSON.parse(await fs.readFile(cacheFile, 'utf8')) as {revision: number};
+            expect(cached.revision).toBe(24);
+
+            // the box's snapshot (it does not apply the test's events) is a change, and written
+            await store.refresh();
+            await new Promise((resolve) => setTimeout(resolve, 400));
+            const second = await written();
+            expect(second).toBeGreaterThan(first);
+            // the same snapshot after a reconnect is not
+            await store.refresh();
+            await store.stop();
+            expect(await written()).toBe(second);
+        } finally {
+            await store.stop();
         }
     });
 });

@@ -79,6 +79,55 @@ describe('writeJsonFile', () => {
     });
 });
 
+describe('writeJsonFile and unchanged content', () => {
+    it('does not write a file again whose content did not change', async () => {
+        const file = path.join(dir, 'devices.json');
+        await expect(writeJsonFile(file, {a: [1, 2]})).resolves.toBe(true);
+        const spy = vi.spyOn(fs, 'writeFile');
+        try {
+            await expect(writeJsonFile(file, {a: [1, 2]})).resolves.toBe(false);
+            expect(spy).not.toHaveBeenCalled();
+            await expect(writeJsonFile(file, {a: [1, 3]})).resolves.toBe(true);
+            expect(spy).toHaveBeenCalledTimes(1);
+        } finally {
+            spy.mockRestore();
+        }
+        await expect(readJsonFile(file)).resolves.toEqual({a: [1, 3]});
+    });
+
+    it('knows what it read: the same value written after a read is skipped', async () => {
+        const file = path.join(dir, 'names.json');
+        await fs.writeFile(file, `${JSON.stringify({x: 'y'}, null, 2)}\n`, 'utf8');
+        await readJsonFile(file);
+        await expect(writeJsonFile(file, {x: 'y'})).resolves.toBe(false);
+        // another layout of the same value is another text, and is written once
+        await fs.writeFile(file, JSON.stringify({x: 'y'}), 'utf8');
+        await readJsonFile(file);
+        await expect(writeJsonFile(file, {x: 'y'})).resolves.toBe(true);
+        await expect(writeJsonFile(file, {x: 'y'})).resolves.toBe(false);
+    });
+
+    it('writes again when the file was deleted or replaced behind its back', async () => {
+        const file = path.join(dir, 'a.json');
+        await writeJsonFile(file, {a: 1});
+        await fs.rm(file);
+        await expect(writeJsonFile(file, {a: 1})).resolves.toBe(true);
+        await fs.writeFile(file, '{}', 'utf8');
+        await expect(writeJsonFile(file, {a: 1})).resolves.toBe(true);
+        await expect(readJsonFile(file)).resolves.toEqual({a: 1});
+        await removeFile(file);
+        await expect(writeJsonFile(file, {a: 1})).resolves.toBe(true);
+    });
+
+    it('forgets a file it could not read', async () => {
+        const file = path.join(dir, 'gone.json');
+        await writeJsonFile(file, {a: 1});
+        await fs.rm(file);
+        await expect(readJsonFile(file)).resolves.toBeUndefined();
+        await expect(writeJsonFile(file, {a: 1})).resolves.toBe(true);
+    });
+});
+
 describe('removeFile', () => {
     it('removes a file and tolerates a missing one', async () => {
         const file = path.join(dir, 'a.json');
@@ -133,6 +182,17 @@ describe('DebouncedJsonFile', () => {
         await store.remove();
         expect(store.dirty).toBe(false);
         await expect(store.read()).resolves.toBeUndefined();
+    });
+
+    it('a save after remove is written, not removed by it', async () => {
+        const json = new DebouncedJsonFile<{n: number}>(path.join(dir, 'shard.json'), {delayMs: 0});
+        json.save({n: 1});
+        await json.flush();
+        const removed = json.remove();
+        json.save({n: 2});
+        await removed;
+        await json.flush();
+        await expect(json.read()).resolves.toEqual({n: 2});
     });
 
     it('read is undefined before anything was written', async () => {

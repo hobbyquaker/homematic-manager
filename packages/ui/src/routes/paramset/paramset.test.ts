@@ -1012,9 +1012,21 @@ describe('a MASTER form whose controls repeat (B-73, #168)', () => {
     beforeEach(() => {
         transport = new MockTransport({demo: true});
         const demoFile = transport.handlerFor('data.file');
-        transport.respond('data.file', (path) =>
-            path === 'data/master-metadata.json' ? {...(demoFile(path) as object), ...masterMetadata} : demoFile(path),
-        );
+        transport.respond('data.file', (path) => {
+            if (path === 'data/master-metadata.json') return {...(demoFile(path) as object), ...masterMetadata};
+            if (path === 'data/cross-validations.json') {
+                return [
+                    {
+                        id: 'cond_tx_threshold_hi_gte_lo',
+                        rule: 'gte',
+                        errorKey: 'cross_validation.hi_must_be_gte_lo',
+                        paramA: 'COND_TX_THRESHOLD_HI',
+                        paramB: 'COND_TX_THRESHOLD_LO',
+                    },
+                ];
+            }
+            return demoFile(path);
+        });
         const demoDescription = transport.handlerFor('paramset.description');
         transport.respond('paramset.description', (interfaceName, address, paramset) =>
             address === CHANNEL && paramset === 'MASTER'
@@ -1092,9 +1104,21 @@ describe("a MASTER form drawn by the channel's channelMode (task 75)", () => {
     beforeEach(() => {
         transport = new MockTransport({demo: true});
         const demoFile = transport.handlerFor('data.file');
-        transport.respond('data.file', (path) =>
-            path === 'data/master-metadata.json' ? {...(demoFile(path) as object), ...masterMetadata} : demoFile(path),
-        );
+        transport.respond('data.file', (path) => {
+            if (path === 'data/master-metadata.json') return {...(demoFile(path) as object), ...masterMetadata};
+            if (path === 'data/cross-validations.json') {
+                return [
+                    {
+                        id: 'cond_tx_threshold_hi_gte_lo',
+                        rule: 'gte',
+                        errorKey: 'cross_validation.hi_must_be_gte_lo',
+                        paramA: 'COND_TX_THRESHOLD_HI',
+                        paramB: 'COND_TX_THRESHOLD_LO',
+                    },
+                ];
+            }
+            return demoFile(path);
+        });
         const demoDescription = transport.handlerFor('paramset.description');
         transport.respond('paramset.description', (interfaceName, address, paramset) =>
             address === CHANNEL && paramset === 'MASTER'
@@ -1148,5 +1172,124 @@ describe("a MASTER form drawn by the channel's channelMode (task 75)", () => {
         await fireEvent.input(field, {target: {value: '1.5'}});
         await fireEvent.input(field, {target: {value: '2'}});
         expect(transport.calls.filter((call) => call.method === 'channel.mode')).toHaveLength(1);
+    });
+});
+
+/**
+ * Task 110: a power meter's switching thresholds are stored in hundredths of a watt. The CCU's
+ * WebUI shows them in watts, capped at what the device can switch, and writes `round(W * 100)`.
+ */
+describe("a power meter's thresholds in watts (task 110)", () => {
+    // the demo's HmIP-BSM (1150 W); its channel 4 stands in for the COND_SWITCH_TRANSMITTER channel
+    const CHANNEL = '000A1B2C3D4E5F:4';
+    const description: ParamsetDescription = {
+        COND_TX_THRESHOLD_LO: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 16_777_215, DEFAULT: 1000},
+        COND_TX_THRESHOLD_HI: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 16_777_215, DEFAULT: 10_000},
+        COND_TX_FALLING: {TYPE: 'BOOL', OPERATIONS: 3, DEFAULT: false},
+    };
+    const masterMetadata = {
+        SWITCH_VIRTUAL_RECEIVER: {
+            channelType: 'SWITCH_VIRTUAL_RECEIVER',
+            controls: [
+                {kind: 'param', param: 'COND_TX_THRESHOLD_LO'},
+                {kind: 'param', param: 'COND_TX_THRESHOLD_HI'},
+            ],
+        },
+    };
+    let transport: MockTransport;
+
+    async function openChannel(): Promise<void> {
+        await mountApp({transport, hash: '#/HmIP-RF/devices'});
+        const parent = document.querySelector<HTMLElement>('[data-row-id="000A1B2C3D4E5F"]')!;
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
+        await fireEvent.click(await screen.findByTestId(`paramset-${CHANNEL}-MASTER`));
+        await screen.findByTestId('param-COND_TX_THRESHOLD_HI');
+    }
+
+    function input(param: string): HTMLInputElement {
+        return within(screen.getByTestId(`param-${param}`)).getByRole<HTMLInputElement>('spinbutton');
+    }
+
+    beforeEach(() => {
+        transport = new MockTransport({demo: true});
+        const demoFile = transport.handlerFor('data.file');
+        transport.respond('data.file', (path) => {
+            if (path === 'data/master-metadata.json') return {...(demoFile(path) as object), ...masterMetadata};
+            if (path === 'data/cross-validations.json') {
+                return [
+                    {
+                        id: 'cond_tx_threshold_hi_gte_lo',
+                        rule: 'gte',
+                        errorKey: 'cross_validation.hi_must_be_gte_lo',
+                        paramA: 'COND_TX_THRESHOLD_HI',
+                        paramB: 'COND_TX_THRESHOLD_LO',
+                    },
+                ];
+            }
+            return demoFile(path);
+        });
+        const demoDescription = transport.handlerFor('paramset.description');
+        transport.respond('paramset.description', (interfaceName, address, paramset) =>
+            address === CHANNEL && paramset === 'MASTER'
+                ? description
+                : demoDescription(interfaceName, address, paramset),
+        );
+        const demoGet = transport.handlerFor('paramset.get');
+        transport.respond('paramset.get', (interfaceName, address, paramset) =>
+            address === CHANNEL && paramset === 'MASTER'
+                ? {COND_TX_THRESHOLD_LO: 5000, COND_TX_THRESHOLD_HI: 12_345, COND_TX_FALLING: false}
+                : demoGet(interfaceName, address, paramset),
+        );
+    });
+
+    it("shows them in W with two decimals and the device's maximum", async () => {
+        await openChannel();
+        await waitFor(() => {
+            expect(input('COND_TX_THRESHOLD_HI').value).toBe('123.45');
+        });
+        expect(input('COND_TX_THRESHOLD_LO').value).toBe('50');
+        expect(input('COND_TX_THRESHOLD_HI').max).toBe('1150');
+        expect(input('COND_TX_THRESHOLD_HI').step).toBe('0.01');
+        const row = screen.getByTestId('param-COND_TX_THRESHOLD_HI');
+        expect(row.querySelector('.hmm-param-unit')?.textContent).toBe('W');
+        expect(row.querySelector('.hmm-param-range')?.textContent).toBe('0 … 1150');
+        expect(row.querySelector('.hmm-param-default')?.textContent).toContain('100 W');
+    });
+
+    it('writes the watts typed as hundredths, rounded rather than truncated', async () => {
+        await openChannel();
+        await fireEvent.input(input('COND_TX_THRESHOLD_LO'), {target: {value: '12.34'}});
+        await fireEvent.click(screen.getByTestId('paramset-preview'));
+        await screen.findByTestId('write-preview');
+        await fireEvent.click(screen.getByTestId('write-confirm'));
+        await waitFor(() => {
+            expect(transport.lastCall('paramset.put')).toEqual([
+                'HmIP-RF',
+                [CHANNEL],
+                'MASTER',
+                {COND_TX_THRESHOLD_LO: 1234},
+                undefined,
+            ]);
+        });
+    });
+
+    it('warns while the upper threshold is below the lower one', async () => {
+        await openChannel();
+        expect(screen.queryByTestId('paramset-warnings')).toBeNull();
+        await fireEvent.input(input('COND_TX_THRESHOLD_HI'), {target: {value: '40'}});
+        await waitFor(() => {
+            expect(screen.getByTestId('paramset-warnings').textContent).toContain('COND_TX_THRESHOLD_HI');
+        });
+    });
+
+    it('shows the stored hundredths in the expert view', async () => {
+        await openChannel();
+        await screen.findByTestId('paramset-easy-form');
+        expect(input('COND_TX_THRESHOLD_HI').value).toBe('123.45');
+        await fireEvent.click(screen.getByTestId('paramset-expert'));
+        await waitFor(() => {
+            expect(input('COND_TX_THRESHOLD_HI').value).toBe('12345');
+        });
+        expect(screen.getByTestId('param-COND_TX_THRESHOLD_HI').querySelector('.hmm-param-unit')).toBeNull();
     });
 });

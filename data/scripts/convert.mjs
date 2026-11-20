@@ -37,6 +37,7 @@ import {
     sortKeys,
     upstreamDir,
 } from './lib/paths.mjs';
+import {HMM_CROSS_VALIDATIONS} from './lib/cross-validations.mjs';
 import {CROSS_VALIDATION_MESSAGES, identifierKey, labelKey, mergeMap, valueKey} from './lib/translations.mjs';
 import {writeJson} from './lib/write-json.mjs';
 
@@ -415,7 +416,7 @@ for (const receiver of Object.values(receiverProfiles)) {
     }
 }
 
-const crossValidations = easymode.cross_validations.rules.map((rule) => {
+const crossValidations = [...easymode.cross_validations.rules, ...HMM_CROSS_VALIDATIONS].map((rule) => {
     const base = {id: rule.id, rule: rule.rule, errorKey: useLabelKey(rule.error_key)};
     if (rule.rule === 'between') {
         return {...base, param: rule.param, minParam: rule.min_param, maxParam: rule.max_param};

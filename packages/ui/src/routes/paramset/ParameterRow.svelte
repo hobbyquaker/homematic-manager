@@ -1,6 +1,12 @@
 <script lang="ts">
     import type {ParamsetValue, ValueState} from '@homematic-manager/core';
-    import {fromDisplayValue, presetLabel as presetText, toDisplayValue} from '@homematic-manager/core';
+    import {
+        fromDisplayValue,
+        fromScaledDisplay,
+        presetLabel as presetText,
+        toDisplayValue,
+        toScaledDisplay,
+    } from '@homematic-manager/core';
 
     import {tick} from 'svelte';
 
@@ -79,7 +85,7 @@
 
     const readOnly = $derived(disabled || !field.writable);
     const numeric = $derived(field.kind === 'integer' || field.kind === 'float');
-    const shown = $derived(numeric ? toDisplayValue(asNumber(value), field.description) : value);
+    const shown = $derived(numeric ? toShown(asNumber(value)) : value);
     const text = $derived(shown === undefined || shown === null ? '' : String(shown));
     const enumIndex = $derived(asNumber(value) ?? -1);
     /** `NOT_USED` and friends: a value outside MIN..MAX that means something (#96). */
@@ -111,6 +117,20 @@
      */
     const translated = $derived(label !== field.name);
 
+    /** Stored -> displayed: through the field's own scale where it has one (task 110), else its `UNIT`. */
+    function toShown(stored: number | undefined): number | undefined {
+        return field.factor === undefined
+            ? toDisplayValue(stored, field.description)
+            : toScaledDisplay(stored, field.factor);
+    }
+
+    /** Displayed -> stored, the inverse of {@link toShown}. */
+    function fromShown(displayed: number): number | undefined {
+        return field.factor === undefined
+            ? fromDisplayValue(displayed, field.description)
+            : fromScaledDisplay(displayed, field.factor, field.kind === 'integer');
+    }
+
     function asNumber(input: unknown): number | undefined {
         if (typeof input === 'number') {
             return input;
@@ -125,7 +145,7 @@
         if (raw === '') {
             return;
         }
-        const stored = fromDisplayValue(Number(raw), field.description);
+        const stored = fromShown(Number(raw));
         if (stored !== undefined && Number.isFinite(stored)) {
             onchange(stored);
         }
@@ -144,7 +164,7 @@
     /** A number the free field may start from: not a special, inside the range. */
     function plainInRange(candidate: number | undefined): candidate is number {
         if (candidate === undefined || field.special.some((special) => special.VALUE === candidate)) return false;
-        const shown = toDisplayValue(candidate, field.description);
+        const shown = toShown(candidate);
         return (
             typeof shown === 'number' &&
             (field.min === undefined || shown >= field.min) &&
@@ -157,7 +177,7 @@
         const fallback = asNumber(field.description.DEFAULT);
         if (plainInRange(fallback)) return fallback;
         if (plainInRange(lastPlain)) return lastPlain;
-        return fromDisplayValue(field.min ?? 0, field.description) ?? 0;
+        return fromShown(field.min ?? 0) ?? 0;
     }
 
     async function chooseSpecial(id: string): Promise<void> {
@@ -238,12 +258,7 @@
                     bind:this={numberInput}
                     value={activeSpecial === undefined
                         ? text
-                        : String(
-                              toDisplayValue(
-                                  entering !== undefined && entering.on === value ? entering.draft : prefill(),
-                                  field.description,
-                              ),
-                          )}
+                        : String(toShown(entering !== undefined && entering.on === value ? entering.draft : prefill()))}
                     oninput={(event) => changeNumber(event.currentTarget.value)}
                 />
             {/if}
@@ -343,7 +358,11 @@
         {@const defaultSpecial = field.special.find((special) => special.VALUE === asNumber(field.description.DEFAULT))}
         <div class="hmm-param-default">
             {t('default {value}', {
-                value: defaultSpecial ? specialText(defaultSpecial.ID) : String(field.description.DEFAULT),
+                value: defaultSpecial
+                    ? specialText(defaultSpecial.ID)
+                    : field.factor !== undefined && typeof field.description.DEFAULT === 'number'
+                      ? `${String(toShown(field.description.DEFAULT))} ${field.unit}`
+                      : String(field.description.DEFAULT),
             })}
         </div>
     {/if}

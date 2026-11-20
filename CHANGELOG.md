@@ -8,6 +8,14 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ## [Unreleased]
 
+### Added
+
+- **The switching thresholds of the HmIP power meters are shown and entered in watts** (HmIP-PSM, -PSM-2, -PSMCO,
+  ELV-SH-PSMCI, -BSM, -FSM, -FSM16, -USBSM), as the CCU's WebUI does, with the most the device can switch as the upper
+  end (3680 W, 3000 W, 1150 W or 60 W) instead of the stored hundredths and `0 … 16777215`. The expert view still
+  shows the stored value. An upper threshold below the lower one is pointed out, for every device with conditional
+  transmitting.
+
 ### Fixed
 
 - **Decimal parameters are written without floating-point residue**, and a value that was not changed is no longer

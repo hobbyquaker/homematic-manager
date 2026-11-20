@@ -35,6 +35,7 @@ export * from './paramset/cast.js';
 export * from './paramset/validate.js';
 export * from './paramset/diff.js';
 export * from './paramset/multiApply.js';
+export * from './paramset/powerMeter.js';
 
 // Easy modes and the MASTER metadata layer
 export * from './easymodes/engine.js';

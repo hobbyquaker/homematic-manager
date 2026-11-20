@@ -35,5 +35,12 @@
     "errorKey": "cross_validation.hi_must_be_gte_lo",
     "paramA": "LONG_COND_VALUE_HI",
     "paramB": "LONG_COND_VALUE_LO"
+  },
+  {
+    "id": "cond_tx_threshold_hi_gte_lo",
+    "rule": "gte",
+    "errorKey": "cross_validation.hi_must_be_gte_lo",
+    "paramA": "COND_TX_THRESHOLD_HI",
+    "paramB": "COND_TX_THRESHOLD_LO"
   }
 ]

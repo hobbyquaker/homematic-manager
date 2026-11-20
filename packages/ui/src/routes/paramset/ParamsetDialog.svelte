@@ -176,7 +176,13 @@
     const index = $derived(stores.devices.index(interfaceName));
     const channelType = $derived(index?.get(address)?.TYPE ?? '');
     const title = $derived(`${paramset} — ${stores.nameOf(address)} (${address})`);
-    const fields = $derived(description ? formFields(description, view) : []);
+    /** The device's type, for the scales the WebUI picks by device (task 110); never in the expert view. */
+    const deviceType = $derived(
+        index?.get(address)?.PARENT_TYPE || index?.get(address.split(':')[0] ?? '')?.TYPE || undefined,
+    );
+    const fields = $derived(
+        description ? formFields(description, view, expertView || !deviceType ? {} : {deviceType}) : [],
+    );
     /**
      * The device-specific editors of task 10. They are plug-ins on top of this dialog: whatever
      * they recognise they draw themselves, and exactly those rows leave the generic list - the

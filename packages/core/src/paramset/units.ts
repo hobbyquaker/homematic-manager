@@ -79,6 +79,27 @@ export function fromDisplayValue(
     return roundScaled(value / displayFactor(description));
 }
 
+/**
+ * Stored value -> displayed value for a field with a scale of its own, not its `UNIT`'s - a power
+ * meter's thresholds in hundredths of a watt shown in watts (task 110).
+ */
+export function toScaledDisplay(value: number | undefined, factor: number): number | undefined {
+    return value === undefined ? undefined : roundScaled(value * factor);
+}
+
+/**
+ * Displayed value -> stored value, the inverse of {@link toScaledDisplay}. An INTEGER parameter is
+ * rounded to the nearest whole number, as the WebUI's `Math.round(W * 100)` does; truncating
+ * would turn 12.34 W (1233.9999… after the division) into 1233.
+ */
+export function fromScaledDisplay(value: number | undefined, factor: number, integer: boolean): number | undefined {
+    if (value === undefined) {
+        return undefined;
+    }
+    const stored = roundScaled(value / factor);
+    return integer && Number.isFinite(stored) ? Math.round(stored) : stored;
+}
+
 /** `MIN`/`MAX` in display units, so a spin box can use them directly. */
 export function displayBounds(description: ParameterDescription): {min?: number; max?: number} {
     const min = toDisplayValue(numericBound(description, 'MIN'), description);

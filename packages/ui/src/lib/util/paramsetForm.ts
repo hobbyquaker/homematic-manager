@@ -18,6 +18,7 @@ import {
     isWritable,
     numericBound,
     parameterOrder,
+    powerThresholdScale,
     toDisplayValue,
     unitLabel,
 } from '@homematic-manager/core';
@@ -69,6 +70,13 @@ export interface FormField {
     readonly min?: number;
     readonly max?: number;
     readonly step: number;
+    /**
+     * Task 110: stored value × factor = displayed value, for a field whose scale is not its `UNIT`'s
+     * (a power meter's thresholds, stored in hundredths of a watt and shown in watts). `min`, `max`,
+     * `step` and `unit` are in that scale already. Absent for every other field, which converts
+     * through its `UNIT` (`toDisplayValue`).
+     */
+    readonly factor?: number;
     readonly valueList?: readonly string[];
     /** Values outside `MIN..MAX` with a meaning of their own - `NOT_USED` and friends (#96). */
     readonly special: readonly SpecialValue[];
@@ -84,7 +92,19 @@ export interface FormField {
  * or a channel type the data does not know - it is `TAB_ORDER` and then alphabetical, which is
  * what `parameterOrder` does and what the CCU's own dialog falls back to.
  */
-export function formFields(description: ParamsetDescription, view?: MasterView): FormField[] {
+export interface FormFieldOptions {
+    /**
+     * The device type, for the scales the CCU's WebUI picks by device (task 110: the HmIP power
+     * meters' thresholds in watts). The expert view leaves it out and shows the stored values.
+     */
+    readonly deviceType?: string;
+}
+
+export function formFields(
+    description: ParamsetDescription,
+    view?: MasterView,
+    options: FormFieldOptions = {},
+): FormField[] {
     const names = view ? view.parameters.map((parameter) => parameter.name) : parameterOrder(description);
     const meta = new Map((view?.parameters ?? []).map((parameter) => [parameter.name, parameter]));
 
@@ -98,6 +118,23 @@ export function formFields(description: ParamsetDescription, view?: MasterView):
             const max = toDisplayValue(numericBound(parameter, 'MAX'), parameter);
             const preset = meta.get(name)?.preset;
             const list = enumList(parameter);
+            const scale = powerThresholdScale(options.deviceType, name);
+            if (scale !== undefined) {
+                return {
+                    name,
+                    description: parameter,
+                    kind: fieldKind(parameter),
+                    writable: isWritable(parameter),
+                    unit: scale.unit,
+                    min: scale.min,
+                    max: scale.max,
+                    step: scale.step,
+                    factor: scale.factor,
+                    special: parameter.SPECIAL ?? [],
+                    visible: meta.get(name)?.visible ?? true,
+                    ...(preset === undefined ? {} : {preset}),
+                } satisfies FormField;
+            }
             const field: FormField = {
                 name,
                 description: parameter,

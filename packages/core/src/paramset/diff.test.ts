@@ -64,6 +64,22 @@ describe('diffParamset, the default: changed parameters only', () => {
         expect(diffParamset(original, {MODE: 'ON'}, description, {enumAs: 'name'}).changed).toEqual([]);
     });
 
+    it('compares floats at their precision, so residue is not a change (task 111)', () => {
+        // what a percent field computes and what a BIN-RPC read can hand back
+        expect(diffParamset({LEVEL: 0.7}, {LEVEL: 0.07 * 10}, description).changed).toEqual([]);
+        expect(diffParamset({LEVEL: 0.3}, {LEVEL: 0.1 + 0.2}, description).changed).toEqual([]);
+        expect(diffParamset({LEVEL: 0.30000000000000004}, {LEVEL: '0.3'}, description).changed).toEqual([]);
+        expect(diffParamset({LEVEL: 0.3}, {LEVEL: 0.305}, description).values).toEqual({
+            LEVEL: {explicitDouble: 0.305},
+        });
+    });
+
+    it('writes a changed float without residue (task 111)', () => {
+        expect(diffParamset({LEVEL: 0}, {LEVEL: 0.1 + 0.2}, description).values).toEqual({
+            LEVEL: {explicitDouble: 0.3},
+        });
+    });
+
     it('treats a parameter the device never reported as changed', () => {
         const diff = diffParamset({}, {COUNT: 1}, description);
         expect(diff.values).toEqual({COUNT: 1});

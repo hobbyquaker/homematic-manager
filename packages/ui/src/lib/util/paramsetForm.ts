@@ -10,6 +10,7 @@ import type {
     ValidationProblem,
 } from '@homematic-manager/core';
 import {
+    decimalsOf,
     diffParamset,
     enumEncodingFor,
     enumList,
@@ -103,7 +104,7 @@ export function formFields(description: ParamsetDescription, view?: MasterView):
                 kind: fieldKind(parameter),
                 writable: isWritable(parameter),
                 unit: unitLabel(parameter),
-                step: parameter.TYPE === 'FLOAT' ? 0.1 : 1,
+                step: parameter.TYPE === 'FLOAT' ? floatStep(min, max) : 1,
                 special: parameter.SPECIAL ?? [],
                 visible: meta.get(name)?.visible ?? true,
                 ...(min === undefined ? {} : {min}),
@@ -114,6 +115,17 @@ export function formFields(description: ParamsetDescription, view?: MasterView):
             return field;
         })
         .filter((field): field is FormField => field !== undefined);
+}
+
+/**
+ * The spin step of a FLOAT, in display units: one unit of the last decimal its range is written
+ * with (task 111, the CCU's WebUI rounds to the same decimals), and 0.1 at the coarsest, which is
+ * what every FLOAT had before. `0.01..3680` W steps by 0.01, `0..1.005` by 0.001, a percent field
+ * (`0..100` in display units) and a temperature `5..30` by 0.1.
+ */
+export function floatStep(min: number | undefined, max: number | undefined): number {
+    const decimals = Math.max(1, ...[min, max].map((bound) => (bound === undefined ? 0 : decimalsOf(bound))));
+    return Number(`1e-${decimals}`);
 }
 
 /** One line of the preview: what a parameter holds now and what would be written. */

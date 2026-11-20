@@ -86,7 +86,10 @@ export function castValue(
         case 'BOOL':
             return castBool(value);
         case 'FLOAT': {
-            const number = clamp(finite(Number.parseFloat(String(value))), description, options);
+            const number = roundFloat(
+                clamp(finite(Number.parseFloat(String(value))), description, options),
+                description,
+            );
             return options.explicitDouble === false ? number : {explicitDouble: number};
         }
         case 'ENUM':
@@ -156,6 +159,71 @@ function castInteger(value: unknown, description: ParameterDescription, options:
 
 function toInteger(value: unknown): number {
     return finite(Number.parseInt(String(value), 10));
+}
+
+/**
+ * The decimals the interface processes print a double with: rfd's XML-RPC answers `0.500000`, and
+ * binrpc decodes every double with `toFixed(6)`. Anything finer is float residue, never a value a
+ * device holds.
+ */
+export const FLOAT_WIRE_DECIMALS = 6;
+
+/**
+ * The decimals a number is written with, residue removed first: `0.1` has one, `1.005` three,
+ * `30` none, and `0.30000000000000004` one, because twelve significant digits are all the
+ * comparison trusts (the WebUI's `toPrecision(12)` guard, OpenCCU-Base 3412ada).
+ */
+export function decimalsOf(value: number): number {
+    if (!Number.isFinite(value)) {
+        return 0;
+    }
+    const text = String(Number.parseFloat(value.toPrecision(12)));
+    const exponent = /e([+-]\d+)$/.exec(text);
+    const mantissa = exponent ? text.slice(0, exponent.index) : text;
+    const point = mantissa.indexOf('.');
+    const fraction = point === -1 ? 0 : mantissa.length - point - 1;
+    return Math.max(0, fraction - (exponent ? Number(exponent[1]) : 0));
+}
+
+/**
+ * The decimals of a parameter's range: the most that `MIN` or `MAX` carry, 0 when neither is a
+ * number. This is what the CCU's WebUI rounds a FLOAT to (`ProofAndSetValue`, OpenCCU-Base
+ * 3412ada) and what the editor derives its step from.
+ */
+export function rangeDecimals(description: ParameterDescription): number {
+    const bounds = [description.MIN, description.MAX].filter((bound): bound is number => typeof bound === 'number');
+    return bounds.reduce((most, bound) => Math.max(most, decimalsOf(bound)), 0);
+}
+
+/**
+ * The decimals a FLOAT is rounded to before it is compared or written: those of its range, but
+ * never fewer than {@link FLOAT_WIRE_DECIMALS}.
+ *
+ * The WebUI rounds to the range alone, and it can, because Tcl sees the bounds as the text the
+ * interface sent (`30.000000`). Here they arrive as numbers, and a bound of `30.0` is `30`: most
+ * FLOATs of the hm-simulator corpus have integer bounds while they hold halves (temperatures
+ * 5..30), twentieths (levels 0..1) or tenths (times 0..111600). Rounding those to the range would
+ * turn 21.5 °C into 22, so the range only ever adds decimals.
+ */
+export function floatDecimals(description: ParameterDescription): number {
+    return Math.max(FLOAT_WIRE_DECIMALS, rangeDecimals(description));
+}
+
+/**
+ * A FLOAT rounded to {@link floatDecimals}: `0.1 + 0.2` is `0.3` again, and `1.0049999999999999`
+ * is `1.005`. The scaled number goes through `toPrecision(15)` first, so a product that lands a
+ * bit below a half (`1.005 * 1000` is `1004.9999999999999`) still rounds the way it was written;
+ * fifteen digits rather than the WebUI's twelve, because a Wired time of 16383000 s scaled by
+ * 10**6 already has fourteen.
+ */
+export function roundFloat(value: number, description: ParameterDescription): number {
+    if (!Number.isFinite(value)) {
+        return value;
+    }
+    const factor = 10 ** floatDecimals(description);
+    const rounded = Math.round(Number.parseFloat((value * factor).toPrecision(15))) / factor;
+    // `-0` is a number no interface wants to see and `Object.is` tells it from 0
+    return rounded === 0 ? 0 : rounded;
 }
 
 /** No `NaN` and no `Infinity` ever leaves this module: both are unencodable in XML-RPC. */

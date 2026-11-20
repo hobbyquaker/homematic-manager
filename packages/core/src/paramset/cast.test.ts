@@ -2,7 +2,7 @@ import {readFileSync} from 'node:fs';
 
 import {describe, expect, it} from 'vitest';
 
-import {castValue, enumEncodingFor} from './cast.js';
+import {castValue, decimalsOf, enumEncodingFor, floatDecimals, rangeDecimals, roundFloat} from './cast.js';
 import type {ParameterDescription, ParamsetDescription} from './description.js';
 
 const fixtures = JSON.parse(
@@ -113,6 +113,54 @@ describe('castValue FLOAT', () => {
     it('does not clamp against a bound that is not a number', () => {
         const bounds = {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 'LOW', MAX: 'HIGH'};
         expect(castValue(99, bounds, {clamp: true})).toEqual({explicitDouble: 99});
+    });
+});
+
+describe('FLOAT precision (task 111)', () => {
+    it('counts the decimals a number is written with, residue removed', () => {
+        expect(decimalsOf(0)).toBe(0);
+        expect(decimalsOf(30)).toBe(0);
+        expect(decimalsOf(30.5)).toBe(1);
+        expect(decimalsOf(-3.5)).toBe(1);
+        expect(decimalsOf(1.005)).toBe(3);
+        expect(decimalsOf(48.72)).toBe(2);
+        expect(decimalsOf(0.1 + 0.2)).toBe(1);
+        expect(decimalsOf(1e-7)).toBe(7);
+        expect(decimalsOf(1.5e-7)).toBe(8);
+        expect(decimalsOf(1e21)).toBe(0);
+        expect(decimalsOf(Number.NaN)).toBe(0);
+    });
+
+    it('takes the decimals of the range from MIN and MAX', () => {
+        expect(rangeDecimals({TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 1.005})).toBe(3);
+        expect(rangeDecimals({TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0.01, MAX: 3680})).toBe(2);
+        expect(rangeDecimals({TYPE: 'FLOAT', OPERATIONS: 3, MIN: 5, MAX: 30})).toBe(0);
+        expect(rangeDecimals({TYPE: 'FLOAT', OPERATIONS: 3, MIN: 'LOW', MAX: 'HIGH'})).toBe(0);
+        expect(rangeDecimals({TYPE: 'FLOAT', OPERATIONS: 3})).toBe(0);
+    });
+
+    it('never rounds coarser than the wire: integer bounds still hold halves and twentieths', () => {
+        // P1_TEMPERATURE_* is 5..30 and holds 17.5; LONG_ON_LEVEL is 0..1 and holds 0.505
+        expect(floatDecimals({TYPE: 'FLOAT', OPERATIONS: 3, MIN: 5, MAX: 30})).toBe(6);
+        expect(castValue('17.5', {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 5, MAX: 30})).toEqual({explicitDouble: 17.5});
+        expect(castValue(0.505, {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 1})).toEqual({explicitDouble: 0.505});
+        expect(floatDecimals({TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 1e-7})).toBe(7);
+    });
+
+    it('rounds float residue away before it reaches the wire', () => {
+        expect(castValue(0.1 + 0.2, FLOAT)).toEqual({explicitDouble: 0.3});
+        expect(castValue(0.07 * 100, FLOAT, {explicitDouble: false})).toBe(7);
+        expect(castValue('1.23456789', FLOAT, {explicitDouble: false})).toBe(1.234568);
+        expect(roundFloat(1.0049999999999999, FLOAT)).toBe(1.005);
+        expect(roundFloat(16383000.5, FLOAT)).toBe(16383000.5);
+        expect(roundFloat(-1e-9, FLOAT)).toBe(0);
+        expect(Object.is(roundFloat(-1e-9, FLOAT), 0)).toBe(true);
+        expect(roundFloat(Number.NaN, FLOAT)).toBeNaN();
+    });
+
+    it('keeps a value that is already exact, and rounds a cast twice the same', () => {
+        expect(castValue(castValue(0.1 + 0.2, FLOAT), FLOAT)).toEqual({explicitDouble: 0.3});
+        expect(castValue('21.5', FLOAT, {explicitDouble: false})).toBe(21.5);
     });
 });
 

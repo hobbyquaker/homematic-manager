@@ -6,6 +6,14 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **Decimal parameters are written without floating-point residue**, and a value that was not changed is no longer
+  sent because it differs from the device's in the fifteenth decimal. The number fields step by the last decimal of
+  the parameter's range (0.01 W where the range is 0.01–3680 W) instead of 0.1 everywhere.
+
 ## [3.4.2] — 2026-10-30
 
 ### Added

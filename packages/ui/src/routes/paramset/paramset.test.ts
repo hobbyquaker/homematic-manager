@@ -7,6 +7,7 @@ import {
     buildPreview,
     buildSuppressPreview,
     fieldKind,
+    floatStep,
     formFields,
     displayValue,
     linkWritePreview,
@@ -57,6 +58,22 @@ describe('formFields', () => {
         expect(level.max).toBe(100);
 
         expect(fields[3]!.writable).toBe(false);
+    });
+
+    it('steps a FLOAT by the last decimal of its range, 0.1 at the coarsest (task 111)', () => {
+        const fields = formFields({
+            ...description,
+            POWER: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0.01, MAX: 3680, UNIT: 'W'},
+            WP_LEVEL: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 1.005},
+            COUNT: {TYPE: 'INTEGER', OPERATIONS: 3, MIN: 0, MAX: 10},
+        });
+        const step = (name: string): number | undefined => fields.find((field) => field.name === name)?.step;
+        expect(step('ON_TIME')).toBe(0.1);
+        expect(step('LEVEL')).toBe(0.1);
+        expect(step('POWER')).toBe(0.01);
+        expect(step('WP_LEVEL')).toBe(0.001);
+        expect(step('COUNT')).toBe(1);
+        expect(floatStep(undefined, undefined)).toBe(0.1);
     });
 
     it('follows the metadata order, visibility and presets when there is a MasterView', () => {

@@ -357,6 +357,39 @@ proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
         ]);
     });
 
+    it('takes a combo box of $param as the control of that parameter (task 116)', () => {
+        // the shape of getHeatingClimateControlTransceiver since OpenCCU-Base ff52021
+        const dialogs = String.raw`
+proc getHeating {chn p descr} {
+  set param TEMPERATURE_WINDOW_OPEN
+  if { [info exists ps($param)] == 1  } {
+    array_clear options
+    for {set val 5.0} {$val <= 30.0} {set val [expr $val + 0.5]} {
+      set options($val) "$val &#176;C"
+    }
+    append html "<tr><td>\${stringTableTemperatureFallWindowOpen}</td>"
+    append html "<td>[get_ComboBox options $param separate_$CHANNEL\_$prn ps $param]</td>"
+  }
+  set param TEMPERATURE_MINIMUM
+  append html "<td>[get_ComboBox options $param tmp_$CHANNEL\_$prn ps $param onchange=x]</span> <span class='hidden'>[getTextField $param $ps($param) $chn $prn]</span></td>"
+}
+`;
+        const form = String.raw`
+proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {
+  append HTML_PARAMS(separate_1) "[getHeating $chn ps psDescr]"
+}
+`;
+        expect(extractMasterControls(htmlParamsBody(form) ?? '', parseProcs(dialogs))).toEqual([
+            {
+                kind: 'param',
+                param: 'TEMPERATURE_WINDOW_OPEN',
+                labelKey: 'stringTableTemperatureFallWindowOpen',
+                requires: ['TEMPERATURE_WINDOW_OPEN'],
+            },
+            {kind: 'param', param: 'TEMPERATURE_MINIMUM'},
+        ]);
+    });
+
     it('reads a BidCos form keyed by paramset id: the kind before the parameter, and getComboBox (task 64)', () => {
         const bidcos = String.raw`
 proc set_htmlParams {iface address pps pps_descr special_input_id peer_type} {

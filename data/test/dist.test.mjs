@@ -137,10 +137,10 @@ describe('manifest', () => {
         }
     });
 
-    it('pins openccu-data 2026.7.2', () => {
+    it('pins openccu-data 2026.9.1', () => {
         const openccu = manifest.sources.filter((source) => source.name.startsWith('openccu-data/'));
         expect(openccu).toHaveLength(4);
-        for (const source of openccu) expect(source.version).toBe('2026.7.2');
+        for (const source of openccu) expect(source.version).toBe('2026.9.1');
     });
 });
 
@@ -263,6 +263,10 @@ describe('the MASTER forms by paramset id (task 64)', () => {
         expect(byId.cc_tc_ch_master.controls.map((control) => control.param)).toContain('DECALCIFICATION_DAY');
         expect(byId.cc_rt_dev_master.controls.length).toBeGreaterThan(0);
         expect(byId['hmip-etrv_1_master'].controls.length).toBeGreaterThan(0);
+        // task 116: the rows the WebUI draws with `get_ComboBox options $param` are in the forms
+        expect(byId['hmip-etrv_1_master'].controls.map((control) => control.param)).toEqual(
+            expect.arrayContaining(['TEMPERATURE_OFFSET', 'BOOST_POSITION', 'VALVE_MAXIMUM_POSITION']),
+        );
         // the internal keys: the channel's own button as a link profile of its receiver type
         expect(byId.dimmer_ch_master.internalKey).toEqual({receiverType: 'DIMMER'});
         expect(byId.switch_ch_master.internalKey).toEqual({receiverType: 'SWITCH'});
@@ -272,9 +276,10 @@ describe('the MASTER forms by paramset id (task 64)', () => {
 });
 
 describe('master metadata, presets and cross validations', () => {
-    // 54 channel types from openccu-data, and 9 more that only the CCU's MASTER forms cover (task 63)
-    it('matches MasterMetadata for all 63 channel types', () => {
-        expect(Object.keys(masterMetadata)).toHaveLength(63);
+    // 54 channel types from openccu-data, and 10 more that only the CCU's MASTER forms cover (task 63;
+    // PERMISSION_TRANSCEIVER since task 116 reads `get_ComboBox options $param`)
+    it('matches MasterMetadata for all 64 channel types', () => {
+        expect(Object.keys(masterMetadata)).toHaveLength(64);
         for (const [channelType, entry] of Object.entries(masterMetadata)) {
             expect(entry.channelType).toBe(channelType);
             for (const key of Object.keys(entry)) {

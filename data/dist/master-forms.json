@@ -1,7 +1,18 @@
 {
   "$comment": "The CCU MASTER forms keyed by paramset id (task 64), extracted by scripts/easymode-controls.mjs from the WebUI easymode TCL; HMSL, see NOTICE.md.",
-  "source": "OpenCCU 3.89.8.20260719 (/www/config/easymodes, /www/webui/js/lang)",
+  "source": "OpenCCU-Base 3.89.13 (b10f75e)",
   "byParamsetId": {
+    "alpha-ip-rbga_1_master": {
+      "controls": [
+        {"kind": "param", "param": "TEMPERATURE_MINIMUM"},
+        {"kind": "param", "param": "TEMPERATURE_MAXIMUM"},
+        {
+          "kind": "param",
+          "param": "TEMPERATURE_OFFSET",
+          "label": {"de": "Temperatur-Offset", "en": "Temperature offset"}
+        }
+      ]
+    },
     "blind_ch_master": {"internalKey": {"receiverType": "BLIND"}},
     "cc_rt_dev_master": {
       "controls": [
@@ -26,18 +37,31 @@
         {"kind": "param", "param": "MIN_MAX_VALUE_NOT_RELEVANT_FOR_MANU_MODE"},
         {"kind": "param", "param": "TEMPERATUREFALL_VALUE"},
         {"kind": "param", "param": "TEMPERATUREFALL_WINDOW_OPEN"},
+        {"kind": "param", "param": "TEMPERATUREFALL_MODUS"},
+        {"kind": "param", "param": "TEMPERATUREFALL_WINDOW_OPEN_TIME_PERIOD"},
         {
           "kind": "param",
-          "param": "DECALCIFICATION_TIME",
+          "param": "DECALCIFICATION_WEEKDAY",
           "label": {"de": "Entkalkungstag", "en": "Routine descaling - day"}
         },
+        {"kind": "param", "param": "DECALCIFICATION_TIME"},
+        {
+          "kind": "param",
+          "param": "TEMPERATURE_OFFSET",
+          "label": {"de": "Temperatur-Offset", "en": "Temperature offset"}
+        },
+        {"kind": "param", "param": "BOOST_TIME_PERIOD"},
         {"kind": "param", "param": "BOOST_POSITION"},
         {"kind": "param", "param": "BOOST_AFTER_WINDOW_OPEN"},
         {"kind": "param", "param": "SHOW_WEEKDAY"},
+        {"kind": "param", "param": "DISPLAY_INFORMATION"},
         {"kind": "param", "param": "DAYLIGHT_SAVING_TIME"},
         {"kind": "param", "param": "VALVE_OFFSET"},
         {"kind": "param", "param": "VALVE_ERROR_RUN_POSITION"},
-        {"kind": "param", "param": "VALVE_MAXIMUM_POSITION"}
+        {"kind": "param", "param": "VALVE_MAXIMUM_POSITION"},
+        {"kind": "param", "param": "ADAPTIVE_REGULATION"},
+        {"kind": "param", "param": "MANU_MODE_PRIORITIZATION"},
+        {"kind": "param", "param": "PARTY_MODE_PRIORITIZATION"}
       ]
     },
     "cc_tc_ch_master": {
@@ -277,14 +301,19 @@
         {"kind": "param", "param": "TEMPERATURE_MAXIMUM"},
         {"kind": "param", "param": "TEMPERATUREFALL_VALUE"},
         {"kind": "param", "param": "TEMPERATUREFALL_WINDOW_OPEN"},
+        {"kind": "param", "param": "TEMPERATUREFALL_MODUS"},
+        {"kind": "param", "param": "TEMPERATUREFALL_WINDOW_OPEN_TIME_PERIOD"},
         {
           "kind": "param",
-          "param": "DECALCIFICATION_TIME",
+          "param": "DECALCIFICATION_WEEKDAY",
           "label": {"de": "Entkalkungstag", "en": "Routine descaling - day"}
         },
+        {"kind": "param", "param": "DECALCIFICATION_TIME"},
+        {"kind": "param", "param": "BOOST_TIME_PERIOD"},
         {"kind": "param", "param": "BOOST_POSITION"},
         {"kind": "param", "param": "BOOST_AFTER_WINDOW_OPEN"},
         {"kind": "param", "param": "SHOW_WEEKDAY"},
+        {"kind": "param", "param": "DISPLAY_INFORMATION"},
         {"kind": "param", "param": "DAYLIGHT_SAVING_TIME"}
       ]
     },
@@ -295,11 +324,34 @@
           "param": "BUTTON_RESPONSE_WITHOUT_BACKLIGHT",
           "requires": ["BUTTON_RESPONSE_WITHOUT_BACKLIGHT"]
         },
+        {"kind": "param", "param": "TEMPERATURE_MINIMUM"},
+        {"kind": "param", "param": "TEMPERATURE_MAXIMUM"},
         {
           "kind": "param",
-          "param": "BOOST_AFTER_WINDOW_OPEN",
-          "requires": ["BOOST_AFTER_WINDOW_OPEN"],
+          "param": "TEMPERATURE_OFFSET",
+          "label": {"de": "Temperatur-Offset", "en": "Temperature offset"}
+        },
+        {"kind": "param", "param": "BOOST_TIME_PERIOD"},
+        {"kind": "param", "param": "BOOST_POSITION"},
+        {"kind": "param", "param": "DECALCIFICATION_TIME", "requires": ["DECALCIFICATION_WEEKDAY"]},
+        {
+          "kind": "param",
+          "param": "VALVE_ERROR_RUN_POSITION",
+          "requires": ["VALVE_ERROR_RUN_POSITION"],
+          "label": {"de": "Ventil in Fehlerposition", "en": "Valve in error position"}
+        },
+        {
+          "kind": "param",
+          "param": "VALVE_MAXIMUM_POSITION",
+          "requires": ["VALVE_MAXIMUM_POSITION"],
           "label": {"de": "maximale Ventilöffnungsposition", "en": "maximum valve opening position"}
+        },
+        {"kind": "param", "param": "BOOST_AFTER_WINDOW_OPEN", "requires": ["BOOST_AFTER_WINDOW_OPEN"]},
+        {
+          "kind": "param",
+          "param": "CHANNEL_OPERATION_MODE",
+          "requires": ["CHANNEL_OPERATION_MODE"],
+          "label": {"de": "Modus", "en": "Mode"}
         },
         {"kind": "param", "param": "ACOUSTIC_ALARM_SIGNAL", "requires": ["ACOUSTIC_ALARM_SIGNAL"]}
       ]
@@ -335,6 +387,12 @@
         },
         {"kind": "param", "param": "COOLING_EMERGENCY_PWM_SIGNAL", "requires": ["COOLING_EMERGENCY_PWM_SIGNAL"]},
         {"kind": "param", "param": "HEATING_EMERGENCY_PWM_SIGNAL", "requires": ["HEATING_EMERGENCY_PWM_SIGNAL"]},
+        {
+          "kind": "param",
+          "param": "FROST_PROTECTION_TEMPERATURE",
+          "requires": ["FROST_PROTECTION_TEMPERATURE"],
+          "label": {"de": "Frostschutztemperatur", "en": "Frost protection temperature"}
+        },
         {
           "kind": "param",
           "param": "HEATING_LOAD_TYPE",
@@ -380,7 +438,8 @@
           "param": "ON_TIME_FACTOR",
           "requires": ["SWITCHING_INTERVAL_BASE"],
           "label": {"de": "Wert Einschaltdauer", "en": "Value switch-on time"}
-        }
+        },
+        {"kind": "param", "param": "DECALCIFICATION_TIME", "requires": ["DECALCIFICATION_WEEKDAY"]}
       ]
     },
     "hmip-fal230-c10_11_master": {
@@ -458,6 +517,12 @@
         {"kind": "param", "param": "HEATING_EMERGENCY_PWM_SIGNAL", "requires": ["HEATING_EMERGENCY_PWM_SIGNAL"]},
         {
           "kind": "param",
+          "param": "FROST_PROTECTION_TEMPERATURE",
+          "requires": ["FROST_PROTECTION_TEMPERATURE"],
+          "label": {"de": "Frostschutztemperatur", "en": "Frost protection temperature"}
+        },
+        {
+          "kind": "param",
           "param": "HEATING_LOAD_TYPE",
           "option": "HEATING_LOAD_TYPE",
           "requires": ["HEATING_LOAD_TYPE"]
@@ -501,7 +566,8 @@
           "param": "ON_TIME_FACTOR",
           "requires": ["SWITCHING_INTERVAL_BASE"],
           "label": {"de": "Wert Einschaltdauer", "en": "Value switch-on time"}
-        }
+        },
+        {"kind": "param", "param": "DECALCIFICATION_TIME", "requires": ["DECALCIFICATION_WEEKDAY"]}
       ]
     },
     "hmip-fal230-c6_7_master": {
@@ -579,6 +645,12 @@
         {"kind": "param", "param": "HEATING_EMERGENCY_PWM_SIGNAL", "requires": ["HEATING_EMERGENCY_PWM_SIGNAL"]},
         {
           "kind": "param",
+          "param": "FROST_PROTECTION_TEMPERATURE",
+          "requires": ["FROST_PROTECTION_TEMPERATURE"],
+          "label": {"de": "Frostschutztemperatur", "en": "Frost protection temperature"}
+        },
+        {
+          "kind": "param",
           "param": "HEATING_LOAD_TYPE",
           "option": "HEATING_LOAD_TYPE",
           "requires": ["HEATING_LOAD_TYPE"]
@@ -622,7 +694,8 @@
           "param": "ON_TIME_FACTOR",
           "requires": ["SWITCHING_INTERVAL_BASE"],
           "label": {"de": "Wert Einschaltdauer", "en": "Value switch-on time"}
-        }
+        },
+        {"kind": "param", "param": "DECALCIFICATION_TIME", "requires": ["DECALCIFICATION_WEEKDAY"]}
       ]
     },
     "hmip-fal24-c10_11_master": {
@@ -700,6 +773,12 @@
         {"kind": "param", "param": "HEATING_EMERGENCY_PWM_SIGNAL", "requires": ["HEATING_EMERGENCY_PWM_SIGNAL"]},
         {
           "kind": "param",
+          "param": "FROST_PROTECTION_TEMPERATURE",
+          "requires": ["FROST_PROTECTION_TEMPERATURE"],
+          "label": {"de": "Frostschutztemperatur", "en": "Frost protection temperature"}
+        },
+        {
+          "kind": "param",
           "param": "HEATING_LOAD_TYPE",
           "option": "HEATING_LOAD_TYPE",
           "requires": ["HEATING_LOAD_TYPE"]
@@ -743,7 +822,8 @@
           "param": "ON_TIME_FACTOR",
           "requires": ["SWITCHING_INTERVAL_BASE"],
           "label": {"de": "Wert Einschaltdauer", "en": "Value switch-on time"}
-        }
+        },
+        {"kind": "param", "param": "DECALCIFICATION_TIME", "requires": ["DECALCIFICATION_WEEKDAY"]}
       ]
     },
     "hmip-fal24-c6_7_master": {
@@ -821,6 +901,12 @@
         {"kind": "param", "param": "HEATING_EMERGENCY_PWM_SIGNAL", "requires": ["HEATING_EMERGENCY_PWM_SIGNAL"]},
         {
           "kind": "param",
+          "param": "FROST_PROTECTION_TEMPERATURE",
+          "requires": ["FROST_PROTECTION_TEMPERATURE"],
+          "label": {"de": "Frostschutztemperatur", "en": "Frost protection temperature"}
+        },
+        {
+          "kind": "param",
           "param": "HEATING_LOAD_TYPE",
           "option": "HEATING_LOAD_TYPE",
           "requires": ["HEATING_LOAD_TYPE"]
@@ -864,7 +950,8 @@
           "param": "ON_TIME_FACTOR",
           "requires": ["SWITCHING_INTERVAL_BASE"],
           "label": {"de": "Wert Einschaltdauer", "en": "Value switch-on time"}
-        }
+        },
+        {"kind": "param", "param": "DECALCIFICATION_TIME", "requires": ["DECALCIFICATION_WEEKDAY"]}
       ]
     },
     "hmip-falmot-c8_0_master": {
@@ -900,6 +987,12 @@
         {"kind": "param", "param": "HEATING_EMERGENCY_PWM_SIGNAL", "requires": ["HEATING_EMERGENCY_PWM_SIGNAL"]},
         {
           "kind": "param",
+          "param": "FROST_PROTECTION_TEMPERATURE",
+          "requires": ["FROST_PROTECTION_TEMPERATURE"],
+          "label": {"de": "Frostschutztemperatur", "en": "Frost protection temperature"}
+        },
+        {
+          "kind": "param",
           "param": "HEATING_LOAD_TYPE",
           "option": "HEATING_LOAD_TYPE",
           "requires": ["HEATING_LOAD_TYPE"]
@@ -943,7 +1036,8 @@
           "param": "ON_TIME_FACTOR",
           "requires": ["SWITCHING_INTERVAL_BASE"],
           "label": {"de": "Wert Einschaltdauer", "en": "Value switch-on time"}
-        }
+        },
+        {"kind": "param", "param": "DECALCIFICATION_TIME", "requires": ["DECALCIFICATION_WEEKDAY"]}
       ]
     },
     "hmip-pcbs-bat_1_master": {
@@ -1292,6 +1386,13 @@
         },
         {
           "kind": "param",
+          "param": "DEVICE_SENSOR_SENSITIVITY",
+          "option": "RAW_0_100Percent",
+          "requires": ["DEVICE_SENSOR_SENSITIVITY"],
+          "label": {"de": "Sensor-Empfindlichkeit", "en": "Sensor sensitivity"}
+        },
+        {
+          "kind": "param",
           "param": "DISPLAY_CONTRAST",
           "requires": ["DISPLAY_CONTRAST"],
           "label": {"de": "Displaykontrast", "en": "Display contrast"}
@@ -1335,6 +1436,12 @@
         },
         {
           "kind": "param",
+          "param": "PERMANENT_FULL_RX",
+          "requires": ["PERMANENT_FULL_RX"],
+          "label": {"de": "Spannungsversorgung", "en": "Power supply"}
+        },
+        {
+          "kind": "param",
           "param": "LONGITUDE",
           "requires": ["LONGITUDE"],
           "label": {"de": "Wohnort", "en": "Place of residence"}
@@ -1357,6 +1464,24 @@
           "option": "NORMALLY_CLOSE_OPEN",
           "requires": ["SABOTAGE_CONTACT_TYPE"],
           "label": {"de": "Typ des Sabotagekontaktes", "en": "Type of sabotage contact"}
+        },
+        {
+          "kind": "param",
+          "param": "BLOCKING_TEMPORARY",
+          "requires": ["BLOCKING_TEMPORARY"],
+          "label": {
+            "de": "Anzahl der fehlerhaften Eingabenfür temporäres Sperren",
+            "en": "Number of faulty entries for temporary locking"
+          }
+        },
+        {
+          "kind": "param",
+          "param": "BLOCKING_PERMANENT",
+          "requires": ["BLOCKING_PERMANENT"],
+          "label": {
+            "de": "Anzahl der weiteren fehlerhaften Eingabenfür vollständiges Sperren",
+            "en": "Number of further faulty entries for complete locking"
+          }
         }
       ]
     },
@@ -1389,8 +1514,11 @@
           "requires": ["ENABLE_ROUTING"],
           "label": {"de": "Routing aktiv", "en": "Routing active"}
         },
+        {"kind": "param", "param": "SCREEN_LAYOUT_PAGE_NUMBER_11"},
+        {"kind": "param", "param": "LANGUAGE", "requires": ["LANGUAGE"]},
         {"kind": "param", "param": "DETECTION_RANGE", "requires": ["DETECTION_RANGE"]},
-        {"kind": "param", "param": "BACKLIGHT_OFFSET", "requires": ["BACKLIGHT_OFFSET"]}
+        {"kind": "param", "param": "BACKLIGHT_OFFSET", "requires": ["BACKLIGHT_OFFSET"]},
+        {"kind": "param", "param": "DISPLAY_ON_TIME", "requires": ["DISPLAY_ON_TIME"]}
       ]
     },
     "hmip-wgd_0_master": {
@@ -1422,17 +1550,27 @@
           "requires": ["ENABLE_ROUTING"],
           "label": {"de": "Routing aktiv", "en": "Routing active"}
         },
+        {"kind": "param", "param": "SCREEN_LAYOUT_PAGE_NUMBER_11"},
+        {"kind": "param", "param": "LANGUAGE", "requires": ["LANGUAGE"]},
         {"kind": "param", "param": "DETECTION_RANGE", "requires": ["DETECTION_RANGE"]},
-        {"kind": "param", "param": "BACKLIGHT_OFFSET", "requires": ["BACKLIGHT_OFFSET"]}
+        {"kind": "param", "param": "BACKLIGHT_OFFSET", "requires": ["BACKLIGHT_OFFSET"]},
+        {"kind": "param", "param": "DISPLAY_ON_TIME", "requires": ["DISPLAY_ON_TIME"]}
       ]
     },
     "hmip-wth_1_master": {
       "controls": [
+        {"kind": "param", "param": "SHOW_SET_TEMPERATURE", "requires": ["SHOW_SET_TEMPERATURE"]},
+        {"kind": "param", "param": "SHOW_HUMIDITY", "requires": ["SHOW_SET_TEMPERATURE", "SHOW_HUMIDITY"]},
+        {
+          "kind": "param",
+          "param": "CLIMATE_CONTROL_DISPLAY",
+          "requires": ["CLIMATE_CONTROL_DISPLAY"],
+          "label": {"de": "Anzeige im Display", "en": "Information in display"}
+        },
         {
           "kind": "param",
           "param": "BUTTON_RESPONSE_WITHOUT_BACKLIGHT",
-          "requires": ["BUTTON_RESPONSE_WITHOUT_BACKLIGHT"],
-          "label": {"de": "Anzeige im Display", "en": "Information in display"}
+          "requires": ["BUTTON_RESPONSE_WITHOUT_BACKLIGHT"]
         },
         {"kind": "param", "param": "TEMPERATURE_LOWERING_COOLING", "requires": ["TEMPERATURE_LOWERING_COOLING"]},
         {"kind": "param", "param": "TEMPERATURE_LOWERING", "requires": ["TEMPERATURE_LOWERING_COOLING"]},
@@ -1445,13 +1583,43 @@
         },
         {"kind": "param", "param": "OPTIMUM_START_STOP", "requires": ["OPTIMUM_START_STOP"]},
         {"kind": "param", "param": "DURATION_5MIN", "requires": ["DURATION_5MIN"]},
+        {"kind": "param", "param": "TEMPERATURE_WINDOW_OPEN", "requires": ["TEMPERATURE_WINDOW_OPEN"]},
+        {"kind": "param", "param": "TEMPERATURE_WINDOW_OPEN_COOLING", "requires": ["TEMPERATURE_WINDOW_OPEN_COOLING"]},
+        {"kind": "param", "param": "TEMPERATUREFALL_MODUS", "requires": ["TEMPERATUREFALL_MODUS"]},
         {"kind": "param", "param": "TEMPERATUREFALL_VALUE", "requires": ["TEMPERATUREFALL_VALUE"]},
         {
           "kind": "param",
           "param": "TEMPERATUREFALL_WINDOW_OPEN_TIME_PERIOD",
           "requires": ["TEMPERATUREFALL_WINDOW_OPEN_TIME_PERIOD"]
         },
+        {"kind": "param", "param": "VALVE_ERROR_RUN_POSITION", "requires": ["VALVE_ERROR_RUN_POSITION"]},
+        {
+          "kind": "param",
+          "param": "VALVE_MAXIMUM_POSITION",
+          "requires": ["VALVE_MAXIMUM_POSITION"],
+          "label": {"de": "maximale Ventilöffnungsposition", "en": "maximum valve opening position"}
+        },
+        {
+          "kind": "param",
+          "param": "TEMPERATURE_OFFSET",
+          "requires": ["TEMPERATURE_OFFSET"],
+          "label": {"de": "Temperatur-Offset", "en": "Temperature offset"}
+        },
+        {"kind": "param", "param": "VALVE_OFFSET", "requires": ["VALVE_OFFSET"]},
+        {
+          "kind": "param",
+          "param": "DECALCIFICATION_TIME",
+          "requires": ["DECALCIFICATION_WEEKDAY", "DECALCIFICATION_TIME"]
+        },
+        {"kind": "param", "param": "BOOST_TIME_PERIOD"},
+        {"kind": "param", "param": "BOOST_POSITION", "requires": ["BOOST_POSITION"]},
         {"kind": "param", "param": "BOOST_AFTER_WINDOW_OPEN", "requires": ["BOOST_AFTER_WINDOW_OPEN"]},
+        {
+          "kind": "param",
+          "param": "CHANNEL_OPERATION_MODE",
+          "requires": ["CHANNEL_OPERATION_MODE"],
+          "label": {"de": "Betriebsmodus", "en": "Operating mode"}
+        },
         {"kind": "param", "param": "ACOUSTIC_ALARM_SIGNAL", "requires": ["ACOUSTIC_ALARM_SIGNAL"]}
       ]
     },
@@ -1486,6 +1654,12 @@
         },
         {"kind": "param", "param": "COOLING_EMERGENCY_PWM_SIGNAL", "requires": ["COOLING_EMERGENCY_PWM_SIGNAL"]},
         {"kind": "param", "param": "HEATING_EMERGENCY_PWM_SIGNAL", "requires": ["HEATING_EMERGENCY_PWM_SIGNAL"]},
+        {
+          "kind": "param",
+          "param": "FROST_PROTECTION_TEMPERATURE",
+          "requires": ["FROST_PROTECTION_TEMPERATURE"],
+          "label": {"de": "Frostschutztemperatur", "en": "Frost protection temperature"}
+        },
         {
           "kind": "param",
           "param": "HEATING_LOAD_TYPE",
@@ -1531,7 +1705,8 @@
           "param": "ON_TIME_FACTOR",
           "requires": ["SWITCHING_INTERVAL_BASE"],
           "label": {"de": "Wert Einschaltdauer", "en": "Value switch-on time"}
-        }
+        },
+        {"kind": "param", "param": "DECALCIFICATION_TIME", "requires": ["DECALCIFICATION_WEEKDAY"]}
       ]
     },
     "hmipw-fal230-c10_11_master": {
@@ -1609,6 +1784,12 @@
         {"kind": "param", "param": "HEATING_EMERGENCY_PWM_SIGNAL", "requires": ["HEATING_EMERGENCY_PWM_SIGNAL"]},
         {
           "kind": "param",
+          "param": "FROST_PROTECTION_TEMPERATURE",
+          "requires": ["FROST_PROTECTION_TEMPERATURE"],
+          "label": {"de": "Frostschutztemperatur", "en": "Frost protection temperature"}
+        },
+        {
+          "kind": "param",
           "param": "HEATING_LOAD_TYPE",
           "option": "HEATING_LOAD_TYPE",
           "requires": ["HEATING_LOAD_TYPE"]
@@ -1652,7 +1833,8 @@
           "param": "ON_TIME_FACTOR",
           "requires": ["SWITCHING_INTERVAL_BASE"],
           "label": {"de": "Wert Einschaltdauer", "en": "Value switch-on time"}
-        }
+        },
+        {"kind": "param", "param": "DECALCIFICATION_TIME", "requires": ["DECALCIFICATION_WEEKDAY"]}
       ]
     },
     "hmipw-fal230-c6_7_master": {
@@ -1730,6 +1912,12 @@
         {"kind": "param", "param": "HEATING_EMERGENCY_PWM_SIGNAL", "requires": ["HEATING_EMERGENCY_PWM_SIGNAL"]},
         {
           "kind": "param",
+          "param": "FROST_PROTECTION_TEMPERATURE",
+          "requires": ["FROST_PROTECTION_TEMPERATURE"],
+          "label": {"de": "Frostschutztemperatur", "en": "Frost protection temperature"}
+        },
+        {
+          "kind": "param",
           "param": "HEATING_LOAD_TYPE",
           "option": "HEATING_LOAD_TYPE",
           "requires": ["HEATING_LOAD_TYPE"]
@@ -1773,7 +1961,8 @@
           "param": "ON_TIME_FACTOR",
           "requires": ["SWITCHING_INTERVAL_BASE"],
           "label": {"de": "Wert Einschaltdauer", "en": "Value switch-on time"}
-        }
+        },
+        {"kind": "param", "param": "DECALCIFICATION_TIME", "requires": ["DECALCIFICATION_WEEKDAY"]}
       ]
     },
     "hmipw-fal24-c10_11_master": {
@@ -1851,6 +2040,12 @@
         {"kind": "param", "param": "HEATING_EMERGENCY_PWM_SIGNAL", "requires": ["HEATING_EMERGENCY_PWM_SIGNAL"]},
         {
           "kind": "param",
+          "param": "FROST_PROTECTION_TEMPERATURE",
+          "requires": ["FROST_PROTECTION_TEMPERATURE"],
+          "label": {"de": "Frostschutztemperatur", "en": "Frost protection temperature"}
+        },
+        {
+          "kind": "param",
           "param": "HEATING_LOAD_TYPE",
           "option": "HEATING_LOAD_TYPE",
           "requires": ["HEATING_LOAD_TYPE"]
@@ -1894,7 +2089,8 @@
           "param": "ON_TIME_FACTOR",
           "requires": ["SWITCHING_INTERVAL_BASE"],
           "label": {"de": "Wert Einschaltdauer", "en": "Value switch-on time"}
-        }
+        },
+        {"kind": "param", "param": "DECALCIFICATION_TIME", "requires": ["DECALCIFICATION_WEEKDAY"]}
       ]
     },
     "hmipw-fal24-c6_7_master": {
@@ -1972,6 +2168,12 @@
         {"kind": "param", "param": "HEATING_EMERGENCY_PWM_SIGNAL", "requires": ["HEATING_EMERGENCY_PWM_SIGNAL"]},
         {
           "kind": "param",
+          "param": "FROST_PROTECTION_TEMPERATURE",
+          "requires": ["FROST_PROTECTION_TEMPERATURE"],
+          "label": {"de": "Frostschutztemperatur", "en": "Frost protection temperature"}
+        },
+        {
+          "kind": "param",
           "param": "HEATING_LOAD_TYPE",
           "option": "HEATING_LOAD_TYPE",
           "requires": ["HEATING_LOAD_TYPE"]
@@ -2015,7 +2217,8 @@
           "param": "ON_TIME_FACTOR",
           "requires": ["SWITCHING_INTERVAL_BASE"],
           "label": {"de": "Wert Einschaltdauer", "en": "Value switch-on time"}
-        }
+        },
+        {"kind": "param", "param": "DECALCIFICATION_TIME", "requires": ["DECALCIFICATION_WEEKDAY"]}
       ]
     },
     "hmipw-wgd-pl_0_master": {
@@ -2047,8 +2250,11 @@
           "requires": ["ENABLE_ROUTING"],
           "label": {"de": "Routing aktiv", "en": "Routing active"}
         },
+        {"kind": "param", "param": "SCREEN_LAYOUT_PAGE_NUMBER_10"},
+        {"kind": "param", "param": "LANGUAGE", "requires": ["LANGUAGE"]},
         {"kind": "param", "param": "DETECTION_RANGE", "requires": ["DETECTION_RANGE"]},
-        {"kind": "param", "param": "BACKLIGHT_OFFSET", "requires": ["BACKLIGHT_OFFSET"]}
+        {"kind": "param", "param": "BACKLIGHT_OFFSET", "requires": ["BACKLIGHT_OFFSET"]},
+        {"kind": "param", "param": "DISPLAY_ON_TIME", "requires": ["DISPLAY_ON_TIME"]}
       ]
     },
     "hmipw-wgd_0_master": {
@@ -2080,8 +2286,11 @@
           "requires": ["ENABLE_ROUTING"],
           "label": {"de": "Routing aktiv", "en": "Routing active"}
         },
+        {"kind": "param", "param": "SCREEN_LAYOUT_PAGE_NUMBER_10"},
+        {"kind": "param", "param": "LANGUAGE", "requires": ["LANGUAGE"]},
         {"kind": "param", "param": "DETECTION_RANGE", "requires": ["DETECTION_RANGE"]},
-        {"kind": "param", "param": "BACKLIGHT_OFFSET", "requires": ["BACKLIGHT_OFFSET"]}
+        {"kind": "param", "param": "BACKLIGHT_OFFSET", "requires": ["BACKLIGHT_OFFSET"]},
+        {"kind": "param", "param": "DISPLAY_ON_TIME", "requires": ["DISPLAY_ON_TIME"]}
       ]
     },
     "jalousie_ch_master": {"internalKey": {"receiverType": "JALOUSIE"}},
@@ -2205,10 +2414,22 @@
         {"kind": "param", "param": "TEMPERATURE_MINIMUM"},
         {"kind": "param", "param": "TEMPERATURE_MAXIMUM"},
         {"kind": "param", "param": "MIN_MAX_VALUE_NOT_RELEVANT_FOR_MANU_MODE"},
+        {
+          "kind": "param",
+          "param": "TEMPERATURE_OFFSET",
+          "label": {"de": "Temperatur-Offset", "en": "Temperature offset"}
+        },
+        {"kind": "param", "param": "HEATING_COOLING"},
+        {"kind": "param", "param": "BOOST_TIME_PERIOD"},
         {"kind": "param", "param": "BOOST_AFTER_WINDOW_OPEN"},
         {"kind": "param", "param": "SHOW_WEEKDAY"},
+        {"kind": "param", "param": "DISPLAY_INFORMATION"},
+        {"kind": "param", "param": "SHOW_SET_TEMPERATUR"},
+        {"kind": "param", "param": "SHOW_HUMIDITY"},
         {"kind": "param", "param": "DAYLIGHT_SAVING_TIME"},
-        {"kind": "param", "param": "SENDE_WEATHER_DATA"}
+        {"kind": "param", "param": "SENDE_WEATHER_DATA"},
+        {"kind": "param", "param": "MANU_MODE_PRIORITIZATION"},
+        {"kind": "param", "param": "PARTY_MODE_PRIORITIZATION"}
       ]
     }
   }

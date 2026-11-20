@@ -1,35 +1,35 @@
 {
-  "generatedAt": "2026-09-30T20:15:59.038Z",
+  "generatedAt": "2026-11-20T12:21:09.887Z",
   "sources": [
     {
       "name": "openccu-data/easymode_extract",
-      "version": "2026.7.2",
-      "url": "https://raw.githubusercontent.com/SukramJ/openccu-data/2026.7.2/openccu_data/data/easymode_extract.json.gz",
+      "version": "2026.9.1",
+      "url": "https://raw.githubusercontent.com/SukramJ/openccu-data/2026.9.1/openccu_data/data/easymode_extract.json.gz",
       "sha256": "b5ccdee52e25e482c71c878ac03e68b37585c0352d31e3725153b9c21caf7c42"
     },
     {
       "name": "openccu-data/translation_extract",
-      "version": "2026.7.2",
-      "url": "https://raw.githubusercontent.com/SukramJ/openccu-data/2026.7.2/openccu_data/data/translation_extract.json.gz",
+      "version": "2026.9.1",
+      "url": "https://raw.githubusercontent.com/SukramJ/openccu-data/2026.9.1/openccu_data/data/translation_extract.json.gz",
       "sha256": "a4bc8a5c9c96cad5cbd8aa184afe37ecffa272119f2ec0d5d452e26c9edd39cb"
     },
     {
       "name": "openccu-data/profiles",
-      "version": "2026.7.2",
-      "url": "https://raw.githubusercontent.com/SukramJ/openccu-data/2026.7.2/openccu_data/data/profiles/",
+      "version": "2026.9.1",
+      "url": "https://raw.githubusercontent.com/SukramJ/openccu-data/2026.9.1/openccu_data/data/profiles/",
       "sha256": "76b1b639791e41d418c9c795fc6110d01f1ab9fc774c1fd4e6cdc43896dc79d8"
     },
     {
       "name": "openccu-data/translation_custom",
-      "version": "2026.7.2",
-      "url": "https://raw.githubusercontent.com/SukramJ/openccu-data/2026.7.2/openccu_data/data/translation_custom/",
-      "sha256": "7f675ef1842bd5838e5ea97ce29e2f4284400b70e55bf66458abd7a7854d4274"
+      "version": "2026.9.1",
+      "url": "https://raw.githubusercontent.com/SukramJ/openccu-data/2026.9.1/openccu_data/data/translation_custom/",
+      "sha256": "af774708e6b119388dd5bd62bec436b16b2942f9eb15efb495dd3fd33da70da2"
     },
     {
       "name": "webui/easymode-controls",
-      "version": "OpenCCU 3.89.8.20260719 (/www/config/easymodes, /www/webui/js/lang)",
+      "version": "OpenCCU-Base 3.89.13 (b10f75e)",
       "url": "https://github.com/hobbyquaker/homematic-manager/blob/master/data/scripts/easymode-controls.mjs",
-      "sha256": "986ed168215ab315d78a0e1082a3928fea583e5004891e75a197af78457b0fef"
+      "sha256": "4648bcbfff9f36300ca406f4e929bff7e924b48c1500a51569505094f6bff505"
     },
     {
       "name": "homematic-manager/legacy-easymode-localization",

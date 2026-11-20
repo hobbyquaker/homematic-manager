@@ -32,8 +32,19 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   parameters" in the link dialog brings the former behaviour back and is remembered in the browser. With it, the
   check after the write also shows a parameter that was not sent and reads differently afterwards.
 
+### Changed
+
+- **Device data from openccu-data 2026.9.1**: the operation modes of the HmIP door lock drive's channels are named,
+  and its channel type is spelt right in German. The CCU's settings forms are read from OpenCCU-Base 3.89.13.
+
 ### Fixed
 
+- **The settings forms show every row the CCU's WebUI draws as a selection list**, which the easy view left out
+  before (they were only in the expert view): on the HmIP thermostats and wall thermostats the window-open
+  temperature, the temperature fall mode, the valve positions, the offset, decalcification and boost; on
+  HM-CC-RT-DN, HM-TC-IT-WM-W-EU and HM-CC-VG-1 the fall mode, decalcification, boost and display rows; the motion
+  detectors' sensitivity and operation mode, the contacts' messages per position, the HmIP-WGD's language and display
+  time, and more.
 - **Decimal parameters are written without floating-point residue**, and a value that was not changed is no longer
   sent because it differs from the device's in the fifteenth decimal. The number fields step by the last decimal of
   the parameter's range (0.01 W where the range is 0.01–3680 W) instead of 0.1 everywhere.

@@ -509,8 +509,13 @@ export function extractMasterControls(body, procs, seen = new Set()) {
             pending = undefined;
             continue;
         }
-        if ((match = /get_ComboBox options\s+([A-Z][A-Z0-9_|]*)/u.exec(line))) {
-            const [first, ...also] = match[1].split('|');
+        // task 116: `get_ComboBox options $param ...` too - the HmIP heating channel's page draws the
+        // window-open temperature, the temperature fall mode, the valve positions and the boost
+        // opening that way, and they were missing from its form
+        if ((match = /get_ComboBox options\s+(\$param\b|[A-Z][A-Z0-9_|]*)/u.exec(line))) {
+            const names = match[1] === '$param' ? param : match[1];
+            if (names === undefined || covered(names)) continue;
+            const [first, ...also] = names.split('|');
             add({
                 kind: 'param',
                 param: first,

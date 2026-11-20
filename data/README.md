@@ -15,15 +15,15 @@ them (below), and `legacy/` is gone since 3.0.0.
 
 ## What is in `dist/`
 
-Currently 196 files, 9.3 MB, built from openccu-data **2026.7.2**.
+Currently 196 files, 9.3 MB, built from openccu-data **2026.9.1**.
 
 | File | Type | Content |
 | --- | --- | --- |
 | `manifest.json` | `DataManifest` | version, URL and sha256 of every source, the receiver types, the languages |
 | `profiles/<RECEIVER_TYPE>.json` | `ReceiverProfiles` | 65 files, 7.5 MB, 3521 link profiles over 725 receiver/sender combinations; the largest is `SHUTTER_VIRTUAL_RECEIVER.json` at 624 KB, the smallest `WS_TH.json` at 435 B. The core loads one file per receiver type, lazily |
 | `receiver-type-aliases.json` | `ReceiverTypeAliases` | 3 receiver types that reuse another type's profiles |
-| `master-metadata.json` | `Record<channelType, MasterMetadata>` | 40 KB, 54 channel types: display order, conditional visibility, option-preset assignment, parameter groups |
-| `master-forms.json` | `MasterForms` | 83 KB, 71 MASTER forms keyed by paramset id, 9 of them with the channel's internal key |
+| `master-metadata.json` | `Record<channelType, MasterMetadata>` | 130 KB, 64 channel types: display order, conditional visibility, option-preset assignment, parameter groups |
+| `master-forms.json` | `MasterForms` | 90 KB, 72 MASTER forms keyed by paramset id, 9 of them with the channel's internal key |
 | `option-presets.json` | `Record<id, OptionPreset>` | 89 dropdowns of typical values (`DELAY`: `${none}`/5s/…/1h plus a free value), each entry the WebUI's template (`${after} 1min`) |
 | `cross-validations.json` | `CrossValidationRule[]` | 7 rules between parameters of one paramset (`DIM_MAX_LEVEL >= DIM_MIN_LEVEL`, …): 5 from openccu-data, then ours from `scripts/lib/cross-validations.mjs` (`COND_TX_THRESHOLD_HI >= _LO`, `TEMPERATURE_COMFORT >= TEMPERATURE_LOWERING`) |
 | `translations/de.json`, `en.json` | `Translations` | 767 KB / 746 KB: 253 channel types, 488 device models, 2359 parameters, ~3040 parameter values, 167 help texts, ~5470 UI labels |
@@ -87,7 +87,10 @@ the committed `extracted/easymode_controls.json.gz`, and the converter adds it t
 `*_TIME_FACTOR` pair with its preset type, a combo box with its option set, a subset choice - with
 the WebUI's own row label where it could be resolved and the parameters an `info exists` branch asks
 for (`requires`). The time selectors' presets go to `easymode-time-selectors.json`. The current
-extract is from OpenCCU 3.89.8.20260719: 609 easymodes, 2205 profiles with a form; the rest keep the
+extract is from OpenCCU-Base 3.89.13 (`b10f75e`, its `src/webui/www/config/easymodes` and
+`src/webui/www/webui/js/lang`; task 116 - since OpenCCU-Base carries OpenCCU's WebUI patches natively,
+its tree gives the same forms as OpenCCU 3.89.8.20260719's running `/www` did before): 609 easymodes,
+2205 profiles with a form; the rest keep the
 dialog's full list. Unlike `upstream/`, `extracted/` is committed, because it cannot be downloaded.
 
 The combo boxes' **option sets** come from the same tree: `proc option` in `etc/options.tcl`,
@@ -104,7 +107,7 @@ text twice.
 The same script reads the **MASTER forms** of the HmIP channel types: the
 `set_htmlParams` of `hmip/<CHANNEL_TYPE>.tcl` and the procedure of `etc/hmipChannelConfigDialogs.tcl`
 it calls (`getKeyTransceiver`, `getDimmerVirtualReceiver`, ...), into `master-metadata.json` as
-`controls` for that channel type - 63 channel types, 339 controls, a time being the `X_UNIT` /
+`controls` for that channel type - 64 channel types, 368 controls, a time being the `X_UNIT` /
 `X_VALUE` pair behind `getComboBox ... "<type>"` + `getTimeUnitComboBox*`. Their labels are mostly
 the WebUI's own `stringTable...` keys, so the script also takes `--webui-lang` (the
 `/www/webui/js/lang` directory, whose strings are %XX-escaped ISO-8859-1).
@@ -114,7 +117,7 @@ channel type also gets **`branches`**: one entry per way through its `if` / `els
 chains, with the tests that lead there (`when`, all of which hold) and that way's own `controls`. The
 tests read are the channel's `channelMode` metadata (the blind actuators' `blind` / `shutter`), the
 device type (equal, or containing a part) and the channel number, each possibly negated; a chain on
-anything else (a firmware version) stays whole. OpenCCU 3.89.8 has five such forms:
+anything else (a firmware version) stays whole. OpenCCU 3.89.8 and OpenCCU-Base 3.89.13 have five such forms:
 `BLIND_VIRTUAL_RECEIVER`, `BLIND_TRANSMITTER`, `ACCELERATION_TRANSCEIVER` (HmIP-DLP),
 `ENERGIE_METER_TRANSMITTER` (HmIP-ESI, HmIP-ESI-IND by channel) and `KEY_TRANSCEIVER` (an HmIP-ASIR's
 sabotage contact has no form). `controls` stays the union of the ways, each control once, from its
@@ -236,5 +239,5 @@ merged from a running CCU - are more accurate than a fresh extraction from OpenC
 That is the reason this directory pins a released version and updates deliberately instead of
 re-extracting: what is committed upstream is the better data, and it is reproducible.
 
-At 2026.7.2 the upstream repository has no `DATA_SOURCES.md` any more; its `README.md` documents the
+Since 2026.7.2 the upstream repository has no `DATA_SOURCES.md` any more; its `README.md` documents the
 same merge behaviour.

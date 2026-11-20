@@ -36,6 +36,12 @@
         "requires": ["EVENT_DELAY_UNIT"],
         "label": {"de": "Eventverzögerung", "en": "Event delay"}
       },
+      {
+        "kind": "param",
+        "param": "EVENT_FILTER_NUMBER",
+        "requires": ["EVENT_FILTER_NUMBER"],
+        "label": {"de": "Empfindlichkeit", "en": "Sensitivity"}
+      },
       {"kind": "param", "param": "CHANNEL_OPERATION_MODE", "requires": ["CHANNEL_OPERATION_MODE"]},
       {"kind": "param", "param": "EVENT_FILTER_PERIOD", "requires": ["EVENT_FILTER_PERIOD"]},
       {"kind": "param", "param": "MSG_FOR_POS_A", "requires": ["MSG_FOR_POS_A"]},
@@ -84,6 +90,12 @@
             "requires": ["EVENT_DELAY_UNIT"],
             "label": {"de": "Eventverzögerung", "en": "Event delay"}
           },
+          {
+            "kind": "param",
+            "param": "EVENT_FILTER_NUMBER",
+            "requires": ["EVENT_FILTER_NUMBER"],
+            "label": {"de": "Empfindlichkeit", "en": "Sensitivity"}
+          },
           {"kind": "param", "param": "CHANNEL_OPERATION_MODE", "requires": ["CHANNEL_OPERATION_MODE"]},
           {"kind": "param", "param": "EVENT_FILTER_PERIOD", "requires": ["EVENT_FILTER_PERIOD"]},
           {"kind": "param", "param": "MSG_FOR_POS_A", "requires": ["MSG_FOR_POS_A"]},
@@ -121,13 +133,19 @@
         "controls": [
           {
             "kind": "param",
+            "param": "CHANNEL_OPERATION_MODE",
+            "requires": ["CHANNEL_OPERATION_MODE"],
+            "label": {"de": "Sabotage-Erkennung", "en": "Sabotage detection"}
+          },
+          {
+            "kind": "param",
             "param": "EVENT_TIMEOUT_VALUE",
             "requires": ["EVENT_TIMEOUT_BASE"],
             "label": {"de": "Wert der Zeitspanne", "en": "Time interval value"}
           },
           {
             "kind": "param",
-            "param": "EVENT_FILTER_PERIOD",
+            "param": "EVENT_FILTER_NUMBER",
             "requires": ["EVENT_FILTER_NUMBER"],
             "label": {"de": "Meldungen bei", "en": "Messages for"}
           },
@@ -389,6 +407,24 @@
         "param": "POWERUP_ON_LEVEL",
         "requires": ["POWERUP_ON_LEVEL"],
         "label": {"de": "Dimmwert", "en": "Dimming value"}
+      },
+      {
+        "kind": "param",
+        "param": "FEEDBACK_LEVEL_VALUE",
+        "requires": ["FEEDBACK_LEVEL_VALUE"],
+        "label": {"de": "Level Feedback", "en": "Level feedback"}
+      },
+      {
+        "kind": "param",
+        "param": "ACTIVATE_LEVEL_VALUE",
+        "requires": ["ACTIVATE_LEVEL_VALUE"],
+        "label": {"de": "Level aktive Helligkeit", "en": "Level active brightness"}
+      },
+      {
+        "kind": "param",
+        "param": "ACTIVATE_LEVEL_ONTIME_VALUE",
+        "requires": ["ACTIVATE_LEVEL_ONTIME_VALUE"],
+        "label": {"de": "Einschaltdauer", "en": "Switch-on time"}
       }
     ]
   },
@@ -462,6 +498,12 @@
       {"id": "group_2", "labelKey": "stringtableblinddelaycompensation", "parameters": ["DELAY_COMPENSATION"]}
     ],
     "controls": [
+      {
+        "kind": "param",
+        "param": "OUTPUT_SWAP",
+        "requires": ["OUTPUT_SWAP"],
+        "label": {"de": "Ausgänge tauschen", "en": "Swap outputs"}
+      },
       {
         "kind": "time",
         "prefix": "EVENT_DELAY",
@@ -539,6 +581,12 @@
         "when": [{"channelMode": "blind"}],
         "controls": [
           {
+            "kind": "param",
+            "param": "OUTPUT_SWAP",
+            "requires": ["OUTPUT_SWAP"],
+            "label": {"de": "Ausgänge tauschen", "en": "Swap outputs"}
+          },
+          {
             "kind": "time",
             "prefix": "EVENT_DELAY",
             "selector": "eventDelay",
@@ -608,6 +656,7 @@
       {
         "when": [{"channelMode": "blind", "not": true}, {"channelMode": "shutter"}],
         "controls": [
+          {"kind": "param", "param": "OUTPUT_SWAP", "label": {"de": "Ausgänge tauschen", "en": "Swap outputs"}},
           {
             "kind": "time",
             "prefix": "EVENT_DELAY",
@@ -676,6 +725,12 @@
           {"channelMode": "shutter", "not": true}
         ],
         "controls": [
+          {
+            "kind": "param",
+            "param": "OUTPUT_SWAP",
+            "requires": ["OUTPUT_SWAP"],
+            "label": {"de": "Ausgänge tauschen", "en": "Swap outputs"}
+          },
           {
             "kind": "time",
             "prefix": "EVENT_DELAY",
@@ -863,7 +918,8 @@
         "param": "INTERVAL_VALUE",
         "requires": ["INTERVAL_UNIT"],
         "label": {"de": "Wert des Kalibrierungsintervalls", "en": "Value calibration interval"}
-      }
+      },
+      {"kind": "param", "param": "INTERVAL_UNIT", "requires": ["INTERVAL_UNIT"]}
     ]
   },
   "CLIMATECONTROL_FLOOR_DIRECT_TRANSMITTER": {
@@ -950,6 +1006,12 @@
         "option": "HEATING_MODE_SELECTION",
         "requires": ["HEATING_MODE_SELECTION"],
         "label": {"de": "Art des Raumes", "en": "Kind of room"}
+      },
+      {
+        "kind": "param",
+        "param": "FROST_PROTECTION_TEMPERATURE",
+        "requires": ["FROST_PROTECTION_TEMPERATURE"],
+        "label": {"de": "Frostschutztemperatur", "en": "Frost protection temperature"}
       },
       {
         "kind": "param",
@@ -1109,6 +1171,7 @@
       {"trigger": "EVENT_RANDOMTIME_UNIT", "triggerValue": "custom", "show": ["EVENT_RANDOMTIME_VALUE"]}
     ],
     "controls": [
+      {"kind": "param", "param": "CHANNEL_OPERATION_MODE", "requires": ["CHANNEL_OPERATION_MODE"]},
       {
         "kind": "param",
         "param": "DIM_LEVEL_LOWEST",
@@ -1228,6 +1291,12 @@
         "label": {"de": "Filter", "en": "Filter"}
       },
       {
+        "kind": "param",
+        "param": "FILTER_SIZE",
+        "requires": ["FILTER_SIZE"],
+        "label": {"de": "Filtergröße", "en": "Filter size"}
+      },
+      {
         "kind": "time",
         "prefix": "INTERVAL",
         "selector": "timeMin_1_5_10_15_30_60",
@@ -1313,6 +1382,18 @@
         "param": "DOOR_LOCK_NEUTRAL_POS",
         "requires": ["DOOR_LOCK_NEUTRAL_POS"],
         "label": {"de": "Neutrale Position", "en": "Neutral position"}
+      },
+      {
+        "kind": "param",
+        "param": "MSG_FOR_POS_A",
+        "requires": ["MSG_FOR_POS_A"],
+        "label": {"de": "Meldung, wenn entriegelt", "en": "Message if unlocked"}
+      },
+      {
+        "kind": "param",
+        "param": "MSG_FOR_POS_B",
+        "requires": ["MSG_FOR_POS_B"],
+        "label": {"de": "Meldung, wenn verriegelt", "en": "Message if locked"}
       }
     ]
   },
@@ -1660,6 +1741,7 @@
       }
     ],
     "controls": [
+      {"kind": "param", "param": "CHANNEL_OPERATION_MODE", "label": {"de": "Sensor", "en": "Sensor"}},
       {"kind": "param", "param": "METER_CONSTANT_VOLUME", "label": {"de": "Gerätekonstante", "en": "Device constant"}},
       {"kind": "param", "param": "METER_CONSTANT_ENERGY", "label": {"de": "Gerätekonstante", "en": "Device constant"}},
       {"kind": "param", "param": "METER_OBIS_SEARCH_STRING", "label": {"de": "OBIS String", "en": "OBIS string"}},
@@ -1709,6 +1791,7 @@
       {
         "when": [{"deviceType": "HmIP-ESI"}, {"channel": 1}],
         "controls": [
+          {"kind": "param", "param": "CHANNEL_OPERATION_MODE", "label": {"de": "Sensor", "en": "Sensor"}},
           {
             "kind": "param",
             "param": "METER_CONSTANT_VOLUME",
@@ -1731,6 +1814,12 @@
       {
         "when": [{"deviceType": "HmIP-ESI", "not": true}, {"deviceType": "HmIP-ESI-IND"}, {"channel": 1}],
         "controls": [
+          {
+            "kind": "param",
+            "param": "CHANNEL_OPERATION_MODE",
+            "requires": ["CHANNEL_OPERATION_MODE"],
+            "label": {"de": "Sensor-Status", "en": "Sensor status"}
+          },
           {
             "kind": "param",
             "param": "METER_CONSTANT_VOLUME",
@@ -1772,6 +1861,12 @@
           {"deviceType": "HmIP-ESI-IND", "not": true}
         ],
         "controls": [
+          {
+            "kind": "param",
+            "param": "CHANNEL_OPERATION_MODE",
+            "requires": ["CHANNEL_OPERATION_MODE"],
+            "label": {"de": "Modus", "en": "Mode"}
+          },
           {
             "kind": "time",
             "prefix": "EVENT_DELAY",
@@ -1898,11 +1993,18 @@
   "HEATING_CLIMATECONTROL_TRANSCEIVER": {
     "channelType": "HEATING_CLIMATECONTROL_TRANSCEIVER",
     "controls": [
+      {"kind": "param", "param": "SHOW_SET_TEMPERATURE", "requires": ["SHOW_SET_TEMPERATURE"]},
+      {"kind": "param", "param": "SHOW_HUMIDITY", "requires": ["SHOW_SET_TEMPERATURE", "SHOW_HUMIDITY"]},
+      {
+        "kind": "param",
+        "param": "CLIMATE_CONTROL_DISPLAY",
+        "requires": ["CLIMATE_CONTROL_DISPLAY"],
+        "label": {"de": "Anzeige im Display", "en": "Information in display"}
+      },
       {
         "kind": "param",
         "param": "BUTTON_RESPONSE_WITHOUT_BACKLIGHT",
-        "requires": ["BUTTON_RESPONSE_WITHOUT_BACKLIGHT"],
-        "label": {"de": "Anzeige im Display", "en": "Information in display"}
+        "requires": ["BUTTON_RESPONSE_WITHOUT_BACKLIGHT"]
       },
       {"kind": "param", "param": "TEMPERATURE_LOWERING_COOLING", "requires": ["TEMPERATURE_LOWERING_COOLING"]},
       {"kind": "param", "param": "TEMPERATURE_LOWERING", "requires": ["TEMPERATURE_LOWERING_COOLING"]},
@@ -1915,13 +2017,43 @@
       },
       {"kind": "param", "param": "OPTIMUM_START_STOP", "requires": ["OPTIMUM_START_STOP"]},
       {"kind": "param", "param": "DURATION_5MIN", "requires": ["DURATION_5MIN"]},
+      {"kind": "param", "param": "TEMPERATURE_WINDOW_OPEN", "requires": ["TEMPERATURE_WINDOW_OPEN"]},
+      {"kind": "param", "param": "TEMPERATURE_WINDOW_OPEN_COOLING", "requires": ["TEMPERATURE_WINDOW_OPEN_COOLING"]},
+      {"kind": "param", "param": "TEMPERATUREFALL_MODUS", "requires": ["TEMPERATUREFALL_MODUS"]},
       {"kind": "param", "param": "TEMPERATUREFALL_VALUE", "requires": ["TEMPERATUREFALL_VALUE"]},
       {
         "kind": "param",
         "param": "TEMPERATUREFALL_WINDOW_OPEN_TIME_PERIOD",
         "requires": ["TEMPERATUREFALL_WINDOW_OPEN_TIME_PERIOD"]
       },
+      {"kind": "param", "param": "VALVE_ERROR_RUN_POSITION", "requires": ["VALVE_ERROR_RUN_POSITION"]},
+      {
+        "kind": "param",
+        "param": "VALVE_MAXIMUM_POSITION",
+        "requires": ["VALVE_MAXIMUM_POSITION"],
+        "label": {"de": "maximale Ventilöffnungsposition", "en": "maximum valve opening position"}
+      },
+      {
+        "kind": "param",
+        "param": "TEMPERATURE_OFFSET",
+        "requires": ["TEMPERATURE_OFFSET"],
+        "label": {"de": "Temperatur-Offset", "en": "Temperature offset"}
+      },
+      {"kind": "param", "param": "VALVE_OFFSET", "requires": ["VALVE_OFFSET"]},
+      {
+        "kind": "param",
+        "param": "DECALCIFICATION_TIME",
+        "requires": ["DECALCIFICATION_WEEKDAY", "DECALCIFICATION_TIME"]
+      },
+      {"kind": "param", "param": "BOOST_TIME_PERIOD"},
+      {"kind": "param", "param": "BOOST_POSITION", "requires": ["BOOST_POSITION"]},
       {"kind": "param", "param": "BOOST_AFTER_WINDOW_OPEN", "requires": ["BOOST_AFTER_WINDOW_OPEN"]},
+      {
+        "kind": "param",
+        "param": "CHANNEL_OPERATION_MODE",
+        "requires": ["CHANNEL_OPERATION_MODE"],
+        "label": {"de": "Betriebsmodus", "en": "Operating mode"}
+      },
       {"kind": "param", "param": "ACOUSTIC_ALARM_SIGNAL", "requires": ["ACOUSTIC_ALARM_SIGNAL"]}
     ]
   },
@@ -2339,6 +2471,13 @@
       },
       {
         "kind": "param",
+        "param": "DEVICE_SENSOR_SENSITIVITY",
+        "option": "RAW_0_100Percent",
+        "requires": ["DEVICE_SENSOR_SENSITIVITY"],
+        "label": {"de": "Sensor-Empfindlichkeit", "en": "Sensor sensitivity"}
+      },
+      {
+        "kind": "param",
         "param": "DISPLAY_CONTRAST",
         "requires": ["DISPLAY_CONTRAST"],
         "label": {"de": "Displaykontrast", "en": "Display contrast"}
@@ -2382,6 +2521,12 @@
       },
       {
         "kind": "param",
+        "param": "PERMANENT_FULL_RX",
+        "requires": ["PERMANENT_FULL_RX"],
+        "label": {"de": "Spannungsversorgung", "en": "Power supply"}
+      },
+      {
+        "kind": "param",
         "param": "LONGITUDE",
         "requires": ["LONGITUDE"],
         "label": {"de": "Wohnort", "en": "Place of residence"}
@@ -2404,6 +2549,24 @@
         "option": "NORMALLY_CLOSE_OPEN",
         "requires": ["SABOTAGE_CONTACT_TYPE"],
         "label": {"de": "Typ des Sabotagekontaktes", "en": "Type of sabotage contact"}
+      },
+      {
+        "kind": "param",
+        "param": "BLOCKING_TEMPORARY",
+        "requires": ["BLOCKING_TEMPORARY"],
+        "label": {
+          "de": "Anzahl der fehlerhaften Eingabenfür temporäres Sperren",
+          "en": "Number of faulty entries for temporary locking"
+        }
+      },
+      {
+        "kind": "param",
+        "param": "BLOCKING_PERMANENT",
+        "requires": ["BLOCKING_PERMANENT"],
+        "label": {
+          "de": "Anzahl der weiteren fehlerhaften Eingabenfür vollständiges Sperren",
+          "en": "Number of further faulty entries for complete locking"
+        }
       }
     ]
   },
@@ -2415,7 +2578,29 @@
       {"kind": "param", "param": "MIN_INTERVAL"},
       {"kind": "param", "param": "MOTION_ACTIVE_TIME"},
       {"kind": "param", "param": "BRIGHTNESS_FILTER"},
-      {"kind": "param", "param": "COND_TX_THRESHOLD_LO"}
+      {"kind": "param", "param": "PIR_OPERATION_MODE"},
+      {"kind": "param", "param": "COND_TX_THRESHOLD_LO"},
+      {
+        "kind": "param",
+        "param": "PIR_SENSITIVITY",
+        "requires": ["PIR_SENSITIVITY"],
+        "label": {"de": "Sensorempfindlichkeit", "en": "Sensor sensitivity"}
+      },
+      {
+        "kind": "param",
+        "param": "ATC_MODE",
+        "requires": ["ATC_MODE"],
+        "label": {"de": "Temperaturkompensation der Sensoren", "en": "Temperature compensation of the sensors"}
+      },
+      {
+        "kind": "param",
+        "param": "ATC_ADAPTION_INTERVAL",
+        "requires": ["ATC_ADAPTION_INTERVAL"],
+        "label": {
+          "de": "Intervall für Temperaturkompensation der Sensoren",
+          "en": "Interval for temperature compensation of the sensors"
+        }
+      }
     ]
   },
   "MOTIONDETECTOR_VIRTUAL_TRANSCEIVER": {
@@ -2431,7 +2616,29 @@
       {"kind": "param", "param": "MIN_INTERVAL"},
       {"kind": "param", "param": "MOTION_ACTIVE_TIME"},
       {"kind": "param", "param": "BRIGHTNESS_FILTER"},
-      {"kind": "param", "param": "COND_TX_THRESHOLD_LO"}
+      {"kind": "param", "param": "PIR_OPERATION_MODE"},
+      {"kind": "param", "param": "COND_TX_THRESHOLD_LO"},
+      {
+        "kind": "param",
+        "param": "PIR_SENSITIVITY",
+        "requires": ["PIR_SENSITIVITY"],
+        "label": {"de": "Sensorempfindlichkeit", "en": "Sensor sensitivity"}
+      },
+      {
+        "kind": "param",
+        "param": "ATC_MODE",
+        "requires": ["ATC_MODE"],
+        "label": {"de": "Temperaturkompensation der Sensoren", "en": "Temperature compensation of the sensors"}
+      },
+      {
+        "kind": "param",
+        "param": "ATC_ADAPTION_INTERVAL",
+        "requires": ["ATC_ADAPTION_INTERVAL"],
+        "label": {
+          "de": "Intervall für Temperaturkompensation der Sensoren",
+          "en": "Interval for temperature compensation of the sensors"
+        }
+      }
     ]
   },
   "MULTI_MODE_INPUT_TRANSMITTER": {
@@ -2590,6 +2797,13 @@
     "controls": [
       {
         "kind": "param",
+        "param": "ATC_MODE",
+        "requires": ["ATC_MODE"],
+        "label": {"de": "Temperaturkompensation der Sensoren", "en": "Temperature compensation of the sensors"}
+      },
+      {"kind": "param", "param": "ATC_ADAPTION_INTERVAL", "requires": ["ATC_ADAPTION_INTERVAL"]},
+      {
+        "kind": "param",
         "param": "EVENT_BLINDTIME_VALUE",
         "requires": ["EVENT_BLINDTIME_BASE"],
         "label": {"de": "Wert der Zeitspanne", "en": "Time interval value"}
@@ -2627,10 +2841,11 @@
     "controls": [
       {
         "kind": "param",
-        "param": "COND_TX_DECISION_ABOVE",
-        "requires": ["COND_TX_DECISION_ABOVE"],
+        "param": "CHANNEL_OPERATION_MODE",
+        "requires": ["CHANNEL_OPERATION_MODE"],
         "label": {"de": "Betriebsart", "en": "Operating mode"}
       },
+      {"kind": "param", "param": "COND_TX_DECISION_ABOVE", "requires": ["COND_TX_DECISION_ABOVE"]},
       {"kind": "param", "param": "COND_TX_DECISION_BELOW", "requires": ["COND_TX_DECISION_BELOW"]},
       {"kind": "param", "param": "COND_TX_THRESHOLD_HI", "requires": ["COND_TX_THRESHOLD_HI"]},
       {"kind": "param", "param": "COND_TX_THRESHOLD_LO", "requires": ["COND_TX_THRESHOLD_LO"]}
@@ -2640,6 +2855,7 @@
     "channelType": "PASSAGE_DETECTOR_DIRECTION_TRANSMITTER",
     "parameterOrder": ["CHANNEL_OPERATION_MODE", "COND_TX_DECISION_ABOVE", "COND_TX_DECISION_BELOW"],
     "controls": [
+      {"kind": "param", "param": "CHANNEL_OPERATION_MODE", "requires": ["CHANNEL_OPERATION_MODE"]},
       {
         "kind": "param",
         "param": "COND_TX_DECISION_ABOVE",
@@ -2660,6 +2876,17 @@
       }
     ]
   },
+  "PERMISSION_TRANSCEIVER": {
+    "channelType": "PERMISSION_TRANSCEIVER",
+    "controls": [
+      {
+        "kind": "param",
+        "param": "POWERUP_JUMPTARGET",
+        "requires": ["POWERUP_JUMPTARGET"],
+        "label": {"de": "Aktion bei Spannungszufuhr", "en": "Activity on power supply"}
+      }
+    ]
+  },
   "PRESENCEDETECTOR_TRANSCEIVER": {
     "channelType": "PRESENCEDETECTOR_TRANSCEIVER",
     "controls": [
@@ -2668,7 +2895,21 @@
       {"kind": "param", "param": "MIN_INTERVAL"},
       {"kind": "param", "param": "MOTION_ACTIVE_TIME"},
       {"kind": "param", "param": "BRIGHTNESS_FILTER"},
-      {"kind": "param", "param": "COND_TX_THRESHOLD_LO"}
+      {"kind": "param", "param": "PIR_OPERATION_MODE"},
+      {"kind": "param", "param": "COND_TX_THRESHOLD_LO"},
+      {
+        "kind": "param",
+        "param": "ATC_MODE",
+        "requires": ["ATC_MODE"],
+        "label": {"de": "Temperaturkompensation der Sensoren", "en": "Temperature compensation of the sensors"}
+      },
+      {"kind": "param", "param": "ATC_ADAPTION_INTERVAL", "requires": ["ATC_ADAPTION_INTERVAL"]},
+      {
+        "kind": "param",
+        "param": "PIR_SENSITIVITY",
+        "requires": ["ATC_ADAPTION_INTERVAL", "PIR_SENSITIVITY"],
+        "label": {"de": "Sensorempfindlichkeit", "en": "Sensor sensitivity"}
+      }
     ]
   },
   "RAIN_DETECTION_TRANSMITTER": {
@@ -2719,6 +2960,24 @@
         "prefix": "EVENT_DELAY",
         "selector": "eventDelay",
         "label": {"de": "Eventverzögerung", "en": "Event delay"}
+      },
+      {
+        "kind": "param",
+        "param": "MSG_FOR_POS_B",
+        "requires": ["MSG_FOR_POS_B"],
+        "label": {"de": "Meldung in Position unten", "en": "Message in position down"}
+      },
+      {
+        "kind": "param",
+        "param": "MSG_FOR_POS_A",
+        "requires": ["MSG_FOR_POS_A"],
+        "label": {"de": "Meldung in Position quer", "en": "Message in landscape position"}
+      },
+      {
+        "kind": "param",
+        "param": "MSG_FOR_POS_C",
+        "requires": ["MSG_FOR_POS_C"],
+        "label": {"de": "Meldung in Position oben", "en": "Message in position top"}
       }
     ]
   },
@@ -2754,6 +3013,12 @@
     ],
     "controls": [
       {
+        "kind": "param",
+        "param": "CHANNEL_OPERATION_MODE",
+        "requires": ["CHANNEL_OPERATION_MODE"],
+        "label": {"de": "Kanal aktiv / inaktiv:", "en": "Channel active / inactive:"}
+      },
+      {
         "kind": "time",
         "prefix": "EVENT_DELAY",
         "selector": "eventDelay",
@@ -2766,6 +3031,12 @@
         "selector": "eventRandomTime",
         "requires": ["EVENT_RANDOMTIME_UNIT"],
         "label": {"de": "Zufallsanteil", "en": "Random part"}
+      },
+      {
+        "kind": "param",
+        "param": "OUTPUT_SWAP",
+        "requires": ["OUTPUT_SWAP"],
+        "label": {"de": "Drehrichtung tauschen", "en": "Change direction of rotation"}
       },
       {
         "kind": "time",
@@ -2820,6 +3091,18 @@
         "param": "SAMPLE_INTERVAL",
         "requires": ["SAMPLE_INTERVAL"],
         "label": {"de": "Zeitspanne zwischen den einzelnen Messungen", "en": "Time between the single measurements"}
+      },
+      {
+        "kind": "param",
+        "param": "MSG_FOR_POS_A",
+        "requires": ["MSG_FOR_POS_A"],
+        "label": {"de": "Meldung in Position offen", "en": "Message in position open"}
+      },
+      {
+        "kind": "param",
+        "param": "MSG_FOR_POS_B",
+        "requires": ["MSG_FOR_POS_B"],
+        "label": {"de": "Meldung in Position geschlossen", "en": "Message in position closed"}
       }
     ]
   },
@@ -2887,6 +3170,7 @@
       }
     ],
     "controls": [
+      {"kind": "param", "param": "OUTPUT_SWAP", "label": {"de": "Ausgänge tauschen", "en": "Swap outputs"}},
       {
         "kind": "time",
         "prefix": "EVENT_DELAY",
@@ -3085,6 +3369,12 @@
     "parameterOrder": ["FILTER_SIZE", "INTERVAL_UNIT", "INTERVAL_VALUE", "REFERENCE_16BIT_MIN", "REFERENCE_16BIT_MAX"],
     "conditionalVisibility": [{"trigger": "INTERVAL_UNIT", "triggerValue": "custom", "show": ["INTERVAL_VALUE"]}],
     "controls": [
+      {
+        "kind": "param",
+        "param": "FILTER_SIZE",
+        "requires": ["FILTER_SIZE"],
+        "label": {"de": "Filtergröße", "en": "Filter size"}
+      },
       {
         "kind": "time",
         "prefix": "INTERVAL",
@@ -3300,7 +3590,31 @@
         "requires": ["EVENT_DELAY_UNIT"],
         "label": {"de": "Eventverzögerung", "en": "Event delay"}
       },
+      {
+        "kind": "param",
+        "param": "EVENT_FILTER_NUMBER",
+        "requires": ["EVENT_FILTER_NUMBER"],
+        "label": {"de": "Empfindlichkeit", "en": "Sensitivity"}
+      },
       {"kind": "param", "param": "EVENT_FILTER_PERIOD", "requires": ["EVENT_FILTER_PERIOD"]},
+      {
+        "kind": "param",
+        "param": "ACOUSTIC_ALARM_SIGNAL",
+        "requires": ["ACOUSTIC_ALARM_SIGNAL"],
+        "label": {"de": "Alarmsignal", "en": "Alarm signal"}
+      },
+      {
+        "kind": "param",
+        "param": "ACOUSTIC_ALARM_TIMING",
+        "requires": ["ACOUSTIC_ALARM_TIMING"],
+        "label": {"de": "Alarmmeldung", "en": "Alarm message"}
+      },
+      {
+        "kind": "param",
+        "param": "ACOUSTIC_ALARM_TRIGGER",
+        "requires": ["ACOUSTIC_ALARM_TRIGGER"],
+        "label": {"de": "Alarmauslöser", "en": "Alarm trigger"}
+      },
       {"kind": "param", "param": "TRIGGER_ANGLE", "requires": ["TRIGGER_ANGLE"]}
     ]
   },

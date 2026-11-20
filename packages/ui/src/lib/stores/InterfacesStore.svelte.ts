@@ -12,6 +12,14 @@ export class InterfacesStore {
     states = $state<InterfaceState[]>([]);
     rega = $state<RegaState | undefined>(undefined);
     loading = $state(false);
+    /**
+     * Task 115: each interface's `system.listMethods`, fetched once when first asked for; `null`
+     * when it gave no usable list. Missing while the answer is on its way.
+     */
+    methodNames = $state<Record<string, readonly string[] | null>>({});
+    // bookkeeping only: what has been asked for must not re-run the views that ask
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- see above
+    readonly #methodsRequested = new Set<string>();
 
     readonly #transport: Transport;
     readonly #notices: NoticesStore;
@@ -37,6 +45,26 @@ export class InterfacesStore {
     /** The interface's `type`, which decides the tabs and the device columns; `''` if unknown. */
     typeOf(name: string): string {
         return this.get(name)?.type ?? '';
+    }
+
+    /**
+     * Task 115: the methods the interface lists, `undefined` while unknown or without a usable list.
+     * The first call starts the request; the answer lands in {@link methodNames}.
+     */
+    methodsOf(name: string): readonly string[] | undefined {
+        if (name !== '' && !this.#methodsRequested.has(name)) {
+            this.#methodsRequested.add(name);
+            void this.#transport.request('interfaces.methodNames', name).then(
+                (names) => {
+                    this.methodNames = {...this.methodNames, [name]: names};
+                },
+                () => {
+                    // no list is the old rule; ask again on the next look
+                    this.#methodsRequested.delete(name);
+                },
+            );
+        }
+        return this.methodNames[name] ?? undefined;
     }
 
     isConnected(name: string): boolean {

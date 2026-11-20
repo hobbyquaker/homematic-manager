@@ -22,6 +22,8 @@ import {
     countsAsServiceMessage,
     isAcknowledgeable,
     isKnownInterface,
+    offersConfigMaintenance,
+    type ConfigMaintenanceMethod,
     maintenanceAddress,
     mergeMethodHelp,
     methodsFor,
@@ -352,6 +354,7 @@ export class Backend {
             describe: (interfaceName, address, paramset) => this.#describe(interfaceName, address, paramset),
             read: (interfaceName, method, params) => this.#read(interfaceName, method, params),
             write: (interfaceName, method, params) => this.#write(interfaceName, method, params),
+            offers: (interfaceName, method) => this.#offersConfigMaintenance(interfaceName, method),
             onProgress: (progress) => {
                 this.events.emit('write.progress', progress);
             },
@@ -564,6 +567,10 @@ export class Backend {
             case 'interfaces.reconnect':
                 await this.#requireManager().reconnect(p[0]);
                 return null;
+            case 'interfaces.methodNames': {
+                const listed = await this.#methodList(p[0]);
+                return listed === undefined ? null : [...listed];
+            }
             case 'rega.state':
                 return this.#rega?.state ?? {enabled: this.#config.connection.rega, reachable: false, names: 0};
 
@@ -578,10 +585,10 @@ export class Backend {
             case 'devices.reportValueUsage':
                 return Number(await this.#write(p[0], 'reportValueUsage', [p[1], p[2], p[3]]));
             case 'devices.restoreConfig':
-                await this.#write(p[0], 'restoreConfigToDevice', [p[1]]);
+                await this.#configMaintenance(p[0], 'restoreConfigToDevice', p[1]);
                 return null;
             case 'devices.clearConfigCache':
-                await this.#write(p[0], 'clearConfigCache', [p[1]]);
+                await this.#configMaintenance(p[0], 'clearConfigCache', p[1]);
                 return null;
             case 'devices.repairConfig':
                 return this.#repair.repair(p[0], p[1], (params[2] as RepairConfigOptions | undefined) ?? {});
@@ -2124,8 +2131,9 @@ export class Backend {
     }
 
     /**
-     * B-26 (#158): the methods a user-defined interface lists in `system.listMethods`, or
-     * `undefined` when it gave no usable list.
+     * B-26 (#158): the methods an interface lists in `system.listMethods`, or `undefined` when it
+     * gave no usable list. Used for user-defined interfaces' service messages and, since task 115,
+     * for the BidCos maintenance calls of every interface.
      *
      * Asked once and shared by concurrent callers; the answer is dropped when the interface
      * subscribes again. A process that does not have `system.listMethods` either is remembered for
@@ -2161,6 +2169,24 @@ export class Backend {
         );
         this.#listedMethods.set(interfaceName, pending);
         return pending;
+    }
+
+    /**
+     * Task 115: does this interface offer `restoreConfigToDevice` / `clearConfigCache`? Its own
+     * `system.listMethods` decides, never on HmIP; see `offersConfigMaintenance`.
+     */
+    async #offersConfigMaintenance(interfaceName: string, method: ConfigMaintenanceMethod): Promise<boolean> {
+        const listed = await this.#methodList(interfaceName);
+        const type = this.#manager?.states().find((state) => state.name === interfaceName)?.type ?? '';
+        return offersConfigMaintenance(interfaceName, type, method, listed);
+    }
+
+    /** `devices.restoreConfig` and `devices.clearConfigCache`: refused where the interface lacks the method. */
+    async #configMaintenance(interfaceName: string, method: ConfigMaintenanceMethod, address: string): Promise<void> {
+        if (!(await this.#offersConfigMaintenance(interfaceName, method))) {
+            throw validationError(`${interfaceName} does not offer ${method}`);
+        }
+        await this.#write(interfaceName, method, [address]);
     }
 
     /** Reads the BidCos service messages of one interface into the store. */
@@ -2564,6 +2590,7 @@ export const API_METHOD_NAMES: readonly ApiMethodName[] = [
     'connection.pairCancel',
     'interfaces.list',
     'interfaces.reconnect',
+    'interfaces.methodNames',
     'rega.state',
     'devices.list',
     'devices.description',

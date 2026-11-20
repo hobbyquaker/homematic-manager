@@ -954,6 +954,12 @@ export interface ApiMethods {
 
     'interfaces.list': {params: []; result: InterfaceState[]};
     'interfaces.reconnect': {params: [interfaceName?: string]; result: null};
+    /**
+     * Task 115: what the interface lists in `system.listMethods`, asked once per subscription;
+     * `null` when it gave no usable list. The device menu offers `restoreConfigToDevice` and
+     * `clearConfigCache` only where they are listed (`offersConfigMaintenance`).
+     */
+    'interfaces.methodNames': {params: [interfaceName: string]; result: string[] | null};
     'rega.state': {params: []; result: RegaState};
     /**
      * Issue #54: confirm every device that is still in the CCU's inbox, and answer with the

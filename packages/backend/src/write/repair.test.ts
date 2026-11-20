@@ -1,10 +1,16 @@
 import {describe, expect, it} from 'vitest';
 
-import {DeviceIndex, type DeviceDescription, type ParamsetDescription, type RpcValue} from '@homematic-manager/core';
+import {
+    DeviceIndex,
+    offersConfigMaintenance,
+    type DeviceDescription,
+    type ParamsetDescription,
+    type RpcValue,
+} from '@homematic-manager/core';
 
 import {BackendError} from '../errors.js';
 import type {RpcOutValue} from '../rpc/client.js';
-import {ConfigRepair, fallbackValue, supportsBidcosMaintenance, type ConfigRepairDeps} from './repair.js';
+import {ConfigRepair, fallbackValue, type ConfigRepairDeps} from './repair.js';
 
 const DEVICE_MASTER: ParamsetDescription = {
     BUTTON_LOCK: {TYPE: 'BOOL', OPERATIONS: 3, DEFAULT: false},
@@ -45,6 +51,8 @@ function harness(
         stored?: Record<string, Record<string, RpcValue>>;
         onWrite?: (method: string, params: readonly RpcOutValue[]) => Promise<RpcValue>;
         onDescribe?: (address: string, paramset: string) => Promise<ParamsetDescription>;
+        /** The interface's `system.listMethods`; none by default (task 115). */
+        listed?: readonly string[];
     } = {},
 ): Harness {
     const writes: Harness['writes'] = [];
@@ -70,18 +78,12 @@ function harness(
             writes.push({method, params});
             return options.onWrite ? options.onWrite(method, params) : Promise.resolve('');
         },
+        offers: (interfaceName, method) =>
+            Promise.resolve(offersConfigMaintenance(interfaceName, interfaceName, method, options.listed)),
         onProgress: (entry) => progress.push({done: entry.done, total: entry.total}),
     };
     return {repair: new ConfigRepair(deps), writes, reads, progress};
 }
-
-describe('supportsBidcosMaintenance', () => {
-    it('is false for HmIP, where the methods answer -1 Generic error', () => {
-        expect(supportsBidcosMaintenance('HmIP-RF')).toBe(false);
-        expect(supportsBidcosMaintenance('BidCos-RF')).toBe(true);
-        expect(supportsBidcosMaintenance('BidCos-Wired')).toBe(true);
-    });
-});
 
 describe('fallbackValue', () => {
     it('prefers the DEFAULT', () => {
@@ -226,6 +228,28 @@ describe('ConfigRepair', () => {
         });
         expect(hmipResult.bidcosRecovery).toBeUndefined();
         expect(hmip.writes.map((entry) => entry.method)).not.toContain('restoreConfigToDevice');
+    });
+
+    it('calls a BidCos recovery only where the interface lists it (task 115)', async () => {
+        // hs485d of an eQ-3 CCU3 has neither method
+        const ccu3Wired = harness({stored: {'ABC1:2/MASTER': {POWERUP_ONDELAY_VALUE: 0}}, listed: ['init']});
+        const refused = await ccu3Wired.repair.repair('BidCos-Wired', 'ABC1:2', {
+            channels: ['ABC1:2'],
+            bidcosRecovery: 'restoreConfigToDevice',
+        });
+        expect(refused.bidcosRecovery).toBeUndefined();
+        expect(ccu3Wired.writes.map((entry) => entry.method)).not.toContain('restoreConfigToDevice');
+
+        const liteWired = harness({
+            stored: {'ABC1:2/MASTER': {POWERUP_ONDELAY_VALUE: 0}},
+            listed: ['init', 'restoreConfigToDevice'],
+        });
+        const done = await liteWired.repair.repair('BidCos-Wired', 'ABC1:2', {
+            channels: ['ABC1:2'],
+            bidcosRecovery: 'restoreConfigToDevice',
+        });
+        expect(done.bidcosRecovery).toBe('restoreConfigToDevice');
+        expect(liteWired.writes.map((entry) => entry.method)).toContain('restoreConfigToDevice');
     });
 
     it('reports a channel whose description cannot be fetched instead of failing the repair', async () => {

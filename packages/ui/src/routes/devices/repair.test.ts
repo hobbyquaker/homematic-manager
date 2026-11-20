@@ -146,6 +146,33 @@ describe('the repair dialog', () => {
         });
     });
 
+    it('offers only the recoveries the interface lists (task 115)', async () => {
+        transport.respond('interfaces.methodNames', () => ['init', 'restoreConfigToDevice']);
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await fireEvent.click(document.querySelector('[data-row-id="MEQ0123456"]')!);
+        await fireEvent.click(screen.getByTestId('devices-repair'));
+
+        await waitFor(() => {
+            expect(
+                [...screen.getByTestId<HTMLSelectElement>('repair-recovery').options].map((option) => option.value),
+            ).toEqual(['none', 'restoreConfigToDevice']);
+        });
+    });
+
+    it('hides the recovery choice where the interface lists neither method (task 115)', async () => {
+        transport.respond('interfaces.methodNames', () => ['init']);
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await fireEvent.click(document.querySelector('[data-row-id="MEQ0123456"]')!);
+        await fireEvent.click(screen.getByTestId('devices-repair'));
+
+        await waitFor(() => {
+            expect(screen.getByTestId('repair-bidcos-note')).toBeTruthy();
+        });
+        await waitFor(() => {
+            expect(screen.queryByTestId('repair-recovery')).toBeNull();
+        });
+    });
+
     it('has no BidCos recovery and no "normal" note on HmIP - those methods answer -1 there', async () => {
         const {stores} = await mountApp({transport, hash: '#/HmIP-RF/devices'});
         await waitFor(() => {

@@ -15,6 +15,7 @@
         isSmokeDetectorChannel,
         isSmokeGroupAddress,
         lowestFreeSmokeGroup,
+        offersConfigMaintenance,
         parseRoles,
         receiverLabel,
         smokeGroupAddress,
@@ -413,8 +414,23 @@
     /** Task 58: a synthesised smoke group row is no device the interface could delete or replace. */
     const realDevice = $derived(oneDevice !== '' && !isSmokeGroupAddress(oneDevice) ? oneDevice : '');
     const canDelete = $derived(realDevice !== '' && !dontDelete);
-    /** `restoreConfigToDevice` and `clearConfigCache` are BidCos-only, as the 2.x menu classes said. */
     const isBidcos = $derived(interfaceType.startsWith('BidCos'));
+    /**
+     * `restoreConfigToDevice` and `clearConfigCache` are BidCos methods, as the 2.x menu classes
+     * said - and task 115: only where the interface lists them. hs485d of an eQ-3 CCU3 has neither.
+     */
+    const listedMethods = $derived(stores.interfaces.methodsOf(interfaceName));
+    const canRestore = $derived(
+        offersConfigMaintenance(interfaceName, interfaceType, 'restoreConfigToDevice', listedMethods),
+    );
+    const canClear = $derived(offersConfigMaintenance(interfaceName, interfaceType, 'clearConfigCache', listedMethods));
+    /** Why a maintenance entry is greyed out: no device, no BidCos, or a process without the method. */
+    function maintenanceReason(offered: boolean): string {
+        if (offered) {
+            return reasonFor('device');
+        }
+        return isBidcos ? t('This interface does not offer this method') : reasonFor('bidcos');
+    }
     /** Task 28: VirtualDevices and CUxD have no install mode, so there is nothing to pair there. */
     const canPair = $derived(canPairDevices(interfaceType));
 
@@ -882,9 +898,9 @@
                     {
                         id: 'restore',
                         label: t('restoreConfigToDevice'),
-                        disabled: !isBidcos,
+                        disabled: !canRestore,
                     },
-                    {id: 'clear', label: t('clearConfigCache'), disabled: !isBidcos},
+                    {id: 'clear', label: t('clearConfigCache'), disabled: !canClear},
                     {id: 'repair', label: t('Repair configuration')},
                     {id: 'sep2', separator: true},
                     // Task 25: the selection into a room or a function - one entry each
@@ -1082,16 +1098,16 @@
                 <ToolbarButton
                     title={t('restoreConfigToDevice')}
                     icon="⟲"
-                    disabled={oneDevice === '' || !isBidcos}
-                    reason={isBidcos ? reasonFor('device') : reasonFor('bidcos')}
+                    disabled={oneDevice === '' || !canRestore}
+                    reason={maintenanceReason(canRestore)}
                     testId="devices-restore"
                     onclick={() => void stores.devices.restoreConfig(interfaceName, oneDevice)}
                 />
                 <ToolbarButton
                     title={t('clearConfigCache')}
                     icon="⌫"
-                    disabled={oneDevice === '' || !isBidcos}
-                    reason={isBidcos ? reasonFor('device') : reasonFor('bidcos')}
+                    disabled={oneDevice === '' || !canClear}
+                    reason={maintenanceReason(canClear)}
                     testId="devices-clear"
                     onclick={() => void stores.devices.clearConfigCache(interfaceName, oneDevice)}
                 />

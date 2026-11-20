@@ -85,6 +85,10 @@ const defaultAnswers: Record<string, Answer> = {
     },
 };
 
+function callsOf(h: Harness, interfaceName: string, method: string): number {
+    return h.calls.filter((call) => call.interfaceName === interfaceName && call.method === method).length;
+}
+
 async function harness(
     options: {
         answers?: Record<string, Answer>;
@@ -1397,12 +1401,56 @@ describe('devices', () => {
         });
         expect(await h.backend.request('devices.replace', 'HmIP-RF', 'A', 'B')).toBe(true);
         expect(await h.backend.request('devices.reportValueUsage', 'HmIP-RF', 'A:1', 'STATE', 1)).toBe(2);
-        expect(await h.backend.request('devices.restoreConfig', 'HmIP-RF', 'A')).toBeNull();
-        expect(await h.backend.request('devices.clearConfigCache', 'HmIP-RF', 'A')).toBeNull();
+        // task 115: hmipserver lists both and answers -1 to each, so they are refused before the call
+        await expect(h.backend.request('devices.restoreConfig', 'HmIP-RF', 'A')).rejects.toThrow(
+            'HmIP-RF does not offer restoreConfigToDevice',
+        );
+        await expect(h.backend.request('devices.clearConfigCache', 'HmIP-RF', 'A')).rejects.toThrow(
+            'does not offer clearConfigCache',
+        );
+        expect(callsOf(h, 'HmIP-RF', 'restoreConfigToDevice')).toBe(0);
         expect(await h.backend.request('devices.updateFirmware', 'HmIP-RF', ['A'])).toEqual([true, false]);
         expect(await h.backend.request('devices.installFirmware', 'HmIP-RF', 'A')).toBe(true);
         expect(await h.backend.request('devices.replaceable', 'HmIP-RF', 'A')).toHaveLength(1);
         expect(await h.backend.request('devices.installMode.get', 'HmIP-RF')).toBe(42);
+        await h.backend.stop();
+    });
+
+    it('sends the BidCos maintenance calls only where system.listMethods lists them (task 115)', async () => {
+        let listed: unknown = ['init', 'system.listMethods', 'clearConfigCache'];
+        const h = await harness({
+            answers: {
+                'BidCos-RF': (method, params) => {
+                    switch (method) {
+                        case 'system.listMethods':
+                            return listed as RpcValue;
+                        case 'restoreConfigToDevice':
+                        case 'clearConfigCache':
+                            return '';
+                        default:
+                            return (defaultAnswers['BidCos-RF'] as Answer)(method, params);
+                    }
+                },
+            },
+        });
+        expect(await h.backend.request('interfaces.methodNames', 'BidCos-RF')).toEqual([
+            'init',
+            'system.listMethods',
+            'clearConfigCache',
+        ]);
+        await expect(h.backend.request('devices.restoreConfig', 'BidCos-RF', 'A')).rejects.toThrow(
+            'BidCos-RF does not offer restoreConfigToDevice',
+        );
+        expect(await h.backend.request('devices.clearConfigCache', 'BidCos-RF', 'A')).toBeNull();
+        expect(callsOf(h, 'BidCos-RF', 'restoreConfigToDevice')).toBe(0);
+        expect(callsOf(h, 'BidCos-RF', 'clearConfigCache')).toBe(1);
+
+        // a process without a usable list: the type decides, as before
+        listed = [];
+        await h.backend.request('interfaces.reconnect', 'BidCos-RF');
+        expect(await h.backend.request('interfaces.methodNames', 'BidCos-RF')).toBeNull();
+        expect(await h.backend.request('devices.restoreConfig', 'BidCos-RF', 'A')).toBeNull();
+        expect(callsOf(h, 'BidCos-RF', 'restoreConfigToDevice')).toBe(1);
         await h.backend.stop();
     });
 
@@ -2108,10 +2156,6 @@ describe('the service-message poll and methods an interface does not have (B-26,
         });
 
     const CUSTOM = {name: 'Custom', host: 'ccu.lan', port: 2121, protocol: 'xmlrpc', path: '/RPC3'};
-
-    function callsOf(h: Harness, interfaceName: string, method: string): number {
-        return h.calls.filter((call) => call.interfaceName === interfaceName && call.method === method).length;
-    }
 
     function noticesAbout(h: Harness, text: string): string[] {
         return h.events

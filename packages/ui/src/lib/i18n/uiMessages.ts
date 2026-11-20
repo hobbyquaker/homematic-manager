@@ -566,6 +566,11 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Nur bei BidCos-Schnittstellen verfügbar',
         en: 'Only available on BidCos interfaces',
     },
+    // Task 115: hs485d of an eQ-3 CCU3 has no restoreConfigToDevice/clearConfigCache.
+    'This interface does not offer this method': {
+        de: 'Diese Schnittstelle bietet diese Methode nicht an',
+        en: 'This interface does not offer this method',
+    },
     // Task 28: VirtualDevices and CUxD have no install mode.
     'This interface cannot pair devices': {
         de: 'Diese Schnittstelle kann keine Geräte anlernen',

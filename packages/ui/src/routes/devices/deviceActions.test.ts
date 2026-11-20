@@ -88,6 +88,22 @@ describe('the devices toolbar', () => {
         expect(tooltipOf('devices-restore')).toContain('BidCos');
     });
 
+    it('greys restore and clearConfigCache out where the interface does not list them (task 115)', async () => {
+        // hs485d of an eQ-3 CCU3 has neither; here BidCos-RF stands in for it
+        transport.respond('interfaces.methodNames', (name) =>
+            name === 'BidCos-RF' ? ['init', 'clearConfigCache'] : null,
+        );
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        await select('MEQ0123456');
+
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLButtonElement>('devices-restore').disabled).toBe(true);
+        });
+        expect(tooltipOf('devices-restore')).toContain('bietet diese Methode nicht an');
+        expect(screen.getByTestId<HTMLButtonElement>('devices-clear').disabled).toBe(false);
+        expect(transport.countOf('interfaces.methodNames')).toBe(1);
+    });
+
     it('sends restoreConfigToDevice and clearConfigCache for the selected device', async () => {
         transport.result('devices.restoreConfig', null).result('devices.clearConfigCache', null);
         await mountApp({transport, hash: '#/BidCos-RF/devices'});

@@ -13,6 +13,7 @@ import {
     interfacePort,
     interfaceProtocol,
     isKnownInterface,
+    offersConfigMaintenance,
     type InterfaceDefinition,
     REGA_LOCAL_PORT,
     REGA_PORT,
@@ -69,6 +70,36 @@ describe('the interface table', () => {
         // a user-defined interface, and one whose type is not known yet, get the dialog
         expect(canPairDevices('custom')).toBe(true);
         expect(canPairDevices('')).toBe(true);
+    });
+});
+
+describe('offersConfigMaintenance (task 115)', () => {
+    it('never offers the BidCos maintenance calls on HmIP, even when listMethods lists them', () => {
+        const hmipserver = ['init', 'restoreConfigToDevice', 'clearConfigCache'];
+        expect(offersConfigMaintenance('HmIP-RF', 'HmIP-RF', 'restoreConfigToDevice', hmipserver)).toBe(false);
+        expect(offersConfigMaintenance('my-hmip', 'custom', 'clearConfigCache', hmipserver)).toBe(false);
+        expect(offersConfigMaintenance('HmIP-RF', 'HmIP-RF', 'clearConfigCache', undefined)).toBe(false);
+    });
+
+    it('follows the interface list where there is one', () => {
+        // hs485d of an eQ-3 CCU3: neither method
+        expect(offersConfigMaintenance('BidCos-Wired', 'BidCos-Wired', 'restoreConfigToDevice', ['init'])).toBe(false);
+        expect(offersConfigMaintenance('BidCos-Wired', 'BidCos-Wired', 'clearConfigCache', new Set(['init']))).toBe(
+            false,
+        );
+        expect(
+            offersConfigMaintenance('BidCos-Wired', 'BidCos-Wired', 'restoreConfigToDevice', ['restoreConfigToDevice']),
+        ).toBe(true);
+        expect(offersConfigMaintenance('Homegear', 'custom', 'clearConfigCache', new Set(['clearConfigCache']))).toBe(
+            true,
+        );
+    });
+
+    it('falls back to BidCos only without a usable list', () => {
+        expect(offersConfigMaintenance('BidCos-RF', 'BidCos-RF', 'restoreConfigToDevice', undefined)).toBe(true);
+        expect(offersConfigMaintenance('BidCos-Wired', '', 'clearConfigCache', undefined)).toBe(true);
+        expect(offersConfigMaintenance('CUxD', 'CUxD', 'clearConfigCache', undefined)).toBe(false);
+        expect(offersConfigMaintenance('custom', '', 'clearConfigCache', undefined)).toBe(false);
     });
 });
 

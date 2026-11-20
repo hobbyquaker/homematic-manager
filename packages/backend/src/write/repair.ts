@@ -30,6 +30,7 @@ import {
     enumEncodingFor,
     isWritable,
     validateValue,
+    type ConfigMaintenanceMethod,
     type DeviceIndex,
     type ParameterDescription,
     type Paramset,
@@ -53,16 +54,13 @@ export interface ConfigRepairDeps {
     describe(interfaceName: string, address: string, paramset: string): Promise<ParamsetDescription>;
     read(interfaceName: string, method: string, params: readonly RpcOutValue[]): Promise<RpcValue>;
     write(interfaceName: string, method: string, params: readonly RpcOutValue[]): Promise<RpcValue>;
+    /**
+     * Task 115: does this interface offer `clearConfigCache` / `restoreConfigToDevice`? Never on
+     * hmipserver (it lists both and answers `-1 Generic error` to every call); elsewhere its own
+     * `system.listMethods` decides - hs485d of an eQ-3 CCU3 has neither (`offersConfigMaintenance`).
+     */
+    offers(interfaceName: string, method: ConfigMaintenanceMethod): Promise<boolean>;
     onProgress(progress: {done: number; total: number; last?: WriteResult}): void;
-}
-
-/**
- * `clearConfigCache` and `restoreConfigToDevice` exist in hmipserver's `system.listMethods` and
- * answer `-1 Generic error` to every call: they are BidCos methods. Offering them for an HmIP
- * device would only produce a fault the user cannot act on.
- */
-export function supportsBidcosMaintenance(interfaceName: string): boolean {
-    return interfaceName !== 'HmIP-RF';
 }
 
 /** A value that is certainly valid for this parameter, for a stored one that is not. */
@@ -155,15 +153,12 @@ export class ConfigRepair {
             this.#deps.onProgress({done, total: targets.length, last: channel.write});
         }
 
-        if (
-            options.bidcosRecovery !== undefined &&
-            options.bidcosRecovery !== 'none' &&
-            options.dryRun !== true &&
-            supportsBidcosMaintenance(interfaceName)
-        ) {
+        if (options.bidcosRecovery !== undefined && options.bidcosRecovery !== 'none' && options.dryRun !== true) {
             const method = options.bidcosRecovery === 'clearConfigCache' ? 'clearConfigCache' : 'restoreConfigToDevice';
-            await this.#deps.write(interfaceName, method, [deviceAddress]);
-            result.bidcosRecovery = options.bidcosRecovery;
+            if (await this.#deps.offers(interfaceName, method)) {
+                await this.#deps.write(interfaceName, method, [deviceAddress]);
+                result.bidcosRecovery = options.bidcosRecovery;
+            }
         }
 
         const after = options.dryRun === true ? before : await this.#configPending(interfaceName, deviceAddress);

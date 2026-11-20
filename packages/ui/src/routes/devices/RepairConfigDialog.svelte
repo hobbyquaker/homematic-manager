@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type {RepairConfigOptions, RepairConfigResult} from '@homematic-manager/core';
+    import {offersConfigMaintenance, type RepairConfigOptions, type RepairConfigResult} from '@homematic-manager/core';
 
     import Dialog from 'occulite-ui/components/Dialog';
     import {getStores} from '../../lib/stores/context.js';
@@ -23,7 +23,14 @@
     let loadToken = 0;
 
     const interfaceName = $derived(stores.app.selectedInterface);
-    const hmip = $derived(!stores.interfaces.typeOf(interfaceName).startsWith('BidCos'));
+    const interfaceType = $derived(stores.interfaces.typeOf(interfaceName));
+    const hmip = $derived(!interfaceType.startsWith('BidCos'));
+    /** Task 115: only the recovery calls the interface lists (hs485d of an eQ-3 CCU3 has none). */
+    const listedMethods = $derived(stores.interfaces.methodsOf(interfaceName));
+    const canClear = $derived(offersConfigMaintenance(interfaceName, interfaceType, 'clearConfigCache', listedMethods));
+    const canRestore = $derived(
+        offersConfigMaintenance(interfaceName, interfaceType, 'restoreConfigToDevice', listedMethods),
+    );
     const result = $derived(done ?? plan);
     const corrections = $derived(
         result?.channels.flatMap((channel) => channel.corrected.map((c) => ({channel, c}))) ?? [],
@@ -131,13 +138,13 @@
             <p data-testid="repair-nothing">{t('Nothing has to be corrected')}</p>
         {/if}
 
-        {#if !hmip}
+        {#if !hmip && (canClear || canRestore)}
             <label class="hmm-repair-recovery">
                 <span>{t('Additional BidCos recovery')}</span>
                 <select class="hmm-select" bind:value={bidcosRecovery} data-testid="repair-recovery">
                     <option value="none">—</option>
-                    <option value="clearConfigCache">clearConfigCache</option>
-                    <option value="restoreConfigToDevice">restoreConfigToDevice</option>
+                    {#if canClear}<option value="clearConfigCache">clearConfigCache</option>{/if}
+                    {#if canRestore}<option value="restoreConfigToDevice">restoreConfigToDevice</option>{/if}
                 </select>
             </label>
         {/if}

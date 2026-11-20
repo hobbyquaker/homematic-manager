@@ -208,6 +208,8 @@ export class MockTransport implements Transport {
         this.result('connection.pairCancel', null);
         this.result('interfaces.list', DEMO_INTERFACE_STATES);
         this.result('interfaces.reconnect', null);
+        // task 115: the demo's interfaces give no list, so the type decides as before
+        this.result('interfaces.methodNames', null);
         this.result('rega.state', DEMO_REGA_STATE);
         this.respond('devices.list', (interfaceName) =>
             isDemoInterface(interfaceName) ? DEMO_DEVICES[interfaceName] : [],

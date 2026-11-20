@@ -259,6 +259,35 @@ export function canPairDevices(type: string): boolean {
     return interfaceDefinition(type)?.installMode !== false;
 }
 
+/** The two BidCos maintenance calls of the device menu and the repair dialog (task 115). */
+export type ConfigMaintenanceMethod = 'restoreConfigToDevice' | 'clearConfigCache';
+
+/**
+ * Task 115: may `restoreConfigToDevice` or `clearConfigCache` be offered for this interface?
+ *
+ * - hmipserver lists both in `system.listMethods` and answers `-1 Generic error` to every call, so
+ *   an HmIP interface never offers them, whatever its list says.
+ * - Elsewhere the interface's own `system.listMethods` decides, as the CCU WebUI's rule does since
+ *   OpenCCU-Base restricted the button to the processes that have the method: hs485d of an eQ-3
+ *   CCU3 has neither, rfd and openccu-lite's hs485d have both.
+ * - Without a usable list (`undefined`: the process has no `system.listMethods`, or it failed) the
+ *   type decides as before: BidCos interfaces only.
+ */
+export function offersConfigMaintenance(
+    name: string,
+    type: string,
+    method: ConfigMaintenanceMethod,
+    listed: readonly string[] | ReadonlySet<string> | undefined,
+): boolean {
+    if (/hmip/i.test(name) || /hmip/i.test(type)) {
+        return false;
+    }
+    if (listed === undefined) {
+        return type.startsWith('BidCos') || (type === '' && name.startsWith('BidCos'));
+    }
+    return 'has' in listed ? listed.has(method) : listed.includes(method);
+}
+
 /**
  * The identity string passed to `init(url, ident)` and sent back with every callback, which is how
  * the callback server tells the interfaces apart. `hmm_<name>` for everything except CUxD, which

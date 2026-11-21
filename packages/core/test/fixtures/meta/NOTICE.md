@@ -1,8 +1,9 @@
 # The openccu-lite conformance corpus
 
-A verbatim copy of `fixtures/` from [openccu-lite](https://github.com/hobbyquaker/openccu-lite)
-(Apache-2.0, © Sebastian Raff), taken from `occulited` commit `018591a` on 2026-09-11 (a fresh
-store starts with `room` and `function` only; `floor` is no default any more).
+A verbatim copy of `fixtures/` from [occulited](https://github.com/openccu-lite/occulited), the
+system service of openccu-lite (Apache-2.0, © Sebastian Raff), taken from `occulited` commit
+`4076d0c1` on 2026-11-21 (cases 10-12: Control's icons in the metadata namespace `control`; case 13:
+a name cannot be cleared; serial numbers anonymised).
 
 It is the contract of that project's **D-16**: the metadata store has two implementations - Go in
 `occulited`, TypeScript in `packages/core/src/meta/` here - and both run this corpus in their own
@@ -13,9 +14,9 @@ bug. `CORPUS.md` is the upstream README and describes the file layout and the op
 checkout, and the upstream directory when `OPENCCU_LITE_FIXTURES` points at it:
 
 ```sh
-OPENCCU_LITE_FIXTURES=~/repos/openccu-lite/fixtures npm test -w @homematic-manager/core
+OPENCCU_LITE_FIXTURES=~/repos/occulited/fixtures npm test -w @homematic-manager/core
 ```
 
-`node scripts/sync-meta-fixtures.mjs ~/repos/openccu-lite` refreshes the copy and says what changed.
+`node scripts/sync-meta-fixtures.mjs ~/repos/occulited` refreshes the copy and says what changed.
 A refresh is a commit of its own, and a fixture that starts failing after one is a specification
 change to read before it is a bug to fix.

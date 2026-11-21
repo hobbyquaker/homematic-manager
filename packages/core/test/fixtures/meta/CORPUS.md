@@ -19,7 +19,7 @@ semantics without changing a fixture here, that is the bug.
   "title": "what this proves",
   "start": "empty" | { ...document... },
   "ops": [
-    { "op": "object.set", "ref": "BidCos-RF.JEQ0230153:1", "body": {"name": "Heizung"}, "expect": {"ok": true, "revision": 1} },
+    { "op": "object.set", "ref": "BidCos-RF.JEQ9000001:1", "body": {"name": "Heizung"}, "expect": {"ok": true, "revision": 1} },
     { "op": "objects.query", "enum": "room/eg", "expect": {"refs": ["..."]} },
     { "op": "node.delete", "path": "room/eg", "expect": {"error": "has-members"} }
   ],

@@ -4,10 +4,10 @@
     "format": 1,
     "revision": 12,
     "objects": {
-      "BidCos-RF.JEQ0230153": {
+      "BidCos-RF.JEQ9000001": {
         "name": "Thermostat Bad"
       },
-      "BidCos-RF.JEQ0230153:1": {
+      "BidCos-RF.JEQ9000001:1": {
         "name": "Thermostat Bad:1",
         "enums": [
           "room/og/bad",
@@ -159,7 +159,7 @@
     },
     {
       "op": "object.get",
-      "ref": "BidCos-RF.JEQ0230153:1",
+      "ref": "BidCos-RF.JEQ9000001:1",
       "expect": {
         "value": {
           "name": "Thermostat Bad:1",
@@ -183,7 +183,7 @@
     },
     {
       "op": "object.get",
-      "ref": "BidCos-RF.JEQ0230153:1",
+      "ref": "BidCos-RF.JEQ9000001:1",
       "expect": {
         "value": {
           "enums": [

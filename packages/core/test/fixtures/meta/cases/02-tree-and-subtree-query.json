@@ -4,10 +4,10 @@
     "format": 1,
     "revision": 12,
     "objects": {
-      "BidCos-RF.JEQ0230153": {
+      "BidCos-RF.JEQ9000001": {
         "name": "Thermostat Bad"
       },
-      "BidCos-RF.JEQ0230153:1": {
+      "BidCos-RF.JEQ9000001:1": {
         "name": "Thermostat Bad:1",
         "enums": [
           "room/og/bad",
@@ -119,7 +119,7 @@
       "enum": "room",
       "expect": {
         "refs": [
-          "BidCos-RF.JEQ0230153:1",
+          "BidCos-RF.JEQ9000001:1",
           "HmIP-RF.000A1B2C3D4E5F:4",
           "HmIP-RF.0011223344AABB:1"
         ]

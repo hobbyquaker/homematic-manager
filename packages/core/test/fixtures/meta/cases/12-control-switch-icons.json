@@ -1,0 +1,121 @@
+{
+  "title": "Control's switch icons per state (occulited task 110) are the control namespace's icons key with on and off: beside the old icon key, which stays the fallback for both states; written whole, removed with the namespace; the store does not interpret it",
+  "start": "empty",
+  "ops": [
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.S:3",
+      "body": {
+        "name": "Stehlampe",
+        "meta": {
+          "control": {
+            "icon": "light_floor_lamp"
+          }
+        }
+      },
+      "expect": {
+        "ok": true,
+        "revision": 1
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.S:3",
+      "body": {
+        "meta": {
+          "control": {
+            "icon": "light_floor_lamp",
+            "icons": {
+              "on": "light_light_dim_100"
+            }
+          }
+        }
+      },
+      "expect": {
+        "ok": true,
+        "revision": 2
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.S:3",
+      "body": {
+        "meta": {
+          "control": {
+            "icon": "light_floor_lamp",
+            "icons": {
+              "off": "light_light_dim_00",
+              "on": "light_light_dim_100"
+            }
+          }
+        }
+      },
+      "expect": {
+        "ok": true,
+        "revision": 3
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "HmIP-RF.S:3",
+      "expect": {
+        "value": {
+          "name": "Stehlampe",
+          "meta": {
+            "control": {
+              "icon": "light_floor_lamp",
+              "icons": {
+                "off": "light_light_dim_00",
+                "on": "light_light_dim_100"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.S:3",
+      "body": {
+        "meta": {
+          "control": {
+            "icon": "light_floor_lamp",
+            "icons": {
+              "off": "light_light_dim_00",
+              "on": "light_light_dim_100"
+            }
+          }
+        }
+      },
+      "expect": {
+        "ok": true,
+        "unchanged": true
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.S:3",
+      "body": {
+        "meta": {
+          "control": null
+        }
+      },
+      "expect": {
+        "ok": true,
+        "revision": 4
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "HmIP-RF.S:3",
+      "expect": {
+        "value": {
+          "name": "Stehlampe"
+        }
+      }
+    }
+  ],
+  "end": {
+    "revision": 4
+  }
+}

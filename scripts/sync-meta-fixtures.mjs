@@ -2,7 +2,7 @@
 /**
  * Refreshes the vendored copy of openccu-lite's conformance corpus.
  *
- *   node scripts/sync-meta-fixtures.mjs ~/repos/openccu-lite
+ *   node scripts/sync-meta-fixtures.mjs ~/repos/occulited
  *
  * The corpus is that project's D-16 contract - `occulited` in Go and `packages/core/src/meta/` here
  * both run it - and this repository keeps a copy so that CI needs no second checkout. A refresh is
@@ -23,7 +23,7 @@ const check = args.includes('--check');
 const source = args.find((argument) => !argument.startsWith('--'));
 
 if (!source) {
-    console.error('usage: node scripts/sync-meta-fixtures.mjs <openccu-lite checkout> [--check]');
+    console.error('usage: node scripts/sync-meta-fixtures.mjs <occulited checkout> [--check]');
     process.exit(2);
 }
 

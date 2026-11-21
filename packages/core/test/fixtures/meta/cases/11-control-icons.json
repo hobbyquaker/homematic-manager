@@ -1,0 +1,136 @@
+{
+  "title": "Control's contact icons per state (occulited task 105) are the control namespace's icons key: set beside the icon key, one state replaced by writing the namespace whole, removed with the namespace; the store does not interpret it",
+  "start": "empty",
+  "ops": [
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.B:1",
+      "body": {
+        "name": "Fenster Bad",
+        "meta": {
+          "control": {
+            "icons": {
+              "open": "fts_window_2w_open"
+            }
+          }
+        }
+      },
+      "expect": {
+        "ok": true,
+        "revision": 1
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "HmIP-RF.B:1",
+      "expect": {
+        "value": {
+          "name": "Fenster Bad",
+          "meta": {
+            "control": {
+              "icons": {
+                "open": "fts_window_2w_open"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.B:1",
+      "body": {
+        "meta": {
+          "control": {
+            "icons": {
+              "open": "fts_window_2w_open",
+              "tilted": "fts_window_2w_tilt"
+            }
+          }
+        }
+      },
+      "expect": {
+        "ok": true,
+        "revision": 2
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.B:1",
+      "body": {
+        "meta": {
+          "control": {
+            "icons": {
+              "open": "fts_window_2w_open",
+              "tilted": "fts_window_2w_tilt"
+            }
+          }
+        }
+      },
+      "expect": {
+        "ok": true,
+        "unchanged": true
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.B:1",
+      "body": {
+        "meta": {
+          "control": {
+            "icon": "fts_window_2w",
+            "icons": {
+              "tilted": "fts_window_2w_tilt"
+            }
+          }
+        }
+      },
+      "expect": {
+        "ok": true,
+        "revision": 3
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "HmIP-RF.B:1",
+      "expect": {
+        "value": {
+          "name": "Fenster Bad",
+          "meta": {
+            "control": {
+              "icon": "fts_window_2w",
+              "icons": {
+                "tilted": "fts_window_2w_tilt"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "HmIP-RF.B:1",
+      "body": {
+        "meta": {
+          "control": null
+        }
+      },
+      "expect": {
+        "ok": true,
+        "revision": 4
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "HmIP-RF.B:1",
+      "expect": {
+        "value": {
+          "name": "Fenster Bad"
+        }
+      }
+    }
+  ],
+  "end": {
+    "revision": 4
+  }
+}

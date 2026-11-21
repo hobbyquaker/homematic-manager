@@ -8,10 +8,10 @@
         "format": 1,
         "revision": 99,
         "objects": {
-          "BidCos-RF.JEQ0230153": {
+          "BidCos-RF.JEQ9000001": {
             "name": "Thermostat Bad"
           },
-          "BidCos-RF.JEQ0230153:1": {
+          "BidCos-RF.JEQ9000001:1": {
             "name": "Thermostat Bad:1",
             "enums": [
               "room/og/bad",
@@ -211,7 +211,7 @@
         }
       },
       "delete": [
-        "BidCos-RF.JEQ0230153"
+        "BidCos-RF.JEQ9000001"
       ],
       "expect": {
         "ok": true,

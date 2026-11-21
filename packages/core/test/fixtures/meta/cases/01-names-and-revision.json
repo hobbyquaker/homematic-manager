@@ -4,7 +4,7 @@
   "ops": [
     {
       "op": "object.set",
-      "ref": "BidCos-RF.JEQ0230153:1",
+      "ref": "BidCos-RF.JEQ9000001:1",
       "body": {
         "name": "Heizung Bad"
       },
@@ -15,7 +15,7 @@
     },
     {
       "op": "object.set",
-      "ref": "BidCos-RF.JEQ0230153:1",
+      "ref": "BidCos-RF.JEQ9000001:1",
       "body": {
         "name": "Heizung Bad"
       },
@@ -26,7 +26,7 @@
     },
     {
       "op": "object.set",
-      "ref": "BidCos-RF.JEQ0230153:1",
+      "ref": "BidCos-RF.JEQ9000001:1",
       "body": {
         "name": "  Heizung Bad  "
       },
@@ -37,7 +37,7 @@
     },
     {
       "op": "object.set",
-      "ref": "BidCos-RF.JEQ0230153:1",
+      "ref": "BidCos-RF.JEQ9000001:1",
       "body": {
         "name": "Thermostat Bad"
       },
@@ -48,7 +48,7 @@
     },
     {
       "op": "object.get",
-      "ref": "BidCos-RF.JEQ0230153:1",
+      "ref": "BidCos-RF.JEQ9000001:1",
       "expect": {
         "value": {
           "name": "Thermostat Bad"
@@ -126,7 +126,7 @@
   "end": {
     "revision": 2,
     "objects": {
-      "BidCos-RF.JEQ0230153:1": {
+      "BidCos-RF.JEQ9000001:1": {
         "name": "Thermostat Bad"
       }
     }

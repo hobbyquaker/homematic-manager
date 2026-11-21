@@ -1,0 +1,89 @@
+{
+  "title": "A name cannot be cleared: an empty or blank name is refused on an existing object too and changes nothing; forgetting the entry is DELETE (occulited B-117)",
+  "start": "empty",
+  "ops": [
+    {
+      "op": "node.create",
+      "enum": "room",
+      "parent": null,
+      "id": "kueche",
+      "name": "Küche",
+      "expect": {
+        "ok": true,
+        "revision": 1
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "BidCos-RF.BidCoS-RF:3",
+      "body": {
+        "name": "Dimmer Küche ▲",
+        "enums": ["room/kueche"]
+      },
+      "expect": {
+        "ok": true,
+        "revision": 2
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "BidCos-RF.BidCoS-RF:3",
+      "body": {
+        "name": ""
+      },
+      "expect": {
+        "error": "invalid-name"
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "BidCos-RF.BidCoS-RF:3",
+      "body": {
+        "name": "   "
+      },
+      "expect": {
+        "error": "invalid-name"
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "BidCos-RF.BidCoS-RF:3",
+      "expect": {
+        "value": {
+          "name": "Dimmer Küche ▲",
+          "enums": ["room/kueche"]
+        }
+      }
+    },
+    {
+      "op": "object.set",
+      "ref": "BidCos-RF.BidCoS-RF:3",
+      "body": {
+        "name": "BidCoS-RF:3"
+      },
+      "expect": {
+        "ok": true,
+        "revision": 3
+      }
+    },
+    {
+      "op": "object.delete",
+      "ref": "BidCos-RF.BidCoS-RF:3",
+      "expect": {
+        "ok": true,
+        "revision": 4
+      }
+    },
+    {
+      "op": "object.get",
+      "ref": "BidCos-RF.BidCoS-RF:3",
+      "expect": {
+        "error": "unknown-object"
+      }
+    }
+  ],
+  "end": {
+    "revision": 4,
+    "objects": {}
+  }
+}

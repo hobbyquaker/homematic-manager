@@ -210,6 +210,41 @@ export interface MetaHmipKeyDecline {
     readonly variant: string;
 }
 
+/**
+ * Task 88: why an HmIP device's pairing went the way it did - one device of openccu-lite's
+ * `GET /api/system/v1/radio/hmip/pairing` (occulited task 158), read from hmipserver's own lines.
+ */
+export interface MetaHmipPairingAttempt {
+    /** The device's SGTIN, as on its sticker. */
+    readonly sgtin: string;
+    /** The device's address, when the system says it. */
+    readonly address?: string;
+    /** What hmipserver's lines say: `included`, `asked`, `key-mismatch`, `rejected`, `aborted`, … */
+    readonly outcome: string;
+    /**
+     * What it means under the system's key-server mode: `key-mismatch`, `key-invalid`,
+     * `other-device`, `no-install-mode`, `unsupported-device`, `no-key`, `key-server-refused`,
+     * `key-server-unreachable`, `incomplete`; absent for a pairing that worked. A reason this
+     * application does not know yet is kept as it came, with the system's own sentence.
+     */
+    readonly reason?: string;
+    /** The pairing failed for a reason that needs a hand (what the system's Status page warns of). */
+    readonly failed: boolean;
+    /** The time of the device's newest line (RFC 3339), when the system says it. */
+    readonly at?: string;
+    /** The key server's HTTP status, when it answered one instead of the device's key. */
+    readonly http_status?: number;
+    /** The system's own sentence for the reason, in its two languages. */
+    readonly message?: {readonly en: string; readonly de: string};
+}
+
+/** Task 88: `GET /api/system/v1/radio/hmip/pairing`'s answer, as far as the pairing dialog needs it. */
+export interface MetaHmipPairingAttempts {
+    /** The system's clock as it answered: the next ask passes it back as `since`, so two clocks never meet. */
+    readonly now: string;
+    readonly attempts: readonly MetaHmipPairingAttempt[];
+}
+
 /** What `GET /api/meta/v1/version` answers - the runtime detection of the porting kit. */
 export interface MetaVersion {
     readonly api: string;

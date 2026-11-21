@@ -670,6 +670,13 @@ export class Backend {
                 await this.#metaReady?.catch(() => undefined);
                 return (await this.#meta?.hmipKeyDeclines()) ?? null;
             }
+            case 'meta.pairingAttempts': {
+                // task 88: as `meta.keyDeclines`
+                await this.#metaReady?.catch(() => undefined);
+                // a `since` that is no string is ignored rather than sent: the system answers `400` for it
+                const since = typeof params[0] === 'string' ? params[0] : undefined;
+                return (await this.#meta?.hmipPairingAttempts(since)) ?? null;
+            }
             case 'meta.export':
                 return (await this.#requireMeta()).document();
             case 'meta.import':

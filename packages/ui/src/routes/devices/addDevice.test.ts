@@ -150,8 +150,11 @@ describe('the add-device dialog', () => {
     });
 
     /** Opens the dialog on HmIP-RF once its devices are there. */
-    async function openOnHmip(): Promise<void> {
+    async function openOnHmip(language?: 'de' | 'en'): Promise<void> {
         const {stores} = await mountApp({transport, hash: '#/HmIP-RF/devices'});
+        if (language !== undefined) {
+            stores.i18n.language = language;
+        }
         await waitFor(() => {
             expect(stores.devices.devices('HmIP-RF').length).toBeGreaterThan(0);
         });
@@ -382,10 +385,10 @@ describe('the add-device dialog', () => {
     });
 
     /*
-     * Task 88: an HmIP device that answers with a key hmipserver declines. On openccu-lite the
-     * system shows that as its warning `hmip-key-declined`; the dialog takes what the system knew
-     * when the window opened, asks again every fifth tick, and a decline that is new is this
-     * window's: the device did answer, so "nothing joined" is not said.
+     * Task 88: an HmIP device that answers with a key hmipserver declines. An openccu-lite without
+     * the pairing route (before 2.0.0-beta.11) shows that only as its warning `hmip-key-declined`;
+     * the dialog takes what the system knew when the window opened, asks again every fifth tick, and
+     * a decline that is new is this window's: the device did answer, so "nothing joined" is not said.
      */
     const SGTIN = '3014F711A000000000000088';
     const OLD_DECLINE = {sgtin: '3014F711A000000000000002', variant: '3014F711A000000000000002@2026-10-03T09:00:00Z'};
@@ -408,7 +411,7 @@ describe('the add-device dialog', () => {
         await fireEvent.click(screen.getByTestId('add-device-start'));
     }
 
-    it('says the device key does not match when the system declined it during the window (task 88)', async () => {
+    it('says the device key does not match when a system without the pairing route declined it during the window (task 88)', async () => {
         vi.useFakeTimers({shouldAdvanceTime: true, toFake: ['setInterval', 'clearInterval']});
         try {
             let left = 60;
@@ -419,7 +422,7 @@ describe('the add-device dialog', () => {
             // the system already knew a decline of another device when the window opened
             let declines: unknown[] = [OLD_DECLINE];
             transport.respond('meta.keyDeclines', () => declines as never);
-            await openOnHmip();
+            await openOnHmip('de');
             await startWithKey();
             await waitFor(() => {
                 expect(screen.getByTestId('add-device-countdown')).toBeTruthy();
@@ -431,15 +434,16 @@ describe('the add-device dialog', () => {
             await waitFor(() => {
                 expect(transport.countOf('meta.keyDeclines')).toBe(2);
             });
-            expect(screen.queryByTestId('add-device-key-declined')).toBeNull();
+            expect(screen.queryByTestId('add-device-pairing-failed')).toBeNull();
 
             // the device asks and is declined: the next fifth tick says so, the window keeps running
             declines = [OLD_DECLINE, DECLINE];
             await vi.advanceTimersByTimeAsync(5000);
-            const block = await waitFor(() => screen.getByTestId('add-device-key-declined'));
+            const block = await waitFor(() => screen.getByTestId('add-device-pairing-failed'));
+            expect(block.dataset['reason']).toBe('key-mismatch');
             expect(block.textContent).toContain('Der Geräteschlüssel passt nicht');
             expect(block.textContent).toContain(
-                `Das Gerät ${SGTIN} hat sich gemeldet, aber der Geräteschlüssel passt nicht. Schlüssel prüfen (QR-Code / KEY) und erneut anlernen.`,
+                `Das Gerät ${SGTIN} hat geantwortet, aber der dem System dafür angegebene Schlüssel (beim Anlernen eingegeben oder auf der Seite Schlüssel gespeichert) passt nicht zu ihm.`,
             );
             expect(screen.getByTestId('add-device-countdown')).toBeTruthy();
 
@@ -453,19 +457,21 @@ describe('the add-device dialog', () => {
             });
             expect(screen.getByTestId<HTMLInputElement>('add-device-sgtin').value).toBe(SGTIN);
             expect(screen.queryByTestId('add-device-countdown')).toBeNull();
-            expect(screen.getByTestId('add-device-key-declined')).toBeTruthy();
+            expect(screen.getByTestId('add-device-pairing-failed')).toBeTruthy();
             expect(screen.queryByTestId('add-device-nothing-joined')).toBeNull();
 
             // a new start takes it away; the decline it knew is the new window's baseline
             await fireEvent.click(screen.getByTestId('add-device-start'));
             await waitFor(() => {
-                expect(screen.queryByTestId('add-device-key-declined')).toBeNull();
+                expect(screen.queryByTestId('add-device-pairing-failed')).toBeNull();
             });
             await vi.advanceTimersByTimeAsync(5000);
             await waitFor(() => {
                 expect(transport.countOf('meta.keyDeclines')).toBeGreaterThanOrEqual(5);
             });
-            expect(screen.queryByTestId('add-device-key-declined')).toBeNull();
+            expect(screen.queryByTestId('add-device-pairing-failed')).toBeNull();
+            // the route was asked once per window, and its answer (none) sent the dialog to the warnings
+            expect(transport.countOf('meta.pairingAttempts')).toBe(2);
         } finally {
             vi.useRealTimers();
         }
@@ -481,7 +487,7 @@ describe('the add-device dialog', () => {
             expect(transport.countOf('meta.keyDeclines')).toBe(1);
         });
         declines = [DECLINE];
-        const block = await waitFor(() => screen.getByTestId('add-device-key-declined'), {timeout: 3000});
+        const block = await waitFor(() => screen.getByTestId('add-device-pairing-failed'), {timeout: 3000});
         expect(block.textContent).toContain(SGTIN);
         expect(screen.queryByTestId('add-device-nothing-joined')).toBeNull();
 
@@ -496,20 +502,217 @@ describe('the add-device dialog', () => {
     });
 
     it('names the key as a cause when a key was given and nothing can say it was declined (task 88)', async () => {
-        // a CCU: no warnings API, so nothing is asked during the window
-        await openOnHmip();
+        // a CCU: no pairing route, no warnings API, so nothing is asked during the window
+        await openOnHmip('de');
         await startWithKey();
         const notice = await waitFor(() => screen.getByTestId('add-device-nothing-joined'), {timeout: 3000});
         expect(notice.textContent).toContain('passt der angegebene Schlüssel nicht zu ihm');
         expect(notice.textContent).toContain('Werkseinstellungen');
         expect(transport.countOf('meta.keyDeclines')).toBe(1);
+        expect(transport.countOf('meta.pairingAttempts')).toBe(1);
 
         // without a key, the old text
         await startAnyDevice();
         await waitFor(() => {
             expect(screen.getByTestId('add-device-nothing-joined').textContent).not.toContain('Schlüssel');
         });
-        expect(screen.queryByTestId('add-device-key-declined')).toBeNull();
+        expect(screen.queryByTestId('add-device-pairing-failed')).toBeNull();
+    });
+
+    /*
+     * Task 88: openccu-lite 2.0.0-beta.11 and later say why a pairing failed: `GET
+     * /api/system/v1/radio/hmip/pairing` (occulited task 158). The dialog keeps the route's `now` when
+     * the window opens, passes it back as `since` every fifth tick and once more as the window
+     * closes, and shows one block per device of the window with the reason in the system's words.
+     */
+    const NOW = '2026-11-21T10:45:00.5+01:00';
+    function attempt(sgtin: string, reason: string | undefined, extra: Record<string, unknown> = {}): unknown {
+        return {
+            sgtin,
+            address: sgtin.slice(-14),
+            outcome: reason ?? 'included',
+            ...(reason === undefined ? {} : {reason}),
+            failed: reason !== undefined && !['other-device', 'no-install-mode', 'incomplete'].includes(reason),
+            ...extra,
+        };
+    }
+
+    it("shows the system's reason for a failed pairing during the window, and passes its own clock back (task 88)", async () => {
+        vi.useFakeTimers({shouldAdvanceTime: true, toFake: ['setInterval', 'clearInterval']});
+        try {
+            let left = 60;
+            transport.respond('devices.installMode.get', () => {
+                left -= 1;
+                return left;
+            });
+            let attempts: unknown[] = [];
+            const since: unknown[] = [];
+            transport.respond('meta.pairingAttempts', (...params: unknown[]) => {
+                since.push(params[0]);
+                return {now: since.length === 1 ? NOW : '2026-11-21T10:46:00Z', attempts} as never;
+            });
+            await openOnHmip('de');
+            await startWithKey();
+            await waitFor(() => {
+                expect(since).toEqual([undefined]);
+            });
+
+            // a device that is still asking, and one that asked while no window was open: nothing to say yet
+            attempts = [attempt(SGTIN, 'incomplete'), attempt('3014F711A000000000000009', 'no-install-mode')];
+            await vi.advanceTimersByTimeAsync(5000);
+            await waitFor(() => {
+                expect(since).toEqual([undefined, NOW]);
+            });
+            expect(screen.queryByTestId('add-device-pairing-failed')).toBeNull();
+
+            // the key server was not reached: said at the next fifth tick, the window keeps running
+            attempts = [attempt(SGTIN, 'key-server-unreachable')];
+            await vi.advanceTimersByTimeAsync(5000);
+            const block = await waitFor(() => screen.getByTestId('add-device-pairing-failed'));
+            expect(since).toEqual([undefined, NOW, NOW]);
+            expect(block.dataset['reason']).toBe('key-server-unreachable');
+            expect(block.dataset['sgtin']).toBe(SGTIN);
+            expect(block.textContent).toContain('Der Schlüsselserver von eQ-3 wurde nicht erreicht');
+            expect(block.textContent).toContain(
+                `Das Gerät ${SGTIN} wollte sich anmelden, aber das System hat den Schlüsselserver von eQ-3 nicht erreicht (secgtw.homematic.com, Port 8443).`,
+            );
+            // only a wrong key has the way to the key entry
+            expect(screen.queryByTestId('add-device-key-declined-enter')).toBeNull();
+            expect(screen.getByTestId('add-device-countdown')).toBeTruthy();
+
+            // it tried again and was paired: its block goes with the next answer
+            attempts = [attempt(SGTIN, undefined)];
+            await vi.advanceTimersByTimeAsync(5000);
+            await waitFor(() => {
+                expect(screen.queryByTestId('add-device-pairing-failed')).toBeNull();
+            });
+            expect(transport.countOf('meta.keyDeclines')).toBe(0);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    const REASONS: {reason: string; extra?: Record<string, unknown>; de: string[]; en: string[]}[] = [
+        {
+            reason: 'key-mismatch',
+            de: ['Der Geräteschlüssel passt nicht', 'passt nicht zu ihm. Den Schlüssel prüfen (QR-Code oder KEY'],
+            en: ['The device key does not match', 'does not match it. Check the key (QR code or KEY on its sticker)'],
+        },
+        {
+            reason: 'key-invalid',
+            de: ['Der gespeicherte Schlüssel ist ungültig', 'ist kein gültiger Geräteschlüssel (falsche Länge)'],
+            en: ['The stored key is not valid', 'is no valid device key (wrong length)'],
+        },
+        {
+            reason: 'other-device',
+            de: ['für eine andere SGTIN geöffnet', 'Die beim Anlernen eingegebene SGTIN mit dem Aufkleber'],
+            en: ['The pairing was open for another SGTIN', 'Compare the SGTIN entered for the pairing'],
+        },
+        {
+            reason: 'no-key',
+            de: ['Das System hat keinen Schlüssel für das Gerät', 'im lokalen Schlüsselmodus'],
+            en: ['The system has no key for the device', "in local key mode eQ-3's key server is never asked"],
+        },
+        {
+            reason: 'key-server-refused',
+            de: ['hat das Gerät abgelehnt', 'noch an einer anderen Zentrale angelernt'],
+            en: ["eQ-3's key server refused the device", 'still paired with another central unit'],
+        },
+        {
+            reason: 'key-server-unreachable',
+            de: ['wurde nicht erreicht', 'Die Internetverbindung, die DNS-Einstellungen und die Firewall prüfen'],
+            en: [
+                "eQ-3's key server was not reached",
+                'Check the internet connection, the DNS settings and the firewall',
+            ],
+        },
+        {
+            reason: 'key-server-unreachable',
+            extra: {http_status: 503},
+            de: ['wurde nicht erreicht', 'hat mit dem HTTP-Status 503 statt mit dem Schlüssel'],
+            en: ["eQ-3's key server was not reached", 'answered with HTTP status 503 instead of the device'],
+        },
+        {
+            reason: 'unsupported-device',
+            de: ['Der Gerätetyp ist noch nicht bekannt', 'Ein System-Update mit einer neueren HmIP-Software'],
+            en: ['The device type is not known yet', 'A system update with a newer HmIP software brings it'],
+        },
+        {
+            reason: 'incomplete',
+            de: ['Das Anlernen wurde nicht abgeschlossen', 'Das Gerät nahe am System in den Anlernmodus bringen'],
+            en: ['The pairing did not complete', 'Keep it close to the system'],
+        },
+        {
+            // a reason a newer system knows: its own sentence, in the UI's language
+            reason: 'duty-cycle',
+            extra: {
+                message: {en: `The radio was too busy for ${SGTIN}.`, de: `Der Funk war für ${SGTIN} ausgelastet.`},
+            },
+            de: ['Das Anlernen ist fehlgeschlagen', 'Der Funk war für'],
+            en: ['The pairing failed', 'The radio was too busy for'],
+        },
+    ];
+
+    for (const {reason, extra, de, en} of REASONS) {
+        for (const [language, texts] of [
+            ['de', de],
+            ['en', en],
+        ] as const) {
+            it(`says ${reason}${extra?.['http_status'] === undefined ? '' : ' with a status'} in ${language} as the window closes (task 88)`, async () => {
+                // getInstallMode answers 0: the first tick finds the window closed, the last look finds the reason
+                let attempts: unknown[] = [];
+                transport.respond('meta.pairingAttempts', () => ({now: NOW, attempts}) as never);
+                await openOnHmip(language);
+                await startAnyDevice();
+                await waitFor(() => {
+                    expect(transport.countOf('meta.pairingAttempts')).toBe(1);
+                });
+                attempts = [attempt(SGTIN, reason, extra), attempt('3014F711A000000000000002', undefined)];
+                const block = await waitFor(() => screen.getByTestId('add-device-pairing-failed'), {timeout: 3000});
+                expect(block.dataset['reason']).toBe(reason);
+                expect(block.textContent).toContain(SGTIN);
+                for (const text of texts) {
+                    expect(block.textContent).toContain(text);
+                }
+                // one block: the device that was paired has none
+                expect(screen.getAllByTestId('add-device-pairing-failed')).toHaveLength(1);
+                expect(screen.queryByTestId('add-device-nothing-joined')).toBeNull();
+                expect(screen.queryByTestId('add-device-key-declined-enter') !== null).toBe(reason === 'key-mismatch');
+                expect(transport.countOf('meta.keyDeclines')).toBe(0);
+            });
+        }
+    }
+
+    it("says nothing joined when the route has nothing for the window, and the key entry for the route's key mismatch (task 88)", async () => {
+        let attempts: unknown[] = [];
+        transport.respond('meta.pairingAttempts', () => ({now: NOW, attempts}) as never);
+        await openOnHmip('en');
+        await startAnyDevice();
+        const notice = await waitFor(() => screen.getByTestId('add-device-nothing-joined'), {timeout: 3000});
+        expect(notice.textContent).toContain('no device has joined');
+        expect(screen.queryByTestId('add-device-pairing-failed')).toBeNull();
+
+        // a request at the wrong moment is no reason: still nothing joined
+        attempts = [attempt('3014F711A000000000000009', 'no-install-mode')];
+        await startAnyDevice();
+        await waitFor(() => {
+            expect(transport.countOf('meta.pairingAttempts')).toBeGreaterThanOrEqual(4);
+        });
+        await waitFor(() => screen.getByTestId('add-device-nothing-joined'), {timeout: 3000});
+        expect(screen.queryByTestId('add-device-pairing-failed')).toBeNull();
+
+        // the key mismatch from the route leads to the key entry
+        attempts = [attempt(SGTIN, 'key-mismatch')];
+        await startAnyDevice();
+        await waitFor(() => screen.getByTestId('add-device-pairing-failed'), {timeout: 3000});
+        await fireEvent.click(screen.getByTestId('add-device-key-declined-enter'));
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLSelectElement>('add-device-hmip-mode').value).toBe('KEY');
+        });
+        expect(screen.getByTestId<HTMLInputElement>('add-device-sgtin').value).toBe(SGTIN);
+        await waitFor(() => {
+            expect(document.activeElement).toBe(screen.getByTestId('add-device-key'));
+        });
     });
 
     /**

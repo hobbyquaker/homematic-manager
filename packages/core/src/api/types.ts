@@ -17,6 +17,7 @@ import type {
     MetaEnum,
     MetaHmipKeyDecline,
     MetaHmipPairing,
+    MetaHmipPairingAttempts,
     MetaImportMode,
     MetaNodePatch,
 } from '../meta/types.js';
@@ -1112,6 +1113,13 @@ export interface ApiMethods {
      * CCU, no connection, a system without the warnings API, a credential it refuses, no answer.
      */
     'meta.keyDeclines': {params: []; result: MetaHmipKeyDecline[] | null};
+    /**
+     * Task 88: the HmIP pairing attempts the system read from hmipserver's lines (openccu-lite's
+     * `GET /api/system/v1/radio/hmip/pairing`), all of this boot or those since `since` - the `now`
+     * of an earlier answer. `null` wherever nothing can say it: a CCU, no connection, a system
+     * without the route (the dialog then asks `meta.keyDeclines`), a credential it refuses, no answer.
+     */
+    'meta.pairingAttempts': {params: [since?: string]; result: MetaHmipPairingAttempts | null};
     /** The whole document, for a backup or a move between installations. */
     'meta.export': {params: []; result: MetaDocument};
     'meta.import': {params: [document: unknown, mode?: MetaImportMode]; result: null};

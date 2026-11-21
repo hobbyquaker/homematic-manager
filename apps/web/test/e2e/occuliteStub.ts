@@ -55,6 +55,15 @@ export interface OcculiteStub {
     readonly warnings: StubWarning[];
     /** Task 88: how often the warnings were read. */
     readonly warningReads: () => number;
+    /**
+     * Task 88: what `GET /api/system/v1/radio/hmip/pairing` answers as its attempts now, or
+     * `undefined` when the stub is a system from before the route (it answers 404 then). A test
+     * pushes an attempt into it while the install mode runs, as occulited would once hmipserver
+     * logged the device's lines.
+     */
+    readonly pairing: StubPairingAttempt[] | undefined;
+    /** Task 88: the `since` of every read of the pairing route, `''` for none. */
+    readonly pairingSince: string[];
     close(): Promise<void>;
 }
 
@@ -83,15 +92,37 @@ export interface StubWarning {
     href?: string;
 }
 
+/** One device's attempt, as occulited's `GET /radio/hmip/pairing` lists it (occulited task 158). */
+export interface StubPairingAttempt {
+    sgtin: string;
+    address?: string;
+    outcome: string;
+    reason?: string;
+    failed: boolean;
+    at?: string;
+    http_status?: number;
+    requests: number;
+    message?: {en: string; de: string};
+    line: string;
+}
+
+/** Task 88: the stub's clock as its pairing route answers it - one `now` per read, a second apart. */
+const STUB_NOW = Date.parse('2026-11-21T10:45:00Z');
+
 export async function startOcculiteStub(options: {
     devices: StubDevice[];
     groups?: StubGroup[];
     hmip?: StubPairing;
     warnings?: StubWarning[];
+    /** Task 88: the pairing route's attempts; absent = a system from before the route. */
+    pairing?: StubPairingAttempt[];
 }): Promise<OcculiteStub> {
     const groups: StubGroup[] = structuredClone(options.groups ?? []);
     const warnings: StubWarning[] = structuredClone(options.warnings ?? []);
     let warningReads = 0;
+    const pairing: StubPairingAttempt[] | undefined =
+        options.pairing === undefined ? undefined : structuredClone(options.pairing);
+    const pairingSince: string[] = [];
     const requests: string[] = [];
     const sockets = new Set<Socket>();
     let nextId = groups.reduce((max, group) => Math.max(max, group.id), 0) + 1;
@@ -194,6 +225,23 @@ export async function startOcculiteStub(options: {
                 return;
             }
 
+            if (url.pathname === '/api/system/v1/radio/hmip/pairing' && method === 'GET' && pairing !== undefined) {
+                // task 88: system:read, like the warnings
+                if (request.headers.authorization !== `Bearer ${STUB_TOKEN}`) {
+                    json(response, 401, {error: 'unauthenticated', message: 'login required'});
+                    return;
+                }
+                const since = url.searchParams.get('since') ?? '';
+                pairingSince.push(since);
+                json(response, 200, {
+                    now: new Date(STUB_NOW + pairingSince.length * 1000).toISOString(),
+                    ...(since === '' ? {} : {since}),
+                    keyserver_mode: 'KEYSERVER_LOCAL',
+                    attempts: pairing,
+                });
+                return;
+            }
+
             if (url.pathname.startsWith('/api/system/v1/groups')) {
                 const route = url.pathname.slice('/api/system/v1'.length);
                 requests.push(body === '' ? `${method} ${route}` : `${method} ${route} ${body}`);
@@ -291,6 +339,8 @@ export async function startOcculiteStub(options: {
         requests,
         warnings,
         warningReads: () => warningReads,
+        pairing,
+        pairingSince,
         close: () =>
             new Promise<void>((resolve) => {
                 // the event stream holds its socket open; a plain close would wait for it forever

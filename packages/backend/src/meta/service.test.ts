@@ -49,7 +49,9 @@ interface Recorded {
 }
 
 /** A box made of a function: `/version`, `/snapshot`, an event stream that never sends anything. */
-function fakeBox(options: {version?: unknown; status?: number; warnings?: () => Response} = {}): {
+function fakeBox(
+    options: {version?: unknown; status?: number; warnings?: () => Response; pairing?: (url: string) => Response} = {},
+): {
     fetch: typeof globalThis.fetch;
     calls: Recorded[];
 } {
@@ -87,6 +89,9 @@ function fakeBox(options: {version?: unknown; status?: number; warnings?: () => 
         }
         if (address.endsWith('/snapshot')) {
             return Promise.resolve(json(SNAPSHOT));
+        }
+        if (address.includes('/api/system/v1/radio/hmip/pairing')) {
+            return Promise.resolve(options.pairing?.(address) ?? json({error: 'unknown-path', message: 'no'}, 404));
         }
         if (address.endsWith('/api/system/v1/warnings')) {
             return Promise.resolve(options.warnings?.() ?? json({error: 'unknown-path', message: 'no'}, 404));
@@ -344,6 +349,75 @@ describe('the detection', () => {
         const ccu = fakeBox({status: 404});
         const local = await service({metaUrl: 'http://ccu'}, ccu.fetch);
         await expect(local.hmipKeyDeclines()).resolves.toBeUndefined();
+        expect(ccu.calls.length).toBe(1);
+    });
+
+    /**
+     * Task 88: why a pairing failed is the system's pairing route (occulited task 158), read with
+     * the system API's credential and `since` passed back as it came; a system without the route
+     * (404), a credential it refuses, an answer that is not the route's and a CCU have nothing to say.
+     */
+    it("reads the HmIP pairing attempts from the system's pairing route, and none without a system", async () => {
+        const json = (body: unknown, status = 200): Response =>
+            new Response(JSON.stringify(body), {status, headers: {'Content-Type': 'application/json'}});
+        const attempt = {
+            sgtin: '3014F711A000000000000088',
+            address: '00000000000088',
+            outcome: 'aborted',
+            reason: 'key-server-unreachable',
+            failed: true,
+            at: '2026-11-21T10:45:12Z',
+            http_status: 503,
+            requests: 2,
+            message: {en: 'en text', de: 'de text'},
+            line: 'Aborting inclusion process; device 3014F711A000000000000088 will stay in inclusion state',
+        };
+        let answer = (): Response =>
+            json({now: '2026-11-21T10:46:00.123+01:00', keyserver_mode: 'KEYSERVER', attempts: [attempt]});
+        const box = fakeBox({pairing: () => answer()});
+        const meta = await service(
+            {metaUrl: 'http://box', metaToken: 'olt_0123456789abcdef0123456789abcdef'},
+            box.fetch,
+        );
+        await expect(meta.hmipPairingAttempts()).resolves.toEqual({
+            now: '2026-11-21T10:46:00.123+01:00',
+            attempts: [
+                {
+                    sgtin: '3014F711A000000000000088',
+                    address: '00000000000088',
+                    outcome: 'aborted',
+                    reason: 'key-server-unreachable',
+                    failed: true,
+                    at: '2026-11-21T10:45:12Z',
+                    http_status: 503,
+                    message: {en: 'en text', de: 'de text'},
+                },
+            ],
+        });
+        const call = box.calls.find((entry) => entry.url.includes('/api/system/v1/radio/hmip/pairing'));
+        expect(call?.method).toBe('GET');
+        expect(call?.url).toBe('http://box/api/system/v1/radio/hmip/pairing');
+        expect(call?.authorization).toBe('Bearer olt_0123456789abcdef0123456789abcdef');
+
+        // the window's start goes back as `since`, encoded (a `+` in a query is a space otherwise)
+        await meta.hmipPairingAttempts('2026-11-21T10:46:00.123+01:00');
+        expect(box.calls.at(-1)?.url).toBe(
+            'http://box/api/system/v1/radio/hmip/pairing?since=2026-11-21T10%3A46%3A00.123%2B01%3A00',
+        );
+
+        // a credential the system refuses, a system without the route, no route answer: nothing to say
+        answer = () => json({error: 'forbidden', message: 'system:read'}, 403);
+        await expect(meta.hmipPairingAttempts()).resolves.toBeUndefined();
+        answer = () => json({error: 'unknown-path', message: 'no'}, 404);
+        await expect(meta.hmipPairingAttempts()).resolves.toBeUndefined();
+        answer = () => json({error: 'unsupported', message: 'no journal'}, 501);
+        await expect(meta.hmipPairingAttempts()).resolves.toBeUndefined();
+        answer = () => new Response('<html>', {status: 200, headers: {'Content-Type': 'text/html'}});
+        await expect(meta.hmipPairingAttempts()).resolves.toBeUndefined();
+
+        const ccu = fakeBox({status: 404});
+        const local = await service({metaUrl: 'http://ccu'}, ccu.fetch);
+        await expect(local.hmipPairingAttempts()).resolves.toBeUndefined();
         expect(ccu.calls.length).toBe(1);
     });
 

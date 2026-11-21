@@ -6,8 +6,8 @@
         parseHmipCode,
         renameEntries,
         type InstallModeOptions,
-        type MetaHmipKeyDecline,
         type MetaHmipPairing,
+        type MetaHmipPairingAttempt,
     } from '@homematic-manager/core';
 
     import {tick} from 'svelte';
@@ -38,11 +38,36 @@
      */
     const KEY_MISMATCH_EVERY = 5;
     /**
-     * Task 88: every how-many-th countdown tick asks an openccu-lite system whether hmipserver
-     * declined a device's inclusion for a wrong key. hmipserver tells no RPC client about it; the
-     * system reads the line from its log and shows it as the warning `hmip-key-declined`.
+     * Task 88: every how-many-th countdown tick asks an openccu-lite system why an HmIP device's
+     * pairing failed. hmipserver tells no RPC client about it; the system reads its lines from the
+     * journal (`GET /api/system/v1/radio/hmip/pairing`, older systems: the warning
+     * `hmip-key-declined`).
      */
     const KEY_DECLINE_EVERY = 5;
+
+    /** Task 88: a device of this window whose pairing failed, and why. */
+    interface PairingProblem {
+        readonly sgtin: string;
+        readonly address?: string;
+        /** The system's reason (`key-mismatch`, `key-server-unreachable`, …). */
+        readonly reason: string;
+        readonly httpStatus?: number;
+        /** The system's own sentence, for a reason this application does not know yet. */
+        readonly message?: {readonly en: string; readonly de: string};
+    }
+
+    /**
+     * Task 88: the reasons worth saying within the window. `no-install-mode` is not one (the window
+     * is open), and `incomplete` only once it has closed - until then the pairing may still be
+     * running.
+     */
+    function isWindowProblem(attempt: MetaHmipPairingAttempt, closed: boolean): boolean {
+        const reason = attempt.reason;
+        if (reason === undefined || attempt.outcome === 'included' || reason === 'no-install-mode') {
+            return false;
+        }
+        return reason !== 'incomplete' || closed;
+    }
 
     let seconds = $state(60);
     let bidcosMode = $state(1);
@@ -95,11 +120,18 @@
     let tempKeySent = false;
     let tempKeyField = $state<HTMLInputElement | undefined>(undefined);
     /**
-     * Task 88: the HmIP device whose inclusion the system declined during this window because the
-     * key it got for the device is wrong - the device did answer, so "nothing joined" would send
-     * the user the wrong way. `undefined` while there is none.
+     * Task 88: the HmIP devices whose pairing failed during this window, with the system's reason -
+     * a device that did answer and was turned down for its key, refused by eQ-3's key server, or
+     * not let in because the key server was not reached: "nothing joined" would send the user the
+     * wrong way. Empty while there is none.
      */
-    let keyDeclined = $state<MetaHmipKeyDecline | undefined>(undefined);
+    let problems = $state<PairingProblem[]>([]);
+    /**
+     * Task 88: the system's clock when this window opened (`now` of the pairing route's first
+     * answer), passed back as `since`. `undefined` while there is no answer, and for good on a
+     * system without the route: then the warnings are asked instead.
+     */
+    let pairingSince: string | undefined;
     /**
      * Task 88: the last HmIP start carried a key typed or scanned here. Where no system can say that
      * the key was declined (a CCU, an older system), the timeout text then names the key as a cause.
@@ -194,9 +226,10 @@
         inboxConfirmed = '';
         nothingJoined = false;
         keyMismatch = '';
-        keyDeclined = undefined;
+        problems = [];
         keyGiven = false;
         declineBaseline = undefined;
+        pairingSince = undefined;
         tempKey = '';
         void clearTempKey();
     });
@@ -222,10 +255,10 @@
                 paired = [...paired, ...fresh];
                 // task 76: the pairing the key was for is done
                 keyMismatch = '';
-                // task 88: the declined device has come after all
-                if (keyDeclined?.address !== undefined && fresh.includes(keyDeclined.address)) {
-                    keyDeclined = undefined;
-                }
+                // task 88: a device whose pairing failed has come after all
+                problems = problems.filter(
+                    (problem) => problem.address === undefined || !fresh.includes(problem.address),
+                );
                 void clearTempKey();
             }
         });
@@ -252,9 +285,13 @@
                     void clearTempKey();
                 }
             });
-            // task 88: an HmIP device did ask, and the system declined it for its key
-            if (isHmip && declineBaseline !== undefined && countdownTicks % KEY_DECLINE_EVERY === 0) {
-                void checkKeyDeclines(current);
+            // task 88: an HmIP device did ask, and its pairing failed - the system says why
+            if (
+                isHmip &&
+                (pairingSince !== undefined || declineBaseline !== undefined) &&
+                countdownTicks % KEY_DECLINE_EVERY === 0
+            ) {
+                void checkPairing(current, false);
             }
             // task 76: a device with another system's key did ask to join; rfd refused it quietly
             if (!isHmip && countdownTicks % KEY_MISMATCH_EVERY === 0) {
@@ -283,11 +320,11 @@
         busy = true;
         nothingJoined = false;
         keyMismatch = '';
-        keyDeclined = undefined;
+        problems = [];
         installWindow += 1;
         countdownTicks = 0;
         if (isHmip && options.address === undefined) {
-            watchKeyDeclines(installWindow);
+            watchPairing(installWindow);
             keyGiven = (options.hmipKey?.key ?? '') !== '';
         }
         const {tempKey: key, ...withoutKey} = options;
@@ -320,43 +357,170 @@
     }
 
     /**
-     * Task 88: what the system knows of declined keys as the window opens. Asked before the install
-     * mode starts and not awaited: until it answers the countdown asks nothing, and where it never
-     * answers (a CCU) it never does.
+     * Task 88: where this window starts on the system's clock - the pairing route's `now` - or, on
+     * a system without the route, what it knows of declined keys as the window opens (the warning
+     * `hmip-key-declined`). Asked before the install mode starts and not awaited: until it answers
+     * the countdown asks nothing, and where nothing answers (a CCU) it never does.
      */
-    function watchKeyDeclines(windowId: number): void {
+    function watchPairing(windowId: number): void {
+        pairingSince = undefined;
         declineBaseline = undefined;
-        void stores.devices.hmipKeyDeclines().then((found) => {
+        void stores.devices.hmipPairingAttempts().then(async (answer) => {
+            if (windowId !== installWindow) {
+                return;
+            }
+            if (answer !== undefined) {
+                pairingSince = answer.now;
+                return;
+            }
+            const found = await stores.devices.hmipKeyDeclines();
             if (windowId === installWindow && found !== undefined) {
                 declineBaseline = new Set(found.map((decline) => decline.variant));
             }
         });
     }
 
-    /** Task 88: a decline the system did not know when the window opened is this window's. */
-    async function checkKeyDeclines(windowId: number): Promise<void> {
-        const baseline = declineBaseline;
-        if (baseline === undefined) {
+    /**
+     * Task 88: the pairings of this window that failed, as the system reads them now. With the
+     * route the answer is the whole window's (`since` its start), so it replaces what was shown: a
+     * device that tried again and was paired drops out. Without it, a decline the system did not
+     * know when the window opened is this window's.
+     */
+    async function checkPairing(windowId: number, closed: boolean): Promise<void> {
+        let found: PairingProblem[] | undefined;
+        if (pairingSince !== undefined) {
+            const answer = await stores.devices.hmipPairingAttempts(pairingSince);
+            found = answer?.attempts
+                .filter((attempt) => isWindowProblem(attempt, closed))
+                .map((attempt) => ({
+                    sgtin: attempt.sgtin,
+                    ...(attempt.address === undefined ? {} : {address: attempt.address}),
+                    reason: attempt.reason ?? '',
+                    ...(attempt.http_status === undefined ? {} : {httpStatus: attempt.http_status}),
+                    ...(attempt.message === undefined ? {} : {message: attempt.message}),
+                }));
+        } else if (declineBaseline !== undefined) {
+            const baseline = declineBaseline;
+            const declines = await stores.devices.hmipKeyDeclines();
+            found = declines
+                ?.filter((decline) => !baseline.has(decline.variant))
+                .map((decline) => ({
+                    sgtin: decline.sgtin,
+                    ...(decline.address === undefined ? {} : {address: decline.address}),
+                    reason: 'key-mismatch',
+                }));
+        }
+        if (found === undefined || windowId !== installWindow) {
             return;
         }
-        const found = await stores.devices.hmipKeyDeclines();
-        const fresh = found?.find((decline) => !baseline.has(decline.variant));
-        if (fresh !== undefined && windowId === installWindow && keyDeclined === undefined) {
-            keyDeclined = fresh;
+        const fresh = found.filter((problem) => problem.address === undefined || !paired.includes(problem.address));
+        if (fresh.length > 0 || pairingSince !== undefined) {
+            problems = fresh;
+        }
+        if (problems.length > 0) {
             nothingJoined = false;
         }
     }
 
     /**
      * Task 28: the window ran out and nobody came. Task 88: on a system that can say it, ask once
-     * more first - a decline in the window's last seconds is the better answer.
+     * more first - a failure in the window's last seconds, or a pairing that never completed, is
+     * the better answer.
      */
     async function sayNothingJoined(windowId: number): Promise<void> {
         if (isHmip) {
-            await checkKeyDeclines(windowId);
+            await checkPairing(windowId, true);
         }
-        if (windowId === installWindow && keyDeclined === undefined && paired.length === 0) {
+        if (windowId === installWindow && problems.length === 0 && paired.length === 0) {
             nothingJoined = true;
+        }
+    }
+
+    /** Task 88: the heading and the sentence for a failed pairing, in the UI's language. */
+    function problemText(problem: PairingProblem): {title: string; text: string} {
+        const params = {sgtin: problem.sgtin, status: String(problem.httpStatus ?? '')};
+        switch (problem.reason) {
+            case 'key-mismatch':
+                return {
+                    title: t('The device key does not match'),
+                    text: t(
+                        'The device {sgtin} answered, but the key given to the system for it (entered for the pairing, or stored on the Keys page) does not match it. Check the key (QR code or KEY on its sticker) and pair it again; if it no longer tries, reset it to its factory settings first.',
+                        params,
+                    ),
+                };
+            case 'key-invalid':
+                return {
+                    title: t('The stored key is not valid'),
+                    text: t(
+                        "The key stored for the device {sgtin} is no valid device key (wrong length). Remove it on the Keys page, scan or type the key from the device's sticker again, apply it, and pair the device once more.",
+                        params,
+                    ),
+                };
+            case 'other-device':
+                return {
+                    title: t('The pairing was open for another SGTIN'),
+                    text: t(
+                        "The device {sgtin} asked to join, but the pairing was open for another SGTIN. Compare the SGTIN entered for the pairing with the device's sticker and start the pairing again.",
+                        params,
+                    ),
+                };
+            case 'unsupported-device':
+                return {
+                    title: t('The device type is not known yet'),
+                    text: t(
+                        "The device {sgtin} asked to join, but the system's HmIP software does not know its device type yet, so it cannot be paired. A system update with a newer HmIP software brings it.",
+                        params,
+                    ),
+                };
+            case 'no-key':
+                return {
+                    title: t('The system has no key for the device'),
+                    text: t(
+                        "The device {sgtin} asked to join, but the system has no key for it, and in local key mode eQ-3's key server is never asked. Pair it with its key (SGTIN and KEY from its sticker), or store the key on the Keys page first.",
+                        params,
+                    ),
+                };
+            case 'key-server-refused':
+                return {
+                    title: t("eQ-3's key server refused the device"),
+                    text: t(
+                        "eQ-3's key server did not accept the device {sgtin}. Usually it is still paired with another central unit (a CCU or the Homematic IP app): remove it there, reset it to its factory settings, and pair it again.",
+                        params,
+                    ),
+                };
+            case 'key-server-unreachable':
+                return {
+                    title: t("eQ-3's key server was not reached"),
+                    text:
+                        problem.httpStatus === undefined
+                            ? t(
+                                  "The device {sgtin} asked to join, but the system could not reach eQ-3's key server (secgtw.homematic.com, port 8443). Check the internet connection, the DNS settings and the firewall, then pair it again.",
+                                  params,
+                              )
+                            : t(
+                                  "The device {sgtin} asked to join, but eQ-3's key server (secgtw.homematic.com, port 8443) answered with HTTP status {status} instead of the device's key. Check the internet connection, a proxy and the firewall, then pair it again; the key server may also be down for a while.",
+                                  params,
+                              ),
+                };
+            case 'incomplete':
+                return {
+                    title: t('The pairing did not complete'),
+                    text: t(
+                        'The device {sgtin} asked to join, but the pairing did not complete. Keep it close to the system, put it into pairing mode again and pair it once more; if that fails as well, reset it to its factory settings first.',
+                        params,
+                    ),
+                };
+            default:
+                // a reason a newer system knows and this application does not: the system's own words
+                return {
+                    title: t('The pairing failed'),
+                    text:
+                        problem.message === undefined
+                            ? `${problem.sgtin}: ${problem.reason}`
+                            : stores.i18n.language === 'de'
+                              ? problem.message.de
+                              : problem.message.en,
+                };
         }
     }
 
@@ -365,16 +529,12 @@
      * asking and is declined every time), the SGTIN put into its field and the key field focused,
      * its text selected so the right key replaces it.
      */
-    async function enterKey(): Promise<void> {
-        const decline = keyDeclined;
-        if (decline === undefined) {
-            return;
-        }
+    async function enterKey(problem: PairingProblem): Promise<void> {
         if (remaining > 0) {
             await stop();
         }
         hmipMode = 'KEY';
-        sgtin = normaliseKeyText(decline.sgtin);
+        sgtin = normaliseKeyText(problem.sgtin);
         scanning = false;
         await tick();
         deviceKeyField?.focus();
@@ -693,27 +853,32 @@
                 >
             {/if}
         </div>
-        {#if keyDeclined !== undefined}
+        {#each problems as problem (problem.sgtin)}
+            {@const text = problemText(problem)}
             <!--
-                Task 88: the device did answer - hmipserver declined it because the key it got for
-                the device is not that device's key (openccu-lite's warning hmip-key-declined).
+                Task 88: the device did answer, and its pairing failed - hmipserver turned it down,
+                and the system read why from hmipserver's lines (its pairing route, occulited task
+                158; on an older system only the wrong key, its warning hmip-key-declined).
             -->
-            <section class="hmm-add-key-question" role="alert" data-testid="add-device-key-declined">
-                <h4>{t('The device key does not match')}</h4>
-                <p>
-                    {t(
-                        'The device {sgtin} did answer, but its device key does not match. Check the key (QR code / KEY) and pair it again.',
-                        {sgtin: keyDeclined.sgtin},
-                    )}
-                </p>
-                <button
-                    type="button"
-                    class="hmm-button"
-                    data-testid="add-device-key-declined-enter"
-                    onclick={() => void enterKey()}>{t('Enter the key')}</button
-                >
+            <section
+                class="hmm-add-key-question"
+                role="alert"
+                data-testid="add-device-pairing-failed"
+                data-reason={problem.reason}
+                data-sgtin={problem.sgtin}
+            >
+                <h4>{text.title}</h4>
+                <p>{text.text}</p>
+                {#if problem.reason === 'key-mismatch'}
+                    <button
+                        type="button"
+                        class="hmm-button"
+                        data-testid="add-device-key-declined-enter"
+                        onclick={() => void enterKey(problem)}>{t('Enter the key')}</button
+                    >
+                {/if}
             </section>
-        {/if}
+        {/each}
         {#if nothingJoined}
             <!--
                 Task 76: two texts, because the two radio systems fail differently. An HmIP device
@@ -881,6 +1046,11 @@
 
     .hmm-add-key-question p {
         margin: 0 0 8px;
+    }
+
+    /* task 88: a reason without a button ends with its sentence */
+    .hmm-add-key-question p:last-child {
+        margin-bottom: 0;
     }
 
     .hmm-add-paired h4 {

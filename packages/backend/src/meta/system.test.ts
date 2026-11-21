@@ -28,6 +28,7 @@ import {
     certificateProblemOf,
     detectSystem,
     hmipKeyDeclinesOf,
+    hmipPairingAttemptsOf,
     hmipPairingOf,
     httpsRedirectTarget,
     metaErrorOf,
@@ -579,5 +580,79 @@ describe('the credentials', () => {
         expect(normaliseSid('QL5IGTZSCJSV4H4AHCVOX4MQVC')).toBe('QL5IGTZSCJSV4H4AHCVOX4MQVC');
         expect(normaliseSid('no spaces allowed')).toBeUndefined();
         expect(normaliseSid(undefined)).toBeUndefined();
+    });
+});
+
+describe('hmipPairingAttemptsOf (task 88)', () => {
+    it("keeps the route's attempts with their reason, sentence and key-server status", () => {
+        const answer = {
+            now: '2026-11-21T10:46:00Z',
+            since: '2026-11-21T10:45:00Z',
+            keyserver_mode: 'LOCAL',
+            attempts: [
+                {
+                    sgtin: '3014F711A000000000000088',
+                    address: '00000000000088',
+                    outcome: 'key-mismatch',
+                    reason: 'key-mismatch',
+                    failed: true,
+                    at: '2026-11-21T10:45:12Z',
+                    requests: 1,
+                    message: {en: 'The device answered', de: 'Das Gerät hat geantwortet'},
+                    line: 'The inclusion for device 3014F711A000000000000088 is declined, the local key is wrong',
+                },
+                {sgtin: '3014F711A000000000000002', outcome: 'included', failed: false, requests: 1, line: ''},
+                {
+                    sgtin: '3014F711A000000000000003',
+                    outcome: 'aborted',
+                    reason: 'key-server-unreachable',
+                    failed: true,
+                    http_status: 503,
+                    message: {en: 'only one language'},
+                },
+                // no SGTIN, no outcome, not an object: skipped
+                {sgtin: '', outcome: 'asked'},
+                {sgtin: '3014F711A000000000000004'},
+                null,
+                // odd optional fields are dropped, not fatal
+                {sgtin: '3014F711A000000000000005', outcome: 'asked', reason: '', http_status: 'x', at: 5},
+            ],
+        };
+        expect(hmipPairingAttemptsOf(answer)).toEqual({
+            now: '2026-11-21T10:46:00Z',
+            attempts: [
+                {
+                    sgtin: '3014F711A000000000000088',
+                    address: '00000000000088',
+                    outcome: 'key-mismatch',
+                    reason: 'key-mismatch',
+                    failed: true,
+                    at: '2026-11-21T10:45:12Z',
+                    message: {en: 'The device answered', de: 'Das Gerät hat geantwortet'},
+                },
+                {sgtin: '3014F711A000000000000002', outcome: 'included', failed: false},
+                {
+                    sgtin: '3014F711A000000000000003',
+                    outcome: 'aborted',
+                    reason: 'key-server-unreachable',
+                    failed: true,
+                    http_status: 503,
+                },
+                {sgtin: '3014F711A000000000000005', outcome: 'asked', failed: false},
+            ],
+        });
+    });
+
+    it("answers undefined for what is not the route's answer", () => {
+        expect(hmipPairingAttemptsOf({now: '2026-11-21T10:46:00Z', attempts: []})).toEqual({
+            now: '2026-11-21T10:46:00Z',
+            attempts: [],
+        });
+        expect(hmipPairingAttemptsOf({attempts: []})).toBeUndefined();
+        expect(hmipPairingAttemptsOf({now: '', attempts: []})).toBeUndefined();
+        expect(hmipPairingAttemptsOf({now: '2026-11-21T10:46:00Z'})).toBeUndefined();
+        expect(hmipPairingAttemptsOf({error: 'unknown-path'})).toBeUndefined();
+        expect(hmipPairingAttemptsOf('<html>')).toBeUndefined();
+        expect(hmipPairingAttemptsOf(null)).toBeUndefined();
     });
 });

@@ -42,6 +42,8 @@ import {
     type MetaEvent,
     type MetaHmipKeyDecline,
     type MetaHmipPairing,
+    type MetaHmipPairingAttempt,
+    type MetaHmipPairingAttempts,
     type MetaVersion,
     type SystemCertificate,
     type SystemCertificateProblem,
@@ -375,6 +377,55 @@ export function hmipKeyDeclinesOf(body: unknown): MetaHmipKeyDecline[] | undefin
         });
     }
     return declines;
+}
+
+/**
+ * Task 88: openccu-lite's `GET /api/system/v1/radio/hmip/pairing` answer (occulited task 158), or
+ * `undefined` when the body is not that answer (the pairing dialog then falls back to the
+ * warnings). An attempt without a usable SGTIN or outcome is skipped, not fatal; the optional
+ * fields are kept only in their own type.
+ */
+export function hmipPairingAttemptsOf(body: unknown): MetaHmipPairingAttempts | undefined {
+    if (typeof body !== 'object' || body === null) {
+        return undefined;
+    }
+    const {now, attempts} = body as {now?: unknown; attempts?: unknown};
+    if (typeof now !== 'string' || now === '' || !Array.isArray(attempts)) {
+        return undefined;
+    }
+    const out: MetaHmipPairingAttempt[] = [];
+    for (const attempt of attempts as unknown[]) {
+        if (typeof attempt !== 'object' || attempt === null) {
+            continue;
+        }
+        const {sgtin, address, outcome, reason, failed, at, http_status, message} = attempt as Record<string, unknown>;
+        if (typeof sgtin !== 'string' || sgtin === '' || typeof outcome !== 'string' || outcome === '') {
+            continue;
+        }
+        const text = messageOf(message);
+        out.push({
+            sgtin,
+            ...(typeof address === 'string' && address !== '' ? {address} : {}),
+            outcome,
+            ...(typeof reason === 'string' && reason !== '' ? {reason} : {}),
+            failed: failed === true,
+            ...(typeof at === 'string' && at !== '' ? {at} : {}),
+            ...(typeof http_status === 'number' && Number.isInteger(http_status) && http_status > 0
+                ? {http_status}
+                : {}),
+            ...(text === undefined ? {} : {message: text}),
+        });
+    }
+    return {now, attempts: out};
+}
+
+/** Task 88: an attempt's `{en, de}` sentence, when both are strings. */
+function messageOf(value: unknown): {en: string; de: string} | undefined {
+    if (typeof value !== 'object' || value === null) {
+        return undefined;
+    }
+    const {en, de} = value as {en?: unknown; de?: unknown};
+    return typeof en === 'string' && typeof de === 'string' ? {en, de} : undefined;
 }
 
 /** The version answer in a response body, when it is one. */

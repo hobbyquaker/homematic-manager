@@ -498,6 +498,8 @@ export class MockTransport implements Transport {
         this.result('meta.pairing', null);
         // task 88: and it has no warnings API to tell a declined key
         this.result('meta.keyDeclines', null);
+        // task 88: nor the pairing route that says why a pairing failed
+        this.result('meta.pairingAttempts', null);
         this.respond('meta.export', () => store.document());
         this.respond('meta.import', (document, mode) => {
             store.import(document, mode ?? 'replace');

@@ -6,6 +6,18 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Added
+
+- **The pairing dialog says why an HmIP device did not join.** On openccu-lite 2.0.0-beta.11 and later it shows, for
+  each device that tried during the install mode, the reason the system read from the HmIP service: the device key does
+  not match (with a button to enter the right one), the stored key is not valid, the pairing was open for another SGTIN,
+  the system has no key for the device in local key mode, eQ-3's key server refused the device or was not reached (with
+  the HTTP status when it answered one), the device type is not known yet, or the pairing did not complete. Older
+  openccu-lite systems still report a wrong key; on a CCU, a pairing with a key that runs out names the key as a
+  possible cause.
+
 ## [3.5.1] — 2026-11-20
 
 ### Changed

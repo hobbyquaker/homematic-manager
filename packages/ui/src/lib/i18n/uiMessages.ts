@@ -873,12 +873,76 @@ export const UI_MESSAGES: MessageCatalogue = {
             de: 'Der Anlernmodus ist abgelaufen, und kein Gerät hat sich angemeldet. Hat das Gerät es versucht (seine LED leuchtete rot), passt der angegebene Schlüssel nicht zu ihm: Schlüssel prüfen (QR-Code / KEY) und erneut starten. Ein Gerät, das noch an einer anderen Zentrale angelernt ist, sendet keine Anlernanfrage: Gerät auf Werkseinstellungen zurücksetzen und erneut starten.',
             en: 'The install mode has ended and no device has joined. If the device did try (its LED lit up red), the key given does not match it: check the key (QR code / KEY) and start again. A device that is still paired with another central sends no inclusion request: reset it to factory state and start again.',
         },
-    // Task 88: openccu-lite's warning hmip-key-declined during the install mode - the device did answer.
+    // Task 88: why an HmIP pairing failed, as openccu-lite's pairing route (occulited task 158) and its
+    // Status page say it - copied from occulited's catalogue, so the two say the same thing.
     'The device key does not match': {de: 'Der Geräteschlüssel passt nicht', en: 'The device key does not match'},
-    'The device {sgtin} did answer, but its device key does not match. Check the key (QR code / KEY) and pair it again.':
+    'The stored key is not valid': {de: 'Der gespeicherte Schlüssel ist ungültig', en: 'The stored key is not valid'},
+    'The pairing was open for another SGTIN': {
+        de: 'Das Anlernen war für eine andere SGTIN geöffnet',
+        en: 'The pairing was open for another SGTIN',
+    },
+    'The device type is not known yet': {
+        de: 'Der Gerätetyp ist noch nicht bekannt',
+        en: 'The device type is not known yet',
+    },
+    'The system has no key for the device': {
+        de: 'Das System hat keinen Schlüssel für das Gerät',
+        en: 'The system has no key for the device',
+    },
+    "eQ-3's key server refused the device": {
+        de: 'Der Schlüsselserver von eQ-3 hat das Gerät abgelehnt',
+        en: "eQ-3's key server refused the device",
+    },
+    "eQ-3's key server was not reached": {
+        de: 'Der Schlüsselserver von eQ-3 wurde nicht erreicht',
+        en: "eQ-3's key server was not reached",
+    },
+    'The pairing did not complete': {de: 'Das Anlernen wurde nicht abgeschlossen', en: 'The pairing did not complete'},
+    'The pairing failed': {de: 'Das Anlernen ist fehlgeschlagen', en: 'The pairing failed'},
+    'The device {sgtin} answered, but the key given to the system for it (entered for the pairing, or stored on the Keys page) does not match it. Check the key (QR code or KEY on its sticker) and pair it again; if it no longer tries, reset it to its factory settings first.':
         {
-            de: 'Das Gerät {sgtin} hat sich gemeldet, aber der Geräteschlüssel passt nicht. Schlüssel prüfen (QR-Code / KEY) und erneut anlernen.',
-            en: 'The device {sgtin} did answer, but its device key does not match. Check the key (QR code / KEY) and pair it again.',
+            de: 'Das Gerät {sgtin} hat geantwortet, aber der dem System dafür angegebene Schlüssel (beim Anlernen eingegeben oder auf der Seite Schlüssel gespeichert) passt nicht zu ihm. Den Schlüssel prüfen (QR-Code oder KEY auf dem Aufkleber) und das Gerät erneut anlernen; versucht es das nicht mehr, vorher auf Werkseinstellungen zurücksetzen.',
+            en: 'The device {sgtin} answered, but the key given to the system for it (entered for the pairing, or stored on the Keys page) does not match it. Check the key (QR code or KEY on its sticker) and pair it again; if it no longer tries, reset it to its factory settings first.',
+        },
+    "The key stored for the device {sgtin} is no valid device key (wrong length). Remove it on the Keys page, scan or type the key from the device's sticker again, apply it, and pair the device once more.":
+        {
+            de: 'Der für das Gerät {sgtin} gespeicherte Schlüssel ist kein gültiger Geräteschlüssel (falsche Länge). Ihn auf der Seite Schlüssel entfernen, den Schlüssel vom Aufkleber des Geräts erneut scannen oder eintippen, übernehmen und das Gerät noch einmal anlernen.',
+            en: "The key stored for the device {sgtin} is no valid device key (wrong length). Remove it on the Keys page, scan or type the key from the device's sticker again, apply it, and pair the device once more.",
+        },
+    "The device {sgtin} asked to join, but the pairing was open for another SGTIN. Compare the SGTIN entered for the pairing with the device's sticker and start the pairing again.":
+        {
+            de: 'Das Gerät {sgtin} wollte sich anmelden, aber das Anlernen war für eine andere SGTIN geöffnet. Die beim Anlernen eingegebene SGTIN mit dem Aufkleber des Geräts vergleichen und das Anlernen neu starten.',
+            en: "The device {sgtin} asked to join, but the pairing was open for another SGTIN. Compare the SGTIN entered for the pairing with the device's sticker and start the pairing again.",
+        },
+    "The device {sgtin} asked to join, but the system's HmIP software does not know its device type yet, so it cannot be paired. A system update with a newer HmIP software brings it.":
+        {
+            de: 'Das Gerät {sgtin} wollte sich anmelden, aber die HmIP-Software des Systems kennt seinen Gerätetyp noch nicht, daher kann es nicht angelernt werden. Ein System-Update mit einer neueren HmIP-Software bringt ihn mit.',
+            en: "The device {sgtin} asked to join, but the system's HmIP software does not know its device type yet, so it cannot be paired. A system update with a newer HmIP software brings it.",
+        },
+    "The device {sgtin} asked to join, but the system has no key for it, and in local key mode eQ-3's key server is never asked. Pair it with its key (SGTIN and KEY from its sticker), or store the key on the Keys page first.":
+        {
+            de: 'Das Gerät {sgtin} wollte sich anmelden, aber das System hat keinen Schlüssel dafür, und im lokalen Schlüsselmodus wird der Schlüsselserver von eQ-3 nie gefragt. Das Gerät mit seinem Schlüssel anlernen (SGTIN und KEY vom Aufkleber) oder den Schlüssel vorher auf der Seite Schlüssel speichern.',
+            en: "The device {sgtin} asked to join, but the system has no key for it, and in local key mode eQ-3's key server is never asked. Pair it with its key (SGTIN and KEY from its sticker), or store the key on the Keys page first.",
+        },
+    "eQ-3's key server did not accept the device {sgtin}. Usually it is still paired with another central unit (a CCU or the Homematic IP app): remove it there, reset it to its factory settings, and pair it again.":
+        {
+            de: 'Der Schlüsselserver von eQ-3 hat das Gerät {sgtin} nicht angenommen. Meist ist es noch an einer anderen Zentrale angelernt (einer CCU oder der Homematic IP App): es dort entfernen, auf Werkseinstellungen zurücksetzen und erneut anlernen.',
+            en: "eQ-3's key server did not accept the device {sgtin}. Usually it is still paired with another central unit (a CCU or the Homematic IP app): remove it there, reset it to its factory settings, and pair it again.",
+        },
+    "The device {sgtin} asked to join, but the system could not reach eQ-3's key server (secgtw.homematic.com, port 8443). Check the internet connection, the DNS settings and the firewall, then pair it again.":
+        {
+            de: 'Das Gerät {sgtin} wollte sich anmelden, aber das System hat den Schlüsselserver von eQ-3 nicht erreicht (secgtw.homematic.com, Port 8443). Die Internetverbindung, die DNS-Einstellungen und die Firewall prüfen, dann das Gerät erneut anlernen.',
+            en: "The device {sgtin} asked to join, but the system could not reach eQ-3's key server (secgtw.homematic.com, port 8443). Check the internet connection, the DNS settings and the firewall, then pair it again.",
+        },
+    "The device {sgtin} asked to join, but eQ-3's key server (secgtw.homematic.com, port 8443) answered with HTTP status {status} instead of the device's key. Check the internet connection, a proxy and the firewall, then pair it again; the key server may also be down for a while.":
+        {
+            de: 'Das Gerät {sgtin} wollte sich anmelden, aber der Schlüsselserver von eQ-3 (secgtw.homematic.com, Port 8443) hat mit dem HTTP-Status {status} statt mit dem Schlüssel des Geräts geantwortet. Die Internetverbindung, einen Proxy und die Firewall prüfen, dann das Gerät erneut anlernen; der Schlüsselserver kann auch zeitweise gestört sein.',
+            en: "The device {sgtin} asked to join, but eQ-3's key server (secgtw.homematic.com, port 8443) answered with HTTP status {status} instead of the device's key. Check the internet connection, a proxy and the firewall, then pair it again; the key server may also be down for a while.",
+        },
+    'The device {sgtin} asked to join, but the pairing did not complete. Keep it close to the system, put it into pairing mode again and pair it once more; if that fails as well, reset it to its factory settings first.':
+        {
+            de: 'Das Gerät {sgtin} wollte sich anmelden, aber das Anlernen wurde nicht abgeschlossen. Das Gerät nahe am System in den Anlernmodus bringen und erneut anlernen; schlägt das wieder fehl, vorher auf Werkseinstellungen zurücksetzen.',
+            en: 'The device {sgtin} asked to join, but the pairing did not complete. Keep it close to the system, put it into pairing mode again and pair it once more; if that fails as well, reset it to its factory settings first.',
         },
     'Enter the key': {de: 'Schlüssel eingeben', en: 'Enter the key'},
     // Task 76: the BidCos text - a device with another system's key does ask; rfd refuses it and the dialog asks for the key.

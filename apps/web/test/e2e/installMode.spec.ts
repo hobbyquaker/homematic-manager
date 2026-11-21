@@ -404,12 +404,15 @@ test('the printed HmIP key starts the whitelist pairing (B-72)', async ({page, h
 /**
  * Task 88: an HmIP device answers with a key hmipserver declines - the maintainer's case in
  * openccu-lite task 201's lab run, where the dialog said after its 60 s that no device had answered.
- * On openccu-lite the system shows the decline as its warning `hmip-key-declined`; here the stub
+ * An openccu-lite without the pairing route (before 2.0.0-beta.11) shows the decline only as its
+ * warning `hmip-key-declined`; here the stub (no pairing route: 404)
  * holds one decline of another device from before the window, and gets this device's while the
  * install mode runs. The dialog says the key does not match, the button stops the window and leads
  * to the key entry; in both themes.
  */
-test('a declined HmIP key is said as such, with the way to the key entry (task 88)', async ({page}) => {
+test('a declined HmIP key is said as such on a system without the pairing route, with the way to the key entry (task 88)', async ({
+    page,
+}) => {
     const sgtin = '3014F711A000000000000088';
     const stub = await startOcculiteStub({
         devices: [{address: BIDCOS_SWITCH, type: 'HM-LC-Sw1-Pl', name: 'Steckdose'}],
@@ -438,7 +441,7 @@ test('a declined HmIP key is said as such, with the way to the key entry (task 8
         expect(sim.getInstallMode('hmip')).toBeGreaterThan(0);
         // the decline the system already knew is not this window's
         await expect.poll(() => stub.warningReads(), {timeout: 10_000}).toBeGreaterThanOrEqual(2);
-        await expect(page.getByTestId('add-device-key-declined')).toHaveCount(0);
+        await expect(page.getByTestId('add-device-pairing-failed')).toHaveCount(0);
 
         // the device asks, hmipserver declines it, occulited reads the line
         stub.warnings.push({
@@ -448,11 +451,12 @@ test('a declined HmIP key is said as such, with the way to the key entry (task 8
             params: {sgtin, address: '00000000000088', at: '2026-10-03T10:45:12Z'},
             href: '/system/keys#device-keys',
         });
-        const block = page.getByTestId('add-device-key-declined');
+        const block = page.getByTestId('add-device-pairing-failed');
         await expect(block).toBeVisible({timeout: 10_000});
+        await expect(block).toHaveAttribute('data-reason', 'key-mismatch');
         await expect(block).toContainText('The device key does not match');
         await expect(block).toContainText(
-            `The device ${sgtin} did answer, but its device key does not match. Check the key (QR code / KEY) and pair it again.`,
+            `The device ${sgtin} answered, but the key given to the system for it (entered for the pairing, or stored on the Keys page) does not match it.`,
         );
         await expect(page.getByTestId('add-device-nothing-joined')).toHaveCount(0);
 
@@ -499,5 +503,167 @@ test('a CCU names the key as a cause when an HmIP start with a key ran out (task
     const notice = page.getByTestId('add-device-nothing-joined');
     await expect(notice).toBeVisible({timeout: 20_000});
     await expect(notice).toContainText('If the device did try (its LED lit up red), the key given does not match it');
-    await expect(page.getByTestId('add-device-key-declined')).toHaveCount(0);
+    await expect(page.getByTestId('add-device-pairing-failed')).toHaveCount(0);
+});
+
+/**
+ * Task 88: openccu-lite 2.0.0-beta.11 and later say why an HmIP pairing failed - `GET
+ * /api/system/v1/radio/hmip/pairing` (occulited task 158), read from hmipserver's lines. The dialog
+ * keeps the route's `now` as the window opens and passes it back as `since`; an attempt the stub
+ * gets during the window shows as a block with the system's reason, in both themes, a device that
+ * was paired after all drops out, and at the window's end the attempt that never completed is said
+ * instead of "nothing joined". The warnings are not asked where the route answers.
+ */
+test("openccu-lite's pairing route says why an HmIP pairing failed (task 88)", async ({page}) => {
+    const sgtin = '3014F711A000000000000088';
+    const other = '3014F711A000000000000077';
+    const stub = await startOcculiteStub({
+        devices: [{address: BIDCOS_SWITCH, type: 'HM-LC-Sw1-Pl', name: 'Steckdose'}],
+        pairing: [],
+    });
+    const box = await startForTest({
+        simulator: true,
+        simulatorOptions: structuredClone(SIMULATOR_FIXTURE),
+        connection: {rega: true, language: 'en', metaUrl: stub.url, metaToken: STUB_TOKEN},
+    });
+    const sim = box.simulator as Simulator;
+    try {
+        await page.goto(`${box.url}#/HmIP-RF/devices`);
+        await page.getByTestId('devices-add').click();
+        await page.getByTestId('add-device-hmip-mode').selectOption('ANY');
+        await page.getByTestId('add-device-dialog').locator('.hmm-add-seconds').fill('20');
+        await page.getByTestId('add-device-start').click();
+        await expect(page.getByTestId('add-device-countdown')).toBeVisible();
+        expect(sim.getInstallMode('hmip')).toBeGreaterThan(0);
+        // the window's start, then the same start passed back
+        await expect.poll(() => stub.pairingSince.length, {timeout: 10_000}).toBeGreaterThanOrEqual(2);
+        expect(stub.pairingSince[0]).toBe('');
+        expect(stub.pairingSince[1]).toBe('2026-11-21T10:45:01.000Z');
+
+        // the key server was not reached for one device; another one is still asking
+        stub.pairing?.push(
+            {
+                sgtin,
+                address: '00000000000088',
+                outcome: 'aborted',
+                reason: 'key-server-unreachable',
+                failed: true,
+                at: '2026-11-21T10:45:05Z',
+                requests: 1,
+                line: `Aborting inclusion process; device ${sgtin} will stay in inclusion state`,
+            },
+            {
+                sgtin: other,
+                address: '00000000000077',
+                outcome: 'asked',
+                reason: 'incomplete',
+                failed: false,
+                requests: 1,
+                line: `Inclusion ${other}: Step 1 Request handled`,
+            },
+        );
+        const block = page.getByTestId('add-device-pairing-failed');
+        await expect(block).toHaveCount(1, {timeout: 10_000});
+        await expect(block).toHaveAttribute('data-reason', 'key-server-unreachable');
+        await expect(block).toContainText("eQ-3's key server was not reached");
+        await expect(block).toContainText(
+            `The device ${sgtin} asked to join, but the system could not reach eQ-3's key server (secgtw.homematic.com, port 8443). Check the internet connection, the DNS settings and the firewall, then pair it again.`,
+        );
+        await expect(page.getByTestId('add-device-key-declined-enter')).toHaveCount(0);
+        await expect(page.getByTestId('add-device-countdown')).toBeVisible();
+
+        // the warning colour is the theme's, in light and in dark
+        const border = async (): Promise<string> =>
+            block.first().evaluate((element) => getComputedStyle(element).borderColor);
+        const light = await border();
+        await page.emulateMedia({colorScheme: 'dark'});
+        await expect.poll(border).not.toBe(light);
+        await page.emulateMedia({colorScheme: 'light'});
+
+        // it tries again with the network back and is paired: its block goes
+        stub.pairing?.splice(0, 1, {
+            sgtin,
+            address: '00000000000088',
+            outcome: 'included',
+            failed: false,
+            requests: 2,
+            line: `Device included ${sgtin}`,
+        });
+        await expect(block).toHaveCount(0, {timeout: 10_000});
+
+        // the window runs out: the device that only asked is said, not "nothing joined"
+        await expect(block).toHaveCount(1, {timeout: 30_000});
+        await expect(block).toHaveAttribute('data-reason', 'incomplete');
+        await expect(block).toContainText(`The device ${other} asked to join, but the pairing did not complete.`);
+        await expect(page.getByTestId('add-device-countdown')).toHaveCount(0);
+        await expect(page.getByTestId('add-device-nothing-joined')).toHaveCount(0);
+        expect(new Set(stub.pairingSince.slice(1))).toEqual(new Set(['2026-11-21T10:45:01.000Z']));
+        expect(stub.warningReads()).toBe(0);
+    } finally {
+        await box.close();
+        await stub.close();
+    }
+});
+
+/**
+ * Task 88: a pairing with key whose SGTIN was mistyped - the device asks, hmipserver turns it away
+ * as another SGTIN's; the route's `other-device` says so. And a wrong key from the route leads to the
+ * key entry like the warning did.
+ */
+test("the pairing route's other-device and key mismatch, in German (task 88)", async ({page}) => {
+    const sgtin = '3014F711A000000000000066';
+    const stub = await startOcculiteStub({
+        devices: [{address: BIDCOS_SWITCH, type: 'HM-LC-Sw1-Pl', name: 'Steckdose'}],
+        pairing: [],
+    });
+    const box = await startForTest({
+        simulator: true,
+        simulatorOptions: structuredClone(SIMULATOR_FIXTURE),
+        connection: {rega: true, language: 'de', metaUrl: stub.url, metaToken: STUB_TOKEN},
+    });
+    try {
+        await page.goto(`${box.url}#/HmIP-RF/devices`);
+        await page.getByTestId('devices-add').click();
+        await page.getByTestId('add-device-hmip-mode').selectOption('KEY');
+        await page.getByTestId('add-device-sgtin').fill('3014-F711-A000-0000-0000-1234');
+        await page.getByTestId('add-device-key').fill('1TGJ8-Y1FAE-4UW1R-1EFFF-9E9EHZ');
+        await page.getByTestId('add-device-start').click();
+        await expect(page.getByTestId('add-device-countdown')).toBeVisible();
+        await expect.poll(() => stub.pairingSince.length, {timeout: 10_000}).toBeGreaterThanOrEqual(1);
+
+        stub.pairing?.push({
+            sgtin,
+            address: '00000000000066',
+            outcome: 'other-device',
+            reason: 'other-device',
+            failed: false,
+            requests: 1,
+            line: `Whitelist inclusion mode. Wrong SGTIN ${sgtin}. Do nothing`,
+        });
+        const block = page.getByTestId('add-device-pairing-failed');
+        await expect(block).toHaveAttribute('data-reason', 'other-device', {timeout: 10_000});
+        await expect(block).toContainText('Das Anlernen war für eine andere SGTIN geöffnet');
+        await expect(block).toContainText(
+            `Das Gerät ${sgtin} wollte sich anmelden, aber das Anlernen war für eine andere SGTIN geöffnet.`,
+        );
+
+        stub.pairing?.splice(0, 1, {
+            sgtin,
+            address: '00000000000066',
+            outcome: 'key-mismatch',
+            reason: 'key-mismatch',
+            failed: true,
+            requests: 2,
+            line: `The inclusion for device ${sgtin} is declined, the local key is wrong`,
+        });
+        await expect(block).toHaveAttribute('data-reason', 'key-mismatch', {timeout: 10_000});
+        await expect(block).toContainText('Der Geräteschlüssel passt nicht');
+        await page.getByTestId('add-device-key-declined-enter').click();
+        await expect(page.getByTestId('add-device-countdown')).toHaveCount(0);
+        await expect(page.getByTestId('add-device-sgtin')).toHaveValue(sgtin);
+        await expect(page.getByTestId('add-device-key')).toBeFocused();
+    } finally {
+        await box.close();
+        await stub.close();
+    }
 });

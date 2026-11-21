@@ -29,6 +29,7 @@ import {
     type MetaEnum,
     type MetaHmipKeyDecline,
     type MetaHmipPairing,
+    type MetaHmipPairingAttempts,
     type MetaImportMode,
     type MetaNodePatch,
     type MetaObjectView,
@@ -50,6 +51,7 @@ import {
     SystemLink,
     detectSystem,
     hmipKeyDeclinesOf,
+    hmipPairingAttemptsOf,
     transportFor,
     type MetaDetection,
 } from './system.js';
@@ -58,6 +60,8 @@ import {
 const WARNINGS_PATH = '/api/system/v1/warnings';
 /** Task 88: the pairing dialog asks every five seconds; an answer later than that is no use to it. */
 const WARNINGS_TIMEOUT_MS = 5_000;
+/** Task 88: openccu-lite's HmIP pairing attempts, read from hmipserver's lines (occulited task 158). */
+const PAIRING_ATTEMPTS_PATH = '/api/system/v1/radio/hmip/pairing';
 
 /** What the service needs to know about ReGa to offer it as a provider (task 27). */
 export interface MetaRegaLink {
@@ -623,6 +627,32 @@ export class MetaService {
         try {
             return hmipKeyDeclinesOf(
                 await link.client('write').request('GET', WARNINGS_PATH, undefined, {timeout: WARNINGS_TIMEOUT_MS}),
+            );
+        } catch {
+            return undefined;
+        }
+    }
+
+    /**
+     * Task 88: why the system's HmIP pairings went the way they did - `GET
+     * /api/system/v1/radio/hmip/pairing[?since=]` (occulited task 158, `system:read`), with the
+     * system API's credential as the warnings. `since` is the `now` of an earlier answer.
+     * `undefined` on every connection without a system, on a system without the route (404: an
+     * openccu-lite before 2.0.0-beta.11), on a refused credential and on no answer: the pairing
+     * dialog then asks the warnings, and after them says what it always said. Never throws.
+     */
+    async hmipPairingAttempts(since?: string): Promise<MetaHmipPairingAttempts | undefined> {
+        const link = this.boxLink();
+        if (link === undefined) {
+            return undefined;
+        }
+        const path =
+            since === undefined || since === ''
+                ? PAIRING_ATTEMPTS_PATH
+                : `${PAIRING_ATTEMPTS_PATH}?since=${encodeURIComponent(since)}`;
+        try {
+            return hmipPairingAttemptsOf(
+                await link.client('write').request('GET', path, undefined, {timeout: WARNINGS_TIMEOUT_MS}),
             );
         } catch {
             return undefined;

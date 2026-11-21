@@ -1312,6 +1312,86 @@ describe('the declined HmIP keys of openccu-lite (task 88)', () => {
     });
 });
 
+/**
+ * Task 88: why an HmIP pairing failed reaches the pairing dialog as `meta.pairingAttempts`, the
+ * system's pairing route asked afresh each time with the `since` the dialog passes, and `null`
+ * wherever nothing says anything.
+ */
+describe('the HmIP pairing attempts of openccu-lite (task 88)', () => {
+    it('is null before a connection, on a CCU and on a system without the route', async () => {
+        const backend = await Backend.open({dataDir: dir, importLegacy: false});
+        expect(await backend.request('meta.pairingAttempts')).toBeNull();
+        await backend.stop();
+
+        const h = await harness({
+            backend: {metaOptions: {fetch: () => Promise.resolve(new Response('not found', {status: 404}))}},
+        });
+        expect(await h.backend.request('meta.pairingAttempts')).toBeNull();
+        await h.backend.stop();
+    });
+
+    it("relays the system's attempts, with the since the dialog passes", async () => {
+        const json = (body: unknown): Response =>
+            new Response(JSON.stringify(body), {status: 200, headers: {'Content-Type': 'application/json'}});
+        const asked: string[] = [];
+        let route = true;
+        const fetchImpl = ((input: string | URL) => {
+            const url = new URL(String(input));
+            switch (url.pathname) {
+                case '/api/meta/v1/version':
+                    return Promise.resolve(json({api: 'meta', version: 1, format: 1, revision: 3}));
+                case '/api/meta/v1/snapshot':
+                    return Promise.resolve(json({format: 1, revision: 3, objects: {}, enums: {}}));
+                case '/api/meta/v1/events/sse':
+                    return Promise.resolve(
+                        new Response(new ReadableStream({start: () => undefined}), {
+                            headers: {'Content-Type': 'text/event-stream'},
+                        }),
+                    );
+                case '/api/system/v1/radio/hmip/pairing':
+                    asked.push(url.searchParams.get('since') ?? '');
+                    if (!route) {
+                        return Promise.resolve(new Response('not found', {status: 404}));
+                    }
+                    return Promise.resolve(
+                        json({
+                            now: '2026-11-21T10:46:00Z',
+                            keyserver_mode: 'KEYSERVER',
+                            attempts: [
+                                {
+                                    sgtin: '3014F711A000000000000088',
+                                    outcome: 'rejected',
+                                    reason: 'key-server-refused',
+                                    failed: true,
+                                    requests: 1,
+                                    line: '',
+                                },
+                            ],
+                        }),
+                    );
+                default:
+                    return Promise.resolve(new Response('not found', {status: 404}));
+            }
+        }) as unknown as typeof globalThis.fetch;
+        const h = await harness({
+            connection: {metaUrl: 'http://box', metaToken: 'olt_0123456789abcdef0123456789abcdef'},
+            backend: {metaOptions: {fetch: fetchImpl}},
+        });
+        const answer = {
+            now: '2026-11-21T10:46:00Z',
+            attempts: [
+                {sgtin: '3014F711A000000000000088', outcome: 'rejected', reason: 'key-server-refused', failed: true},
+            ],
+        };
+        expect(await h.backend.request('meta.pairingAttempts')).toEqual(answer);
+        expect(await h.backend.request('meta.pairingAttempts', '2026-11-21T10:45:00Z')).toEqual(answer);
+        expect(asked).toEqual(['', '2026-11-21T10:45:00Z']);
+        route = false;
+        expect(await h.backend.request('meta.pairingAttempts', '2026-11-21T10:45:00Z')).toBeNull();
+        await h.backend.stop();
+    });
+});
+
 describe('rooms and functions through ReGa (task 27)', () => {
     /**
      * A CCU: no metadata API, and the detection answered at once rather than by a timeout. The

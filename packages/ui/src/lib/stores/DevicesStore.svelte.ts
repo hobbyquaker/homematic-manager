@@ -4,6 +4,7 @@ import type {
     InstallModeOptions,
     MetaHmipKeyDecline,
     MetaHmipPairing,
+    MetaHmipPairingAttempts,
     RepairConfigOptions,
     RepairConfigResult,
     Transport,
@@ -435,6 +436,24 @@ export class DevicesStore {
     async hmipKeyDeclines(): Promise<MetaHmipKeyDecline[] | undefined> {
         try {
             return (await this.#transport.request('meta.keyDeclines')) ?? undefined;
+        } catch {
+            return undefined;
+        }
+    }
+
+    /**
+     * Task 88: the HmIP pairing attempts the system read from hmipserver's lines, all of this boot
+     * or those since `since` (the `now` of an earlier answer), or `undefined` where nothing says it
+     * (a CCU, a system without the route, a refused credential, no answer) - the dialog then asks
+     * the warnings, and a failure here is no notice either.
+     */
+    async hmipPairingAttempts(since?: string): Promise<MetaHmipPairingAttempts | undefined> {
+        try {
+            return (
+                (await (since === undefined
+                    ? this.#transport.request('meta.pairingAttempts')
+                    : this.#transport.request('meta.pairingAttempts', since))) ?? undefined
+            );
         } catch {
             return undefined;
         }

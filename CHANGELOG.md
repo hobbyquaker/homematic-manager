@@ -6,6 +6,20 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Added
+
+- **The end positions of an HmIP tubular motor can be calibrated by hand.** The values of the shutter channel of a
+  motor that has this calibration (the HmIP-M-TD15 and its twin RM-110-45/15) show whether the end positions are
+  saved, and _Calibrate…_ opens the steps of the CCU's WebUI "Calibration of the end positions": move the shutter up
+  or down by 100 ms, 400 ms or a number of seconds, change the motor's direction, save the upper and then the lower
+  end position, or delete them. The dialog warns that the motor moves, its STOP is always there, and closing it stops
+  a motor it set moving. Built from the WebUI's code and tested against a device description derived from it only,
+  not on a real motor: feedback from a real one is welcome.
+- `paramset.put` takes a `command` option for the VALUES of one channel: the given datapoints go out together in one
+  `putParamset`, without reading first and without dropping a value as unchanged.
+
 ## [3.7.1] — 2026-11-21
 
 ### Fixed

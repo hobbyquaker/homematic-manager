@@ -17,6 +17,7 @@
     import {getStores} from '../../lib/stores/context.js';
     import {isHmipInterface} from '../../lib/stores/suppression.js';
     import {AUTO_DETECT_PARAM, isSet, offersAutoCalibration} from '../../lib/util/blindAutoCalibration.js';
+    import {offersManualCalibration} from '../../lib/util/shutterManualCalibration.js';
     import {changedModeParameters, modeBlockingPeers, modeParameters} from '../../lib/util/channelModeLinks.js';
     import {coveredParameters, detectDeviceEditors, type EditorContext} from '../../lib/util/editors/index.js';
     import {
@@ -36,6 +37,7 @@
     import DeviceEditors from './editors/DeviceEditors.svelte';
     import ParameterRow from './ParameterRow.svelte';
     import RoutingTable from './RoutingTable.svelte';
+    import ShutterManualCalibration from './ShutterManualCalibration.svelte';
     import SuppressRow from './SuppressRow.svelte';
     import WritePreviewDialog from './WritePreviewDialog.svelte';
 
@@ -282,6 +284,11 @@
             Object.entries(edited).filter(([name]) => !name.startsWith('REFERENCE_RUNNING_TIME_')),
         );
     }
+    /**
+     * Task 122: the manual calibration of the end positions of an HmIP tubular motor, where the CCU's WebUI offers it -
+     * on the channel's operating page, the VALUES here - for a channel whose VALUES have `MANUAL_SELF_CALIBRATION`.
+     */
+    const manualCalibration = $derived(open && paramset === 'VALUES' && offersManualCalibration(description));
     /** VALUES is the only paramset whose datapoints can be written one at a time. */
     const perDatapoint = $derived(paramset === 'VALUES');
     /** Multi-apply is a MASTER affair; 2.x offered its channel picker only there. */
@@ -742,6 +749,9 @@
                 unsaved={!isSet(original[AUTO_DETECT_PARAM])}
                 onsuccess={() => void calibrated()}
             />
+        {/if}
+        {#if manualCalibration}
+            <ShutterManualCalibration {interfaceName} {address} />
         {/if}
 
         {#if paramset === 'ROUTING_TABLE'}

@@ -757,6 +757,15 @@ export interface WriteOptions {
      * returned it, the edits on top (task 113).
      */
     changedOnly?: boolean;
+    /**
+     * `paramset.put` on `VALUES` of one channel only: the parameters are one command to the device -
+     * a datapoint and the ones that qualify it, such as `MANUAL_SELF_CALIBRATION` with its level and
+     * duration (task 122) - and go out together, exactly as given, cast and validated, in one
+     * `putParamset`. Nothing is read first and nothing is dropped as unchanged: a command repeats
+     * (the same short step twice), and its datapoints may not be readable at all. It adds no
+     * parameter the caller did not name - what `setValue` does for one datapoint, for a group.
+     */
+    command?: boolean;
     /** Only validate and return what would be sent. */
     dryRun?: boolean;
 }

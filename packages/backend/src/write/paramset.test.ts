@@ -119,6 +119,45 @@ describe('ParamsetWriter.put', () => {
         expect(Object.keys(result?.sent ?? {})).not.toContain('ADDRESS');
     });
 
+    it('sends a VALUES command as given: nothing read, nothing dropped as unchanged (task 122)', async () => {
+        const h = harness({current: {'ABC1:1': {STATE: true, LEVEL: 0.5}}});
+        const [result] = await h.writer.put(
+            'HmIP-RF',
+            ['ABC1:1'],
+            'VALUES',
+            {STATE: true, LEVEL: 0.5},
+            {command: true},
+        );
+        expect(h.reads).toEqual([]);
+        // a FLOAT goes out as an explicit double, as in every write
+        const sent = {STATE: true, LEVEL: {explicitDouble: 0.5}};
+        expect(result).toMatchObject({ok: true, sent});
+        expect(h.writes).toEqual([{method: 'putParamset', params: ['ABC1:1', 'VALUES', sent]}]);
+    });
+
+    it('validates a command like any write and adds nothing to it', async () => {
+        const h = harness();
+        const [refused] = await h.writer.put('HmIP-RF', ['ABC1:1'], 'VALUES', {LEVEL: 2}, {command: true});
+        expect(refused).toMatchObject({ok: false, skipped: true});
+        expect(h.writes).toEqual([]);
+        const [sent] = await h.writer.put('HmIP-RF', ['ABC1:1'], 'VALUES', {LEVEL: 1}, {command: true});
+        expect(sent?.sent).toEqual({LEVEL: {explicitDouble: 1}});
+    });
+
+    it('refuses a command anywhere but the VALUES of one channel', async () => {
+        const h = harness();
+        await expect(h.writer.put('HmIP-RF', ['ABC1:1'], 'MASTER', {LOGGING: true}, {command: true})).rejects.toThrow(
+            'a command goes to the VALUES of one channel',
+        );
+        await expect(
+            h.writer.put('HmIP-RF', ['ABC1:1', 'DEF1:1'], 'VALUES', {STATE: true}, {command: true}),
+        ).rejects.toThrow('a command goes to the VALUES of one channel');
+        await expect(
+            h.writer.put('HmIP-RF', ['ABC1:1'], 'VALUES', {STATE: true}, {command: true, writeAll: true}),
+        ).rejects.toThrow('a command goes to the VALUES of one channel');
+        expect(h.writes).toEqual([]);
+    });
+
     it('skips a write where nothing changed', async () => {
         const h = harness({current: {'ABC1:1': {LOGGING: true}}});
         const [result] = await h.writer.put('HmIP-RF', ['ABC1:1'], 'MASTER', {LOGGING: true});

@@ -272,6 +272,30 @@ export class ParamsetStore {
         }
     }
 
+    /**
+     * Task 122: a command of datapoints that go together (`MANUAL_SELF_CALIBRATION` with its level
+     * and duration) as one `putParamset` on the channel's VALUES, exactly as given (the backend's
+     * `command` write: nothing read first, nothing dropped as unchanged). `true` when the interface
+     * took it; a failure is a notice. Leaves {@link results} alone - it is no edit of the dialog's.
+     */
+    async command(interfaceName: string, address: string, values: ParamsetWrite): Promise<boolean> {
+        const context = `putParamset ${address} VALUES ${Object.keys(values).join(', ')}`;
+        try {
+            const [result] = await this.#transport.request('paramset.put', interfaceName, [address], 'VALUES', values, {
+                command: true,
+            });
+            if (result?.ok === true && result.skipped !== true) {
+                return true;
+            }
+            const reason = result?.problems.map((problem) => problem.message).join('; ') || 'not sent';
+            this.#notices.push('error', `${context}: ${reason}`);
+            return false;
+        } catch (error) {
+            this.#notices.fromError(error, context);
+            return false;
+        }
+    }
+
     /** One datapoint, the button next to a VALUES row. */
     async setValue(interfaceName: string, address: string, parameter: string, value: RpcWriteValue): Promise<boolean> {
         try {

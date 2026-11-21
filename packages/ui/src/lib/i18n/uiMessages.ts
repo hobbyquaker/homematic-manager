@@ -1461,6 +1461,95 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Zuerst die Änderung schreiben: Das Gerät erkennt seine Endlagen noch nicht selbst.',
         en: 'Write the change first: the device does not detect its end positions yet.',
     },
+    // task 122: the manual calibration of the end positions of an HmIP tubular motor (HmIP-M-TD15); the CCU's words
+    // where the WebUI has them (shutterSelfCalibration.js, translate.lang*.js)
+    'Calibration of the end positions': {de: 'Kalibrierung der Endlagen', en: 'Calibration of the end positions'},
+    'Calibrate…': {de: 'Kalibrieren…', en: 'Calibrate…'},
+    'The end positions are calibrated': {de: 'Die Endlagen sind kalibriert', en: 'The end positions are calibrated'},
+    'The end positions have not been saved. The tubular motor therefore cannot be used.': {
+        de: 'Die Endlagen wurden noch nicht kalibriert. Der Rohrmotor kann daher nicht genutzt werden.',
+        en: 'The end positions have not been saved. The tubular motor therefore cannot be used.',
+    },
+    'Not known yet whether the device holds its end positions.': {
+        de: 'Noch nicht bekannt, ob das Gerät seine Endlagen gespeichert hat.',
+        en: 'Not known yet whether the device holds its end positions.',
+    },
+    'The motor moves as soon as a movement button is pressed. Make sure nothing and nobody is in the way of the shutter. STOP stops it at any time; closing this dialog stops it too.':
+        {
+            de: 'Der Motor fährt, sobald eine Fahrtaste gedrückt wird. Es darf nichts und niemand im Weg des Rollladens sein. STOP hält ihn jederzeit an; das Schließen dieses Dialogs ebenfalls.',
+            en: 'The motor moves as soon as a movement button is pressed. Make sure nothing and nobody is in the way of the shutter. STOP stops it at any time; closing this dialog stops it too.',
+        },
+    'S T O P': {de: 'S T O P', en: 'S T O P'},
+    'Upper end position set: Yes': {de: 'Obere Endlage gesetzt: Ja', en: 'Upper end position set: Yes'},
+    'Upper end position set: No': {de: 'Obere Endlage gesetzt: Nein', en: 'Upper end position set: No'},
+    'Upper end position set: not known': {
+        de: 'Obere Endlage gesetzt: unbekannt',
+        en: 'Upper end position set: not known',
+    },
+    'Lower end position set: Yes': {de: 'Untere Endlage gesetzt: Ja', en: 'Lower end position set: Yes'},
+    'Lower end position set: No': {de: 'Untere Endlage gesetzt: Nein', en: 'Lower end position set: No'},
+    'Lower end position set: not known': {
+        de: 'Untere Endlage gesetzt: unbekannt',
+        en: 'Lower end position set: not known',
+    },
+    'Move the shutter to its upper end position and save it. If it moves the wrong way, change the direction of rotation of the motor first.':
+        {
+            de: 'Den Rollladen in die obere Endlage fahren und sie speichern. Fährt er in die falsche Richtung, zuerst die Drehrichtung des Motors wechseln.',
+            en: 'Move the shutter to its upper end position and save it. If it moves the wrong way, change the direction of rotation of the motor first.',
+        },
+    'Move the shutter to its lower end position and save it.': {
+        de: 'Den Rollladen in die untere Endlage fahren und sie speichern.',
+        en: 'Move the shutter to its lower end position and save it.',
+    },
+    'The end positions are calibrated. To calibrate them again, delete them first.': {
+        de: 'Die Endlagen sind kalibriert. Um sie neu zu kalibrieren, zuerst die Endlagen löschen.',
+        en: 'The end positions are calibrated. To calibrate them again, delete them first.',
+    },
+    'The end positions have been saved. The tubular motor can be used.': {
+        de: 'Die Endlagen wurden gespeichert. Der Rohrmotor kann nun genutzt werden.',
+        en: 'The end positions have been saved. The tubular motor can be used.',
+    },
+    'Movement time': {de: 'Fahrzeit', en: 'Movement time'},
+    Seconds: {de: 'Sekunden', en: 'Seconds'},
+    Up: {de: 'Auf', en: 'Up'},
+    Down: {de: 'Ab', en: 'Down'},
+    'Change the direction of rotation of the motor': {
+        de: 'Drehrichtung des Motors wechseln',
+        en: 'Change the direction of rotation of the motor',
+    },
+    'Save upper end position': {de: 'Obere Endlage speichern', en: 'Save upper end position'},
+    'Save lower end position': {de: 'Untere Endlage speichern', en: 'Save lower end position'},
+    'Delete end positions': {de: 'Endlagen löschen', en: 'Delete end positions'},
+    'Delete end positions?': {de: 'Endlagen löschen?', en: 'Delete end positions?'},
+    'The device forgets both end positions. The tubular motor cannot be used until they are calibrated again.': {
+        de: 'Das Gerät vergisst beide Endlagen. Der Rohrmotor kann erst wieder genutzt werden, wenn sie neu kalibriert sind.',
+        en: 'The device forgets both end positions. The tubular motor cannot be used until they are calibrated again.',
+    },
+    'The device did not take the command.': {
+        de: 'Das Gerät hat den Befehl nicht angenommen.',
+        en: 'The device did not take the command.',
+    },
+    'Up for 100 ms.': {de: 'Auf für 100 ms.', en: 'Up for 100 ms.'},
+    'Down for 100 ms.': {de: 'Ab für 100 ms.', en: 'Down for 100 ms.'},
+    'Up for 400 ms.': {de: 'Auf für 400 ms.', en: 'Up for 400 ms.'},
+    'Down for 400 ms.': {de: 'Ab für 400 ms.', en: 'Down for 400 ms.'},
+    'Up for {seconds} s.': {de: 'Auf für {seconds} s.', en: 'Up for {seconds} s.'},
+    'Down for {seconds} s.': {de: 'Ab für {seconds} s.', en: 'Down for {seconds} s.'},
+    'The direction of rotation was changed.': {
+        de: 'Die Drehrichtung wurde gewechselt.',
+        en: 'The direction of rotation was changed.',
+    },
+    'Stopped.': {de: 'Angehalten.', en: 'Stopped.'},
+    'The upper end position was saved.': {
+        de: 'Die obere Endlage wurde gespeichert.',
+        en: 'The upper end position was saved.',
+    },
+    'The lower end position was saved.': {
+        de: 'Die untere Endlage wurde gespeichert.',
+        en: 'The lower end position was saved.',
+    },
+    'The end positions were deleted.': {de: 'Die Endlagen wurden gelöscht.', en: 'The end positions were deleted.'},
+    Done: {de: 'Fertig', en: 'Done'},
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

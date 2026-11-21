@@ -25,6 +25,9 @@
  * (`multiApplyEligibility()`, task 6.3). 2.x offered every channel with the same `TYPE` and never
  * compared descriptions, which is exactly what put more than 100 devices into `CONFIG_PENDING`.
  *
+ * A **command** (`options.command`, task 122) is the exception for `VALUES`: a datapoint and the ones that qualify it,
+ * sent together as given - one `putParamset` that is to a group what `setValue` is to one datapoint.
+ *
  * `dryRun` performs everything except the call, so the preview dialog shows the real payload.
  */
 
@@ -130,6 +133,12 @@ export class ParamsetWriter {
     ): Promise<WriteResult[]> {
         if (addresses.length === 0) {
             throw validationError('no address to write to');
+        }
+        if (
+            options.command === true &&
+            (paramset !== 'VALUES' || addresses.length !== 1 || options.writeAll === true)
+        ) {
+            throw validationError('a command goes to the VALUES of one channel, and only with what it names');
         }
         const [source, ...extras] = addresses as [string, ...string[]];
         const refused = new Map<string, WriteProblem>();
@@ -306,7 +315,8 @@ export class ParamsetWriter {
         }
 
         let original: Paramset = {};
-        if (options.writeAll !== true) {
+        // a command is sent as given (WriteOptions.command): nothing read, so nothing counts as unchanged
+        if (options.writeAll !== true && options.command !== true) {
             try {
                 original = await readParamset(this.#deps, interfaceName, address, paramsetKey);
             } catch (error) {

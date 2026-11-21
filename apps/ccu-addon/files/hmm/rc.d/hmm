@@ -511,7 +511,14 @@ case "$1" in
         # profile directory is *kept*: it holds the CCU configuration the user made in the UI.
         # `uninstall purge` deletes that too.
         Stop
-        $ADDON_DIR/bin/update_addon $ADDON
+        # B-100: on openccu-lite the system owns the registration. The uninstall runs as the
+        # addon's user (addon-hmm), which may neither read hm_addons.cfg nor remove the rc.d entry,
+        # the www link or the addon directory itself - all of them root's - and the system removes
+        # each of them after this script (the addon directory once it is empty). So only what is
+        # the addon's own is removed here, and the uninstall ends without an error line.
+        LITE=0
+        IsOpenccuLite && LITE=1
+        [ "$LITE" = 1 ] || $ADDON_DIR/bin/update_addon $ADDON
         if [ -L $MONIT_CONF ] || [ -f $MONIT_CONF ]; then
             rm -f $MONIT_CONF
             [ -x /usr/bin/monit ] && /usr/bin/monit reload >/dev/null 2>&1
@@ -526,9 +533,14 @@ case "$1" in
         if [ -f $LIGHTTPD_CONF ] && rm -f $LIGHTTPD_CONF 2>/dev/null; then
             LighttpdReload
         fi
-        rm -f $CONF_DIR/rc.d/$ADDON
-        rm -rf $WWW_DIR
-        rm -rf $ADDON_DIR
+        if [ "$LITE" = 1 ]; then
+            # the directory's content, not the directory: /usr/local/addons is root's
+            rm -rf "${ADDON_DIR:?}"/* "$ADDON_DIR"/.[!.]* 2>/dev/null
+        else
+            rm -f $CONF_DIR/rc.d/$ADDON
+            rm -rf $WWW_DIR
+            rm -rf $ADDON_DIR
+        fi
         # task 43: the log outside the addon tree goes with it
         rm -f $VARLOG_LOG $VARLOG_LOG.1 2>/dev/null
         if [ "$2" = purge ]; then

@@ -964,6 +964,37 @@ dex '/usr/local/etc/config/rc.d/hmm uninstall purge' >/dev/null
 check "uninstall purge removes the profile too" "gone" "$(dex 'test -d /usr/local/hmm || echo gone')"
 
 echo
+echo "openccu-lite: a fresh install needs no reboot, and the uninstall as the addon's user (B-99, B-100)"
+# openccu-lite starts the addon's unit right after the install, so a fresh install is exit 0 there: its
+# Addons page would otherwise ask for a reboot for an addon that already runs. The uninstall runs as the
+# addon's user, which may not read hm_addons.cfg nor remove the rc.d entry, the www link or the addon
+# directory - the system removes those after the script. Here a uid of its own and a hm_addons.cfg
+# only root can read stand in for that.
+dex 'printf "VERSION=3.89.8.20260719\nPRODUCT=ova\nPLATFORM=ova\nVARIANT=lite\nLITE=1.0.0-dev.28\n" > /VERSION' >/dev/null
+out="$(install_addon)"
+check "a fresh install on openccu-lite exits 0" "exit 0" "$out"
+check "and the addon runs" "Starting hmm: OK" "$(dex '/usr/local/etc/config/rc.d/hmm restart')"
+check "the Systemsteuerung entry is written, as root" "CONFIG_URL /addons/hmm/settings.cgi?cmd=config" \
+    "$(dex 'cat /usr/local/etc/config/hm_addons.cfg')"
+# the system stops the unit before the uninstall, and gives the addon its directories
+dex '/usr/local/etc/config/rc.d/hmm stop; chown -R 4711:4711 /usr/local/addons/hmm /usr/local/hmm \
+    && chmod 600 /usr/local/etc/config/hm_addons.cfg' >/dev/null
+out="$(dex 'cd / && setpriv --reuid=4711 --regid=4711 --clear-groups /usr/local/etc/config/rc.d/hmm uninstall 2>&1; echo "exit $?"')"
+check "the uninstall as the addon's user exits 0" "exit 0" "$out"
+absent "without hm_addons.cfg's permission error" "hm_addons.cfg" "$out"
+absent "and without a refused removal" "ermission denied" "$out"
+check "the addon directory is empty, for the system to remove" "empty" \
+    "$(dex '[ -z "$(ls -A /usr/local/addons/hmm)" ] && echo empty')"
+check "the Systemsteuerung entry is left to the system" "CONFIG_URL /addons/hmm/settings.cgi?cmd=config" \
+    "$(dex 'cat /usr/local/etc/config/hm_addons.cfg')"
+check "and so are the rc.d entry and the www link" "both" \
+    "$(dex 'test -L /usr/local/etc/config/rc.d/hmm && test -L /usr/local/etc/config/addons/www/hmm && echo both')"
+check "the profile is kept" "kept" "$(dex 'test -d /usr/local/hmm && echo kept')"
+# what the system does after the script, and back to a CCU
+dex 'chmod 644 /usr/local/etc/config/hm_addons.cfg && rmdir /usr/local/addons/hmm \
+    && rm -f /usr/local/etc/config/rc.d/hmm /usr/local/etc/config/addons/www/hmm && rm -rf /usr/local/hmm /VERSION' >/dev/null
+
+echo
 if [ "$failed" = 0 ]; then
     echo "container test passed"
 else

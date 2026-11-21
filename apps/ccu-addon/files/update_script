@@ -29,6 +29,7 @@ LEGACY_PIDFILE=/var/run/$ADDON.pid
 
 # 10 tells the WebUI this was a fresh install (it then offers a reboot), 0 an update. The CCU3
 # firmware ignores the code and always reboots; OpenCCU installs live and only reboots on 10.
+# openccu-lite always gets 0 (B-99, at the end).
 EXITCODE=10
 
 mount | grep -q ' /usr/local ' || mount /usr/local
@@ -339,5 +340,11 @@ elif [ "$WAS_RUNNING" = 1 ]; then
         $CONF_DIR/rc.d/$ADDON start >/dev/null 2>&1
     fi
 fi
+
+# B-99: openccu-lite needs no reboot for an addon - its unit starts it right after the install (above,
+# or the system's own move of the daemon into addon-hmm.service) - and its Addons page and welcome page
+# would otherwise ask the user to reboot for an addon that is already running. A CCU and OpenCCU keep
+# 10 on a fresh install.
+[ "$LITE" = 1 ] && EXITCODE=0
 
 exit $EXITCODE

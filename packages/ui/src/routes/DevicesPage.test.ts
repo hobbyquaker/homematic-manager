@@ -325,6 +325,100 @@ describe('the paramset buttons (B-33)', () => {
     });
 });
 
+/**
+ * Task 101: the central's radio module as hmipserver lists it (lab, an HmIP-RFUSB on openccu-lite,
+ * 2026-10-20): a device of SUBTYPE CCU with MASTER and SERVICE, and a `:0` whose VALUES carry the
+ * duty cycle and the carrier sense level. FLAGS 1 here, not the 9 of the lab: it is the module that
+ * keeps delete and replace off, not the DontDelete flag.
+ */
+describe("the central's radio module (task 101)", () => {
+    const RFUSB = '00041709ADFA5B';
+    const DEVICES: DeviceDescription[] = [
+        {
+            ADDRESS: RFUSB,
+            TYPE: 'HmIP-RFUSB',
+            SUBTYPE: 'CCU',
+            VERSION: 1,
+            FLAGS: 1,
+            FIRMWARE: '4.4.18',
+            AVAILABLE_FIRMWARE: '0.0.0',
+            CHILDREN: [`${RFUSB}:0`],
+            PARAMSETS: ['MASTER', 'SERVICE'],
+        },
+        {
+            ADDRESS: `${RFUSB}:0`,
+            TYPE: 'MAINTENANCE',
+            PARENT: RFUSB,
+            PARENT_TYPE: 'HmIP-RFUSB',
+            INDEX: 0,
+            PARAMSETS: ['MASTER', 'VALUES'],
+        },
+    ];
+    const FILLED = {SOME_SETTING: {TYPE: 'BOOL', OPERATIONS: 7, FLAGS: 1}} satisfies ParamsetDescription;
+    const VALUES = {
+        CARRIER_SENSE_LEVEL: {TYPE: 'FLOAT', OPERATIONS: 5, FLAGS: 1, MIN: 0, MAX: 100},
+        DUTY_CYCLE_LEVEL: {TYPE: 'FLOAT', OPERATIONS: 5, FLAGS: 1, MIN: 0, MAX: 100},
+    } satisfies ParamsetDescription;
+
+    async function mountRadioModule(): Promise<void> {
+        const transport = new MockTransport({demo: true});
+        transport.respond('devices.list', (interfaceName) =>
+            interfaceName === 'HmIP-RF' ? DEVICES : isDemoInterface(interfaceName) ? DEMO_DEVICES[interfaceName] : [],
+        );
+        transport.respond('paramset.description', (_interfaceName, _address, paramset) =>
+            paramset === 'VALUES' ? VALUES : FILLED,
+        );
+        await mountApp({transport, hash: '#/HmIP-RF/devices'});
+        await waitFor(() => {
+            expect(rowOf(RFUSB)).toBeTruthy();
+        });
+        await fireEvent.click(within(rowOf(RFUSB)).getByRole('button', {name: expandRowName()}));
+    }
+
+    async function offered(address: string): Promise<string[]> {
+        const cell = await screen.findByTestId(`paramsets-${address}`);
+        await waitFor(() => {
+            expect(cell.getAttribute('aria-busy')).toBe('false');
+        });
+        return within(cell)
+            .queryAllByRole('button')
+            .map((button) => button.textContent.trim());
+    }
+
+    it('offers no settings, on the device or its channel, but keeps the maintenance values', async () => {
+        await mountRadioModule();
+        expect(await offered(RFUSB)).toEqual(['SERVICE']);
+        expect(await offered(`${RFUSB}:0`)).toEqual(['VALUES']);
+
+        await fireEvent.contextMenu(rowOf(`${RFUSB}:0`));
+        await waitFor(() => {
+            const labels = within(screen.getByTestId('devices-menu'))
+                .getAllByRole('menuitem')
+                .map((item) => item.textContent.trim());
+            expect(labels.filter((label) => /Param/.test(label))).toEqual(['VALUES Paramset']);
+        });
+    });
+
+    it('cannot be deleted or replaced, from the toolbar or the menu, and says why', async () => {
+        await mountRadioModule();
+        await fireEvent.click(rowOf(RFUSB));
+        for (const id of ['devices-delete', 'devices-replace']) {
+            expect(screen.getByTestId<HTMLButtonElement>(id).disabled, id).toBe(true);
+            expect(screen.getByTestId(`${id}-tooltip`).getAttribute('data-tooltip'), id).toContain(
+                'Das Funkmodul der Zentrale kann nicht gelöscht oder ersetzt werden',
+            );
+        }
+        // renaming stays, as on the CCU's own virtual devices
+        expect(screen.getByTestId<HTMLButtonElement>('devices-rename').disabled).toBe(false);
+
+        await fireEvent.contextMenu(rowOf(RFUSB));
+        const menu = within(screen.getByTestId('devices-menu'));
+        for (const label of ['Gerät tauschen', 'Löschen']) {
+            expect(menu.getByRole<HTMLButtonElement>('menuitem', {name: label}).disabled, label).toBe(true);
+        }
+    });
+});
+
 describe('the Msgs column (B-34)', () => {
     const cell = (): HTMLElement => rowOf('KEQ0345678').querySelector<HTMLElement>('[data-column-key="msgs"]')!;
 

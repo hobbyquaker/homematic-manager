@@ -11,6 +11,8 @@ import {
     decodeDirection,
     decodeRxMode,
     isCentralDeviceType,
+    isRadioModuleDevice,
+    RADIO_MODULE_DEVICE_TYPES,
     isChannelDescription,
     isRoaming,
     parseRoles,
@@ -92,6 +94,25 @@ describe('isCentralDeviceType', () => {
             expect(isCentralDeviceType(type)).toBe(true);
         }
         expect(isCentralDeviceType('HM-LC-Sw1-Pl-CT-R1')).toBe(false);
+    });
+});
+
+describe('isRadioModuleDevice', () => {
+    it("knows the central's radio module by its type, in any case, and by hmipserver's SUBTYPE CCU", () => {
+        for (const type of RADIO_MODULE_DEVICE_TYPES) {
+            expect(isRadioModuleDevice({TYPE: type}), type).toBe(true);
+            expect(isRadioModuleDevice({TYPE: type.toUpperCase()}), type).toBe(true);
+        }
+        expect(isRadioModuleDevice({TYPE: 'HmIP-FUTURE', SUBTYPE: 'CCU'})).toBe(true);
+        expect(isRadioModuleDevice({TYPE: 'HmIP-RCV-50', SUBTYPE: ''})).toBe(false);
+        expect(isRadioModuleDevice({TYPE: 'HmIP-SWDO', SUBTYPE: 'SWDO'})).toBe(false);
+        expect(isRadioModuleDevice({})).toBe(false);
+    });
+
+    it('is no central type: the radio module is hardware', () => {
+        for (const type of RADIO_MODULE_DEVICE_TYPES) {
+            expect(isCentralDeviceType(type)).toBe(false);
+        }
     });
 });
 
@@ -252,6 +273,23 @@ describe('DeviceIndex', () => {
             {ADDRESS: 'HmIP-RCV-50:1', TYPE: 'KEY_TRANSCEIVER', PARENT: 'HmIP-RCV-50'},
         ]);
         expect(noParentType.isCentral('HmIP-RCV-50:1')).toBe(true);
+    });
+
+    it("flags the central's radio module and its channels, by the device or the channel's PARENT_TYPE", () => {
+        const radio = new DeviceIndex('HmIP-RF', [
+            {ADDRESS: '00041709ADFA5B', TYPE: 'HmIP-RFUSB', SUBTYPE: 'CCU', CHILDREN: ['00041709ADFA5B:0']},
+            {ADDRESS: '00041709ADFA5B:0', TYPE: 'MAINTENANCE', PARENT: '00041709ADFA5B'},
+            {ADDRESS: '3014F711A0000000:0', TYPE: 'MAINTENANCE', PARENT: '3014F711A0000000', PARENT_TYPE: 'RPI-RF-MOD'},
+            {ADDRESS: 'HmIP-RCV-50', TYPE: 'HmIP-RCV-50'},
+            {ADDRESS: '0001D3C99C3C93', TYPE: 'HmIP-SWDO', SUBTYPE: 'SWDO'},
+        ]);
+        expect(radio.isRadioModule('00041709ADFA5B')).toBe(true);
+        expect(radio.isRadioModule('00041709ADFA5B:0')).toBe(true);
+        expect(radio.isRadioModule('3014F711A0000000:0')).toBe(true);
+        expect(radio.isRadioModule('HmIP-RCV-50')).toBe(false);
+        expect(radio.isRadioModule('0001D3C99C3C93')).toBe(false);
+        expect(radio.isRadioModule('nope')).toBe(false);
+        expect(radio.isCentral('00041709ADFA5B')).toBe(false);
     });
 
     it('does not flag a channel whose device is unknown', () => {

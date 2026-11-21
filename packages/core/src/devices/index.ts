@@ -184,6 +184,25 @@ export function isCentralDeviceType(type: string): boolean {
 }
 
 /**
+ * The device types of the central's own radio module over HmIP-RF: the HmIP-CCU3's, the RPI-RF-MOD's
+ * and the HmIP-RFUSB's. hmipserver lists it as a device of `SUBTYPE` `CCU` with a `:0` that carries
+ * the duty cycle and the carrier sense level. Unlike {@link CENTRAL_DEVICE_TYPES} it is hardware -
+ * firmware, live values - so it is no central type; it is only never deleted, replaced or given
+ * settings, as the WebUI does since OpenCCU-Base #210.
+ */
+export const RADIO_MODULE_DEVICE_TYPES: readonly string[] = ['HmIP-CCU3', 'RPI-RF-MOD', 'HmIP-RFUSB'];
+
+const RADIO_MODULE_TYPES_UPPER = new Set(RADIO_MODULE_DEVICE_TYPES.map((type) => type.toUpperCase()));
+
+/** Is this device description the central's radio module (by its type, or hmipserver's `SUBTYPE` `CCU`)? */
+export function isRadioModuleDevice(device: {
+    readonly TYPE?: string | undefined;
+    readonly SUBTYPE?: string | undefined;
+}): boolean {
+    return RADIO_MODULE_TYPES_UPPER.has((device.TYPE ?? '').toUpperCase()) || device.SUBTYPE === 'CCU';
+}
+
+/**
  * Is this description a channel (rather than a device)? Narrows PARENT to a string, which is
  * what makes the parent lookups below total.
  */
@@ -360,6 +379,18 @@ export class DeviceIndex {
         }
         const parentType = description.PARENT_TYPE ?? this.parentOf(address)?.TYPE;
         return parentType !== undefined && isCentralDeviceType(parentType);
+    }
+
+    /** Is this address the central's radio module (or one of its channels)? See {@link isRadioModuleDevice}. */
+    isRadioModule(address: string): boolean {
+        const description = this.#byAddress.get(address);
+        if (!description) {
+            return false;
+        }
+        if (!isChannelDescription(description)) {
+            return isRadioModuleDevice(description);
+        }
+        return isRadioModuleDevice(this.parentOf(address) ?? {TYPE: description.PARENT_TYPE});
     }
 
     /** The CCU's own virtual devices on this interface. */

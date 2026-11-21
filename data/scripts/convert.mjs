@@ -459,7 +459,13 @@ const turkish = {
 
 /** @type {Record<string, string>} */
 const deviceIcons = {};
-const iconSources = {...extract.device_icons, ...(custom.device_icons ?? {})};
+/**
+ * Pictures the WebUI gives a type that the extract does not map. The HmIP-RFUSB's device (the
+ * central's radio module, like the RPI-RF-MOD and the HmIP-CCU3) shows the CCU3 picture in the WebUI
+ * since OpenCCU-Base #210.
+ */
+const HMM_DEVICE_ICONS = {'HmIP-RFUSB': 'CCU3.png'};
+const iconSources = {...extract.device_icons, ...(custom.device_icons ?? {}), ...HMM_DEVICE_ICONS};
 for (const [rawType, file] of Object.entries(iconSources)) {
     const type = identifierKey(rawType);
     // The contract wants the bare file name; ten upstream entries sit in the CCU's `coupling/`

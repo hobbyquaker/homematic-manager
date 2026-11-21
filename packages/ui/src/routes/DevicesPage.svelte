@@ -411,9 +411,14 @@
      * to remove; 2.x greyed delete, replace and rename out for those rows.
      */
     const dontDelete = $derived(oneDevice !== '' && decodeDeviceFlags(index?.get(oneDevice)?.FLAGS).dontDelete);
+    /**
+     * Task 101: the central's radio module (HmIP-CCU3, RPI-RF-MOD, HmIP-RFUSB) is never deleted or
+     * replaced, whatever its flags say - the WebUI offers neither since OpenCCU-Base #210.
+     */
+    const radioModule = $derived(oneDevice !== '' && (index?.isRadioModule(oneDevice) ?? false));
     /** Task 58: a synthesised smoke group row is no device the interface could delete or replace. */
     const realDevice = $derived(oneDevice !== '' && !isSmokeGroupAddress(oneDevice) ? oneDevice : '');
-    const canDelete = $derived(realDevice !== '' && !dontDelete);
+    const canDelete = $derived(realDevice !== '' && !dontDelete && !radioModule);
     const isBidcos = $derived(interfaceType.startsWith('BidCos'));
     /**
      * `restoreConfigToDevice` and `clearConfigCache` are BidCos methods, as the 2.x menu classes
@@ -441,7 +446,11 @@
             case 'channel':
                 return t('Select one or more channels');
             case 'delete':
-                return dontDelete ? t('This device carries the DontDelete flag') : t('Select a device');
+                return radioModule
+                    ? t("The central's radio module cannot be deleted or replaced")
+                    : dontDelete
+                      ? t('This device carries the DontDelete flag')
+                      : t('Select a device');
             case 'bidcos':
                 return t('Only available on BidCos interfaces');
         }
@@ -657,7 +666,7 @@
                 }
                 return stores.paramsets.contentOf(interfaceName, row, 'VALUES', parent, 'service-messages');
             },
-            {channel},
+            {channel, radioModule: index?.isRadioModule(row.ADDRESS) ?? false},
         );
     }
 
@@ -945,7 +954,7 @@
     );
 
     function dontDeleteOf(address: string): boolean {
-        return decodeDeviceFlags(index?.get(address)?.FLAGS).dontDelete;
+        return decodeDeviceFlags(index?.get(address)?.FLAGS).dontDelete || (index?.isRadioModule(address) ?? false);
     }
 
     async function onMenuSelect(id: string): Promise<void> {

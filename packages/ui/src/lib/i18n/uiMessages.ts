@@ -562,6 +562,11 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Dieses Gerät trägt das Flag DontDelete',
         en: 'This device carries the DontDelete flag',
     },
+    // Task 101: the HmIP-CCU3's, RPI-RF-MOD's or HmIP-RFUSB's own device
+    "The central's radio module cannot be deleted or replaced": {
+        de: 'Das Funkmodul der Zentrale kann nicht gelöscht oder ersetzt werden',
+        en: "The central's radio module cannot be deleted or replaced",
+    },
     'Only available on BidCos interfaces': {
         de: 'Nur bei BidCos-Schnittstellen verfügbar',
         en: 'Only available on BidCos interfaces',

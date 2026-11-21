@@ -491,13 +491,19 @@ describe('translations', () => {
 
 describe('device icons', () => {
     it('is a DeviceIcons map of bare file names', () => {
-        expect(Object.keys(deviceIcons).length).toBe(535);
+        expect(Object.keys(deviceIcons).length).toBe(536);
         for (const [type, file] of Object.entries(deviceIcons)) {
             expect(type).toBe(type.toUpperCase());
             expect(file).not.toContain('/');
             expect(file).toMatch(/\.(?:png|webp|gif|jpg)$/u);
         }
         expect(deviceIcons['HM-LC-SW1-FM']).toBe('4_hm-lc-sw1-fm.png');
+    });
+
+    it("gives every kind of the central's radio module the CCU3 picture, as the WebUI does", () => {
+        for (const type of ['HMIP-CCU3', 'RPI-RF-MOD', 'HMIP-RFUSB']) {
+            expect(deviceIcons[type], type).toBe('CCU3.png');
+        }
     });
 });
 

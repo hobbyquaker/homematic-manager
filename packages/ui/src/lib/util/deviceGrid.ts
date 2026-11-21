@@ -166,6 +166,10 @@ export interface OfferedParamsets {
  * lists it on most HmIP channels and describes it there as a copy of the device's (lab, 2026-09-13),
  * so the device's button is the one place for it. It is not even asked about.
  *
+ * The central's radio module (`row.radioModule`, HmIP-CCU3 / RPI-RF-MOD / HmIP-RFUSB) has no
+ * settings: MASTER is never offered on it or its channels, as the WebUI has none for it since
+ * OpenCCU-Base #210. Its VALUES - the duty cycle and the carrier sense level - stay.
+ *
  * A paramset whose description has not been answered yet is not offered: a button that appears is
  * better than one that appears and disappears under the pointer. One whose description failed is
  * offered, because hiding it would hide the failure too - the dialog reports it.
@@ -173,12 +177,12 @@ export interface OfferedParamsets {
 export function offeredParamsets(
     listed: unknown,
     contentOf: (paramset: string) => ParamsetContent | undefined,
-    row: {readonly channel: boolean} = {channel: false},
+    row: {readonly channel: boolean; readonly radioModule?: boolean} = {channel: false},
 ): OfferedParamsets {
     const names: string[] = [];
     let pending = false;
     for (const name of asStringList(listed) ?? []) {
-        if (name === 'LINK' || (row.channel && name === 'SERVICE')) {
+        if (name === 'LINK' || (row.channel && name === 'SERVICE') || (row.radioModule === true && name === 'MASTER')) {
             continue;
         }
         const content = contentOf(name);

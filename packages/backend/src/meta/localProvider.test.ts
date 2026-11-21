@@ -79,6 +79,40 @@ describe('the local metadata provider', () => {
         expect(changes).toBe(before + 1);
     });
 
+    it("keeps Control's icons and any namespace it does not know through a rename and a room change", async () => {
+        // occulited's Control keeps a channel's icons in the namespace `control` (fixtures 10-12);
+        // this application never shows them, so a write from here must leave them as they are
+        const meta = {
+            control: {icon: 'light_light_dim_100', icons: {on: 'light_light_dim_100', off: 'light_light_dim_00'}},
+            'some-addon': {anything: [1, 2, 3]},
+        };
+        await fs.writeFile(
+            file,
+            JSON.stringify({
+                format: 1,
+                revision: 4,
+                objects: {'HmIP-RF.0011223344AABB:4': {name: 'Licht', enums: [], meta}},
+                enums: {
+                    room: {name: {de: 'Räume', en: 'Rooms'}, tree: [{id: 'eg', name: 'Erdgeschoss'}]},
+                    function: {name: {de: 'Gewerke', en: 'Functions'}, tree: []},
+                },
+            }),
+        );
+        const store = provider();
+        await store.start();
+        await store.setNames([{ref: 'HmIP-RF.0011223344AABB:4', name: 'Deckenlicht'}]);
+        await store.setMembership([{ref: 'HmIP-RF.0011223344AABB:4', paths: ['room/eg']}]);
+
+        const second = provider();
+        await second.start();
+        expect(second.document().objects['HmIP-RF.0011223344AABB:4']).toEqual({
+            name: 'Deckenlicht',
+            enums: ['room/eg'],
+            meta,
+        });
+        expect(second.state().revision).toBe(6);
+    });
+
     it('refuses a write the format refuses, with the code the API would answer', async () => {
         const store = provider();
         await store.start();

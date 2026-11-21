@@ -18,6 +18,13 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   openccu-lite systems still report a wrong key; on a CCU, a pairing with a key that runs out names the key as a
   possible cause.
 
+### Changed
+
+- **Icons chosen in openccu-lite's Control stay as they are.** Renaming a channel or changing its rooms and functions
+  here leaves the icons Control keeps for it (one per switch, or one per state of a switch or a contact) untouched, as it
+  does any other addon's data on the channel. The metadata store of a profile without openccu-lite now passes the same
+  test cases as openccu-lite's own store, including these icons and that a name cannot be cleared.
+
 ## [3.5.1] — 2026-11-20
 
 ### Changed

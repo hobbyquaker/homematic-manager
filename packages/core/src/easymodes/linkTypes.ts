@@ -367,7 +367,14 @@ async function dispatch(
     return {receiverType: dispatcher.folder, senderType: `${senderType}_${String(mode)}${variant}`};
 }
 
+/** hs485d's interface: its links take their profiles from the `HMW_` folders only (B-101). */
+const WIRED_INTERFACE = 'BidCos-Wired';
+
+/** No profile folder at all: the link dialog offers the expert view only (B-101). */
+export const NO_PROFILES: LinkProfileTypes = {receiverType: '', senderType: ''};
+
 async function bidcosTypes(
+    interfaceName: string,
     receiver: LinkEnd,
     sender: LinkEnd,
     queries: LinkTypeQueries,
@@ -381,7 +388,15 @@ async function bidcosTypes(
         .map((word) => (word.includes('=') ? (word.split('=')[1] ?? '') : word))
         .find((id) => Object.prototype.hasOwnProperty.call(BIDCOS_LINK_FILES, id));
     const rules = paramid === undefined ? undefined : BIDCOS_LINK_FILES[paramid];
-    if (!rules) return {receiverType: receiver.type, senderType: sender.type};
+    if (!rules) {
+        // B-101: a wired channel's types are the radio ones (a HMW-LC-Dim1L-DR is DIMMER and KEY), so
+        // the plain folder holds BidCos-RF's profiles - with RF's jump-table numbers (0 = no jump, one
+        // higher than hs485d's) and RF's "not used" time 111600 s instead of the wired 16383000 s.
+        // Written to a wired dimmer, they left it in a running on-timer and ignoring presses. Without
+        // the `hmw_*_ch_link` id there is no wired profile to pick: no easy mode, the expert view only.
+        if (interfaceName === WIRED_INTERFACE) return NO_PROFILES;
+        return {receiverType: receiver.type, senderType: sender.type};
+    }
 
     let receiverType = receiver.type;
     if (rules.receiver === 'HMW_') receiverType = `HMW_${receiver.type}`;
@@ -408,7 +423,8 @@ async function bidcosTypes(
 /**
  * The receiver folder and sender file the WebUI takes a link's profiles from. Without the reads a
  * rule needs (a query missing, failing or answering nothing), the rule leaves the type as it is,
- * which is what hmm did before.
+ * which is what hmm did before - except on BidCos-Wired, where that would be a radio folder and the
+ * answer is {@link NO_PROFILES} (B-101).
  */
 export async function linkProfileTypes(
     interfaceName: string,
@@ -418,7 +434,7 @@ export async function linkProfileTypes(
 ): Promise<LinkProfileTypes> {
     const master = cachedMaster(queries);
     if (!isHmipInterface(interfaceName)) {
-        return bidcosTypes(receiver, sender, queries, master);
+        return bidcosTypes(interfaceName, receiver, sender, queries, master);
     }
     const folder = await hmipReceiver(receiver, queries, master);
     const senderType = await hmipSender(receiver, sender, master);

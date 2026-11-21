@@ -9,6 +9,7 @@ import {
     isHmipInterface,
     LINK_DISPATCHERS,
     linkProfileTypes,
+    NO_PROFILES,
     type LinkEnd,
     type LinkTypeQueries,
     type MasterRead,
@@ -451,6 +452,55 @@ describe('linkProfileTypes: BidCos (task 108)', () => {
         expect((await linkProfileTypes('BidCos-Wired', sw, key, listed)).receiverType).toBe('HMW_SWITCH');
         const failing: LinkTypeQueries = {linkParamsetId: () => Promise.reject(new Error('fault'))};
         expect((await linkProfileTypes('BidCos-RF', sw, key, failing)).receiverType).toBe('SWITCH');
+    });
+});
+
+describe('linkProfileTypes: a wired link never takes a radio folder (B-101)', () => {
+    // HMW-LC-Dim1L-DR: the dimmer channel is DIMMER and its inputs are KEY, the radio types
+    const dimmer = end('FEQ1:3', 'DIMMER', 'HMW-LC-Dim1L-DR');
+    const input = end('FEQ1:2', 'KEY', 'HMW-LC-Dim1L-DR');
+    const pushbutton: MasterRead = {
+        values: {INPUT_TYPE: 'PUSHBUTTON'},
+        description: {INPUT_TYPE: {TYPE: 'ENUM', OPERATIONS: 7, VALUE_LIST: ['SWITCH', 'PUSHBUTTON']}},
+    };
+
+    it('takes HMW_DIMMER with the input type when hs485d names hmw_dimmer_ch_link', async () => {
+        const queries = answering({paramsetId: {'FEQ1:3': 'hmw_dimmer_ch_link'}, master: {'FEQ1:2': pushbutton}});
+        await expect(linkProfileTypes('BidCos-Wired', dimmer, input, queries)).resolves.toEqual({
+            receiverType: 'HMW_DIMMER',
+            senderType: 'KEY_1',
+        });
+        // and the wired profile 3 there writes hs485d's jump table and its "not used" time
+        const profile = shipped.get('HMW_DIMMER')?.senders['KEY_1']?.find((entry) => entry.id === 3);
+        expect(profile?.params['SHORT_JT_RAMPOFF']).toEqual({kind: 'fixed', value: 5});
+        expect(profile?.params['SHORT_JT_OFF']).toEqual({kind: 'fixed', value: 0});
+        expect(profile?.params['SHORT_ON_TIME']).toEqual({kind: 'fixed', value: 16383000});
+    });
+
+    it('offers no profiles where the id is missing, refused, unknown or not answered', async () => {
+        const cases: LinkTypeQueries[] = [
+            {},
+            {linkParamsetId: () => Promise.reject(new Error('fault'))},
+            answering({paramsetId: {'FEQ1:3': ''}}),
+            answering({paramsetId: {'FEQ1:3': 'hmw_something_new_ch_link'}}),
+        ];
+        for (const queries of cases) {
+            await expect(linkProfileTypes('BidCos-Wired', dimmer, input, queries)).resolves.toEqual(NO_PROFILES);
+        }
+    });
+
+    it('because the radio folder of those types is what was written to a wired dimmer', () => {
+        // BidCos-RF's DIMMER/KEY profile 3: every jump target one higher than hs485d's enum, and 111600 s -
+        // the values found on the maintainer's wired dimmer link, value for value
+        const radio = shipped.get('DIMMER')?.senders['KEY']?.find((entry) => entry.id === 3);
+        const fixed = (name: string): unknown => {
+            const constraint = radio?.params[name];
+            return constraint?.kind === 'fixed' ? constraint.value : undefined;
+        };
+        expect(['ONDELAY', 'RAMPON', 'ON', 'OFFDELAY', 'RAMPOFF', 'OFF'].map((jt) => fixed(`SHORT_JT_${jt}`))).toEqual([
+            2, 3, 4, 5, 6, 1,
+        ]);
+        expect(fixed('SHORT_ON_TIME')).toBe(111600);
     });
 });
 

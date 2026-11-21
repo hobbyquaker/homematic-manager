@@ -11,6 +11,8 @@ import hmipSwitchLinksRaw from '../../../../core/test/fixtures/hmip-switch-links
 import shutterVirtualReceiverRaw from '../../../../../data/dist/profiles/SHUTTER_VIRTUAL_RECEIVER.json?raw';
 import switchVirtualReceiverRaw from '../../../../../data/dist/profiles/SWITCH_VIRTUAL_RECEIVER.json?raw';
 import timeSelectorsRaw from '../../../../../data/dist/easymode-time-selectors.json?raw';
+import dimmerProfilesRaw from '../../../../../data/dist/profiles/DIMMER.json?raw';
+import hmwDimmerProfilesRaw from '../../../../../data/dist/profiles/HMW_DIMMER.json?raw';
 
 const description: ParamsetDescription = {
     SHORT_ON_TIME: {TYPE: 'FLOAT', OPERATIONS: 3, MIN: 0, MAX: 8590, UNIT: 's', TAB_ORDER: 3},
@@ -1776,5 +1778,132 @@ describe('the sender side of a weather station or a filling level sensor (task 1
                 `putParamset(${SENDER}←${RECEIVER}, LINK, {"FILL_LEVEL_LOWER_THRESHOLD":180,"FILL_LEVEL_UPPER_THRESHOLD":190})`,
             );
         });
+    });
+});
+
+describe('a wired dimmer linked to its own input (B-101)', () => {
+    // HMW-LC-Dim1L-DR: the dimmer channel is DIMMER and the input KEY - the radio types. Up to 3.4.0 the
+    // dialog offered BidCos-RF's DIMMER/KEY profiles here, and profile 3 wrote RF's jump table (one too
+    // high for hs485d) and RF's 111600 s. Without the wired id hs485d names, nothing but the expert view.
+    const DIM = 'XEQ0000301';
+    const RECEIVER = `${DIM}:3`;
+    const SENDER = `${DIM}:2`;
+    const jt = {
+        TYPE: 'ENUM',
+        OPERATIONS: 7,
+        VALUE_LIST: ['ONDELAY', 'RAMPON', 'ON', 'OFFDELAY', 'RAMPOFF', 'OFF', 'NO_JUMP_IGNORE_COMMAND'],
+    };
+    const dimmerLink: ParamsetDescription = {
+        SHORT_JT_OFF: jt,
+        SHORT_JT_ONDELAY: jt,
+        SHORT_ON_TIME: {
+            TYPE: 'FLOAT',
+            OPERATIONS: 7,
+            MIN: 0,
+            MAX: 982980,
+            SPECIAL: [{ID: 'NOT_USED', VALUE: 16383000}],
+        },
+        UI_HINT: {TYPE: 'STRING', OPERATIONS: 3, DEFAULT: ''},
+    } as ParamsetDescription;
+    let transport: MockTransport;
+    let files: string[];
+
+    function setUp(linkParamsetId: string): void {
+        transport = new MockTransport({demo: true});
+        files = [];
+        transport.respond('devices.list', (interfaceName) =>
+            interfaceName === 'BidCos-Wired'
+                ? [
+                      {
+                          ADDRESS: DIM,
+                          TYPE: 'HMW-LC-Dim1L-DR',
+                          FIRMWARE: '3.03',
+                          VERSION: 11,
+                          CHILDREN: [SENDER, RECEIVER],
+                      },
+                      {
+                          ADDRESS: SENDER,
+                          TYPE: 'KEY',
+                          PARENT: DIM,
+                          PARENT_TYPE: 'HMW-LC-Dim1L-DR',
+                          INDEX: 2,
+                          VERSION: 11,
+                          PARAMSETS: ['MASTER', 'VALUES', 'LINK'],
+                          LINK_SOURCE_ROLES: 'SWITCH',
+                      },
+                      {
+                          ADDRESS: RECEIVER,
+                          TYPE: 'DIMMER',
+                          PARENT: DIM,
+                          PARENT_TYPE: 'HMW-LC-Dim1L-DR',
+                          INDEX: 3,
+                          VERSION: 11,
+                          PARAMSETS: ['MASTER', 'VALUES', 'LINK'],
+                          LINK_TARGET_ROLES: 'SWITCH',
+                      },
+                  ]
+                : [],
+        );
+        transport.respond('links.list', (interfaceName) =>
+            interfaceName === 'BidCos-Wired' ? [{SENDER, RECEIVER, FLAGS: 0, NAME: '', DESCRIPTION: ''}] : [],
+        );
+        transport.respond('paramset.id', (_interfaceName, address, paramset) =>
+            address === RECEIVER && paramset === 'LINK' ? linkParamsetId : '',
+        );
+        const demoFile = transport.handlerFor('data.file');
+        transport.respond('data.file', (path) => {
+            files.push(path);
+            if (path === 'data/profiles/DIMMER.json') return JSON.parse(dimmerProfilesRaw);
+            if (path === 'data/profiles/HMW_DIMMER.json') return JSON.parse(hmwDimmerProfilesRaw);
+            return demoFile(path);
+        });
+        transport.respond('paramset.description', (_interfaceName, address, paramset) => {
+            if (address === RECEIVER && paramset === 'LINK') return dimmerLink;
+            if (address === SENDER && paramset === 'MASTER') {
+                return {INPUT_TYPE: {TYPE: 'ENUM', OPERATIONS: 7, VALUE_LIST: ['SWITCH', 'PUSHBUTTON']}};
+            }
+            return {};
+        });
+        transport.respond('paramset.get', (_interfaceName, address, paramset) => {
+            if (address === RECEIVER && paramset === SENDER) {
+                return {SHORT_JT_OFF: 0, SHORT_JT_ONDELAY: 1, SHORT_ON_TIME: 16383000, UI_HINT: ''};
+            }
+            if (address === SENDER && paramset === 'MASTER') return {INPUT_TYPE: 1};
+            return {};
+        });
+    }
+
+    async function openLink(): Promise<void> {
+        const {stores} = await mountApp({transport, hash: '#/BidCos-Wired/links'});
+        await waitFor(() => {
+            expect(stores.links.of('BidCos-Wired').length).toBe(1);
+        });
+        await fireEvent.dblClick(document.querySelector(`[data-row-id="${SENDER}->${RECEIVER}"]`)!);
+        await waitFor(() => {
+            expect(screen.getByTestId('link-receiver-params').textContent).not.toBe('');
+        });
+    }
+
+    it('offers the wired profiles when hs485d names hmw_dimmer_ch_link', async () => {
+        setUp('hmw_dimmer_ch_link');
+        await openLink();
+        const hmw = (JSON.parse(hmwDimmerProfilesRaw) as ReceiverProfiles).senders['KEY_1']!;
+        await waitFor(() => {
+            const select = screen.getByTestId<HTMLSelectElement>('link-profile');
+            expect([...select.options].map((option) => option.value)).toEqual(hmw.map((entry) => String(entry.id)));
+        });
+        expect(files).not.toContain('data/profiles/DIMMER.json');
+    });
+
+    it('offers no radio profile, and no profile at all, without that id', async () => {
+        setUp('');
+        await openLink();
+        // the load has finished and the receiver's rows are raw: no profile list, no easy form
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLSelectElement>('link-profile').options.length).toBe(0);
+        });
+        expect(screen.queryByTestId('link-easy-form')).toBeNull();
+        expect(screen.getByTestId<HTMLInputElement>('link-expert').checked).toBe(true);
+        expect(files).not.toContain('data/profiles/DIMMER.json');
     });
 });

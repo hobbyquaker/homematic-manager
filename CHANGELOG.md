@@ -33,6 +33,14 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 - **openccu-lite no longer asks for a reboot after the addon is installed.** The system starts the addon right
   away, but the installer still answered as on a CCU, so the Addons page and the welcome page asked for a reboot for
   an addon that was already running. A CCU and OpenCCU still reboot after a first install.
+- **A link to a Homematic Wired actuator never gets a radio actuator's profile.** Up to 3.4.0 the link dialog offered
+  the BidCos-RF profiles for a wired dimmer, switch or blind actuator, because their channels have the same types. A
+  profile chosen there wrote the radio device's step numbers and its "not used" time, which a wired dimmer reads
+  differently: it then ignored presses and stayed in a running on-timer without reporting its end state. 3.4.1 already
+  takes the wired profiles, as the CCU does; now, when the CCU does not say which wired form a link has, the dialog
+  shows the expert view only instead of falling back to the radio profiles. Links set up with such a profile before
+  are worth a look in the expert view: jump targets one higher than the CCU's own profile, and on/off times of
+  111600 s.
 - **The addon's uninstall on openccu-lite ends without error lines.** It no longer tries to remove the parts the
   system removes itself (its Systemsteuerung entry, its start script and web link), which it may not touch there and
   which showed up as "permission denied" in the uninstall's output.

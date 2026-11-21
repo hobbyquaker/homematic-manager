@@ -349,7 +349,20 @@
 
     /** The profiles of this receiver/sender pair, plus the metadata that orders the easy mode. */
     $effect(() => {
-        if (!open || profileReceiverType === '' || profileSenderType === '') {
+        if (!open) {
+            return;
+        }
+        if (profileReceiverType === '' || profileSenderType === '') {
+            // B-101: a link with no profile folder (a wired link without its `hmw_*_ch_link` id) keeps
+            // no other link's list: the expert view only, never another pair's profiles
+            if (loadedFor !== '' && profilesFor !== '|') {
+                profilesToken += 1;
+                profilesFor = '|';
+                profiles = [];
+                metadata = undefined;
+                profileId = EXPERT_PROFILE_ID;
+                expert = true;
+            }
             return;
         }
         const types = `${profileReceiverType}|${profileSenderType}`;

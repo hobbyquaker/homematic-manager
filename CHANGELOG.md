@@ -6,6 +6,14 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **The HmIP-eTRV-B-2 R4M shows its device picture.** Device types reported with a space in the name, such as the
+  HmIP-eTRV-B-2 R4M or the Roto ZEL STG RM devices, showed no picture, in the desktop app and in the addon alike.
+  (#171, @McPan)
+
 ## [3.6.0] — 2026-11-21
 
 ### Added

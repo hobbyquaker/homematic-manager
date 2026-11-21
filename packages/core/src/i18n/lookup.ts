@@ -20,7 +20,7 @@
  * shows the English one instead of the raw identifier.
  */
 
-import type {Language, Translations} from '../data/types.js';
+import {dataKey, type Language, type Translations} from '../data/types.js';
 
 /** The order in which languages are consulted; the first that has the key wins. */
 export type TranslationChain = readonly Translations[];
@@ -137,9 +137,12 @@ function keys(suffix: string, channelType: string | undefined): string[] {
     );
 }
 
-/** The key as it was given, plus its upper-case form where that differs. */
+/**
+ * The key as it was given, its upper-case form, and the pipeline's own key form with spaces as `_`
+ * (B-103: `HmIP-eTRV-B-2 R4M` is filed as `HMIP-ETRV-B-2_R4M`), where these differ.
+ */
 function identifiers(value: string): string[] {
-    return dedupe([value, value.toUpperCase()]);
+    return dedupe([value, value.toUpperCase(), dataKey(value)]);
 }
 
 function dedupe(values: string[]): string[] {

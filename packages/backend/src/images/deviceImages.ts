@@ -39,6 +39,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import {dataKey} from '@homematic-manager/core';
+
 /** Where the CCU keeps its device pictures, in one directory per size. */
 export const CCU_IMAGE_BASE = '/config/img/devices';
 
@@ -131,10 +133,19 @@ export function ccuOrigin(upstream: ImageUpstream | undefined): string | undefin
     return `${upstream.tls === true ? 'https' : 'http'}://${upstream.host}`;
 }
 
-/** A file name that cannot escape the cache directory, whatever the device type looked like. */
-export function cacheFileName(deviceType: string, iconFile: string): string {
-    const extension = path.extname(iconFile) || '.png';
-    return `${deviceType.replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 120)}${extension}`;
+/**
+ * The cache file of a picture: named after the CCU's file, not after the device type (B-103). The
+ * cache used to be keyed by the type, so a type the mapping missed stored the "unknown device"
+ * picture under its own name, and that copy would have outlived the fix of the lookup forever.
+ * Types that share a picture now share the file, too. Cannot escape the cache directory.
+ */
+export function cacheFileName(iconFile: string): string {
+    const parsed = path.parse(iconFile);
+    const extension = parsed.ext || '.png';
+    return `${parsed.name
+        .replace(/[^A-Za-z0-9._-]/g, '_')
+        .replace(/^\.+/, '_')
+        .slice(0, 120)}${extension}`;
 }
 
 /** Where a picture came from; `memory` and `disk` are the two cache levels. */
@@ -215,8 +226,9 @@ export class DeviceImageService {
     /** The file name the CCU knows this device type under, or `undefined`. */
     async fileFor(deviceType: string): Promise<string | undefined> {
         const icons = await this.icons();
-        // openccu-data keys the mapping by the upper-cased type; the CCU reports `HM-LC-Sw1-Pl`
-        const file = icons[deviceType] ?? icons[deviceType.toUpperCase()] ?? icons[UNKNOWN_DEVICE_KEY];
+        // the pipeline keys the mapping by the upper-cased type with spaces as `_`; the CCU reports
+        // `HM-LC-Sw1-Pl` and `HmIP-eTRV-B-2 R4M` (B-103)
+        const file = icons[deviceType] ?? icons[dataKey(deviceType)] ?? icons[UNKNOWN_DEVICE_KEY];
         if (file === undefined) {
             return undefined;
         }
@@ -247,7 +259,7 @@ export class DeviceImageService {
         if (iconFile === undefined) {
             return undefined;
         }
-        const cacheFile = path.join(this.#options.cacheDir, cacheFileName(deviceType, iconFile));
+        const cacheFile = path.join(this.#options.cacheDir, cacheFileName(iconFile));
         let fromDisk = await readIfPresent(cacheFile);
         if (fromDisk && !looksLikeImage(fromDisk)) {
             // B-57: an earlier version cached what the box answered, a page included

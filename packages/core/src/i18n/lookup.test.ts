@@ -161,6 +161,15 @@ describe('against the translations the pipeline actually produces (task 9)', () 
         expect(realLookup.parameter('LEVEL', 'DIMMER')).not.toBe('LEVEL');
     });
 
+    it('finds the model of a device type that has a space, filed with `_` (B-103)', () => {
+        expect(realLookup.deviceModel('HmIP-HAP JS1')).toBe(real.deviceModels['HMIP-HAP_JS1']);
+        const suffixed = Object.keys(real.deviceModels).filter((key) => /^[A-Z].*_/.test(key));
+        expect(suffixed.length).toBeGreaterThan(0);
+        for (const key of suffixed) {
+            expect(realLookup.deviceModel(key.replaceAll('_', ' ').toLowerCase()), key).toBe(real.deviceModels[key]);
+        }
+    });
+
     it('reads the lowercase uiLabels of a real translation file', () => {
         const key = Object.keys(real.uiLabels)[0];
         if (key === undefined) {

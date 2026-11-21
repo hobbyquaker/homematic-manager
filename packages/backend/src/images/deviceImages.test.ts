@@ -103,10 +103,11 @@ function answering(match: (url: string) => string | undefined): FetchMock {
 
 describe('the small helpers', () => {
     it('keeps the extension and cannot escape the cache directory', () => {
-        expect(cacheFileName('HmIP-PDT', '134_hmip-pdt.png')).toBe('HmIP-PDT.png');
-        expect(cacheFileName('263_149_/_263_150', 'a.png')).toBe('263_149___263_150.png');
-        expect(cacheFileName('../../etc/passwd', 'a.webp')).toBe('.._.._etc_passwd.webp');
-        expect(cacheFileName('X', 'no-extension')).toBe('X.png');
+        expect(cacheFileName('134_hmip-pdt.png')).toBe('134_hmip-pdt.png');
+        expect(cacheFileName('263 149 +x.png')).toBe('263_149__x.png');
+        expect(cacheFileName('../../etc/passwd.webp')).toBe('passwd.webp');
+        expect(cacheFileName('..png')).toBe('_.png');
+        expect(cacheFileName('no-extension')).toBe('no-extension.png');
     });
 
     it('maps the extensions the CCU and the subset use', () => {
@@ -183,6 +184,29 @@ describe('readIconMapFile', () => {
 });
 
 describe('DeviceImageService', () => {
+    it('finds a type the CCU reports with a space, which the mapping files with `_` (B-103)', async () => {
+        const icons = {'HMIP-ETRV-B-2_R4M': '180_hmip-etrv-b.png', DEVICE: 'unknown_device.png'};
+        const images = service({upstream: undefined, icons: () => Promise.resolve(icons)});
+        expect(await images.fileFor('HmIP-eTRV-B-2 R4M')).toBe('180_hmip-etrv-b.png');
+        expect(await images.fileFor('HmIP-eTRV-B-2')).toBe('unknown_device.png');
+    });
+
+    it('finds every suffixed type of the real device-icons.json under its reported spelling (B-103)', async () => {
+        // read here rather than in the module: the mapping is what the pipeline ships in data/dist
+        const real = JSON.parse(
+            await fs.readFile(new URL('../../../../data/dist/device-icons.json', import.meta.url), 'utf8'),
+        ) as Record<string, string>;
+        const images = service({upstream: undefined, icons: () => Promise.resolve(real)});
+        const suffixed = Object.keys(real).filter((key) => key.includes('_'));
+        expect(suffixed).toContain('HMIP-ETRV-B-2_R4M');
+        for (const key of suffixed) {
+            const reported = key.replaceAll('_', ' ');
+            const mixed = reported.replace(/^HMIP-/, 'HmIP-');
+            expect(await images.fileFor(reported), key).toBe(real[key]);
+            expect(await images.fileFor(mixed), key).toBe(real[key]);
+        }
+    });
+
     it('fetches from the CCU, caches it on disk and answers the next call from memory', async () => {
         const upstreamFetch = okFetch('FROM-CCU');
         const images = service({fetch: upstreamFetch, upstream: {host: 'ccu3'}});
@@ -198,7 +222,7 @@ describe('DeviceImageService', () => {
         // a fresh service, same cache directory: the disk copy answers without any request
         const second = service({fetch: okFetch('OTHER'), upstream: {host: 'ccu3'}});
         expect(await second.get('HmIP-PDT')).toMatchObject({source: 'disk'});
-        expect(label(await fs.readFile(path.join(cacheDir, 'HmIP-PDT.png')))).toBe('FROM-CCU');
+        expect(label(await fs.readFile(path.join(cacheDir, '134_hmip-pdt.png')))).toBe('FROM-CCU');
     });
 
     it('uses https and basic auth when the connection asks for them', async () => {
@@ -329,7 +353,7 @@ describe('DeviceImageService', () => {
         const bundled = await service({fetch: pagesOnly, upstream: {host: 'lite'}}).get('HM-LC-Sw1-Pl');
         expect(bundled).toMatchObject({source: 'bundled', mime: 'image/webp'});
         expect(pagesOnly).toHaveBeenCalledTimes(ccuImagePaths('x.png').length);
-        await expect(fs.readFile(path.join(cacheDir, 'HM-LC-Sw1-Pl.png'))).rejects.toThrow();
+        await expect(fs.readFile(path.join(cacheDir, 'OM55_DimmerSwitch.png'))).rejects.toThrow();
     });
 
     it('does not take a picture served with a page type, or a page served as a picture', async () => {
@@ -351,11 +375,24 @@ describe('DeviceImageService', () => {
 
     it('removes a page an earlier version cached as the picture and asks again', async () => {
         await fs.mkdir(cacheDir, {recursive: true});
-        await fs.writeFile(path.join(cacheDir, 'HmIP-PDT.png'), HTML_PAGE);
+        await fs.writeFile(path.join(cacheDir, '134_hmip-pdt.png'), HTML_PAGE);
         const image = await service({fetch: okFetch('FRESH'), upstream: {host: 'ccu3'}}).get('HmIP-PDT');
         expect(image).toMatchObject({source: 'ccu'});
-        expect(label(await fs.readFile(path.join(cacheDir, 'HmIP-PDT.png')))).toBe('FRESH');
+        expect(label(await fs.readFile(path.join(cacheDir, '134_hmip-pdt.png')))).toBe('FRESH');
         expect(warnings.join(' ')).toContain('is not a picture');
+    });
+
+    it('does not serve the unknown-device picture an older version cached under the type (B-103)', async () => {
+        // before B-103 the cache was named after the type, and a type the mapping missed got this
+        await fs.mkdir(cacheDir, {recursive: true});
+        await fs.writeFile(path.join(cacheDir, 'HmIP-eTRV-B-2_R4M.png'), pic('UNKNOWN'));
+        const icons = {'HMIP-ETRV-B-2_R4M': '180_hmip-etrv-b.png', DEVICE: 'unknown_device.png'};
+        const upstreamFetch = answering((url) => (url.endsWith('/250/180_hmip-etrv-b.png') ? 'ETRV-B' : undefined));
+        const images = service({fetch: upstreamFetch, upstream: {host: 'ccu3'}, icons: () => Promise.resolve(icons)});
+        const image = await images.get('HmIP-eTRV-B-2 R4M');
+        expect(image).toMatchObject({source: 'ccu'});
+        expect(label(image?.body)).toBe('ETRV-B');
+        expect(label(await fs.readFile(path.join(cacheDir, '180_hmip-etrv-b.png')))).toBe('ETRV-B');
     });
 
     it('does not grow without bound', async () => {

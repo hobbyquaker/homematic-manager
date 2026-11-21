@@ -76,7 +76,7 @@ describe('imageLog', () => {
 describe('the hmm-image protocol handler', () => {
     it('answers with the image bytes and a content type', async () => {
         fs.mkdirSync(cacheDir, {recursive: true});
-        fs.writeFileSync(path.join(cacheDir, 'HmIP-BSM.png'), PNG);
+        fs.writeFileSync(path.join(cacheDir, '141_hmip-bsm.png'), PNG);
         const handle = createImageProtocolHandler(new DeviceImageService(options()));
         const response = await handle(new Request(deviceImageUrl('HmIP-BSM')));
         expect(response.status).toBe(200);
@@ -96,8 +96,8 @@ describe('the hmm-image protocol handler', () => {
 
     it('round-trips a device type with characters that need escaping', async () => {
         fs.mkdirSync(cacheDir, {recursive: true});
-        // the cache file name is the sanitised device type, so the slash never reaches the disk
-        await fsp.writeFile(path.join(cacheDir, '263_149___263_150.png'), PNG);
+        // the cache file is named after the picture (B-103), so the type's slash never reaches the disk
+        await fsp.writeFile(path.join(cacheDir, 'x.png'), PNG);
         const handle = createImageProtocolHandler(
             new DeviceImageService(options({icons: () => Promise.resolve({'263_149_/_263_150': 'x.png'})})),
         );

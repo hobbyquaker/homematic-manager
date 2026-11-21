@@ -297,7 +297,7 @@ describe('the image proxy (D-10)', () => {
                 .toString(),
         ).toBe('FROM-CCU');
         expect(upstream.mock.calls[0]?.[0]).toContain('http://127.0.0.1/config/img/devices/250/OM55_DimmerSwitch.png');
-        expect(await fs.readdir(path.join(dataDir, 'images'))).toContain('HM-LC-Sw1-Pl.png');
+        expect(await fs.readdir(path.join(dataDir, 'images'))).toContain('OM55_DimmerSwitch.png');
     });
 
     it('is 404 for a type nothing knows and for an empty one', async () => {

@@ -245,6 +245,17 @@ export interface Translations {
 /** device type -> image file name (relative, no directory), as the CCU serves it under /config/img/devices/<size>/. */
 export type DeviceIcons = Record<string, string>;
 
+/**
+ * The key the data pipeline files an identifier under (`data/scripts/lib/translations.mjs`'s
+ * `identifierKey`): spaces become `_`, everything upper case. A device type is reported mixed case
+ * and may contain a space - `HmIP-eTRV-B-2 R4M`, `ZEL STG RM FWT` - while `device-icons.json` and the
+ * `deviceModels` of the translations hold `HMIP-ETRV-B-2_R4M` and `ZEL_STG_RM_FWT` (B-103): a lookup
+ * that only upper-cases misses every type with a space in it.
+ */
+export function dataKey(identifier: string): string {
+    return identifier.replaceAll(' ', '_').toUpperCase();
+}
+
 /** Where the data came from; written by the pipeline, shown in the About dialog. */
 export interface DataManifest {
     generatedAt: string;

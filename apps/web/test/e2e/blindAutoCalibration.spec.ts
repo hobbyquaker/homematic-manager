@@ -9,6 +9,10 @@
  * hm-simulator stores `SELF_CALIBRATION` like any datapoint and moves no blind, so the device's part is played here:
  * the writes are recorded as they arrive, a `STOP` puts `SELF_CALIBRATION_RESULT` back to false (as the real actuator
  * does), and the test sets the result and the measured running times when "the run is over".
+ *
+ * A real HmIP-BBL (fw 1.8.20, homematic-manager#172) showed one more thing hm-simulator does not do by itself: hmipserver
+ * answers `getValue SELF_CALIBRATION_RESULT` with fault -5 "Unknown Parameter value" while it holds no value for it.
+ * {@link unknownResult} plays that.
  */
 
 import {createRequire} from 'node:module';
@@ -140,6 +144,28 @@ async function openMaster(page: Page, device: string): Promise<void> {
     await expect(page.getByTestId('paramset-preview')).toBeVisible();
 }
 
+/**
+ * hmipserver without a value for `SELF_CALIBRATION_RESULT` of the channel (#172): `getValue` answers -5, as on the real
+ * system, also after the device reported the result - so only the event can end the run.
+ */
+function unknownResult(sim: Simulator, channel: string): () => number {
+    let faults = 0;
+    const getValue = sim.getValue.bind(sim);
+    sim.getValue = (iface, address, datapoint) => {
+        if (address === channel && datapoint === 'SELF_CALIBRATION_RESULT') {
+            faults++;
+            // the simulator's servers send any {faultCode, faultString} as a fault
+            throw {
+                faultCode: -5,
+                faultString: 'Unknown Parameter value for value key: SELF_CALIBRATION_RESULT',
+                message: 'Unknown Parameter value for value key: SELF_CALIBRATION_RESULT',
+            };
+        }
+        return getValue(iface, address, datapoint);
+    };
+    return () => faults;
+}
+
 /** The actuator finished: it stored what it measured and reports the result. */
 function finish(sim: Simulator, channel: string, seconds: number): void {
     sim.putParamset('hmip', channel, 'MASTER', {
@@ -213,6 +239,33 @@ test('a second run: START, STOP, START, because the result of the first is still
 
     finish(sim, channel, 37);
     await expect(row).toHaveAttribute('data-state', 'success');
+});
+
+test('#172: the result unknown to hmipserver (-5) - START, STOP, START, no fault shown, the event ends the run', async ({
+    page,
+}) => {
+    const sim = await start();
+    const channel = `${BBL}:3`;
+    const faults = unknownResult(sim, channel);
+    await openMaster(page, BBL);
+
+    await page.getByTestId('blind-auto-calibration-start').click();
+    await page.getByTestId('blind-auto-calibration-confirm').click();
+    // unknown may be an old run's true: the WebUI's START, STOP, START
+    await expect.poll(() => writes).toEqual([`${channel} START`, `${channel} STOP`, `${channel} START`]);
+
+    // the polls answer -5: the run goes on, and the fault is nowhere on the page
+    const row = page.getByTestId('blind-auto-calibration');
+    await expect.poll(faults).toBeGreaterThanOrEqual(3);
+    await expect(row).toHaveAttribute('data-state', 'running');
+    await expect(page.getByTestId('blind-auto-calibration-status')).toHaveText('Calibration running…');
+    await expect(page.getByText(/Unknown Parameter/)).toHaveCount(0);
+
+    finish(sim, channel, 51);
+    await expect(row).toHaveAttribute('data-state', 'success');
+    await expect(page.getByTestId('blind-REFERENCE_RUNNING_TIME_TOP_BOTTOM-seconds')).toHaveValue('51');
+    await expect(page.getByText(/Unknown Parameter/)).toHaveCount(0);
+    expect(writes).toEqual([`${channel} START`, `${channel} STOP`, `${channel} START`]);
 });
 
 test('Stop writes STOP and ends the run', async ({page}) => {

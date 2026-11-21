@@ -31,12 +31,23 @@
 
     const running = $derived(run !== undefined);
 
-    /** The two calls of the run, on this channel; a failure is a notice and a "no" to the sequence. */
+    /**
+     * The calls of the run, on this channel. A refused write is a notice and a "no" to the
+     * sequence; a read raises none - hmipserver answers -5 for a result it does not know yet (#172),
+     * which the sequence takes as "unknown". The result's event ends the run as soon as it arrives.
+     */
     function rpc(target: {interfaceName: string; address: string}) {
         return {
-            getValue: (parameter: string) => stores.paramsets.getValue(target.interfaceName, target.address, parameter),
+            getValue: (parameter: string) =>
+                stores.paramsets.getValue(target.interfaceName, target.address, parameter, {quiet: true}),
             setValue: (parameter: string, value: string) =>
                 stores.paramsets.setValue(target.interfaceName, target.address, parameter, value),
+            onEvent: (parameter: string, handler: (value: unknown) => void) =>
+                stores.paramsets.onChannelEvent(target.interfaceName, target.address, (datapoint, value) => {
+                    if (datapoint === parameter) {
+                        handler(value);
+                    }
+                }),
         };
     }
 

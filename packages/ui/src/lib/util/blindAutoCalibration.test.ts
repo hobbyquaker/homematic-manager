@@ -17,7 +17,19 @@ import {
 function device(result: unknown = false) {
     const state = {result, failRead: false, failWrite: false};
     const calls: string[] = [];
+    const listeners = new Set<(value: unknown) => void>();
+    /** The device reports the result as an event, as hmipserver forwards it. */
+    const report = (value: unknown): void => {
+        for (const listener of [...listeners]) {
+            listener(value);
+        }
+    };
     const rpc: CalibrationRpc = {
+        onEvent: vi.fn((parameter: string, handler: (value: unknown) => void) => {
+            calls.push(`listen ${parameter}`);
+            listeners.add(handler);
+            return () => listeners.delete(handler);
+        }),
         getValue: vi.fn(async (parameter: string) => {
             calls.push(`get ${parameter}`);
             return state.failRead ? undefined : state.result;
@@ -35,7 +47,7 @@ function device(result: unknown = false) {
     };
     const writes = (): string[] => calls.filter((call) => call.startsWith('set ')).map((call) => call.slice(21));
     const reads = (): number => calls.filter((call) => call.startsWith('get ')).length;
-    return {state, calls, rpc, writes, reads};
+    return {state, calls, rpc, writes, reads, report, listeners};
 }
 
 const MASTER = {ENDPOSITION_AUTO_DETECT: {TYPE: 'BOOL', OPERATIONS: 3}};
@@ -84,7 +96,11 @@ describe('the calibration sequence', () => {
         const blind = device(false);
         const run = startAutoCalibration(blind.rpc);
         await vi.advanceTimersByTimeAsync(0);
-        expect(blind.calls).toEqual(['get SELF_CALIBRATION_RESULT', 'set SELF_CALIBRATION START']);
+        expect(blind.calls).toEqual([
+            'get SELF_CALIBRATION_RESULT',
+            'listen SELF_CALIBRATION_RESULT',
+            'set SELF_CALIBRATION START',
+        ]);
 
         // nothing is asked before the first second is over
         await vi.advanceTimersByTimeAsync(CALIBRATION_POLL_MS - 1);
@@ -113,6 +129,7 @@ describe('the calibration sequence', () => {
             'get SELF_CALIBRATION_RESULT',
             'set SELF_CALIBRATION START',
             'set SELF_CALIBRATION STOP',
+            'listen SELF_CALIBRATION_RESULT',
             'set SELF_CALIBRATION START',
         ]);
 
@@ -183,13 +200,108 @@ describe('the calibration sequence', () => {
         expect(blind.reads()).toBe(reads);
     });
 
-    it('fails without a write when the result cannot be read at the start', async () => {
+    // #172: hmipserver answers -5 "Unknown Parameter value" for a result it holds no value for
+    it('starts, stops and starts when the result is unknown at the start, and takes unknown polls as "not yet"', async () => {
         const blind = device(false);
         blind.state.failRead = true;
         const run = startAutoCalibration(blind.rpc);
+        let outcome: string | undefined;
+        void run.done.then((result) => (outcome = result));
         await vi.advanceTimersByTimeAsync(0);
-        await expect(run.done).resolves.toBe('failed');
-        expect(blind.writes()).toEqual([]);
+        expect(blind.writes()).toEqual(['START', 'STOP', 'START']);
+
+        // the device has not reported the result yet: still unknown, still running
+        await vi.advanceTimersByTimeAsync(30 * CALIBRATION_POLL_MS);
+        expect(outcome).toBeUndefined();
+        expect(blind.reads()).toBe(31);
+
+        // the first report makes it readable
+        blind.state.failRead = false;
+        blind.state.result = true;
+        await vi.advanceTimersByTimeAsync(CALIBRATION_POLL_MS);
+        expect(outcome).toBe('success');
+        expect(blind.writes()).toEqual(['START', 'STOP', 'START']);
+    });
+
+    it('ends on the event of the result without waiting for the next poll', async () => {
+        const blind = device(false);
+        blind.state.failRead = true;
+        const run = startAutoCalibration(blind.rpc);
+        let outcome: string | undefined;
+        void run.done.then((result) => (outcome = result));
+        await vi.advanceTimersByTimeAsync(3 * CALIBRATION_POLL_MS + 100);
+        const reads = blind.reads();
+
+        // a false (the STOP's report) is no end
+        blind.report(false);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(outcome).toBeUndefined();
+
+        blind.report(true);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(outcome).toBe('success');
+        expect(blind.reads()).toBe(reads);
+        expect(blind.listeners.size).toBe(0);
+    });
+
+    it('does not count a true reported before the last START went out', async () => {
+        const blind = device(true);
+        const gate: Array<() => void> = [];
+        const set = blind.rpc.setValue.bind(blind.rpc);
+        let starts = 0;
+        blind.rpc.setValue = vi.fn(async (parameter: string, value: string) => {
+            if (value === 'START' && ++starts === 1) {
+                await new Promise<void>((resolve) => gate.push(resolve));
+            }
+            return set(parameter, value);
+        });
+        const run = startAutoCalibration(blind.rpc);
+        let outcome: string | undefined;
+        void run.done.then((result) => (outcome = result));
+        await vi.advanceTimersByTimeAsync(0);
+        // the old result, reported while the first START is under way: nobody listens yet
+        blind.report(true);
+        gate.shift()?.();
+        await vi.advanceTimersByTimeAsync(2 * CALIBRATION_POLL_MS);
+        expect(outcome).toBeUndefined();
+        expect(blind.writes()).toEqual(['START', 'STOP', 'START']);
+
+        blind.report(true);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(outcome).toBe('success');
+    });
+
+    it('gives up after five minutes when the result stays unknown, and writes nothing then', async () => {
+        const blind = device(false);
+        blind.state.failRead = true;
+        const run = startAutoCalibration(blind.rpc);
+        await vi.advanceTimersByTimeAsync(CALIBRATION_TIMEOUT_MS);
+        await expect(run.done).resolves.toBe('timeout');
+        expect(blind.writes()).toEqual(['START', 'STOP', 'START']);
+        expect(blind.listeners.size).toBe(0);
+    });
+
+    it('works without events: the poll alone sees the end', async () => {
+        const blind = device(false);
+        delete blind.rpc.onEvent;
+        const run = startAutoCalibration(blind.rpc);
+        await vi.advanceTimersByTimeAsync(2 * CALIBRATION_POLL_MS);
+        blind.state.result = true;
+        await vi.advanceTimersByTimeAsync(CALIBRATION_POLL_MS);
+        await expect(run.done).resolves.toBe('success');
+    });
+
+    it('stops listening when the user stops the run', async () => {
+        const blind = device(false);
+        const run = startAutoCalibration(blind.rpc);
+        await vi.advanceTimersByTimeAsync(CALIBRATION_POLL_MS + 10);
+        expect(blind.listeners.size).toBe(1);
+        await run.stop();
+        await expect(run.done).resolves.toBe('stopped');
+        expect(blind.listeners.size).toBe(0);
+        blind.report(true);
+        await vi.advanceTimersByTimeAsync(0);
+        await expect(run.done).resolves.toBe('stopped');
     });
 
     it('fails when the START is refused, and does not poll', async () => {

@@ -6,6 +6,16 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Fixed
+
+- **The automatic calibration of a blind starts on a real HmIP-BBL.** It stopped at once with "Unknown Parameter value
+  for value key: SELF_CALIBRATION_RESULT (-5)", and the blind did not move: the system answers that fault while it has
+  not yet heard the calibration result from the device, which is the normal case before a first run. An unknown result
+  now starts the run as the CCU's WebUI does (start, stop, start), the end of the run is taken from the device's report
+  as soon as it arrives, and the fault is no longer shown. (#172, @agross)
+
 ## [3.7.0] — 2026-11-21
 
 ### Added

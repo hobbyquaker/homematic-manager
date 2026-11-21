@@ -283,11 +283,22 @@ export class ParamsetStore {
         }
     }
 
-    async getValue(interfaceName: string, address: string, parameter: string): Promise<RpcValue | undefined> {
+    /**
+     * `getValue`; `undefined` on a failure. `quiet` raises no notice for it - for a caller to whom
+     * an unreadable value is an answer (hmipserver's -5 for a value it does not know yet, #172).
+     */
+    async getValue(
+        interfaceName: string,
+        address: string,
+        parameter: string,
+        options: {quiet?: boolean} = {},
+    ): Promise<RpcValue | undefined> {
         try {
             return await this.#transport.request('value.get', interfaceName, address, parameter);
         } catch (error) {
-            this.#notices.fromError(error, `getValue ${address} ${parameter}`);
+            if (!options.quiet) {
+                this.#notices.fromError(error, `getValue ${address} ${parameter}`);
+            }
             return undefined;
         }
     }

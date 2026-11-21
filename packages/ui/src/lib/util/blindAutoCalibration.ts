@@ -14,6 +14,15 @@ import type {Paramset, ParamsetDescription} from '@homematic-manager/core';
  * successful run and only a stopped run puts it back. A second run therefore starts, stops and
  * starts again - otherwise the result that says "finished" is already there before the blind moved.
  *
+ * And a second one, seen on a real HmIP-BBL (homematic-manager#172): hmipserver answers `getValue`
+ * of a datapoint it holds no value for - nothing reported since it started - with fault -5
+ * "Unknown Parameter value", although the description lists it as readable. An unreadable result
+ * therefore says "not known", never "the run cannot start". The device may still hold a true from
+ * a run before hmipserver started, so an unknown result is handled like a true one: START, STOP,
+ * START - which is also what the WebUI sends then (its JSON wrapper turns the fault into `null`,
+ * and `null == 0` is false there). The end of the run is taken from the `SELF_CALIBRATION_RESULT`
+ * event when one arrives, and from the poll otherwise.
+ *
  * Nothing here touches a store or the DOM: the two calls are handed in, so the sequence is tested
  * with a mocked RPC and fake timers.
  */
@@ -35,10 +44,19 @@ export const CALIBRATION_TIMEOUT_MS = 5 * 60 * 1000;
 
 /** What the sequence needs from the interface; both answer `undefined`/`false` on a failure. */
 export interface CalibrationRpc {
-    /** `getValue` of a datapoint of the channel; `undefined` when the call failed. */
+    /**
+     * `getValue` of a datapoint of the channel; `undefined` when it could not be read - a failed
+     * call, or hmipserver's -5 for a value it does not know yet. Raises no notice: an unknown
+     * result is part of the sequence, not an error.
+     */
     getValue(parameter: string): Promise<unknown>;
     /** `setValue` of a datapoint of the channel; `false` when the call failed. */
     setValue(parameter: string, value: string): Promise<boolean>;
+    /**
+     * The events of a datapoint of the channel; answers the function that ends the subscription.
+     * Optional: without it the poll alone sees the end of the run.
+     */
+    onEvent?(parameter: string, handler: (value: unknown) => void): () => void;
 }
 
 /**
@@ -87,13 +105,15 @@ export function isSet(value: unknown): boolean {
 /**
  * Starts a run and watches it.
  *
- * 1. `getValue SELF_CALIBRATION_RESULT`; not set → `START`; set already → `START`, `STOP`, `START`.
- * 2. Every second `getValue SELF_CALIBRATION_RESULT` until it is set (`success`).
+ * 1. `getValue SELF_CALIBRATION_RESULT`; false → `START`; true, or not readable → `START`, `STOP`,
+ *    `START`.
+ * 2. Every second `getValue SELF_CALIBRATION_RESULT` until it is set (`success`); an event of the
+ *    result that says true ends the run at once.
  * 3. {@link CalibrationRun.stop} writes `STOP` and ends the run (`stopped`); after five minutes
  *    without a result it ends as `timeout`, without a write - the WebUI only stops waiting, too.
  *
- * A failed first read or a failed `START` ends it as `failed`; a failed read while polling is taken
- * as "not yet" and asked again, since one lost answer says nothing about the run.
+ * A refused `START` or `STOP` ends it as `failed`; an unreadable result while polling is taken as
+ * "not yet" and asked again - hmipserver may not know the value before the device reports it.
  */
 export function startAutoCalibration(rpc: CalibrationRpc, options: CalibrationOptions = {}): CalibrationRun {
     const pollMs = options.pollMs ?? CALIBRATION_POLL_MS;
@@ -105,12 +125,26 @@ export function startAutoCalibration(rpc: CalibrationRpc, options: CalibrationOp
     let halting: Promise<void> | undefined;
     let wake: (() => void) | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    /** The device reported the result true after the last `START` went out. */
+    let reported = false;
+    let unsubscribe: (() => void) | undefined;
 
     function end(outcome: CalibrationOutcome): void {
         halted = true;
         ended ??= outcome;
         clearTimeout(timer);
         wake?.();
+    }
+
+    /** Events count only once the last `START` was accepted: a true before it is the old result. */
+    function listen(): void {
+        unsubscribe = rpc.onEvent?.(CALIBRATION_RESULT_PARAM, (value) => {
+            if (isSet(value) && !halted) {
+                reported = true;
+                clearTimeout(timer);
+                wake?.();
+            }
+        });
     }
 
     /** Asked after every await: a stop arrives from outside, which the compiler's narrowing cannot see. */
@@ -137,11 +171,12 @@ export function startAutoCalibration(rpc: CalibrationRpc, options: CalibrationOp
         if (isHalted()) {
             return over();
         }
-        if (before === undefined) {
-            return 'failed';
-        }
-        const steps = isSet(before) ? ['START', 'STOP', 'START'] : ['START'];
-        for (const step of steps) {
+        // false: a fresh device or a stopped run; true or unknown: possibly an old run's result
+        const steps = before === undefined || isSet(before) ? ['START', 'STOP', 'START'] : ['START'];
+        for (const [index, step] of steps.entries()) {
+            if (index === steps.length - 1) {
+                listen();
+            }
             const sent = await rpc.setValue(CALIBRATION_PARAM, step);
             if (isHalted()) {
                 return over();
@@ -153,9 +188,14 @@ export function startAutoCalibration(rpc: CalibrationRpc, options: CalibrationOp
 
         const deadline = Date.now() + timeoutMs;
         for (;;) {
-            await pause();
+            if (!reported) {
+                await pause();
+            }
             if (isHalted()) {
                 return over();
+            }
+            if (reported) {
+                return 'success';
             }
             const result = await rpc.getValue(CALIBRATION_RESULT_PARAM);
             if (isHalted()) {
@@ -173,6 +213,7 @@ export function startAutoCalibration(rpc: CalibrationRpc, options: CalibrationOp
     const done = run().then((outcome) => {
         ended ??= outcome;
         clearTimeout(timer);
+        unsubscribe?.();
         return ended;
     });
 

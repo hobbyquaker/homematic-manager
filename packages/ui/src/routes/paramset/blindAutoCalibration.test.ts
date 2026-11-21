@@ -209,6 +209,61 @@ describe('the automatic calibration of a blind channel', () => {
         expect(screen.getByTestId('blind-auto-calibration').getAttribute('data-state')).toBe('running');
     });
 
+    // #172: a real HmIP-BBL whose result hmipserver has not heard of since it started
+    it('starts START, STOP, START when the result is unknown (-5), shows no fault, and ends on the event', async () => {
+        transport.fail('value.get', {
+            message: 'HmIP-RF: Unknown Parameter value for value key: SELF_CALIBRATION_RESULT (-5)',
+            kind: 'rpc',
+        });
+        await open();
+        vi.useFakeTimers({shouldAdvanceTime: true});
+        await start();
+        await waitFor(() => {
+            expect(writes).toEqual(['SELF_CALIBRATION "START"', 'SELF_CALIBRATION "STOP"', 'SELF_CALIBRATION "START"']);
+        });
+        // the polls keep answering -5: still running, and no notice of it
+        await vi.advanceTimersByTimeAsync(5000);
+        expect(screen.getByTestId('blind-auto-calibration').getAttribute('data-state')).toBe('running');
+        expect(transport.countOf('value.get')).toBeGreaterThanOrEqual(5);
+        expect(document.body.textContent).not.toContain('Unknown Parameter');
+
+        device.master = {...master, REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE: 42};
+        // another datapoint of the channel, or a false, does not end it
+        for (const [datapoint, value] of [
+            ['LEVEL', 0.5],
+            ['SELF_CALIBRATION_RESULT', false],
+        ] as const) {
+            transport.emit('rpc.event', {
+                timestamp: Date.now(),
+                interfaceName: 'BidCos-RF',
+                method: 'event',
+                address: 'MEQ0123456',
+                datapoint,
+                value,
+            });
+        }
+        await vi.advanceTimersByTimeAsync(0);
+        expect(screen.getByTestId('blind-auto-calibration').getAttribute('data-state')).toBe('running');
+
+        transport.emit('rpc.event', {
+            timestamp: Date.now(),
+            interfaceName: 'BidCos-RF',
+            method: 'event',
+            address: 'MEQ0123456',
+            datapoint: 'SELF_CALIBRATION_RESULT',
+            value: true,
+        });
+        await waitFor(() => {
+            expect(screen.getByTestId('blind-auto-calibration').getAttribute('data-state')).toBe('success');
+        });
+        await waitFor(() => {
+            expect(screen.getByTestId<HTMLInputElement>('blind-REFERENCE_RUNNING_TIME_TOP_BOTTOM-seconds').value).toBe(
+                '42',
+            );
+        });
+        expect(document.body.textContent).not.toContain('Unknown Parameter');
+    });
+
     it('stops on the button: STOP is written and MASTER is not read again', async () => {
         await open();
         await start();

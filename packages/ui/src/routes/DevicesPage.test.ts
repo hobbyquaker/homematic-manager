@@ -196,7 +196,7 @@ describe('the paramset buttons (B-33)', () => {
      * parameters - and still get no SERVICE button (the maintainer's decision). Channel 4 has an
      * empty VALUES, as on the DRI16's channel 17.
      */
-    const DRS8 = '001618A99C5F30';
+    const DRS8 = '0016180000F030';
     const SERVICE: ParamsetDescription = Object.fromEntries(
         ['APPLICATION_VERSION', 'BOOTLOADER_VERSION', 'HARDWARE_VERSION', 'OS_VERSION', 'TEST_STATUS'].map((name) => [
             name,
@@ -332,7 +332,7 @@ describe('the paramset buttons (B-33)', () => {
  * keeps delete and replace off, not the DontDelete flag.
  */
 describe("the central's radio module (task 101)", () => {
-    const RFUSB = '00041709ADFA5B';
+    const RFUSB = '000417000000A1';
     const DEVICES: DeviceDescription[] = [
         {
             ADDRESS: RFUSB,

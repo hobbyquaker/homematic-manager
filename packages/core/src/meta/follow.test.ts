@@ -36,9 +36,9 @@ function base(): MetaDocument {
             },
         },
         objects: {
-            'BidCos-RF.JEQ0230153:1': {name: 'Licht Bad', enums: ['room/eg/bad'], meta: {}},
-            'BidCos-RF.JEQ0230153:2': {name: 'Taster', enums: ['room/eg/wohnzimmer'], meta: {}},
-            'BidCos-RF.JEQ0230153:3': {name: 'Heizung', enums: [], meta: {}},
+            'BidCos-RF.XEQ0000001:1': {name: 'Licht Bad', enums: ['room/eg/bad'], meta: {}},
+            'BidCos-RF.XEQ0000001:2': {name: 'Taster', enums: ['room/eg/wohnzimmer'], meta: {}},
+            'BidCos-RF.XEQ0000001:3': {name: 'Heizung', enums: [], meta: {}},
         },
     };
 }
@@ -54,21 +54,21 @@ function applied(document: MetaDocument, event: MetaEvent): MetaDocument {
 
 describe('the revision rule', () => {
     it('applies the event that follows the document, and carries its revision', () => {
-        expect(applied(base(), {revision: 6, kind: 'object.deleted', ref: 'BidCos-RF.JEQ0230153:3'}).revision).toBe(6);
+        expect(applied(base(), {revision: 6, kind: 'object.deleted', ref: 'BidCos-RF.XEQ0000001:3'}).revision).toBe(6);
     });
 
     it('an event we have already seen is nothing to do - a replay after a reconnect is allowed', () => {
         const document = base();
-        expect(applyEvent(document, {revision: 5, kind: 'object.deleted', ref: 'BidCos-RF.JEQ0230153:3'})).toBe(
+        expect(applyEvent(document, {revision: 5, kind: 'object.deleted', ref: 'BidCos-RF.XEQ0000001:3'})).toBe(
             document,
         );
-        expect(applyEvent(document, {revision: 1, kind: 'object.deleted', ref: 'BidCos-RF.JEQ0230153:3'})).toBe(
+        expect(applyEvent(document, {revision: 1, kind: 'object.deleted', ref: 'BidCos-RF.XEQ0000001:3'})).toBe(
             document,
         );
     });
 
     it('a gap is a resync: something happened that we did not see', () => {
-        expect(applyEvent(base(), {revision: 7, kind: 'object.deleted', ref: 'BidCos-RF.JEQ0230153:3'})).toBe('resync');
+        expect(applyEvent(base(), {revision: 7, kind: 'object.deleted', ref: 'BidCos-RF.XEQ0000001:3'})).toBe('resync');
     });
 
     it('an import and an explicit resync are a resync, whatever revision they carry', () => {
@@ -86,10 +86,10 @@ describe('objects', () => {
         const next = applied(base(), {
             revision: 6,
             kind: 'object.updated',
-            ref: 'BidCos-RF.JEQ0230153:1',
+            ref: 'BidCos-RF.XEQ0000001:1',
             value: {name: 'Licht Bad neu', enums: ['room/og'], meta: {hmm: {a: 1}}},
         });
-        expect(next.objects['BidCos-RF.JEQ0230153:1']).toEqual({
+        expect(next.objects['BidCos-RF.XEQ0000001:1']).toEqual({
             name: 'Licht Bad neu',
             enums: ['room/og'],
             meta: {hmm: {a: 1}},
@@ -97,12 +97,12 @@ describe('objects', () => {
     });
 
     it('object.deleted forgets one', () => {
-        const next = applied(base(), {revision: 6, kind: 'object.deleted', ref: 'BidCos-RF.JEQ0230153:1'});
-        expect(Object.keys(next.objects)).toEqual(['BidCos-RF.JEQ0230153:2', 'BidCos-RF.JEQ0230153:3']);
+        const next = applied(base(), {revision: 6, kind: 'object.deleted', ref: 'BidCos-RF.XEQ0000001:1'});
+        expect(Object.keys(next.objects)).toEqual(['BidCos-RF.XEQ0000001:2', 'BidCos-RF.XEQ0000001:3']);
     });
 
     it('an event without the fields its kind needs is a resync', () => {
-        expect(applyEvent(base(), {revision: 6, kind: 'object.updated', ref: 'BidCos-RF.JEQ0230153:1'})).toBe('resync');
+        expect(applyEvent(base(), {revision: 6, kind: 'object.updated', ref: 'BidCos-RF.XEQ0000001:1'})).toBe('resync');
         expect(applyEvent(base(), {revision: 6, kind: 'object.deleted'})).toBe('resync');
     });
 });
@@ -129,14 +129,14 @@ describe('enums', () => {
     it('enum.deleted takes the enum and every membership below it with it', () => {
         const next = applied(base(), {revision: 6, kind: 'enum.deleted', enum: 'room'});
         expect(next.enums).toEqual({});
-        expect(next.objects['BidCos-RF.JEQ0230153:1']?.enums).toEqual([]);
-        expect(next.objects['BidCos-RF.JEQ0230153:2']?.enums).toEqual([]);
+        expect(next.objects['BidCos-RF.XEQ0000001:1']?.enums).toEqual([]);
+        expect(next.objects['BidCos-RF.XEQ0000001:2']?.enums).toEqual([]);
     });
 
     it('an object that had nothing to lose is left exactly as it was', () => {
         const document = base();
         const next = applied(document, {revision: 6, kind: 'enum.deleted', enum: 'room'});
-        expect(next.objects['BidCos-RF.JEQ0230153:3']).toBe(document.objects['BidCos-RF.JEQ0230153:3']);
+        expect(next.objects['BidCos-RF.XEQ0000001:3']).toBe(document.objects['BidCos-RF.XEQ0000001:3']);
     });
 
     it('an enum event without its fields is a resync', () => {
@@ -199,8 +199,8 @@ describe('nodes', () => {
     it('node.deleted removes the subtree and detaches every member of it', () => {
         const next = applied(base(), {revision: 6, kind: 'node.deleted', enum: 'room', path: 'room/eg'});
         expect(next.enums['room']?.tree.map((node) => node.id)).toEqual(['og']);
-        expect(next.objects['BidCos-RF.JEQ0230153:1']?.enums).toEqual([]);
-        expect(next.objects['BidCos-RF.JEQ0230153:2']?.enums).toEqual([]);
+        expect(next.objects['BidCos-RF.XEQ0000001:1']?.enums).toEqual([]);
+        expect(next.objects['BidCos-RF.XEQ0000001:2']?.enums).toEqual([]);
     });
 
     it('node.moved moves the node and rewrites the member paths below it, in the same event', () => {
@@ -213,8 +213,8 @@ describe('nodes', () => {
         });
         expect(next.enums['room']?.tree[0]?.children?.map((node) => node.id)).toEqual(['wohnzimmer']);
         expect(next.enums['room']?.tree[1]?.children?.map((node) => node.id)).toEqual(['bad']);
-        expect(next.objects['BidCos-RF.JEQ0230153:1']?.enums).toEqual(['room/og/bad']);
-        expect(next.objects['BidCos-RF.JEQ0230153:2']?.enums).toEqual(['room/eg/wohnzimmer']);
+        expect(next.objects['BidCos-RF.XEQ0000001:1']?.enums).toEqual(['room/og/bad']);
+        expect(next.objects['BidCos-RF.XEQ0000001:2']?.enums).toEqual(['room/eg/wohnzimmer']);
     });
 
     it('a move of a whole subtree rewrites the paths of everything under it', () => {
@@ -225,8 +225,8 @@ describe('nodes', () => {
             from: 'room/eg',
             to: 'room/og/eg',
         });
-        expect(next.objects['BidCos-RF.JEQ0230153:1']?.enums).toEqual(['room/og/eg/bad']);
-        expect(next.objects['BidCos-RF.JEQ0230153:2']?.enums).toEqual(['room/og/eg/wohnzimmer']);
+        expect(next.objects['BidCos-RF.XEQ0000001:1']?.enums).toEqual(['room/og/eg/bad']);
+        expect(next.objects['BidCos-RF.XEQ0000001:2']?.enums).toEqual(['room/og/eg/wohnzimmer']);
     });
 
     it('a node event that does not address a node of a known enum is a resync', () => {
@@ -253,7 +253,7 @@ describe('nodes', () => {
 describe('applyEvents', () => {
     it('applies a replay in order', () => {
         const next = applyEvents(base(), [
-            {revision: 6, kind: 'object.deleted', ref: 'BidCos-RF.JEQ0230153:3'},
+            {revision: 6, kind: 'object.deleted', ref: 'BidCos-RF.XEQ0000001:3'},
             {
                 revision: 7,
                 kind: 'node.created',
@@ -272,9 +272,9 @@ describe('applyEvents', () => {
     it('stops at the first event that needs a snapshot rather than applying the rest', () => {
         expect(
             applyEvents(base(), [
-                {revision: 6, kind: 'object.deleted', ref: 'BidCos-RF.JEQ0230153:3'},
-                {revision: 8, kind: 'object.deleted', ref: 'BidCos-RF.JEQ0230153:2'},
-                {revision: 9, kind: 'object.deleted', ref: 'BidCos-RF.JEQ0230153:1'},
+                {revision: 6, kind: 'object.deleted', ref: 'BidCos-RF.XEQ0000001:3'},
+                {revision: 8, kind: 'object.deleted', ref: 'BidCos-RF.XEQ0000001:2'},
+                {revision: 9, kind: 'object.deleted', ref: 'BidCos-RF.XEQ0000001:1'},
             ]),
         ).toBe('resync');
     });

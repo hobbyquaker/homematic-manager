@@ -40,7 +40,7 @@ async function startWithBox(): Promise<Stack> {
         devices: [
             {address: BIDCOS_SWITCH, type: 'HM-LC-Sw1-Pl', name: 'Steckdose'},
             {address: THERMOSTAT, type: 'HM-CC-RT-DN', name: 'Thermostat Bad', fits: 'HomeMatic.heating'},
-            {address: 'KEQ0165114', type: 'HM-Sec-SC', name: 'Fenster Bad', fits: 'HomeMatic.heating'},
+            {address: 'XEQ0000002', type: 'HM-Sec-SC', name: 'Fenster Bad', fits: 'HomeMatic.heating'},
             {
                 address: `${HMIP_BUTTON}:1`,
                 type: 'REMOTE_CONTROL',
@@ -49,7 +49,7 @@ async function startWithBox(): Promise<Stack> {
                 connected: true,
             },
         ],
-        groups: [{id: 1, name: 'Bad', type: 'HomeMatic.heating', members: ['KEQ0165114']}],
+        groups: [{id: 1, name: 'Bad', type: 'HomeMatic.heating', members: ['XEQ0000002']}],
     });
     const host = await startForTest({
         simulator: true,
@@ -87,7 +87,7 @@ test('the Groups tab is on VirtualDevices when the system has the groups API, li
         // the system's label key, translated; the virtual device; the member by its name from the system's store
         await expect(row).toContainText('Heating control');
         await expect(row).toContainText('INT0000001');
-        await expect(page.getByTestId('group-members-1')).toContainText('Fenster Bad (KEQ0165114)');
+        await expect(page.getByTestId('group-members-1')).toContainText('Fenster Bad (XEQ0000002)');
         await expect(page.getByTestId('groups-table-count')).toHaveText('1 group');
 
         // the interface popup names the system's store, so the person can see where the names come from
@@ -118,7 +118,7 @@ test('a group is created with a member, its members changed as a whole, and dele
         await expect(dialog).toHaveAttribute('open', '');
         await expect(page.getByTestId('group-type')).toHaveValue('HomeMatic.heating');
         await expect(page.getByTestId(`group-member-${THERMOSTAT}`)).toBeVisible();
-        await expect(page.getByTestId('group-member-KEQ0165114')).toHaveCount(0);
+        await expect(page.getByTestId('group-member-XEQ0000002')).toHaveCount(0);
         await expect(page.getByTestId('group-candidates')).toContainText('Thermostat Bad');
         await expect(page.getByTestId('group-save')).toBeDisabled();
         await page.getByTestId('group-name').fill('Küche');

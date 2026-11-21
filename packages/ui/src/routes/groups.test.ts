@@ -32,9 +32,9 @@ const BOX: MetaState = {
     url: 'http://box',
 };
 
-const SEC_SC: HeatingGroupMember = {id: 'KEQ0165114', serial: 'KEQ0165114', type: 'HM-Sec-SC'};
+const SEC_SC: HeatingGroupMember = {id: 'XEQ0000002', serial: 'XEQ0000002', type: 'HM-Sec-SC'};
 const RT_DN: HeatingGroupMember = {id: 'LEQ0987654', serial: 'LEQ0987654', type: 'HM-CC-RT-DN'};
-const WRC2: HeatingGroupMember = {id: '000193C9951175:1', serial: '000193C9951175:1', type: 'REMOTE_CONTROL'};
+const WRC2: HeatingGroupMember = {id: '0001D3C0000001:1', serial: '0001D3C0000001:1', type: 'REMOTE_CONTROL'};
 
 const TYPES: Array<{id: string; label: string}> = [
     {id: 'HomeMatic.heating', label: 'Heating_Control'},
@@ -220,7 +220,7 @@ describe('the Groups tab', () => {
     });
 
     it('lists the groups with type, virtual device and members by name', async () => {
-        transport.respond('names.get', () => ({KEQ0165114: 'Fenster Bad'}));
+        transport.respond('names.get', () => ({XEQ0000002: 'Fenster Bad'}));
         await mountApp({transport, hash: '#/VirtualDevices/groups'});
         await waitFor(() => expect(row('1')).toBeTruthy());
         const text = row('1').textContent;
@@ -228,7 +228,7 @@ describe('the Groups tab', () => {
         // the system's label key, in the UI's language
         expect(text).toContain('Heizungssteuerung');
         expect(text).toContain('INT0000001');
-        expect(screen.getByTestId('group-members-1').textContent).toContain('Fenster Bad (KEQ0165114)');
+        expect(screen.getByTestId('group-members-1').textContent).toContain('Fenster Bad (XEQ0000002)');
         expect(screen.getByTestId('groups-table-count').textContent).toBe('1 Gruppe');
         // once with the probe, for the device table's names (task 94), once as the tab opens
         expect(transport.countOf('groups.list')).toBe(2);
@@ -248,7 +248,7 @@ describe('the Groups tab', () => {
         const options = [...screen.getByTestId<HTMLSelectElement>('group-type').options].map((option) => option.text);
         expect(options).toEqual(['Heizungssteuerung', 'HmIP-Heizungssteuerung']);
         // the member of the existing group is not offered again; the free thermostat is
-        expect(screen.queryByTestId('group-member-KEQ0165114')).toBeNull();
+        expect(screen.queryByTestId('group-member-XEQ0000002')).toBeNull();
         expect(screen.getByTestId('group-member-LEQ0987654')).toBeTruthy();
         // nothing to save without a name
         expect(screen.getByTestId<HTMLButtonElement>('group-save').disabled).toBe(true);
@@ -276,7 +276,7 @@ describe('the Groups tab', () => {
         await fireEvent.change(screen.getByTestId('group-type'), {target: {value: 'hmip.heating.group'}});
         // the HmIP type has nothing to take, and the WRC2 channels are already connected elsewhere
         await waitFor(() => expect(screen.getByTestId('group-no-candidates')).toBeTruthy());
-        expect(screen.getByTestId('group-connected').textContent).toContain('000193C9951175:1');
+        expect(screen.getByTestId('group-connected').textContent).toContain('0001D3C0000001:1');
 
         await fireEvent.change(screen.getByTestId('group-type'), {target: {value: 'HomeMatic.heating'}});
         await waitFor(() =>
@@ -298,18 +298,18 @@ describe('the Groups tab', () => {
         expect(screen.getByTestId('group-device').textContent).toBe('INT0000001');
         // its member is ticked and first, the free thermostat is offered after it
         const candidates = within(screen.getByTestId('group-candidates'));
-        expect(candidates.getByTestId<HTMLInputElement>('group-member-KEQ0165114').checked).toBe(true);
+        expect(candidates.getByTestId<HTMLInputElement>('group-member-XEQ0000002').checked).toBe(true);
         expect(candidates.getByTestId<HTMLInputElement>('group-member-LEQ0987654').checked).toBe(false);
         // nothing changed yet
         expect(screen.getByTestId<HTMLButtonElement>('group-save').disabled).toBe(true);
 
-        await fireEvent.click(candidates.getByTestId('group-member-KEQ0165114'));
+        await fireEvent.click(candidates.getByTestId('group-member-XEQ0000002'));
         await fireEvent.click(candidates.getByTestId('group-member-LEQ0987654'));
         await fireEvent.click(screen.getByTestId('group-save'));
         await waitFor(() => expect(dialog.hasAttribute('open')).toBe(false));
         expect(store.changes).toEqual(['update 1 - LEQ0987654']);
         await waitFor(() => expect(screen.getByTestId('group-members-1').textContent).toContain('LEQ0987654'));
-        expect(screen.getByTestId('group-members-1').textContent).not.toContain('KEQ0165114');
+        expect(screen.getByTestId('group-members-1').textContent).not.toContain('XEQ0000002');
     });
 
     it('renames a group without touching its members', async () => {
@@ -333,7 +333,7 @@ describe('the Groups tab', () => {
         const dialog = screen.getByTestId('group-delete-dialog');
         await waitFor(() => expect(dialog.hasAttribute('open')).toBe(true));
         expect(screen.getByTestId('group-delete-subject').textContent).toBe('Bad');
-        expect(screen.getByTestId('group-delete-members').textContent).toContain('KEQ0165114');
+        expect(screen.getByTestId('group-delete-members').textContent).toContain('XEQ0000002');
         expect(dialog.textContent).toContain('INT0000001');
 
         await fireEvent.click(screen.getByTestId('group-delete-apply'));
@@ -342,7 +342,7 @@ describe('the Groups tab', () => {
         await waitFor(() => expect(document.querySelector('[data-row-id="1"]')).toBeNull());
         expect(screen.getByTestId('groups-table-count').textContent).toBe('0 Gruppen');
         // the former members are the ones whose configuration is pending now
-        expect(screen.getByTestId('groups-pending').textContent).toContain('KEQ0165114');
+        expect(screen.getByTestId('groups-pending').textContent).toContain('XEQ0000002');
     });
 
     it('shows a refusal as a notice and keeps the dialog open', async () => {

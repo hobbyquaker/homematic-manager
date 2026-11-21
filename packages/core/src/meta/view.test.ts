@@ -157,14 +157,14 @@ describe('summarise', () => {
             revision: 4,
             enums,
             objects: {
-                'BidCos-RF.JEQ0230153:1': licht,
-                'BidCos-RF.JEQ0230153:2': {name: 'Taster', enums: [], meta: {}},
+                'BidCos-RF.XEQ0000001:1': licht,
+                'BidCos-RF.XEQ0000001:2': {name: 'Taster', enums: [], meta: {}},
             },
         };
         const summaries = summariseAll(document, {ancestors: true});
-        expect(Object.keys(summaries)).toEqual(['BidCos-RF.JEQ0230153:1', 'BidCos-RF.JEQ0230153:2']);
-        expect(summaries['BidCos-RF.JEQ0230153:1']?.rooms).toEqual(['Obergeschoss', 'Bad']);
-        expect(summaries['BidCos-RF.JEQ0230153:2']?.functions).toEqual([]);
+        expect(Object.keys(summaries)).toEqual(['BidCos-RF.XEQ0000001:1', 'BidCos-RF.XEQ0000001:2']);
+        expect(summaries['BidCos-RF.XEQ0000001:1']?.rooms).toEqual(['Obergeschoss', 'Bad']);
+        expect(summaries['BidCos-RF.XEQ0000001:2']?.functions).toEqual([]);
         expect(summariseAll({format: 1, revision: 0, enums: {}, objects: {}})).toEqual({});
     });
 });

@@ -75,8 +75,8 @@ function box(
     };
 }
 
-const SEC_SC = {id: 'KEQ0165114', serial: 'KEQ0165114', type: 'HM-Sec-SC'};
-const WRC2_1 = {id: '000193C9951175:1', serial: '000193C9951175:1', type: 'REMOTE_CONTROL'};
+const SEC_SC = {id: 'XEQ0000002', serial: 'XEQ0000002', type: 'HM-Sec-SC'};
+const WRC2_1 = {id: '0001D3C0000001:1', serial: '0001D3C0000001:1', type: 'REMOTE_CONTROL'};
 
 const LIST = {
     groups: [
@@ -226,11 +226,11 @@ describe('the changes', () => {
             'POST /groups': (call) =>
                 json({...DETAIL_1, id: 3, name: (call.body as {name: string}).name, devices_to_configure: [SEC_SC]}),
         });
-        const change = await client.create('Küche', 'HomeMatic.heating', ['KEQ0165114']);
+        const change = await client.create('Küche', 'HomeMatic.heating', ['XEQ0000002']);
         expect(calls[0]).toMatchObject({
             method: 'POST',
             url: 'http://box/api/system/v1/groups',
-            body: {name: 'Küche', type: 'HomeMatic.heating', members: ['KEQ0165114']},
+            body: {name: 'Küche', type: 'HomeMatic.heating', members: ['XEQ0000002']},
         });
         expect(calls[0]?.headers['content-type']).toBe('application/json');
         expect(change).toMatchObject({id: 3, name: 'Küche', members: [SEC_SC], devicesToConfigure: [SEC_SC]});
@@ -245,8 +245,8 @@ describe('the changes', () => {
         expect(calls[0]).toMatchObject({method: 'PUT', url: 'http://box/api/system/v1/groups/1', body: {members: []}});
         expect(calls[0]?.body).not.toHaveProperty('name');
 
-        await client.update(1, {name: 'Bad oben', members: ['KEQ0165114']});
-        expect(calls[1]?.body).toEqual({name: 'Bad oben', members: ['KEQ0165114']});
+        await client.update(1, {name: 'Bad oben', members: ['XEQ0000002']});
+        expect(calls[1]?.body).toEqual({name: 'Bad oben', members: ['XEQ0000002']});
     });
 
     it('deletes a group and answers with its former members', async () => {

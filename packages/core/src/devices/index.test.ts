@@ -277,19 +277,19 @@ describe('DeviceIndex', () => {
 
     it("flags the central's radio module and its channels, by the device or the channel's PARENT_TYPE", () => {
         const radio = new DeviceIndex('HmIP-RF', [
-            {ADDRESS: '00041709ADFA5B', TYPE: 'HmIP-RFUSB', SUBTYPE: 'CCU', CHILDREN: ['00041709ADFA5B:0']},
-            {ADDRESS: '00041709ADFA5B:0', TYPE: 'MAINTENANCE', PARENT: '00041709ADFA5B'},
+            {ADDRESS: '000417000000A1', TYPE: 'HmIP-RFUSB', SUBTYPE: 'CCU', CHILDREN: ['000417000000A1:0']},
+            {ADDRESS: '000417000000A1:0', TYPE: 'MAINTENANCE', PARENT: '000417000000A1'},
             {ADDRESS: '3014F711A0000000:0', TYPE: 'MAINTENANCE', PARENT: '3014F711A0000000', PARENT_TYPE: 'RPI-RF-MOD'},
             {ADDRESS: 'HmIP-RCV-50', TYPE: 'HmIP-RCV-50'},
             {ADDRESS: '0001D3C99C3C93', TYPE: 'HmIP-SWDO', SUBTYPE: 'SWDO'},
         ]);
-        expect(radio.isRadioModule('00041709ADFA5B')).toBe(true);
-        expect(radio.isRadioModule('00041709ADFA5B:0')).toBe(true);
+        expect(radio.isRadioModule('000417000000A1')).toBe(true);
+        expect(radio.isRadioModule('000417000000A1:0')).toBe(true);
         expect(radio.isRadioModule('3014F711A0000000:0')).toBe(true);
         expect(radio.isRadioModule('HmIP-RCV-50')).toBe(false);
         expect(radio.isRadioModule('0001D3C99C3C93')).toBe(false);
         expect(radio.isRadioModule('nope')).toBe(false);
-        expect(radio.isCentral('00041709ADFA5B')).toBe(false);
+        expect(radio.isCentral('000417000000A1')).toBe(false);
     });
 
     it('does not flag a channel whose device is unknown', () => {

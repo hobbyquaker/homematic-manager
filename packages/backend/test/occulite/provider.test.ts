@@ -116,7 +116,7 @@ describe.skipIf(!available)('the occulite provider against a real occulited', ()
     });
 
     it('reads the names into the name cache, keyed by address', () => {
-        expect(names.get('JEQ0230153:1')).toBe('Thermostat Bad:1');
+        expect(names.get('XEQ0000001:1')).toBe('Thermostat Bad:1');
         expect(names.get('000A1B2C3D4E5F:4')).toBe('Deckenlampe');
     });
 
@@ -147,12 +147,12 @@ describe.skipIf(!available)('the occulite provider against a real occulited', ()
         const created = await service.createNode('room', null, 'Büro');
         expect(created).toBe('room/buero');
 
-        await service.assign(['HmIP-RF.000A1B2C3D4E5F:4', 'BidCos-RF.JEQ0230153:1'], 'room/buero', true);
+        await service.assign(['HmIP-RF.000A1B2C3D4E5F:4', 'BidCos-RF.XEQ0000001:1'], 'room/buero', true);
         expect(service.objects()['HmIP-RF.000A1B2C3D4E5F:4']?.rooms).toContain('Büro');
-        expect(service.objects()['BidCos-RF.JEQ0230153:1']?.rooms).toContain('Büro');
+        expect(service.objects()['BidCos-RF.XEQ0000001:1']?.rooms).toContain('Büro');
 
-        await service.assign(['BidCos-RF.JEQ0230153:1'], 'room/buero', false);
-        expect(service.objects()['BidCos-RF.JEQ0230153:1']?.rooms).not.toContain('Büro');
+        await service.assign(['BidCos-RF.XEQ0000001:1'], 'room/buero', false);
+        expect(service.objects()['BidCos-RF.XEQ0000001:1']?.rooms).not.toContain('Büro');
         // and the box agrees
         const members = (await box.json('GET', '/api/meta/v1/objects?enum=room/buero')) as {
             objects?: Record<string, unknown>;
@@ -176,20 +176,20 @@ describe.skipIf(!available)('the occulite provider against a real occulited', ()
         const before = changes;
         const response = await box.request(
             'PATCH',
-            '/api/meta/v1/objects/BidCos-RF.JEQ0230153%3A1',
+            '/api/meta/v1/objects/BidCos-RF.XEQ0000001%3A1',
             {name: 'Von woanders umbenannt'},
             box.sid,
         );
         expect(response.status).toBe(200);
         await eventually(
-            () => service.objects()['BidCos-RF.JEQ0230153:1']?.name === 'Von woanders umbenannt',
+            () => service.objects()['BidCos-RF.XEQ0000001:1']?.name === 'Von woanders umbenannt',
             'the SSE stream to deliver a rename made elsewhere',
         );
         expect(
             changes,
             `changes ${String(changes)} before ${String(before)} notices ${notices.join(' | ')}`,
         ).toBeGreaterThan(before);
-        expect(names.get('JEQ0230153:1')).toBe('Von woanders umbenannt');
+        expect(names.get('XEQ0000001:1')).toBe('Von woanders umbenannt');
     });
 
     it('re-snapshots when the box says resync', async () => {
@@ -197,7 +197,7 @@ describe.skipIf(!available)('the occulite provider against a real occulited', ()
         const response = await box.request('PUT', '/api/meta/v1/import?mode=replace', HOUSE, box.sid);
         expect(response.status).toBe(200);
         await eventually(
-            () => service.objects()['BidCos-RF.JEQ0230153:1']?.name === 'Thermostat Bad:1',
+            () => service.objects()['BidCos-RF.XEQ0000001:1']?.name === 'Thermostat Bad:1',
             'the import to be followed by a fresh snapshot',
         );
         expect(service.state().objects).toBe(4);
@@ -218,7 +218,7 @@ describe.skipIf(!available)('the occulite provider against a real occulited', ()
         await readOnly.start();
         try {
             expect(readOnly.state()).toMatchObject({reachable: true, objects: 4});
-            await expect(readOnly.setNames([{address: 'JEQ0230153:1', name: 'nicht erlaubt'}])).rejects.toThrow(
+            await expect(readOnly.setNames([{address: 'XEQ0000001:1', name: 'nicht erlaubt'}])).rejects.toThrow(
                 /administrator|forbidden/i,
             );
             expect(readOnly.state().writable).toBe(false);

@@ -24,8 +24,8 @@ export interface MetaRef {
  * `<interface>.<address>` split at the **first** dot, or `undefined`.
  *
  * The interface name never contains a dot; the address may (it does not today, but the rule is the
- * separator, not the shape of what follows it). `BidCos-RF.JEQ0230153:1` is a channel,
- * `BidCos-RF.JEQ0230153` the device it belongs to.
+ * separator, not the shape of what follows it). `BidCos-RF.XEQ0000001:1` is a channel,
+ * `BidCos-RF.XEQ0000001` the device it belongs to.
  */
 export function parseRef(ref: string): MetaRef | undefined {
     const dot = ref.indexOf('.');

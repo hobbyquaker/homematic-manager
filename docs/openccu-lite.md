@@ -61,7 +61,7 @@ answers that save a round trip:
   `X-Occulite-Session` first, confirmed with `GET /api/auth/v1/state`, and needs no
   `?sid=` on openccu-lite at all; the shim answers the `?sid=` of older shells as before.
 - **ReGa ids** (`dom.GetObject(1234)`): there are none. The identity of an object is its **ref**,
-  `<interface>.<address>` — `BidCos-RF.JEQ0230153:1` for a channel, `HmIP-RF.0001D3C99C7D4B` for a
+  `<interface>.<address>` — `BidCos-RF.XEQ0000001:1` for a channel, `HmIP-RF.0001D3C99C7D4B` for a
   device.
 - **Service messages / alarms as ReGa variables** (40 and 41): interface-level state only. The
   Homematic Manager reads service messages from the interface processes anyway, so its list is the

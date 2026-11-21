@@ -19,7 +19,7 @@ function furnished(): MetaStore {
     const store = new MetaStore();
     store.createNode('room', null, 'eg', 'Erdgeschoss');
     store.createNode('room', 'room/eg', 'bad', 'Bad');
-    store.set('BidCos-RF.JEQ0230153:1', {name: 'Licht Bad', enums: ['room/eg/bad']});
+    store.set('BidCos-RF.XEQ0000001:1', {name: 'Licht Bad', enums: ['room/eg/bad']});
     return store;
 }
 
@@ -103,14 +103,14 @@ describe('load', () => {
 describe('the plain reads', () => {
     it('find answers undefined where get refuses', () => {
         const store = furnished();
-        expect(store.find('BidCos-RF.JEQ0230153:1')?.name).toBe('Licht Bad');
-        expect(store.find('BidCos-RF.JEQ0230153:9')).toBeUndefined();
-        expect(() => store.get('BidCos-RF.JEQ0230153:9')).toThrow(expect.objectContaining({code: 'unknown-object'}));
+        expect(store.find('BidCos-RF.XEQ0000001:1')?.name).toBe('Licht Bad');
+        expect(store.find('BidCos-RF.XEQ0000001:9')).toBeUndefined();
+        expect(() => store.get('BidCos-RF.XEQ0000001:9')).toThrow(expect.objectContaining({code: 'unknown-object'}));
     });
 
     it('objects and enums hand out everything, keyed', () => {
         const store = furnished();
-        expect(Object.keys(store.objects())).toEqual(['BidCos-RF.JEQ0230153:1']);
+        expect(Object.keys(store.objects())).toEqual(['BidCos-RF.XEQ0000001:1']);
         expect(Object.keys(store.enums())).toEqual(['room', 'function']);
         expect(store.enums()['room']?.tree[0]?.children?.[0]?.name).toBe('Bad');
     });
@@ -184,11 +184,11 @@ describe('nodes', () => {
 describe('deleting something that still has members', () => {
     it('deleteNode names the refs that would lose a path', () => {
         const store = furnished();
-        store.set('BidCos-RF.JEQ0230153:2', {name: 'Taster', enums: ['room/eg/bad']});
+        store.set('BidCos-RF.XEQ0000001:2', {name: 'Taster', enums: ['room/eg/bad']});
         expect(() => store.deleteNode('room/eg')).toThrow(
             expect.objectContaining({
                 code: 'has-members',
-                detail: {refs: ['BidCos-RF.JEQ0230153:1', 'BidCos-RF.JEQ0230153:2']},
+                detail: {refs: ['BidCos-RF.XEQ0000001:1', 'BidCos-RF.XEQ0000001:2']},
             }),
         );
         expect(store.getEnum('room').tree).toHaveLength(1);
@@ -197,7 +197,7 @@ describe('deleting something that still has members', () => {
     it('deleteEnum does the same for a whole enum', () => {
         const store = furnished();
         expect(() => store.deleteEnum('room')).toThrow(
-            expect.objectContaining({code: 'has-members', detail: {refs: ['BidCos-RF.JEQ0230153:1']}}),
+            expect.objectContaining({code: 'has-members', detail: {refs: ['BidCos-RF.XEQ0000001:1']}}),
         );
         expect(store.revision).toBe(3);
     });
@@ -248,7 +248,7 @@ describe('the writes the corpus does not ask for', () => {
     it('a query needs a target that is a path at all', () => {
         const store = furnished();
         expect(() => store.query('Room/eg')).toThrow(expect.objectContaining({code: 'unknown-path'}));
-        expect(store.query('room')).toEqual(['BidCos-RF.JEQ0230153:1']);
+        expect(store.query('room')).toEqual(['BidCos-RF.XEQ0000001:1']);
     });
 
     it('a rename keeps the subtree below the node', () => {
@@ -265,14 +265,14 @@ describe('the writes the corpus does not ask for', () => {
         const store = furnished();
         expect(store.updateNode('room/eg/bad', {parent: null}).changed).toBe(true);
         expect(store.getEnum('room').tree.map((node) => node.id)).toEqual(['eg', 'bad']);
-        expect(store.get('BidCos-RF.JEQ0230153:1').enums).toEqual(['room/bad']);
+        expect(store.get('BidCos-RF.XEQ0000001:1').enums).toEqual(['room/bad']);
     });
 
     it('moves into a parent that has no children yet, and refuses one that has the id already', () => {
         const store = furnished();
         store.createNode('room', null, 'og', 'Obergeschoss');
         store.updateNode('room/eg/bad', {parent: 'room/og'});
-        expect(store.get('BidCos-RF.JEQ0230153:1').enums).toEqual(['room/og/bad']);
+        expect(store.get('BidCos-RF.XEQ0000001:1').enums).toEqual(['room/og/bad']);
 
         store.createNode('room', 'room/eg', 'bad', 'Bad unten');
         expect(() => store.updateNode('room/eg/bad', {parent: 'room/og'})).toThrow(
@@ -285,6 +285,6 @@ describe('the writes the corpus does not ask for', () => {
         store.updateNode('room/eg', {icon: 'stairs'});
         store.deleteNode('room/eg/bad', 'detach');
         expect(store.getEnum('room').tree[0]).toEqual({id: 'eg', name: 'Erdgeschoss', icon: 'stairs'});
-        expect(store.get('BidCos-RF.JEQ0230153:1').enums).toEqual([]);
+        expect(store.get('BidCos-RF.XEQ0000001:1').enums).toEqual([]);
     });
 });

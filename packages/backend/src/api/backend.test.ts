@@ -2665,7 +2665,7 @@ describe('InProcessTransport', () => {
 
 describe('the heating groups of openccu-lite (task 57)', () => {
     const TOKEN = 'olt_0123456789abcdef0123456789abcdef';
-    const SEC_SC = {id: 'KEQ0165114', serial: 'KEQ0165114', type: 'HM-Sec-SC'};
+    const SEC_SC = {id: 'XEQ0000002', serial: 'XEQ0000002', type: 'HM-Sec-SC'};
 
     /**
      * A box made of a function: the metadata API the provider probes and follows, and the groups
@@ -2759,8 +2759,8 @@ describe('the heating groups of openccu-lite (task 57)', () => {
         expect(b.calls).toContain('PUT /api/system/v1/groups/1 {"members":[]}');
         // over the WebSocket an omitted argument arrives as `null`, and that keeps the field as well
         // (the e2e suite found the box being sent `"name":null`)
-        await h.backend.request('groups.update', 1, null as never, ['KEQ0165114']);
-        expect(b.calls.at(-1)).toBe('PUT /api/system/v1/groups/1 {"members":["KEQ0165114"]}');
+        await h.backend.request('groups.update', 1, null as never, ['XEQ0000002']);
+        expect(b.calls.at(-1)).toBe('PUT /api/system/v1/groups/1 {"members":["XEQ0000002"]}');
         expect(new Set(b.credentials)).toEqual(new Set([`Bearer ${TOKEN}`]));
         await h.backend.stop();
     });

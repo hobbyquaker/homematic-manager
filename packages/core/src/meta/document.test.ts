@@ -39,7 +39,7 @@ function raw(): Record<string, unknown> {
             },
         },
         objects: {
-            'BidCos-RF.JEQ0230153:1': {name: 'Licht Bad', enums: ['room/eg/bad'], meta: {hmm: {colour: 'red'}}},
+            'BidCos-RF.XEQ0000001:1': {name: 'Licht Bad', enums: ['room/eg/bad'], meta: {hmm: {colour: 'red'}}},
         },
     };
 }
@@ -188,7 +188,7 @@ describe('parseDocument', () => {
         const document = parseDocument(raw());
         expect(document.format).toBe(1);
         expect(document.revision).toBe(3);
-        expect(document.objects['BidCos-RF.JEQ0230153:1']?.enums).toEqual(['room/eg/bad']);
+        expect(document.objects['BidCos-RF.XEQ0000001:1']?.enums).toEqual(['room/eg/bad']);
         expect(document.enums['room']?.tree[0]?.children?.[0]?.name).toBe('Bad');
     });
 
@@ -228,7 +228,7 @@ describe('parseDocument', () => {
     });
 
     it('refuses a key of objects that is not a ref', () => {
-        expect(() => parseDocument({format: 1, revision: 0, objects: {JEQ0230153: {name: 'Licht'}}})).toThrow(
+        expect(() => parseDocument({format: 1, revision: 0, objects: {XEQ0000001: {name: 'Licht'}}})).toThrow(
             expect.objectContaining({code: 'invalid-ref'}),
         );
     });
@@ -239,12 +239,12 @@ describe('parseDocument', () => {
                 format: 1,
                 revision: 0,
                 enums: {room: {name: {en: 'Rooms'}, tree: []}},
-                objects: {'BidCos-RF.JEQ0230153:1': {name: 'Licht', enums: ['room/nowhere']}},
+                objects: {'BidCos-RF.XEQ0000001:1': {name: 'Licht', enums: ['room/nowhere']}},
             }),
         ).toThrow(
             expect.objectContaining({
                 code: 'unknown-path',
-                detail: {ref: 'BidCos-RF.JEQ0230153:1', path: 'room/nowhere'},
+                detail: {ref: 'BidCos-RF.XEQ0000001:1', path: 'room/nowhere'},
             }),
         );
     });
@@ -260,7 +260,7 @@ describe('documentJson and documentEquals', () => {
     const b = parseDocument({
         // the same document written with every key in another order, and at another revision
         objects: {
-            'BidCos-RF.JEQ0230153:1': {meta: {hmm: {colour: 'red'}}, enums: ['room/eg/bad'], name: 'Licht Bad'},
+            'BidCos-RF.XEQ0000001:1': {meta: {hmm: {colour: 'red'}}, enums: ['room/eg/bad'], name: 'Licht Bad'},
         },
         enums: {
             room: {
@@ -289,7 +289,7 @@ describe('documentJson and documentEquals', () => {
     it('sees a difference in the data', () => {
         const renamed: MetaDocument = {
             ...a,
-            objects: {'BidCos-RF.JEQ0230153:1': {name: 'Licht Bad oben', enums: [], meta: {}}},
+            objects: {'BidCos-RF.XEQ0000001:1': {name: 'Licht Bad oben', enums: [], meta: {}}},
         };
         expect(documentEquals(a, renamed)).toBe(false);
     });
@@ -327,7 +327,7 @@ describe('parseDocumentOrEmpty', () => {
             parseDocumentOrEmpty({
                 format: 1,
                 revision: 0,
-                objects: {'BidCos-RF.JEQ0230153:1': {name: 'Licht', meta: {hmm: 1n}}},
+                objects: {'BidCos-RF.XEQ0000001:1': {name: 'Licht', meta: {hmm: 1n}}},
             }),
         ).toThrow(TypeError);
     });

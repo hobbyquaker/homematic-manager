@@ -57,27 +57,27 @@ function chain(depth: number): readonly MetaNode[] {
 
 describe('refs: <interface>.<address>', () => {
     it('splits at the first dot, so an address may carry one', () => {
-        expect(parseRef('BidCos-RF.JEQ0230153:1')).toEqual({interfaceName: 'BidCos-RF', address: 'JEQ0230153:1'});
+        expect(parseRef('BidCos-RF.XEQ0000001:1')).toEqual({interfaceName: 'BidCos-RF', address: 'XEQ0000001:1'});
         expect(parseRef('HmIP-RF.000A.1B:2')).toEqual({interfaceName: 'HmIP-RF', address: '000A.1B:2'});
     });
 
     it('refuses anything that is not two halves', () => {
         expect(parseRef('BidCos-RF')).toBeUndefined();
-        expect(parseRef('.JEQ0230153')).toBeUndefined();
+        expect(parseRef('.XEQ0000001')).toBeUndefined();
         expect(parseRef('BidCos-RF.')).toBeUndefined();
         expect(parseRef('.')).toBeUndefined();
         expect(parseRef('')).toBeUndefined();
     });
 
     it('makeRef is the inverse', () => {
-        expect(makeRef('BidCos-RF', 'JEQ0230153:1')).toBe('BidCos-RF.JEQ0230153:1');
+        expect(makeRef('BidCos-RF', 'XEQ0000001:1')).toBe('BidCos-RF.XEQ0000001:1');
         expect(parseRef(makeRef('HmIP-RF', '000A1B'))).toEqual({interfaceName: 'HmIP-RF', address: '000A1B'});
     });
 
     it('isValidRef and requireRef answer the same question, one of them loudly', () => {
-        expect(isValidRef('BidCos-RF.JEQ0230153:1')).toBe(true);
+        expect(isValidRef('BidCos-RF.XEQ0000001:1')).toBe(true);
         expect(isValidRef('BidCos-RF')).toBe(false);
-        expect(requireRef('BidCos-RF.JEQ0230153:1').address).toBe('JEQ0230153:1');
+        expect(requireRef('BidCos-RF.XEQ0000001:1').address).toBe('XEQ0000001:1');
         expect(() => requireRef('BidCos-RF')).toThrow(expect.objectContaining({code: 'invalid-ref'}));
     });
 });

@@ -28,6 +28,15 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   does any other addon's data on the channel. The metadata store of a profile without openccu-lite now passes the same
   test cases as openccu-lite's own store, including these icons and that a name cannot be cleared.
 
+### Fixed
+
+- **openccu-lite no longer asks for a reboot after the addon is installed.** The system starts the addon right
+  away, but the installer still answered as on a CCU, so the Addons page and the welcome page asked for a reboot for
+  an addon that was already running. A CCU and OpenCCU still reboot after a first install.
+- **The addon's uninstall on openccu-lite ends without error lines.** It no longer tries to remove the parts the
+  system removes itself (its Systemsteuerung entry, its start script and web link), which it may not touch there and
+  which showed up as "permission denied" in the uninstall's output.
+
 ## [3.5.1] — 2026-11-20
 
 ### Changed

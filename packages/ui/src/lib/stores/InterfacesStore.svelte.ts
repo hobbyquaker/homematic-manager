@@ -10,6 +10,8 @@ import type {NoticesStore} from './NoticesStore.svelte.js';
  */
 export class InterfacesStore {
     states = $state<InterfaceState[]>([]);
+    /** B-104: whether the states have been read (or pushed) once; until then nobody knows what is absent. */
+    known = $state(false);
     rega = $state<RegaState | undefined>(undefined);
     loading = $state(false);
     /**
@@ -31,6 +33,7 @@ export class InterfacesStore {
         this.#unsubscribe.push(
             transport.on('interfaces.changed', (states) => {
                 this.states = states;
+                this.known = true;
             }),
             transport.on('rega.changed', (rega) => {
                 this.rega = rega;
@@ -67,6 +70,24 @@ export class InterfacesStore {
         return this.methodNames[name] ?? undefined;
     }
 
+    /**
+     * B-104: the interface is configured but the system has no such process - BidCos-RF on an
+     * openccu-lite system in the HmIP-only mode, BidCos-Wired without a wired gateway. Nothing is
+     * read from it.
+     */
+    isAbsent(name: string): boolean {
+        return this.get(name)?.absent === true;
+    }
+
+    /**
+     * B-104: whether a view may read from the interface by itself - once the states are known, and
+     * not when it is absent. A view that mounted before the start had read them asked an absent
+     * BidCos-RF for its links, its gateways and its methods.
+     */
+    readable(name: string): boolean {
+        return name !== '' && this.known && !this.isAbsent(name);
+    }
+
     isConnected(name: string): boolean {
         return this.get(name)?.connected === true;
     }
@@ -92,6 +113,8 @@ export class InterfacesStore {
             this.#notices.fromError(error, 'interfaces.list');
         } finally {
             this.loading = false;
+            // a failed list is known as well: nothing is absent then, as before B-104
+            this.known = true;
         }
         try {
             this.rega = await this.#transport.request('rega.state');

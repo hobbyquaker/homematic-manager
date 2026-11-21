@@ -1104,3 +1104,24 @@ describe('an empty device list', () => {
         });
     });
 });
+
+describe('an HmIP-only system (B-104)', () => {
+    it('opens on HmIP-RF and asks the absent BidCos-RF nothing, before the start or after it', async () => {
+        const transport = new MockTransport({demo: true});
+        const demoStates = transport.handlerFor('interfaces.list');
+        transport.respond('interfaces.list', async () =>
+            (await demoStates()).map((state) =>
+                state.name === 'BidCos-RF'
+                    ? {...state, connected: false, absent: true, error: 'BidCos-RF: the system runs no such interface'}
+                    : state,
+            ),
+        );
+        const {stores} = await mountApp({transport});
+        await waitFor(() => {
+            expect(stores.app.selectedInterface).toBe('HmIP-RF');
+        });
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        expect(transport.calls.filter((call) => call.params[0] === 'BidCos-RF').map((call) => call.method)).toEqual([]);
+        expect(stores.notices.items.map((item) => item.message)).toEqual([]);
+    });
+});

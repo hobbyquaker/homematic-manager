@@ -13,6 +13,10 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 - **The HmIP-eTRV-B-2 R4M shows its device picture.** Device types reported with a space in the name, such as the
   HmIP-eTRV-B-2 R4M or the Roto ZEL STG RM devices, showed no picture, in the desktop app and in the addon alike.
   (#171, @McPan)
+- **An interface the system does not have no longer floods the app with errors.** On an openccu-lite system with
+  BidCos-RF switched off (HmIP only), the app opened on BidCos-RF and asked it for its direct links over and over, each
+  failure another error message. It now opens on the first interface that is there, reads nothing from one that is not,
+  and a failed read of the links is not repeated by itself. (#170, @agross)
 
 ## [3.6.0] — 2026-11-21
 

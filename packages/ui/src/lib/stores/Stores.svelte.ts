@@ -182,7 +182,7 @@ export class Stores {
             this.app.storeSelected && storeTabs(this.taxonomy.state).length === 0
                 ? (this.app.configuredInterfaces[0] ?? '')
                 : this.app.selectedInterface;
-        await this.selectInterface(selected);
+        await this.selectInterface(this.#present(selected));
         this.#started = true;
     }
 
@@ -197,6 +197,19 @@ export class Stores {
         const wasStore = this.app.storeSelected;
         this.app.setInterface(interfaceName);
         await this.#interfaceSelected(wasStore);
+    }
+
+    /**
+     * B-104: an interface the system does not have is no place to start in. The first configured
+     * interface is BidCos-RF, and on an HmIP-only openccu-lite system that one is absent: the app
+     * opened on an empty grid of an interface that cannot be read. The first configured interface
+     * that is there instead - or the one asked for, when none is.
+     */
+    #present(interfaceName: string): string {
+        if (interfaceName === '' || this.app.storeSelected || !this.interfaces.isAbsent(interfaceName)) {
+            return interfaceName;
+        }
+        return this.app.configuredInterfaces.find((name) => !this.interfaces.isAbsent(name)) ?? interfaceName;
     }
 
     /** What follows a switch of `app.selectedInterface`, by the picker or by the hash (B-42). */
@@ -217,9 +230,11 @@ export class Stores {
         if (interfaceName === '') {
             return;
         }
+        // B-104: an absent interface is neither read nor retried; its grid shows what the cache has
+        const present = !this.interfaces.isAbsent(interfaceName);
         await Promise.all([
-            this.devices.ensure(interfaceName),
-            this.links.ensure(interfaceName),
+            present ? this.devices.ensure(interfaceName) : undefined,
+            present ? this.links.ensure(interfaceName) : undefined,
             this.serviceMessages.load(),
             this.events.load(),
         ]);
@@ -231,9 +246,10 @@ export class Stores {
         if (interfaceName === '' || this.app.storeSelected) {
             return;
         }
+        const present = !this.interfaces.isAbsent(interfaceName);
         await Promise.all([
-            this.devices.load(interfaceName, {refresh: true}),
-            this.links.load(interfaceName),
+            present ? this.devices.load(interfaceName, {refresh: true}) : undefined,
+            present ? this.links.load(interfaceName) : undefined,
             this.serviceMessages.load(),
             this.interfaces.load(),
         ]);

@@ -1850,6 +1850,13 @@ describe('a wired dimmer linked to its own input (B-101)', () => {
         transport.respond('paramset.id', (_interfaceName, address, paramset) =>
             address === RECEIVER && paramset === 'LINK' ? linkParamsetId : '',
         );
+        // the demo's BidCos-Wired is absent, and an absent interface is never read (B-104)
+        const demoStates = transport.handlerFor('interfaces.list');
+        transport.respond('interfaces.list', async () =>
+            (await demoStates()).map((state) =>
+                state.name === 'BidCos-Wired' ? {...state, connected: true, absent: false} : state,
+            ),
+        );
         const demoFile = transport.handlerFor('data.file');
         transport.respond('data.file', (path) => {
             files.push(path);

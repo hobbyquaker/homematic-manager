@@ -1,5 +1,6 @@
 import type {LinkRecord, LinkTemplate, Transport} from '@homematic-manager/core';
 import {linkFlags} from '@homematic-manager/core';
+import {untrack} from 'svelte';
 
 import type {NoticesStore} from './NoticesStore.svelte.js';
 
@@ -7,6 +8,13 @@ import type {NoticesStore} from './NoticesStore.svelte.js';
 export class LinksStore {
     links = $state<Record<string, LinkRecord[]>>({});
     loading = $state<Record<string, boolean>>({});
+    /**
+     * B-104: the interfaces whose last read failed. {@link ensure} does not read them again by
+     * itself: the device grid calls it from an effect, and every failure that ended a read re-ran
+     * that effect into the next one - an endless loop of `getLinks` and an error toast per round.
+     * An explicit {@link load} (the Links tab's reload, the refresh) still asks.
+     */
+    failed = $state<Record<string, boolean>>({});
 
     readonly #transport: Transport;
     readonly #notices: NoticesStore;
@@ -36,7 +44,9 @@ export class LinksStore {
         this.loading = {...this.loading, [interfaceName]: true};
         try {
             this.links = {...this.links, [interfaceName]: await this.#transport.request('links.list', interfaceName)};
+            this.failed = {...this.failed, [interfaceName]: false};
         } catch (error) {
+            this.failed = {...this.failed, [interfaceName]: true};
             this.#notices.fromError(error, `links.list ${interfaceName}`);
         } finally {
             this.loading = {...this.loading, [interfaceName]: false};
@@ -201,18 +211,33 @@ export class LinksStore {
         }
     }
 
+    /**
+     * Reads the links of an interface unless they are there, on their way, or failed the last time
+     * (B-104). Reads nothing reactive: it is called from effects, which must not re-run on its
+     * account.
+     */
     async ensure(interfaceName: string): Promise<void> {
-        if (interfaceName === '' || this.links[interfaceName] || this.isLoading(interfaceName)) {
+        const skip = untrack(
+            () =>
+                interfaceName === '' ||
+                this.links[interfaceName] !== undefined ||
+                this.isLoading(interfaceName) ||
+                this.failed[interfaceName] === true,
+        );
+        if (skip) {
             return;
         }
-        await this.load(interfaceName);
+        // the synchronous start of the read reads `loading` as well
+        await untrack(() => this.load(interfaceName));
     }
 
     forget(interfaceName?: string): void {
         if (interfaceName === undefined) {
             this.links = {};
+            this.failed = {};
             return;
         }
         this.links = Object.fromEntries(Object.entries(this.links).filter(([name]) => name !== interfaceName));
+        this.failed = Object.fromEntries(Object.entries(this.failed).filter(([name]) => name !== interfaceName));
     }
 }

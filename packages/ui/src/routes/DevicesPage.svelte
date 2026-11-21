@@ -280,8 +280,11 @@
     /** The BidCos interfaces of this process, for the names of the receivers (B-2). */
     const gateways = $derived(stores.radio.gateways(interfaceName));
 
+    /** B-104: what this view reads by itself, it reads only from an interface the system has. */
+    const readable = $derived(stores.interfaces.readable(interfaceName));
+
     $effect(() => {
-        if (interfaceType === 'BidCos-RF') {
+        if (interfaceType === 'BidCos-RF' && readable) {
             void stores.radio.ensureGateways(interfaceName);
         }
     });
@@ -361,9 +364,12 @@
         return channelVisible(viewOf(member.ADDRESS), viewOf(deviceAddress(member.ADDRESS)), target);
     }
 
-    /** #25: the link count in the channel grid needs the links of this interface to be loaded. */
+    /**
+     * #25: the link count in the channel grid needs the links of this interface to be loaded - not
+     * of one the system does not have, and a read that failed is not repeated from here (B-104).
+     */
     $effect(() => {
-        if (interfaceName !== '') {
+        if (readable) {
             void stores.links.ensure(interfaceName);
         }
     });
@@ -425,7 +431,7 @@
      * `restoreConfigToDevice` and `clearConfigCache` are BidCos methods, as the 2.x menu classes
      * said - and task 115: only where the interface lists them. hs485d of an eQ-3 CCU3 has neither.
      */
-    const listedMethods = $derived(stores.interfaces.methodsOf(interfaceName));
+    const listedMethods = $derived(readable ? stores.interfaces.methodsOf(interfaceName) : undefined);
     const canRestore = $derived(
         offersConfigMaintenance(interfaceName, interfaceType, 'restoreConfigToDevice', listedMethods),
     );

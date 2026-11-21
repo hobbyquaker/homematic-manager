@@ -526,6 +526,29 @@ describe('AppStore', () => {
 });
 
 describe('InterfacesStore', () => {
+    it('lets a view read an interface only once the states are known and it is there (B-104)', async () => {
+        const transport = new MockTransport({demo: true});
+        const store = new InterfacesStore(transport, new NoticesStore(transport));
+        expect(store.readable('BidCos-RF')).toBe(false);
+        await store.load();
+        expect(store.readable('BidCos-RF')).toBe(true);
+        expect(store.isAbsent('BidCos-Wired')).toBe(true);
+        expect(store.readable('BidCos-Wired')).toBe(false);
+        expect(store.readable('')).toBe(false);
+        // a configured interface the list does not name is not known to be absent
+        expect(store.readable('CUxD-2')).toBe(true);
+
+        const pushed = new InterfacesStore(transport, new NoticesStore(transport));
+        transport.emit('interfaces.changed', DEMO_INTERFACE_STATES);
+        expect(pushed.readable('HmIP-RF')).toBe(true);
+
+        const failing = new MockTransport({demo: true});
+        failing.fail('interfaces.list', 'no backend');
+        const unknown = new InterfacesStore(failing, new NoticesStore(failing));
+        await unknown.load();
+        expect(unknown.readable('BidCos-RF')).toBe(true);
+    });
+
     it('loads the states and the ReGa status', async () => {
         const transport = new MockTransport({demo: true});
         const store = new InterfacesStore(transport, new NoticesStore(transport));
@@ -1085,6 +1108,59 @@ describe('Stores', () => {
         expect(bareStores.app.selectedInterface).toBe('BidCos-RF');
         expect(bareStores.app.tab).toBe('devices');
         expect(bareRouter.location.hash).toBe('#/BidCos-RF/devices');
+    });
+
+    it('starts on an interface that is there and reads nothing from one that is not (B-104)', async () => {
+        // an openccu-lite system in the HmIP-only mode: BidCos-RF is configured first and absent
+        const transport = new MockTransport({demo: true});
+        transport.result('interfaces.list', [
+            {...DEMO_INTERFACE_STATES[0]!, connected: false, absent: true, error: 'no such interface'},
+            {...DEMO_INTERFACE_STATES[1]!},
+        ]);
+        const router = fakeRouter();
+        const stores = createStores(transport, {
+            location: router.location,
+            onHashChange: router.onHashChange,
+            storage: new MemoryStorage(),
+        });
+        await stores.start();
+        expect(stores.app.selectedInterface).toBe('HmIP-RF');
+        expect(router.location.hash).toBe('#/HmIP-RF/devices');
+        expect(transport.calls.filter((call) => call.params[0] === 'BidCos-RF')).toEqual([]);
+
+        // chosen in the picker or by a bookmark it is shown, from the cache, but never read
+        transport.reset();
+        await stores.selectInterface('BidCos-RF');
+        await stores.refresh();
+        expect(transport.countOf('devices.list')).toBe(0);
+        expect(transport.countOf('links.list')).toBe(0);
+        expect(stores.notices.items.map((item) => item.message)).toEqual([]);
+
+        // a bookmark of the absent interface starts on it the same way: on the first one there
+        const bookmarked = fakeRouter('#/BidCos-RF/links');
+        const again = createStores(transport, {
+            location: bookmarked.location,
+            onHashChange: bookmarked.onHashChange,
+            storage: new MemoryStorage(),
+        });
+        await again.start();
+        expect(again.app.selectedInterface).toBe('HmIP-RF');
+        expect(again.app.tab).toBe('links');
+        stores.dispose();
+        again.dispose();
+    });
+
+    it('stays on an absent interface when no configured one is there', async () => {
+        const transport = new MockTransport({demo: true});
+        transport.result(
+            'interfaces.list',
+            DEMO_INTERFACE_STATES.map((state) => ({...state, connected: false, absent: true})),
+        );
+        const stores = createStores(transport, {location: fakeRouter().location, storage: new MemoryStorage()});
+        await stores.start();
+        expect(stores.app.selectedInterface).toBe('BidCos-RF');
+        expect(transport.countOf('links.list')).toBe(0);
+        stores.dispose();
     });
 
     it('selectInterface with no interface loads nothing', async () => {

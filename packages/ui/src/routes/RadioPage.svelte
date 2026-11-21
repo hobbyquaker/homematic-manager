@@ -234,7 +234,8 @@
      */
     $effect(() => {
         const name = interfaceName;
-        if (name !== '') {
+        // B-104: never from an interface the system does not have
+        if (stores.interfaces.readable(name)) {
             void stores.radio.ensureMatrix(name);
         }
     });

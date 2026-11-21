@@ -2030,8 +2030,8 @@ describe('paramsets, values and links', () => {
                 {address: '127.0.0.1', inSubnet: false},
             ],
         });
-        const typed = await h.backend.request('config.callbackAddresses', ' 172.16.24.145 ');
-        expect(typed.host).toBe('172.16.24.145');
+        const typed = await h.backend.request('config.callbackAddresses', ' 192.0.2.145 ');
+        expect(typed.host).toBe('192.0.2.145');
         expect(typed.auto).toEqual({address: '192.168.1.5', reason: 'route'});
         expect(typed.addresses.every((entry) => !entry.inSubnet)).toBe(true);
         // `null` is what an omitted argument becomes over the WebSocket

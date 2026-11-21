@@ -87,7 +87,7 @@ describe('address arithmetic (B-53)', () => {
     it('decides subnet membership by the netmask', () => {
         expect(inSubnet('192.168.1.20', '255.255.255.0', '192.168.1.2')).toBe(true);
         expect(inSubnet('192.168.1.20', '255.255.255.0', '192.168.2.2')).toBe(false);
-        expect(inSubnet('172.16.23.50', '255.255.254.0', '172.16.22.1')).toBe(true);
+        expect(inSubnet('198.51.101.50', '255.255.254.0', '198.51.100.1')).toBe(true);
         expect(inSubnet('10.8.0.2', '255.255.255.255', '10.8.0.1')).toBe(false);
         expect(inSubnet('10.8.0.2', '0.0.0.0', '8.8.8.8')).toBe(true);
         expect(inSubnet('10.8.0.2', 'ffff::', '10.8.0.1')).toBe(false);
@@ -127,22 +127,22 @@ describe('pickCallbackAddress (B-53)', () => {
     });
 
     it('takes the route source next, and the first non-link-local address last', () => {
-        expect(pickCallbackAddress('ccu', '172.16.24.145', [vpn, lan], '192.168.1.20').auto).toEqual({
+        expect(pickCallbackAddress('ccu', '192.0.2.145', [vpn, lan], '192.168.1.20').auto).toEqual({
             address: '192.168.1.20',
             reason: 'route',
         });
-        expect(pickCallbackAddress('ccu', '172.16.24.145', [linkLocal, vpn, lan], undefined).auto).toEqual({
+        expect(pickCallbackAddress('ccu', '192.0.2.145', [linkLocal, vpn, lan], undefined).auto).toEqual({
             address: '10.8.0.2',
             reason: 'first',
         });
         // a route source that is not offered is not taken
-        expect(pickCallbackAddress('ccu', '172.16.24.145', [lan], '10.9.9.9').auto.reason).toBe('first');
+        expect(pickCallbackAddress('ccu', '192.0.2.145', [lan], '10.9.9.9').auto.reason).toBe('first');
         expect(pickCallbackAddress('', undefined, [], undefined)).toEqual({
             host: '',
             auto: {address: '127.0.0.1', reason: 'first'},
             addresses: [{address: '127.0.0.1', inSubnet: false}],
         });
-        expect(pickCallbackAddress('ccu', '172.16.24.145', [linkLocal], undefined).auto.address).toBe('127.0.0.1');
+        expect(pickCallbackAddress('ccu', '192.0.2.145', [linkLocal], undefined).auto.address).toBe('127.0.0.1');
     });
 
     it('uses the loopback for a CCU on the loopback and for local', () => {
@@ -186,10 +186,10 @@ describe('describeCallbackAddresses (B-53)', () => {
     });
 
     it('asks the route for a CCU elsewhere', async () => {
-        const net = network({resolve: () => Promise.resolve('172.16.24.145')});
+        const net = network({resolve: () => Promise.resolve('192.0.2.145')});
         const info = await describeCallbackAddresses('ccu', net);
         expect(info.auto).toEqual({address: '10.8.0.2', reason: 'route'});
-        expect(net.routes).toEqual(['172.16.24.145']);
+        expect(net.routes).toEqual(['192.0.2.145']);
     });
 
     it('asks nothing for an unresolvable name, no host, a loopback CCU or local', async () => {

@@ -452,14 +452,14 @@ describe('the automatic callback address (B-53)', () => {
         const network = fakeNetwork({
             interfaces: [
                 {address: '10.8.0.2', netmask: '255.255.255.255'},
-                {address: '172.16.23.50', netmask: '255.255.255.0'},
+                {address: '198.51.100.50', netmask: '255.255.255.0'},
             ],
-            hosts: {'ccu.lan': '172.16.24.145'},
-            route: () => '172.16.23.50',
+            hosts: {'ccu.lan': '192.0.2.145'},
+            route: () => '198.51.100.50',
         });
         const h = harness({connection: AUTO, network});
         await h.manager.start();
-        expect(h.manager.callbackIp).toBe('172.16.23.50');
+        expect(h.manager.callbackIp).toBe('198.51.100.50');
     });
 
     it('ignores a route whose source is no address it offers, or is link-local', async () => {
@@ -468,7 +468,7 @@ describe('the automatic callback address (B-53)', () => {
                 {address: '169.254.1.1', netmask: '255.255.0.0'},
                 {address: '10.0.0.3', netmask: '255.255.255.0'},
             ],
-            hosts: {'ccu.lan': '172.16.24.145'},
+            hosts: {'ccu.lan': '192.0.2.145'},
             route: () => '169.254.1.1',
         });
         const h = harness({connection: AUTO, network});
@@ -593,12 +593,12 @@ describe('the automatic callback address (B-53)', () => {
         const network = fakeNetwork({
             interfaces: [
                 {address: '10.211.55.2', netmask: '255.255.255.0'},
-                {address: '172.16.23.50', netmask: '255.255.255.0'},
+                {address: '198.51.100.50', netmask: '255.255.255.0'},
             ],
-            hosts: {'ccu.lan': '172.16.24.145'},
-            route: () => '172.16.23.50',
+            hosts: {'ccu.lan': '192.0.2.145'},
+            route: () => '198.51.100.50',
         });
-        const h = harness({connection: {callback: {ip: '172.16.23.50', xmlrpcPort: 0, binrpcPort: 0}}, network});
+        const h = harness({connection: {callback: {ip: '198.51.100.50', xmlrpcPort: 0, binrpcPort: 0}}, network});
         await h.manager.start();
         expect(h.manager.callbackWarning).toBeUndefined();
     });

@@ -474,6 +474,46 @@ describe('the PARAMSETS and Links columns (B-35)', () => {
     });
 });
 
+describe("the Msgs marks' time (task 68)", () => {
+    it('say since when a message stands where the openccu-lite system dates it, and nothing more elsewhere', async () => {
+        const transport = new MockTransport({demo: true});
+        transport.result('serviceMessages.list', [
+            {
+                interfaceName: 'BidCos-RF',
+                address: 'LEQ0456789:0',
+                datapoint: 'LOWBAT',
+                value: true,
+                since: new Date(2026, 10, 20, 6, 30).getTime(),
+                sinceSource: 'system',
+            },
+            // the app's own first sight, as on a CCU: the mark reads as it always did
+            {
+                interfaceName: 'BidCos-RF',
+                address: 'KEQ0345678:0',
+                datapoint: 'STICKY_UNREACH',
+                value: true,
+                since: new Date(2026, 10, 20, 7, 0).getTime(),
+            },
+        ]);
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        const titleIn = async (address: string): Promise<string> => {
+            const cell = await screen.findByTestId(`msgs-${address}`);
+            await waitFor(() => {
+                expect(cell.querySelector('[title]')).not.toBeNull();
+            });
+            return cell.querySelector('[title]')?.getAttribute('title') ?? '';
+        };
+        const dated = await titleIn('LEQ0456789');
+        expect(dated).toContain('LOWBAT LEQ0456789:0');
+        // the date in the browser's own format, as everywhere in the app
+        expect(dated).toMatch(/, seit \S*2026 06:30/u);
+        expect(dated).toContain('Die Uhr des openccu-lite-Systems');
+        const undated = await titleIn('KEQ0345678');
+        expect(undated).not.toContain('seit');
+        expect(undated).not.toContain('openccu-lite');
+    });
+});
+
 describe('the service-message marks', () => {
     const messages: ServiceMessage[] = [
         {interfaceName: 'BidCos-RF', address: 'A:0', datapoint: 'LOWBAT', value: true, since: 0},
@@ -482,6 +522,33 @@ describe('the service-message marks', () => {
         {interfaceName: 'BidCos-RF', address: 'B:0', datapoint: 'LOWBAT', value: true, since: 0},
         {interfaceName: 'BidCos-RF', address: 'A:0', datapoint: 'INSTALL_TEST', value: true, since: 0},
     ];
+
+    it('task 68: carries the time only where the openccu-lite system gave it', () => {
+        const dated: ServiceMessage[] = [
+            {
+                interfaceName: 'HmIP-RF',
+                address: 'A:0',
+                datapoint: 'LOW_BAT',
+                value: true,
+                since: 5,
+                sinceSource: 'system',
+            },
+            {
+                interfaceName: 'HmIP-RF',
+                address: 'A:0',
+                datapoint: 'UNREACH',
+                value: true,
+                since: 6,
+                sinceSource: 'rega',
+            },
+            {interfaceName: 'HmIP-RF', address: 'A:0', datapoint: 'CONFIG_PENDING', value: true, since: 7},
+        ];
+        expect(serviceMarks('A', dated, 99).map((mark) => [mark.datapoint, mark.since])).toEqual([
+            ['UNREACH', undefined],
+            ['LOW_BAT', 5],
+            ['CONFIG_PENDING', undefined],
+        ]);
+    });
 
     it('puts the unreachable mark first, keeps two, and only takes the device it is asked for', () => {
         expect(serviceMarks('A', messages).map((mark) => mark.datapoint)).toEqual(['UNREACH', 'LOWBAT']);

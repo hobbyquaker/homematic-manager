@@ -60,6 +60,7 @@
         type TaxonomyId,
     } from '../lib/util/taxonomy.js';
     import type {AssignTarget} from '../lib/util/assignment.js';
+    import {formatDateTime} from '../lib/util/format.js';
 
     import AddLinkDialog from './links/AddLinkDialog.svelte';
     import SmokeGroupDialog from './devices/SmokeGroupDialog.svelte';
@@ -1225,7 +1226,7 @@
                             <ServiceBadge
                                 {mark}
                                 label={t(mark.label)}
-                                title={`${t(mark.label)} (${mark.datapoint} ${mark.address})${explanation === undefined ? '' : ` — ${t(explanation)}`}`}
+                                title={`${t(mark.label)} (${mark.datapoint} ${mark.address})${mark.since === undefined ? '' : `, ${t('since {time}', {time: formatDateTime(mark.since)})} (${t("The openccu-lite system's clock")})`}${explanation === undefined ? '' : ` — ${t(explanation)}`}`}
                             />
                             {#if offersRepair(mark.datapoint, !isBidcos)}
                                 <button

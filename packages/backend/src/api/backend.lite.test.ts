@@ -287,6 +287,52 @@ describe('the addon on an openccu-lite system (task 107)', () => {
             ),
         ).toBe(true);
     });
+
+    it("answers the system's times on the system itself, as on a remote connection (task 68)", async () => {
+        await fake.stop();
+        fake = new FakeBox({
+            token: 'olt_test',
+            interfaces: ['HmIP-RF', 'BidCos-RF'],
+            devices: DEVICES,
+            values: {
+                'HmIP-RF.ABC1:0.UNREACH': {
+                    value: true,
+                    ts: '2026-11-21T08:00:00.000Z',
+                    lc: '2026-11-20T06:30:00.000Z',
+                    confirmed: true,
+                },
+                'HmIP-RF.ABC1:1.STATE': {
+                    value: true,
+                    ts: '2026-11-21T07:00:00.000Z',
+                    lc: '2026-11-21T06:00:00.000Z',
+                    confirmed: true,
+                },
+            },
+            descriptions: {'HmIP-RF.ABC1:1': {STATE: {TYPE: 'BOOL', OPERATIONS: 7}}},
+            meta: {revision: 3, objects: {}, enums: {}},
+        });
+        await fake.start();
+        await fs.writeFile(path.join(tokenDir, 'hmm.api'), 'olt_test\n');
+        const h = await openOnSystem();
+        await h.backend.request('config.set', localConnection() as never);
+        await until(() => h.events.some((event) => event.name === 'devices.changed'));
+        expect((await h.backend.request('config.get')).connection.localRpc).toBe('lite');
+
+        expect(await h.backend.request('paramset.valueStates', 'HmIP-RF', 'ABC1:1')).toMatchObject({
+            STATE: {
+                ts: Date.parse('2026-11-21T07:00:00.000Z'),
+                lc: Date.parse('2026-11-21T06:00:00.000Z'),
+                confirmed: true,
+            },
+        });
+        fake.event('HmIP-RF', 'ABC1:0', 'UNREACH', true);
+        await until(() => h.events.some((event) => event.name === 'rpc.event'));
+        const messages = await h.backend.request('serviceMessages.list', 'HmIP-RF');
+        expect(messages.find((message) => message.datapoint === 'UNREACH')).toMatchObject({
+            since: Date.parse('2026-11-20T06:30:00.000Z'),
+            sinceSource: 'system',
+        });
+    });
 });
 
 describe('a remote openccu-lite connection (task 72)', () => {

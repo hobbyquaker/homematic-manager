@@ -179,14 +179,18 @@ connection state, and tries again on the next reconnect. It never fails to start
 refused a credential.
 
 **The system's clock.** The system keeps the time of every datapoint it stores (its state store):
-the last report and the last change. The app shows them on such a connection.
+the last report and the last change. The app shows them on such a connection, and on the system
+itself when the addon reaches the interfaces through lite-rpc (its default since 3.4.0; with the
+direct connection there are no such times).
 A VALUES dialog says *since …* beside a value — its last change, the tooltip adds the last report —
 and greys a value the system restored from its own file that no device has reported since the
 system started (*restored*). The service-message list dates a message by the last change of its
 datapoint instead of by the moment this app first saw it, so a restart of the app does not reset
 it; the tooltip of the *Since* cell says whose clock it is — the system's, the CCU's (*Erste
-Meldung*, on a CCU with ReGa) or this app's. The store keeps what the system chose to keep; a
-datapoint without a time there keeps this app's.
+Meldung*, on a CCU with ReGa) or this app's. The service-message marks in the device list say
+the same time in their tooltip (*since …*, the system's clock) where the system dates the message.
+The store keeps what the system chose to keep; a datapoint without a time there keeps this app's,
+and a CCU's marks read as before.
 
 **Two streams per token.** The app opens one stream for the events and one for the metadata
 store; the system allows two per token. A second installation must pair on its own — never copy

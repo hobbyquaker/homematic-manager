@@ -33,6 +33,12 @@ export interface ServiceMark {
     readonly label: string;
     /** The channel that reports it, for the tooltip. */
     readonly address: string;
+    /**
+     * Task 68: since when it stands, only where the openccu-lite system's state store says so (its
+     * last change). The app's own first sight and ReGa's first report are left to the message list,
+     * so a CCU's marks read as before.
+     */
+    readonly since?: number;
 }
 
 /**
@@ -111,7 +117,12 @@ export function serviceMarks(address: string, messages: readonly ServiceMessage[
         if (!mark || marks.some((known) => known.datapoint === message.datapoint)) {
             continue;
         }
-        marks.push({datapoint: message.datapoint, ...mark, address: message.address});
+        marks.push({
+            datapoint: message.datapoint,
+            ...mark,
+            address: message.address,
+            ...(message.sinceSource === 'system' ? {since: message.since} : {}),
+        });
     }
     const unreach = marks.some((mark) => mark.datapoint === 'UNREACH');
     return marks

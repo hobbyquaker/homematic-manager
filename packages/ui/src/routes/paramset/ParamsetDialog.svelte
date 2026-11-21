@@ -16,6 +16,7 @@
     import type {MultiSelectOption} from 'occulite-ui';
     import {getStores} from '../../lib/stores/context.js';
     import {isHmipInterface} from '../../lib/stores/suppression.js';
+    import {AUTO_DETECT_PARAM, isSet, offersAutoCalibration} from '../../lib/util/blindAutoCalibration.js';
     import {changedModeParameters, modeBlockingPeers, modeParameters} from '../../lib/util/channelModeLinks.js';
     import {coveredParameters, detectDeviceEditors, type EditorContext} from '../../lib/util/editors/index.js';
     import {
@@ -30,6 +31,7 @@
     } from '../../lib/util/paramsetForm.js';
 
     import LinkParamsetDialog from '../links/LinkParamsetDialog.svelte';
+    import BlindAutoCalibration from './BlindAutoCalibration.svelte';
     import EasyForm from './EasyForm.svelte';
     import DeviceEditors from './editors/DeviceEditors.svelte';
     import ParameterRow from './ParameterRow.svelte';
@@ -238,6 +240,48 @@
             void stores.meta.loadPresets();
         }
     });
+
+    /**
+     * The automatic calibration of an HmIP blind or shutter actuator, offered where the CCU offers
+     * it: the MASTER paramset has `ENDPOSITION_AUTO_DETECT` and it is on, and the channel's VALUES
+     * have `SELF_CALIBRATION`. The VALUES description is only asked for on a channel with that flag
+     * (and comes from the store's cache after the first time).
+     */
+    let calibrationValues = $state<ParamsetDescription | undefined>(undefined);
+    const autoDetect = $derived(open && paramset === 'MASTER' && description?.[AUTO_DETECT_PARAM] !== undefined);
+    $effect(() => {
+        if (!autoDetect) {
+            calibrationValues = undefined;
+            return;
+        }
+        const request = {interfaceName, address};
+        untrack(() => {
+            void stores.paramsets.describe(request.interfaceName, request.address, 'VALUES').then((found) => {
+                if (request.address === address && request.interfaceName === interfaceName) {
+                    calibrationValues = found;
+                }
+            });
+        });
+    });
+    const autoCalibration = $derived(
+        autoDetect && !expertView && offersAutoCalibration(description, merged(), calibrationValues),
+    );
+
+    /**
+     * A calibration run finished: the device has written the running times it measured, so MASTER
+     * is read again. Other edits stay as they are; an edited running time gives way to the measured one.
+     */
+    async function calibrated(): Promise<void> {
+        const request = {interfaceName, address, token: loadToken};
+        const values = await stores.paramsets.read(request.interfaceName, request.address, 'MASTER');
+        if (!values || request.token !== loadToken || paramset !== 'MASTER') {
+            return;
+        }
+        original = values;
+        edited = Object.fromEntries(
+            Object.entries(edited).filter(([name]) => !name.startsWith('REFERENCE_RUNNING_TIME_')),
+        );
+    }
     /** VALUES is the only paramset whose datapoints can be written one at a time. */
     const perDatapoint = $derived(paramset === 'VALUES');
     /** Multi-apply is a MASTER affair; 2.x offered its channel picker only there. */
@@ -330,23 +374,28 @@
         }
         const token = (loadToken += 1);
         const request = {interfaceName, address, paramset};
-        void stores.paramsets.open(request.interfaceName, request.address, request.paramset).then((loaded) => {
-            if (token !== loadToken) {
-                return;
-            }
-            description = loaded?.description;
-            original = loaded?.values ?? {};
-            valueStates = {};
-            if (request.paramset === 'VALUES') {
-                void loadValueStates(token);
-            }
-            edited = {};
-            results = [];
-            readBack = [];
-            targets = [];
-            writeAll = false;
-            expertView = false;
-        });
+        // untracked: `open` reads the store's description cache, and this must not run again when
+        // that cache fills for another paramset (the VALUES description the calibration row and the
+        // suppression rows ask for) - it read the device a second time and dropped an edit made meanwhile
+        void untrack(() => stores.paramsets.open(request.interfaceName, request.address, request.paramset)).then(
+            (loaded) => {
+                if (token !== loadToken) {
+                    return;
+                }
+                description = loaded?.description;
+                original = loaded?.values ?? {};
+                valueStates = {};
+                if (request.paramset === 'VALUES') {
+                    void loadValueStates(token);
+                }
+                edited = {};
+                results = [];
+                readBack = [];
+                targets = [];
+                writeAll = false;
+                expertView = false;
+            },
+        );
     });
 
     /**
@@ -686,6 +735,14 @@
         {/if}
 
         <DeviceEditors specs={shownEditors} values={merged()} {channelType} onchange={changeMany} />
+        {#if autoCalibration}
+            <BlindAutoCalibration
+                {interfaceName}
+                {address}
+                unsaved={!isSet(original[AUTO_DETECT_PARAM])}
+                onsuccess={() => void calibrated()}
+            />
+        {/if}
 
         {#if paramset === 'ROUTING_TABLE'}
             <!-- task 26: an HmIP router's table is read-only and numbered; a graph says more than rows -->

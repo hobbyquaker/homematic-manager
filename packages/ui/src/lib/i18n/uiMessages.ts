@@ -1429,6 +1429,38 @@ export const UI_MESSAGES: MessageCatalogue = {
         de: 'Keine: Die Schnittstellen werden über das lite-rpc dieses Systems erreicht; die Ereignisse kommen aus seinem Stream.',
         en: "None: the interfaces are reached through this system's lite-rpc; the events come from its stream.",
     },
+    // the automatic calibration run of an HmIP blind/shutter actuator, the CCU's "Auto Calibration" button
+    'Automatic calibration': {de: 'Automatische Kalibrierung', en: 'Automatic calibration'},
+    'Start calibration': {de: 'Kalibrierfahrt starten', en: 'Start calibration'},
+    'Stop calibration': {de: 'Kalibrierfahrt stoppen', en: 'Stop calibration'},
+    'Start the automatic calibration?': {
+        de: 'Automatische Kalibrierung starten?',
+        en: 'Start the automatic calibration?',
+    },
+    'The blind travels all the way to both end positions, and the device measures the running times and stores them. Make sure nothing is in its way. The slat time is not measured. The run can be stopped at any time.':
+        {
+            de: 'Der Behang fährt vollständig in beide Endlagen, das Gerät misst dabei die Fahrzeiten und speichert sie. Es darf nichts im Weg sein. Die Lamellenverstellzeit wird nicht gemessen. Die Fahrt lässt sich jederzeit stoppen.',
+            en: 'The blind travels all the way to both end positions, and the device measures the running times and stores them. Make sure nothing is in its way. The slat time is not measured. The run can be stopped at any time.',
+        },
+    'Calibration running…': {de: 'Kalibrierfahrt läuft…', en: 'Calibration running…'},
+    'Stopping the calibration…': {de: 'Kalibrierfahrt wird gestoppt…', en: 'Stopping the calibration…'},
+    'Calibration finished. The measured running times were read from the device.': {
+        de: 'Kalibrierfahrt beendet. Die gemessenen Fahrzeiten wurden vom Gerät gelesen.',
+        en: 'Calibration finished. The measured running times were read from the device.',
+    },
+    'Calibration stopped.': {de: 'Kalibrierfahrt gestoppt.', en: 'Calibration stopped.'},
+    'No result after 5 minutes. The calibration may have been stopped at the device.': {
+        de: 'Nach 5 Minuten kein Ergebnis. Die Kalibrierfahrt wurde möglicherweise am Gerät gestoppt.',
+        en: 'No result after 5 minutes. The calibration may have been stopped at the device.',
+    },
+    'The calibration could not be started.': {
+        de: 'Die Kalibrierfahrt konnte nicht gestartet werden.',
+        en: 'The calibration could not be started.',
+    },
+    'Write the change first: the device does not detect its end positions yet.': {
+        de: 'Zuerst die Änderung schreiben: Das Gerät erkennt seine Endlagen noch nicht selbst.',
+        en: 'Write the change first: the device does not detect its end positions yet.',
+    },
 };
 
 /** Core's catalogue plus the UI's own keys; the UI's entries win on a collision. */

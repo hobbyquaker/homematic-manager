@@ -6,6 +6,17 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
+## [Unreleased]
+
+### Added
+
+- **A blind or shutter actuator can be calibrated automatically from its channel settings.** The settings of the blind
+  channel of an HmIP actuator that detects its end positions itself (HmIP-BROLL, HmIP-BBL on a current firmware) have a
+  _Start calibration_ button, where the CCU's WebUI has its "Auto Calibration": after a question, the blind travels to
+  both end positions and the device measures the running times. The run can be stopped, and when it has finished the
+  measured times are read from the device. As on the CCU, the button is only there while _Automatic detection of the
+  end position_ is switched on. (openccu-lite/openccu-lite#24, @agross)
+
 ## [3.6.1] — 2026-11-21
 
 ### Fixed

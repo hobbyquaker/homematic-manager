@@ -22,7 +22,9 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 - **Since when a service message stands, in the device list too.** On openccu-lite the tooltip of a service-message
   mark in the device list says since when the message stands, from the system's own clock, as the service-message list
-  and the VALUES dialog already do. On a CCU the marks read as before.
+  and the VALUES dialog already do. An open VALUES dialog now follows the device: a new value and its _since_ appear as
+  the device reports them, instead of at the next read; a value being edited is left alone. On a CCU both read as
+  before.
 - **The central's radio module is treated like the central.** The own device of an HmIP-CCU3, an RPI-RF-MOD or an
   HmIP-RFUSB shows the CCU3 picture (the HmIP-RFUSB had none), cannot be deleted or replaced, and offers no settings
   dialog on the device or its channel, as in the WebUI; its duty cycle and carrier sense level stay visible.

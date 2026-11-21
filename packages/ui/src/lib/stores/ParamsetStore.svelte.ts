@@ -305,6 +305,28 @@ export class ParamsetStore {
     }
 
     /**
+     * Task 68: the events of one channel, datapoint and value, while a VALUES dialog shows the
+     * system's times for it. Answers the function that ends the subscription.
+     */
+    onChannelEvent(
+        interfaceName: string,
+        address: string,
+        handler: (datapoint: string, value: RpcValue) => void,
+    ): () => void {
+        return this.#transport.on('rpc.event', (record) => {
+            if (
+                record.method === 'event' &&
+                record.interfaceName === interfaceName &&
+                record.address === address &&
+                record.datapoint !== undefined &&
+                record.value !== undefined
+            ) {
+                handler(record.datapoint, record.value);
+            }
+        });
+    }
+
+    /**
      * Task 26 (openccu-lite 28.9): the service parameters of a channel whose messages the HmIP
      * server suppresses - eQ-3's `getSuppressedServiceMessages`, HmIP only. `undefined` when the
      * interface does not offer the method (BidCos, Homegear): the dialog then shows nothing, and

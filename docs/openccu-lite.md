@@ -184,7 +184,8 @@ itself when the addon reaches the interfaces through lite-rpc (its default since
 direct connection there are no such times).
 A VALUES dialog says *since …* beside a value — its last change, the tooltip adds the last report —
 and greys a value the system restored from its own file that no device has reported since the
-system started (*restored*). The service-message list dates a message by the last change of its
+system started (*restored*). While it is open it follows the channel's events, so a new value and
+its time appear as the device reports them (a value being edited is left alone). The service-message list dates a message by the last change of its
 datapoint instead of by the moment this app first saw it, so a restart of the app does not reset
 it; the tooltip of the *Since* cell says whose clock it is — the system's, the CCU's (*Erste
 Meldung*, on a CCU with ReGa) or this app's. The service-message marks in the device list say

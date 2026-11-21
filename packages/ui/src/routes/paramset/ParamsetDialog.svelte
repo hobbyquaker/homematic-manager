@@ -49,6 +49,9 @@
     const stores = getStores();
     const t = stores.i18n.t;
 
+    /** Task 68: how long after a channel's event its times are read again from the system's store. */
+    const VALUE_STATES_SETTLE_MS = 300;
+
     let description = $state<ParamsetDescription | undefined>(undefined);
     let original = $state<Paramset>({});
     /** Task 82: the state store's times of the VALUES, on a remote openccu-lite connection; `{}` elsewhere. */
@@ -537,6 +540,35 @@
         }
         return String(value);
     }
+
+    /**
+     * Task 68: while the dialog shows the openccu-lite system's times (a CCU answers none, and its
+     * dialog stays as it was), an event of the channel moves its value and its *since* along: the
+     * value at once - an edit the user made still wins over it - and the times from the store a
+     * moment later, once the system has filed the event.
+     */
+    const showsTimes = $derived(open && paramset === 'VALUES' && Object.keys(valueStates).length > 0);
+    $effect(() => {
+        if (!showsTimes) {
+            return;
+        }
+        const token = loadToken;
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        const off = stores.paramsets.onChannelEvent(interfaceName, address, (datapoint, value) => {
+            if (token !== loadToken) {
+                return;
+            }
+            if (description?.[datapoint] !== undefined) {
+                original = {...original, [datapoint]: value as ParamsetValue};
+            }
+            clearTimeout(timer);
+            timer = setTimeout(() => void loadValueStates(token), VALUE_STATES_SETTLE_MS);
+        });
+        return () => {
+            clearTimeout(timer);
+            off();
+        };
+    });
 
     /** Task 82: the times of the values just read, unless the dialog moved on meanwhile. */
     async function loadValueStates(token: number): Promise<void> {

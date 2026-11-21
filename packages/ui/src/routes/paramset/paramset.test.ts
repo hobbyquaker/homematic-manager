@@ -583,6 +583,79 @@ describe('the paramset dialog', () => {
         expect(restored.getAttribute('title')).toContain('seit dem Start des Systems hat es kein Gerät gemeldet');
     });
 
+    it("task 68: an event of the channel moves the value and its time along while the system's times show", async () => {
+        const lc = new Date(2026, 10, 21, 7, 15, 0).getTime();
+        let current = {ts: lc, lc, confirmed: true, source: 'event'};
+        transport.respond('paramset.valueStates', (_interfaceName, address) =>
+            address === 'MEQ0123456:1' ? {STATE: current} : {},
+        );
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
+        await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:1-VALUES'));
+        await waitFor(() => {
+            expect(screen.getByTestId('since-STATE').textContent).toMatch(/07:15:00$/);
+        });
+        const box = within(screen.getByTestId('param-STATE')).getByRole<HTMLInputElement>('checkbox');
+        const before = box.checked;
+        const reads = transport.countOf('paramset.valueStates');
+
+        // the system files the change, then the event arrives
+        const changed = new Date(2026, 10, 21, 8, 40, 0).getTime();
+        current = {ts: changed, lc: changed, confirmed: true, source: 'event'};
+        transport.emit('rpc.event', {
+            timestamp: changed,
+            interfaceName: 'BidCos-RF',
+            method: 'event',
+            address: 'MEQ0123456:1',
+            datapoint: 'STATE',
+            value: !before,
+        });
+        await waitFor(() => {
+            expect(box.checked).toBe(!before);
+        });
+        await waitFor(() => {
+            expect(screen.getByTestId('since-STATE').textContent).toMatch(/08:40:00$/);
+        });
+        expect(transport.countOf('paramset.valueStates')).toBe(reads + 1);
+
+        // another channel's event changes nothing here
+        transport.emit('rpc.event', {
+            timestamp: changed,
+            interfaceName: 'BidCos-RF',
+            method: 'event',
+            address: 'MEQ0123456:2',
+            datapoint: 'STATE',
+            value: before,
+        });
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        expect(box.checked).toBe(!before);
+        expect(transport.countOf('paramset.valueStates')).toBe(reads + 1);
+    });
+
+    it('task 68: an open VALUES dialog on a CCU stays as it was read when an event arrives', async () => {
+        await mountApp({transport, hash: '#/BidCos-RF/devices'});
+        const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;
+        await fireEvent.click(within(parent).getByRole('button', {name: expandRowName()}));
+        await fireEvent.click(screen.getByTestId('paramset-MEQ0123456:1-VALUES'));
+        await waitFor(() => {
+            expect(screen.getByTestId('set-STATE')).toBeTruthy();
+        });
+        const box = within(screen.getByTestId('param-STATE')).getByRole<HTMLInputElement>('checkbox');
+        const before = box.checked;
+        transport.emit('rpc.event', {
+            timestamp: 1,
+            interfaceName: 'BidCos-RF',
+            method: 'event',
+            address: 'MEQ0123456:1',
+            datapoint: 'STATE',
+            value: !before,
+        });
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        expect(box.checked).toBe(before);
+        expect(transport.countOf('paramset.valueStates')).toBe(1);
+    });
+
     it('shows no times where the connection answers none, as on a CCU (task 82)', async () => {
         await mountApp({transport, hash: '#/BidCos-RF/devices'});
         const parent = document.querySelector<HTMLElement>('[data-row-id="MEQ0123456"]')!;

@@ -6,7 +6,7 @@ component; the numbers in brackets are GitHub issues and pull requests.
 Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homematic-manager/releases);
 2.7.1 (2023-01-28) is the last 2.x release.
 
-## [Unreleased]
+## [3.7.0] — 2026-11-21
 
 ### Added
 
@@ -15,7 +15,13 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
   _Start calibration_ button, where the CCU's WebUI has its "Auto Calibration": after a question, the blind travels to
   both end positions and the device measures the running times. The run can be stopped, and when it has finished the
   measured times are read from the device. As on the CCU, the button is only there while _Automatic detection of the
-  end position_ is switched on. (openccu-lite/openccu-lite#24, @agross)
+  end position_ is switched on. Tested against the devices' descriptions in a simulator only, not yet on a real
+  device: feedback from a real run is welcome. (openccu-lite/openccu-lite#24, @agross)
+
+### Fixed
+
+- **A change made while a channel's settings dialog was still loading is no longer lost.** The dialog could read the
+  device's settings a second time while it loaded, and a value changed in between went back to the device's.
 
 ## [3.6.1] — 2026-11-21
 
@@ -2025,6 +2031,7 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
+[3.7.0]: https://github.com/hobbyquaker/homematic-manager/compare/v3.6.1...v3.7.0
 [3.6.1]: https://github.com/hobbyquaker/homematic-manager/compare/v3.6.0...v3.6.1
 [3.6.0]: https://github.com/hobbyquaker/homematic-manager/compare/v3.5.1...v3.6.0
 [3.5.1]: https://github.com/hobbyquaker/homematic-manager/compare/v3.5.0...v3.5.1

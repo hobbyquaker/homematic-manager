@@ -8,6 +8,8 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 
 ## [Unreleased]
 
+## [3.8.0] — 2026-11-22
+
 ### Added
 
 - **The end positions of an HmIP tubular motor can be calibrated by hand.** The values of the shutter channel of a
@@ -2067,6 +2069,7 @@ XML-RPC on `/RPC3` of port 2121, so a user-defined interface reaches it, but no 
 available to verify that against]; and the extended set of device-specific editors (universal light
 effects, RGBW/dual-white, alarm panel, the ESI energy meter, door locks).
 
+[3.8.0]: https://github.com/hobbyquaker/homematic-manager/compare/v3.7.1...v3.8.0
 [3.7.1]: https://github.com/hobbyquaker/homematic-manager/compare/v3.7.0...v3.7.1
 [3.7.0]: https://github.com/hobbyquaker/homematic-manager/compare/v3.6.1...v3.7.0
 [3.6.1]: https://github.com/hobbyquaker/homematic-manager/compare/v3.6.0...v3.6.1

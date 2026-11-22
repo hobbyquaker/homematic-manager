@@ -52,8 +52,8 @@
         {@const extra = foreign(field)}
         <div class="hmm-enum-row" data-testid={`enum-${field.param}`}>
             <div class="hmm-enum-label">
-                <span>{label(field.param)}</span>
-                <span class="hmm-enum-id">{field.param}</span>
+                <span class="hmm-enum-name">{label(field.param)}</span>
+                {#if label(field.param) !== field.param}<span class="hmm-enum-id">{field.param}</span>{/if}
             </div>
             <div class="hmm-enum-control">
                 <select
@@ -116,6 +116,11 @@
         min-width: 0;
     }
 
+    .hmm-enum-name,
+    .hmm-enum-id {
+        overflow-wrap: anywhere;
+    }
+
     .hmm-enum-id,
     .hmm-enum-raw {
         font-family: var(--hmm-font-mono);
@@ -140,5 +145,22 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+    }
+    /* B-106: on a phone the three columns do not fit - the label over the control, the rest under it */
+    @media (max-width: 599px) {
+        .hmm-enum-row {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 2px;
+            padding: 4px;
+        }
+
+        .hmm-enum-control {
+            flex-wrap: wrap;
+        }
+
+        .hmm-enum-meta {
+            align-items: flex-start;
+            justify-content: flex-start;
+        }
     }
 </style>

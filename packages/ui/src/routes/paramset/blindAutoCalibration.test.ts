@@ -192,6 +192,114 @@ describe('the automatic calibration of a blind channel', () => {
         expect(writes).toEqual(['SELF_CALIBRATION "START"']);
     });
 
+    // B-106 (#172): a real HmIP-BBL reported the result before hmipserver held the measured times
+    it('keeps reading MASTER until the measured times arrive, shows them in the open dialog, and marks nothing changed', async () => {
+        await open();
+        vi.useFakeTimers({shouldAdvanceTime: true});
+        await start();
+        await waitFor(() => {
+            expect(writes).toEqual(['SELF_CALIBRATION "START"']);
+        });
+        const reads = transport.countOf('paramset.get');
+        // the result first, the old running times still in MASTER
+        device.result = true;
+        await vi.advanceTimersByTimeAsync(1100);
+        await waitFor(() => {
+            expect(screen.getByTestId('blind-auto-calibration').getAttribute('data-state')).toBe('reading');
+        });
+        expect(screen.getByTestId('blind-auto-calibration-status').textContent).toContain('Warte, bis das Gerät');
+        expect(screen.getByTestId<HTMLButtonElement>('blind-auto-calibration-start').disabled).toBe(true);
+        expect(screen.getByTestId<HTMLInputElement>('blind-REFERENCE_RUNNING_TIME_TOP_BOTTOM-seconds').value).toBe(
+            '90',
+        );
+
+        // a few seconds later hmipserver has them
+        await vi.advanceTimersByTimeAsync(2000);
+        device.master = {
+            ...master,
+            REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE: 58,
+            REFERENCE_RUNNING_TIME_BOTTOM_TOP_VALUE: 61,
+        };
+        await vi.advanceTimersByTimeAsync(3000);
+        await waitFor(() => {
+            expect(screen.getByTestId('blind-auto-calibration').getAttribute('data-state')).toBe('success');
+        });
+        expect(screen.getByTestId<HTMLInputElement>('blind-REFERENCE_RUNNING_TIME_TOP_BOTTOM-seconds').value).toBe(
+            '58',
+        );
+        expect(screen.getByTestId<HTMLInputElement>('blind-REFERENCE_RUNNING_TIME_BOTTOM_TOP-seconds').value).toBe(
+            '61',
+        );
+        expect(screen.getByTestId('blind-auto-calibration-status').textContent).toContain(
+            'gemessenen Fahrzeiten wurden',
+        );
+        expect(transport.countOf('paramset.get')).toBeGreaterThan(reads + 1);
+        // and no more reads once they are there
+        const after = transport.countOf('paramset.get');
+        await vi.advanceTimersByTimeAsync(70_000);
+        expect(transport.countOf('paramset.get')).toBe(after);
+
+        // the reading is the device's state, not an edit: nothing to write
+        await fireEvent.click(screen.getByTestId('paramset-preview'));
+        await waitFor(() => {
+            expect(screen.getByTestId('preview-empty')).toBeTruthy();
+        });
+        expect(writes).toEqual(['SELF_CALIBRATION "START"']);
+    });
+
+    it('says so when the running times do not move within a minute after the result', async () => {
+        await open();
+        vi.useFakeTimers({shouldAdvanceTime: true});
+        await start();
+        await waitFor(() => {
+            expect(writes).toEqual(['SELF_CALIBRATION "START"']);
+        });
+        device.result = true;
+        await vi.advanceTimersByTimeAsync(1100);
+        await waitFor(() => {
+            expect(screen.getByTestId('blind-auto-calibration').getAttribute('data-state')).toBe('reading');
+        });
+        await vi.advanceTimersByTimeAsync(61_000);
+        await waitFor(() => {
+            expect(screen.getByTestId('blind-auto-calibration').getAttribute('data-state')).toBe('success');
+        });
+        expect(screen.getByTestId('blind-auto-calibration-status').textContent).toContain('weiterhin die bisherigen');
+        expect(screen.getByTestId<HTMLButtonElement>('blind-auto-calibration-start').disabled).toBe(false);
+    });
+
+    it('reads at once when the device sends an event while the times are awaited', async () => {
+        await open();
+        vi.useFakeTimers({shouldAdvanceTime: true});
+        await start();
+        await waitFor(() => {
+            expect(writes).toEqual(['SELF_CALIBRATION "START"']);
+        });
+        device.result = true;
+        await vi.advanceTimersByTimeAsync(1100);
+        await waitFor(() => {
+            expect(screen.getByTestId('blind-auto-calibration').getAttribute('data-state')).toBe('reading');
+        });
+        // between two scheduled reads: hmipserver took the configuration in and says so on channel 0
+        await vi.advanceTimersByTimeAsync(4100);
+        const reads = transport.countOf('paramset.get');
+        device.master = {...master, REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE: 57};
+        transport.emit('rpc.event', {
+            timestamp: Date.now(),
+            interfaceName: 'BidCos-RF',
+            method: 'event',
+            address: 'MEQ0123456:0',
+            datapoint: 'CONFIG_PENDING',
+            value: false,
+        });
+        await waitFor(() => {
+            expect(screen.getByTestId('blind-auto-calibration').getAttribute('data-state')).toBe('success');
+        });
+        expect(transport.countOf('paramset.get')).toBe(reads + 1);
+        expect(screen.getByTestId<HTMLInputElement>('blind-REFERENCE_RUNNING_TIME_TOP_BOTTOM-seconds').value).toBe(
+            '57',
+        );
+    });
+
     it('sends START, STOP, START when an earlier run left the result true', async () => {
         device.result = true;
         transport.respond('value.set', (_interfaceName, _address, parameter, value) => {

@@ -220,7 +220,7 @@
     data-testid={`param-${field.name}`}
 >
     <div class="hmm-param-label">
-        <span title={field.name}>{label}</span>
+        <span class="hmm-param-name" title={field.name}>{label}</span>
         {#if translated}<span class="hmm-param-id">{field.name}</span>{/if}
     </div>
 
@@ -403,6 +403,12 @@
         grid-column: 1;
         flex-direction: column;
         min-width: 0;
+    }
+
+    /* B-106: a label longer than its column wraps; a raw name, which has no spaces, breaks anywhere */
+    .hmm-param-name,
+    .hmm-param-id {
+        overflow-wrap: anywhere;
     }
 
     .hmm-param-id {

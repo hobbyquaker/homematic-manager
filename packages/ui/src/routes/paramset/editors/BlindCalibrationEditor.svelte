@@ -3,6 +3,7 @@
     import {numericBound} from '@homematic-manager/core';
 
     import {
+        BLIND_RUNNING_TIME_LABELS,
         blindRawValue,
         blindSeconds,
         formatSeconds,
@@ -30,8 +31,14 @@
     /** The running times the encoding had to round; the row then says what the device will do. */
     let inexact = $state<Record<string, number>>({});
 
+    /**
+     * The CCU's label, else the app's own for a running time (B-106); a parameter nobody translated
+     * keeps its raw name, printed once (the second line is only there under a real label).
+     */
     function label(param: string): string {
-        return stores.meta.parameterLabel(param, channelType);
+        const found = stores.meta.parameterLabel(param, channelType);
+        const own = BLIND_RUNNING_TIME_LABELS[param];
+        return found === param && own !== undefined ? t(own) : found;
     }
 
     function changeSeconds(entry: BlindRunningTime, raw: string): void {
@@ -71,8 +78,8 @@
         {@const current = blindSeconds(entry, values)}
         <div class="hmm-blind-row" data-testid={`blind-${entry.id}`}>
             <div class="hmm-blind-label">
-                <span>{label(entry.id)}</span>
-                <span class="hmm-blind-id">{entry.id}</span>
+                <span class="hmm-blind-name">{label(entry.id)}</span>
+                {#if label(entry.id) !== entry.id}<span class="hmm-blind-id">{entry.id}</span>{/if}
             </div>
             <div class="hmm-blind-control">
                 <input
@@ -103,8 +110,8 @@
     {#each spec.delays as entry (entry.param)}
         <div class="hmm-blind-row" data-testid={`blind-${entry.param}`}>
             <div class="hmm-blind-label">
-                <span>{label(entry.param)}</span>
-                <span class="hmm-blind-id">{entry.param}</span>
+                <span class="hmm-blind-name">{label(entry.param)}</span>
+                {#if label(entry.param) !== entry.param}<span class="hmm-blind-id">{entry.param}</span>{/if}
             </div>
             <div class="hmm-blind-control">
                 <input
@@ -132,8 +139,8 @@
     {#each spec.extras as entry (entry.param)}
         <div class="hmm-blind-row" data-testid={`blind-${entry.param}`}>
             <div class="hmm-blind-label">
-                <span>{label(entry.param)}</span>
-                <span class="hmm-blind-id">{entry.param}</span>
+                <span class="hmm-blind-name">{label(entry.param)}</span>
+                {#if label(entry.param) !== entry.param}<span class="hmm-blind-id">{entry.param}</span>{/if}
             </div>
             <div class="hmm-blind-control">
                 {#if entry.description.TYPE === 'BOOL'}
@@ -195,12 +202,16 @@
         min-width: 0;
     }
 
+    /* B-106: a long label wraps instead of running under the input; a raw name breaks anywhere */
+    .hmm-blind-name {
+        overflow-wrap: anywhere;
+    }
+
     .hmm-blind-id {
         font-family: var(--hmm-font-mono);
         font-size: var(--hmm-font-size-small);
         color: var(--hmm-fg-faint);
-        overflow: hidden;
-        text-overflow: ellipsis;
+        overflow-wrap: anywhere;
     }
 
     .hmm-blind-control {
@@ -234,5 +245,22 @@
 
     .hmm-blind-warn {
         color: var(--hmm-warn);
+    }
+    /* B-106: on a phone the three columns do not fit - the label over the control, the rest under it */
+    @media (max-width: 599px) {
+        .hmm-blind-row {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 2px;
+            padding: 4px;
+        }
+
+        .hmm-blind-control {
+            flex-wrap: wrap;
+        }
+
+        .hmm-blind-meta {
+            align-items: flex-start;
+            justify-content: flex-start;
+        }
     }
 </style>

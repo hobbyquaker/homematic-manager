@@ -5,6 +5,7 @@
         startAutoCalibration,
         type CalibrationOutcome,
         type CalibrationRun,
+        type MeasuredOutcome,
     } from '../../lib/util/blindAutoCalibration.js';
 
     interface Props {
@@ -15,8 +16,11 @@
          * row is there, as on the CCU, and the button waits for the write.
          */
         unsaved?: boolean;
-        /** A run finished: the device has stored the running times it measured. */
-        onsuccess: () => void;
+        /**
+         * A run finished: the device has measured the running times, and the dialog reads them until
+         * they arrive (B-106). The row shows the run as reading meanwhile, and then how that ended.
+         */
+        onsuccess: () => Promise<MeasuredOutcome>;
     }
 
     let {interfaceName, address, unsaved = false, onsuccess}: Props = $props();
@@ -28,7 +32,12 @@
     let run = $state.raw<CalibrationRun | undefined>(undefined);
     let stopping = $state(false);
     let outcome = $state<CalibrationOutcome | undefined>(undefined);
+    /** After a successful run: reading the measured times (`reading`), then what the reading found. */
+    let measured = $state<MeasuredOutcome | 'reading' | undefined>(undefined);
+    /** Bumped by every start and by the dialog moving on, so a late reading of an old run is ignored. */
+    let generation = 0;
 
+    const reading = $derived(measured === 'reading');
     const running = $derived(run !== undefined);
 
     /**
@@ -57,6 +66,8 @@
             return;
         }
         outcome = undefined;
+        measured = undefined;
+        const mine = (generation += 1);
         const started = startAutoCalibration(rpc({interfaceName, address}));
         run = started;
         void started.done.then((result) => {
@@ -67,7 +78,12 @@
             stopping = false;
             outcome = result;
             if (result === 'success') {
-                onsuccess();
+                measured = 'reading';
+                void onsuccess().then((found) => {
+                    if (generation === mine) {
+                        measured = found;
+                    }
+                });
             }
         });
     }
@@ -85,6 +101,8 @@
     function abandon(): void {
         const current = run;
         run = undefined;
+        generation += 1;
+        measured = undefined;
         stopping = false;
         current?.abandon();
     }
@@ -106,7 +124,11 @@
         }
         switch (outcome) {
             case 'success':
-                return t('Calibration finished. The measured running times were read from the device.');
+                return measured === 'reading'
+                    ? t('Calibration finished. Waiting for the device to report the measured running times…')
+                    : measured === 'unchanged'
+                      ? t('Calibration finished. The device still reports the previous running times.')
+                      : t('Calibration finished. The measured running times were read from the device.');
             case 'stopped':
                 return t('Calibration stopped.');
             case 'timeout':
@@ -125,7 +147,11 @@
     while the run is under way, and one line that says how it ended. The blind travels to both end
     positions, so the start asks first - in the app's own dialog.
 -->
-<div class="hmm-autocal" data-testid="blind-auto-calibration" data-state={running ? 'running' : (outcome ?? 'idle')}>
+<div
+    class="hmm-autocal"
+    data-testid="blind-auto-calibration"
+    data-state={running ? 'running' : reading ? 'reading' : (outcome ?? 'idle')}
+>
     <div class="hmm-autocal-label">
         <span>{t('Automatic calibration')}</span>
         <span class="hmm-autocal-id">SELF_CALIBRATION</span>
@@ -144,7 +170,7 @@
                 type="button"
                 class="hmm-button hmm-autocal-button"
                 data-testid="blind-auto-calibration-start"
-                disabled={unsaved}
+                disabled={unsaved || reading}
                 onclick={() => (confirmOpen = true)}>{t('Start calibration')}</button
             >
         {/if}
@@ -153,7 +179,9 @@
         <div class="hmm-autocal-status" role="status" data-testid="blind-auto-calibration-status" title={status}>
             {status}
         </div>
-        <span class="hmm-autocal-bar" class:hmm-autocal-active={running} aria-hidden="true"><span></span></span>
+        <span class="hmm-autocal-bar" class:hmm-autocal-active={running || reading} aria-hidden="true"
+            ><span></span></span
+        >
     </div>
 </div>
 
@@ -296,5 +324,16 @@
     .hmm-autocal-help {
         margin: 0;
         color: var(--hmm-fg-muted);
+    }
+    /* B-106: on a phone the label goes over the button, the button and the status share the line below */
+    @media (max-width: 599px) {
+        .hmm-autocal {
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 4px 8px;
+        }
+
+        .hmm-autocal-label {
+            grid-column: 1 / -1;
+        }
     }
 </style>

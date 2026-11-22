@@ -298,3 +298,99 @@ test('no button while ENDPOSITION_AUTO_DETECT is off, and none on a firmware wit
     await expect(page.getByTestId('blind-auto-calibration')).toBeVisible();
     expect(writes).toEqual([]);
 });
+
+test('#172: the measured times reach hmipserver seconds after the result - the open dialog shows them', async ({
+    page,
+}) => {
+    const sim = await start();
+    const channel = `${BBL}:3`;
+    await openMaster(page, BBL);
+    const row = page.getByTestId('blind-auto-calibration');
+    const rowBox = await row.boundingBox();
+    const seconds = page.getByTestId('blind-REFERENCE_RUNNING_TIME_TOP_BOTTOM-seconds');
+    const before = await seconds.inputValue();
+
+    await page.getByTestId('blind-auto-calibration-start').click();
+    await page.getByTestId('blind-auto-calibration-confirm').click();
+    await expect.poll(() => writes).toEqual([`${channel} START`]);
+
+    // the real HmIP-BBL: the result first, while MASTER still holds the old running times ...
+    sim.setValue('hmip', channel, 'SELF_CALIBRATION_RESULT', true, {internal: true});
+    await expect(row).toHaveAttribute('data-state', 'reading');
+    await expect(page.getByTestId('blind-auto-calibration-status')).toContainText('Waiting for the device');
+    await expect(page.getByTestId('blind-auto-calibration-start')).toBeDisabled();
+    expect(await row.boundingBox()).toEqual(rowBox);
+    await page.waitForTimeout(2500);
+    await expect(seconds).toHaveValue(before);
+
+    // ... and the measured ones a few seconds later
+    sim.putParamset('hmip', channel, 'MASTER', {
+        REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT: 0,
+        REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE: 5878,
+    });
+    await expect(seconds).toHaveValue('58.78', {timeout: 10_000});
+    await expect(row).toHaveAttribute('data-state', 'success');
+    await expect(page.getByTestId('blind-auto-calibration-status')).toHaveText(
+        'Calibration finished. The measured running times were read from the device.',
+    );
+    expect(await row.boundingBox()).toEqual(rowBox);
+
+    // the reading is the device's state, not an edit of the user's
+    await page.getByTestId('paramset-preview').click();
+    await expect(page.getByTestId('preview-empty')).toBeVisible();
+    expect(writes).toEqual([`${channel} START`]);
+});
+
+/**
+ * #172: the running-time rows read "REFERENCE_RUNNING_TIME_TOP_BOTT…" - the raw name as the title, cut off by the
+ * input, over the same raw name. The WebUI's labels now, the raw name only as the second line, and no label of the
+ * block runs under its control - on a desktop and on a phone, in both themes (the screenshots are attachments).
+ */
+for (const theme of ['light', 'dark'] as const) {
+    for (const width of [1280, 390]) {
+        test(`the calibration block's labels are whole at ${String(width)} px, ${theme}`, async ({page}, testInfo) => {
+            await start();
+            await page.setViewportSize({width, height: 900});
+            await page.emulateMedia({colorScheme: theme});
+            await page.addInitScript((value) => {
+                window.localStorage.setItem('hmm.theme', value);
+            }, theme);
+            await openMaster(page, BBL);
+            await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+            const block = page.getByTestId('editor-blind-calibration');
+            await expect(block).toBeVisible();
+
+            const top = page.getByTestId('blind-REFERENCE_RUNNING_TIME_TOP_BOTTOM');
+            await expect(top.locator('.hmm-blind-name')).toHaveText('Running time top to bottom');
+            await expect(top.locator('.hmm-blind-id')).toHaveText('REFERENCE_RUNNING_TIME_TOP_BOTTOM');
+            await expect(
+                page.getByTestId('blind-REFERENCE_RUNNING_TIME_BOTTOM_TOP').locator('.hmm-blind-name'),
+            ).toHaveText('Running time bottom to top');
+
+            const rows = page.locator('.hmm-blind-row, .hmm-autocal');
+            expect(await rows.count()).toBeGreaterThan(3);
+            const problems = await rows.evaluateAll((elements) =>
+                elements.flatMap((element) => {
+                    const label = element.firstElementChild as HTMLElement;
+                    const control = label.nextElementSibling as HTMLElement;
+                    const found: string[] = [];
+                    const name = label.textContent?.trim().slice(0, 40) ?? '';
+                    for (const part of label.children) {
+                        if (part.scrollWidth > part.clientWidth + 1) found.push(`${name}: cut off`);
+                    }
+                    const a = label.getBoundingClientRect();
+                    const b = control.getBoundingClientRect();
+                    // side by side, or the control on a line of its own below
+                    if (a.right > b.left + 1 && a.bottom > b.top + 1) found.push(`${name}: under its control`);
+                    if (element.scrollWidth > element.clientWidth + 1) found.push(`${name}: wider than the dialog`);
+                    return found;
+                }),
+            );
+            expect(problems).toEqual([]);
+            await block.screenshot({path: testInfo.outputPath(`blind-calibration-${String(width)}-${theme}.png`)});
+            await page
+                .getByTestId('blind-auto-calibration')
+                .screenshot({path: testInfo.outputPath(`blind-auto-calibration-${String(width)}-${theme}.png`)});
+        });
+    }
+}

@@ -237,3 +237,111 @@ export function startAutoCalibration(rpc: CalibrationRpc, options: CalibrationOp
         },
     };
 }
+
+/**
+ * After a run: when to read MASTER again, in milliseconds after the end of the run. A real HmIP-BBL
+ * (homematic-manager#172) reports the result before hmipserver holds the running times it measured:
+ * a read at the moment of the result still answered the old ones, a reopen of the dialog seconds
+ * later the new ones. So MASTER is read at once and then again, more and more rarely, until the
+ * running times move - for a minute at most.
+ */
+export const MEASURED_READ_SCHEDULE_MS: readonly number[] = [
+    0, 1000, 2000, 3000, 5000, 8000, 12_000, 17_000, 23_000, 30_000, 40_000, 50_000, 60_000,
+];
+
+/** The MASTER parameters a run writes: the running times, in either encoding (see blindCalibration.ts). */
+export function isRunningTimeParam(name: string): boolean {
+    return name.startsWith('REFERENCE_RUNNING_TIME_');
+}
+
+/** Whether the running times of two readings of MASTER differ. */
+export function runningTimesDiffer(before: Readonly<Paramset>, after: Readonly<Paramset>): boolean {
+    const names = new Set([...Object.keys(before), ...Object.keys(after)].filter(isRunningTimeParam));
+    return [...names].some((name) => before[name] !== after[name]);
+}
+
+/**
+ * How the wait for the measured times ended: they arrived (`changed`), the window passed with the old
+ * ones still there (`unchanged` - the run may have measured the same, or the device has not reported
+ * yet), or the dialog went away (`abandoned`).
+ */
+export type MeasuredOutcome = 'changed' | 'unchanged' | 'abandoned';
+
+export interface MeasuredReadOptions {
+    /** MASTER as the dialog held it before the run. */
+    readonly baseline: Readonly<Paramset>;
+    /** `getParamset MASTER`; `undefined` on a failure (counts as "not yet"). */
+    read(): Promise<Paramset | undefined>;
+    /** Every reading, as it arrives - the dialog shows it. */
+    onread(values: Paramset): void;
+    /** `false` once the dialog closed or moved on: no further read. */
+    current(): boolean;
+    /**
+     * Events of the device that may mean hmipserver learned something (`CONFIG_PENDING` and the
+     * like): each one brings the next read forward. Answers the function that ends the subscription.
+     */
+    onWake?(handler: () => void): () => void;
+    readonly schedule?: readonly number[];
+}
+
+/**
+ * Reads MASTER after a finished run until the running times differ from {@link MeasuredReadOptions.baseline},
+ * on {@link MEASURED_READ_SCHEDULE_MS} or sooner when the device sends an event. Never rejects; one read at a time.
+ */
+export async function readMeasuredTimes(options: MeasuredReadOptions): Promise<MeasuredOutcome> {
+    const schedule = options.schedule ?? MEASURED_READ_SCHEDULE_MS;
+    const start = Date.now();
+    let wake: (() => void) | undefined;
+    let woken = false;
+    const unsubscribe = options.onWake?.(() => {
+        woken = true;
+        wake?.();
+    });
+    /** Asked after every await: an event sets the flag from outside, which the compiler's narrowing cannot see. */
+    const isWoken = (): boolean => woken;
+    try {
+        // the readings are due at the times of the schedule; an event brings the next one forward
+        // without using up the schedule, and the window ends with its last entry
+        let next = 0;
+        for (;;) {
+            const elapsed = Date.now() - start;
+            while (next < schedule.length && (schedule[next] ?? 0) < elapsed) {
+                next++;
+            }
+            const due = schedule[next];
+            if (due === undefined && !isWoken()) {
+                return 'unchanged';
+            }
+            const delay = due === undefined ? 0 : due - elapsed;
+            if (delay > 0 && !isWoken()) {
+                await new Promise<void>((resolve) => {
+                    const timer = setTimeout(resolve, delay);
+                    wake = () => {
+                        clearTimeout(timer);
+                        resolve();
+                    };
+                });
+                wake = undefined;
+            }
+            if (!isWoken()) {
+                next++;
+            }
+            woken = false;
+            if (!options.current()) {
+                return 'abandoned';
+            }
+            const values = await options.read();
+            if (!options.current()) {
+                return 'abandoned';
+            }
+            if (values) {
+                options.onread(values);
+                if (runningTimesDiffer(options.baseline, values)) {
+                    return 'changed';
+                }
+            }
+        }
+    } finally {
+        unsubscribe?.();
+    }
+}

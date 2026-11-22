@@ -3,10 +3,15 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {
     CALIBRATION_POLL_MS,
     CALIBRATION_TIMEOUT_MS,
+    MEASURED_READ_SCHEDULE_MS,
+    isRunningTimeParam,
     isSet,
     offersAutoCalibration,
+    readMeasuredTimes,
+    runningTimesDiffer,
     startAutoCalibration,
     type CalibrationRpc,
+    type MeasuredReadOptions,
 } from './blindAutoCalibration.js';
 
 /**
@@ -346,5 +351,156 @@ describe('the calibration sequence', () => {
         await expect(run.done).resolves.toBe('success');
         await run.stop();
         expect(blind.writes()).toEqual(['START']);
+    });
+});
+
+/**
+ * B-106 (#172): a real HmIP-BBL reported the result before hmipserver held the measured running times, so the one
+ * read at that moment answered the old ones. The reading goes on until they move.
+ */
+describe('reading the measured running times after a run', () => {
+    beforeEach(() => {
+        vi.useFakeTimers();
+    });
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    const OLD = {REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE: 5870, REFERENCE_RUNNING_TIME_TOP_BOTTOM_UNIT: 0, X: 1};
+    const NEW = {...OLD, REFERENCE_RUNNING_TIME_TOP_BOTTOM_VALUE: 5878};
+
+    /** hmipserver's MASTER: the old times until `arrive` - then the measured ones. */
+    function server(options: Partial<MeasuredReadOptions> = {}, start: {arrived?: boolean; fail?: boolean} = {}) {
+        // the first read goes out at once, so what it sees is set here
+        const state = {
+            values: {...(start.arrived === true ? NEW : OLD)} as Record<string, number>,
+            fail: start.fail === true,
+            current: true,
+        };
+        const readings: Record<string, number>[] = [];
+        const wakes = new Set<() => void>();
+        const read = vi.fn(async () => (state.fail ? undefined : {...state.values}));
+        const done = readMeasuredTimes({
+            baseline: OLD,
+            read,
+            onread: (values) => readings.push(values as Record<string, number>),
+            current: () => state.current,
+            onWake: (handler) => {
+                wakes.add(handler);
+                return () => wakes.delete(handler);
+            },
+            ...options,
+        });
+        const arrive = (): void => {
+            state.values = {...NEW};
+        };
+        const wake = (): void => {
+            for (const handler of [...wakes]) handler();
+        };
+        return {state, readings, read, done, arrive, wake, wakes};
+    }
+
+    it('knows the running-time parameters in both encodings, and compares only them', () => {
+        expect(isRunningTimeParam('REFERENCE_RUNNING_TIME_TOP_BOTTOM')).toBe(true);
+        expect(isRunningTimeParam('REFERENCE_RUNNING_TIME_SLATS_VALUE')).toBe(true);
+        expect(isRunningTimeParam('REFERENCE_RUN_COUNTER')).toBe(false);
+        expect(runningTimesDiffer(OLD, {...OLD, X: 2})).toBe(false);
+        expect(runningTimesDiffer(OLD, NEW)).toBe(true);
+        expect(runningTimesDiffer({}, {REFERENCE_RUNNING_TIME_SLATS: 1})).toBe(true);
+    });
+
+    it('reads at once and ends there when the times have already moved', async () => {
+        const sim = server({}, {arrived: true});
+        await vi.advanceTimersByTimeAsync(0);
+        await expect(sim.done).resolves.toBe('changed');
+        expect(sim.read).toHaveBeenCalledTimes(1);
+        expect(sim.readings).toEqual([NEW]);
+        expect(sim.wakes.size).toBe(0);
+    });
+
+    it('reads again until the measured times arrive, and shows every reading', async () => {
+        const sim = server();
+        await vi.advanceTimersByTimeAsync(0);
+        expect(sim.read).toHaveBeenCalledTimes(1);
+        await vi.advanceTimersByTimeAsync(999);
+        expect(sim.read).toHaveBeenCalledTimes(1);
+        await vi.advanceTimersByTimeAsync(1);
+        expect(sim.read).toHaveBeenCalledTimes(2);
+        // the device reports 2.5 s after the result: the reading at 3 s sees it
+        await vi.advanceTimersByTimeAsync(1500);
+        sim.arrive();
+        await vi.advanceTimersByTimeAsync(1000);
+        await expect(sim.done).resolves.toBe('changed');
+        expect(sim.read).toHaveBeenCalledTimes(4);
+        expect(sim.readings.at(-1)).toEqual(NEW);
+        expect(sim.readings.slice(0, -1)).toEqual([OLD, OLD, OLD]);
+    });
+
+    it('reads at once on an event of the device, without using up the schedule', async () => {
+        const sim = server();
+        await vi.advanceTimersByTimeAsync(0);
+        await vi.advanceTimersByTimeAsync(1000);
+        expect(sim.read).toHaveBeenCalledTimes(2);
+        // an event at 1.2 s (CONFIG_PENDING, say) that comes before the new times: one extra read, the 2-s one stays
+        await vi.advanceTimersByTimeAsync(200);
+        sim.wake();
+        await vi.advanceTimersByTimeAsync(0);
+        expect(sim.read).toHaveBeenCalledTimes(3);
+        await vi.advanceTimersByTimeAsync(799);
+        expect(sim.read).toHaveBeenCalledTimes(3);
+        await vi.advanceTimersByTimeAsync(1);
+        expect(sim.read).toHaveBeenCalledTimes(4);
+        // the event that comes with the new times ends it at once
+        sim.arrive();
+        sim.wake();
+        await vi.advanceTimersByTimeAsync(0);
+        await expect(sim.done).resolves.toBe('changed');
+        expect(sim.read).toHaveBeenCalledTimes(5);
+    });
+
+    it('gives up after the last entry of the schedule when the times stay the same', async () => {
+        const sim = server();
+        const last = MEASURED_READ_SCHEDULE_MS.at(-1) ?? 0;
+        await vi.advanceTimersByTimeAsync(last);
+        await expect(sim.done).resolves.toBe('unchanged');
+        expect(sim.read).toHaveBeenCalledTimes(MEASURED_READ_SCHEDULE_MS.length);
+        expect(sim.wakes.size).toBe(0);
+        await vi.advanceTimersByTimeAsync(60_000);
+        expect(sim.read).toHaveBeenCalledTimes(MEASURED_READ_SCHEDULE_MS.length);
+    });
+
+    it('takes a failed read as "not yet"', async () => {
+        const sim = server({schedule: [0, 1000]}, {fail: true});
+        await vi.advanceTimersByTimeAsync(0);
+        expect(sim.readings).toEqual([]);
+        sim.state.fail = false;
+        sim.arrive();
+        await vi.advanceTimersByTimeAsync(1000);
+        await expect(sim.done).resolves.toBe('changed');
+        expect(sim.readings).toEqual([NEW]);
+    });
+
+    it('stops when the dialog goes away, also with a read under way', async () => {
+        const sim = server();
+        await vi.advanceTimersByTimeAsync(0);
+        sim.state.current = false;
+        await vi.advanceTimersByTimeAsync(1000);
+        await expect(sim.done).resolves.toBe('abandoned');
+        expect(sim.read).toHaveBeenCalledTimes(1);
+
+        let answer: (values: Record<string, number>) => void = () => undefined;
+        const state = {current: true};
+        const readings: unknown[] = [];
+        const done = readMeasuredTimes({
+            baseline: OLD,
+            read: () => new Promise((resolve) => (answer = resolve)),
+            onread: (values) => readings.push(values),
+            current: () => state.current,
+        });
+        await vi.advanceTimersByTimeAsync(0);
+        state.current = false;
+        answer(NEW);
+        await expect(done).resolves.toBe('abandoned');
+        expect(readings).toEqual([]);
     });
 });

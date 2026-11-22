@@ -23,7 +23,7 @@
 <!-- A row of the parameter table (task 77, app.css): the name in the label column, the checkbox as the control. -->
 <div class="hmm-param hmm-param-table-row" class:hmm-param-changed={changed} data-testid={`suppress-row-${name}`}>
     <div class="hmm-param-label">
-        <span>{name}</span>
+        <span class="hmm-suppress-name">{name}</span>
     </div>
 
     <div class="hmm-param-control">
@@ -40,6 +40,10 @@
 </div>
 
 <style>
+    .hmm-suppress-name {
+        overflow-wrap: anywhere;
+    }
+
     .hmm-param {
         align-items: center;
         padding: 2px 4px;

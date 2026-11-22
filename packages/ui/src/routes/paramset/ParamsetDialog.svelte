@@ -16,7 +16,16 @@
     import type {MultiSelectOption} from 'occulite-ui';
     import {getStores} from '../../lib/stores/context.js';
     import {isHmipInterface} from '../../lib/stores/suppression.js';
-    import {AUTO_DETECT_PARAM, isSet, offersAutoCalibration} from '../../lib/util/blindAutoCalibration.js';
+    import {
+        AUTO_DETECT_PARAM,
+        CALIBRATION_RESULT_PARAM,
+        isRunningTimeParam,
+        isSet,
+        offersAutoCalibration,
+        readMeasuredTimes,
+        runningTimesDiffer,
+        type MeasuredOutcome,
+    } from '../../lib/util/blindAutoCalibration.js';
     import {offersManualCalibration} from '../../lib/util/shutterManualCalibration.js';
     import {changedModeParameters, modeBlockingPeers, modeParameters} from '../../lib/util/channelModeLinks.js';
     import {coveredParameters, detectDeviceEditors, type EditorContext} from '../../lib/util/editors/index.js';
@@ -270,19 +279,48 @@
     );
 
     /**
-     * A calibration run finished: the device has written the running times it measured, so MASTER
-     * is read again. Other edits stay as they are; an edited running time gives way to the measured one.
+     * A calibration run finished: the device has measured the running times, so MASTER is read again
+     * until they show up (B-106: hmipserver holds them a few seconds after the result, so one read at
+     * the moment of the result still answered the old ones). Every reading replaces the device's values
+     * the dialog compares against; other edits stay as they are, an edited running time gives way to the
+     * measured one - nothing becomes "changed" by the reading itself.
      */
-    async function calibrated(): Promise<void> {
+    function calibrated(): Promise<MeasuredOutcome> {
         const request = {interfaceName, address, token: loadToken};
-        const values = await stores.paramsets.read(request.interfaceName, request.address, 'MASTER');
-        if (!values || request.token !== loadToken || paramset !== 'MASTER') {
-            return;
-        }
-        original = values;
-        edited = Object.fromEntries(
-            Object.entries(edited).filter(([name]) => !name.startsWith('REFERENCE_RUNNING_TIME_')),
-        );
+        const device = request.address.split(':')[0] ?? request.address;
+        let first = true;
+        return readMeasuredTimes({
+            baseline: {...original},
+            read: () => stores.paramsets.readQuietly(request.interfaceName, request.address, 'MASTER'),
+            current: () =>
+                open &&
+                request.token === loadToken &&
+                paramset === 'MASTER' &&
+                request.address === address &&
+                request.interfaceName === interfaceName,
+            onread: (values) => {
+                if (!first && !runningTimesDiffer(original, values)) {
+                    return;
+                }
+                first = false;
+                original = values;
+                edited = Object.fromEntries(Object.entries(edited).filter(([name]) => !isRunningTimeParam(name)));
+            },
+            // an event of the channel or of the device's maintenance channel (CONFIG_PENDING, say)
+            // may be hmipserver taking in the new configuration: read at once then
+            onWake: (handler) => {
+                const offs = [request.address, `${device}:0`].map((channel) =>
+                    stores.paramsets.onChannelEvent(request.interfaceName, channel, (datapoint) => {
+                        if (datapoint !== CALIBRATION_RESULT_PARAM) {
+                            handler();
+                        }
+                    }),
+                );
+                return () => {
+                    for (const off of offs) off();
+                };
+            },
+        });
     }
     /**
      * Task 122: the manual calibration of the end positions of an HmIP tubular motor, where the CCU's WebUI offers it -
@@ -747,7 +785,7 @@
                 {interfaceName}
                 {address}
                 unsaved={!isSet(original[AUTO_DETECT_PARAM])}
-                onsuccess={() => void calibrated()}
+                onsuccess={calibrated}
             />
         {/if}
         {#if manualCalibration}

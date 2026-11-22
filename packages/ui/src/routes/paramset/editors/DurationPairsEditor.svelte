@@ -101,7 +101,7 @@
         {@const notUsed = isNotUsedDuration(view, values)}
         <div class="hmm-duration" data-testid={`duration-${view.pair.name}`}>
             <div class="hmm-duration-label">
-                <span>{label(view)}</span>
+                <span class="hmm-duration-name">{label(view)}</span>
                 <span class="hmm-duration-id">{view.pair.unitParam} / {view.pair.countParam}</span>
             </div>
 
@@ -206,12 +206,15 @@
         min-width: 0;
     }
 
+    .hmm-duration-name {
+        overflow-wrap: anywhere;
+    }
+
     .hmm-duration-id {
         font-family: var(--hmm-font-mono);
         font-size: var(--hmm-font-size-small);
         color: var(--hmm-fg-faint);
-        overflow: hidden;
-        text-overflow: ellipsis;
+        overflow-wrap: anywhere;
     }
 
     .hmm-duration-control {
@@ -247,5 +250,22 @@
 
     .hmm-duration-broken {
         color: var(--hmm-warn);
+    }
+    /* B-106: on a phone the three columns do not fit - the label over the control, the rest under it */
+    @media (max-width: 599px) {
+        .hmm-duration {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 2px;
+            padding: 4px;
+        }
+
+        .hmm-duration-control {
+            flex-wrap: wrap;
+        }
+
+        .hmm-duration-meta {
+            align-items: flex-start;
+            justify-content: flex-start;
+        }
     }
 </style>

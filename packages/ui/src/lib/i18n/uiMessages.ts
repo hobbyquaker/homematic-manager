@@ -1146,6 +1146,11 @@ export const UI_MESSAGES: MessageCatalogue = {
     },
 
     'Blind calibration': {de: 'Jalousie-Kalibrierung', en: 'Blind calibration'},
+    // B-106: the running times of an HmIP blind actuator, as the WebUI's HmIP blind dialog labels them
+    // (translate.lang.stringtable.js: stringTableBlindRunningTimeTopBottom, …BlindRunnintTimeBottomTop, …JalousieRunningTimeSlats)
+    'Running time top to bottom': {de: 'Fahrzeit von oben nach unten', en: 'Running time top to bottom'},
+    'Running time bottom to top': {de: 'Fahrzeit von unten nach oben', en: 'Running time bottom to top'},
+    'Slat adjustment time': {de: 'Lamellenverstellzeit', en: 'Slat adjustment time'},
     'The running times of a reference run, in plain seconds next to the value the device stores.': {
         de: 'Die Laufzeiten einer Referenzfahrt, in Sekunden neben dem Wert, den das Gerät speichert.',
         en: 'The running times of a reference run, in plain seconds next to the value the device stores.',
@@ -1447,6 +1452,14 @@ export const UI_MESSAGES: MessageCatalogue = {
     'Calibration finished. The measured running times were read from the device.': {
         de: 'Kalibrierfahrt beendet. Die gemessenen Fahrzeiten wurden vom Gerät gelesen.',
         en: 'Calibration finished. The measured running times were read from the device.',
+    },
+    'Calibration finished. Waiting for the device to report the measured running times…': {
+        de: 'Kalibrierfahrt beendet. Warte, bis das Gerät die gemessenen Fahrzeiten meldet…',
+        en: 'Calibration finished. Waiting for the device to report the measured running times…',
+    },
+    'Calibration finished. The device still reports the previous running times.': {
+        de: 'Kalibrierfahrt beendet. Das Gerät meldet weiterhin die bisherigen Fahrzeiten.',
+        en: 'Calibration finished. The device still reports the previous running times.',
     },
     'Calibration stopped.': {de: 'Kalibrierfahrt gestoppt.', en: 'Calibration stopped.'},
     'No result after 5 minutes. The calibration may have been stopped at the device.': {

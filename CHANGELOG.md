@@ -20,6 +20,18 @@ Versions before 3.0 are in the [releases](https://github.com/hobbyquaker/homemat
 - `paramset.put` takes a `command` option for the VALUES of one channel: the given datapoints go out together in one
   `putParamset`, without reading first and without dropping a value as unchanged.
 
+### Fixed
+
+- **The running times measured by the automatic calibration show in the open settings.** The device reports the end of
+  the run a few seconds before the system has its measured times, so the dialog said they were read but kept the old
+  ones until it was opened again. It now reads them again until they arrive, for up to a minute, and says so while it
+  waits; the new times count as the device's values, not as changes to write. (#172, @agross)
+- **The running times of the calibration block have readable labels.** An HmIP blind channel showed the raw parameter
+  name, cut off, over the same raw name; the rows now carry the CCU's labels ("Running time top to bottom", "Fahrzeit
+  von oben nach unten" and so on) with the raw name below. A label longer than its column wraps instead of being cut
+  off, a parameter without a label shows its raw name once, and on a phone the calibration and duration rows put the
+  label above the input. (#172, @agross)
+
 ## [3.7.1] — 2026-11-21
 
 ### Fixed

@@ -34,6 +34,20 @@ export const BLIND_RUNNING_TIMES: readonly string[] = [
     'REFERENCE_RUNNING_TIME_SLATS',
 ];
 
+/**
+ * B-106 (#172): the labels of the running times where the string table has none for the channel type -
+ * it names them for the BidCos `BLIND` and `JALOUSIE` only, so an HmIP `BLIND_TRANSMITTER` showed the
+ * raw name twice. The WebUI's HmIP blind dialog (`hmipChannelConfigDialogs.tcl`) labels these rows with
+ * the same three texts of `translate.lang.stringtable.js` (`stringTableBlindRunningTimeTopBottom`,
+ * `stringTableBlindRunnintTimeBottomTop`, `stringTableJalousieRunningTimeSlats`); keys of the UI
+ * catalogue (uiMessages.ts), de and en there word for word.
+ */
+export const BLIND_RUNNING_TIME_LABELS: Readonly<Record<string, string>> = {
+    REFERENCE_RUNNING_TIME_TOP_BOTTOM: 'Running time top to bottom',
+    REFERENCE_RUNNING_TIME_BOTTOM_TOP: 'Running time bottom to top',
+    REFERENCE_RUNNING_TIME_SLATS: 'Slat adjustment time',
+};
+
 /** The plain-seconds parameters that belong with a calibration. */
 export const BLIND_DELAYS: readonly string[] = ['CHANGE_OVER_DELAY', 'DELAY_COMPENSATION'];
 

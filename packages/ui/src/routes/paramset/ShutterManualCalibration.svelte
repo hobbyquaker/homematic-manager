@@ -561,4 +561,15 @@
     .hmm-danger {
         color: var(--hmm-error);
     }
+    /* B-106: on a phone the label goes over the button, the button and the status share the line below */
+    @media (max-width: 599px) {
+        .hmm-manualcal {
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 4px 8px;
+        }
+
+        .hmm-manualcal-label {
+            grid-column: 1 / -1;
+        }
+    }
 </style>

@@ -28,8 +28,8 @@
     "api_scopes": ["rpc:admin"],
     "data_dirs": ["/usr/local/hmm"],
     "note": {
-      "de": "Das Profil (config.json, Caches, Gerätebilder) liegt in /usr/local/hmm, außerhalb des Addon-Verzeichnisses, damit es Updates und eine Deinstallation überlebt; das System übergibt es dem Addon-Benutzer.",
-      "en": "The profile (config.json, caches, device images) lives in /usr/local/hmm, outside the addon directory, so it survives updates and an uninstall; the system hands it to the addon user."
+      "de": "Dazu: die Empfangsqualität (RSSI) beurteilen, Servicemeldungen quittieren, Events mitlesen und beliebige RPC-Methoden von Hand aufrufen. Auf openccu-lite pflegt er außerdem die Namen, Räume und Gewerke des Systems.",
+      "en": "Also: judge reception quality (RSSI), acknowledge service messages, watch events live and call any RPC method by hand. On openccu-lite it also edits the system's names, rooms and functions."
     }
   }
 }

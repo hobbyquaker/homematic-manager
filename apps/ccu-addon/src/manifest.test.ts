@@ -32,7 +32,14 @@ describe('the openccu-lite manifest', () => {
         expect(manifest.runtime.data_dirs).toEqual(['/usr/local/hmm']);
         expect(manifest.runtime.root).toBeUndefined();
         // user-facing text carries no internal ids
-        for (const text of Object.values(manifest.runtime.note as Record<string, string>)) {
+        // the note is the users' text, the technical text what it needs (occulited task 188)
+        const technical = manifest.runtime.technical as Record<string, string>;
+        expect(technical.de).toMatch(/\/usr\/local\/hmm/);
+        expect(technical.en).toMatch(/\/usr\/local\/hmm/);
+        for (const text of [
+            ...Object.values(manifest.runtime.note as Record<string, string>),
+            ...Object.values(technical),
+        ]) {
             expect(text).not.toMatch(/\b[A-Z]-\d+\b|\btask \d+/);
         }
     });
